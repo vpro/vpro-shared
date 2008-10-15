@@ -24,23 +24,22 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-domain</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-integration</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-services</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-web</artifactId>
-        <version>0.1-SNAPSHOT</version>
-        <classifier>war</classifier>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
