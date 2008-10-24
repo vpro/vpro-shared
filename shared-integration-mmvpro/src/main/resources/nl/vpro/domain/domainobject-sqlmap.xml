@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="DomainObject">
+  <typeAlias alias="DomainObject" type="nl.vpro.domain.DomainObject" />
+
+  <resultMap class="DomainObject" id="domainObjectResult">
+    <result property="id" javaType="Long" column="number"/>
+  </resultMap>
+
+  <select id="getByID" parameterClass="int" resultMap="programResult">
+    <![CDATA[
+      SELECT
+        n.*
+      FROM
+        vpro4_mediafragments m
+      WHERE
+        m.number = #number#
+    ]]>
+  </select>
+</sqlMap>
