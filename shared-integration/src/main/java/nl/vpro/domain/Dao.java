@@ -20,8 +20,8 @@ public interface Dao<DO extends DomainObject> {
      * Finds an entity by id.
      *
      * @param id the id of the entity to return
-     * @return the entity with the given id
+     * @return a domainobject with the given id
      */
-    //void load(DO domainObject, String... paths) throws Exception;
+    DO getByID(Long id);
 
 }

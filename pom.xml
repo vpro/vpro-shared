@@ -9,12 +9,15 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-parent</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <name>shared-parent</name>
 
   <modules>
     <module>shared-domain</module>
     <module>shared-integration</module>
+    <module>shared-integration-mmvpro</module>
     <module>shared-services</module>
     <module>shared-web</module>
   </modules>
@@ -29,6 +32,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-integration</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-integration-mmvpro</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
