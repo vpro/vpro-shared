@@ -29,7 +29,7 @@ public class SecondsToDateTypeHandler implements TypeHandlerCallback {
      * .ibatis.sqlmap.client.extensions.ResultGetter)
      */
     public Object getResult(ResultGetter getter) throws SQLException {
-        return valueOf(getter.getLong());
+        return secondsToDate(getter.getLong());
     }
 
     /*
@@ -60,11 +60,11 @@ public class SecondsToDateTypeHandler implements TypeHandlerCallback {
      * lang.String)
      */
     public Object valueOf(String string) {
-        return valueOf(Long.valueOf(string));
+        return secondsToDate(Long.parseLong(string));
     }
 
-    public Date valueOf(long seconds) {
-        if (seconds > 0) {
+    public Date secondsToDate(long seconds) {
+        if (seconds >= 0) {
             return new Date(1000 * seconds);
         } else {
             return null;
