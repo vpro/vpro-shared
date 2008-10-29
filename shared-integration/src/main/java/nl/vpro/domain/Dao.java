@@ -6,6 +6,8 @@
 
 package nl.vpro.domain;
 
+import java.util.List;
+
 import nl.vpro.domain.DomainObject;
 
 /**
@@ -17,11 +19,19 @@ import nl.vpro.domain.DomainObject;
 public interface Dao<DO extends DomainObject> {
 
     /**
-     * Finds an entity by id.
+     * Retrieves a fully initialized entity by its id.
      *
      * @param id the id of the entity to return
-     * @return a domainobject with the given id
+     * @return the domainobject with the given id
      */
     DO getByID(Long id);
 
+    /**
+     * Retrieves a list of domainobjects belonging to this DAO,
+     * related to an a source with id id.
+     *
+     * @param id the id of source source object
+     * @return a list of domainobjects related to this id
+     */
+    List<DO> getRelatedByID(Long id);
 }
