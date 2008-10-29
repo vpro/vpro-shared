@@ -14,7 +14,7 @@ import com.ibatis.sqlmap.client.extensions.TypeHandlerCallback;
 
 /**
  * Typehandler that maps MMBase time in seconds to date objects and vice
- * versa. Null values are being mapped to -1 database values
+ * versa. Null values are being mapped to -1 database values.
  *
  * @author roekoe
  *
@@ -43,12 +43,13 @@ public class SecondsToDateTypeHandler implements TypeHandlerCallback {
             throws SQLException {
         if (date instanceof Date) {
             if (!date.equals(null)) {
-                setter.setLong(Math.round(((Date)date).getTime()));
+                setter.setLong(Math.round(((Date)date).getTime() / 1000));
             } else {
                 setter.setLong(-1);
             }
         } else {
-            throw new SQLException("Expected java.util.Date instead of " + date.getClass().getName());
+            throw new SQLException("Expected java.util.Date instead of "
+                    + date.getClass().getName());
         }
     }
 
@@ -63,7 +64,7 @@ public class SecondsToDateTypeHandler implements TypeHandlerCallback {
         return secondsToDate(Long.parseLong(string));
     }
 
-    public Date secondsToDate(long seconds) {
+    private Date secondsToDate(long seconds) {
         if (seconds >= 0) {
             return new Date(1000 * seconds);
         } else {

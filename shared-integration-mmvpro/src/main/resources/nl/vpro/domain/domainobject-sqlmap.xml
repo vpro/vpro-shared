@@ -9,15 +9,4 @@
   <resultMap class="DomainObject" id="domainObjectResult">
     <result property="id" javaType="Long" column="number"/>
   </resultMap>
-
-  <select id="getByID" parameterClass="int" resultMap="programResult">
-    <![CDATA[
-      SELECT
-        n.*
-      FROM
-        vpro4_mediafragments m
-      WHERE
-        m.number = #number#
-    ]]>
-  </select>
 </sqlMap>
