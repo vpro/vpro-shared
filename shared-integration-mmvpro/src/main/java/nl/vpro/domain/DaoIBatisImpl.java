@@ -69,9 +69,6 @@ public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> 
         return sqlMapClientTemplate.queryForList(sqlMapNameSpace + ".getRelatedByID", id);
     }
 
-    /** (non-Javadoc)
-     * @see nl.vpro.domain.Dao#getRelatedById(java.lang.Long)
-     */
     public void getRelatedByID(Long id, RowHandler rowHandler) {
         sqlMapClientTemplate.queryWithRowHandler(sqlMapNameSpace + ".getRelatedByID", id, rowHandler);
     }
