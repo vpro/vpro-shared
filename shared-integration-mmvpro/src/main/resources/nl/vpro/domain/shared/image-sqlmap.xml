@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="Image">
+  <typeAlias alias="Image" type="nl.vpro.domain.shared.Image" />
+
+  <resultMap id="imageResult" class="Image" groupBy="number" extends="PublishableObject.publishableObjectResult">
+    <result property="title" column="title"/>
+    <result property="description" column="description"/><!--
+    <result property="data" column="handle"/>
+    <result property="imageType" column="itype"/>
+    --><result property="height" column="height"/>
+    <result property="width" column="width"/>
+  </resultMap>
+
+  <sql id="selectImageResult">
+    <![CDATA[
+      SELECT
+        i.number,
+        i.title,
+        i.description,
+        CASE
+          WHEN i.itype = 'null' THEN NULL
+          ELSE i.itype
+        END,
+        CASE
+          WHEN i.height = -1 THEN NULL
+          ELSE i.height
+        END,
+        CASE
+          WHEN i.width = -1 THEN NULL
+          ELSE i.width
+        END,
+        i.handle
+    ]]>
+  </sql>
+
+  <select id="getByID" parameterClass="Long" resultMap="imageResult">
+    <include refid="selectImageResult"/>
+    <![CDATA[
+      FROM
+        vpro4_images i
+      WHERE
+        number = #number#
+      ORDER BY
+        p.pos
+    ]]>
+  </select>
+
+  <select id="getRelatedByID" parameterClass="Long" resultMap="imageResult">
+    <include refid="selectImageResult"/>
+    <![CDATA[
+      FROM
+        vpro4_posrel p,
+        vpro4_images i
+      WHERE
+        p.snumber = #number# AND
+        p.dnumber = i.number
+      ORDER BY
+        p.pos
+    ]]>
+  </select>
+</sqlMap>
+

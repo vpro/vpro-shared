@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PublishableObject">
+  <typeAlias alias="PublishableObject" type="nl.vpro.domain.PublishableObject" />
+
+  <resultMap id="publishableObjectResult" class="PublishableObject" extends="DomainObject.domainObjectResult">
+    <!-- TODO wire publishables. This is temporary -->
+    <!--<result property="workflow" column="workflow"/>-->
+  </resultMap>
+</sqlMap>
