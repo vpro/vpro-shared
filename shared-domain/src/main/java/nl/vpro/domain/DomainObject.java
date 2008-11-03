@@ -15,9 +15,8 @@ import javax.xml.bind.annotation.XmlAttribute;
  * @author roekoe
  * @version $Id$
  */
+@SuppressWarnings("serial")
 public abstract class DomainObject implements Serializable {
-
-    private static final long serialVersionUID = 247492039472015107L;
 
     private Long id;
 
