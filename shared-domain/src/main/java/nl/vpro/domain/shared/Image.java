@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.log4j.Logger;
 
 import nl.vpro.domain.DomainObject;
+import nl.vpro.domain.PublishableObject;
 
 /**
  * An image.
@@ -23,14 +24,16 @@ import nl.vpro.domain.DomainObject;
  * @author peter
  * @version $Id$
  */
-@XmlType(propOrder = {"title", "width", "height","imageType"})
-public class Image extends DomainObject {
-
-    private static final long serialVersionUID = 2182582685395751329L;
+@XmlType(propOrder = {"title", "description", "width", "height","imageType"})
+public class Image extends PublishableObject {
 
     private static final Logger log = Logger.getLogger(Image.class);
 
+    private static final long serialVersionUID = 2182582685395751329L;
+
     private Blob data;
+
+    private String description;
 
     private int height;
 
@@ -46,6 +49,13 @@ public class Image extends DomainObject {
     @XmlTransient
     public Blob getData() {
         return data;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
     }
 
     /**
@@ -94,6 +104,13 @@ public class Image extends DomainObject {
      */
     public void setData(Blob data) {
         this.data = data;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
