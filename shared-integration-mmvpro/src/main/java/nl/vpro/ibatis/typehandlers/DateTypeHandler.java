@@ -19,7 +19,7 @@ import com.ibatis.sqlmap.client.extensions.TypeHandlerCallback;
  * @author roekoe
  *
  */
-public class SecondsToDateTypeHandler implements TypeHandlerCallback {
+public class DateTypeHandler implements TypeHandlerCallback {
 
     /*
      * (non-Javadoc)
@@ -42,7 +42,7 @@ public class SecondsToDateTypeHandler implements TypeHandlerCallback {
     public void setParameter(ParameterSetter setter, Object date)
             throws SQLException {
         if (date instanceof Date) {
-            if (!date.equals(null)) {
+            if (!(date == null)) {
                 setter.setLong(Math.round(((Date)date).getTime() / 1000));
             } else {
                 setter.setLong(-1);
