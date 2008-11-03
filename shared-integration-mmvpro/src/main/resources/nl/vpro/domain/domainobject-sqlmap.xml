@@ -6,7 +6,7 @@
 <sqlMap namespace="DomainObject">
   <typeAlias alias="DomainObject" type="nl.vpro.domain.DomainObject" />
 
-  <resultMap class="DomainObject" id="domainObjectResult">
+  <resultMap id="domainObjectResult" class="DomainObject">
     <result property="id" javaType="Long" column="number"/>
   </resultMap>
 </sqlMap>
