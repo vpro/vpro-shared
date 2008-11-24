@@ -14,13 +14,17 @@
 
   <name>shared-parent</name>
 
-  <modules>
+  <modules>                                                                           
     <module>shared-domain</module>
     <module>shared-integration</module>
     <module>shared-integration-mmvpro</module>
     <module>shared-services</module>
     <module>shared-web</module>
   </modules>
+
+  <properties>
+    <spring.version>2.5.6</spring.version>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
