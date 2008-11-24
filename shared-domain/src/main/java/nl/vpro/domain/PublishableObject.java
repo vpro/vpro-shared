@@ -9,6 +9,8 @@ import java.util.Date;
 
 import nl.vpro.domain.users.Editor;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * Publishable contains all items for Publishables.
  *
@@ -38,6 +40,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the lastModified
      */
+    @XmlTransient
     public Date getLastModified() {
         return lastModified;
     }
@@ -52,6 +55,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the creationDate
      */
+    @XmlTransient
     public Date getCreationDate() {
         return creationDate;
     }
@@ -66,6 +70,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the lastModifiedBy
      */
+    @XmlTransient
     public Editor getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -80,6 +85,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the createdBy
      */
+    @XmlTransient
     public Editor getCreatedBy() {
         return createdBy;
     }
@@ -94,6 +100,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the publishStart
      */
+    @XmlTransient
     public Date getPublishStart() {
         return publishStart;
     }
@@ -108,6 +115,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the publishStop
      */
+    @XmlTransient
     public Date getPublishStop() {
         return publishStop;
     }
@@ -122,6 +130,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the workflow
      */
+    @XmlTransient
     public Workflow getWorkflow() {
         return workflow;
     }
@@ -136,6 +145,7 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the viewCounter
      */
+    @XmlTransient
     public Integer getViewCounter() {
         return viewCounter;
     }
