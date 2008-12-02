@@ -13,8 +13,7 @@ import nl.vpro.domain.DomainObject;
 /**
  * Superinterface for all data access objects.
  *
- * @param <T> the entity type of this dao
- * @param <PK> the primary key for this element
+ * @param <DO> the entity type of this dao
  */
 public interface Dao<DO extends DomainObject> {
 

@@ -19,6 +19,7 @@
     <![CDATA[
       SELECT
         i.number,
+        'vpro' AS domain,
         i.title,
         i.description,
         CASE

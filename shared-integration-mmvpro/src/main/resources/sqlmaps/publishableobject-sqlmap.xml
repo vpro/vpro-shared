@@ -7,7 +7,6 @@
   <typeAlias alias="PublishableObject" type="nl.vpro.domain.PublishableObject" />
 
   <resultMap id="publishableObjectResult" class="PublishableObject" extends="DomainObject.domainObjectResult">
-    <!-- TODO wire publishables. This is temporary -->
-    <!--<result property="workflow" column="workflow"/>-->
+    <result property="domain" javaType="String" column="domain"/>
   </resultMap>
 </sqlMap>
