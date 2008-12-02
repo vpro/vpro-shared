@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.apache.log4j.Logger;
 
-import nl.vpro.domain.DomainObject;
 import nl.vpro.domain.PublishableObject;
 
 /**
@@ -30,6 +29,8 @@ public class Image extends PublishableObject {
     private static final Logger log = Logger.getLogger(Image.class);
 
     private static final long serialVersionUID = 2182582685395751329L;
+
+    public static final String SCHEMA_NAME = "image";
 
     private Blob data;
 
@@ -141,4 +142,7 @@ public class Image extends PublishableObject {
         this.width = width;
     }
 
+    public String getUrn() {
+        return "urn:" + getDomain() + ":" + SCHEMA_NAME + ":" + getId();
+    }
 }

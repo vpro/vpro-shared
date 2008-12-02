@@ -10,6 +10,7 @@ import java.util.Date;
 import nl.vpro.domain.users.Editor;
 
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * Publishable contains all items for Publishables.
@@ -36,6 +37,8 @@ public abstract class PublishableObject extends DomainObject {
     private Workflow workflow = Workflow.DRAFT;
 
     private Integer viewCounter;
+
+    private String domain;
 
     /**
      * @return the lastModified
@@ -130,6 +133,9 @@ public abstract class PublishableObject extends DomainObject {
     /**
      * @return the workflow
      */
+    @XmlAttribute
+    abstract public String getUrn();
+
     @XmlTransient
     public Workflow getWorkflow() {
         return workflow;
@@ -157,4 +163,12 @@ public abstract class PublishableObject extends DomainObject {
         this.viewCounter = viewCounter;
     }
 
+    @XmlTransient
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
 }

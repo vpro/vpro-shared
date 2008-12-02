@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.apache.commons.beanutils.BeanUtils;
 
 /**
  * Simple helper methods.
@@ -629,4 +630,13 @@ public class Helper {
         }
     }
 
+
+    public static void copyProperties(Object source, Object target) {
+        try{
+            BeanUtils.copyProperties(source, target);
+        }
+        catch(Exception e){
+            new IllegalArgumentException(e);
+        }
+    }
 }

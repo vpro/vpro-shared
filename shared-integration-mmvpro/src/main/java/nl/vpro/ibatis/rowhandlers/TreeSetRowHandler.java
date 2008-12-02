@@ -24,9 +24,6 @@ import nl.vpro.domain.DomainObject;
 public class TreeSetRowHandler<DO extends DomainObject> implements RowHandler {
     private TreeSet<DO> set = new TreeSet<DO>();
 
-    /* (non-Javadoc)
-     * @see com.ibatis.sqlmap.client.event.RowHandler#handleRow(java.lang.Object)
-     */
     @SuppressWarnings("unchecked")
     public void handleRow(Object domainObject) {
         set.add((DO)domainObject);

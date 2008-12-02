@@ -53,17 +53,11 @@ public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> 
         this.sqlMapNameSpace = sqlMapNameSpace;
     }
 
-    /** (non-Javadoc)
-     * @see nl.vpro.domain.Dao#getByID(java.lang.Long)
-     */
     @SuppressWarnings("unchecked")
     public DO getByID(Long id) {
         return (DO) sqlMapClientTemplate.queryForObject(sqlMapNameSpace + ".getByID", id);
     }
 
-    /** (non-Javadoc)
-     * @see nl.vpro.domain.Dao#getRelatedById(java.lang.Long)
-     */
     @SuppressWarnings("unchecked")
     public List<DO> getRelatedByID(Long id) {
         return sqlMapClientTemplate.queryForList(sqlMapNameSpace + ".getRelatedByID", id);
@@ -73,30 +67,18 @@ public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> 
         sqlMapClientTemplate.queryWithRowHandler(sqlMapNameSpace + ".getRelatedByID", id, rowHandler);
     }
 
-    /**
-     * @return the sqlMapClientTemplate
-     */
     public SqlMapClientTemplate getSqlMapClientTemplate() {
         return sqlMapClientTemplate;
     }
 
-    /**
-     * @param sqlMapClientTemplate the sqlMapClientTemplate to set
-     */
     public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
         this.sqlMapClientTemplate = sqlMapClientTemplate;
     }
 
-    /**
-     * @return the sqlmap namespace in use
-     */
     public String getSqlMapNameSpace() {
         return sqlMapNameSpace;
     }
 
-    /**
-     * @param sqlMapNameSpace the sqlmap namespace to use
-     */
     public void setSqlMapNameSpace(String sqlMapNameSpace) {
         this.sqlMapNameSpace = sqlMapNameSpace;
     }
