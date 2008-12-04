@@ -11,16 +11,20 @@ import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
+import org.springframework.stereotype.Repository;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 import nl.vpro.domain.DomainObject;
+
+import javax.annotation.Resource;
 
 /**
  * @author roekoe
  *
  * @param <DO>
  */
+@Repository
 public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> {
     private static final Logger log = Logger.getLogger(DaoIBatisImpl.class);
 
@@ -28,29 +32,7 @@ public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> 
 
     private String sqlMapNameSpace = "DomainObject";
 
-    /**
-     * Subclasses should override this constructor.  All subclasses of this class should
-     * call the only public constructor in order set the SqlMap namespace.
-     * to set
-     *
-     * @param sqlMapQlientTemplate an SqlMap template to be set when instantiated
-     */
-    DaoIBatisImpl(SqlMapClientTemplate sqlMapClientTemplate) {
-        this.sqlMapClientTemplate = sqlMapClientTemplate;
-    }
-
-    /**
-     * Default public constructor. Subclasses of this class should
-     * call this public constructor in order set the SqlMapClientTemplate and
-     * the SqlMap namespace.
-     *
-     * @param sqlMapQlientTemplate a Spring SqlMapClientTemplate to be set when instantiated
-     * @param sqlMapNameSpace the SqlMap namespace as declared in the sqlmap file for this
-     * DAO subclasses.
-     */
-    public DaoIBatisImpl(SqlMapClientTemplate sqlMapClientTemplate, String sqlMapNameSpace) {
-        this.sqlMapClientTemplate = sqlMapClientTemplate;
-        this.sqlMapNameSpace = sqlMapNameSpace;
+    public DaoIBatisImpl() {
     }
 
     @SuppressWarnings("unchecked")
@@ -71,6 +53,7 @@ public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> 
         return sqlMapClientTemplate;
     }
 
+    @Resource(name = "mediaSqlMapClientTemplate")
     public void setSqlMapClientTemplate(SqlMapClientTemplate sqlMapClientTemplate) {
         this.sqlMapClientTemplate = sqlMapClientTemplate;
     }
