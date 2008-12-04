@@ -26,8 +26,7 @@ public class ImageDaoIBatisImpl extends DaoIBatisImpl<Image>
      */
     private static final String SQLMAP_NAMESPACE = "Image";
 
-    @Autowired
-    ImageDaoIBatisImpl(SqlMapClientTemplate sqlMapClientTemplate) {
-        super(sqlMapClientTemplate, SQLMAP_NAMESPACE);
+    ImageDaoIBatisImpl() {
+        super.setSqlMapNameSpace(SQLMAP_NAMESPACE);
     }
 }
