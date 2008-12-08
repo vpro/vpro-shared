@@ -5,32 +5,30 @@
  */
 package nl.vpro.ibatis.rowhandlers;
 
-import java.util.TreeSet;
-
 import com.ibatis.sqlmap.client.event.RowHandler;
-
 import nl.vpro.domain.DomainObject;
+
+import java.util.TreeSet;
 
 /**
  * IBatis RowHandler that returns an embeded result as a {@link TreeSet}.
- *
+ * <p/>
  * Ibatis should be able to retrieve results as Sets instead of Lists directly, but I
  * can't get it to work. A workaround is calling a query with a rowhandler. After querying
  * you have to call getSet to retrieve the result as a set from the rowhandler
  *
  * @author roekoe
- *
  */
 public class TreeSetRowHandler<DO extends DomainObject> implements RowHandler {
-    private TreeSet<DO> set = new TreeSet<DO>();
+  private TreeSet<DO> set = new TreeSet<DO>();
 
-    @SuppressWarnings("unchecked")
-    public void handleRow(Object domainObject) {
-        set.add((DO)domainObject);
-    }
+  @SuppressWarnings("unchecked")
+  public void handleRow(Object domainObject) {
+    set.add((DO) domainObject);
+  }
 
-    public TreeSet<DO> getSet() {
-        return set;
-    }
+  public TreeSet<DO> getSet() {
+    return set;
+  }
 
 }
