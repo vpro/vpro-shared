@@ -36,13 +36,13 @@ public class Image extends PublishableObject {
 
     private String description;
 
-    private int height;
+    private Integer height;
 
     private ImageType imageType;
 
     private String title;
 
-    private int width;
+    private Integer width;
 
     /**
      * @return the data
@@ -74,7 +74,7 @@ public class Image extends PublishableObject {
      * @return Returns the height.
      */
     @XmlElement
-    public int getHeight() {
+    public Integer getHeight() {
         return height;
     }
 
@@ -96,7 +96,7 @@ public class Image extends PublishableObject {
      * @return Returns the width.
      */
     @XmlElement
-    public int getWidth() {
+    public Integer getWidth() {
         return width;
     }
 
@@ -117,7 +117,7 @@ public class Image extends PublishableObject {
     /**
      * @param height The height to set.
      */
-    public void setHeight(int height) {
+    public void setHeight(Integer height) {
         this.height = height;
     }
 
@@ -138,7 +138,7 @@ public class Image extends PublishableObject {
     /**
      * @param width The width to set.
      */
-    public void setWidth(int width) {
+    public void setWidth(Integer width) {
         this.width = width;
     }
 
