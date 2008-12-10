@@ -21,24 +21,10 @@ import com.ibatis.sqlmap.client.extensions.TypeHandlerCallback;
  */
 public class DateTypeHandler implements TypeHandlerCallback {
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.ibatis.sqlmap.client.extensions.TypeHandlerCallback#getResult(com
-     * .ibatis.sqlmap.client.extensions.ResultGetter)
-     */
     public Object getResult(ResultGetter getter) throws SQLException {
         return secondsToDate(getter.getLong());
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.ibatis.sqlmap.client.extensions.TypeHandlerCallback#setParameter(
-     * com.ibatis.sqlmap.client.extensions.ParameterSetter, java.lang.Object)
-     */
     public void setParameter(ParameterSetter setter, Object date)
             throws SQLException {
         if (date instanceof Date) {
@@ -53,13 +39,6 @@ public class DateTypeHandler implements TypeHandlerCallback {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.ibatis.sqlmap.client.extensions.TypeHandlerCallback#valueOf(java.
-     * lang.String)
-     */
     public Object valueOf(String string) {
         return secondsToDate(Long.parseLong(string));
     }
