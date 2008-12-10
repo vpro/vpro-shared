@@ -11,7 +11,7 @@
     <result property="description" column="description"/><!--
     <result property="data" column="handle"/>
     <result property="imageType" column="itype"/>
-    --><result property="height" column="height"/>
+    --><result property="height" column="height" />
     <result property="width" column="width"/>
   </resultMap>
 

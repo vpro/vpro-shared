@@ -25,13 +25,17 @@ public class ListWithPORefTypes {
     }
 
     public static <T extends PublishableObject> ListWithPORefTypes createPORefType(List<T> list) {
-        List<PORefType> listOut = new ArrayList<PORefType>();
-        for (T poObject : list) {
-            listOut.add(PORefType.createPORefType(poObject));
+        if (list.size() > 0) {
+            List<PORefType> listOut = new ArrayList<PORefType>();
+            for (T poObject : list) {
+                listOut.add(PORefType.createPORefType(poObject));
+            }
+            ListWithPORefTypes listWithPORefTypes = new ListWithPORefTypes();
+            listWithPORefTypes.setPOObjects(listOut);
+            return listWithPORefTypes;
+        } else {
+            return null;
         }
-        ListWithPORefTypes listWithPORefTypes = new ListWithPORefTypes();
-        listWithPORefTypes.setPOObjects(listOut);
-        return listWithPORefTypes;
     }
 
 }
