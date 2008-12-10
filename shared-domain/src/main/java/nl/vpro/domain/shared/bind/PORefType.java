@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 public class PORefType {
 
     private String urn;
+    private String type;
 
     public PORefType() {
     }
@@ -27,9 +28,19 @@ public class PORefType {
         this.urn = urn;
     }
 
+    @XmlAttribute
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public static <T extends PublishableObject> PORefType createPORefType(T publishableObject) {
         PORefType poRefType = new PORefType();
         poRefType.setUrn(publishableObject.getUrn());
+        poRefType.setType(publishableObject.getClass().getSimpleName().toLowerCase());
         return poRefType;
     }
 }
