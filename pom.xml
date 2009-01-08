@@ -15,6 +15,7 @@
   <name>shared-parent</name>
 
   <modules>                                                                           
+    <module>shared-configuration</module>
     <module>shared-domain</module>
     <module>shared-integration</module>
     <module>shared-integration-mmvpro</module>
