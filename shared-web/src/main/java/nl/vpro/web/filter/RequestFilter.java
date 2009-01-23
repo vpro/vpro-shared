@@ -1,4 +1,4 @@
-package nl.vpro.mmbase.applications.portalettes;
+package nl.vpro.web.filter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
