@@ -30,107 +30,102 @@ import org.springframework.web.util.WebUtils;
  */
 public class SplashPageFilter implements Filter {
 
-    private static final Log log = LogFactory.getLog(SplashPageFilter.class);
+	private static final Log log = LogFactory.getLog(SplashPageFilter.class);
 
-    private static final String PARAM_REQUEST_FILTER_CLASS = "requestFilterClass";
-    private static final String NOSPLASH_PARAM = "nosplash";
-    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm";
-    private static final String DEFAULT_COOKIE_NAME = "skipSplashPage";
+	private static final String PARAM_REQUEST_FILTER_CLASS = "requestFilterClass";
+	private static final String NOSPLASH_PARAM = "nosplash";
+	private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm";
+	private static final String DEFAULT_COOKIE_NAME = "skipSplashPage";
 
-    private String cookieName;
-    private Date startDate;
-    private Date endDate;
-    private String target;
-    private RequestFilter requestFilter = new DummyRequestFilter();
-    private String requestFilterClassName;
+	private String cookieName;
+	private Date startDate;
+	private Date endDate;
+	private String target;
+	private ExclusionStrategy exclusionStrategy = new DummyExclusionStrategy();
+	private String exclusionStrategyClassName;
 
-    public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException,
-            ServletException {
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) resp;
+	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
+		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) resp;
 
-        if (applyFilter(request, response)) {
-            Cookie skipSplashCookie = new Cookie(cookieName, Boolean.toString(true));
-            int secondsTillEndDate = (int) ((endDate.getTime() - new Date().getTime()) / 1000);
-            skipSplashCookie.setMaxAge(secondsTillEndDate);
-            response.addCookie(skipSplashCookie);
-            request.getRequestDispatcher(target).forward(request, response);
-            
-        } else {
-            chain.doFilter(request, response);
-        }
-    }
+		if (applyFilter(request, response)) {
+			Cookie skipSplashCookie = new Cookie(cookieName, Boolean.toString(true));
+			int secondsTillEndDate = (int) ((endDate.getTime() - new Date().getTime()) / 1000);
+			skipSplashCookie.setMaxAge(secondsTillEndDate);
+			response.addCookie(skipSplashCookie);
+			request.getRequestDispatcher(target).forward(request, response);
+		} else {
+			chain.doFilter(request, response);
+		}
+	}
 
-    public void init(FilterConfig filterConfig) throws ServletException {
-        log.info("Starting SplashPage filter.");
+	public void init(FilterConfig filterConfig) throws ServletException {
+		log.info("Starting SplashPage filter.");
 
-        // required init parameters
-        String start = filterConfig.getInitParameter("start");
-        String end = filterConfig.getInitParameter("end");
-        target = filterConfig.getInitParameter("target");
-        if (StringUtils.isBlank(start) || StringUtils.isBlank(end) || StringUtils.isBlank(target)) {
-            throw new ServletException("Can't start filter! required parameters (start, end, target) not found.");
-        }
+		// required init parameters
+		String start = filterConfig.getInitParameter("start");
+		String end = filterConfig.getInitParameter("end");
+		target = filterConfig.getInitParameter("target");
+		if (StringUtils.isBlank(start) || StringUtils.isBlank(end) || StringUtils.isBlank(target)) {
+			throw new ServletException("Can't start filter! required parameters (start, end, target) not found.");
+		}
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
-        try {
-            startDate = dateFormat.parse(start);
-            endDate = dateFormat.parse(end);
-        } catch (ParseException e) {
-            throw new ServletException("Could not parse date: " + e);
-        }
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
+		try {
+			startDate = dateFormat.parse(start);
+			endDate = dateFormat.parse(end);
+		} catch (ParseException e) {
+			throw new ServletException("Could not parse date: " + e);
+		}
 
-        // optional init parameters
-        cookieName = filterConfig.getInitParameter("cookiename");
-        if (cookieName == null) {
-            cookieName = DEFAULT_COOKIE_NAME;
-        }
-        
-        requestFilterClassName = filterConfig.getInitParameter(PARAM_REQUEST_FILTER_CLASS);
-        if (! StringUtils.isBlank(requestFilterClassName)) {
-            try {
-                if (isRequestFilter(requestFilterClassName)) {
-                    requestFilter = (RequestFilter) Class.forName(requestFilterClassName).newInstance();
-                    ServletContext servletContext = filterConfig.getServletContext();
-                    requestFilter.setServletContext(servletContext);
-                }
-            } catch (Exception e) {
-                throw new ServletException("could not instantiate RequestFilter from classname: "
-                        + requestFilterClassName, e);
-            }
-        }
-        log.info(String.format("Applying filter from %s to %s", startDate, endDate));
-    }
+		// optional init parameters
+		cookieName = filterConfig.getInitParameter("cookiename");
+		if (cookieName == null) {
+			cookieName = DEFAULT_COOKIE_NAME;
+		}
 
-    private boolean isRequestFilter(String requestFilterClassName) throws ClassNotFoundException {
-        Class<?> c = this.getClass().getClassLoader().loadClass(requestFilterClassName);
-        if (RequestFilter.class.isAssignableFrom(c)) {
-            return true;
-        }
-        return false;
-    }
+		exclusionStrategyClassName = filterConfig.getInitParameter(PARAM_REQUEST_FILTER_CLASS);
+		if (!StringUtils.isBlank(exclusionStrategyClassName)) {
+			try {
+				if (isRequestFilter(exclusionStrategyClassName)) {
+					exclusionStrategy = (ExclusionStrategy) Class.forName(exclusionStrategyClassName).newInstance();
+					ServletContext servletContext = filterConfig.getServletContext();
+					exclusionStrategy.setServletContext(servletContext);
+				}
+			} catch (Exception e) {
+				throw new ServletException("could not instantiate RequestFilter from classname: " + exclusionStrategyClassName, e);
+			}
+		}
+		log.info(String.format("Applying filter from %s to %s", startDate, endDate));
+	}
 
-    public void destroy() {
-        log.info("Destroying SplashPage Filter.");
-    }
+	private boolean isRequestFilter(String requestFilterClassName) throws ClassNotFoundException {
+		Class<?> c = this.getClass().getClassLoader().loadClass(requestFilterClassName);
+		return ExclusionStrategy.class.isAssignableFrom(c);
+	}
 
-    private boolean applyFilter(HttpServletRequest request, HttpServletResponse response) throws ServletException{
-        if (ServletRequestUtils.getBooleanParameter(request, NOSPLASH_PARAM, false) || ! requestFilter.pass(request)) {
-            return false;
-        }
+	public void destroy() {
+		log.info("Destroying SplashPage Filter.");
+	}
 
-        Date now = new Date();
-        if (now.after(startDate) && now.before(endDate)) {
-            // cookie present?
-            Cookie cookie = WebUtils.getCookie(request, cookieName);
-            if (cookie != null && Boolean.parseBoolean(cookie.getValue())) {
-                return false;
-            }
+	private boolean applyFilter(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+		return isSplashPageActive(request) && withinDateRange() && cookieNotSet(request) && notExcludedByStrategy(request);
+	}
 
-            return true;
-        } else {
-            // not between start and end date.
-            return false;
-        }
-    }
+	private boolean isSplashPageActive(HttpServletRequest request) {
+		return !ServletRequestUtils.getBooleanParameter(request, NOSPLASH_PARAM, false);
+	}
+
+	private boolean withinDateRange() {
+		Date now = new Date();
+		return now.after(startDate) && now.before(endDate);
+	}
+
+	private boolean cookieNotSet(HttpServletRequest request) {
+		return WebUtils.getCookie(request, cookieName) == null;
+	}
+	
+	private boolean notExcludedByStrategy(HttpServletRequest request) throws ServletException {
+		return !exclusionStrategy.exclude(request);
+	}
 }
