@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServletRequest;
  * @author ernst
  *
  */
-public class DummyRequestFilter implements RequestFilter {
+public class DummyExclusionStrategy implements ExclusionStrategy {
 
-    public boolean pass(HttpServletRequest request) {
-        return true;
+    public boolean exclude(HttpServletRequest request) {
+        return false;
     }
 
     public void setServletContext(ServletContext servletContext) {
