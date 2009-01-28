@@ -45,20 +45,36 @@ public class SplashPageFilterTest {
 	}
 	
 	@Test
-	public void testDoFilterWithNosplashParameter() throws IOException, ServletException {
+	public void testDoFilterWithoutNosplashParameter() throws IOException, ServletException {
 		expect(request.getParameter("nosplash")).andReturn(null);
 		expect(filterConfig.getInitParameter("start")).andReturn("2008-01-01 12:00");
 		expect(filterConfig.getInitParameter("end")).andReturn("3008-01-01 12:00");
-		expect(filterConfig.getInitParameter("target")).andReturn("hi");
+		expect(filterConfig.getInitParameter("target")).andReturn("url");
 		expect(filterConfig.getInitParameter("cookiename")).andReturn(null);
 		expect(filterConfig.getInitParameter("requestFilterClass")).andReturn(null);
 		expect(request.getCookies()).andReturn(new Cookie[]{});
 		response.addCookie(isA(Cookie.class));
-		expect(request.getRequestDispatcher("hi")).andReturn(requestDispatcher);
+		expect(request.getRequestDispatcher("url")).andReturn(requestDispatcher);
 		requestDispatcher.forward(request, response);
 		replay(request, response, filterConfig, requestDispatcher, chain);
 		splashPagefilter.init(filterConfig);
 		splashPagefilter.doFilter(request, response, chain);
 		verify(requestDispatcher);
+	}
+	
+	@Test
+	public void testDoFilterWithCookieSet() throws IOException, ServletException {
+		expect(request.getParameter("nosplash")).andReturn(null);
+		expect(filterConfig.getInitParameter("start")).andReturn("2008-01-01 12:00");
+		expect(filterConfig.getInitParameter("end")).andReturn("3008-01-01 12:00");
+		expect(filterConfig.getInitParameter("target")).andReturn("url");
+		expect(filterConfig.getInitParameter("cookiename")).andReturn("skipSplashPage");
+		expect(filterConfig.getInitParameter("requestFilterClass")).andReturn(null);
+		expect(request.getCookies()).andReturn(new Cookie[]{ new Cookie("skipSplashPage", Boolean.toString(true)) });
+		chain.doFilter(request, response);
+		replay(request, response, filterConfig, chain);
+		splashPagefilter.init(filterConfig);
+		splashPagefilter.doFilter(request, response, chain);
+		verify(chain);
 	}
 }
