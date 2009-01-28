@@ -53,7 +53,7 @@ public class SplashPageFilter implements Filter {
 			int secondsTillEndDate = (int) ((endDate.getTime() - new Date().getTime()) / 1000);
 			skipSplashCookie.setMaxAge(secondsTillEndDate);
 			response.addCookie(skipSplashCookie);
-			request.getRequestDispatcher(target).forward(request, response);
+			response.sendRedirect(target);
 		} else {
 			chain.doFilter(request, response);
 		}
