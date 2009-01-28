@@ -10,7 +10,6 @@ import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +31,6 @@ public class SplashPageFilterTest {
 	private HttpServletResponse response;
 	private FilterChain chain;
 	private FilterConfig filterConfig;
-	private RequestDispatcher requestDispatcher;
 	
 	@Before
 	public void setUp() {
@@ -40,7 +38,6 @@ public class SplashPageFilterTest {
 		response = createMock(HttpServletResponse.class);
 		chain = createMock(FilterChain.class);
 		filterConfig = createMock(FilterConfig.class);
-		requestDispatcher = createMock(RequestDispatcher.class);
 		splashPagefilter = new SplashPageFilter();
 	}
 	
@@ -54,12 +51,11 @@ public class SplashPageFilterTest {
 		expect(filterConfig.getInitParameter("requestFilterClass")).andReturn(null);
 		expect(request.getCookies()).andReturn(new Cookie[]{});
 		response.addCookie(isA(Cookie.class));
-		expect(request.getRequestDispatcher("url")).andReturn(requestDispatcher);
-		requestDispatcher.forward(request, response);
-		replay(request, response, filterConfig, requestDispatcher, chain);
+		response.sendRedirect("url");
+		replay(request, response, filterConfig, chain);
 		splashPagefilter.init(filterConfig);
 		splashPagefilter.doFilter(request, response, chain);
-		verify(requestDispatcher);
+		verify(response);
 	}
 	
 	@Test
