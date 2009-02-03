@@ -43,6 +43,7 @@ public class SplashPageFilterTest {
 	
 	@Test
 	public void testDoFilterWithoutNosplashParameter() throws IOException, ServletException {
+		expect(request.getRequestURI()).andReturn("/");
 		expect(request.getParameter("nosplash")).andReturn(null);
 		expect(filterConfig.getInitParameter("start")).andReturn("2008-01-01 12:00");
 		expect(filterConfig.getInitParameter("end")).andReturn("3008-01-01 12:00");
@@ -60,6 +61,7 @@ public class SplashPageFilterTest {
 	
 	@Test
 	public void testDoFilterWithCookieSet() throws IOException, ServletException {
+		expect(request.getRequestURI()).andReturn("/");
 		expect(request.getParameter("nosplash")).andReturn(null);
 		expect(filterConfig.getInitParameter("start")).andReturn("2008-01-01 12:00");
 		expect(filterConfig.getInitParameter("end")).andReturn("3008-01-01 12:00");
