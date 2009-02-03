@@ -16,11 +16,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nl.vpro.web.filter.compat.ServletRequestUtils;
+import nl.vpro.web.filter.compat.WebUtils;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.web.bind.ServletRequestUtils;
-import org.springframework.web.util.WebUtils;
+
 
 /**
  * Determines whether or not a splash page should be shown.
