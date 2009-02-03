@@ -14,10 +14,6 @@
 	<name>nl.vpro.shared</name>
 	<description>This modules contains web utils and classes to be shared among other modules.</description>
 
-	<properties>
-		<spring.version>2.5.6</spring.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -33,16 +29,12 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.4</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
