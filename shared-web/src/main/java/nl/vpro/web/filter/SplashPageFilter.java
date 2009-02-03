@@ -49,6 +49,8 @@ public class SplashPageFilter implements Filter {
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
+		
+		log.debug("Request URI: " + request.getRequestURI());
 
 		if (applyFilter(request, response)) {
 			Cookie skipSplashCookie = new Cookie(cookieName, Boolean.toString(true));
