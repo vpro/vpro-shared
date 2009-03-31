@@ -9,6 +9,9 @@ Modules:
 
 Release notes:
 
+Versie 0.3
+Meerdere web utils toegevoegd, waaronder een splash filter voor de ledenactie. Verder een aantal kleine aanpassingen tbv media versie 0.3.
+
 Versie 0.2
 Bevat dezelfde functionaliteit als versie 0.1, maar gebruikt iBatis ipv MMBase voor het ophalen van data.
 
