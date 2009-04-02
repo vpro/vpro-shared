@@ -8,9 +8,7 @@ package nl.vpro.domain.shared;
 
 import java.sql.Blob;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 import org.apache.log4j.Logger;
 
@@ -23,31 +21,33 @@ import nl.vpro.domain.PublishableObject;
  * @author peter
  * @version $Id$
  */
-@XmlType(propOrder = {"title", "description", "width", "height","imageType"})
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(propOrder = {
+        "title",
+        "description",
+        "width",
+        "height",
+        "imageType"})
 public class Image extends PublishableObject {
-
     private static final Logger log = Logger.getLogger(Image.class);
-
     private static final long serialVersionUID = 2182582685395751329L;
-
     public static final String SCHEMA_NAME = "image";
 
-    private Blob data;
-
-    private String description;
-
-    private Integer height;
-
-    private ImageType imageType;
-
+    @XmlElement(namespace = "urn:vpro:media:2009")
     private String title;
-
+    private String description;
+    @XmlElement(namespace = "urn:vpro:media:2009")
     private Integer width;
+    @XmlElement(namespace = "urn:vpro:media:2009")
+    private Integer height;
+    @XmlElement(namespace = "urn:vpro:media:2009")
+    private ImageType imageType;
+    @XmlTransient
+    private Blob data;
 
     /**
      * @return the data
      */
-    @XmlTransient
     public Blob getData() {
         return data;
     }
@@ -70,17 +70,10 @@ public class Image extends PublishableObject {
         }
     }
 
-    /**
-     * @return Returns the height.
-     */
-    @XmlElement
     public Integer getHeight() {
         return height;
     }
 
-    /**
-     * @return the image type
-     */
     public ImageType getImageType() {
         return imageType;
     }
@@ -92,10 +85,6 @@ public class Image extends PublishableObject {
         return title;
     }
 
-    /**
-     * @return Returns the width.
-     */
-    @XmlElement
     public Integer getWidth() {
         return width;
     }

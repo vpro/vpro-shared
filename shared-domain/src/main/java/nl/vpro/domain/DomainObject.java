@@ -9,6 +9,8 @@ package nl.vpro.domain;
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAccessType;
 
 /**
  *
@@ -16,21 +18,16 @@ import javax.xml.bind.annotation.XmlAttribute;
  * @version $Id$
  */
 @SuppressWarnings("serial")
+@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class DomainObject implements Serializable {
 
-    private Long id;
-
-    /**
-     * @return the id
-     */
     @XmlAttribute
+    protected Long id;
+
     public Long getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
     public void setId(Long id) {
         this.id = id;
     }

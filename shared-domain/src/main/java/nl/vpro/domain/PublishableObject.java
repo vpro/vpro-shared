@@ -9,8 +9,7 @@ import java.util.Date;
 
 import nl.vpro.domain.users.Editor;
 
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.*;
 
 /**
  * Publishable contains all items for Publishables.
@@ -20,150 +19,95 @@ import javax.xml.bind.annotation.XmlAttribute;
  * @version $Id$
  */
 @SuppressWarnings("serial")
+@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class PublishableObject extends DomainObject {
 
-    private Date lastModified;
-
-    private Date creationDate;
-
-    private Editor lastModifiedBy;
-
-    private Editor createdBy;
-
-    private Date publishStart = new Date();
-
-    private Date publishStop;
-
-    private Workflow workflow = Workflow.DRAFT;
-
-    private Integer viewCounter;
-
-    private String domain;
-
-    /**
-     * @return the lastModified
-     */
+    @XmlAttribute
+    protected Date creationDate;
+    @XmlAttribute
+    protected Date lastModified;
     @XmlTransient
+    protected Editor createdBy;
+    @XmlAttribute
+    protected Date publishStart = new Date();
+    @XmlTransient
+    protected Editor lastModifiedBy;
+    @XmlAttribute
+    protected Date publishStop;
+    @XmlAttribute
+    protected Workflow workflow = Workflow.DRAFT;
+    @XmlTransient
+    protected Integer viewCounter;
+    @XmlTransient
+    protected String domain;
+
     public Date getLastModified() {
         return lastModified;
     }
 
-    /**
-     * @param lastModified the lastModified to set
-     */
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
 
-    /**
-     * @return the creationDate
-     */
-    @XmlTransient
     public Date getCreationDate() {
         return creationDate;
     }
 
-    /**
-     * @param creationDate the creationDate to set
-     */
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
 
-    /**
-     * @return the lastModifiedBy
-     */
-    @XmlTransient
     public Editor getLastModifiedBy() {
         return lastModifiedBy;
     }
 
-    /**
-     * @param lastModifiedBy the lastModifiedBy to set
-     */
     public void setLastModifiedBy(Editor lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    /**
-     * @return the createdBy
-     */
-    @XmlTransient
     public Editor getCreatedBy() {
         return createdBy;
     }
 
-    /**
-     * @param createdBy the createdBy to set
-     */
     public void setCreatedBy(Editor createdBy) {
         this.createdBy = createdBy;
     }
 
-    /**
-     * @return the publishStart
-     */
-    @XmlTransient
     public Date getPublishStart() {
         return publishStart;
     }
 
-    /**
-     * @param publishStart the publishStart to set
-     */
     public void setPublishStart(Date publishStart) {
         this.publishStart = publishStart;
     }
 
-    /**
-     * @return the publishStop
-     */
-    @XmlTransient
     public Date getPublishStop() {
         return publishStop;
     }
 
-    /**
-     * @param publishStop the publishStop to set
-     */
     public void setPublishStop(Date publishStop) {
         this.publishStop = publishStop;
     }
 
-    /**
-     * @return the workflow
-     */
-    @XmlAttribute
+    @XmlAttribute(name = "urn")
     abstract public String getUrn();
 
-    @XmlTransient
     public Workflow getWorkflow() {
         return workflow;
     }
 
-    /**
-     * @param workflow the workflow to set
-     */
     public void setWorkflow(Workflow workflow) {
         this.workflow = workflow;
     }
 
-    /**
-     * @return the viewCounter
-     */
-    @XmlTransient
     public Integer getViewCounter() {
         return viewCounter;
     }
 
-    /**
-     * @param viewCounter the viewCounter to set
-     */
     public void setViewCounter(Integer viewCounter) {
         this.viewCounter = viewCounter;
     }
 
-    @XmlTransient
     public String getDomain() {
         return domain;
     }
