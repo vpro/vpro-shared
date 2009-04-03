@@ -1,6 +1,8 @@
 
 package nl.vpro.domain.shared;
 
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
 import java.io.File;
 
 /**
@@ -9,6 +11,8 @@ import java.io.File;
  * @author peter
  * @version $Id$
  */
+@XmlEnum
+@XmlType(name = "imageTypeEnum")
 public enum ImageType {
     JPG, GIF, PNG, BMP, PCX, IFF, RAS, PBM, PGM, PPM, PSD;
 

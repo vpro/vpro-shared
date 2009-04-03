@@ -6,9 +6,8 @@
 
 package nl.vpro.domain.shared;
 
-import java.sql.Blob;
-
 import javax.xml.bind.annotation.*;
+import java.sql.Blob;
 
 import org.apache.log4j.Logger;
 
@@ -22,26 +21,27 @@ import nl.vpro.domain.PublishableObject;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {
+@XmlType(name = "imageType", namespace = "urn:vpro:shared:2009", propOrder = {
         "title",
         "description",
-        "width",
         "height",
-        "imageType"})
+        "width"
+})
 public class Image extends PublishableObject {
     private static final Logger log = Logger.getLogger(Image.class);
     private static final long serialVersionUID = 2182582685395751329L;
     public static final String SCHEMA_NAME = "image";
 
-    @XmlElement(namespace = "urn:vpro:media:2009")
+    @XmlElement(namespace = "urn:vpro:shared:2009")
     private String title;
+    @XmlElement(namespace = "urn:vpro:shared:2009")
     private String description;
-    @XmlElement(namespace = "urn:vpro:media:2009")
+    @XmlElement(namespace = "urn:vpro:shared:2009")
     private Integer width;
-    @XmlElement(namespace = "urn:vpro:media:2009")
+    @XmlElement(namespace = "urn:vpro:shared:2009")
     private Integer height;
-    @XmlElement(namespace = "urn:vpro:media:2009")
-    private ImageType imageType;
+    @XmlAttribute
+    private ImageType type;
     @XmlTransient
     private Blob data;
 
@@ -63,8 +63,8 @@ public class Image extends PublishableObject {
      * @return The extension (jpg, gif, etc.) to use for this image
      */
     public String getExtension() {
-        if (imageType!=null) {
-            return imageType.toString().toLowerCase();
+        if(type != null) {
+            return type.toString().toLowerCase();
         } else {
             return ImageType.JPG.toString().toLowerCase();
         }
@@ -74,8 +74,8 @@ public class Image extends PublishableObject {
         return height;
     }
 
-    public ImageType getImageType() {
-        return imageType;
+    public ImageType getType() {
+        return type;
     }
 
     /**
@@ -111,10 +111,10 @@ public class Image extends PublishableObject {
     }
 
     /**
-     * @param imageType the image type
+     * @param type the image type
      */
-    public void setImageType(ImageType imageType) {
-        this.imageType = imageType;
+    public void setType(ImageType type) {
+        this.type = type;
     }
 
     /**
