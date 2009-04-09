@@ -5,11 +5,7 @@
  */
 package nl.vpro.domain.shared;
 
-import java.util.SortedSet;
-
 import nl.vpro.domain.Dao;
-import nl.vpro.domain.DomainObject;
-import nl.vpro.domain.shared.ImageRelated;
 
 /**
  * Dao for program interaction.

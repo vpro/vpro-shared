@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlAccessType;
  */
 @SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class DomainObject implements Serializable {
+public abstract class SharedDomainObject implements Serializable {
 
     @XmlAttribute
     protected Long id;

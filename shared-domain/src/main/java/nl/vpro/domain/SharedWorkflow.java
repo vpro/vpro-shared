@@ -32,7 +32,7 @@ import javax.xml.bind.annotation.XmlEnumValue;
  * @version $Id$
  */
 @XmlEnum
-public enum Workflow {
+public enum SharedWorkflow {
 
     DRAFT("ontwerp"),
     @XmlEnumValue("FOR APPROVAL")
@@ -47,7 +47,7 @@ public enum Workflow {
     /**
      * Sole constructor
      */
-    Workflow(String description) {
+    SharedWorkflow(String description) {
         this.description = description;
     }
 
@@ -58,8 +58,8 @@ public enum Workflow {
         return description;
     }
 
-    public static Workflow fromValue(String s) {
-        for (Workflow w: Workflow.values()) {
+    public static SharedWorkflow fromValue(String s) {
+        for (SharedWorkflow w: SharedWorkflow.values()) {
             if (w.description.equals(s)) {
                 return w;
             }

@@ -6,7 +6,7 @@
 
 package nl.vpro.domain.shared;
 
-import nl.vpro.domain.DomainObject;
+import nl.vpro.domain.SharedDomainObject;
 
 
 /**
@@ -16,7 +16,7 @@ import nl.vpro.domain.DomainObject;
  * @author roekoe
  * @version $Id$
  */
-public class ImageRelated extends DomainObject {
+public class ImageRelated extends SharedDomainObject {
 
     private static final long serialVersionUID = 1667066853154310116L;
 

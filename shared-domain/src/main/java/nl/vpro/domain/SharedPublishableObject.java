@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.*;
  */
 @SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class PublishableObject extends DomainObject {
+public abstract class SharedPublishableObject extends SharedDomainObject {
 
     @XmlAttribute
     protected Date creationDate;
@@ -35,7 +35,7 @@ public abstract class PublishableObject extends DomainObject {
     @XmlAttribute
     protected Date publishStop;
     @XmlAttribute
-    protected Workflow workflow = Workflow.DRAFT;
+    protected SharedWorkflow workflow = SharedWorkflow.DRAFT;
     @XmlTransient
     protected Integer viewCounter;
     @XmlTransient
@@ -92,11 +92,11 @@ public abstract class PublishableObject extends DomainObject {
     @XmlAttribute(name = "urn")
     abstract public String getUrn();
 
-    public Workflow getWorkflow() {
+    public SharedWorkflow getWorkflow() {
         return workflow;
     }
 
-    public void setWorkflow(Workflow workflow) {
+    public void setWorkflow(SharedWorkflow workflow) {
         this.workflow = workflow;
     }
 

@@ -6,7 +6,7 @@
 package nl.vpro.ibatis.rowhandlers;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
-import nl.vpro.domain.DomainObject;
+import nl.vpro.domain.SharedDomainObject;
 
 import java.util.TreeSet;
 
@@ -19,7 +19,7 @@ import java.util.TreeSet;
  *
  * @author roekoe
  */
-public class TreeSetRowHandler<DO extends DomainObject> implements RowHandler {
+public class TreeSetRowHandler<DO extends SharedDomainObject> implements RowHandler {
   private TreeSet<DO> set = new TreeSet<DO>();
 
   @SuppressWarnings("unchecked")
