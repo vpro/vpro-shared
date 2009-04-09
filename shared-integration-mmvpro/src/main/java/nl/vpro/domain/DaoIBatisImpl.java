@@ -7,7 +7,6 @@ package nl.vpro.domain;
 
 
 import java.util.List;
-import java.util.SortedSet;
 
 import org.apache.log4j.Logger;
 import org.springframework.orm.ibatis.SqlMapClientTemplate;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 
-import nl.vpro.domain.DomainObject;
+import nl.vpro.domain.SharedDomainObject;
 
 import javax.annotation.Resource;
 
@@ -25,12 +24,12 @@ import javax.annotation.Resource;
  * @param <DO>
  */
 @Repository
-public abstract class DaoIBatisImpl<DO extends DomainObject> implements Dao<DO> {
+public abstract class DaoIBatisImpl<DO extends SharedDomainObject> implements Dao<DO> {
     private static final Logger log = Logger.getLogger(DaoIBatisImpl.class);
 
     private SqlMapClientTemplate sqlMapClientTemplate;
 
-    private String sqlMapNameSpace = "DomainObject";
+    private String sqlMapNameSpace = "SharedDomainObject";
 
     public DaoIBatisImpl() {
     }

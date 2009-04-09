@@ -11,7 +11,7 @@ import java.sql.Blob;
 
 import org.apache.log4j.Logger;
 
-import nl.vpro.domain.PublishableObject;
+import nl.vpro.domain.SharedPublishableObject;
 
 /**
  * An image.
@@ -27,7 +27,7 @@ import nl.vpro.domain.PublishableObject;
         "height",
         "width"
 })
-public class Image extends PublishableObject {
+public class Image extends SharedPublishableObject {
     private static final Logger log = Logger.getLogger(Image.class);
     private static final long serialVersionUID = 2182582685395751329L;
     public static final String SCHEMA_NAME = "image";

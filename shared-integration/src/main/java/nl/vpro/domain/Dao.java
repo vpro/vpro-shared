@@ -8,14 +8,14 @@ package nl.vpro.domain;
 
 import java.util.List;
 
-import nl.vpro.domain.DomainObject;
+import nl.vpro.domain.SharedDomainObject;
 
 /**
  * Superinterface for all data access objects.
  *
  * @param <DO> the entity type of this dao
  */
-public interface Dao<DO extends DomainObject> {
+public interface Dao<DO extends SharedDomainObject> {
 
     /**
      * Retrieves a fully initialized entity by its id.

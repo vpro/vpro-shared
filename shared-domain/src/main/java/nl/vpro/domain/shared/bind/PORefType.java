@@ -4,7 +4,7 @@
  */
 package nl.vpro.domain.shared.bind;
 
-import nl.vpro.domain.PublishableObject;
+import nl.vpro.domain.SharedPublishableObject;
 import nl.vpro.domain.shared.Image;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -37,7 +37,7 @@ public class PORefType {
         this.type = type;
     }
 
-    public static <T extends PublishableObject> PORefType createPORefType(T publishableObject) {
+    public static <T extends SharedPublishableObject> PORefType createPORefType(T publishableObject) {
         PORefType poRefType = new PORefType();
         poRefType.setUrn(publishableObject.getUrn());
         poRefType.setType(publishableObject.getClass().getSimpleName().toLowerCase());

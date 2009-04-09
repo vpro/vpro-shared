@@ -4,7 +4,7 @@
     "http://ibatis.apache.org/dtd/sql-map-2.dtd">
 
 <sqlMap namespace="DomainObject">
-  <typeAlias alias="DomainObject" type="nl.vpro.domain.DomainObject" />
+  <typeAlias alias="DomainObject" type="nl.vpro.domain.SharedDomainObject" />
 
   <resultMap id="domainObjectResult" class="DomainObject">
     <result property="id" javaType="Long" column="number"/>

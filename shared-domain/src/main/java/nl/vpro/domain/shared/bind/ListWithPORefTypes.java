@@ -4,11 +4,10 @@
  */
 package nl.vpro.domain.shared.bind;
 
-import nl.vpro.domain.PublishableObject;
+import nl.vpro.domain.SharedPublishableObject;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.ArrayList;
 
 public class ListWithPORefTypes {
@@ -24,7 +23,7 @@ public class ListWithPORefTypes {
         this.poObjects = poObjects;
     }
 
-    public static <T extends PublishableObject> ListWithPORefTypes createPORefType(List<T> list) {
+    public static <T extends SharedPublishableObject> ListWithPORefTypes createPORefType(List<T> list) {
         if (list.size() > 0) {
             List<PORefType> listOut = new ArrayList<PORefType>();
             for (T poObject : list) {

@@ -4,7 +4,7 @@
     "http://ibatis.apache.org/dtd/sql-map-2.dtd">
 
 <sqlMap namespace="PublishableObject">
-  <typeAlias alias="PublishableObject" type="nl.vpro.domain.PublishableObject" />
+  <typeAlias alias="PublishableObject" type="nl.vpro.domain.SharedPublishableObject" />
 
   <resultMap id="publishableObjectResult" class="PublishableObject" extends="DomainObject.domainObjectResult">
     <result property="domain" javaType="String" column="domain"/>
