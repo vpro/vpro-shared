@@ -21,6 +21,7 @@
     <module>shared-integration-mmvpro</module>
     <module>shared-services</module>
     <module>shared-web</module>
+    <module>shared-util</module>
   </modules>
 
   <properties>

@@ -10,7 +10,7 @@
   <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-web</artifactId>
 
-  <name>nl.vpro.shared</name>
+  <name>shared-web</name>
   <description>This modules contains web utils and classes to be shared among other modules.</description>
 
 	<dependencies>

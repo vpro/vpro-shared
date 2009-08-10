@@ -4,7 +4,7 @@
  * Creation date 15-dec-2005.
  */
 
-package nl.vpro.domain.util;
+package nl.vpro.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -20,18 +20,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.apache.commons.beanutils.BeanUtils;
 
 /**
  * Simple helper methods.
  *
  * @author arne, peter
+ * @author r.j.koekoek@vpro.nl
  * @version $Id: Helper.java 8879 2006-09-26 14:17:19Z arne $
  */
 public class Helper {
-
-    private static final Logger log = Logger.getLogger(Helper.class);
 
     /**
      * Tests for equality, allowing nulls.
@@ -378,7 +376,7 @@ public class Helper {
     }
 
     /**
-     * Tries and find an element in an array. {@link Helper#equals(Object, Object} equals} is used for comparisons. A
+     * Tries and find an element in an array. {@link Helper#equals(Object, Object) equals} is used for comparisons. A
      * linear search is performed - if the input array is sorted, it would be wiser to use
      * {@link Arrays#binarySearch(Object[], Object)}.
      *
@@ -432,9 +430,6 @@ public class Helper {
         if (list == null || list.isEmpty()) {
             result = null;
         } else if (list.size() > 1) {
-            if (log.isDebugEnabled()) {
-                log.debug("List " + list);
-            }
             throw new IllegalStateException(String.format("The list contained %s elements, it should contain 0 or 1 elements", list.size()));
         } else {
             result = list.get(0);
@@ -456,9 +451,6 @@ public class Helper {
         if (set == null || set.isEmpty()) {
             result = null;
         } else if (set.size() > 1) {
-            if (log.isDebugEnabled()) {
-                log.debug("Set " + set);
-            }
             throw new IllegalStateException(String.format("The set contained %s elements, it should contain 0 or 1 elements", set.size()));
         } else {
             result = set.iterator().next();

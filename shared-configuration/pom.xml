@@ -12,6 +12,8 @@
   <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-configuration</artifactId>
 
+  <name>shared-configuration</name>
+
   <dependencies>
     <dependency>
       <groupId>commons-configuration</groupId>

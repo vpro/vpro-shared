@@ -5,9 +5,10 @@
  */
 package nl.vpro.domain.users;
 
-import nl.vpro.domain.util.Helper;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import nl.vpro.util.Helper;
 
 /**
  * @author roekoe
