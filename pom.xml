@@ -22,6 +22,7 @@
     <module>shared-services</module>
     <module>shared-web</module>
     <module>shared-util</module>
+    <module>shared-transfer</module>
   </modules>
 
   <properties>
