@@ -6,7 +6,7 @@
   <parent>
     <artifactId>shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
@@ -21,8 +21,28 @@
       <version>1.5</version>
       <exclusions>
         <exclusion>
+          <groupId>commons-el</groupId>
+          <artifactId>commons-el</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-fileupload</groupId>
+          <artifactId>commons-fileupload</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.portlet</groupId>
+          <artifactId>portlet-api</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>javax.servlet</groupId>
           <artifactId>servlet-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>myfaces</groupId>
+          <artifactId>myfaces-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>oro</groupId>
+          <artifactId>oro</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
