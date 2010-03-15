@@ -12,8 +12,8 @@ import java.io.IOException;
 /**
  * <p>Wraps a JSON response with padding and sets the response content type to application
  * /javascript. This filter is triggered when a callback parameter is present on the URL
- * containing the callback methodname. If the name for the callback parameter is to obvious,
- * you can supply an alternative value in this filters init params.
+ * containing the name for the callback method to use. If the name for the callback
+ * parameter is to obvious, you can supply an alternative value in this filters init config.
  */
 public class JsonpFilter implements Filter {
     private static final String CALLBACK = "callback";
@@ -37,8 +37,8 @@ public class JsonpFilter implements Filter {
                 callback = CALLBACK;
             }
 
-            AcceptJsonRequest requestWrapper = new AcceptJsonRequest((HttpServletRequest)request);
-            JsonResponse responseWrapper = new JsonResponse((HttpServletResponse)response, callback);
+            RequestWrapper requestWrapper = new RequestWrapper((HttpServletRequest)request);
+            ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse)response, callback);
 
             chain.doFilter(requestWrapper, responseWrapper);
 
