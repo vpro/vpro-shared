@@ -11,11 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-public class AcceptJsonRequest extends HttpServletRequestWrapper {
+public class RequestWrapper extends HttpServletRequestWrapper {
 
-    String accept;
+    private String accept;
 
-    public AcceptJsonRequest(HttpServletRequest request) {
+    public RequestWrapper(HttpServletRequest request) {
         super(request);
         this.accept = "application/json";
     }

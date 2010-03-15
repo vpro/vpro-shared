@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 
-public class JsonResponse extends HttpServletResponseWrapper {
+public class ResponseWrapper extends HttpServletResponseWrapper {
 
     private ByteArrayOutputStream output;
 
@@ -19,11 +19,11 @@ public class JsonResponse extends HttpServletResponseWrapper {
 
     private int increment;
 
-    public JsonResponse(HttpServletResponse response) throws UnsupportedEncodingException {
+    public ResponseWrapper(HttpServletResponse response) throws UnsupportedEncodingException {
         this(response, "callback");
     }
 
-    public JsonResponse(HttpServletResponse response, String callback) throws UnsupportedEncodingException {
+    public ResponseWrapper(HttpServletResponse response, String callback) throws UnsupportedEncodingException {
         super(response);
         output = new ByteArrayOutputStream();
 
@@ -41,7 +41,7 @@ public class JsonResponse extends HttpServletResponseWrapper {
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        return new JsonStream(output);
+        return new ServletStreamImpl(output);
     }
 
 

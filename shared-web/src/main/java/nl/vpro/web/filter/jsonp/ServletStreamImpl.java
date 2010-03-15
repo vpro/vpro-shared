@@ -9,11 +9,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class JsonStream extends ServletOutputStream {
+public class ServletStreamImpl extends ServletOutputStream {
     
     private DataOutputStream stream;
 
-    public JsonStream(OutputStream stream) {
+    public ServletStreamImpl(OutputStream stream) {
         this.stream = new DataOutputStream(stream);
     }
 
