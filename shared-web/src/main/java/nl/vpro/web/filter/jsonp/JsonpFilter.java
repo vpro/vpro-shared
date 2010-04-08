@@ -53,6 +53,9 @@ public class JsonpFilter implements Filter {
 
     private boolean isJsonpRequest(ServletRequest request) {
         return request instanceof HttpServletRequest
-                && ((HttpServletRequest)request).getParameterMap().containsKey(callback);
+                && ((HttpServletRequest)request).getMethod().equals("GET")
+                // GetParameterMap flushes the inputstream for 
+                // application/x-www-form-urlencoded PUT requests
+                && (request).getParameterMap().containsKey(callback);
     }
 }
