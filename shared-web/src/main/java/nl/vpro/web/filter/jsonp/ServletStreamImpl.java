@@ -9,6 +9,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * To wrap the output stream we need an implementation of a ServletOutputStream
+ */
 public class ServletStreamImpl extends ServletOutputStream {
     
     private DataOutputStream stream;
