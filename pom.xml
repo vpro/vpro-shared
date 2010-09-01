@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro</groupId>
     <artifactId>vpro-parent</artifactId>
-    <version>R20090226</version>
+    <version>R20100901</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
@@ -22,7 +22,6 @@
     <module>shared-configuration</module>
     <module>shared-domain</module>
     <module>shared-integration</module>
-    <module>shared-integration-mmvpro</module>
     <module>shared-services</module>
     <module>shared-web</module>
     <module>shared-util</module>
