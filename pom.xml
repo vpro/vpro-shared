@@ -9,7 +9,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-parent</artifactId>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5</version>
   <packaging>pom</packaging>
 
   <name>shared-parent</name>
@@ -29,9 +29,9 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared</connection>
-    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared</developerConnection>
-    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/</url>
+    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/tags/0.5</connection>
+    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/tags/0.5</developerConnection>
+    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/tags/0.5</url>
   </scm>
 
   <properties>
