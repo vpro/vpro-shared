@@ -28,6 +28,12 @@
     <module>shared-transfer</module>
   </modules>
 
+  <scm>
+    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared</connection>
+    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared</developerConnection>
+    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/</url>
+  </scm>
+
   <properties>
     <spring.version>3.0.3.RELEASE</spring.version>
   </properties>
