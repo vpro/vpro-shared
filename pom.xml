@@ -29,9 +29,8 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/tags/0.5</connection>
-    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/tags/0.5</developerConnection>
-    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/tags/0.5</url>
+    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5</connection>
+    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5</developerConnection>
   </scm>
 
   <properties>
@@ -48,11 +47,6 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-integration</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>shared-integration-mmvpro</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
