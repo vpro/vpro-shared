@@ -8,6 +8,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * Returns a JSON response containing a property with the requested resource as its content.
@@ -42,7 +43,9 @@ public class JsonTemplateFilter implements Filter {
                 chain.doFilter(requestWrapper, responseWrapper);
                 responseWrapper.flush();
             } catch(Exception e) {
-                response.getWriter().write("{ \"error\" : \"" + e.getMessage() + "\"}");
+                final PrintWriter writer = response.getWriter();
+                writer.write("{ \"error\" : \"" + e.getMessage() + "\"}");
+                writer.close();
                 return;
             }
 
