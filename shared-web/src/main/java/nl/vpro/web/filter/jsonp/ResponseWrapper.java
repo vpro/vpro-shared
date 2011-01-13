@@ -9,9 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 
-public class ResponseWrapper extends HttpServletResponseWrapper {
+import nl.vpro.web.support.WrappedServletOutputStream;
 
-    private ByteArrayOutputStream output;
+class ResponseWrapper extends HttpServletResponseWrapper {
+
+    private ByteArrayOutputStream buffer;
 
     private byte[] prefix;
 
@@ -25,7 +27,7 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
 
     public ResponseWrapper(HttpServletResponse response, String callback) throws UnsupportedEncodingException {
         super(response);
-        output = new ByteArrayOutputStream();
+        buffer = new ByteArrayOutputStream();
 
         String encoding = getResponse().getCharacterEncoding();
 
@@ -41,19 +43,18 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        return new ServletStreamImpl(output);
+        return new WrappedServletOutputStream(buffer);
     }
 
 
     public void flush() throws IOException {
+        getResponse().setContentType("application/javascript");
+        getResponse().setContentLength(buffer.size() + increment);
+
         OutputStream out = getResponse().getOutputStream();
         out.write(prefix);
-        out.write(output.toByteArray());
+        buffer.writeTo(out);
         out.write(suffix);
         out.close();
-
-        getResponse().setContentType("application/javascript");
-        getResponse().setContentLength(output.size() + increment);
-
     }
 }

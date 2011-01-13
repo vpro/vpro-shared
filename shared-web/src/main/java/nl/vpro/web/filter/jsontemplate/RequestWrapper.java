@@ -2,13 +2,11 @@
  * Copyright (C) 2010 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.web.filter.jsonp;
+package nl.vpro.web.filter.jsontemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 class RequestWrapper extends HttpServletRequestWrapper {

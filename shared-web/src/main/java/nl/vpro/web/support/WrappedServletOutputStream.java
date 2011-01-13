@@ -2,7 +2,7 @@
  * Copyright (C) 2010 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.web.filter.jsonp;
+package nl.vpro.web.support;
 
 import javax.servlet.ServletOutputStream;
 import java.io.DataOutputStream;
@@ -12,11 +12,11 @@ import java.io.OutputStream;
 /**
  * To wrap the output stream we need an implementation of a ServletOutputStream
  */
-public class ServletStreamImpl extends ServletOutputStream {
+public class WrappedServletOutputStream extends ServletOutputStream {
     
     private DataOutputStream stream;
 
-    public ServletStreamImpl(OutputStream stream) {
+    public WrappedServletOutputStream(OutputStream stream) {
         this.stream = new DataOutputStream(stream);
     }
 
