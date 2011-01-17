@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Returns a JSON response containing a property with the requested resource as its content.
@@ -20,6 +22,8 @@ import java.io.PrintWriter;
  */
 public class JsonTemplateFilter implements Filter {
     private static final String PROPERTY = "jstemplate";
+
+    private static final Pattern restrictedChars = Pattern.compile("[^A-Za-z0-9_]");
 
     private String property;
 
@@ -35,6 +39,12 @@ public class JsonTemplateFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if(isJsonpRequest(request)) {
             String property = request.getParameter(this.property);
+
+            Matcher matcher = restrictedChars.matcher(property);
+            if(matcher.find()) {
+                ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Unsupported JSON property: " + property);
+                return;
+            }
 
             RequestWrapper requestWrapper = new RequestWrapper((HttpServletRequest)request);
             ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse)response, property);
