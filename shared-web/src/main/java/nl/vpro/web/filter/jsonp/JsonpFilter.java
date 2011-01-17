@@ -8,6 +8,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>Wraps a JSON response with padding and sets the response content type to application
@@ -17,6 +19,8 @@ import java.io.IOException;
  */
 public class JsonpFilter implements Filter {
     private static final String CALLBACK = "callback";
+
+    private static final Pattern restrictedChars = Pattern.compile("[^A-Za-z0-9_]");
 
     private String callback;
 
@@ -35,6 +39,12 @@ public class JsonpFilter implements Filter {
 
             if(callback.equals("")) {
                 callback = CALLBACK;
+            }
+
+            Matcher matcher = restrictedChars.matcher(callback);
+            if(matcher.find()) {
+                ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Unsupported callback: " + callback);
+                return;
             }
 
             RequestWrapper requestWrapper = new RequestWrapper((HttpServletRequest)request);
