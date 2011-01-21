@@ -29,8 +29,8 @@ class ResponseWrapper extends HttpServletResponseWrapper {
 
         encoding = getResponse().getCharacterEncoding();
 
-        prefix = ("{ \"" + property + "\" : \"<p>").getBytes(encoding);
-        suffix = "</p>\"}".getBytes(encoding);
+        prefix = ("{ \"" + property + "\" : \"").getBytes(encoding);
+        suffix = "\"}".getBytes(encoding);
 
     }
 
