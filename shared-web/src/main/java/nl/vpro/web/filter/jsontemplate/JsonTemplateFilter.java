@@ -16,14 +16,14 @@ import java.util.regex.Pattern;
  * Returns a JSON response containing a property with the requested resource as its content.
  * <p>
  * Default usage:
- * http://localhost:8080/vpro/imagegallery/0.0.1/imagegallery.js?jstemplate=data
+ * http://localhost:8080/vpro/imagegallery/0.1/imagegallery.js?jstemplate=data
  * where the jstemplate parameter holds the name of the returned JSON property.
  *
  */
 public class JsonTemplateFilter implements Filter {
     private static final String PROPERTY = "jstemplate";
 
-    private static final Pattern restrictedChars = Pattern.compile("[^A-Za-z0-9_]");
+    private static final Pattern RESTRICTED = Pattern.compile("[^A-Za-z0-9_]");
 
     private String property;
 
@@ -40,7 +40,7 @@ public class JsonTemplateFilter implements Filter {
         if(isJsonpRequest(request)) {
             String property = request.getParameter(this.property);
 
-            Matcher matcher = restrictedChars.matcher(property);
+            Matcher matcher = RESTRICTED.matcher(property);
             if(matcher.find()) {
                 ((HttpServletResponse)response).sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Unsupported JSON property: " + property);
                 return;

@@ -45,7 +45,7 @@ class ResponseWrapper extends HttpServletResponseWrapper {
     }
 
     public void flush() throws IOException {
-        final ByteArrayOutputStream tmp = new ByteArrayOutputStream((int)(buffer.size() * 1.4));
+        final ByteArrayOutputStream tmp = new ByteArrayOutputStream();
 
         final Charset charset = Charset.forName(encoding);
 
