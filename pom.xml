@@ -39,14 +39,14 @@
       <id>nexus-releases</id>
       <url>http://nexus.vpro.nl/content/repositories/releases</url>
     </repository>
- 
+
     <snapshotRepository>
       <id>nexus-snapshots</id>
       <name>Internal Snapshots</name>
       <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
-  
+
   <properties>
     <spring.version>3.0.3.RELEASE</spring.version>
   </properties>
