@@ -37,7 +37,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
             if (configFile.exists()) {
                 try {
                     properties.load(new FileInputStream(configFile));
-                    LOG.info("Loaded from " + configFile + " " + properties );
+                    LOG.info("Loaded from " + configFile + " " + properties.keySet());
                 } catch (IOException e) {
                     LOG.error(e.getMessage(), e);
                 }
