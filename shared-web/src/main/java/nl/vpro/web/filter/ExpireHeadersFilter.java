@@ -1,7 +1,6 @@
 package nl.vpro.web.filter;
 
 import java.io.IOException;
-import java.util.Calendar;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +26,11 @@ public class ExpireHeadersFilter implements Filter {
     private FilterConfig filterConfig = null;
 
     private boolean development = false;
+    private int ttl = DEFAULT_TTL;
+    private String cacheControl;
 
+
+    @Override
     public void init(FilterConfig filterConfig) {
         this.filterConfig = filterConfig;
 
@@ -38,19 +41,19 @@ public class ExpireHeadersFilter implements Filter {
         if(log.isDebugEnabled()) {
             log.debug("Using ExpireHeadersFilter");
         }
+        this.ttl = getTTL();
+
+        this.cacheControl = "public, max-age=" + ttl + ", must-revalidate";
     }
 
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse)res;
         if(!development) {
-
             // Set the expire header
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.SECOND, getTTL());
-            response.setDateHeader("Expires", cal.getTimeInMillis());
-
+            response.setDateHeader("Expires", System.currentTimeMillis() + ttl);
             // Set the max-age header.
-            response.setHeader("Cache-Control", "public, max-age=" + getTTL() + ", must-revalidate");
+            response.setHeader("Cache-Control", "public, max-age=" + cacheControl);
         } else {
             response.setHeader("Cache-Control", "no-cache");
         }
@@ -58,6 +61,7 @@ public class ExpireHeadersFilter implements Filter {
         chain.doFilter(req, res);
     }
 
+    @Override
     public void destroy() {
     }
 
