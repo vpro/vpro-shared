@@ -4,12 +4,13 @@
  */
 package nl.vpro.web.filter.jsonp;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * <p>Wraps a JSON response with padding and sets the response content type to application
@@ -24,6 +25,7 @@ public class JsonpFilter implements Filter {
 
     private String callback;
 
+    @Override
     public void init(FilterConfig config) throws ServletException {
         String callback = config.getInitParameter("callback");
         if(callback != null && !callback.equals("")) {
@@ -33,6 +35,7 @@ public class JsonpFilter implements Filter {
         }
     }
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if(isJsonpRequest(request)) {
             String callback = request.getParameter(this.callback);
@@ -58,14 +61,15 @@ public class JsonpFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
     }
 
     private boolean isJsonpRequest(ServletRequest request) {
         return request instanceof HttpServletRequest
                 && ((HttpServletRequest)request).getMethod().equals("GET")
-                // GetParameterMap flushes the inputstream for 
+                // GetParameterMap flushes the inputstream for
                 // application/x-www-form-urlencoded PUT requests
-                && (request).getParameterMap().containsKey(callback);
+                && request.getParameterMap().containsKey(callback);
     }
 }

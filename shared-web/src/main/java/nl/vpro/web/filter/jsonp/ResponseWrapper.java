@@ -4,22 +4,23 @@
  */
 package nl.vpro.web.filter.jsonp;
 
+import java.io.*;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import java.io.*;
 
 import nl.vpro.web.support.WrappedServletOutputStream;
 
 class ResponseWrapper extends HttpServletResponseWrapper {
 
-    private ByteArrayOutputStream buffer;
+    private final ByteArrayOutputStream buffer;
 
-    private byte[] prefix;
+    private final byte[] prefix;
 
-    private byte[] suffix;
+    private final byte[] suffix;
 
-    private int increment;
+    private final int increment;
 
     public ResponseWrapper(HttpServletResponse response) throws UnsupportedEncodingException {
         this(response, "callback");
@@ -29,7 +30,7 @@ class ResponseWrapper extends HttpServletResponseWrapper {
         super(response);
         buffer = new ByteArrayOutputStream();
 
-        String encoding = getResponse().getCharacterEncoding();
+        final String encoding = response.getCharacterEncoding();
 
         prefix = (callback + "(").getBytes(encoding);
         suffix = ");".getBytes(encoding);
@@ -46,8 +47,7 @@ class ResponseWrapper extends HttpServletResponseWrapper {
         return new WrappedServletOutputStream(buffer);
     }
 
-
-    public void flush() throws IOException {
+    void flush() throws IOException {
         getResponse().setContentType("application/javascript");
         getResponse().setContentLength(buffer.size() + increment);
 

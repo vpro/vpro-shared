@@ -4,25 +4,27 @@
  */
 package nl.vpro.web.filter.jsonp;
 
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 class RequestWrapper extends HttpServletRequestWrapper {
 
-    private String accept;
+    private final String accept;
 
-    public RequestWrapper(HttpServletRequest request) {
+    public RequestWrapper(HttpServletRequest request, String a) {
         super(request);
-        this.accept = "application/json";
+        this.accept = a;
+    }
+    public RequestWrapper(HttpServletRequest request) {
+        this(request, "application/json");
     }
 
     @Override
     public String getHeader(String header) {
-        if(header.toLowerCase().equals("accept")) {
+        if(header.equalsIgnoreCase("accept")) {
             return accept;
         }
         return super.getHeader(header);
@@ -30,14 +32,11 @@ class RequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public Enumeration getHeaders(String header) {
-        if(header.toLowerCase().equals("accept")) {
+        if(header.equalsIgnoreCase("accept")) {
             StringTokenizer helper = new StringTokenizer(accept);
             return helper;
         }
         return super.getHeaders(header);
     }
 
-    public void setAccept(String accept) {
-        this.accept = accept;
-    }
 }

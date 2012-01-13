@@ -4,13 +4,14 @@
  */
 package nl.vpro.web.filter.jsontemplate;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Returns a JSON response containing a property with the requested resource as its content.
@@ -27,6 +28,7 @@ public class JsonTemplateFilter implements Filter {
 
     private String property;
 
+    @Override
     public void init(FilterConfig config) throws ServletException {
         String template = config.getInitParameter(PROPERTY);
         if(template != null && !template.equals("")) {
@@ -36,6 +38,7 @@ public class JsonTemplateFilter implements Filter {
         }
     }
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if(isJsonpRequest(request)) {
             String property = request.getParameter(this.property);
@@ -46,7 +49,7 @@ public class JsonTemplateFilter implements Filter {
                 return;
             }
 
-            RequestWrapper requestWrapper = new RequestWrapper((HttpServletRequest)request);
+            RequestWrapper requestWrapper   = new RequestWrapper((HttpServletRequest)request);
             ResponseWrapper responseWrapper = new ResponseWrapper((HttpServletResponse)response, property);
 
             try {
@@ -64,14 +67,16 @@ public class JsonTemplateFilter implements Filter {
         }
     }
 
+    @Override
     public void destroy() {
     }
+
 
     private boolean isJsonpRequest(ServletRequest request) {
         return request instanceof HttpServletRequest
                 && ((HttpServletRequest)request).getMethod().equals("GET")
-                // GetParameterMap flushes the inputstream for 
+                // GetParameterMap flushes the inputstream for
                 // application/x-www-form-urlencoded PUT requests
-                && (request).getParameterMap().containsKey(property);
+                && request.getParameterMap().containsKey(property);
     }
 }
