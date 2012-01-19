@@ -4,10 +4,11 @@
  */
 package nl.vpro.domain.shared.bind;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
-import java.util.*;
 
 public class DateToDuration extends XmlAdapter<Duration, Date> {
 
@@ -18,8 +19,10 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
         long time = date.getTime();
         Duration dur;
         if (time < 30l * 24 * 60 * 60 * 1000) {
+            System.out.println("Using DayTime duration for " + date);
             dur = datatypeFactory.newDurationDayTime(time);
         } else {
+            System.out.println("Using normal duration for " + date);
             dur = datatypeFactory.newDuration(time);
         }
 
