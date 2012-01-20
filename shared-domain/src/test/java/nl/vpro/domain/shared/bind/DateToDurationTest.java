@@ -2,6 +2,9 @@ package nl.vpro.domain.shared.bind;
 
 import java.util.Date;
 
+import javax.xml.bind.JAXB;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
@@ -38,4 +41,16 @@ public class DateToDurationTest {
         assertEquals("P0Y2M1DT0H0M0.000S", dateToDuration.marshal(new Date(60l * 24 * 60 * 60 * 1000)).toString());
     }
 
+    @Test
+    public void jaxb() throws Exception {
+        JAXB.marshal(new TestObject(), System.out);
+    }
+
+
+    public static class TestObject  {
+        @XmlJavaTypeAdapter(nl.vpro.domain.shared.bind.DateToDuration.class)
+        public Date getDuration() {
+            return new Date(100);
+        }
+    };
 }
