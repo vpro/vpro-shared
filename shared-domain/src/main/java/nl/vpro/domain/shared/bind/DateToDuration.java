@@ -107,7 +107,9 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
         }
         @Override
         public String toString() {
-            return "P" + dur.getDays() + "DT" + dur.getHours() + "H" + dur.getMinutes() + "M" + dur.getSeconds() + ".000" + "S";
+            return String.format("P%dDT%dH%dM%d.%03dS",
+                dur.getDays(), dur.getHours(), dur.getMinutes(), dur.getSeconds(),
+                dur.getTimeInMillis(new Date(0)) % 1000L);
         }
     }
 }
