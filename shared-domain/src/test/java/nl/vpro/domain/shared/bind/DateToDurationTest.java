@@ -11,6 +11,7 @@ import static junit.framework.Assert.assertEquals;
  */
 public class DateToDurationTest {
 
+
     @Test
     public void testDayTime() throws Exception {
         DateToDuration dateToDuration = new DateToDuration();
