@@ -46,8 +46,9 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
 
 
     /**
-     * This should be superflous, but test-cases are failing on jenkins.
+     * This should be superfluous, but test-cases are failing on jenkins.
      * implemented just to correct toString
+     * This was not needed on our local machines. I suppose we are working around some jdk-bug or so.
      */
     private class TimeDuration extends Duration {
         private final Duration dur;
