@@ -25,6 +25,7 @@
     <module>shared-services</module>
     <module>shared-web</module>
     <module>shared-util</module>
+    <module>shared-test</module>
     <module>shared-transfer</module>
   </modules>
 
@@ -48,7 +49,9 @@
   </distributionManagement>
 
   <properties>
-    <spring.version>3.0.3.RELEASE</spring.version>
+    <spring.version>3.1.1.RELEASE</spring.version>
+    <junit.version>4.6</junit.version>
+    <mycila.version>2.3</mycila.version>
   </properties>
 
   <dependencyManagement>
@@ -78,6 +81,23 @@
         <artifactId>junit</artifactId>
         <version>4.8.2</version>
         <scope>test</scope>
+      </dependency>
+
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.mycila.testing</groupId>
+        <artifactId>mycila-testing-api</artifactId>
+        <version>${mycila.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.mycila.testing.plugins</groupId>
+        <artifactId>mycila-testing-spring</artifactId>
+        <version>${mycila.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

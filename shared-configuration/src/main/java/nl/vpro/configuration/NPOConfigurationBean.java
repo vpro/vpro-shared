@@ -34,7 +34,9 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     public File getFile() {
         if (file == null) {
             File dir = new File(sx.getRealPath("/"));
-            if (dir == null) dir = File.listRoots()[0];
+            if (!dir.exists()) { // DRS fixed, dir will never be null ofcourse...
+            	dir = File.listRoots()[0];
+            }
             File parent = dir.getParentFile();
             if (parent == null) parent = dir;
             File configDir = new File(parent, "config");
@@ -65,7 +67,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
     @Override
-    public Iterator getKeys() {
+    public Iterator<Object> getKeys() {
         return properties.keySet().iterator();
     }
 
@@ -135,4 +137,15 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     public InputStream getInputStream() throws IOException {
         return new FileInputStream(getFile());
     }
+
+
+	@Override
+	public long contentLength() throws IOException {
+		File file = this.getFile();
+		if (file == null) {
+			return 0;
+		}
+		
+		return file.length();
+	}
 }
