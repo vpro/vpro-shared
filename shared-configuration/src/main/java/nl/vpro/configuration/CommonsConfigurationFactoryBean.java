@@ -17,7 +17,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Costin Leau
  * 
  */
-public class CommonsConfigurationFactoryBean implements InitializingBean, FactoryBean {
+public class CommonsConfigurationFactoryBean implements InitializingBean, FactoryBean<Object> {
 
     private CompositeConfiguration configuration;
 
@@ -33,7 +33,7 @@ public class CommonsConfigurationFactoryBean implements InitializingBean, Factor
     /**
      * {@inheritDoc}
      */
-    public Class getObjectType() {
+    public Class<?> getObjectType() {
         return Configuration.class;
     }
 
