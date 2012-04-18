@@ -51,6 +51,7 @@
 
   <properties>
     <spring.version>3.1.1.RELEASE</spring.version>
+    <spring-security.version>3.1.0.RELEASE</spring-security.version>
     <junit.version>4.6</junit.version>
     <mycila.version>2.3</mycila.version>
   </properties>
