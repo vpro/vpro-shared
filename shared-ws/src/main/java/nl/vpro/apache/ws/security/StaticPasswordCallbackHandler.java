@@ -1,14 +1,26 @@
+/**
+ * Copyright (C) 2011 All rights reserved
+ * VPRO The Netherlands
+ */
 package nl.vpro.apache.ws.security;
 
 import java.io.IOException;
 
-import javax.security.auth.callback.*;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 
 import org.apache.ws.security.WSPasswordCallback;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-// Does not work since Spring 3.1
-public class ProcessClientCallbackHandler implements CallbackHandler {
+public class StaticPasswordCallbackHandler implements CallbackHandler {
+
+    private final String password;
+
+    public StaticPasswordCallbackHandler(String password) {
+        this.password = password;
+    }
 
     @Override
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
@@ -16,8 +28,6 @@ public class ProcessClientCallbackHandler implements CallbackHandler {
             WSPasswordCallback wsp = (WSPasswordCallback) callback;
             switch (wsp.getUsage()) {
                 case WSPasswordCallback.USERNAME_TOKEN:
-                    // Does not work since Spring 3.1
-                    String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
                     wsp.setPassword(password);
                     break;
                 default:
