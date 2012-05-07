@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -32,7 +33,8 @@
 
   <scm>
     <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5</connection>
-    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5</developerConnection>
+    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5
+    </developerConnection>
     <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/shared-parent</url>
   </scm>
 
@@ -54,6 +56,9 @@
     <spring-security.version>3.1.0.RELEASE</spring-security.version>
     <junit.version>4.6</junit.version>
     <mycila.version>2.3</mycila.version>
+    <resteasy.version>2.3.2.Final</resteasy.version>
+    <jackson.version>1.8.5</jackson.version>
+    <slf4j.version>1.6.4</slf4j.version>
   </properties>
 
   <dependencyManagement>
@@ -87,6 +92,35 @@
 
 
       <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>jaxrs-api</artifactId>
+        <version>${resteasy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jaxrs</artifactId>
+        <version>${resteasy.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+
+      <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-test</artifactId>
         <version>${spring.version}</version>
@@ -100,6 +134,11 @@
         <groupId>com.mycila.testing.plugins</groupId>
         <artifactId>mycila-testing-spring</artifactId>
         <version>${mycila.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
