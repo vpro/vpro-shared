@@ -48,4 +48,8 @@ public class ErrorResponse {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 }
