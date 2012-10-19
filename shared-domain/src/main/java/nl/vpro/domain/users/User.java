@@ -8,8 +8,6 @@ package nl.vpro.domain.users;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import nl.vpro.util.Helper;
-
 /**
  * @author roekoe
  *
@@ -117,13 +115,23 @@ public class User {
      */
     public String getFullName() {
         StringBuilder sb = new StringBuilder();
-        Helper.appendIfNotEmpty(sb, getFirstname());
-        sb.append(Helper.isEmpty(getFirstname()) ? "" : " ");
-        Helper.appendIfNotEmpty(sb, getRoyalPrefix());
-        sb.append(Helper.isEmpty(getRoyalPrefix()) ? "" : " ");
-        Helper.appendIfNotEmpty(sb, getLastname());
+        appendIfNotEmpty(sb, getFirstname());
+        sb.append(isEmpty(getFirstname()) ? "" : " ");
+        appendIfNotEmpty(sb, getRoyalPrefix());
+        sb.append(isEmpty(getRoyalPrefix()) ? "" : " ");
+        appendIfNotEmpty(sb, getLastname());
 
         return sb.toString();
+    }
+
+    private boolean isEmpty(String string) {
+        return string == null || string.trim().length() == 0;
+    }
+
+    private void appendIfNotEmpty(StringBuilder sb, String string) {
+        if (!isEmpty(string)) {
+            sb.append(string);
+        }
     }
 
 
