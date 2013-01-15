@@ -15,7 +15,7 @@
   <packaging>jar</packaging>
 
   <name>shared-test</name>
-  <description>Contains some functionality required by JUnit tests (Mycila spring plugin, ...) </description>
+  <description>Contains some functionality required by JUnit tests (Mycila spring plugin, ...)</description>
 
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
@@ -34,11 +34,13 @@
       <groupId>com.mycila.testing.plugins</groupId>
       <artifactId>mycila-testing-spring</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
-
     <resources>
       <resource>
         <directory>src/main/resources</directory>
