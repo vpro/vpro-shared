@@ -5,7 +5,7 @@
   <parent>
     <groupId>nl.vpro</groupId>
     <artifactId>vpro-parent</artifactId>
-    <version>R20100901</version>
+    <version>R20120719</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
@@ -32,24 +32,10 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5</connection>
-    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.5
-    </developerConnection>
-    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/shared-parent</url>
+    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/trunk</developerConnection>
+    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/nl.vpro/shared/trunk</url>
   </scm>
-
-  <distributionManagement>
-    <repository>
-      <id>nexus-releases</id>
-      <url>http://nexus.vpro.nl/content/repositories/releases</url>
-    </repository>
-
-    <snapshotRepository>
-      <id>nexus-snapshots</id>
-      <name>Internal Snapshots</name>
-      <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <properties>
     <spring.version>3.1.1.RELEASE</spring.version>
