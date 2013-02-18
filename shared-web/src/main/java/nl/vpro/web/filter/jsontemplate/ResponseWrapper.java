@@ -4,6 +4,8 @@
  */
 package nl.vpro.web.filter.jsontemplate;
 
+import nl.vpro.web.support.WrappedServletOutputStream;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
@@ -11,24 +13,24 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 import java.nio.charset.Charset;
 
-import nl.vpro.web.support.WrappedServletOutputStream;
 
+/**
+ * TODO needs to buffer the entire response. Twice.
+ */
 class ResponseWrapper extends HttpServletResponseWrapper {
 
-    private ByteArrayOutputStream buffer;
+    private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-    private String encoding;
+    private final String encoding;
 
-    private byte[] prefix;
+    private final byte[] prefix;
 
-    private byte[] suffix;
+    private final byte[] suffix;
 
     public ResponseWrapper(HttpServletResponse response, String property) throws UnsupportedEncodingException {
         super(response);
-        buffer = new ByteArrayOutputStream();
 
         encoding = getResponse().getCharacterEncoding();
-
         prefix = ("{ \"" + property + "\" : \"").getBytes(encoding);
         suffix = "\"}".getBytes(encoding);
 
@@ -69,7 +71,7 @@ class ResponseWrapper extends HttpServletResponseWrapper {
     }
 
     private static String escape(char ch) {
-        StringBuffer sb = new StringBuffer(8);
+        StringBuilder sb = new StringBuilder(8);
 
         // http://json.org/
         switch(ch) {
