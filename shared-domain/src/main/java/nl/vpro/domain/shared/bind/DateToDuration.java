@@ -4,15 +4,14 @@
  */
 package nl.vpro.domain.shared.bind;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
 
 public class DateToDuration extends XmlAdapter<Duration, Date> {
 
@@ -108,9 +107,15 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
         }
         @Override
         public String toString() {
-            return String.format("P%dDT%dH%dM%d.%03dS",
-                dur.getDays(), dur.getHours(), dur.getMinutes(), dur.getSeconds(),
-                dur.getTimeInMillis(new Date(0)) % 1000L);
+            StringBuilder build = new StringBuilder();
+            if (dur.getSign() < 0) {
+                build.append('-');
+            }
+            build.append(String.format("P%dDT%dH%dM%d.%03dS",
+                    dur.getDays(), dur.getHours(), dur.getMinutes(),
+                    dur.getSeconds(),
+                    Math.abs(dur.getTimeInMillis(new Date(0)) % 1000L)));
+            return build.toString();
         }
     }
 }
