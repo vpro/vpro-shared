@@ -5,7 +5,8 @@ import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Make sure that all pages will expire in 5 minutes.
@@ -19,7 +20,7 @@ import org.apache.log4j.Logger;
  * @author Rob Vermeulen (VPRO)
  */
 public class ExpireHeadersFilter implements Filter {
-    private static final Logger log = Logger.getLogger(ExpireHeadersFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(ExpireHeadersFilter.class);
 
     private static final int DEFAULT_TTL = 300;
 
