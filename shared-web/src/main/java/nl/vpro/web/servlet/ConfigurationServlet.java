@@ -208,9 +208,10 @@ public class ConfigurationServlet extends HttpServlet {
             merge(new File(fileName), res);
         }
 
-        merge(new File(System.getProperty("user.home") +
+        String home = System.getProperty("user.home");
+        merge(new File(home +
             File.separator + "conf" + File.separator + name + ".properties"), res);
-        merge(new File(System.getProperty("user.home") +
+        merge(new File(home +
             File.separator + "conf" + File.separator + name + "." + env + ".properties"), res);
         return res;
     }
