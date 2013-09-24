@@ -26,4 +26,22 @@ public class DateUtils {
         calendar.setTime(date);
         return DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
     }
+
+    public static Date lowest(Date first, Date second) {
+        return compare(first, second, true);
+    }
+
+    public static Date highest(Date first, Date second) {
+        return compare(first, second, false);
+    }
+
+    private static Date compare(Date first, Date second, boolean smallest) {
+        if(first == null) {
+            return second;
+        }
+        if(second == null) {
+            return first;
+        }
+        return first.getTime() < second.getTime() ? smallest ? first : second : smallest ? second : first;
+    }
 }
