@@ -43,7 +43,6 @@
     <junit.version>4.6</junit.version>
     <mycila.version>2.3</mycila.version>
     <resteasy.version>2.3.2.Final</resteasy.version>
-    <jackson.version>1.8.5</jackson.version>
     <slf4j.version>1.6.4</slf4j.version>
   </properties>
 
@@ -81,11 +80,6 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>jaxrs-api</artifactId>
         <version>${resteasy.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
