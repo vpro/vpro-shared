@@ -1,6 +1,5 @@
 package nl.vpro.util.rs.error;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -15,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public enum DataError {
     NODATA(0, "The request contains no data."),
     INVALIDDATA(1, "The request contains invalid data that could not be parsed"),
