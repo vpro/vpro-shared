@@ -28,7 +28,7 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
 
     protected Duration marshalDayTime(long time) throws DatatypeConfigurationException {
         DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
-        return new TimeDuration(datatypeFactory.newDurationDayTime(time));
+        return datatypeFactory.newDurationDayTime(time);
     }
 
     protected Duration marshal(long time) throws DatatypeConfigurationException {
