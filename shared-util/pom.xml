@@ -8,7 +8,6 @@
     <version>0.15-SNAPSHOT</version>
   </parent>
 
-  <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-util</artifactId>
 
   <name>shared-util</name>
