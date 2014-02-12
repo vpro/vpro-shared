@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro</groupId>
     <artifactId>vpro-parent</artifactId>
-    <version>R20120719</version>
+    <version>R20131126</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
@@ -23,7 +23,10 @@
     <module>shared-camel</module>
     <module>shared-domain</module>
     <module>shared-integration</module>
+    <module>shared-jackson2</module>
+    <module>shared-resteasy</module>
     <module>shared-services</module>
+    <module>shared-swagger</module>
     <module>shared-web</module>
     <module>shared-ws</module>
     <module>shared-util</module>
@@ -42,7 +45,7 @@
     <spring-security.version>3.1.0.RELEASE</spring-security.version>
     <junit.version>4.6</junit.version>
     <mycila.version>2.3</mycila.version>
-    <resteasy.version>2.3.2.Final</resteasy.version>
+    <resteasy.version>3.0.6.Final</resteasy.version>
     <slf4j.version>1.6.4</slf4j.version>
   </properties>
 
