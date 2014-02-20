@@ -43,6 +43,8 @@
   <properties>
     <spring.version>3.1.1.RELEASE</spring.version>
     <spring-security.version>3.1.0.RELEASE</spring-security.version>
+    <jackson2.version>2.2.1</jackson2.version>
+    <!-- Versions till 2.3.1 have a Resteasy issue -->
     <junit.version>4.6</junit.version>
     <mycila.version>2.3</mycila.version>
     <resteasy.version>3.0.6.Final</resteasy.version>
