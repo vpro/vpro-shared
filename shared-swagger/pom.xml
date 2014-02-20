@@ -82,6 +82,7 @@
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <attachClasses>true</attachClasses>
+          <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
           <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
       </plugin>
