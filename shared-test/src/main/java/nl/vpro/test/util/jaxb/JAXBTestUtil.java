@@ -38,7 +38,15 @@ public class JAXBTestUtil {
     }
 
     /**
-     * @deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
+     * !!!@Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
+     *
+     * One might disagree on this subject!
+     *
+     * I prefer a decent error report. The supposed improvement {#link roundTripAndSimilar} returns "expected [true]
+     * got [false]" on failure which is a very poor description of what goes wrong and always needs further debugging
+     * to investigate the source. Besides that, if a whatever upgrade brakes the layout, while honoring the syntax, I
+     * would still like the be informed om this change.
+     *
      */
     @SuppressWarnings("unchecked")
     public static  <T> T roundTrip(T input, String contains) {
