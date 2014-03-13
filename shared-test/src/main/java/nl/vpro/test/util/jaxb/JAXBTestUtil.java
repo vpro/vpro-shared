@@ -13,8 +13,10 @@ import javax.xml.bind.JAXB;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import static org.fest.assertions.Assertions.assertThat;
+
 
 /**
  *
@@ -47,6 +49,9 @@ public class JAXBTestUtil {
      * to investigate the source. Besides that, if a whatever upgrade brakes the layout, while honoring the syntax, I
      * would still like the be informed om this change.
      *
+     * MM: The difference was in the order of attributes and/or namespaces. Those are not relevant changes.
+     *     SAX implementations are not required to preserve or guarantee any order in this. It is hence impossible to make a test using this that succeeds in any java version.
+     *
      */
     @SuppressWarnings("unchecked")
     public static  <T> T roundTrip(T input, String contains) {
@@ -57,9 +62,20 @@ public class JAXBTestUtil {
 
 
     public static <T> T roundTripAndSimilar(T input, String expected) throws IOException, SAXException {
-        String xml = marshal(input);
-        Diff diff = XMLUnit.compareXML(expected, xml);
-        assertThat(diff.identical()).isTrue();
-        return (T) JAXB.unmarshal(new StringReader(xml), input.getClass());
+        String xml = null;
+        try {
+            xml = marshal(input);
+            Diff diff = XMLUnit.compareXML(expected, xml);
+            if (! diff.identical()) {
+                assertThat(xml).isEqualTo(expected);
+            }
+
+            return (T) JAXB.unmarshal(new StringReader(xml), input.getClass());
+        } catch (SAXParseException spe) {
+            throw new RuntimeException(
+                "input: " + xml + "\n" +
+                "expected: " + expected, spe);
+        }
+
     }
 }
