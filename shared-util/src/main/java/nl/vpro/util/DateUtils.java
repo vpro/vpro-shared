@@ -17,6 +17,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @since 0.11
  */
 public class DateUtils {
+
+    public static Date MIN_VALUE = new Date(Long.MIN_VALUE);
+
+    public static Date MAX_VALUE = new Date(Long.MAX_VALUE);
+
     public static XMLGregorianCalendar toXmlGregorianCalendar(Date date) throws DatatypeConfigurationException {
         return toXmlGregorianCalendar(date, TimeZone.getDefault());
     }
@@ -42,6 +47,24 @@ public class DateUtils {
         if(second == null) {
             return first;
         }
-        return first.getTime() < second.getTime() ? smallest ? first : second : smallest ? second : first;
+        return first.before(second) ? smallest ? first : second : smallest ? second : first;
+    }
+
+    public static Date nullIsMinimal(Date date) {
+        return date == null ? MIN_VALUE : date;
+    }
+
+
+    public static Date nullIsMaximal(Date date) {
+        return date == null ? MAX_VALUE : date;
+    }
+
+    public static Date minimalIsNull(Date date) {
+        return MIN_VALUE.equals(date) ? null : date;
+    }
+
+
+    public static Date maximalIsNull(Date date) {
+        return MAX_VALUE.equals(date) ? null : date;
     }
 }
