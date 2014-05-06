@@ -155,11 +155,17 @@ public class ConfigurationServlet extends HttpServlet {
             merge(new FileInputStream(file), map);
         }
     }
+    protected void mergeServletContextResource(String path, Map<String, Object> map) throws IOException {
+        String file = getServletContext().getRealPath(path);
+        if (file != null) {
+            merge(new File(file), map);
+        }
+    }
 
     protected Map<String, String> getSystem(HttpServletRequest req) throws IOException {
         if(systemProps == null) {
 
-            systemProps = new LinkedHashMap<String, String>();
+            systemProps = new LinkedHashMap<>();
             systemProps.put("env", getEnvironment().toString());
             if(req != null) {
                 int port = req.getServerPort();
@@ -197,17 +203,13 @@ public class ConfigurationServlet extends HttpServlet {
 
 
     protected Map<String, Object> getProperties() throws IOException {
-        Map<String, Object> res = new LinkedHashMap<String, Object>();
+        Map<String, Object> res = new LinkedHashMap<>();
         String env = getEnvironment().toString().toLowerCase();
         merge(getClass().getResourceAsStream("/" + name + ".properties"), res);
         merge(getClass().getResourceAsStream("/" + name + "." + env + ".properties"), res);
 
-        merge(new File(getServletContext().getRealPath("/WEB-INF/classes/" + name + ".properties")), res);
-        String fileName = getServletContext().getRealPath("/WEB-INF/classes/" + name + "." + env + ".properties");
-        if(fileName != null) {
-            merge(new File(fileName), res);
-        }
-
+        mergeServletContextResource("/WEB-INF/classes/" + name + ".properties", res);
+        mergeServletContextResource("/WEB-INF/classes/" + name + "." + env + ".properties", res);
         String home = System.getProperty("user.home");
         merge(new File(home +
             File.separator + "conf" + File.separator + name + ".properties"), res);
@@ -223,7 +225,7 @@ public class ConfigurationServlet extends HttpServlet {
      */
     static Map<String, String> getProperties(InputStream is) throws IOException {
 
-        final Map<String, String> keys = new LinkedHashMap<String, String>();
+        final Map<String, String> keys = new LinkedHashMap<>();
         if(is != null) {
             Properties props = new Properties() {
                 @Override
