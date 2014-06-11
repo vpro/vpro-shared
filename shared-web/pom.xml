@@ -7,7 +7,6 @@
     <version>0.16-SNAPSHOT</version>
   </parent>
 
-  <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-web</artifactId>
 
   <name>shared-web</name>
