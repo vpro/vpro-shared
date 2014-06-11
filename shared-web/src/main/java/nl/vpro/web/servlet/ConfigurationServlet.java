@@ -8,11 +8,13 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +49,8 @@ import org.json.JSONWriter;
  */
 public class ConfigurationServlet extends HttpServlet {
 
+    private  static String ATTRIBUTE_NAME = ConfigurationServlet.class.getName() + ".configuration";
+
     protected String name;
 
     protected static enum Environment {
@@ -63,15 +67,32 @@ public class ConfigurationServlet extends HttpServlet {
         return (Context)context.lookup("java:comp/env");
     }
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public static Map<String, Object> getProperties(ServletContext context) throws IOException {
+        try {
+            return ((Callable<Map<String, Object>>)context.getAttribute(ATTRIBUTE_NAME)).call();
+        } catch (IOException e) {
+            throw e;
+        } catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 
+    @Override
+    public void init() throws ServletException {
+        ServletConfig config = getServletConfig();
         String name = config.getInitParameter("name");
         if(name == null || name.length() == 0) {
             throw new IllegalArgumentException(String.format("Must provide a valid configuration name, got: %s", name));
         }
         this.name = name;
+
+        config.getServletContext().setAttribute(ATTRIBUTE_NAME, new Callable<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> call() throws IOException {
+                return ConfigurationServlet.this.getProperties();
+
+            }
+        });
     }
 
     @Override
