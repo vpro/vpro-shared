@@ -186,19 +186,25 @@ public class ConfigurationServlet extends HttpServlet {
     protected Map<String, String> getSystem(HttpServletRequest req) throws IOException {
         if(systemProps == null) {
 
-            systemProps = new LinkedHashMap<>();
-            systemProps.put("env", getEnvironment().toString());
-            if(req != null) {
+            Map<String, String> result = new LinkedHashMap<>();
+            result.put("env", getEnvironment().toString());
+
+            if (req != null) {
                 int port = req.getServerPort();
-                systemProps.put("thisServer", req.getScheme() + "://" + req.getServerName() + (port == 80 ? "" : ":" + port) + req.getContextPath());
+                result.put("thisServer", req.getScheme() + "://" + req.getServerName() + (port == 80 ? "" : ":" + port) + req.getContextPath());
             }
+
 
             URL u = getServletContext().getResource("/version.properties");
 
 
             if(u != null) {
-                systemProps.putAll(getProperties(u.openStream()));
+                result.putAll(getProperties(u.openStream()));
             }
+            if (req != null) {
+                systemProps = result;
+            }
+            return result;
         }
         return systemProps;
     }
