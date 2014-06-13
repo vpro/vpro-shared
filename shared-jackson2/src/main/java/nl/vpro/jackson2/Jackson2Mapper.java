@@ -27,7 +27,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
         AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
             new JacksonAnnotationIntrospector(),
-            new JaxbAnnotationIntrospector());
+            new JaxbAnnotationIntrospector(getTypeFactory()));
 
         setSerializationInclusion(JsonInclude.Include.NON_NULL);
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
