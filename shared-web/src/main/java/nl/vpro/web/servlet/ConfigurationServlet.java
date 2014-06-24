@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
+
+import com.google.common.base.Function;
 
 /**
  * Serves a 'configuration.js' for javascript clients.
@@ -60,21 +62,15 @@ public class ConfigurationServlet extends HttpServlet {
         DEV
     }
 
-    protected Map<String, String> systemProps;
+    protected Map<String, Map<String, String>> systemPropMap = new HashMap<>();
 
     public static Context getContext() throws NamingException {
         InitialContext context = new InitialContext();
         return (Context)context.lookup("java:comp/env");
     }
 
-    public static Map<String, Object> getProperties(ServletContext context) throws IOException {
-        try {
-            return ((Callable<Map<String, Object>>)context.getAttribute(ATTRIBUTE_NAME)).call();
-        } catch (IOException e) {
-            throw e;
-        } catch(Exception e){
-            throw new RuntimeException(e);
-        }
+    public static Map<String, Object> getProperties(ServletContext context, HttpServletRequest request) throws IOException {
+        return ((Function<HttpServletRequest, Map<String, Object>>)context.getAttribute(ATTRIBUTE_NAME)).apply(request);
     }
 
     @Override
@@ -86,10 +82,14 @@ public class ConfigurationServlet extends HttpServlet {
         }
         this.name = name;
 
-        config.getServletContext().setAttribute(ATTRIBUTE_NAME, new Callable<Map<String, Object>>() {
+        config.getServletContext().setAttribute(ATTRIBUTE_NAME, new Function<HttpServletRequest, Map<String, Object>>() {
             @Override
-            public Map<String, Object> call() throws IOException {
-                return ConfigurationServlet.this.getProperties();
+            public Map<String, Object> apply(HttpServletRequest req) {
+                try {
+                    return ConfigurationServlet.this.getProperties(req);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
 
             }
         });
@@ -118,8 +118,7 @@ public class ConfigurationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
         throws ServletException, IOException {
         resp.setContentType("application/json");
-        getSystem(req);
-        Map<String, Object> props = getProperties();
+        Map<String, Object> props = getProperties(req);
 
         if(getLastModified(req) == -1) {
             resp.setDateHeader("Expires", System.currentTimeMillis() + Integer.parseInt((String)props.get("MaxAge")) * 1000);
@@ -158,40 +157,43 @@ public class ConfigurationServlet extends HttpServlet {
     }
 
 
-    protected void merge(InputStream is, Map<String, Object> map) throws IOException {
+    protected void merge(HttpServletRequest req, InputStream is, Map<String, Object> map) throws IOException {
         if(is == null) {
             return;
         }
         for(Map.Entry<String, String> e : getProperties(is).entrySet()) {
             String value = e.getValue();
-            for(Map.Entry<String, String> sp : getSystem(null).entrySet()) {
+            for(Map.Entry<String, String> sp : getSystem(req).entrySet()) {
                 value = value.replaceAll("\\$\\{" + sp.getKey() + "\\}", sp.getValue());
             }
             map.put(e.getKey(), value);
         }
     }
 
-    protected void merge(File file, Map<String, Object> map) throws IOException {
+    protected void merge(HttpServletRequest req, File file, Map<String, Object> map) throws IOException {
         if(file.canRead()) {
-            merge(new FileInputStream(file), map);
+            merge(req, new FileInputStream(file), map);
         }
     }
-    protected void mergeServletContextResource(String path, Map<String, Object> map) throws IOException {
+    protected void mergeServletContextResource(HttpServletRequest req, String path, Map<String, Object> map) throws IOException {
         String file = getServletContext().getRealPath(path);
         if (file != null) {
-            merge(new File(file), map);
+            merge(req, new File(file), map);
         }
     }
 
+    private String getRequestKey(HttpServletRequest req) {
+        return req == null ? "NULL" : (req.getScheme() + "://" + req.getServerName() + req.getServerPort()  +req.getContextPath());
+    }
     protected Map<String, String> getSystem(HttpServletRequest req) throws IOException {
+        String key = getRequestKey(req);
+        Map<String, String> systemProps = systemPropMap.get(key);
         if(systemProps == null) {
-
-            Map<String, String> result = new LinkedHashMap<>();
-            result.put("env", getEnvironment().toString());
-
-            if (req != null) {
+            systemProps = new LinkedHashMap<>();
+            systemProps.put("env", getEnvironment().toString());
+            if(req != null) {
                 int port = req.getServerPort();
-                result.put("thisServer", req.getScheme() + "://" + req.getServerName() + (port == 80 ? "" : ":" + port) + req.getContextPath());
+                systemProps.put("thisServer", req.getScheme() + "://" + req.getServerName() + (port == 80 ? "" : ":" + port) + req.getContextPath());
             }
 
 
@@ -199,12 +201,9 @@ public class ConfigurationServlet extends HttpServlet {
 
 
             if(u != null) {
-                result.putAll(getProperties(u.openStream()));
+                systemProps.putAll(getProperties(u.openStream()));
             }
-            if (req != null) {
-                systemProps = result;
-            }
-            return result;
+            systemPropMap.put(key, systemProps);
         }
         return systemProps;
     }
@@ -229,18 +228,18 @@ public class ConfigurationServlet extends HttpServlet {
     }
 
 
-    protected Map<String, Object> getProperties() throws IOException {
+    protected Map<String, Object> getProperties(HttpServletRequest req) throws IOException {
         Map<String, Object> res = new LinkedHashMap<>();
         String env = getEnvironment().toString().toLowerCase();
-        merge(getClass().getResourceAsStream("/" + name + ".properties"), res);
-        merge(getClass().getResourceAsStream("/" + name + "." + env + ".properties"), res);
+        merge(req, getClass().getResourceAsStream("/" + name + ".properties"), res);
+        merge(req, getClass().getResourceAsStream("/" + name + "." + env + ".properties"), res);
 
-        mergeServletContextResource("/WEB-INF/classes/" + name + ".properties", res);
-        mergeServletContextResource("/WEB-INF/classes/" + name + "." + env + ".properties", res);
+        mergeServletContextResource(req, "/WEB-INF/classes/" + name + ".properties", res);
+        mergeServletContextResource(req, "/WEB-INF/classes/" + name + "." + env + ".properties", res);
         String home = System.getProperty("user.home");
-        merge(new File(home +
+        merge(req, new File(home +
             File.separator + "conf" + File.separator + name + ".properties"), res);
-        merge(new File(home +
+        merge(req, new File(home +
             File.separator + "conf" + File.separator + name + "." + env + ".properties"), res);
         return res;
     }
