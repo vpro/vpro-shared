@@ -7,13 +7,18 @@ package nl.vpro.test.util.jaxb;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 
-import javax.xml.bind.JAXB;
+import javax.xml.bind.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -24,10 +29,47 @@ import static org.fest.assertions.Assertions.assertThat;
  * @since 1.6
  */
 public class JAXBTestUtil {
+
+    private static final String LOCAL_URI = "uri:local";
     public static String marshal(Object object) {
         StringWriter writer = new StringWriter();
-        JAXB.marshal(object, writer);
+        Annotation xmlRootElementAnnotation = object.getClass().getAnnotation(XmlRootElement.class);
+        if (xmlRootElementAnnotation == null) {
+            try {
+                Marshaller marshaller = getMarshallerForUnknownClass(object.getClass());
+                marshaller.marshal(new JAXBElement(
+
+                    new QName(LOCAL_URI, "local"), object.getClass(), object
+                ), writer);
+            } catch (JAXBException e) {
+                System.err.println(e.getMessage());
+            }
+
+        } else {
+            JAXB.marshal(object, writer);
+        }
         return writer.toString();
+    }
+
+    private static Marshaller getMarshallerForUnknownClass(Class<? extends Object> clazz) throws JAXBException {
+        JAXBContext context = JAXBContext.newInstance(clazz);
+        Marshaller marshaller = context.createMarshaller();
+        NamespacePrefixMapper mapper = new NamespacePrefixMapper() {
+            @Override
+            public String getPreferredPrefix(String namespaceUri,
+                                             String suggestion, boolean requirePrefix) {
+                if (LOCAL_URI.equals(namespaceUri)) {
+                    return "local";
+                } else {
+                    return suggestion;
+                }
+            }
+        };
+
+        marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", mapper);
+
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        return marshaller;
     }
 
     public static <T> T unmarshal(String xml, Class<T> clazz) {
