@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import nl.vpro.test.util.jaxb.test.A;
 import nl.vpro.test.util.jaxb.test.B;
-import nl.vpro.test.util.jaxb.test.C;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,11 +36,4 @@ public class JAXBTestUtilTest {
     }
 
 
-    @Test
-    public void testMarshalWithNoRootElementAndEmptyXmlType() throws Exception {
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-            "<local:C xmlns=\"urn:test:1234\" xmlns:local=\"uri:local\">cc</local:C>\n", JAXBTestUtil.marshal(new C()));
-
-
-    }
 }
