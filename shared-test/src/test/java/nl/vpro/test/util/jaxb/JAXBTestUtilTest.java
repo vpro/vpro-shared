@@ -27,10 +27,10 @@ public class JAXBTestUtilTest {
     @Test
     public void testMarshalWithNoRootElement () throws Exception {
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-            "<local:local xmlns=\"urn:test:1234\" xmlns:local=\"uri:local\">\n" +
+            "<local:B xmlns=\"urn:test:1234\" xmlns:local=\"uri:local\">\n" +
             "    <value>bb</value>\n" +
             "    <c>cc</c>\n" +
-            "</local:local>\n", JAXBTestUtil.marshal(new B()));
+            "</local:B>\n", JAXBTestUtil.marshal(new B()));
 
 
     }

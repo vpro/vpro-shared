@@ -18,8 +18,6 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
-
 import static org.fest.assertions.Assertions.assertThat;
 
 
@@ -31,20 +29,15 @@ import static org.fest.assertions.Assertions.assertThat;
 public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
-    public static String marshal(Object object) {
+
+    public static <T> String marshal(T object) {
         StringWriter writer = new StringWriter();
         Annotation xmlRootElementAnnotation = object.getClass().getAnnotation(XmlRootElement.class);
         if (xmlRootElementAnnotation == null) {
-            try {
-                Marshaller marshaller = getMarshallerForUnknownClass(object.getClass());
-                marshaller.marshal(new JAXBElement(
-
-                    new QName(LOCAL_URI, "local"), object.getClass(), object
-                ), writer);
-            } catch (JAXBException e) {
-                System.err.println(e.getMessage());
-            }
-
+            Class<T> clazz = (Class<T>) object.getClass();
+            JAXB.marshal(new JAXBElement<>(
+                new QName(LOCAL_URI, clazz.getSimpleName(), "local"), clazz, object
+            ), writer);
         } else {
             JAXB.marshal(object, writer);
         }
@@ -54,20 +47,6 @@ public class JAXBTestUtil {
     private static Marshaller getMarshallerForUnknownClass(Class<? extends Object> clazz) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(clazz);
         Marshaller marshaller = context.createMarshaller();
-        NamespacePrefixMapper mapper = new NamespacePrefixMapper() {
-            @Override
-            public String getPreferredPrefix(String namespaceUri,
-                                             String suggestion, boolean requirePrefix) {
-                if (LOCAL_URI.equals(namespaceUri)) {
-                    return "local";
-                } else {
-                    return suggestion;
-                }
-            }
-        };
-
-        marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", mapper);
-
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return marshaller;
     }
