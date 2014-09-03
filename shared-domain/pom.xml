@@ -6,8 +6,6 @@
     <artifactId>shared-parent</artifactId>
     <version>0.17-SNAPSHOT</version>
   </parent>
-
-  <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-domain</artifactId>
 
   <name>shared-domain</name>
