@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
  * @author Michiel Meeuwissen
  * @since ...
  */
-@XmlType
+@XmlType(name = "b")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class B {
     String value = "bb";

@@ -11,6 +11,7 @@ import java.lang.annotation.Annotation;
 
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 
 import org.custommonkey.xmlunit.Diff;
@@ -35,8 +36,16 @@ public class JAXBTestUtil {
         Annotation xmlRootElementAnnotation = object.getClass().getAnnotation(XmlRootElement.class);
         if (xmlRootElementAnnotation == null) {
             Class<T> clazz = (Class<T>) object.getClass();
+            String tagName = null;
+            XmlType xmlType = object.getClass().getAnnotation(XmlType.class);
+            if (xmlType != null) {
+                tagName = xmlType.name();
+            }
+            if (tagName == null || "##default".equals(tagName)) {
+                tagName = clazz.getSimpleName();
+            }
             JAXB.marshal(new JAXBElement<>(
-                new QName(LOCAL_URI, clazz.getSimpleName(), "local"), clazz, object
+                new QName(LOCAL_URI, tagName, "local"), clazz, object
             ), writer);
         } else {
             JAXB.marshal(object, writer);
