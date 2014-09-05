@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class TailAdderTest {
 
@@ -54,4 +54,30 @@ public class TailAdderTest {
         assertEquals(false, adder.hasNext());
     }
 
+
+    @Test
+    public void tailNull() {
+        Iterator<String> i = Collections.<String>emptyList().iterator();
+        TailAdder<String> adder = new TailAdder<>(i, new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return null;
+            }
+        });
+        assertEquals(null, adder.next());
+        assertEquals(false, adder.hasNext());
+    }
+
+
+    @Test
+    public void tailException() {
+        Iterator<String> i = Collections.<String>emptyList().iterator();
+        TailAdder<String> adder = new TailAdder<>(i, new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                throw new Exception();
+            }
+        });
+        assertEquals(false, adder.hasNext());
+    }
 }

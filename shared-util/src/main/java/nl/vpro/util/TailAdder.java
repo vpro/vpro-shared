@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 
+import com.google.common.base.Optional;
+
 /**
  * @author Michiel Meeuwissen
  * @since 1.17
@@ -18,6 +20,8 @@ public class TailAdder<T> implements Iterator<T> {
 
     int wrapcount = 0;
     int addercount = 0;
+    T nextFromAdder;
+    Boolean adderHasNext = null;
 
     @SafeVarargs
     public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Callable<T>... adder) {
@@ -30,10 +34,14 @@ public class TailAdder<T> implements Iterator<T> {
         this(wrapped, false, adder);
     }
 
+
     @Override
     public boolean hasNext() {
-        return wrapped.hasNext() ||
-                ((!onlyIfEmpty || wrapcount == 0) && adder.length > addercount);
+        if (wrapped.hasNext()) {
+            return true;
+        }
+        findNext();
+        return adderHasNext;
     }
 
     @Override
@@ -42,14 +50,28 @@ public class TailAdder<T> implements Iterator<T> {
             wrapcount++;
             return wrapped.next();
         }
-        if (addercount < adder.length) {
-            try {
-                return adder[addercount++].call();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
+        findNext();
+        if (! adderHasNext) {
             throw new NoSuchElementException();
+        }
+        adderHasNext = null;
+        return nextFromAdder;
+    }
+
+    private void findNext() {
+        if (adderHasNext == null) {
+            adderHasNext = false;
+            if (wrapcount == 0 || ! onlyIfEmpty) {
+                while (addercount < adder.length) {
+                    try {
+                        nextFromAdder = adder[addercount++].call();
+                        adderHasNext = true;
+                        break;
+                    } catch (Exception e) {
+                        // skip this
+                    }
+                }
+            }
         }
     }
 
