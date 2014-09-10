@@ -29,6 +29,7 @@
     <module>shared-web</module>
     <module>shared-ws</module>
     <module>shared-util</module>
+    <module>shared-resteasy</module>
     <module>shared-test</module>
     <module>shared-transfer</module>
   </modules>
