@@ -1,29 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
+  <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <bean class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON"/>
+<bean class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON"/>
 
-  <bean class="nl.vpro.swagger.SwaggerApplication"/>
+<bean class="nl.vpro.swagger.SwaggerApplication"/>
 
-  <bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
-    <property name="servletClass">
-      <value>com.wordnik.swagger.jaxrs.config.DefaultJaxrsConfig</value>
-    </property>
-    <property name="servletName">
-      <value>SwaggerConfig</value>
-    </property>
-    <property name="initParameters">
-      <props>
-        <prop key="api.version">${api.version}</prop>
-        <prop key="swagger.api.basepath">${api.basePath}</prop>
-      </props>
-    </property>
-  </bean>
+<bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
+  <property name="servletClass">
+    <value>com.wordnik.swagger.jaxrs.config.DefaultJaxrsConfig</value>
+  </property>
+  <property name="servletName">
+    <value>SwaggerConfig</value>
+  </property>
+  <property name="initParameters">
+    <props>
+      <prop key="api.version">${api.version}</prop>
+      <prop key="swagger.api.basepath">${api.basePath}</prop>
+    </props>
+  </property>
+</bean>
 
-  <!-- Swagger Providers -->
-  <bean class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"/>
-  <bean class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"/>
+<!-- Swagger Providers -->
+<bean class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"/>
+<bean class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"/>
 </beans>
