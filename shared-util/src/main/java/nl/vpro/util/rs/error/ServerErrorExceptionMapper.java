@@ -13,6 +13,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class ServerErrorExceptionMapper extends ApiErrorMapper implements ExceptionMapper<ServerErrorException> {
 
+    @Override
     public Response toResponse(ServerErrorException exception) {
         return createResponse(exception.getMessage(), 500);
     }
