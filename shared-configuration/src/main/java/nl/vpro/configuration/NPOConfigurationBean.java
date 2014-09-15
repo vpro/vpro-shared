@@ -1,21 +1,24 @@
 package nl.vpro.configuration;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Properties;
 
-import org.apache.commons.configuration.*;
-import org.apache.log4j.Logger;
-import org.springframework.web.context.ServletContextAware;
-
 import javax.servlet.ServletContext;
-import org.springframework.core.io.*;
+
+import org.apache.commons.configuration.AbstractConfiguration;
+import org.apache.log4j.Logger;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * @author Michiel Meeuwissen
- * @version $Id$
  */
 public class NPOConfigurationBean extends AbstractConfiguration implements ServletContextAware, Resource {
 
@@ -67,8 +70,25 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
     @Override
-    public Iterator<Object> getKeys() {
-        return properties.keySet().iterator();
+    public Iterator<String> getKeys() {
+        final Iterator<Object> i = properties.keySet().iterator();
+        return new Iterator<String>() {
+            @Override
+            public boolean hasNext() {
+                return i.hasNext();
+
+            }
+
+            @Override
+            public String next() {
+                return String.valueOf(i.next());
+            }
+
+            @Override
+            public void remove() {
+                i.remove();
+            }
+        };
     }
 
     @Override
@@ -145,7 +165,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
 		if (file == null) {
 			return 0;
 		}
-		
+
 		return file.length();
 	}
 }

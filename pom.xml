@@ -41,14 +41,15 @@
   </scm>
 
   <properties>
-    <spring.version>3.1.1.RELEASE</spring.version>
-    <spring-security.version>3.1.0.RELEASE</spring-security.version>
+    <spring.version>3.2.9.RELEASE</spring.version>
+    <spring-security.version>3.2.4.RELEASE</spring-security.version>
     <jackson2.version>2.2.1</jackson2.version>
     <!-- Versions till 2.3.1 have a Resteasy issue -->
     <junit.version>4.6</junit.version>
     <mycila.version>2.3</mycila.version>
     <resteasy.version>3.0.6.Final</resteasy.version>
-    <slf4j.version>1.6.4</slf4j.version>
+    <slf4j.version>1.6.6</slf4j.version>
+    <log4j.version>1.2.17</log4j.version>
   </properties>
 
   <dependencyManagement>
@@ -97,6 +98,11 @@
         <artifactId>commons-lang</artifactId>
         <version>2.6</version>
       </dependency>
+      <dependency>
+        <groupId>commons-configuration</groupId>
+        <artifactId>commons-configuration</artifactId>
+        <version>1.10</version>
+      </dependency>
 
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -104,8 +110,18 @@
         <version>${slf4j.version}</version>
       </dependency>
       <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-test</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
         <version>${spring.version}</version>
       </dependency>
       <dependency>
@@ -128,6 +144,14 @@
         <artifactId>spring-web</artifactId>
         <version>${spring.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.5</version>
+        <scope>provided</scope>
+      </dependency>
+
       <dependency>
         <groupId>xmlunit</groupId>
         <artifactId>xmlunit</artifactId>
@@ -138,7 +162,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0.1</version>
+        <version>17.0</version>
       </dependency>
 
     </dependencies>
