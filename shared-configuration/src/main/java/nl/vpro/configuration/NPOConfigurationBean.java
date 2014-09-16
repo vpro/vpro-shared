@@ -12,7 +12,8 @@ import java.util.Properties;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.configuration.AbstractConfiguration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.ServletContextAware;
@@ -22,7 +23,7 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class NPOConfigurationBean extends AbstractConfiguration implements ServletContextAware, Resource {
 
-    private static final Logger LOG = Logger.getLogger(NPOConfigurationBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NPOConfigurationBean.class);
 
     private final String name;
     private final Properties properties = new Properties();
@@ -44,6 +45,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
             if (parent == null) parent = dir;
             File configDir = new File(parent, "config");
             file = new File(configDir, name);
+            LOG.info("Found configuration file {}", file);
         }
         return file;
     }
