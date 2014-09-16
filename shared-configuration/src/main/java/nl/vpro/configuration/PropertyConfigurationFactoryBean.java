@@ -51,7 +51,8 @@ public class PropertyConfigurationFactoryBean implements InitializingBean, Facto
         this.reload = reload;
     }
 
-    /** {@inheritDoc} */
+
+    @Override
     public void afterPropertiesSet() throws Exception {
         if (location.exists()) {
             LOG.info(String.format("resource %s does exists.", location.getDescription()));
@@ -61,7 +62,7 @@ public class PropertyConfigurationFactoryBean implements InitializingBean, Facto
                 File f = ConfigurationUtils.fileFromURL(location.getURL());
                 if (f != null && f.exists()) {
                     LOG.info(String.format("resource %s will be configured with file reloading strategy.", location
-                            .getDescription()));
+                        .getDescription()));
                     ReloadingStrategy strategy = new FileChangedReloadingStrategy();
                     propconfig.setReloadingStrategy(strategy);
                 }
@@ -73,17 +74,20 @@ public class PropertyConfigurationFactoryBean implements InitializingBean, Facto
         }
     }
 
-    /** {@inheritDoc} */
+
+    @Override
     public Object getObject() throws Exception {
         return configuration;
     }
 
-    /** {@inheritDoc} */
+
+    @Override
     public Class getObjectType() {
         return Configuration.class;
     }
 
-    /** {@inheritDoc} */
+
+    @Override
     public boolean isSingleton() {
         return true;
     }
