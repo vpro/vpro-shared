@@ -37,13 +37,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     @Override
     public File getFile() {
         if (file == null) {
-            File dir = new File(sx.getRealPath("/"));
-            if (!dir.exists()) { // DRS fixed, dir will never be null ofcourse...
-            	dir = File.listRoots()[0];
-            }
-            File parent = dir.getParentFile();
-            if (parent == null) parent = dir;
-            File configDir = new File(parent, "config");
+            File configDir = new NPO(sx).getConfigDirectory();
             file = new File(configDir, name);
             LOG.debug("Found configuration file {}", file);
         }
