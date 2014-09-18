@@ -170,4 +170,9 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
 
 		return file.length();
 	}
+
+    @Override
+    public String toString() {
+        return getFilename();
+    }
 }
