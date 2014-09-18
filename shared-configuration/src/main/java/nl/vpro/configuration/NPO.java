@@ -40,7 +40,7 @@ public class NPO implements ServletContextAware {
     }
 
     public File getDataDirectory() {
-        return new File(getDirectory(sx), "data");
+        return new File(getDirectory(sx).toString().replace("/ro/", "/rw"), "data");
     }
 
 
