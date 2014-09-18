@@ -45,7 +45,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
             if (parent == null) parent = dir;
             File configDir = new File(parent, "config");
             file = new File(configDir, name);
-            LOG.info("Found configuration file {}", file);
+            LOG.debug("Found configuration file {}", file);
         }
         return file;
     }
