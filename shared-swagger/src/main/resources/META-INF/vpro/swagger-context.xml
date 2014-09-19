@@ -17,6 +17,7 @@
     <property name="initParameters">
       <props>
         <prop key="api.version">${api.version}</prop>
+        <!-- Very silly, swagger is stupid. It could simply get this from the requests -->
         <prop key="swagger.api.basepath">${api.basePath}</prop>
       </props>
     </property>
