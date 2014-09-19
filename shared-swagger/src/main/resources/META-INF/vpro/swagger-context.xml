@@ -17,6 +17,7 @@
     <property name="initParameters">
       <props>
         <prop key="api.version">${api.version}</prop>
+        <prop key="swagger.api.basepath">${api.basePath}</prop>
       </props>
     </property>
   </bean>
