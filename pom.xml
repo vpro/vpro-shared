@@ -56,6 +56,16 @@
     <dependencies>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-camel</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-configuration</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-domain</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -66,12 +76,37 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-jackson2</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-services</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-swagger</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-transfer</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-util</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-web</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-ws</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
