@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.security.auth.callback.*;
 
-import org.apache.ws.security.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 // Does not work since Spring 3.1

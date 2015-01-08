@@ -10,7 +10,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.IOException;
 
-import org.apache.ws.security.WSPasswordCallback;
+import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
