@@ -6,10 +6,10 @@ package nl.vpro.apache.ws.security;
 
 import javax.annotation.Resource;
 
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.handler.RequestData;
-import org.apache.ws.security.message.token.UsernameToken;
-import org.apache.ws.security.validate.UsernameTokenValidator;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.handler.RequestData;
+import org.apache.wss4j.dom.message.token.UsernameToken;
+import org.apache.wss4j.dom.validate.UsernameTokenValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +36,7 @@ public class PlainTextUsernameTokenValidator extends UsernameTokenValidator {
             authentication = manager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (AuthenticationException ae) {
-            throw new WSSecurityException(name + ":" + ae.getMessage(), ae);
+            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, name + ":" + ae.getMessage(), ae);
         } catch (RuntimeException t) {
             LOG.error(t.getMessage(), t);
             throw t;
