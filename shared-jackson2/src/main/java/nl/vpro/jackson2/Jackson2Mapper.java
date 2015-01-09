@@ -5,6 +5,7 @@
 package nl.vpro.jackson2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,5 +35,8 @@ public class Jackson2Mapper extends ObjectMapper {
         setAnnotationIntrospector(introspector);
 
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+
     }
 }
