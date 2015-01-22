@@ -7,7 +7,7 @@
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
 
-<bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
+  <bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
     <property name="servletClass">
       <value>com.wordnik.swagger.jaxrs.config.DefaultJaxrsConfig</value>
     </property>
