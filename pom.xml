@@ -41,7 +41,7 @@
   </scm>
 
   <properties>
-    <spring.version>3.2.9.RELEASE</spring.version>
+    <spring.version>4.1.4.RELEASE</spring.version>
     <spring-security.version>3.2.5.RELEASE</spring-security.version>
     <jackson2.version>2.2.1</jackson2.version> <!-- equals to poms-parent -->
     <junit.version>4.6</junit.version>
