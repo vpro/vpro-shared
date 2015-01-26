@@ -34,7 +34,9 @@ public class Jackson2Mapper extends ObjectMapper {
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         setAnnotationIntrospector(introspector);
 
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
+
+
         configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 
