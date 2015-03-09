@@ -4,9 +4,7 @@
  */
 package nl.vpro.test.util.jaxb;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.annotation.Annotation;
 
 import javax.xml.bind.*;
@@ -91,17 +89,38 @@ public class JAXBTestUtil {
         String xml = null;
         try {
             xml = marshal(input);
-            Diff diff = XMLUnit.compareXML(expected, xml);
-            if (! diff.identical()) {
-                assertThat(xml).isEqualTo(expected);
-            }
-
-            return (T) JAXB.unmarshal(new StringReader(xml), input.getClass());
+            similar(xml, expected);
+            T result = (T) JAXB.unmarshal(new StringReader(xml), input.getClass());
+            /// make sure unmarshalling worked too, by marshalling the result again.
+            String xmlAfter = marshal(result);
+            similar(xmlAfter, xml);
+            return result;
         } catch (SAXParseException spe) {
             throw new RuntimeException(
                 "input: " + xml + "\n" +
                 "expected: " + expected, spe);
         }
 
+    }
+
+    public static void similar(String input, String expected) throws IOException, SAXException {
+        Diff diff = XMLUnit.compareXML(expected, input);
+        if (!diff.identical()) {
+            assertThat(input).isEqualTo(expected);
+        }
+    }
+
+    public static void similar(InputStream input, String expected) throws IOException, SAXException {
+        Diff diff = XMLUnit.compareXML(expected, new InputStreamReader(input));
+        if (!diff.identical()) {
+            assertThat(input).isEqualTo(expected);
+        }
+    }
+
+    public static void similar(InputStream input, InputStream expected) throws IOException, SAXException {
+        Diff diff = XMLUnit.compareXML(new InputStreamReader(expected), new InputStreamReader(input));
+        if (!diff.identical()) {
+            assertThat(input).isEqualTo(expected);
+        }
     }
 }
