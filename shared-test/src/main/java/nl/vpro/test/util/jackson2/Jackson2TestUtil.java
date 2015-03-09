@@ -4,13 +4,8 @@
  */
 package nl.vpro.test.util.jackson2;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.xml.bind.JAXB;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nl.vpro.jackson2.Jackson2Mapper;
