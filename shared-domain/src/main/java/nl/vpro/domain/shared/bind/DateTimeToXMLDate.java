@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class DateToXMLDate extends XmlAdapter<String, Date> {
+public class DateTimeToXMLDate extends XmlAdapter<String, Date> {
 
     ThreadLocal<DateFormat> DF = ThreadLocal.withInitial(new Supplier<DateFormat>() {
         @Override
         public DateFormat get() {
-            return new SimpleDateFormat("yyyy-MM-dd");
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         }
     });
