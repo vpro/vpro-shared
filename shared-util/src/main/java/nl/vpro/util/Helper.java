@@ -589,7 +589,6 @@ public class Helper {
      * @param number The number to splice
      * @param maxPartSize The maximum size of a part in the path
      * @return A list of the spliced id
-     * @author peter
      */
     public static List<String> spliceNumber(Number number, int maxPartSize) {
         return spliceNumber(number, 1, maxPartSize);
@@ -602,7 +601,6 @@ public class Helper {
      * @param minPartSize The minimal size of a part, smaller will be skipped
      * @param maxPartSize The maximum size of a part in the path
      * @return A list of the spliced id
-     * @author peter
      */
     public static List<String> spliceNumber(Number number, int minPartSize, int maxPartSize) {
         if (number != null) {
