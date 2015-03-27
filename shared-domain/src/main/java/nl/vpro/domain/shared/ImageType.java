@@ -1,9 +1,10 @@
 
 package nl.vpro.domain.shared;
 
+import java.io.File;
+
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
-import java.io.File;
 
 /**
  * Supported image types.
@@ -65,7 +66,6 @@ public enum ImageType {
     /**
      * Get the image type from a name.
      *
-     * @param n the name
      * @return the imagetype, or <code>null</code> if not found.
      */
     public static ImageType fromName(String value) {
@@ -80,6 +80,7 @@ public enum ImageType {
      *
      * @param n the contenttype
      * @return the imagetype, or <code>null</code> if not found.
+     * @throws UnsupportedImageTypeException
      */
     public static ImageType fromContentType(String n) throws UnsupportedImageTypeException {
         String extension = n.substring(n.lastIndexOf("/") + 1, n.length());
