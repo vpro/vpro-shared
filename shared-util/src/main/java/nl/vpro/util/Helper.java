@@ -270,7 +270,7 @@ public class Helper {
     public static <K, L extends K, V, W extends V> void add(Map<K, List<V>> listMap, L key, W value) {
         List<V> list = listMap.get(key);
         if (list == null) {
-            list = new ArrayList<V>();
+            list = new ArrayList<>();
             listMap.put(key, list);
         }
         list.add(value);
@@ -290,7 +290,7 @@ public class Helper {
     public static <K, L extends K, V, W extends V> void addToSetMap(Map<K, Set<V>> setMap, L key, W value) {
         Set<V> set = setMap.get(key);
         if (set == null) {
-            set = new HashSet<V>();
+            set = new HashSet<>();
             setMap.put(key, set);
         }
         set.add(value);
@@ -565,11 +565,11 @@ public class Helper {
      * @return The similar elements for both lists
      */
     public static <T extends Comparable<? super T>> List<T> sim(List<T> a, List<T> b) {
-        Set<T> all = new HashSet<T>();
+        Set<T> all = new HashSet<>();
         all.addAll(a);
         all.addAll(b);
 
-        Set<T> results = new HashSet<T>();
+        Set<T> results = new HashSet<>();
 
         for (T t : all) {
             if (a.contains(t) && b.contains(t)) {
@@ -577,7 +577,7 @@ public class Helper {
             }
         }
 
-        List<T> theSimilarElements = new ArrayList<T>(results);
+        List<T> theSimilarElements = new ArrayList<>(results);
         Collections.sort(theSimilarElements);
 
         return theSimilarElements;
@@ -606,7 +606,7 @@ public class Helper {
         if (number != null) {
             String s = number.toString();
             int length = s.length();
-            List<String> arrayList = new ArrayList<String>(length / maxPartSize + 1);
+            List<String> arrayList = new ArrayList<>(length / maxPartSize + 1);
             for (int start = 0; start < length; start += maxPartSize) {
                 int end = (start + maxPartSize) >= length ? length : start + maxPartSize;
                 if (end - start >= minPartSize) {
