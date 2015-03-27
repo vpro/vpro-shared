@@ -9,19 +9,18 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 
 /**
- * <p>The workflow status for publishable items.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * <p>
+ * <p>The workflow status for publishable items.</p>
+ *
+ * <p>The following schema fragment specifies the expected content contained within this class.</p>
  * <pre>
- * &lt;simpleType name="workflowEnumType">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="DRAFT"/>
- *     &lt;enumeration value="FOR_APPROVAL"/>
- *     &lt;enumeration value="PUBLISHED"/>
- *     &lt;enumeration value="REFUSED"/>
- *     &lt;enumeration value="DELETED"/>
- *     &lt;enumeration value="MERGED"/>
+ * &lt;simpleType name="workflowEnumType"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="DRAFT"/&gt;
+ *     &lt;enumeration value="FOR_APPROVAL"/&gt;
+ *     &lt;enumeration value="PUBLISHED"/&gt;
+ *     &lt;enumeration value="REFUSED"/&gt;
+ *     &lt;enumeration value="DELETED"/&gt;
+ *     &lt;enumeration value="MERGED"/&gt;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
