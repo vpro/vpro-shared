@@ -9,7 +9,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-parent</artifactId>
-  <version>0.20.1-SNAPSHOT</version>
+  <version>0.20.0</version>
   <packaging>pom</packaging>
 
   <name>shared-parent</name>
@@ -48,9 +48,9 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.20-SNAPSHOT</connection>
-    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/branches/REL-0.20-SNAPSHOT</developerConnection>
-    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/nl/vpro/shared/branches/REL-0.20-SNAPSHOT</url>
+    <connection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/tags/REL-0.20.0</connection>
+    <developerConnection>scm:svn:svn+ssh://subversion.vpro.nl/export/svn/nl/vpro/shared/tags/REL-0.20.0</developerConnection>
+    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/nl/vpro/shared/tags/REL-0.20.0</url>
   </scm>
 
   <properties>
