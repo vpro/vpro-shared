@@ -50,6 +50,7 @@
     <slf4j.version>1.6.6</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <camel.version>2.12.2</camel.version>
+    <guava.version>18.0</guava.version>
   </properties>
 
   <dependencyManagement>
@@ -219,7 +220,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>17.0</version>
+        <version>${guava.version}</version>
       </dependency>
 
     </dependencies>
