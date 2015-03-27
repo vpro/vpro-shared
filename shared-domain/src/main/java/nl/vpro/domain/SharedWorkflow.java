@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlEnumValue;
  *     &lt;enumeration value="REFUSED"/&gt;
  *     &lt;enumeration value="DELETED"/&gt;
  *     &lt;enumeration value="MERGED"/&gt;
- *   &lt;/restriction>
- * &lt;/simpleType>
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  *
  *
