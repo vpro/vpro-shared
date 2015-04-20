@@ -50,7 +50,7 @@
   <scm>
     <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/trunk</connection>
     <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/trunk</developerConnection>
-    <url>https://subversion.vpro.nl/cgi-bin/viewvc.cgi/nl/vpro/shared/trunk</url>
+    <url>https://subversion.vpro.nl/viewvc/nl/vpro/shared/trunk</url>
   </scm>
 
   <properties>
