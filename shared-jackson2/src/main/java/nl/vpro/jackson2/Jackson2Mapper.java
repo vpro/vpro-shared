@@ -41,5 +41,6 @@ public class Jackson2Mapper extends ObjectMapper {
         configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
+        findAndRegisterModules();
     }
 }
