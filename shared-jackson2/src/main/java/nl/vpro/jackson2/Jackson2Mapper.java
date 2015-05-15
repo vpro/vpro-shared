@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 /**
@@ -28,7 +29,8 @@ public class Jackson2Mapper extends ObjectMapper {
 
         AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
             new JacksonAnnotationIntrospector(),
-            new JaxbAnnotationIntrospector(getTypeFactory()));
+            new JaxbAnnotationIntrospector(getTypeFactory()
+            ));
 
         setSerializationInclusion(JsonInclude.Include.NON_NULL);
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -41,6 +43,6 @@ public class Jackson2Mapper extends ObjectMapper {
         configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
-        findAndRegisterModules();
+        registerModule(new JSR310Module());
     }
 }
