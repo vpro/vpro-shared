@@ -1,4 +1,4 @@
-package nl.vpro.domain.shared.bind;
+package nl.vpro.xml.bind;
 
 import java.util.Date;
 
@@ -48,7 +48,7 @@ public class DateToDurationTest {
 
 
     public static class TestObject  {
-        @XmlJavaTypeAdapter(nl.vpro.domain.shared.bind.DateToDuration.class)
+        @XmlJavaTypeAdapter(DateToDuration.class)
         public Date getDuration() {
             return new Date(100);
         }
