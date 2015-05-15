@@ -2,7 +2,7 @@
  * Copyright (C) 2008 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.domain.shared.bind;
+package nl.vpro.xml.bind;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

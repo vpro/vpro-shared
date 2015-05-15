@@ -46,6 +46,7 @@
     <module>shared-test</module>
     <module>shared-transfer</module>
     <module>shared-elasticsearch</module>
+    <module>shared-xml</module>
   </modules>
 
   <scm>
