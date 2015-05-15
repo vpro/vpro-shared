@@ -5,6 +5,7 @@ import java.time.Duration;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
+ * https://bugs.openjdk.java.net/browse/JDK-8042456
  * @author Michiel Meeuwissen
  * @since 0.21
  */
