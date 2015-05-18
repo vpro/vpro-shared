@@ -44,5 +44,7 @@ public class Jackson2Mapper extends ObjectMapper {
         configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 
         registerModule(new JSR310Module());
+        registerModule(new DateModule());
+
     }
 }
