@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
+import nl.vpro.jackson2.JsonFilter;
+
 public class SwaggerFilterTest {
 
     @Test
@@ -15,11 +17,7 @@ public class SwaggerFilterTest {
             "swaggerVersion: \"1.2\",\n" +
             "basePath: \"${api.basePath}\"}";
 
-        SwaggerFilter.Replacement <String> replacement = new SwaggerFilter.Replacement<String>();
-        replacement.key = "basePath";
-        replacement.value = "${api.basePath}";
-        replacement.newValue = "bla";
-
+        JsonFilter.Replacement<String> replacement = new JsonFilter.Replacement<>("basePath", "${api.basePath}", "bla");
         SwaggerFilter filter = new SwaggerFilter();
         OutputStream out = filter.transform(System.out, Arrays.asList(replacement));
 
