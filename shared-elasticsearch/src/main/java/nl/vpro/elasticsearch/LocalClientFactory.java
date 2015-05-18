@@ -16,18 +16,20 @@ import org.elasticsearch.node.NodeBuilder;
  */
 public class LocalClientFactory implements ESClientFactory {
 
-    private static Node node;
+    private Node node;
 
-    private static Client client;
+    private Client client;
 
-    public synchronized static Node node() {
+    private String path = "/tmp";
+
+    public synchronized Node node() {
         if(node == null) {
             Settings settings = ImmutableSettings.settingsBuilder()
                 .put("http.enabled", "true")
                 .put("gateway.type", "none")
                 .put("index.store.type", "memory")
 //                .put("index.store.type", "simplefs")
-                .put("path.home", "/tmp").build();
+                .put("path.home", path).build();
 
             node = NodeBuilder.nodeBuilder()
                 .local(true)
@@ -38,11 +40,21 @@ public class LocalClientFactory implements ESClientFactory {
         return node;
     }
 
-    public synchronized static Client client() {
+    public synchronized Client client() {
         if(client == null) {
             client = node().client();
         }
         return client;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        node = null;
+        client = null;
+        this.path = path;
     }
 
     @Override
