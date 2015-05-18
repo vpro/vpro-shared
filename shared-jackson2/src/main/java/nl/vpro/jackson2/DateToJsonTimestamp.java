@@ -21,7 +21,11 @@ public class DateToJsonTimestamp {
 
         @Override
         public void serialize(Date value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-            jgen.writeNumber(value.getTime());
+            if (value == null) {
+                jgen.writeNull();
+            } else {
+                jgen.writeNumber(value.getTime());
+            }
         }
     }
 
