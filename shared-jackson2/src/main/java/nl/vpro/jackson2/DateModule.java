@@ -7,8 +7,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 
 /**
+ * Work around for http://jira.codehaus.org/browse/JACKSON-920
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 0.21
  */
 public class DateModule extends SimpleModule {
 
