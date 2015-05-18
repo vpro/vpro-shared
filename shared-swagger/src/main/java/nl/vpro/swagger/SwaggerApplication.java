@@ -23,7 +23,7 @@ public class SwaggerApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> set = new HashSet<Class<?>>();
+        Set<Class<?>> set = new HashSet<>();
         for(Object singleton : singletons) {
             set.add(singleton.getClass());
         }
