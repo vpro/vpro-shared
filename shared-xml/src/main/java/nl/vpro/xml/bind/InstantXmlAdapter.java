@@ -1,7 +1,7 @@
 package nl.vpro.xml.bind;
 
-import java.time.Instant;
-import java.util.Date;
+import java.time.*;
+import java.time.format.DateTimeParseException;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -10,15 +10,31 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * @author Michiel Meeuwissen
  * @since 0.21
  */
-public class InstantXmlAdapter extends XmlAdapter<Date, Instant> {
+public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
+
+    public static ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
+
 
     @Override
-    public Instant unmarshal(Date dateValue) {
-        return dateValue != null ? Instant.ofEpochMilli(dateValue.getTime()) : null;
+    public Instant unmarshal(String dateValue) {
+        if (dateValue == null) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(dateValue).atStartOfDay().atZone(ZONE).toInstant();
+        } catch (DateTimeParseException dpe) {
+
+        }
+        try {
+            return LocalDateTime.parse(dateValue).atZone(ZONE).toInstant();
+        } catch (DateTimeParseException dpe) {
+
+        }
+        return OffsetDateTime.parse(dateValue).toInstant();
     }
 
     @Override
-    public Date marshal(Instant value) {
-        return value != null ? new Date(value.toEpochMilli()) : null;
+    public String marshal(Instant value) {
+        return value != null ? OffsetDateTime.ofInstant(value, ZONE).toString() : null;
     }
 }
