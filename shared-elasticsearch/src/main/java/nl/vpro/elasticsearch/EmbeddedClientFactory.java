@@ -4,6 +4,8 @@
  */
 package nl.vpro.elasticsearch;
 
+import java.util.concurrent.Callable;
+
 import javax.annotation.PreDestroy;
 
 import org.elasticsearch.client.Client;
@@ -11,6 +13,8 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michiel Meeuwissen
@@ -26,6 +30,8 @@ public class EmbeddedClientFactory implements ESClientFactory {
 
     private String clusterName = "myCluster";
 
+    private int numberOfMasters = 2;
+
 
     public synchronized Node node() {
         if(node == null) {
@@ -36,10 +42,11 @@ public class EmbeddedClientFactory implements ESClientFactory {
                 .put("node.data", true)
                 .put("node.master", true)
                 .put("cluster.name", clusterName)
-                .put("index.number_of_shards", 1)
-                .put("index.number_of_replicas", 0)
-                .put("discovery.zen.minimum_master_nodes", 1)
+                .put("index.number_of_shards", 2)
+                .put("index.number_of_replicas", 1)
+                .put("discovery.zen.minimum_master_nodes", numberOfMasters)
                 .put("discovery.zen.ping_timeout", 5)
+                .put("discovery.zen.ping.multicast.enabled", true)
                 .put("path.home", path).build();
 
             node = NodeBuilder.nodeBuilder()
@@ -52,13 +59,25 @@ public class EmbeddedClientFactory implements ESClientFactory {
         return node;
     }
 
-    public synchronized Client client() {
-        if(client == null) {
-            client = node().client();
-            client.admin().cluster().prepareHealth().setWaitForYellowStatus().get();
-        }
-        return client;
+    public Callable<Client> client(Logger logger) {
+        return () -> {
+            if (client != null) {
+                return client;
+            }
+            synchronized(EmbeddedClientFactory.this) {
+                if (client == null) {
+                    logger.info("Creating client");
+                    client = node().client();
+                    logger.info("Waiting for green");
+                    client.admin().cluster().prepareHealth().setWaitForGreenStatus().get();
+
+                }
+            }
+            return client;
+
+        };
     }
+
 
     public String getPath() {
         return path;
@@ -80,15 +99,28 @@ public class EmbeddedClientFactory implements ESClientFactory {
         this.clusterName = clusterName;
     }
 
+    public int getNumberOfMasters() {
+        return numberOfMasters;
+    }
+
+    public void setNumberOfMasters(int numberOfMasters) {
+        this.numberOfMasters = numberOfMasters;
+    }
+
     @Override
     public Client buildClient(String logName) {
-        return client();
+        try {
+            return client(LoggerFactory.getLogger(logName)).call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
     @PreDestroy
     public void shutdown() {
         if (client != null) {
+            client.admin().cluster().prepareHealth().setWaitForGreenStatus().get();
             client.close();
         }
         if (node != null) {
