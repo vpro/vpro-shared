@@ -35,8 +35,17 @@ public class SwaggerFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-        String newValue = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getContextPath() + "/api";
-        JsonFilter.Replacement<String> replacement = new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue);
+		String scheme =req.getScheme();
+        StringBuilder newValue = new StringBuilder(scheme);
+		newValue.append("://")
+			.append(req.getServerName());
+		int serverPort = req.getServerPort();
+		if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
+			newValue.append(':').append(serverPort);
+		}
+		newValue.append( req.getContextPath()).append("/api");
+        JsonFilter.Replacement<String> replacement =
+				new JsonFilter.Replacement<String>("basePath", "${api.basePath}", newValue.toString());
         List<JsonFilter.Replacement> replacements = Arrays.asList(replacement);
         final OutputStream out = transform(response.getOutputStream(), replacements);
         HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
