@@ -1,5 +1,6 @@
 package nl.vpro.jackson2;
 
+import java.time.Instant;
 import java.util.Date;
 
 import com.fasterxml.jackson.core.Version;
@@ -20,9 +21,11 @@ public class DateModule extends SimpleModule {
 
         // first deserializers
         addDeserializer(Date.class, DateToJsonTimestamp.Deserializer.INSTANCE);
+        addDeserializer(Instant.class, InstantToJsonTimestamp.Deserializer.INSTANCE);
 
 
         // then serializers:
         addSerializer(Date.class, DateToJsonTimestamp.Serializer.INSTANCE);
+        addSerializer(Instant.class, InstantToJsonTimestamp.Serializer.INSTANCE);
     }
 }
