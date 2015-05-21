@@ -16,5 +16,10 @@
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
     </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>shared-jackson2</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>
