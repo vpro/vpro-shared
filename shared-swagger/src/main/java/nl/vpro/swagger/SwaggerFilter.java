@@ -45,7 +45,7 @@ public class SwaggerFilter implements Filter {
 		}
 		newValue.append( req.getContextPath()).append("/api");
         JsonFilter.Replacement<String> replacement =
-				new JsonFilter.Replacement<String>("basePath", "${api.basePath}", newValue.toString());
+				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
         List<JsonFilter.Replacement> replacements = Arrays.asList(replacement);
         final OutputStream out = transform(response.getOutputStream(), replacements);
         HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
