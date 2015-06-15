@@ -7,19 +7,12 @@ package nl.vpro.xml.bind;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.function.Supplier;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class DateTimeToXMLDate extends XmlAdapter<String, Date> {
 
-    ThreadLocal<DateFormat> DF = ThreadLocal.withInitial(new Supplier<DateFormat>() {
-        @Override
-        public DateFormat get() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        }
-    });
+    ThreadLocal<DateFormat> DF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     @Override
     public Date unmarshal(String date) throws Exception {
