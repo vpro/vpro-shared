@@ -35,8 +35,10 @@
     <module>shared-configuration</module>
     <module>shared-camel</module>
     <module>shared-domain</module>
+    <module>shared-elasticsearch</module>
     <module>shared-integration</module>
     <module>shared-jackson2</module>
+    <module>shared-newrelic</module>
     <module>shared-services</module>
     <module>shared-swagger</module>
     <module>shared-web</module>
@@ -45,7 +47,6 @@
     <module>shared-resteasy</module>
     <module>shared-test</module>
     <module>shared-transfer</module>
-    <module>shared-elasticsearch</module>
     <module>shared-xml</module>
   </modules>
 
