@@ -10,16 +10,16 @@ import java.util.concurrent.TimeUnit;
  * @author Roelof Jan Koekoek
  * @since 3.7
  */
-public class WindowedMetric implements Metric {
+public class RateMetric implements Metric {
     private final String name;
 
     private final String unit;
 
     private final TimeUnit period;
 
-    private final WindowCounter counter = new WindowCounter();
+    private final RateCounter counter = new RateCounter();
 
-    public WindowedMetric(String name, String unit, TimeUnit period) {
+    public RateMetric(String name, String unit, TimeUnit period) {
         this.name = name;
         this.unit = unit;
         this.period = period;

@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Roelof Jan Koekoek
  * @since 3.7
  */
-public class WindowCounter {
+public class RateCounter {
 
     private int previousCount = 0;
 
