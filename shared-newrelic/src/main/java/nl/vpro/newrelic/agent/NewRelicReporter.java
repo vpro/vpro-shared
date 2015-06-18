@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @author Roelof Jan Koekoek
- * @since 3.7
+ * @since 0.22.0
  */
 public interface NewRelicReporter {
 

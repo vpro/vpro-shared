@@ -12,7 +12,7 @@ import com.newrelic.metrics.publish.configuration.ConfigurationException;
 
 /**
  * @author Roelof Jan Koekoek
- * @since 3.7
+ * @since 0.22.0
  */
 public class NewRelicAgentFactory extends AgentFactory {
 

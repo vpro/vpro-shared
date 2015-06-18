@@ -14,7 +14,7 @@ import com.newrelic.metrics.publish.Agent;
 
 /**
  * @author Roelof Jan Koekoek
- * @since 3.7
+ * @since 0.22.0
  */
 public class NewRelicAgent extends Agent {
     private static final Logger LOG = LoggerFactory.getLogger(NewRelicAgent.class);
