@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Roelof Jan Koekoek
- * @since 3.7
+ * @since 0.22.0
  */
 public class RateMetric implements Metric {
     private final String name;

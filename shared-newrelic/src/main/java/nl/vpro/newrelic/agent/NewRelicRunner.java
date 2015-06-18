@@ -19,7 +19,7 @@ import nl.vpro.util.ThreadPools;
 
 /**
  * @author Roelof Jan Koekoek
- * @since 3.7
+ * @since 0.22.0
  */
 public class NewRelicRunner implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NewRelicRunner.class);
