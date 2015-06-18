@@ -39,10 +39,15 @@ public class AverageMetric implements Metric {
 
     @Override
     public float getValue() {
+        if(counts.get() == 0) {
+            return 0;
+        }
+
         return (float)complement.getAndSet(0d) / counts.getAndSet(0);
     }
 
     public void addValue(float value) {
+        counts.incrementAndGet();
         this.complement.addAndGet(value);
     }
 }
