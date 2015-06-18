@@ -4,6 +4,10 @@
  */
 package nl.vpro.newrelic.agent;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.util.concurrent.AtomicDouble;
+
 /**
  * @author Roelof Jan Koekoek
  * @since 0.24.0
@@ -14,9 +18,9 @@ public class AverageMetric implements Metric {
 
     private final String unit;
 
-    private float complement;
+    private final AtomicDouble complement = new AtomicDouble();
 
-    private int counts;
+    private AtomicInteger counts = new AtomicInteger();
 
     public AverageMetric(String name, String unit) {
         this.name = name;
@@ -35,12 +39,10 @@ public class AverageMetric implements Metric {
 
     @Override
     public float getValue() {
-        final float answer = complement / counts;
-        complement = counts = 0;
-        return answer;
+        return (float)complement.getAndSet(0d) / counts.getAndSet(0);
     }
 
     public void addValue(float value) {
-        this.complement += value;
+        this.complement.addAndGet(value);
     }
 }
