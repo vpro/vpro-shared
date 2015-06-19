@@ -43,13 +43,17 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>uk.org.lidalia</groupId>
-      <artifactId>lidalia-slf4j-ext</artifactId>
-      <version>1.0.0</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-ext</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>nl.vpro.media</groupId>
+      <artifactId>media-groovy</artifactId>
+      <version>3.2.0.API3</version>
     </dependency>
   </dependencies>
 </project>
