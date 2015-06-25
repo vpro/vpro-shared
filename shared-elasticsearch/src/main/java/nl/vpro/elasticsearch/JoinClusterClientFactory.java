@@ -1,58 +1,52 @@
-/**
- * Copyright (C) 2015 All rights reserved
- * VPRO The Netherlands
- */
 package nl.vpro.elasticsearch;
 
 import java.util.concurrent.Callable;
 
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Enables a completely embedded elastic search, with data.
+ * Simply join the cluster. That is perhaps the best implementation.
  * @author Michiel Meeuwissen
- * @since 0.21
+ * @since 0.23
  */
-public class EmbeddedClientFactory implements ESClientFactory {
+public class JoinClusterClientFactory implements ESClientFactory {
 
     private Node node;
 
     private Client client;
 
-    private String path = "/tmp";
-
     private String clusterName = "myCluster";
-
-    private int numberOfMasters = 2;
 
     private boolean httpEnabled = false;
 
+    private String unicastHosts = null;
+
 
     public synchronized Node node() {
-        if(node == null) {
-            Settings settings = ImmutableSettings.settingsBuilder()
+        if (node == null) {
+            ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder()
                 .put("http.enabled", httpEnabled)
-                .put("index.store.type", "niofs")
-                .put("client.transport.sniff", true)
-                .put("node.data", true)
-                .put("node.master", true)
-                .put("cluster.name", clusterName)
-                .put("index.number_of_shards", 2)
-                .put("index.number_of_replicas", 1)
-                .put("discovery.zen.minimum_master_nodes", numberOfMasters)
-                .put("discovery.zen.ping_timeout", 5)
-                .put("discovery.zen.ping.multicast.enabled", true)
-                .put("path.home", path).build();
+                ;
+
+            if (StringUtils.isNotEmpty(unicastHosts)) {
+                settings.put("discovery.zen.ping.multicast.enabled", false);
+                settings.put("discovery.zen.ping.unicast.enabled", true);
+                settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
+            }
+
 
             node = NodeBuilder.nodeBuilder()
+
+                .clusterName(clusterName)
+                .client(true)
                 .local(false)
                 .settings(settings)
                 .node();
@@ -67,13 +61,10 @@ public class EmbeddedClientFactory implements ESClientFactory {
             if (client != null) {
                 return client;
             }
-            synchronized(EmbeddedClientFactory.this) {
+            synchronized (JoinClusterClientFactory.this) {
                 if (client == null) {
                     logger.info("Creating client");
                     client = node().client();
-                    logger.info("Waiting for green");
-                    client.admin().cluster().prepareHealth().setWaitForGreenStatus().get();
-
                 }
             }
             return client;
@@ -81,16 +72,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
         };
     }
 
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        node = null;
-        client = null;
-        this.path = path;
-    }
 
     public String getClusterName() {
         return clusterName;
@@ -102,13 +83,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
         this.clusterName = clusterName;
     }
 
-    public int getNumberOfMasters() {
-        return numberOfMasters;
-    }
-
-    public void setNumberOfMasters(int numberOfMasters) {
-        this.numberOfMasters = numberOfMasters;
-    }
 
     public boolean isHttpEnabled() {
         return httpEnabled;
@@ -118,6 +92,14 @@ public class EmbeddedClientFactory implements ESClientFactory {
         this.httpEnabled = httpEnabled;
     }
 
+    public String getUnicastHosts() {
+        return unicastHosts;
+    }
+
+    public void setUnicastHosts(String unicastHosts) {
+        this.unicastHosts = unicastHosts;
+    }
+
     @Override
     public Client buildClient(String logName) {
         try {
@@ -125,15 +107,10 @@ public class EmbeddedClientFactory implements ESClientFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @PreDestroy
     public void shutdown() {
-        if (client != null) {
-            client.admin().cluster().prepareHealth().setWaitForGreenStatus().get();
-            client.close();
-        }
         if (node != null) {
             node.close();
         }
@@ -141,6 +118,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
 
     @Override
     public String toString() {
-        return "ES " + clusterName + "@" + path;
+        return "ES " + clusterName;
     }
 }
