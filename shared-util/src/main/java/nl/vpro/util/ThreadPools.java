@@ -36,13 +36,13 @@ public final class ThreadPools {
         };
     }
 
-	public static final ThreadPoolExecutor copyExecutor =
-			new ThreadPoolExecutor(0, 2000, 60, TimeUnit.SECONDS,
-					new SynchronousQueue<Runnable>(),
-					ThreadPools.createThreadFactory(
-							"nl.vpro-util-Copier",
-							false,
-							Thread.NORM_PRIORITY));
+    public static final ThreadPoolExecutor copyExecutor =
+        new ThreadPoolExecutor(0, 2000, 60, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>(),
+            ThreadPools.createThreadFactory(
+                "nl.vpro-util-Copier",
+                false,
+                Thread.NORM_PRIORITY));
 
     public static final ThreadPoolExecutor startUpExecutor =
         new ThreadPoolExecutor(0, 2, 60, TimeUnit.SECONDS,
