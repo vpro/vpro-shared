@@ -14,7 +14,6 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
@@ -23,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class IndexHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(IndexHelper.class);
+    private final Logger log;
 
 
     private String indexName;
@@ -32,7 +31,8 @@ public class IndexHelper {
     private final Map<String, String> mappings = new HashMap<>();
 
 
-    public IndexHelper(ESClientFactory client, String indexName, String settings) {
+    public IndexHelper(Logger log, ESClientFactory client, String indexName, String settings) {
+        this.log = log;
         this.client = client;
         this.indexName = indexName;
         this.settings = settings;
@@ -50,9 +50,9 @@ public class IndexHelper {
     public  void createIndex() throws ExecutionException, InterruptedException, IOException {
         CreateIndexResponse response = client().admin().indices().prepareCreate(indexName).setSettings(read(settings)).execute().actionGet();
         if (response.isAcknowledged()) {
-            LOG.info("Created index {}", indexName);
+            log.info("Created index {}", indexName);
         } else {
-            LOG.warn("Could not create index {}", indexName);
+            log.warn("Could not create index {}", indexName);
         }
         putMappings();
     }
@@ -61,9 +61,9 @@ public class IndexHelper {
         for (Map.Entry<String, String> e : mappings.entrySet()) {
             PutMappingResponse a = client().admin().indices().preparePutMapping(indexName).setType(e.getKey()).setSource(read(e.getValue())).execute().actionGet();
             if (a.isAcknowledged()) {
-                LOG.info("Put mapping {}/{}", indexName, e.getKey());
+                log.info("Put mapping {}/{}", indexName, e.getKey());
             } else {
-                LOG.warn("Could not put mapping {}/", indexName, e.getKey());
+                log.warn("Could not put mapping {}/", indexName, e.getKey());
             }
         }
     }
@@ -72,25 +72,25 @@ public class IndexHelper {
         try {
             boolean exists = client().admin().indices().prepareExists(indexName).execute().actionGet().isExists();
             if (!exists) {
-                LOG.info("Index '{}' not existing in {}, now creating", indexName, client);
+                log.info("Index '{}' not existing in {}, now creating", indexName, client);
                 try {
                     createIndex();
                 } catch (Exception e) {
                     String c = (e.getCause() != null ? (" " + e.getCause().getMessage()) : "");
-                    LOG.error(e.getMessage() + c);
+                    log.error(e.getMessage() + c);
                 }
             } else {
                 try {
                     putMappings();
                 } catch (Exception e) {
                     String c = (e.getCause() != null ? (" " + e.getCause().getMessage()) : "");
-                    LOG.error(e.getMessage() + c);
+                    log.error(e.getMessage() + c);
 
                 }
-                LOG.info("Found {} tips in '{}' of {}", count(), indexName, client);
+                log.info("Found {} objects in '{}' of {}", count(), indexName, client);
             }
         } catch( NoNodeAvailableException noNodeAvailableException) {
-            LOG.error(noNodeAvailableException.getMessage());
+            log.error(noNodeAvailableException.getMessage());
         }
     }
 
