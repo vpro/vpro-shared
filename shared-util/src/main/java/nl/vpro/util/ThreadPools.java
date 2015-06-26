@@ -1,9 +1,6 @@
 package nl.vpro.util;
 
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Utilities related to ThreadPools
@@ -38,15 +35,15 @@ public final class ThreadPools {
 
     public static final ThreadPoolExecutor copyExecutor =
         new ThreadPoolExecutor(0, 2000, 60, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>(),
+            new SynchronousQueue<>(),
             ThreadPools.createThreadFactory(
                 "nl.vpro-util-Copier",
                 false,
                 Thread.NORM_PRIORITY));
 
     public static final ThreadPoolExecutor startUpExecutor =
-        new ThreadPoolExecutor(0, 2, 60, TimeUnit.SECONDS,
-            new SynchronousQueue<>(),
+        new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS,
+            new LinkedBlockingDeque<>(),
             ThreadPools.createThreadFactory(
                 "nl.vpro-util-StartUp",
                 false,
