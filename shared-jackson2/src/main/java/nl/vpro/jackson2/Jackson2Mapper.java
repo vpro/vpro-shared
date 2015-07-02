@@ -4,6 +4,9 @@
  */
 package nl.vpro.jackson2;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -19,6 +22,9 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
  * @author Michiel Meeuwissen
  */
 public class Jackson2Mapper extends ObjectMapper {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Jackson2Mapper.class);
+
     public static Jackson2Mapper INSTANCE = new Jackson2Mapper();
 
     public static Jackson2Mapper getInstance() {
@@ -51,8 +57,8 @@ public class Jackson2Mapper extends ObjectMapper {
         registerModule(new DateModule());
         try {
             registerModule(new SerializeAvroModule());
-        } catch (Exception nfee) {
-            //
+        } catch (NoClassDefFoundError ncdfe) {
+            LOG.info("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
         }
     }
 }
