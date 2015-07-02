@@ -49,6 +49,10 @@ public class Jackson2Mapper extends ObjectMapper {
         JSR310Module jsr310Module = new JSR310Module();
         registerModule(jsr310Module);
         registerModule(new DateModule());
-        registerModule(new SerializeAvroModule());
+        try {
+            registerModule(new SerializeAvroModule());
+        } catch (Exception nfee) {
+            //
+        }
     }
 }
