@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>shared-parent</artifactId>
+    <groupId>nl.vpro.shared</groupId>
+    <version>0.24.3</version>
+  </parent>
+
+  <artifactId>shared-test</artifactId>
+  <packaging>jar</packaging>
+
+  <name>shared-test</name>
+  <description>Contains some functionality required by JUnit tests (Mycila spring plugin, ...)</description>
+
+  <properties>
+    <buildnumber.doCheck>false</buildnumber.doCheck>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>shared-jackson2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.mycila.testing</groupId>
+      <artifactId>mycila-testing-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.mycila.testing.plugins</groupId>
+      <artifactId>mycila-testing-spring</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xmlunit</groupId>
+      <artifactId>xmlunit</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <configuration>
+          <buildNumberPropertyName>sources.version</buildNumberPropertyName>
+          <timestampPropertyName>build.timestamp</timestampPropertyName>
+          <scmBranchPropertyName>build.scmBranch</scmBranchPropertyName>
+          <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm}</timestampFormat>
+          <doCheck>${buildnumber.doCheck}</doCheck>
+          <doUpdate>false</doUpdate>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
