@@ -4,15 +4,14 @@
  */
 package nl.vpro.resteasy;
 
-import org.jboss.resteasy.spi.StringParameterUnmarshaller;
-
 import java.lang.annotation.Annotation;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.jboss.resteasy.spi.StringParameterUnmarshaller;
+
 /**
- * User: rico
- * Date: 06/02/2014
+ * @author  rico
  */
 public class IS08601Formatter implements StringParameterUnmarshaller<Date> {
     @Override
