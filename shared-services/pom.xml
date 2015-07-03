@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>shared-parent</artifactId>
-    <version>0.24.2</version>
+    <version>0.24.3-SNAPSHOT</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
