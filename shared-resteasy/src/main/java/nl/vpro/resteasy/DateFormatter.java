@@ -4,17 +4,16 @@
  */
 package nl.vpro.resteasy;
 
-import org.jboss.resteasy.spi.StringParameterUnmarshaller;
-import org.jboss.resteasy.util.FindAnnotation;
-
 import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.jboss.resteasy.spi.StringParameterUnmarshaller;
+import org.jboss.resteasy.util.FindAnnotation;
+
 /**
- * User: rico
- * Date: 06/02/2014
+ * @author rico
  */
 public class DateFormatter implements StringParameterUnmarshaller<Date> {
     private SimpleDateFormat formatter;
