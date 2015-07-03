@@ -4,14 +4,13 @@
  */
 package nl.vpro.resteasy;
 
-import org.jboss.resteasy.annotations.StringParameterUnmarshallerBinder;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import org.jboss.resteasy.annotations.StringParameterUnmarshallerBinder;
+
 /**
- * User: rico
- * Date: 06/02/2014
+ * @author rico
  */
 @Retention(RetentionPolicy.RUNTIME)
 @StringParameterUnmarshallerBinder(IS08601Formatter.class)
