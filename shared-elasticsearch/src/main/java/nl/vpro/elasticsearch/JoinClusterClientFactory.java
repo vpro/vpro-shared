@@ -29,6 +29,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private String unicastHosts = null;
 
+    private String tcpPort = "9350-9400";
+
 
     public synchronized Node node() {
         if (node == null) {
@@ -41,6 +43,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
                 settings.put("discovery.zen.ping.unicast.enabled", true);
                 settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
             }
+            settings.put("transport.tcp.port", tcpPort);
 
 
             node = NodeBuilder.nodeBuilder()
@@ -63,8 +66,9 @@ public class JoinClusterClientFactory implements ESClientFactory {
             }
             synchronized (JoinClusterClientFactory.this) {
                 if (client == null) {
-                    logger.info("Creating client");
-                    client = node().client();
+                    Node n = node();
+                    logger.info("Creating client for {}", n);
+                    client = n.client();
                 }
             }
             return client;
@@ -98,6 +102,14 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     public void setUnicastHosts(String unicastHosts) {
         this.unicastHosts = unicastHosts;
+    }
+
+    public String getTcpPort() {
+        return tcpPort;
+    }
+
+    public void setTcpPort(String tcpPort) {
+        this.tcpPort = tcpPort;
     }
 
     @Override
