@@ -5,7 +5,7 @@
   <parent>
     <artifactId>shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.24.6-SNAPSHOT</version>
+    <version>0.24.6</version>
   </parent>
 
   <artifactId>shared-newrelic</artifactId>
