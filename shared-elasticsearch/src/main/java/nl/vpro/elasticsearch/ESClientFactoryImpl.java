@@ -56,14 +56,14 @@ public class ESClientFactoryImpl implements  ESClientFactory {
     @Override
     public Client client(String logName){
         if (client == null) {
-            client = buildClient(logName);
+            client = constructClient(logName);
         }
         return client;
 
 
     }
 
-    private Client buildClient(String logName) {
+    private Client constructClient(String logName) {
         ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder()
             .put("client.transport.ignore_cluster_name", ignoreClusterName)
             .put("client.transport.sniff", sniffCluster)
