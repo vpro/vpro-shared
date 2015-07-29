@@ -7,6 +7,7 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.slf4j.Logger;
@@ -32,20 +33,11 @@ public class JoinClusterClientFactory implements ESClientFactory {
     private String tcpPort = "9350-9400";
 
 
-    public synchronized Node node() {
+    private synchronized Node node(Logger logger) {
         if (node == null) {
-            ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder()
-                .put("http.enabled", httpEnabled)
-                ;
 
-            if (StringUtils.isNotEmpty(unicastHosts)) {
-                settings.put("discovery.zen.ping.multicast.enabled", false);
-                settings.put("discovery.zen.ping.unicast.enabled", true);
-                settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
-            }
-            settings.put("transport.tcp.port", tcpPort);
-
-
+            Settings settings = getSettings();
+            logger.info("Creating es node for {}", this);
             node = NodeBuilder.nodeBuilder()
 
                 .clusterName(clusterName)
@@ -59,6 +51,19 @@ public class JoinClusterClientFactory implements ESClientFactory {
         return node;
     }
 
+    private Settings getSettings() {
+        ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder()
+            .put("http.enabled", httpEnabled);
+
+        if (StringUtils.isNotEmpty(unicastHosts)) {
+            settings.put("discovery.zen.ping.multicast.enabled", false);
+            settings.put("discovery.zen.ping.unicast.enabled", true);
+            settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
+        }
+        settings.put("transport.tcp.port", tcpPort);
+        return settings.build();
+    }
+
     public Callable<Client> client(Logger logger) {
         return () -> {
             if (client != null) {
@@ -66,8 +71,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
             }
             synchronized (JoinClusterClientFactory.this) {
                 if (client == null) {
-                    Node n = node();
-                    logger.info("Creating client for {}", n);
+                    Node n = node(logger);
                     client = n.client();
                 }
             }
@@ -130,7 +134,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     @Override
     public String toString() {
-        return "ES " + clusterName + (StringUtils.isNotBlank(unicastHosts) ? ("(" + unicastHosts + ")") : "");
+        return "ES " + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings().getAsMap();
     }
 
 
