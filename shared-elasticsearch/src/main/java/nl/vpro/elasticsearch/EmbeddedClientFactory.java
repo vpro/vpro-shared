@@ -119,7 +119,7 @@ public class EmbeddedClientFactory implements ESClientFactory {
     }
 
     @Override
-    public Client buildClient(String logName) {
+    public Client client(String logName) {
         try {
             return client(LoggerFactory.getLogger(logName)).call();
         } catch (Exception e) {

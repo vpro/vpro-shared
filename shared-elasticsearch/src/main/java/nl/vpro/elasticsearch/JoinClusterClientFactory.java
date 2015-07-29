@@ -80,14 +80,18 @@ public class JoinClusterClientFactory implements ESClientFactory {
         };
     }
 
+    private void reset() {
+        shutdown();
+        node = null;
+        client = null;
+    }
 
     public String getClusterName() {
         return clusterName;
     }
 
     public void setClusterName(String clusterName) {
-        node = null;
-        client = null;
+        reset();
         this.clusterName = clusterName;
     }
 
@@ -97,6 +101,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setHttpEnabled(boolean httpEnabled) {
+        reset();
         this.httpEnabled = httpEnabled;
     }
 
@@ -105,6 +110,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setUnicastHosts(String unicastHosts) {
+        reset();
         this.unicastHosts = unicastHosts;
     }
 
@@ -113,11 +119,12 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setTcpPort(String tcpPort) {
+        reset();
         this.tcpPort = tcpPort;
     }
 
     @Override
-    public Client buildClient(String logName) {
+    public Client client(String logName) {
         try {
             return client(LoggerFactory.getLogger(logName)).call();
         } catch (Exception e) {

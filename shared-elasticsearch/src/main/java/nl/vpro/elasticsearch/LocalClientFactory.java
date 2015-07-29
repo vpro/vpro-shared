@@ -58,7 +58,7 @@ public class LocalClientFactory implements ESClientFactory {
     }
 
     @Override
-    public Client buildClient(String logName) {
+    public Client client(String logName) {
         return client();
 
     }
