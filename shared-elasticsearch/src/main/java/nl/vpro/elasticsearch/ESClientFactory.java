@@ -8,9 +8,19 @@ import org.elasticsearch.client.Client;
  */
 public interface ESClientFactory {
 
-    Client buildClient(String logName);
+    /**
+     * Returns a client. The client may be cached by the factory.
+     */
 
-    default Client buildClient(Class clazz) {
-        return buildClient(clazz.getName());
+    Client client(String logName);
+
+    default Client client(Class clazz) {
+        return client(clazz.getName());
     }
+
+    @Deprecated
+    default Client buildClient(String logName) {
+        return client(logName);
+    }
+
 }
