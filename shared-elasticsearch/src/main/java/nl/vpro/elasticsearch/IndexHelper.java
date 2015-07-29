@@ -44,7 +44,7 @@ public class IndexHelper {
     }
 
     private Client client() {
-        return client.buildClient(IndexHelper.class.getSimpleName() + "." + indexName);
+        return client.buildClient(IndexHelper.class.getName() + "." + indexName);
     }
 
     public  void createIndex() throws ExecutionException, InterruptedException, IOException {

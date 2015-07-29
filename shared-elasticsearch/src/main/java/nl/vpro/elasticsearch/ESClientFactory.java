@@ -9,4 +9,8 @@ import org.elasticsearch.client.Client;
 public interface ESClientFactory {
 
     Client buildClient(String logName);
+
+    default Client buildClient(Class clazz) {
+        return buildClient(clazz.getName());
+    }
 }
