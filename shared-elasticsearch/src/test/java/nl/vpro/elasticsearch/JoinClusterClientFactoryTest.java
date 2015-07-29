@@ -20,7 +20,7 @@ public class JoinClusterClientFactoryTest {
         JoinClusterClientFactory factory = new JoinClusterClientFactory();
         factory.setClusterName(clusterName);
         factory.setUnicastHosts("localhost[" + port + "]");
-        Client client = factory.buildClient("test");
+        Client client = factory.client("test");
         System.out.println(client.prepareCount("test").get().getCount());
     }
 
@@ -34,7 +34,7 @@ public class JoinClusterClientFactoryTest {
         factory.setIgnoreClusterName(false);
 
 
-        Client client = factory.buildClient("test");
+        Client client = factory.client("test");
 
         System.out.println(client.prepareCount("test").get().getCount());
     }
