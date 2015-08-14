@@ -15,14 +15,28 @@ public class FilteringIterator<T> implements Iterator<T> {
 
     private final Predicate<? super T> filter;
 
+    private final KeepAlive keepAlive;
+
     private T next;
 
     private Boolean hasNext = null;
 
-    public FilteringIterator(Iterator<? extends T> wrapped, Predicate<? super T> filter) {
+    private long count = 0;
+
+    public FilteringIterator(
+            Iterator<? extends T> wrapped,
+            Predicate<? super T> filter) {
+        this(wrapped, filter, new KeepAlive(Long.MAX_VALUE, () -> {}));
+    }
+
+    public FilteringIterator(
+            Iterator<? extends T> wrapped,
+            Predicate<? super T> filter,
+            KeepAlive keepAlive) {
         this.wrapped = wrapped;
         if (wrapped == null) throw new IllegalArgumentException();
         this.filter = filter;
+        this.keepAlive = keepAlive;
     }
 
     @Override
@@ -50,6 +64,10 @@ public class FilteringIterator<T> implements Iterator<T> {
         if(hasNext == null) {
             while(wrapped.hasNext()) {
                 next = wrapped.next();
+                count++;
+                if (count % keepAlive.count == 0) {
+                    keepAlive.callback.run();
+                }
                 if(inFilter(next)) {
                     hasNext = true;
                     return;
@@ -62,5 +80,14 @@ public class FilteringIterator<T> implements Iterator<T> {
 
     private boolean inFilter(T object) {
         return filter == null || filter.apply(object);
+    }
+    public static class KeepAlive {
+        private final long count;
+        private final Runnable callback;
+
+        public KeepAlive(long count, Runnable callback) {
+            this.count = count;
+            this.callback = callback;
+        }
     }
 }
