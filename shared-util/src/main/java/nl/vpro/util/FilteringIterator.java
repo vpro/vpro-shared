@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
@@ -88,9 +90,22 @@ public class FilteringIterator<T> implements Iterator<T> {
 
     }
 
+
+
+
     private boolean inFilter(T object) {
         return filter == null || filter.apply(object);
     }
+
+    public static KeepAlive keepAlive(LongConsumer callback) {
+        return keepAlive(100, callback);
+    }
+
+    public static KeepAlive keepAlive(long c, LongConsumer callback) {
+        return new KeepAlive(c, callback);
+    }
+
+
     public static class KeepAlive {
         private final long count;
         private final LongConsumer callback;
@@ -98,13 +113,7 @@ public class FilteringIterator<T> implements Iterator<T> {
         public KeepAlive(long count, LongConsumer callback) {
             this.count = count;
             this.callback = callback;
-        }
-        public static KeepAlive of(LongConsumer callback) {
-            return of(100, callback);
-        }
 
-        public static KeepAlive of(long c, LongConsumer callback) {
-            return new KeepAlive(c, callback);
         }
     }
 }
