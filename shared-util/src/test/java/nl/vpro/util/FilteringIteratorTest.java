@@ -28,8 +28,9 @@ public class FilteringIteratorTest {
     public void test() {
         List<String> list = Arrays.asList("a", "b", "c", null, "d");
         AtomicInteger i = new AtomicInteger(0);
-        Iterator<String> iterator = new FilteringIterator<>(list.iterator(), notC, FilteringIterator.KeepAlive.of(2, c ->
-        {i.incrementAndGet();}));
+        Iterator<String> iterator = new FilteringIterator<>(list.iterator(), notC,
+                FilteringIterator.keepAlive(2, c -> i.incrementAndGet())
+        );
         StringBuilder build = new StringBuilder();
         while(iterator.hasNext()) {
             iterator.hasNext(); // check that you can call it multiple times
