@@ -2,6 +2,9 @@ package nl.vpro.util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 import com.google.common.base.Predicate;
 
@@ -21,12 +24,13 @@ public class FilteringIterator<T> implements Iterator<T> {
 
     private Boolean hasNext = null;
 
-    private long count = 0;
+    private long countForKeepAlive = 0;
+    private long totalCountForKeepAlive = 0;
 
     public FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter) {
-        this(wrapped, filter, new KeepAlive(Long.MAX_VALUE, () -> {}));
+        this(wrapped, filter, new KeepAlive(Long.MAX_VALUE, value -> {}));
     }
 
     public FilteringIterator(
@@ -64,11 +68,17 @@ public class FilteringIterator<T> implements Iterator<T> {
         if(hasNext == null) {
             while(wrapped.hasNext()) {
                 next = wrapped.next();
-                count++;
-                if (count % keepAlive.count == 0) {
-                    keepAlive.callback.run();
+                totalCountForKeepAlive++;
+                boolean inFilter = inFilter(next);
+                if (inFilter) {
+                    countForKeepAlive++;
                 }
-                if(inFilter(next)) {
+                if (totalCountForKeepAlive >= keepAlive.count) {
+                    keepAlive.callback.accept(countForKeepAlive);
+                    countForKeepAlive = 0;
+                    totalCountForKeepAlive = 0;
+                }
+                if(inFilter) {
                     hasNext = true;
                     return;
                 }
@@ -83,11 +93,18 @@ public class FilteringIterator<T> implements Iterator<T> {
     }
     public static class KeepAlive {
         private final long count;
-        private final Runnable callback;
+        private final LongConsumer callback;
 
-        public KeepAlive(long count, Runnable callback) {
+        public KeepAlive(long count, LongConsumer callback) {
             this.count = count;
             this.callback = callback;
+        }
+        public static KeepAlive of(LongConsumer callback) {
+            return of(100, callback);
+        }
+
+        public static KeepAlive of(long c, LongConsumer callback) {
+            return new KeepAlive(c, callback);
         }
     }
 }
