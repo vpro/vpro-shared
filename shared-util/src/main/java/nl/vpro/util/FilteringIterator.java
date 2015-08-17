@@ -3,9 +3,7 @@ package nl.vpro.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntConsumer;
 import java.util.function.LongConsumer;
 
 import com.google.common.base.Predicate;
@@ -32,7 +30,7 @@ public class FilteringIterator<T> implements Iterator<T> {
     public FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter) {
-        this(wrapped, filter, new KeepAlive(Long.MAX_VALUE, value -> {}));
+        this(wrapped, filter, keepAlive(Long.MAX_VALUE, value -> {}));
     }
 
     public FilteringIterator(
@@ -76,7 +74,11 @@ public class FilteringIterator<T> implements Iterator<T> {
                     countForKeepAlive++;
                 }
                 if (totalCountForKeepAlive >= keepAlive.count) {
-                    keepAlive.callback.accept(countForKeepAlive);
+                    Boolean mustBreak = keepAlive.callback.apply(countForKeepAlive);
+                    if (mustBreak) {
+                        hasNext = false;
+                        return;
+                    }
                     countForKeepAlive = 0;
                     totalCountForKeepAlive = 0;
                 }
@@ -91,8 +93,6 @@ public class FilteringIterator<T> implements Iterator<T> {
     }
 
 
-
-
     private boolean inFilter(T object) {
         return filter == null || filter.apply(object);
     }
@@ -102,15 +102,67 @@ public class FilteringIterator<T> implements Iterator<T> {
     }
 
     public static KeepAlive keepAlive(long c, LongConsumer callback) {
+        return new KeepAlive(c, aLong -> {
+            callback.accept(aLong);
+            return false;
+        });
+    }
+
+    public static KeepAlive keepAlive(Function<Long, Boolean> callback) {
+        return keepAlive(100, callback);
+    }
+
+    public static KeepAlive keepAliveChars(Function<Character, Boolean> callback) {
+        return keepAliveChars(100, callback);
+    }
+
+    /**
+     * This translates the 'numberOfRecords' to a character to write if no records are outputted by the iterated since the last call to the callback.
+     * The callback is called with the character. The idea is to write it simply to the stream, to keep it 'alive.
+     * The use case is in MediaRestServiceImpl#iterate
+     * @param c
+     * @param callback
+     * @return
+     */
+    public static KeepAlive keepAliveChars(long c, Function<Character, Boolean> callback) {
+        final char[] writeChar = new char[]{
+            '\n'
+        };
+        final AtomicInteger numberOfKeepAlives = new AtomicInteger(0);
+        return keepAlive(c, numberOfRecords -> {
+            if (numberOfRecords == 0) {
+                Boolean result = callback.apply(writeChar[0]);
+                if (numberOfKeepAlives.incrementAndGet() > 50) {
+                    writeChar[0] = '\n';
+                    numberOfKeepAlives.set(0);
+                } else {
+                    writeChar[0] = ' ';
+                }
+                return result;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    public static KeepAlive keepAlive(long c, Function<Long, Boolean> callback) {
         return new KeepAlive(c, callback);
     }
 
 
     public static class KeepAlive {
         private final long count;
-        private final LongConsumer callback;
+        private final Function<Long, Boolean> callback;
 
-        public KeepAlive(long count, LongConsumer callback) {
+        /**
+         *
+         * @param count The callback function is called every so much records
+         * @param callback This function is called then. The argument is the number
+         *                 of outputted records since the previous call (which weren't filtered out)
+         *                 The call function can return a boolean to indicate whether the complete iteration must be 'break'ed.
+         *
+         */
+        public KeepAlive(long count, Function<Long, Boolean> callback) {
             this.count = count;
             this.callback = callback;
 
