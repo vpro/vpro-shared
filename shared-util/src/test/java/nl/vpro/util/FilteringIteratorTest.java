@@ -17,20 +17,14 @@ import static org.junit.Assert.assertNull;
  */
 public class FilteringIteratorTest {
 
-    private static final Predicate<String> notC = new Predicate<String>() {
-        @Override
-        public boolean apply(String input) {
-            return !"c".equals(input);
-        }
-    };
+    private static final Predicate<String> notC = input -> !"c".equals(input);
 
     @Test
     public void test() {
         List<String> list = Arrays.asList("a", "b", "c", null, "d");
         AtomicInteger i = new AtomicInteger(0);
         Iterator<String> iterator = new FilteringIterator<>(list.iterator(), notC,
-                FilteringIterator.keepAlive(2, c -> i.incrementAndGet())
-        );
+                FilteringIterator.keepAlive(2, value -> {i.getAndIncrement();}));
         StringBuilder build = new StringBuilder();
         while(iterator.hasNext()) {
             iterator.hasNext(); // check that you can call it multiple times
@@ -84,12 +78,7 @@ public class FilteringIteratorTest {
     public void testRemove2() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", null, "d"));
 
-        Iterator<String> iterator = new FilteringIterator<>(list.iterator(), new Predicate<String>() {
-            @Override
-            public boolean apply(String input) {
-                return input == null || input.equals("b");
-            }
-        });
+        Iterator<String> iterator = new FilteringIterator<>(list.iterator(), input -> input == null || input.equals("b"));
         while (iterator.hasNext()) {
             iterator.next();
             iterator.remove();
