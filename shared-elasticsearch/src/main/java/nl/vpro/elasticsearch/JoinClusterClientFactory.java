@@ -26,6 +26,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private String clusterName = "myCluster";
 
+    private String nodeName = null;
+
     private boolean httpEnabled = false;
 
     private String unicastHosts = null;
@@ -59,6 +61,10 @@ public class JoinClusterClientFactory implements ESClientFactory {
             settings.put("discovery.zen.ping.multicast.enabled", false);
             settings.put("discovery.zen.ping.unicast.enabled", true);
             settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
+        }
+        if (nodeName != null) {
+            settings.put("node.name", nodeName);
+
         }
         settings.put("transport.tcp.port", tcpPort);
         return settings.build();
@@ -123,6 +129,15 @@ public class JoinClusterClientFactory implements ESClientFactory {
         this.tcpPort = tcpPort;
     }
 
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    public void setNodeName(String nodeName) {
+        reset();
+        this.nodeName = nodeName;
+    }
+
     @Override
     public Client client(String logName) {
         try {
@@ -141,7 +156,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     @Override
     public String toString() {
-        return "ES " + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings().getAsMap();
+
+        return "ES " + (nodeName == null ? "" : (nodeName + "@")) + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings().getAsMap();
     }
 
 
