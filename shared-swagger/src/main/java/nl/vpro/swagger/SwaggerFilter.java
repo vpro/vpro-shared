@@ -35,7 +35,10 @@ public class SwaggerFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
-		String scheme =req.getScheme();
+        String scheme = req.getHeader("X-Forwarded-Proto");
+        if (scheme == null) {
+            scheme = req.getScheme();
+        }
         StringBuilder newValue = new StringBuilder(scheme);
 		newValue.append("://")
 			.append(req.getServerName());
