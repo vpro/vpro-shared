@@ -36,13 +36,18 @@ public class SwaggerFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         String scheme = req.getHeader("X-Forwarded-Proto");
+        long serverPort = req.getServerPort();
         if (scheme == null) {
             scheme = req.getScheme();
+        } else {
+            switch(scheme) {
+                case "http": serverPort = 80; break;
+                case "https": serverPort = 443; break;
+            }
         }
         StringBuilder newValue = new StringBuilder(scheme);
 		newValue.append("://")
 			.append(req.getServerName());
-		int serverPort = req.getServerPort();
 		if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
 			newValue.append(':').append(serverPort);
 		}
