@@ -183,7 +183,11 @@ public class ConfigurationServlet extends HttpServlet {
     }
 
     private String getRequestKey(HttpServletRequest req) {
-        return req == null ? "NULL" : (req.getScheme() + "://" + req.getServerName() + req.getServerPort()  +req.getContextPath());
+        String scheme = req != null ? req.getHeader("X-Forwarded-Proto") : null;
+        if (scheme == null && req != null) {
+            scheme = req.getScheme();
+        }
+        return req == null ? "NULL" : (scheme + "://" + req.getServerName() + req.getServerPort()  +req.getContextPath());
     }
     protected Map<String, String> getSystem(HttpServletRequest req) throws IOException {
         String key = getRequestKey(req);
