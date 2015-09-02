@@ -193,7 +193,11 @@ public class ConfigurationServlet extends HttpServlet {
             systemProps.put("env", getEnvironment().toString());
             if(req != null) {
                 int port = req.getServerPort();
-                systemProps.put("thisServer", req.getScheme() + "://" + req.getServerName() + (port == 80 ? "" : ":" + port) + req.getContextPath());
+                String scheme = req.getHeader("X-Forwarded-Proto");
+                if (scheme == null) {
+                    scheme = req.getScheme();
+                }
+                systemProps.put("thisServer", scheme + "://" + req.getServerName() + (port == 80 ? "" : ":" + port) + req.getContextPath());
             }
 
 
