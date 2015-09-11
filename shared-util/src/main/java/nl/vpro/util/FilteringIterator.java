@@ -46,19 +46,6 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
     }
 
 
-    public FilteringIterator(
-        Iterator<? extends T> wrapped,
-        com.google.common.base.Predicate<? super T> filter) {
-        this(wrapped, (Predicate<T>) filter::apply, noKeepAlive());
-    }
-
-    public FilteringIterator(
-        Iterator<? extends T> wrapped,
-        com.google.common.base.Predicate<? super T> filter,
-        KeepAlive keepAlive) {
-        this(wrapped, (Predicate<T>) filter::apply, keepAlive);
-    }
-
     @Override
     public boolean hasNext() {
         findNext();
@@ -113,14 +100,14 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         return filter == null || filter.test(object);
     }
     public static KeepAlive noKeepAlive() {
-        return keepAlive(Long.MAX_VALUE, (long value) -> {});
+        return keepAliveWithoutBreaks(Long.MAX_VALUE, (long value) -> {});
     }
 
-    public static KeepAlive keepAlive(LongConsumer callback) {
-        return keepAlive(100, callback);
+    public static KeepAlive keepAliveWithoutBreaks(LongConsumer callback) {
+        return keepAliveWithoutBreaks(100, callback);
     }
 
-    public static KeepAlive keepAlive(long c, LongConsumer callback) {
+    public static KeepAlive keepAliveWithoutBreaks(long c, LongConsumer callback) {
         return new KeepAlive(c, aLong -> {
             callback.accept(aLong);
             return false;

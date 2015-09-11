@@ -2,10 +2,9 @@ package nl.vpro.util;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import org.junit.Test;
-
-import com.google.common.base.Predicate;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -24,7 +23,7 @@ public class FilteringIteratorTest {
         List<String> list = Arrays.asList("a", "b", "c", null, "d");
         AtomicInteger i = new AtomicInteger(0);
         Iterator<String> iterator = new FilteringIterator<>(list.iterator(), notC,
-                FilteringIterator.keepAlive(2, value -> {i.getAndIncrement();}));
+                FilteringIterator.keepAliveWithoutBreaks(2,  value -> i.getAndIncrement()));
         StringBuilder build = new StringBuilder();
         while(iterator.hasNext()) {
             iterator.hasNext(); // check that you can call it multiple times
@@ -64,7 +63,7 @@ public class FilteringIteratorTest {
     public void testRemove() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", null, "d"));
 
-        Iterator<String> iterator = new FilteringIterator<>(list.iterator(), null);
+        Iterator<String> iterator = new FilteringIterator<>(list.iterator(),  null);
         while (iterator.hasNext()) {
             if ("b".equals(iterator.next())) {
                 iterator.remove();
