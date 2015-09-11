@@ -1,18 +1,20 @@
 package nl.vpro.util;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
+import java.util.function.Predicate;
 
-import com.google.common.base.Predicate;
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.3
  */
-public class FilteringIterator<T> implements Iterator<T> {
+public class FilteringIterator<T> implements CloseableIterator<T> {
 
     private final Iterator<? extends T> wrapped;
 
@@ -30,7 +32,7 @@ public class FilteringIterator<T> implements Iterator<T> {
     public FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter) {
-        this(wrapped, filter, keepAlive(Long.MAX_VALUE, value -> {}));
+        this(wrapped, filter, noKeepAlive());
     }
 
     public FilteringIterator(
@@ -41,6 +43,20 @@ public class FilteringIterator<T> implements Iterator<T> {
         if (wrapped == null) throw new IllegalArgumentException();
         this.filter = filter;
         this.keepAlive = keepAlive;
+    }
+
+
+    public FilteringIterator(
+        Iterator<? extends T> wrapped,
+        com.google.common.base.Predicate<? super T> filter) {
+        this(wrapped, (Predicate<T>) filter::apply, noKeepAlive());
+    }
+
+    public FilteringIterator(
+        Iterator<? extends T> wrapped,
+        com.google.common.base.Predicate<? super T> filter,
+        KeepAlive keepAlive) {
+        this(wrapped, (Predicate<T>) filter::apply, keepAlive);
     }
 
     @Override
@@ -94,7 +110,10 @@ public class FilteringIterator<T> implements Iterator<T> {
 
 
     private boolean inFilter(T object) {
-        return filter == null || filter.apply(object);
+        return filter == null || filter.test(object);
+    }
+    public static KeepAlive noKeepAlive() {
+        return keepAlive(Long.MAX_VALUE, (long value) -> {});
     }
 
     public static KeepAlive keepAlive(LongConsumer callback) {
@@ -147,6 +166,13 @@ public class FilteringIterator<T> implements Iterator<T> {
 
     public static KeepAlive keepAlive(long c, Function<Long, Boolean> callback) {
         return new KeepAlive(c, callback);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (wrapped instanceof Closeable) {
+            ((Closeable) wrapped).close();
+        }
     }
 
 
