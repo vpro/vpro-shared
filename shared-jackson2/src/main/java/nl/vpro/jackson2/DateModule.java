@@ -1,6 +1,7 @@
 package nl.vpro.jackson2;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -28,12 +29,15 @@ public class DateModule extends SimpleModule {
         addDeserializer(Date.class, DateToJsonTimestamp.Deserializer.INSTANCE);
         addDeserializer(Instant.class, InstantToJsonTimestamp.Deserializer.INSTANCE);
         addDeserializer(ZonedDateTime.class, ZonedDateTimeToJsonTimestamp.Deserializer.INSTANCE);
+        addDeserializer(LocalDate.class, LocalDateToJsonDate.Deserializer.INSTANCE);
 
 
         // then serializers:
         addSerializer(Date.class, DateToJsonTimestamp.Serializer.INSTANCE);
         addSerializer(Instant.class, InstantToJsonTimestamp.Serializer.INSTANCE);
         addSerializer(ZonedDateTime.class, ZonedDateTimeToJsonTimestamp.Serializer.INSTANCE);
+        addSerializer(LocalDate.class, LocalDateToJsonDate.Serializer.INSTANCE);
+
 
     }
 }
