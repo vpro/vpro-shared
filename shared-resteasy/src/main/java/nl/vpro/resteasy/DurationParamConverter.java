@@ -1,8 +1,7 @@
 package nl.vpro.resteasy;
 
-import java.time.Duration;
-
 import javax.ws.rs.ext.ParamConverter;
+import java.time.Duration;
 
 
 /**
@@ -12,7 +11,7 @@ import javax.ws.rs.ext.ParamConverter;
 
 public class DurationParamConverter implements ParamConverter<Duration> {
 
-    static DurationParamConverter INSTANCE = new DurationParamConverter();
+    public static DurationParamConverter INSTANCE = new DurationParamConverter();
 
     @Override
     public Duration fromString(String value) {
