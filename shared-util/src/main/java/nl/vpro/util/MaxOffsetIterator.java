@@ -59,12 +59,14 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
         return this;
     }
 
-    public MaxOffsetIterator<T> callBack(AutoCloseable closeable) {
+    public MaxOffsetIterator<T> autoClose(AutoCloseable... closeables) {
         callback = () -> {
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+            for (AutoCloseable closeable : closeables) {
+                try {
+                    closeable.close();
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
 
         };
