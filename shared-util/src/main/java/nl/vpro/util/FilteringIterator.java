@@ -1,7 +1,5 @@
 package nl.vpro.util;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -156,9 +154,9 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
     }
 
     @Override
-    public void close() throws IOException {
-        if (wrapped instanceof Closeable) {
-            ((Closeable) wrapped).close();
+    public void close() throws Exception {
+        if (wrapped instanceof AutoCloseable) {
+            ((AutoCloseable) wrapped).close();
         }
     }
 
