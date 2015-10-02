@@ -3,13 +3,19 @@ package nl.vpro.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * An iterator implementing offset and max, for another iterator.
  *
  * @author Michiel Meeuwissen
  * @since 3.1
  */
-public class MaxOffsetIterator<T> implements Iterator<T> {
+public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
+
+    protected static final Logger LOG = LoggerFactory.getLogger(MaxOffsetIterator.class);
+
 
     private final Iterator<T> wrapped;
 
@@ -50,6 +56,40 @@ public class MaxOffsetIterator<T> implements Iterator<T> {
 
     public MaxOffsetIterator<T> callBack(Runnable run) {
         callback = run;
+        return this;
+    }
+
+    public MaxOffsetIterator<T> callBack(AutoCloseable closeable) {
+        callback = () -> {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+
+        };
+        return this;
+    }
+    public MaxOffsetIterator<T> autoClose() {
+        final Runnable prev = callback;
+        callback = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (prev != null) {
+                        prev.run();
+                    }
+                } finally {
+                    if (wrapped instanceof AutoCloseable) {
+                        try {
+                            ((AutoCloseable) wrapped).close();
+                        }catch(Exception e){
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+        };
         return this;
     }
 
@@ -98,6 +138,12 @@ public class MaxOffsetIterator<T> implements Iterator<T> {
     @Override
     public void remove() {
         wrapped.remove();
+    }
 
+    @Override
+    public void close() throws Exception {
+        if (wrapped instanceof AutoCloseable) {
+            ((AutoCloseable) wrapped).close();
+        }
     }
 }
