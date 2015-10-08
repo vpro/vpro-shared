@@ -137,4 +137,8 @@ public class ESClientFactoryImpl implements  ESClientFactory {
             client.close();
         }
     }
+    @Override
+    public String toString() {
+        return transportAddresses + " " + clusterName;
+    }
 }
