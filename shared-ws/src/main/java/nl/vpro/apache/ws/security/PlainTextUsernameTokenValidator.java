@@ -36,7 +36,9 @@ public class PlainTextUsernameTokenValidator extends UsernameTokenValidator {
             authentication = manager.authenticate(authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (AuthenticationException ae) {
-            throw new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, name + ":" + ae.getMessage(), ae);
+            WSSecurityException e = new WSSecurityException(WSSecurityException.ErrorCode.FAILED_AUTHENTICATION, name + ":" + ae.getMessage());
+            e.initCause(ae);
+            throw ae;
         } catch (RuntimeException t) {
             LOG.error(t.getMessage(), t);
             throw t;
