@@ -21,6 +21,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
  * @author Rico
  * @author Michiel Meeuwissen
  */
+
 public class Jackson2Mapper extends ObjectMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(Jackson2Mapper.class);
