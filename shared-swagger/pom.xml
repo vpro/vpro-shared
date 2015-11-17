@@ -12,7 +12,9 @@
   <packaging>war</packaging>
 
   <name>shared-swagger</name>
-  <description>Provides a war overlay with basic Swagger resources. You have to set-up the web.xml wiring yourself.
+  <description>Provides a war overlay with basic Swa
+
+    gger resources. You have to set-up the web.xml wiring yourself.
   </description>
 
   <properties>
@@ -41,10 +43,9 @@
       <artifactId>spring-webmvc</artifactId>
       <version>${spring.version}</version>
     </dependency>
-
     <dependency>
       <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
   </dependencies>
 
