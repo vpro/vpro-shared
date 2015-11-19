@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -54,12 +54,25 @@ public class SwaggerFilter implements Filter {
 		newValue.append( req.getContextPath()).append("/api");
         JsonFilter.Replacement<String> replacement =
 				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
-        List<JsonFilter.Replacement> replacements = Arrays.asList(replacement);
-        final OutputStream out = transform(response.getOutputStream(), replacements);
+        List<JsonFilter.Replacement> replacements = Collections.singletonList(replacement);
+        final ServletOutputStream servletOutputStream = response.getOutputStream();
+        final OutputStream out = transform(servletOutputStream, replacements);
         HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
             @Override
             public ServletOutputStream getOutputStream() {
                 return new ServletOutputStream() {
+                    boolean isReady = false;
+                    @Override
+                    public boolean isReady() {
+                        return servletOutputStream.isReady();
+
+                    }
+
+                    @Override
+                    public void setWriteListener(WriteListener writeListener) {
+                        servletOutputStream.setWriteListener(writeListener);
+                    }
+
                     @Override
                     public void write(int b) throws IOException {
                         out.write(b);
