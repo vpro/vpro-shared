@@ -21,9 +21,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class MDCFilter implements Filter {
 
+    boolean clear = false;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
+        if (filterConfig.getInitParameter("clear") != null) {
+            clear = Boolean.valueOf(filterConfig.getInitParameter("clear"));
+        }
 
     }
 
@@ -51,9 +55,13 @@ public class MDCFilter implements Filter {
             // access logging...
             Logger logger = LoggerFactory.getLogger(MDCFilter.class.getName() + path.replace('/', '.'));
             logger.debug("{}", response.getStatus());
-            MDC.remove("userName");
-            MDC.remove("request");
-            MDC.remove("remoteAddr");
+            if (clear) {
+                MDC.clear();
+            } else {
+                MDC.remove("userName");
+                MDC.remove("request");
+                MDC.remove("remoteAddr");
+            }
         }
     }
 
