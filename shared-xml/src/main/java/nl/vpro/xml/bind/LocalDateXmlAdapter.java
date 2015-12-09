@@ -1,6 +1,9 @@
 package nl.vpro.xml.bind;
 
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.Temporal;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -9,20 +12,24 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * @author Michiel Meeuwissen
  * @since 0.28
  */
-public class LocalDateXmlAdapter extends XmlAdapter<String, LocalDate> {
+public class LocalDateXmlAdapter extends XmlAdapter<String, Temporal> {
 
 
 
     @Override
-    public LocalDate unmarshal(String dateValue) {
+    public Temporal unmarshal(String dateValue) {
         if (dateValue == null) {
             return null;
         }
-        return LocalDate.parse(dateValue);
+        try {
+            return LocalDate.parse(dateValue);
+        } catch (DateTimeParseException pe) {
+            return Year.parse(dateValue);
+        }
     }
 
     @Override
-    public String marshal(LocalDate value) {
+    public String marshal(Temporal value) {
         return value != null ? value.toString() : null;
     }
 }
