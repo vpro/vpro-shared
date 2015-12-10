@@ -4,6 +4,8 @@
  */
 package nl.vpro.test.util.jackson2;
 
+import net.sf.json.test.JSONAssert;
+
 import java.io.StringWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.vpro.jackson2.Jackson2Mapper;
 
 import static org.fest.assertions.Assertions.assertThat;
+
 
 /**
  * @author Roelof Jan Koekoek
@@ -31,6 +34,18 @@ public class Jackson2TestUtil {
         String text = writer.toString();
         assertThat(text).contains(contains);
 
-        return (T)MAPPER.readValue(text, input.getClass());
+        return (T) MAPPER.readValue(text, input.getClass());
+    }
+
+    public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
+        StringWriter writer = new StringWriter();
+        MAPPER.writeValue(writer, input);
+
+        String text = writer.toString();
+
+        JSONAssert.assertEquals(expected, text);
+
+        return (T) MAPPER.readValue(text, input.getClass());
+
     }
 }
