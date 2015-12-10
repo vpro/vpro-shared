@@ -43,6 +43,7 @@
     <module>shared-swagger</module>
     <module>shared-web</module>
     <module>shared-ws</module>
+    <module>shared-rs</module>
     <module>shared-util</module>
     <module>shared-resteasy</module>
     <module>shared-test</module>
@@ -156,9 +157,14 @@
         <version>2.6</version>
       </dependency>
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.1</version>
+        <version>3.4</version>
       </dependency>
       <dependency>
         <groupId>commons-configuration</groupId>

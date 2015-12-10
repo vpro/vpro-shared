@@ -12,7 +12,7 @@ public class CallbackIterator<T> implements Iterator<T> {
     private Runnable callback;
     private Boolean hasNext;
 
-    public CallbackIterator(Iterator wrapped, Runnable callback) {
+    public CallbackIterator(Iterator<T> wrapped, Runnable callback) {
         this.wrapped = wrapped;
         this.callback = callback;
 

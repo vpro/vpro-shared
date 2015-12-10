@@ -8,14 +8,18 @@
     <version>0.31-SNAPSHOT</version>
   </parent>
 
-  <artifactId>shared-util</artifactId>
+  <artifactId>shared-rs</artifactId>
 
-  <name>shared-util</name>
+  <name>shared-rs</name>
 
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>jaxrs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxrs</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -26,13 +30,9 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>uk.org.lidalia</groupId>
-      <artifactId>lidalia-slf4j-ext</artifactId>
-      <version>1.0.0</version>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
+
   </dependencies>
 </project>
