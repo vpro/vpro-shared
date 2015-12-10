@@ -11,7 +11,7 @@
   <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-transfer</artifactId>
 
-  <name>shared-tranfer</name>
+  <name>shared-transfer</name>
   <description>This module contains the base definitions
     for object (DTO's) that are to be published to the world.
   </description>

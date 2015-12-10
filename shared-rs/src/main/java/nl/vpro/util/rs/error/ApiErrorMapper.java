@@ -1,14 +1,14 @@
 package nl.vpro.util.rs.error;
 
 import nl.vpro.util.rs.transfer.ErrorResponse;
-import org.apache.commons.lang.StringUtils;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * This class is ment to catch exceptions thrown in the process of (un)marshalling domain objects bij RestEasy.
- * Date: 23-4-12
- * Time: 10:48
+
  *
  * @author Ernst Bunders
  */

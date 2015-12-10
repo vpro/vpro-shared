@@ -50,11 +50,9 @@ public final class XTrustProvider extends java.security.Provider {
     public XTrustProvider() {
         super(NAME, VERSION, INFO);
 
-        AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-                put("TrustManagerFactory." + TrustManagerFactoryImpl.getAlgorithm(), TrustManagerFactoryImpl.class.getName());
-                return null;
-            }
+        AccessController.doPrivileged((PrivilegedAction) () -> {
+            put("TrustManagerFactory." + TrustManagerFactoryImpl.getAlgorithm(), TrustManagerFactoryImpl.class.getName());
+            return null;
         });
     }
 
@@ -73,23 +71,29 @@ public final class XTrustProvider extends java.security.Provider {
             return "XTrust509";
         }
 
+        @Override
         protected void engineInit(KeyStore keystore) throws KeyStoreException {
         }
 
+        @Override
         protected void engineInit(ManagerFactoryParameters mgrparams) throws InvalidAlgorithmParameterException {
             throw new InvalidAlgorithmParameterException(XTrustProvider.NAME + " does not use ManagerFactoryParameters");
         }
 
+        @Override
         protected TrustManager[] engineGetTrustManagers() {
             return new TrustManager[]{
                 new X509TrustManager() {
+                    @Override
                     public X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }
 
+                    @Override
                     public void checkClientTrusted(X509Certificate[] certs, String authType) {
                     }
 
+                    @Override
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
                     }
                 }

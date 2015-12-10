@@ -4,7 +4,8 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
