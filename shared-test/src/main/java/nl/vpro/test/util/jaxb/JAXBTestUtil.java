@@ -105,8 +105,11 @@ public class JAXBTestUtil {
 
     public static void similar(String input, String expected) throws IOException, SAXException {
         Diff diff = XMLUnit.compareXML(expected, input);
+
         if (!diff.identical()) {
             assertThat(input).isEqualTo(expected);
+        } else {
+            assertThat(diff.identical()).isTrue();
         }
     }
 
