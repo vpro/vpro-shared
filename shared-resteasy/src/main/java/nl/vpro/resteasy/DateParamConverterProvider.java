@@ -2,6 +2,7 @@ package nl.vpro.resteasy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -21,8 +22,9 @@ public class DateParamConverterProvider implements ParamConverterProvider {
             return (ParamConverter<T>) DateParamConverter.INSTANCE;
         } else if (LocalDate.class.isAssignableFrom(rawType)) {
             return (ParamConverter<T>) LocalDateParamConverter.INSTANCE;
+        } else if (Instant.class.isAssignableFrom(rawType)) {
+            return (ParamConverter<T>) InstantParamConverter.INSTANCE;
         }
-
         return null;
 
     }
