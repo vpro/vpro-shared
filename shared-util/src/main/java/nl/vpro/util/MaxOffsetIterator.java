@@ -36,11 +36,11 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
 
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, boolean countNulls) {
-        this(wrapped, max, 0l, countNulls);
+        this(wrapped, max, 0L, countNulls);
     }
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max) {
-        this(wrapped, max, 0l, true);
+        this(wrapped, max, 0L, true);
     }
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset) {
@@ -49,7 +49,7 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls) {
         this.wrapped = wrapped;
-        this.offset = offset == null ? 0l : offset.longValue();
+        this.offset = offset == null ? 0L : offset.longValue();
         this.offsetmax = max == null ? Long.MAX_VALUE : max.longValue() + this.offset;
         this.countNulls = countNulls;
     }
