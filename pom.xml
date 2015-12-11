@@ -46,6 +46,7 @@
     <module>shared-rs</module>
     <module>shared-util</module>
     <module>shared-resteasy</module>
+    <module>shared-client-resteasy</module>
     <module>shared-test</module>
     <module>shared-transfer</module>
     <module>shared-xml</module>
@@ -73,6 +74,9 @@
     <guava.version>18.0</guava.version>
     <javassist.version>3.18.2-GA</javassist.version>
     <wss4j.version>2.1.4</wss4j.version>
+    <httpcomponents.version>4.3.6</httpcomponents.version>
+    <!-- resteasy doesn't support bigger than this. See https://issues.jboss.org/browse/RESTEASY-975, and https://jira.vpro.nl/browse/MGNL-11312 -->
+    <httpcomponentscore.version>4.3.3</httpcomponentscore.version>
   </properties>
 
   <dependencyManagement>
@@ -148,6 +152,11 @@
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
+        <version>${resteasy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-client</artifactId>
         <version>${resteasy.version}</version>
       </dependency>
 
@@ -308,7 +317,21 @@
         <artifactId>avro</artifactId>
         <version>1.7.7</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpcomponents.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>${httpcomponents.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>${httpcomponentscore.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
