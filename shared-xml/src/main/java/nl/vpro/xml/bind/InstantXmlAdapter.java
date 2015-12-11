@@ -7,6 +7,13 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
+ * Use like so
+ * <pre>{@code
+ * @XmlAttribute
+ * @XmlJavaTypeAdapter(InstantXmlAdapter.class)
+ * @XmlSchemaType(name = "dateTime")
+ * private Instant lastModified;
+ *}</pre>
  * @author Michiel Meeuwissen
  * @since 0.21
  */
