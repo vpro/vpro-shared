@@ -43,7 +43,7 @@ public class Jackson2TestUtil {
 
         String text = writer.toString();
 
-        JSONAssert.assertEquals(expected, text);
+        JSONAssert.assertJsonEquals(expected, text);
 
         return (T) MAPPER.readValue(text, input.getClass());
 
