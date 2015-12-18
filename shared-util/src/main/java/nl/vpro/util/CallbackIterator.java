@@ -1,12 +1,13 @@
 package nl.vpro.util;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * @author Michiel Meeuwissen
  * @since
  */
-public class CallbackIterator<T> implements Iterator<T> {
+public class CallbackIterator<T> implements CountedIterator<T> {
 
     private final Iterator<T> wrapped;
     private Runnable callback;
@@ -52,4 +53,12 @@ public class CallbackIterator<T> implements Iterator<T> {
     }
 
 
+    @Override
+    public Optional<Long> getSize() {
+        if (wrapped instanceof CountedIterator) {
+            return ((CountedIterator) wrapped).getSize();
+        }
+        return Optional.empty();
+
+    }
 }
