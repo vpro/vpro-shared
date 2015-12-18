@@ -20,6 +20,7 @@ public class JsonArrayIteratorTest {
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class, null);
         assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
+        assertThat(it.getSize().get()).isEqualTo(11);
         for (int i = 0; i < 9; i++) {
             assertThat(it.hasNext()).isTrue();
 

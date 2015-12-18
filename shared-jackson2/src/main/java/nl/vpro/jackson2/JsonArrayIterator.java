@@ -3,6 +3,7 @@ package nl.vpro.jackson2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -17,12 +18,13 @@ import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
 
 import nl.vpro.util.CloseableIterator;
+import nl.vpro.util.CountedIterator;
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.0
  */
-public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements CloseableIterator<T>, PeekingIterator<T> {
+public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonArrayIterator.class);
 
@@ -37,13 +39,24 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private final Runnable callback;
 
+    private final Optional<Long> size;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.clazz = clazz;
+        Optional<Long> size = Optional.empty();
+        String fieldName = null;
         while(true) {
             JsonToken token = jp.nextToken();
+            if (token == JsonToken.FIELD_NAME) {
+                fieldName = jp.getCurrentName();
+            }
+            if (token == JsonToken.VALUE_NUMBER_INT && "size".equals(fieldName)) {
+                size = Optional.of(jp.getLongValue());
+            }
             if (token == JsonToken.START_ARRAY) break;
         }
+        this.size = size;
         jp.nextToken();
         this.callback = callback;
     }
@@ -128,5 +141,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         jg.writeEndArray();
         jg.writeEndObject();
         jg.flush();
+    }
+
+    @Override
+    public Optional<Long> getSize() {
+        return size;
+
     }
 }
