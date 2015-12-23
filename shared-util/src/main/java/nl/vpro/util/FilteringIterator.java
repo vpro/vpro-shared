@@ -64,10 +64,10 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         if(! hasNext) {
             throw new NoSuchElementException();
         }
+        hasNext = null;
         if (exception != null) {
             throw exception;
         }
-        hasNext = null;
         return next;
     }
 
