@@ -41,10 +41,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private final Optional<Long> size;
 
+    private final Optional<Long> totalSize;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.clazz = clazz;
         Optional<Long> size = Optional.empty();
+        Optional<Long> totalSize = Optional.empty();
         String fieldName = null;
         while(true) {
             JsonToken token = jp.nextToken();
@@ -54,9 +57,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
             if (token == JsonToken.VALUE_NUMBER_INT && "size".equals(fieldName)) {
                 size = Optional.of(jp.getLongValue());
             }
+            if (token == JsonToken.VALUE_NUMBER_INT && "totalSize".equals(fieldName)) {
+                totalSize = Optional.of(jp.getLongValue());
+            }
             if (token == JsonToken.START_ARRAY) break;
         }
         this.size = size;
+        this.totalSize = totalSize;
         jp.nextToken();
         this.callback = callback;
     }
@@ -147,6 +154,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     @Override
     public Optional<Long> getSize() {
         return size;
+    }
 
+    @Override
+    public Optional<Long> getTotalSize() {
+        return totalSize;
     }
 }
