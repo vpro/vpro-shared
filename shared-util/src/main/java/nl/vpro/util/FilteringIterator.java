@@ -7,12 +7,18 @@ import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.3
  */
 public class FilteringIterator<T> implements CloseableIterator<T> {
+
+    protected static final Logger LOG = LoggerFactory.getLogger(FilteringIterator.class);
+
 
     private final Iterator<? extends T> wrapped;
 
@@ -66,29 +72,33 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
     }
 
     private void findNext() {
-        if(hasNext == null) {
-            while(wrapped.hasNext()) {
-                next = wrapped.next();
-                totalCountForKeepAlive++;
-                boolean inFilter = inFilter(next);
-                if (inFilter) {
-                    countForKeepAlive++;
-                }
-                if (totalCountForKeepAlive >= keepAlive.count) {
-                    Boolean mustBreak = keepAlive.callback.apply(countForKeepAlive);
-                    if (mustBreak) {
-                        hasNext = false;
+        while(hasNext == null) {
+            try {
+                while (wrapped.hasNext()) {
+                    next = wrapped.next();
+                    totalCountForKeepAlive++;
+                    boolean inFilter = inFilter(next);
+                    if (inFilter) {
+                        countForKeepAlive++;
+                    }
+                    if (totalCountForKeepAlive >= keepAlive.count) {
+                        Boolean mustBreak = keepAlive.callback.apply(countForKeepAlive);
+                        if (mustBreak) {
+                            hasNext = false;
+                            return;
+                        }
+                        countForKeepAlive = 0;
+                        totalCountForKeepAlive = 0;
+                    }
+                    if (inFilter) {
+                        hasNext = true;
                         return;
                     }
-                    countForKeepAlive = 0;
-                    totalCountForKeepAlive = 0;
                 }
-                if(inFilter) {
-                    hasNext = true;
-                    return;
-                }
+                hasNext = false;
+            } catch (Exception e) {
+                LOG.error(e.getClass().getName() + " " + e.getMessage());
             }
-            hasNext = false;
         }
 
     }
