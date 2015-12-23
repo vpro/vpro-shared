@@ -134,8 +134,8 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
 
             if(count < offsetmax && wrapped.hasNext()) {
                 try {
-                    next = wrapped.next();
                     exception = null;
+                    next = wrapped.next();
                 } catch (RuntimeException e) {
                     exception = e;
                     next = null;
