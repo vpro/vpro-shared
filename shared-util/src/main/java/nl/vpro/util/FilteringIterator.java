@@ -28,6 +28,8 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
 
     private T next;
 
+    private RuntimeException exception;
+
     private Boolean hasNext = null;
 
     private long countForKeepAlive = 0;
@@ -62,6 +64,9 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         if(! hasNext) {
             throw new NoSuchElementException();
         }
+        if (exception != null) {
+            throw exception;
+        }
         hasNext = null;
         return next;
     }
@@ -73,6 +78,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
 
     private void findNext() {
         while(hasNext == null) {
+            exception = null;
             try {
                 while (wrapped.hasNext()) {
                     next = wrapped.next();
@@ -96,8 +102,11 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
                     }
                 }
                 hasNext = false;
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOG.error(e.getClass().getName() + " " + e.getMessage());
+                exception = e;
+                hasNext = true;
+                next = null;
             }
         }
 

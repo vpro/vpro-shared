@@ -31,6 +31,8 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
 
     private T next;
 
+    private RuntimeException exception;
+
     private Runnable callback;
 
 
@@ -108,6 +110,9 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
             throw new NoSuchElementException();
         }
         hasNext = null;
+        if (exception != null) {
+            throw exception;
+        }
         return next;
     }
 
@@ -116,14 +121,26 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
             hasNext = false;
 
             while(count < offset && wrapped.hasNext()) {
-                T n = wrapped.next();
-                if (countNulls || n != null ) {
+                T n;
+                try {
+                    n = wrapped.next();
+                } catch(RuntimeException runtimeException) {
+                    n = null;
+                }
+                if (countNulls || n != null) {
                     count++;
                 }
             }
 
             if(count < offsetmax && wrapped.hasNext()) {
-                next = wrapped.next();
+                try {
+                    next = wrapped.next();
+                    exception = null;
+                } catch (RuntimeException e) {
+                    exception = e;
+                    next = null;
+
+                }
                 if (countNulls || next != null) {
                     count++;
                 }
