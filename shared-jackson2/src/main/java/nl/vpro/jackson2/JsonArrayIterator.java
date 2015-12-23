@@ -94,7 +94,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         }
                         break;
                     } catch (JsonMappingException jme) {
-                        LOG.error(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                        LOG.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
                     if (callback != null) {
