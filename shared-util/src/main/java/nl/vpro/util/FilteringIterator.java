@@ -103,7 +103,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
                 }
                 hasNext = false;
             } catch (RuntimeException e) {
-                LOG.error(e.getClass().getName() + " " + e.getMessage());
+                LOG.debug(e.getClass().getName() + " " + e.getMessage());
                 exception = e;
                 hasNext = true;
                 next = null;
