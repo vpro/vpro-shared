@@ -131,6 +131,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     jg.writeNull();
                 }
             } catch (Exception e) {
+                LOG.warn(e.getMessage());
                 jg.writeObject(e.getMessage());
             }
             if (logging != null) {
