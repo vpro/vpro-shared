@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -8,6 +9,11 @@ import java.util.Optional;
  * @since 0.31
  */
 public interface CountedIterator<T> extends Iterator<T> {
+
+    static <S> CountedIterator<S> of(Collection<S> wrapped) {
+        return new BasicWrappedIterator<S>(wrapped);
+    }
+
     Optional<Long> getSize();
 
     /**
