@@ -338,6 +338,18 @@
         <artifactId>httpcore</artifactId>
         <version>${httpcomponentscore.version}</version>
       </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-test</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>net.sf.json-lib</groupId>
+        <artifactId>json-lib</artifactId>
+        <classifier>jdk15</classifier>
+        <version>2.4</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
