@@ -2,8 +2,11 @@ package nl.vpro.jackson2;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -35,7 +38,15 @@ public class InstantToJsonTimestamp {
         public static Deserializer INSTANCE = new Deserializer();
         @Override
         public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            return Instant.ofEpochMilli(jp.getLongValue());
+            try {
+                return Instant.ofEpochMilli(jp.getLongValue());
+            } catch (JsonParseException jpe) {
+                try {
+                    return Instant.parse(jp.getValueAsString());
+                } catch (DateTimeParseException dtps) {
+                    return ZonedDateTime.parse(jp.getValueAsString()).toInstant();
+                }
+            }
         }
     }
 }
