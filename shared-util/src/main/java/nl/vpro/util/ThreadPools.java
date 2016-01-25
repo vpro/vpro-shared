@@ -41,6 +41,13 @@ public final class ThreadPools {
                 false,
                 Thread.NORM_PRIORITY));
 
+    public static final ScheduledExecutorService backgroundExecutor =
+        Executors.newScheduledThreadPool(1,
+            ThreadPools.createThreadFactory(
+                "nl.vpro-util-Background",
+                false,
+                Thread.MIN_PRIORITY));
+
     public static final ThreadPoolExecutor startUpExecutor =
         new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
