@@ -25,6 +25,8 @@ public class MergedSortedIteratorTest {
 
         assertThat(Lists.newArrayList(merged)).isEqualTo(Arrays.asList("a", "b", "c", "d", "e"));
         assertThat(merged.getSize().get()).isEqualTo(5L);
+        assertThat(merged.getTotalSize().get()).isEqualTo(5L);
+
 
     }
 
@@ -37,6 +39,8 @@ public class MergedSortedIteratorTest {
 
         assertThat(Lists.newArrayList(merged)).isEqualTo(Arrays.asList("a", "b", "c", "d", "e"));
         assertThat(merged.getSize().get()).isEqualTo(5L);
+        assertThat(merged.getTotalSize().get()).isEqualTo(5L);
+
 
     }
 
@@ -49,6 +53,8 @@ public class MergedSortedIteratorTest {
 
         assertThat(Lists.newArrayList(merged)).isEqualTo(Arrays.asList("a", "b", "c", "d", "e"));
         assertThat(merged.getSize().get()).isEqualTo(5L);
+        assertThat(merged.getTotalSize().get()).isEqualTo(5L);
+
     }
 
 }

@@ -11,8 +11,8 @@ import com.google.common.collect.PeekingIterator;
  */
 public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements  CountedIterator<T> {
 
-    protected MergedSortedIterator(Long size, Iterator<T> iterator) {
-        super(size, iterator);
+    protected MergedSortedIterator(Long size, Long totalSize, Iterator<T> iterator) {
+        super(size, totalSize, iterator);
     }
 
     /**
@@ -20,20 +20,34 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
      *
      */
     public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
-        return new MergedSortedIterator<T>(getSize(iterators), Iterators.mergeSorted(Arrays.asList(iterators), comparator));
+        return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), Iterators.mergeSorted(Arrays.asList(iterators), comparator));
     }
 
     /**
      * This doesn't use queue, so it is also useable with Hibernate.
      */
     public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
-        return new MergedSortedIterator<T>(getSize(iterators), new SameThreadMergingIterator<T>(comparator, iterators));
+        return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), new SameThreadMergingIterator<T>(comparator, iterators));
     }
 
     protected static Long getSize(CountedIterator<?>... iterators) {
         Long size = 0L;
         for (CountedIterator<?> c : iterators) {
             Optional<Long> s = c.getSize();
+            if (s.isPresent()) {
+                size += s.get();
+            } else {
+                size = null;
+                break;
+            }
+        }
+        return size;
+    }
+
+    protected static Long getTotalSize(CountedIterator<?>... iterators) {
+        Long size = 0L;
+        for (CountedIterator<?> c : iterators) {
+            Optional<Long> s = c.getTotalSize();
             if (s.isPresent()) {
                 size += s.get();
             } else {
