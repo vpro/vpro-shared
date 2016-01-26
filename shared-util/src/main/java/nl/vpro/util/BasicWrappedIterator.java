@@ -11,20 +11,25 @@ import java.util.Optional;
 public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     private final Optional<Long> size;
+    private final Optional<Long> totalSize;
+
     public BasicWrappedIterator(Iterator<T> wrapped) {
         super(wrapped);
         size = Optional.empty();
+        totalSize = Optional.empty();
     }
 
-    public BasicWrappedIterator(Long size, Iterator<T> wrapped) {
+    public BasicWrappedIterator(Long size, Long totalSize, Iterator<T> wrapped) {
         super(wrapped);
         this.size = Optional.ofNullable(size);
+        this.totalSize = Optional.ofNullable(totalSize);
     }
 
 
     public BasicWrappedIterator(Collection<T> wrapped) {
         super(wrapped.iterator());
         this.size = Optional.of((long) wrapped.size());
+        this.totalSize = Optional.of((long) wrapped.size());
     }
 
     @Override
@@ -33,6 +38,15 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
             return size;
         } else {
             return super.getSize();
+        }
+    }
+
+    @Override
+    public Optional<Long> getTotalSize() {
+        if (totalSize.isPresent()) {
+            return totalSize;
+        } else {
+            return super.getTotalSize();
         }
     }
 
