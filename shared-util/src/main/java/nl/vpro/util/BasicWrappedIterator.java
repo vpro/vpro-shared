@@ -28,6 +28,15 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     }
 
     @Override
+    public Optional<Long> getSize() {
+        if (size.isPresent()) {
+            return size;
+        } else {
+            return super.getSize();
+        }
+    }
+
+    @Override
     public T next() {
         return wrapped.next();
 

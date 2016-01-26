@@ -24,6 +24,8 @@ public class MergedSortedIteratorTest {
         CountedIterator<String> merged = MergedSortedIterator.merge(Comparator.naturalOrder(), CountedIterator.of(l1), CountedIterator.of(l2));
 
         assertThat(Lists.newArrayList(merged)).isEqualTo(Arrays.asList("a", "b", "c", "d", "e"));
+        assertThat(merged.getSize().get()).isEqualTo(5L);
+
     }
 
     @Test
@@ -34,6 +36,8 @@ public class MergedSortedIteratorTest {
         CountedIterator<String> merged = MergedSortedIterator.mergeInSameThread(Comparator.naturalOrder(), CountedIterator.of(l1), CountedIterator.of(l2));
 
         assertThat(Lists.newArrayList(merged)).isEqualTo(Arrays.asList("a", "b", "c", "d", "e"));
+        assertThat(merged.getSize().get()).isEqualTo(5L);
+
     }
 
     @Test
@@ -44,6 +48,7 @@ public class MergedSortedIteratorTest {
         CountedIterator<String> merged = MergedSortedIterator.mergeInSameThread(Comparator.naturalOrder(), CountedIterator.of(l2), CountedIterator.of(l1));
 
         assertThat(Lists.newArrayList(merged)).isEqualTo(Arrays.asList("a", "b", "c", "d", "e"));
+        assertThat(merged.getSize().get()).isEqualTo(5L);
     }
 
 }
