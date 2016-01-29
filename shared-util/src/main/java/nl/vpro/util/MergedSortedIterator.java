@@ -20,17 +20,28 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
      *
      */
     public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
-        return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), Iterators.mergeSorted(Arrays.asList(iterators), comparator));
+        return merge(comparator, Arrays.asList(iterators));
     }
 
     /**
      * This doesn't use queue, so it is also useable with Hibernate.
      */
     public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
+        return mergeInSameThread(comparator, Arrays.asList(iterators));
+    }
+
+    public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
+        return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), Iterators.mergeSorted(iterators, comparator));
+    }
+
+    /**
+     * This doesn't use queue, so it is also useable with Hibernate.
+     */
+    public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
         return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), new SameThreadMergingIterator<T>(comparator, iterators));
     }
 
-    protected static Long getSize(CountedIterator<?>... iterators) {
+    protected static <T> Long getSize(Iterable<CountedIterator<T>> iterators) {
         Long size = 0L;
         for (CountedIterator<?> c : iterators) {
             Optional<Long> s = c.getSize();
@@ -44,7 +55,7 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
         return size;
     }
 
-    protected static Long getTotalSize(CountedIterator<?>... iterators) {
+    protected static <T> Long getTotalSize(Iterable<CountedIterator<T>> iterators) {
         Long size = 0L;
         for (CountedIterator<?> c : iterators) {
             Optional<Long> s = c.getTotalSize();
@@ -65,9 +76,9 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
         boolean needsFindNext = true;
 
 
-        SameThreadMergingIterator(Comparator<? super S> comparator, Iterator<S>... iterators) {
+        SameThreadMergingIterator(Comparator<? super S> comparator, Iterable<? extends Iterator<S>> iterators) {
             this.comparator = comparator;
-            this.iterators = new ArrayList<>(iterators.length);
+            this.iterators = new ArrayList<>();
             for (Iterator<S> i : iterators) {
                 this.iterators.add(Iterators.peekingIterator(i));
             }
