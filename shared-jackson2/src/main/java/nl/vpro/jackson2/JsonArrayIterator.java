@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
 
@@ -42,6 +43,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     private final Optional<Long> size;
 
     private final Optional<Long> totalSize;
+
+    private int foundNulls = 0;
 
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
@@ -92,13 +95,23 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
             while(true) {
                 try {
                     TreeNode tree = jp.readValueAsTree();
+                    if (tree instanceof NullNode) {
+                        foundNulls++;
+                        continue;
+                    }
                     try {
-                        next = jp.getCodec().treeToValue(tree, clazz);
-                        if (next == null) {
+                        if (tree == null) {
                             if (callback != null) {
                                 callback.run();
+                                next = null;
                             }
+                        } else {
+                            if (foundNulls > 0) {
+                                LOG.warn("Found {} nulls. Will be skipped", foundNulls);
+                            }
+                            next = jp.getCodec().treeToValue(tree, clazz);
                         }
+                        foundNulls = 0;
                         break;
                     } catch (JsonMappingException jme) {
                         LOG.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
