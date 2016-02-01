@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 
-import com.google.common.base.Optional;
 
 /**
  * @author Michiel Meeuwissen
