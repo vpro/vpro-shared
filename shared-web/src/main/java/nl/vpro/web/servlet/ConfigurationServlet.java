@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -22,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
-
-import com.google.common.base.Function;
 
 /**
  * Serves a 'configuration.js' for javascript clients.
