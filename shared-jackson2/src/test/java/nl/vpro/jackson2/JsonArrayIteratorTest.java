@@ -40,7 +40,16 @@ public class JsonArrayIteratorTest {
        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class, null);
         assertThat(it.hasNext()).isFalse();
         assertThat(it.hasNext()).isFalse();
+    }
 
+    @Test
+    public void testNulls() throws IOException {
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class, null);
+        assertThat(it.hasNext()).isTrue();
+        it.next();
+        assertThat(it.hasNext()).isTrue();
+        it.next();
+        assertThat(it.hasNext()).isFalse();
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
