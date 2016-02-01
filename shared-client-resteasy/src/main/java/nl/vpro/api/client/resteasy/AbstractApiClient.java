@@ -4,12 +4,14 @@
  */
 package nl.vpro.api.client.resteasy;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -21,7 +23,9 @@ import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -37,15 +41,20 @@ import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.vpro.resteasy.JacksonContextResolver;
 import nl.vpro.util.ThreadPools;
+import nl.vpro.util.XTrustProvider;
 
 /**
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
 public class AbstractApiClient {
+
+    private static Logger LOG = LoggerFactory.getLogger(AbstractApiClient.class);
 
     static {
         try {
@@ -63,7 +72,7 @@ public class AbstractApiClient {
 
             RegisterBuiltin.register(resteasyProviderFactory);
         } catch (Throwable t) {
-            System.err.println(t.getMessage());
+            LOG.error(t.getClass().getName() + " " + t.getMessage());
         }
     }
 
@@ -74,6 +83,8 @@ public class AbstractApiClient {
 
     private boolean shutdown = false;
 
+    private boolean trustAll = false;
+
     public AbstractApiClient(int connectionTimeoutMillis, int maxConnections, int connectionInPoolTTL) {
         clientHttpEngine = buildHttpEngine(connectionTimeoutMillis, maxConnections, connectionInPoolTTL);
         clientHttpEngineNoTimeout = buildHttpEngine(0/*value of zero is interpreted as infinite timeout*/, 3, -1);
@@ -81,6 +92,13 @@ public class AbstractApiClient {
 
     protected ApacheHttpClient4Engine buildHttpEngine(int connectionTimeoutMillis, int maxConnections, int connectionInPoolTTL) {
         return new ApacheHttpClient4Engine(getHttpClient43(connectionTimeoutMillis, maxConnections, connectionInPoolTTL));
+    }
+
+    public void setTrustAll(boolean b) {
+        this.trustAll = b;
+        if (trustAll) {
+            XTrustProvider.install();
+        }
     }
 
     // See https://issues.jboss.org/browse/RESTEASY-975
@@ -115,13 +133,22 @@ public class AbstractApiClient {
         List<Header> defaultHeaders = new ArrayList<>();
         defaultHeaders.add(new BasicHeader("Keep-Alive", "timeout=1000, max=500"));
 
-        HttpClient client = HttpClients.custom()
+
+        HttpClientBuilder client = HttpClients.custom()
             .setConnectionManager(poolingClientConnectionManager)
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
-            .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy())
-            .build();
-        return client;
+            .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
+
+        if (trustAll){
+            try {
+                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                client.setSSLSocketFactory(sslsf);
+            } catch (NoSuchAlgorithmException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        return client.build();
     }
 
     // should be used as long as resteasy uses http client < 4.3
