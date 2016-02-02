@@ -24,17 +24,11 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
@@ -151,27 +145,6 @@ public class AbstractApiClient {
         return client.build();
     }
 
-    // should be used as long as resteasy uses http client < 4.3
-    private HttpClient getHttpClient(int connectionTimeoutMillis, int maxConnections, int connectionInPoolTTL) {
-
-        PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
-            connectionInPoolTTL, TimeUnit.MILLISECONDS);
-        poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
-        poolingClientConnectionManager.setMaxTotal(maxConnections);
-
-        if (maxConnections > 1) {
-            watchIdleConnections(poolingClientConnectionManager);
-        }
-
-        HttpParams httpParams = new BasicHttpParams();
-
-        HttpConnectionParams.setConnectionTimeout(httpParams, connectionTimeoutMillis);
-        HttpConnectionParams.setSoTimeout(httpParams, connectionTimeoutMillis);
-
-        return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
-
-    }
-
     public ClientHttpEngine getClientHttpEngine() {
         return clientHttpEngine;
     }
@@ -219,26 +192,6 @@ public class AbstractApiClient {
             // 1 minute
             return 60 * 1000;
         }
-    }
-
-   private void watchIdleConnections(final PoolingClientConnectionManager connectionManager) {
-        ThreadFactory threadFactory = ThreadPools.createThreadFactory("API Client purge idle connections", false, Thread.NORM_PRIORITY);
-        connectionGuard = threadFactory.newThread(new Runnable() {
-            @Override
-            public void run() {
-                while(!shutdown) {
-                    try {
-                        synchronized(this) {
-                            wait(5000);
-                            connectionManager.closeExpiredConnections();
-                            //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
-                        }
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }
-        });
-        connectionGuard.start();
     }
 
     private void watchIdleConnections(final PoolingHttpClientConnectionManager connectionManager) {
