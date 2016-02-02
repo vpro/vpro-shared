@@ -38,7 +38,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private final Class<T> clazz;
 
-    private final Runnable callback;
+    private Runnable callback;
 
     private final Optional<Long> size;
 
@@ -48,6 +48,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private Logger log = LOG;
 
+    public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
+        this(inputStream, clazz, null);
+
+    }
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.clazz = clazz;
@@ -76,6 +80,15 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     public void setLogger(Logger log) {
         this.log = log;
     }
+
+    public void setCallback(Runnable callback) {
+        this.callback = callback;
+    }
+
+    public Runnable getCallback() {
+        return callback;
+    }
+
     @Override
     public boolean hasNext() {
         findNext();
