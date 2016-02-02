@@ -46,6 +46,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private int foundNulls = 0;
 
+    private Logger log = LOG;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.clazz = clazz;
@@ -69,6 +71,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         this.totalSize = totalSize;
         jp.nextToken();
         this.callback = callback;
+    }
+
+    public void setLogger(Logger log) {
+        this.log = log;
     }
     @Override
     public boolean hasNext() {
@@ -107,14 +113,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                             }
                         } else {
                             if (foundNulls > 0) {
-                                LOG.warn("Found {} nulls. Will be skipped", foundNulls);
+                                log.warn("Found {} nulls. Will be skipped", foundNulls);
                             }
                             next = jp.getCodec().treeToValue(tree, clazz);
                         }
                         foundNulls = 0;
                         break;
                     } catch (JsonMappingException jme) {
-                        LOG.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                        log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
                     if (callback != null) {
@@ -151,7 +157,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     jg.writeNull();
                 }
             } catch (Exception e) {
-                LOG.warn(e.getMessage());
+                log.warn(e.getMessage());
                 jg.writeObject(e.getMessage());
             }
             if (logging != null) {
