@@ -10,6 +10,9 @@ import org.junit.Test;
 
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class JsonArrayIteratorTest {
 
@@ -18,7 +21,7 @@ public class JsonArrayIteratorTest {
     public void test() throws IOException {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
-        JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class, null);
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class);
         assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
         assertThat(it.getSize().get()).isEqualTo(11);
         for (int i = 0; i < 9; i++) {
@@ -37,20 +40,32 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void testEmpty() throws IOException {
-       JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class, null);
+       JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isFalse();
         assertThat(it.hasNext()).isFalse();
     }
 
     @Test
     public void testNulls() throws IOException {
-        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class, null);
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isTrue();
         it.next();
         assertThat(it.hasNext()).isTrue();
         it.next();
         assertThat(it.hasNext()).isFalse();
     }
+
+    @Test
+    public void callback() throws IOException {
+        Runnable callback = mock(Runnable.class);
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class, callback);
+        while (it.hasNext()) {
+            verify(callback, times(0)).run();
+            it.next();
+        }
+        verify(callback, times(1)).run();
+    }
+
 
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class Change {
