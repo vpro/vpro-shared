@@ -16,6 +16,11 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>uk.org.lidalia</groupId>
+      <artifactId>lidalia-slf4j-ext</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
@@ -26,6 +31,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
