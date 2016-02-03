@@ -40,6 +40,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private Runnable callback;
 
+    private boolean callBackHasRun = false;
+
     private final Optional<Long> size;
 
     private final Optional<Long> totalSize;
@@ -120,10 +122,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     }
                     try {
                         if (tree == null) {
-                            if (callback != null) {
-                                callback.run();
-                                next = null;
-                            }
+                            callback();
+                            next = null;
                         } else {
                             if (foundNulls > 0) {
                                 log.warn("Found {} nulls. Will be skipped", foundNulls);
@@ -136,9 +136,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
-                    if (callback != null) {
-                        callback.run();
-                    }
+                    callback();
                     throw new RuntimeException(e);
                 }
             }
@@ -149,11 +147,18 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     @Override
     public void close() throws IOException {
-        if (callback != null) {
-            callback.run();
-        }
+        callback();
         this.jp.close();
 
+    }
+
+    protected void callback() {
+        if (! callBackHasRun) {
+            if (callback != null) {
+                callback.run();
+            }
+            callBackHasRun = true;
+        }
     }
 
     public void write(OutputStream out, final Function<T, Void> logging) throws IOException {
