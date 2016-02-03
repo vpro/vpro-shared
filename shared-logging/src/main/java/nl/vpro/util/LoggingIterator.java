@@ -10,15 +10,16 @@ import java.util.Iterator;
  * @author Michiel Meeuwissen
  * @since 3.1
  */
-public class LoggingIterator<T> extends WrappedIterator<T, T> {
+public class LoggingIterator<T> implements Iterator<T> {
 
 	private final Logger logger;
     private final Level level;
 	private long count = 0;
 	private final int interval;
+	private final Iterator<T> wrapped;
 
     public LoggingIterator(Iterator<T> wrapped, org.slf4j.Logger logger, Level level, int interval) {
-		super(wrapped);
+        this.wrapped = wrapped;
 		this.logger = new Logger(logger);
         this.level = level;
 		this.interval = interval;
@@ -26,6 +27,11 @@ public class LoggingIterator<T> extends WrappedIterator<T, T> {
 
     public LoggingIterator(Iterator<T> wrapped, org.slf4j.Logger logger, int interval) {
         this(wrapped, logger, Level.INFO, interval);
+    }
+
+    @Override
+    public boolean hasNext() {
+        return wrapped.hasNext();
     }
 
     @Override
@@ -37,4 +43,9 @@ public class LoggingIterator<T> extends WrappedIterator<T, T> {
 		return next;
 
 	}
+
+    @Override
+    public void remove() {
+        wrapped.remove();
+    }
 }
