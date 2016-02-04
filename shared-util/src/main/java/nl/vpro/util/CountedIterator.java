@@ -16,6 +16,10 @@ public interface CountedIterator<T> extends Iterator<T> {
 
     Optional<Long> getSize();
 
+    default Long getCount() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * If the iterator is in some way restricted you may also want to report a total size, representing the unrestricted size.
      */

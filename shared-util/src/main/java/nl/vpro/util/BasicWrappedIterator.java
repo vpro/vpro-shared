@@ -13,6 +13,8 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     private final Optional<Long> size;
     private final Optional<Long> totalSize;
 
+    private long count;
+
     public BasicWrappedIterator(Iterator<T> wrapped) {
         super(wrapped);
         size = Optional.empty();
@@ -52,7 +54,12 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     @Override
     public T next() {
+        count++;
         return wrapped.next();
+    }
 
+    @Override
+    public Long getCount() {
+        return count;
     }
 }

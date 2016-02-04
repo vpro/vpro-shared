@@ -50,6 +50,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private Logger log = LOG;
 
+    private long count = 0;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
         this(inputStream, clazz, null);
 
@@ -109,8 +111,15 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         T result = next;
         next = null;
         needsFindNext = true;
+        count++;
         return result;
     }
+
+    @Override
+    public Long getCount() {
+        return count;
+    }
+
     protected void findNext() {
         if(needsFindNext) {
             while(true) {
