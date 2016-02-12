@@ -61,7 +61,6 @@ public class SwaggerFilter implements Filter {
             @Override
             public ServletOutputStream getOutputStream() {
                 return new ServletOutputStream() {
-                    boolean isReady = false;
                     @Override
                     public boolean isReady() {
                         return servletOutputStream.isReady();
