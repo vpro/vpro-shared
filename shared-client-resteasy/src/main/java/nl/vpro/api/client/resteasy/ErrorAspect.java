@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,6 +89,11 @@ public class ErrorAspect<T> implements InvocationHandler {
                 } catch(Exception e) {
                     // ignore and marshal to string
                 }
+            }
+            switch(we.getResponse().getStatus()) {
+                case HttpResponseCodes.SC_SERVICE_UNAVAILABLE:
+                    mes.append(we.getMessage());
+
             }
             if (mes.length() == 0) {
                 String m = response.readEntity(String.class);
