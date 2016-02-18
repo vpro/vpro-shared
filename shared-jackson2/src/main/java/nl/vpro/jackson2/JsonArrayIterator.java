@@ -50,7 +50,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private Logger log = LOG;
 
-    private long count = -1;
+    private long count = 0;
 
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
         this(inputStream, clazz, null);
@@ -127,7 +127,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     TreeNode tree = jp.readValueAsTree();
                     if (tree instanceof NullNode) {
                         foundNulls++;
-                        count++;
                         continue;
                     }
                     try {
@@ -143,7 +142,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         foundNulls = 0;
                         break;
                     } catch (JsonMappingException jme) {
-                        count++;
                         log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
