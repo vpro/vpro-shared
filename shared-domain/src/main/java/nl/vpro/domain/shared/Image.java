@@ -6,10 +6,9 @@
 
 package nl.vpro.domain.shared;
 
-import javax.xml.bind.annotation.*;
 import java.sql.Blob;
 
-import org.apache.log4j.Logger;
+import javax.xml.bind.annotation.*;
 
 import nl.vpro.domain.SharedPublishableObject;
 
@@ -18,7 +17,6 @@ import nl.vpro.domain.SharedPublishableObject;
  *
  * @author arne
  * @author peter
- * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "imageType", namespace = "urn:vpro:shared:2009", propOrder = {
@@ -28,7 +26,7 @@ import nl.vpro.domain.SharedPublishableObject;
         "width"
 })
 public class Image extends SharedPublishableObject {
-    private static final Logger log = Logger.getLogger(Image.class);
+
     private static final long serialVersionUID = 2182582685395751329L;
     public static final String SCHEMA_NAME = "image";
 

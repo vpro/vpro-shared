@@ -1,6 +1,6 @@
 package nl.vpro.elasticsearch;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.elasticsearch.client.Client;
 import org.junit.Ignore;
@@ -29,7 +29,7 @@ public class JoinClusterClientFactoryTest {
     public void join2() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setClusterName(clusterName);
-        factory.setTransportAddresses(Arrays.asList(new UrlProvider("localhost", port)));
+        factory.setTransportAddresses(Collections.singletonList(new UrlProvider("localhost", port)));
         factory.setSniffCluster(true);
         factory.setIgnoreClusterName(false);
 
