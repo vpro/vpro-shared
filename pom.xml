@@ -381,4 +381,17 @@
 
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>topspin-bintray</id>
+      <distributionManagement>
+        <repository>
+          <id>bintray-npo-topspin-vpro-releases</id>
+          <name>npo-topspin-vpro-releases</name>
+          <url>https://api.bintray.com/maven/npo-topspin/vpro-releases/vpro-parent/;publish=1</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
 </project>
