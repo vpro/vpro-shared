@@ -388,6 +388,20 @@
 
   </dependencies>
 
+  <distributionManagement>
+    <repository>
+      <id>nexus</id>
+      <name>Nexus releases</name>
+      <url>http://nexus.vpro.nl/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus</id>
+      <name>Nexus snapshots</name>
+      <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+
   <profiles>
     <profile>
       <id>topspin-bintray</id>
