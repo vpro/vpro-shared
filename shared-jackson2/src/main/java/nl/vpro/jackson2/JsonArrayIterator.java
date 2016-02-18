@@ -136,12 +136,15 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         } else {
                             if (foundNulls > 0) {
                                 log.warn("Found {} nulls. Will be skipped", foundNulls);
+                                count += foundNulls;
                             }
+
                             next = jp.getCodec().treeToValue(tree, clazz);
                         }
                         foundNulls = 0;
                         break;
                     } catch (JsonMappingException jme) {
+                        count++;
                         log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {

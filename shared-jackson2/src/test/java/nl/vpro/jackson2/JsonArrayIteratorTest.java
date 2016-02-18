@@ -54,24 +54,23 @@ public class JsonArrayIteratorTest {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isTrue();
         it.next();
-        assertThat(it.getCount()).isEqualTo(1);
+        assertThat(it.getCount()).isEqualTo(2);
         assertThat(it.hasNext()).isTrue();
         it.next();
-        assertThat(it.getCount()).isEqualTo(2);
+        assertThat(it.getCount()).isEqualTo(4);
         assertThat(it.hasNext()).isFalse();
-        assertThat(it.getCount()).isEqualTo(2);
+        assertThat(it.getCount()).isEqualTo(4);
     }
 
     @Test
     public void callback() throws IOException {
         Runnable callback = mock(Runnable.class);
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class, callback);
-        int count = 0;
         while (it.hasNext()) {
             verify(callback, times(0)).run();
             it.next();
-            assertThat(it.getCount()).isEqualTo(++count);
         }
+        assertThat(it.getCount()).isEqualTo(it.getSize().get());
         verify(callback, times(1)).run();
     }
 
