@@ -69,6 +69,7 @@
     <module>shared-transfer</module>
     <module>shared-xml</module>
     <module>shared-logging</module>
+    <module>shared-hibernate</module>
   </modules>
 
   <scm>
@@ -95,6 +96,13 @@
     <httpcomponents.version>4.3.6</httpcomponents.version>
     <!-- resteasy doesn't support bigger than this. See https://issues.jboss.org/browse/RESTEASY-975, and https://jira.vpro.nl/browse/MGNL-11312 -->
     <httpcomponentscore.version>4.3.3</httpcomponentscore.version>
+
+    <hibernate.version>4.3.8.Final</hibernate.version>
+    <!--
+    <hibernate.version>5.0.3.Final</hibernate.version>
+    -->
+    <!-- Hibernate Search 5 updates to Lucene 4 and requires a full re-index -->
+    <hibernate.search.version>4.5.2.Final</hibernate.search.version>
   </properties>
 
   <dependencyManagement>
