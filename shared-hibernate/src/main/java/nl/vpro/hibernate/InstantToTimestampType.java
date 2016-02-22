@@ -1,68 +1,62 @@
 package nl.vpro.hibernate;
 
 import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
+import java.time.Instant;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.UserType;
 
 /**
- *
  * @author Michiel Meeuwissen
+ * @since 0.36
  */
-public class FalseToNullType implements UserType {
+public class InstantToTimestampType implements UserType {
 
-    public static final FalseToNullType INSTANCE = new FalseToNullType();
+    public static final InstantToTimestampType INSTANCE = new InstantToTimestampType();
 
 
-    public FalseToNullType() {
+    public InstantToTimestampType() {
         super();
     }
 
     @Override
     public int[] sqlTypes() {
-        return new int[]{Types.BOOLEAN};
+        return new int[]{Types.TIMESTAMP};
     }
 
     @Override
     public Class returnedClass() {
-        return Boolean.class;
+        return Instant.class;
     }
 
     @Override
     public boolean equals(Object x, Object y) throws HibernateException {
-        if(x == null) {
-            x = Boolean.FALSE;
-        }
-        if(y == null) {
-            y = Boolean.FALSE;
-        }
         return x.equals(y);
 
     }
 
     @Override
     public int hashCode(Object x) throws HibernateException {
-        return 0;
+        return x.hashCode();
     }
 
     @Override
     public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
-        Boolean result = rs.getBoolean(names[0]);
-        if (result == null || !result) return null;
-        return result;
+        Timestamp ts = rs.getTimestamp(names[0]);
+        if (ts == null) {
+            return null;
+        }
+        return ts.toInstant();
     }
 
     @Override
     public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
         if (value == null) {
-            st.setBoolean(index, false);
+            st.setNull(index, Types.TIMESTAMP);
         } else {
-            st.setBoolean(index, (Boolean) value);
+            st.setTimestamp(index, Timestamp.from((Instant) value));
         }
     }
 
@@ -91,3 +85,4 @@ public class FalseToNullType implements UserType {
         return original;
     }
 }
+
