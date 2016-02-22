@@ -33,12 +33,18 @@ public class InstantToTimestampType implements UserType {
 
     @Override
     public boolean equals(Object x, Object y) throws HibernateException {
+        if (x == null) {
+            return y == null;
+        }
         return x.equals(y);
 
     }
 
     @Override
     public int hashCode(Object x) throws HibernateException {
+        if (x == null) {
+            return 0;
+        }
         return x.hashCode();
     }
 
