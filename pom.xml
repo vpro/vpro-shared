@@ -70,6 +70,7 @@
     <module>shared-xml</module>
     <module>shared-logging</module>
     <module>shared-hibernate</module>
+    <module>shared-persistence</module>
   </modules>
 
   <scm>
@@ -363,6 +364,11 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
         <version>${httpcomponentscore.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.persistence</groupId>
+        <artifactId>persistence-api</artifactId>
+        <version>1.0.2</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
