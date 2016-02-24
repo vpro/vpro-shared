@@ -19,6 +19,6 @@ public class InstantToTimestampConverter implements AttributeConverter<Instant, 
 
     @Override
     public Instant convertToEntityAttribute(Timestamp timestamp) {
-        return timestamp.toInstant();
+        return timestamp == null ? null : timestamp.toInstant();
     }
 }
