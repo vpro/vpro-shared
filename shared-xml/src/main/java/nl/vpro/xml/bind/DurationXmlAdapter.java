@@ -1,14 +1,9 @@
 package nl.vpro.xml.bind;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import java.time.Duration;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
