@@ -6,19 +6,13 @@ package nl.vpro.test.util.jackson2;
 
 import net.sf.json.test.JSONAssert;
 
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
 import java.io.StringWriter;
-import java.lang.reflect.Type;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.test.util.TestClass;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -74,17 +68,4 @@ public class Jackson2TestUtil {
         return result.value;
     }
 
-    @XmlType
-    public static class TestClass<T> {
-        @XmlValue
-        T value;
-        public TestClass(T v) {
-            this.value = v;
-        }
-        public TestClass() {
-            
-        }
-
-       
-    }
 }

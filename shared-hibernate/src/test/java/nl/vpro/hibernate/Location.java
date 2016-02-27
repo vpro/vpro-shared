@@ -1,23 +1,10 @@
 package nl.vpro.hibernate;
 
-import javax.persistence.*;
-import javax.xml.bind.Unmarshaller;
+import javax.persistence.Column;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Comparator;
 import java.util.Date;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -34,12 +21,7 @@ import nl.vpro.jackson2.XMLDurationToJsonTimestamp;
         "duration"})
 public class Location  {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Location.class);
-
-    private static final long serialVersionUID = -140942203904508506L;
-
-    private static final String BASE_URN = "urn:vpro:media:location:";
-
+    
     @Column(nullable = false)
     @XmlElement
     protected String programUrl;
@@ -73,19 +55,7 @@ public class Location  {
 
     public Location() {
     }
-
-   
-  
-
-
-    public static Long idFromUrn(String urn) {
-        final String id = urn.substring(BASE_URN.length());
-        return Long.valueOf(id);
-    }
-
-    public static String urnForId(long id) {
-        return BASE_URN + id;
-    }
+    
 
     
     public String getProgramUrl() {
