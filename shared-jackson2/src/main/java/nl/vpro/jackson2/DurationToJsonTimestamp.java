@@ -3,7 +3,6 @@ package nl.vpro.jackson2;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,7 +29,7 @@ public class DurationToJsonTimestamp {
             if (value == null) {
                 jgen.writeNull();
             } else {
-                jgen.writeNumber(TimeUnit.MILLISECONDS.convert(value.get(ChronoUnit.SECONDS), TimeUnit.SECONDS));
+                jgen.writeNumber(value.toMillis());
             }
         }
     }
