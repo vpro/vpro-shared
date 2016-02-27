@@ -16,6 +16,8 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import nl.vpro.test.util.TestClass;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 
@@ -46,12 +48,19 @@ public class JAXBTestUtil {
         }
         return writer.toString();
     }
+    
 
-    private static Marshaller getMarshallerForUnknownClass(Class<? extends Object> clazz) throws JAXBException {
-        JAXBContext context = JAXBContext.newInstance(clazz);
+
+    private static Marshaller getMarshallerForUnknownClasses(Class<?>... clazz) throws JAXBException {
+        JAXBContext context = JAXBContext.newInstance((Class[]) clazz);
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return marshaller;
+    }
+    private static String marshal(Marshaller marshaller, Object o) throws JAXBException {
+        StringWriter writer = new StringWriter();
+        marshaller.marshal(o, writer);
+        return writer.toString();
     }
 
     public static <T> T unmarshal(String xml, Class<T> clazz) {
@@ -99,6 +108,28 @@ public class JAXBTestUtil {
             throw new RuntimeException(
                 "input: " + xml + "\n" +
                 "expected: " + expected, spe);
+        }
+
+    }
+
+    public static <T> T roundTripAndSimilarValue(T input, String expected) throws IOException, SAXException, JAXBException {
+
+        TestClass<T> embed = new TestClass<>(input);
+        String xml = null;
+        try {
+            Marshaller marshaller = getMarshallerForUnknownClasses(TestClass.class, input.getClass());
+
+            xml = marshal(marshaller, embed);
+            similar(xml, "<testclass>" + expected + "</testclass>");
+            TestClass<T> result = (TestClass<T>) JAXB.unmarshal(new StringReader(xml), embed.getClass());
+            /// make sure unmarshalling worked too, by marshalling the result again.
+            String xmlAfter = marshal(result);
+            similar(xmlAfter, xml);
+            return result.value;
+        } catch (SAXParseException spe) {
+            throw new RuntimeException(
+                "input: " + xml + "\n" +
+                    "expected: " + expected, spe);
         }
 
     }
