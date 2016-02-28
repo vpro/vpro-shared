@@ -20,6 +20,6 @@ public class DurationToTimeConverter implements AttributeConverter<Duration, Tim
 
     @Override
     public Duration convertToEntityAttribute(Time timestamp) {
-        return timestamp == null ? null : Duration.of(timestamp.getTime(), ChronoUnit.MILLIS);
+        return timestamp == null ? null : Duration.ofMillis(timestamp.getTime());
     }
 }
