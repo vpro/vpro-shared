@@ -15,7 +15,7 @@ public class DurationToTimeConverter implements AttributeConverter<Duration, Tim
 
     @Override
     public Time convertToDatabaseColumn(Duration duration) {
-        return duration == null ? null : new Time(duration.get(ChronoUnit.MILLIS));
+        return duration == null ? null : new Time(duration.toMillis());
     }
 
     @Override
