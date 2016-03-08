@@ -1,5 +1,18 @@
 package nl.vpro.jackson2;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,16 +21,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
 public class XMLDurationToJsonTimestamp {
+
+    private static final Logger LOG = LoggerFactory.getLogger(XMLDurationToJsonTimestamp.class);
+
 
     public static class Serializer extends JsonSerializer<Duration> {
 
@@ -39,12 +46,12 @@ public class XMLDurationToJsonTimestamp {
     public static class Deserializer extends JsonDeserializer<Duration> {
         @Override
         public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            DatatypeFactory datatypeFactory = null;
+            DatatypeFactory datatypeFactory;
             try {
                 datatypeFactory = DatatypeFactory.newInstance();
                 return datatypeFactory.newDuration(jp.getLongValue());
             } catch (DatatypeConfigurationException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
             return null;
         }
