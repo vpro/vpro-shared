@@ -2,7 +2,6 @@ package nl.vpro.jackson2;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
