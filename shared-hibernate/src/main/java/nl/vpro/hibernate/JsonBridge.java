@@ -23,13 +23,14 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
 
     private Class clazz;
 
+
     @Override
     public Object stringToObject(String stringValue) {
         if (stringValue == null) {
             return null;
         }
         try {
-            return Jackson2Mapper.getInstance().readValue(stringValue, clazz);
+            return Jackson2Mapper.getLenientInstance().readValue(stringValue, clazz);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
