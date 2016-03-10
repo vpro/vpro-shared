@@ -27,9 +27,21 @@ public class Jackson2Mapper extends ObjectMapper {
     private static final Logger LOG = LoggerFactory.getLogger(Jackson2Mapper.class);
 
     public static Jackson2Mapper INSTANCE = new Jackson2Mapper();
+    public static Jackson2Mapper LENIENT = new Jackson2Mapper();
+    public static Jackson2Mapper STRICT = new Jackson2Mapper();
+
+
+    static {
+        LENIENT.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+        STRICT.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+    }
 
     public static Jackson2Mapper getInstance() {
         return INSTANCE;
+    }
+
+    public static Jackson2Mapper getLenientInstance() {
+        return LENIENT;
     }
 
     private Jackson2Mapper() {
