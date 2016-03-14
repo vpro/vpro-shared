@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -50,6 +51,8 @@ public class ErrorAspect<T> implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Throwable t;
         String mes;
+        final Logger l;
+        final boolean error;
         try {
             try {
                 return method.invoke(proxied, args);
@@ -57,18 +60,36 @@ public class ErrorAspect<T> implements InvocationHandler {
                 throw itc.getCause();
             }
         } catch (WebApplicationException wea) {
+            int status = wea.getResponse().getStatus();
+            l = getLogger(status);
             mes = getMessage(wea);
             t = wea;
+            error = status >= 500;
         } catch (Throwable e) {
             mes = e.getClass().getName() + " " + e.getMessage();
             t = e;
+            l = log;
+            error = true;
         }
-        log.error("Error for {}{}(\n{}\n) {}",
-            string.get(),
-            method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
-            Arrays.asList(args).stream().map(ErrorAspect.this::valueToString).collect(joining("\n")),
-            mes);
+        if (error) {
+            l.error("Error for {}{}(\n{}\n) {}",
+                string.get(),
+                method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
+                Arrays.asList(args).stream().map(ErrorAspect.this::valueToString).collect(joining("\n")),
+                mes);
+        } else {
+
+            l.info("For {}{}(\n{}\n) {}",
+                string.get(),
+                method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
+                Arrays.asList(args).stream().map(ErrorAspect.this::valueToString).collect(joining("\n")),
+                mes);
+        }
         throw t;
+    }
+
+    Logger getLogger(int status) {
+        return LoggerFactory.getLogger(log.getName() + "." + (status / 100) + "." + String.format("%02d", (status % 100)));
     }
 
     protected static final String[] HEADERS = new String[] {
