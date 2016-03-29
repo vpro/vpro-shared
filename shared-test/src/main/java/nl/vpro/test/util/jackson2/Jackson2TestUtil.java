@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.test.util.TestClass;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**

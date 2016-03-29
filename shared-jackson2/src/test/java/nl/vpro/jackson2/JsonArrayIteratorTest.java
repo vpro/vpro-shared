@@ -1,21 +1,16 @@
 package nl.vpro.jackson2;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import org.junit.Test;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
-import org.junit.Test;
-
-
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 public class JsonArrayIteratorTest {
-
 
     @Test
     public void test() throws IOException {
@@ -24,7 +19,7 @@ public class JsonArrayIteratorTest {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class);
         assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
         assertThat(it.getCount()).isEqualTo(1);
-        assertThat(it.getSize().get()).isEqualTo(14);
+        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
         for (int i = 0; i < 9; i++) {
             assertThat(it.hasNext()).isTrue();
 
@@ -33,13 +28,11 @@ public class JsonArrayIteratorTest {
             if (!change.isDeleted()) {
                 assertThat(change.getMedia()).isNotNull();
             }
-
         }
         assertThat(it.hasNext()).isTrue(); // 11
         assertThat(it.next().getMid()).isEqualTo("POMS_VPRO_1139788");
         assertThat(it.hasNext()).isFalse();
     }
-
 
     @Test
     public void testEmpty() throws IOException {
@@ -70,15 +63,12 @@ public class JsonArrayIteratorTest {
             verify(callback, times(0)).run();
             it.next();
         }
-        assertThat(it.getCount()).isEqualTo(it.getSize().get());
+        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
         verify(callback, times(1)).run();
     }
 
-
-
-
     @XmlAccessorType(XmlAccessType.FIELD)
-    public static class Change {
+    private static class Change {
 
         private String mid;
         private Boolean deleted;
@@ -92,7 +82,7 @@ public class JsonArrayIteratorTest {
             this.deleted = deleted;
         }
 
-        public String getMid() {
+        String getMid() {
             return mid;
         }
 
@@ -100,7 +90,7 @@ public class JsonArrayIteratorTest {
             this.mid = mid;
         }
 
-        public Boolean isDeleted() {
+        Boolean isDeleted() {
             return deleted;
         }
 
@@ -112,17 +102,17 @@ public class JsonArrayIteratorTest {
             return deleted;
         }
 
-        public Object getMedia() {
+        Object getMedia() {
             return media;
         }
 
         public void setMedia(Object media) {
             this.media = media;
         }
+
         @Override
         public String toString() {
             return mid;
         }
-
     }
 }

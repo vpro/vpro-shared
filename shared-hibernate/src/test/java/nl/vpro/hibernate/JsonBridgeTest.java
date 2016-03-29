@@ -1,14 +1,10 @@
 package nl.vpro.hibernate;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.fest.assertions.Assertions;
+import nl.vpro.test.util.jackson2.Jackson2TestUtil;
 import org.junit.Test;
 
-import nl.vpro.test.util.jackson2.Jackson2TestUtil;
-
-import static org.fest.assertions.Assertions.assertThat;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Michiel Meeuwissen

@@ -18,7 +18,7 @@ import org.xml.sax.SAXParseException;
 
 import nl.vpro.test.util.TestClass;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
