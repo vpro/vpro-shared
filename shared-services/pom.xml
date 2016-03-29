@@ -7,7 +7,6 @@
     <version>0.37-SNAPSHOT</version>
   </parent>
 
-  <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-services</artifactId>
 
   <name>shared-services</name>

@@ -8,7 +8,6 @@
     <version>0.37-SNAPSHOT</version>
   </parent>
 
-  <groupId>nl.vpro.shared</groupId>
   <artifactId>shared-transfer</artifactId>
 
   <name>shared-transfer</name>
