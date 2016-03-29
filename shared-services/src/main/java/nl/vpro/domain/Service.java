@@ -10,7 +10,6 @@ package nl.vpro.domain;
  * The superinterface for all services.
  *
  * @author roekoe
- * @version $Id
  */
 public interface Service {
 }
