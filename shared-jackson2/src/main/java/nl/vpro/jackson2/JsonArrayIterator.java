@@ -29,8 +29,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonArrayIterator.class);
 
-
-    final JsonParser jp;
+    private final JsonParser jp;
 
     private T next = null;
 
@@ -42,9 +41,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private boolean callBackHasRun = false;
 
-    private final Optional<Long> size;
+    private final Long size;
 
-    private final Optional<Long> totalSize;
+    private final Long totalSize;
 
     private int foundNulls = 0;
 
@@ -59,8 +58,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.clazz = clazz;
-        Optional<Long> size = Optional.empty();
-        Optional<Long> totalSize = Optional.empty();
+        Long tmpSize = null;
+        Long tmpTotalSize = null;
         String fieldName = null;
         while(true) {
             JsonToken token = jp.nextToken();
@@ -68,15 +67,15 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                 fieldName = jp.getCurrentName();
             }
             if (token == JsonToken.VALUE_NUMBER_INT && "size".equals(fieldName)) {
-                size = Optional.of(jp.getLongValue());
+                tmpSize = jp.getLongValue();
             }
             if (token == JsonToken.VALUE_NUMBER_INT && "totalSize".equals(fieldName)) {
-                totalSize = Optional.of(jp.getLongValue());
+                tmpTotalSize = jp.getLongValue();
             }
             if (token == JsonToken.START_ARRAY) break;
         }
-        this.size = size;
-        this.totalSize = totalSize;
+        this.size = tmpSize;
+        this.totalSize = tmpTotalSize;
         jp.nextToken();
         this.callback = callback;
     }
@@ -202,11 +201,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     @Override
     public Optional<Long> getSize() {
-        return size;
+        return Optional.ofNullable(size);
     }
 
     @Override
     public Optional<Long> getTotalSize() {
-        return totalSize;
+        return Optional.ofNullable(totalSize);
     }
 }
