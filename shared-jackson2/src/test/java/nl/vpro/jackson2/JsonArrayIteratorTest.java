@@ -6,8 +6,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 public class JsonArrayIteratorTest {
@@ -24,7 +26,10 @@ public class JsonArrayIteratorTest {
             assertThat(it.hasNext()).isTrue();
 
             Change change = it.next(); // 10
-            System.out.println(it.getCount() + "/" + it.getSize().get() + " :" + change);
+            Optional<Long> size = it.getSize();
+            if (size.isPresent()) {
+                System.out.println(it.getCount() + "/" + size.get() + " :" + change);
+            }
             if (!change.isDeleted()) {
                 assertThat(change.getMedia()).isNotNull();
             }
@@ -53,6 +58,14 @@ public class JsonArrayIteratorTest {
         assertThat(it.getCount()).isEqualTo(4);
         assertThat(it.hasNext()).isFalse();
         assertThat(it.getCount()).isEqualTo(4);
+    }
+
+    @Test
+    public void testIncompleteJson() throws IOException {
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/incomplete_changes.json"), Change.class);
+
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> { while (it.hasNext()) it.next(); });
+        assertThat(it.hasNext()).isFalse();
     }
 
     @Test
