@@ -9,8 +9,4 @@
   </parent>
 
   <artifactId>shared-xml</artifactId>
-
-  <dependencies>
-
-  </dependencies>
 </project>

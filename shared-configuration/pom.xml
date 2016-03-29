@@ -32,7 +32,6 @@
     <dependency>
       <groupId>org.springmodules</groupId>
       <artifactId>spring-modules-jakarta-commons</artifactId>
-      <version>0.8</version>
       <exclusions>
         <exclusion>
           <groupId>commons-el</groupId>
@@ -79,7 +78,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>${spring.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

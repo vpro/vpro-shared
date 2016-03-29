@@ -80,9 +80,11 @@
   </scm>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>4.1.6.RELEASE</spring.version>
     <spring-security.version>4.0.1.RELEASE</spring-security.version>
 
+    <elasticsearch.version>1.1.0</elasticsearch.version><!-- tied to server version -->
     <jackson2.version>2.5.3</jackson2.version>    <!-- equals to poms-parent -->
     <jackson2.scala.version>2.5.2</jackson2.scala.version>
     <junit.version>4.11</junit.version>
@@ -109,6 +111,16 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>com.wordnik</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.wordnik</groupId>
+        <artifactId>swagger-jaxrs_2.10</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-camel</artifactId>
         <version>${project.version}</version>
@@ -131,6 +143,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>shared-jackson2</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>shared-resteasy</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -169,6 +186,21 @@
         <version>${junit.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.elasticsearch</groupId>
+        <artifactId>elasticsearch</artifactId>
+        <version>${elasticsearch.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-search-orm</artifactId>
+        <version>${hibernate.search.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
@@ -258,6 +290,17 @@
         <artifactId>spring-web</artifactId>
         <version>${spring.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springmodules</groupId>
+        <artifactId>spring-modules-jakarta-commons</artifactId>
+        <version>0.8</version>
+      </dependency>
 
       <dependency>
         <groupId>org.apache.camel</groupId>
@@ -294,9 +337,26 @@
       </dependency>
 
       <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.5</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>uk.org.lidalia</groupId>
+        <artifactId>lidalia-slf4j-ext</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>ext.newrelic</groupId>
+        <artifactId>newrelic-plugin</artifactId>
+        <version>2.0.1.VPRO</version>
       </dependency>
 
       <dependency>
@@ -392,9 +452,34 @@
         <version>1.3</version>
       </dependency>
       <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.7.3</version>
+      </dependency>
+      <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-all</artifactId>
         <version>1.9.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymock</artifactId>
+        <version>2.4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20090211</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.wss4j</groupId>
+        <artifactId>wss4j-ws-security-dom</artifactId>
+        <version>${wss4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>${spring-security.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -410,17 +495,16 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.hamcrest</groupId>-->
+      <!--<artifactId>hamcrest-all</artifactId>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <distributionManagement>
