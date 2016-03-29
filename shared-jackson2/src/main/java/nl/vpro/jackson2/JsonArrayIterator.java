@@ -148,6 +148,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     }
                 } catch (IOException e) {
                     callback();
+                    next = null;
+                    needsFindNext = false;
                     throw new RuntimeException(e);
                 }
             }
