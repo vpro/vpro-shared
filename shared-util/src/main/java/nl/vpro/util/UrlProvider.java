@@ -5,8 +5,7 @@
 package nl.vpro.util;
 
 /**
- * User: rico
- * Date: 05/04/2012
+ * @author rico
  */
 public class UrlProvider {
     private final String host;
