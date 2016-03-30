@@ -97,10 +97,10 @@ public class URLResource<T> {
             if (result == null) {
                 lastLoad = Instant.now();
                 lastModified = Instant.now();
-                LOG.info("Loaded " + newResult + " from " + this.url);
+                LOG.info("Loaded {} from {}",  newResult , this.url);
             } else {
                 if (!Objects.equals(result, newResult)) {
-                    LOG.info("Reloaded " + newResult + " from " + this.url);
+                    LOG.info("Reloaded {} from {}", newResult, this.url);
                     lastLoad = Instant.now();
                     lastModified = Instant.now();
                     changesCount++;
@@ -108,13 +108,13 @@ public class URLResource<T> {
             }
             result = newResult;
         } else {
-            LOG.warn("Loading " + url + " from " + this.url + " result null");
+            LOG.warn("Loading " + url + " from " + this.url + " resulted null");
         }
     }
 
     void getCachedResource(URLConnection connection) throws IOException {
         if (result != null && expires != null && Instant.now().isBefore(expires)) {
-            LOG.info("Not loading " + url + " as it is not yet expired");
+            LOG.info("Not loading {} as it is not yet expired", url);
             return;
         }
         boolean ifModifiedCheck = connection instanceof HttpURLConnection;
