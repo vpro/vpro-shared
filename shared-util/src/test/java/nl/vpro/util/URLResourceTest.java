@@ -14,11 +14,11 @@ import static org.junit.Assert.assertTrue;
  * @since 0.37
  */
 public class URLResourceTest {
-    
-    
+
+
     @Test
     public void broadcasters() {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://poms.omroep.nl/broadcasters/"));
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://poms-dev.omroep.nl/broadcasters/"));
         assertTrue(broadcasters.get().size() > 0);
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());

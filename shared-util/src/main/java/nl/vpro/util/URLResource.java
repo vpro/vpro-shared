@@ -39,7 +39,8 @@ public class URLResource<T> {
     private Instant lastLoad = null;
     private Integer code = null;
     private final URI url;
-    private  Instant lastModified = null;
+    private Instant lastModified = null;
+    private Instant expires = null;
     private Duration maxAge = Duration.of(1, ChronoUnit.HOURS);
     private Duration minAge = Duration.of(5, ChronoUnit.MINUTES);
 
@@ -53,6 +54,7 @@ public class URLResource<T> {
     private long notCheckedCount = 0;
     private long changesCount = 0;
     private boolean async = false;
+
     private ScheduledFuture<?> future = null;
 
 
@@ -79,7 +81,7 @@ public class URLResource<T> {
             if (this.url.getScheme().equals("classpath")) {
                 getCachedResource(this.url.toString().substring("classpath:".length() + 1));
             } else {
-                
+
                 URLConnection connection = url.toURL().openConnection();
                 getCachedResource(connection);
 
@@ -88,7 +90,7 @@ public class URLResource<T> {
             LOG.error(e.getMessage(), e);
         }
     }
-    
+
     void getCachedResource(String resource) {
         T newResult = reader.apply(getClass().getClassLoader().getResourceAsStream(resource));
         if (newResult != null) {
@@ -111,7 +113,10 @@ public class URLResource<T> {
     }
 
     void getCachedResource(URLConnection connection) throws IOException {
-        
+        if (result != null && expires != null && Instant.now().isBefore(expires)) {
+            LOG.info("Not loading " + url + " as it is not yet expired");
+            return;
+        }
         boolean ifModifiedCheck = connection instanceof HttpURLConnection;
         if (ifModifiedCheck && lastModified != null) {
             if (lastLoad == null || lastLoad.isAfter(Instant.now().minus(maxAge))) {
@@ -134,12 +139,34 @@ public class URLResource<T> {
                 InputStream stream = connection.getInputStream();
                 Instant prevMod = lastModified;
                 lastModified = Instant.ofEpochMilli(connection.getHeaderFieldDate("Last-Modified", System.currentTimeMillis()));
+                if (connection.getHeaderField("Expires") != null) {
+                    expires = Instant.ofEpochMilli(connection.getHeaderFieldDate("Expires", System.currentTimeMillis()));
+                }
+                String cacheControl = connection.getHeaderField("Cache-Control");
+                if (cacheControl != null) {
+                    String[] split = cacheControl.split("\\s*,\\s*");
+                    for (String s : split) {
+                        if (s.startsWith("max-age")) {
+                            String[] ma = s.split("\\s*=\\s*", 2);
+                            expires = Instant.now().plus(Duration.of(Integer.parseInt(ma[1]), ChronoUnit.SECONDS));
+                        }
+                    }
+                }
+                Instant maxExpires = Instant.now().plus(maxAge);
+                if (expires.isAfter(maxExpires)) {
+                    LOG.info("Found expiry {} for {} truncated to {}", expires, url, maxExpires);
+                    expires = maxExpires;
+                }
                 T newResult = reader.apply(stream);
                 if (ifModifiedCheck) {
                     if (newResult != null) {
-                        result = newResult;
+                        if (result == null) {
+                            LOG.info("Loaded " + url + " -> " + lastModified);
+                        } else {
+                            LOG.info("Reloaded " + url + " as it is modified since " + prevMod + " -> " + lastModified);
+                        }
                         changesCount++;
-                        LOG.info("Reloaded " + url + " as it is modified since " + prevMod + " -> " + lastModified);
+                        result = newResult;
                     }
                 } else {
                     if (newResult != null) {
@@ -151,7 +178,7 @@ public class URLResource<T> {
                             result = newResult;
                         }
                     }
-                    
+
                 }
                 stream.close();
                 lastLoad = Instant.now();
@@ -159,9 +186,9 @@ public class URLResource<T> {
             default:
                 LOG.error(code + ":" + connection);
         }
-        
+
     }
-    
+
 
     public URI getUrl() {
         return url;
@@ -222,7 +249,7 @@ public class URLResource<T> {
         }
         return this;
     }
-    
+
     private class ScheduledRunnable implements Runnable {
 
         @Override
