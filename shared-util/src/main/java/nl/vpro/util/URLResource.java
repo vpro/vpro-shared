@@ -108,7 +108,7 @@ public class URLResource<T> {
             }
             result = newResult;
         } else {
-            LOG.warn("Loading " + url + " from " + this.url + " resulted null");
+            LOG.warn("Loading from {} resulted null", this.url);
         }
     }
 
@@ -131,7 +131,7 @@ public class URLResource<T> {
         }
         switch (code) {
             case SC_NOT_MODIFIED:
-                LOG.debug("Not modified " + url);
+                LOG.debug("Not modified {}", url);
                 notModifiedCount++;
                 break;
             case SC_OK:
@@ -161,9 +161,9 @@ public class URLResource<T> {
                 if (ifModifiedCheck) {
                     if (newResult != null) {
                         if (result == null) {
-                            LOG.info("Loaded " + url + " -> " + lastModified);
+                            LOG.info("Loaded {} -> {}", url, lastModified);
                         } else {
-                            LOG.info("Reloaded " + url + " as it is modified since " + prevMod + " -> " + lastModified);
+                            LOG.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod , lastModified);
                         }
                         changesCount++;
                         result = newResult;
@@ -173,7 +173,7 @@ public class URLResource<T> {
                         if (result != null && !Objects.equals(result, newResult)) {
                             result = newResult;
                             changesCount++;
-                            LOG.info("Reloaded " + url + ". It is modified since " + lastModified + " (Reason unknown)");
+                            LOG.info("Reloaded {}. It is modified since {} (Reason unknown)", url, lastModified);
                         } else {
                             result = newResult;
                         }
