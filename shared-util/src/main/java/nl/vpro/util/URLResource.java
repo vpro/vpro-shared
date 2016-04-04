@@ -153,7 +153,7 @@ public class URLResource<T> {
                     }
                 }
                 Instant maxExpires = Instant.now().plus(maxAge);
-                if (expires.isAfter(maxExpires)) {
+                if (expires != null && expires.isAfter(maxExpires)) {
                     LOG.info("Found expiry {} for {} truncated to {}", expires, url, maxExpires);
                     expires = maxExpires;
                 }
