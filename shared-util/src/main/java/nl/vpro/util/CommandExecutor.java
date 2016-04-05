@@ -2,6 +2,12 @@ package nl.vpro.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
+
+import org.apache.commons.io.output.WriterOutputStream;
+import org.slf4j.LoggerFactory;
+
+import nl.vpro.logging.LoggerOutputStream;
 
 /**
  * Executor for external commands.
@@ -29,6 +35,14 @@ public interface CommandExecutor {
      * @return The exit code
      */
     int execute(OutputStream out, OutputStream error, String... args);
+
+    default int execute(OutputStream out, String... args) {
+        return execute(out, LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+    }
+
+    default int execute(Writer out, String... args) {
+        return execute(new WriterOutputStream(out, "UTF-8"), LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+    }
 
 
     /**
