@@ -25,7 +25,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     private final String binary;
 
 
-    private long processTimeout = -1l;
+    private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
 
@@ -69,7 +69,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             p = pb.start();
 
             final ProcessTimeoutHandle handle;
-            if (processTimeout > 0l) {
+            if (processTimeout > 0L) {
                 handle = startProcessTimeoutMonitor(p, "" + command, processTimeout * 1000);
             } else {
                 handle = null;
