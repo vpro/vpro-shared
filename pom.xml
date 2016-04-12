@@ -92,7 +92,7 @@
     <resteasy.version>3.0.16.Final</resteasy.version>
     <slf4j.version>1.7.5</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
-    <camel.version>2.14.1</camel.version>
+    <camel.version>2.17.0</camel.version>
     <guava.version>19.0</guava.version>
     <javassist.version>3.18.2-GA</javassist.version>
     <wss4j.version>2.1.4</wss4j.version>
