@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 /**
@@ -25,6 +25,8 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 public class Jackson2Mapper extends ObjectMapper {
 
     private static final Logger LOG = LoggerFactory.getLogger(Jackson2Mapper.class);
+
+    private static boolean loggedAboutAvro = false;
 
     public static Jackson2Mapper INSTANCE = new Jackson2Mapper();
     public static Jackson2Mapper LENIENT = new Jackson2Mapper();
@@ -65,13 +67,16 @@ public class Jackson2Mapper extends ObjectMapper {
 
 
 
-        JSR310Module jsr310Module = new JSR310Module();
-        registerModule(jsr310Module);
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        registerModule(javaTimeModule);
         registerModule(new DateModule());
         try {
             registerModule(new SerializeAvroModule());
         } catch (NoClassDefFoundError ncdfe) {
-            LOG.info("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
+            if (! loggedAboutAvro) {
+                LOG.info("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
+            }
+            loggedAboutAvro = true;
         }
     }
 }
