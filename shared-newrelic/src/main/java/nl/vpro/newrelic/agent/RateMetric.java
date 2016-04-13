@@ -29,14 +29,17 @@ public class RateMetric implements Metric {
         counter.increment();
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getUnit() {
         return unit;
     }
 
+    @Override
     public float getValue() {
         return counter.getRatio(period);
     }
