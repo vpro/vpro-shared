@@ -12,6 +12,7 @@ public class WindowedEventRate {
     protected final int bucketCount;
     private final long[] buckets;
     private final long windowSize;
+    private final long totalDuration;
     private long currentBucketTime = System.currentTimeMillis();
     private int currentBucket = 0;
 
@@ -20,6 +21,7 @@ public class WindowedEventRate {
         Arrays.fill(buckets, 0L);
         windowSize = TimeUnit.MILLISECONDS.convert(unit, timeUnit);
         this.bucketCount = bucketCount;
+        this.totalDuration = bucketCount * windowSize;
     }
     public WindowedEventRate(int unit, TimeUnit timeUnit) {
         this(unit, timeUnit, 100);
@@ -41,7 +43,7 @@ public class WindowedEventRate {
         for (long bucket : buckets) {
             totalCount += bucket;
         }
-        return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / (buckets.length * windowSize);
+        return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / totalDuration;
     }
 
     private void shiftBuckets() {
