@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -56,11 +57,14 @@ public class URLResource<T> {
     private boolean async = false;
 
     private ScheduledFuture<?> future = null;
+    private Consumer<T>[] callbacks;
 
 
-    public URLResource(URI url, Function<InputStream, T> reader) {
+    public URLResource(URI url, Function<InputStream, T> reader, Consumer<T>... callbacks) {
         this.url = url;
         this.reader = reader;
+        this.callbacks = callbacks;
+
     }
 
 
@@ -107,8 +111,15 @@ public class URLResource<T> {
                 }
             }
             result = newResult;
+            callBack();
         } else {
             LOG.warn("Loading from {} resulted null", this.url);
+        }
+    }
+
+    void callBack() {
+        for (Consumer<T> callback : callbacks) {
+            callback.accept(result);
         }
     }
 
@@ -167,11 +178,13 @@ public class URLResource<T> {
                         }
                         changesCount++;
                         result = newResult;
+                        callBack();
                     }
                 } else {
                     if (newResult != null) {
                         if (result != null && !Objects.equals(result, newResult)) {
                             result = newResult;
+                            callBack();
                             changesCount++;
                             LOG.info("Reloaded {}. It is modified since {} (Reason unknown)", url, lastModified);
                         } else {
@@ -235,6 +248,12 @@ public class URLResource<T> {
 
     public URLResource<T> setMinAge(Duration minAge) {
         this.minAge = minAge;
+        return this;
+    }
+
+
+    public URLResource<T> setCallbacks(Consumer<T>... callbacks) {
+        this.callbacks = callbacks;
         return this;
     }
 
