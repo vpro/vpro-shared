@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -39,4 +40,13 @@ public class URLResourceTest {
         assertEquals(1, broadcasters.getNotCheckedCount());
     }
 
+
+    @Test
+    public void broadcastersFromClassPathMap() {
+        URLResource<Map<String, String>> broadcasters = URLResource.map(URI.create("classpath:/broadcasters.properties"));
+        assertTrue(broadcasters.get().size() > 0);
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        broadcasters.get();
+        assertEquals(1, broadcasters.getNotCheckedCount());
+    }
 }
