@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +17,7 @@ public class WindowedEventRate {
     private final long totalDuration;
     private long currentBucketTime = System.currentTimeMillis();
     private int currentBucket = 0;
+    private final Instant start = Instant.now();
 
     public WindowedEventRate(int unit, TimeUnit timeUnit, int bucketCount) {
         buckets = new long[bucketCount];
@@ -62,5 +65,14 @@ public class WindowedEventRate {
     public String toString() {
         return "" + getRate(TimeUnit.SECONDS) + " /s";
     }
+
+    public Duration getTotalDuration() {
+        return Duration.ofMillis(totalDuration);
+    }
+
+    public boolean isWarmingUp() {
+        return Instant.now().isAfter(start.plus(getTotalDuration()));
+    }
+
 
 }
