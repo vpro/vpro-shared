@@ -10,12 +10,14 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +29,13 @@ import org.slf4j.LoggerFactory;
 public class URLResource<T> {
 
 
-    public static URLResource<Properties> properties(URI url) {
-        return new URLResource<>(url, PROPERTIES);
+    public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {
+        return new URLResource<>(url, PROPERTIES, callbacks);
     }
 
+    public static URLResource<Map<String, String>> map(URI url, Consumer<Map<String, String>>... callbacks) {
+        return new URLResource<>(url, MAP, callbacks);
+    }
     private static final int SC_OK = 200;
     private static final int SC_NOT_MODIFIED = 304;
 
@@ -287,5 +292,16 @@ public class URLResource<T> {
             LOG.error(e.getMessage(), e);
         }
         return props;
+    };
+
+    public static Function<InputStream, Map<String, String>> MAP = inputStream -> {
+
+        Properties props = new Properties();
+        try {
+            props.load(inputStream);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return props.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue())));
     };
 }
