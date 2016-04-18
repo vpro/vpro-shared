@@ -30,7 +30,7 @@ public class WindowedEventRateTest {
 
         Thread.sleep(201L);
 
-        assertThat(rate.isWarmingUp()).isTrue();
+        assertThat(rate.isWarmingUp()).isFalse();
 
     }
 
