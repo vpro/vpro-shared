@@ -63,7 +63,7 @@ public class WindowedEventRate {
     }
 
     public String toString() {
-        return "" + getRate(TimeUnit.SECONDS) + " /s";
+        return "" + getRate(TimeUnit.SECONDS) + " /s" + (isWarmingUp() ? " (warming up)" : "");
     }
 
     public Duration getTotalDuration() {
