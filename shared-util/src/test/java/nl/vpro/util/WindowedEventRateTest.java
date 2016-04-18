@@ -4,6 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.38
@@ -17,12 +19,18 @@ public class WindowedEventRateTest {
         long start = System.currentTimeMillis();
 
         for (int i = 0; i < 1000; i++) {
-            System.out.println("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s");
+            System.out.println("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() + ")");
             rate.newEvent();
+
         }
 
         Thread.sleep(4800L);
-        System.out.println("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s");
+
+        System.out.println("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() +")");
+
+        Thread.sleep(201L);
+
+        assertThat(rate.isWarmingUp()).isTrue();
 
     }
 
