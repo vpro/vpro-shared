@@ -71,7 +71,7 @@ public class WindowedEventRate {
     }
 
     public boolean isWarmingUp() {
-        return Instant.now().isAfter(start.plus(getTotalDuration()));
+        return Instant.now().isBefore(start.plus(getTotalDuration()));
     }
 
 
