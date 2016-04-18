@@ -5,7 +5,9 @@
 package nl.vpro.jackson2;
 
 import java.io.IOException;
-import java.time.Duration;
+import java.time.Instant;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -16,32 +18,32 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
- * @author rico
- * @since 0.37
+ * @author Michiel Meeuwissen
+ * @since 0.39
  */
-public class StringDurationToJsonTimestamp {
+public class StringInstantToJsonTimestamp {
 
     public static class Serializer extends JsonSerializer<String> {
-        public static StringDurationToJsonTimestamp.Serializer INSTANCE = new StringDurationToJsonTimestamp.Serializer();
+        public static StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
 
         @Override
         public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
             if (value == null) {
                 jgen.writeNull();
             } else {
-                jgen.writeNumber(Duration.parse(value).toMillis());
+                jgen.writeNumber(DatatypeConverter.parseTime(value).toInstant().toEpochMilli());
             }
         }
     }
 
 
-    public static class Deserializer extends JsonDeserializer<String> {
+    public static class Deserializer extends JsonDeserializer<Instant> {
 
-        public static StringDurationToJsonTimestamp.Deserializer INSTANCE = new StringDurationToJsonTimestamp.Deserializer();
+        public static StringInstantToJsonTimestamp.Deserializer INSTANCE = new StringInstantToJsonTimestamp.Deserializer();
 
         @Override
-        public String deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            return Duration.ofMillis(jp.getLongValue()).toString();
+        public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            return Instant.ofEpochMilli(jp.getLongValue());
         }
     }
 }
