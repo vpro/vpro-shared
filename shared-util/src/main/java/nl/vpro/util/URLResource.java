@@ -58,6 +58,7 @@ public class URLResource<T> {
     private long okCount = 0;
     private long notModifiedCount = 0;
     private long notCheckedCount = 0;
+    private long checkedCount = 0;
     private long changesCount = 0;
     private boolean async = false;
 
@@ -85,12 +86,12 @@ public class URLResource<T> {
             notCheckedCount++;
             return;
         }
-        LOG.info("Loading from {}", this.url);
+        checkedCount++;
+        LOG.debug("Loading from {}", this.url);
         try {
             if (this.url.getScheme().equals("classpath")) {
                 getCachedResource(this.url.toString().substring("classpath:".length() + 1));
             } else {
-
                 URLConnection connection = url.toURL().openConnection();
                 getCachedResource(connection);
 
@@ -110,10 +111,11 @@ public class URLResource<T> {
             } else {
                 if (!Objects.equals(result, newResult)) {
                     LOG.info("Reloaded {} from {}", newResult, this.url);
-                    lastLoad = Instant.now();
                     lastModified = Instant.now();
                     changesCount++;
                 }
+                lastLoad = Instant.now();
+
             }
             result = newResult;
             callBack();
@@ -236,6 +238,10 @@ public class URLResource<T> {
 
     public long getNotCheckedCount() {
         return notCheckedCount;
+    }
+
+    public long getCheckedCount() {
+        return checkedCount;
     }
 
     public Duration getMaxAge() {
