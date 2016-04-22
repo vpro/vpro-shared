@@ -50,6 +50,8 @@ public class AbstractApiClient {
 
     private static Logger LOG = LoggerFactory.getLogger(AbstractApiClient.class);
 
+    private static final Thread connectionGuardThread;
+    private static final ConnectionGuard GUARD = new ConnectionGuard();
     static {
         try {
             ResteasyProviderFactory resteasyProviderFactory = ResteasyProviderFactory.getInstance();
@@ -68,12 +70,15 @@ public class AbstractApiClient {
         } catch (Throwable t) {
             LOG.error(t.getClass().getName() + " " + t.getMessage());
         }
+        ThreadFactory threadFactory = ThreadPools.createThreadFactory("API Client purge idle connections", false, Thread.NORM_PRIORITY);
+        connectionGuardThread = threadFactory.newThread(GUARD);
+        connectionGuardThread.start();
     }
 
     protected final ClientHttpEngine clientHttpEngine;
     protected final ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private Thread connectionGuard;
+    private PoolingHttpClientConnectionManager connectionManager;
 
     private boolean shutdown = false;
 
@@ -106,14 +111,15 @@ public class AbstractApiClient {
             .setSoReuseAddress(true)
             .build();
 
-        PoolingHttpClientConnectionManager poolingClientConnectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL, TimeUnit.MILLISECONDS);
-        poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
-        poolingClientConnectionManager.setMaxTotal(maxConnections);
-        poolingClientConnectionManager.setDefaultSocketConfig(socketConfig);
+        connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL, TimeUnit.MILLISECONDS);
+        connectionManager.setDefaultMaxPerRoute(maxConnections);
+        connectionManager.setMaxTotal(maxConnections);
+        connectionManager.setDefaultSocketConfig(socketConfig);
 
         if (maxConnections > 1) {
-            watchIdleConnections(poolingClientConnectionManager);
+            watchIdleConnections();
         }
+
 
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setExpectContinueEnabled(true)
@@ -129,7 +135,7 @@ public class AbstractApiClient {
 
 
         HttpClientBuilder client = HttpClients.custom()
-            .setConnectionManager(poolingClientConnectionManager)
+            .setConnectionManager(connectionManager)
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
@@ -154,7 +160,7 @@ public class AbstractApiClient {
         if(!shutdown) {
             shutdown = true;
             notifyAll();
-            connectionGuard = null;
+            unwatchIdleConnections();
         }
     }
 
@@ -194,23 +200,34 @@ public class AbstractApiClient {
         }
     }
 
-    private void watchIdleConnections(final PoolingHttpClientConnectionManager connectionManager) {
-        ThreadFactory threadFactory = ThreadPools.createThreadFactory("API Client purge idle connections", false, Thread.NORM_PRIORITY);
-        connectionGuard = threadFactory.newThread(new Runnable() {
-            @Override
-            public void run() {
-                while (!shutdown) {
-                    try {
-                        synchronized (this) {
-                            wait(5000);
+    private void watchIdleConnections() {
+        LOG.info("Watching idle connections in {}", connectionManager);
+        GUARD.connectionManagers.add(connectionManager);
+    }
+
+    private void unwatchIdleConnections() {
+        LOG.info("Unwatching idle connections in {}", connectionManager);
+        GUARD.connectionManagers.remove(connectionManager);
+    }
+
+    private static class ConnectionGuard implements Runnable {
+
+        private boolean shutdown = false;
+        private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
+        @Override
+        public void run() {
+            while (!shutdown) {
+                try {
+                    synchronized (this) {
+                        wait(5000);
+                        for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
                             connectionManager.closeExpiredConnections();
-                            //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
                         }
-                    } catch (InterruptedException ignored) {
+                        //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
                     }
+                } catch (InterruptedException ignored) {
                 }
             }
-        });
-        connectionGuard.start();
+        }
     }
 }
