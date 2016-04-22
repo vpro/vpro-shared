@@ -20,13 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 
 /**
  * Simple helper methods.
  *
  * @author arne, peter
  * @author r.j.koekoek@vpro.nl
- * @version $Id: Helper.java 8879 2006-09-26 14:17:19Z arne $
  */
 public class Helper {
 
@@ -37,7 +38,9 @@ public class Helper {
      * @param o1 an object
      * @param o2 another object
      * @return true when both o1 and o2 are null or when o1.equals(o2), false otherwise
+     * @deprecated Use {@link java.util.Objects#equals(Object, Object)}
      */
+    @Deprecated
     public static <T> boolean equals(T o1, T o2) {
         return equals(o1, o2, true);
     }
@@ -49,7 +52,9 @@ public class Helper {
      * @param o1 an object
      * @param o2 another object
      * @return true when both o1 and o2 are null or when o1.equals(o2), false otherwise
+     * @deprecated Use {@link java.util.Objects#equals(Object, Object)}
      */
+    @Deprecated
     public static <T> boolean equals(T o1, T o2, boolean nullMeansEqual) {
         if (nullMeansEqual) {
             return (o1 == null && o2 == null) || (o1 != null && o1.equals(o2));
@@ -65,7 +70,9 @@ public class Helper {
      * @param o1 an object
      * @param o2 another object
      * @return true when either o1 or o2 is null (not both) or when !o1.equals(o2), false otherwise
+     * @deprecated Use {@link java.util.Objects#equals(Object, Object)}
      */
+    @Deprecated
     public static <T> boolean notEquals(T o1, T o2) {
         return !equals(o1, o2);
     }
@@ -169,7 +176,9 @@ public class Helper {
     /**
      * @param str a string
      * @return true when the string is null or empty
+     * @deprecated Use {@link StringUtils#isEmpty(java.lang.CharSequence)}
      */
+    @Deprecated
     public static boolean isEmpty(String str) {
         return str == null || str.trim().length() == 0;
     }
@@ -177,7 +186,9 @@ public class Helper {
     /**
      * @param str a string
      * @return true when the string is not null and contains text
+     * @deprecated Use {@link StringUtils#isNoneEmpty(CharSequence...)}
      */
+    @Deprecated
     public static boolean isNotEmpty(String str) {
         return !isEmpty(str);
     }
