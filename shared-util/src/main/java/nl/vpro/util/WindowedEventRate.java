@@ -40,6 +40,11 @@ public class WindowedEventRate {
         buckets[currentBucket]++;
     }
 
+    public void newEvents(int count) {
+        shiftBuckets();
+        buckets[currentBucket]+= count;
+    }
+
     public double getRate(TimeUnit unit) {
         shiftBuckets();
         long totalCount = 0;
