@@ -165,8 +165,12 @@ public class URLResource<T> {
                     String[] split = cacheControl.split("\\s*,\\s*");
                     for (String s : split) {
                         if (s.startsWith("max-age")) {
-                            String[] ma = s.split("\\s*=\\s*", 2);
-                            expires = Instant.now().plus(Duration.of(Integer.parseInt(ma[1]), ChronoUnit.SECONDS));
+                            String[] ma = s.split("\\s*[:=]\\s*", 2);
+                            if (ma.length == 2) {
+                                expires = Instant.now().plus(Duration.of(Integer.parseInt(ma[1]), ChronoUnit.SECONDS));
+                            } else {
+                                LOG.warn("Could not parse " + s);
+                            }
                         }
                     }
                 }
