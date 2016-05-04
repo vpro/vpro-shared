@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class Jackson2TestUtil {
 
-    private static final ObjectMapper MAPPER = Jackson2Mapper.getInstance();
+    private static final ObjectMapper MAPPER = Jackson2Mapper.getPrettyInstance();
 
     public static  <T> T roundTrip(T input) throws Exception {
         return roundTrip(input, "");

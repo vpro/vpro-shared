@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -31,11 +32,14 @@ public class Jackson2Mapper extends ObjectMapper {
     public static Jackson2Mapper INSTANCE = new Jackson2Mapper();
     public static Jackson2Mapper LENIENT = new Jackson2Mapper();
     public static Jackson2Mapper STRICT = new Jackson2Mapper();
+    public static Jackson2Mapper PRETTY = new Jackson2Mapper();
 
 
     static {
         LENIENT.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
         STRICT.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+        PRETTY.configure(SerializationFeature.INDENT_OUTPUT, true);
+        PRETTY.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     }
 
     public static Jackson2Mapper getInstance() {
@@ -44,6 +48,10 @@ public class Jackson2Mapper extends ObjectMapper {
 
     public static Jackson2Mapper getLenientInstance() {
         return LENIENT;
+    }
+
+    public static Jackson2Mapper getPrettyInstance() {
+        return PRETTY;
     }
 
     private Jackson2Mapper() {
