@@ -1,6 +1,9 @@
 package nl.vpro.resteasy;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.ext.ParamConverter;
@@ -25,7 +28,24 @@ public class InstantParamConverter implements ParamConverter<Instant> {
         if (NUMERIC.matcher(value).matches()) {
             return Instant.ofEpochMilli(Long.valueOf(value));
         }
-        return Instant.parse(value);
+        try {
+            return Instant.parse(value);
+        } catch (DateTimeParseException dte) {
+            try {
+                return OffsetDateTime.parse(value).toInstant();
+            } catch (DateTimeParseException dte2) {
+                try {
+                    return ZonedDateTime.parse(value).toInstant();
+                } catch (DateTimeParseException dte3) {
+                    if (value.contains(" ")) {
+                        value = value.replace(" ", "+");
+                        return fromString(value);
+                    } else {
+                        throw dte;
+                    }
+                }
+            }
+        }
 
 
     }
