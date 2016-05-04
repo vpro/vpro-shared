@@ -39,7 +39,7 @@ public class Jackson2Mapper extends ObjectMapper {
         LENIENT.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
         STRICT.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         PRETTY.configure(SerializationFeature.INDENT_OUTPUT, true);
-        PRETTY.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+        //PRETTY.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
     }
 
     public static Jackson2Mapper getInstance() {
