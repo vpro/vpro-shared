@@ -4,6 +4,7 @@
  */
 package nl.vpro.util;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -66,5 +67,9 @@ public class DateUtils {
 
     public static Date maximalIsNull(Date date) {
         return MAX_VALUE.equals(date) ? null : date;
+    }
+
+    public static Instant toInstant(Date date) {
+        return date == null ? null : date.toInstant();
     }
 }
