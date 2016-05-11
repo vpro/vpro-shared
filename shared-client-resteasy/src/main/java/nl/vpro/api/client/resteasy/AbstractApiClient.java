@@ -158,7 +158,9 @@ public class AbstractApiClient {
     public void shutdown() {
         if(!shutdown) {
             shutdown = true;
-            notifyAll();
+            synchronized (this) {
+                notifyAll();
+            }
             unwatchIdleConnections();
         }
     }
