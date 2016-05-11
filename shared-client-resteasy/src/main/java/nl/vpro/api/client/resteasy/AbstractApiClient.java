@@ -77,7 +77,7 @@ public class AbstractApiClient {
     protected final ClientHttpEngine clientHttpEngine;
     protected final ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private PoolingHttpClientConnectionManager connectionManager;
+    private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
 
     private boolean shutdown = false;
 
@@ -110,13 +110,13 @@ public class AbstractApiClient {
             .setSoReuseAddress(true)
             .build();
 
-        connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL, TimeUnit.MILLISECONDS);
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL, TimeUnit.MILLISECONDS);
         connectionManager.setDefaultMaxPerRoute(maxConnections);
         connectionManager.setMaxTotal(maxConnections);
         connectionManager.setDefaultSocketConfig(socketConfig);
 
         if (maxConnections > 1) {
-            watchIdleConnections();
+            watchIdleConnections(connectionManager);
         }
 
 
@@ -158,10 +158,9 @@ public class AbstractApiClient {
     public void shutdown() {
         if(!shutdown) {
             shutdown = true;
-            synchronized (this) {
-                notifyAll();
+            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
+                unwatchIdleConnections(connectionManager);
             }
-            unwatchIdleConnections();
         }
     }
 
@@ -201,9 +200,10 @@ public class AbstractApiClient {
         }
     }
 
-    private synchronized void watchIdleConnections() {
-        LOG.info("Watching idle connections in {}", connectionManager);
+    private synchronized void watchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
+        LOG.debug("Watching idle connections in {}", connectionManager);
         GUARD.connectionManagers.add(connectionManager);
+        connectionManagers.add(connectionManager);
         if (connectionGuardThread == null) {
             GUARD.start();
             connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
@@ -211,8 +211,8 @@ public class AbstractApiClient {
         }
     }
 
-    private synchronized void unwatchIdleConnections() {
-        LOG.info("Unwatching idle connections in {}", connectionManager);
+    private synchronized void unwatchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
+        LOG.debug("Unwatching idle connections in {}", connectionManager);
         GUARD.connectionManagers.remove(connectionManager);
         if (GUARD.connectionManagers.isEmpty()) {
             connectionGuardThread.interrupt();
@@ -228,6 +228,9 @@ public class AbstractApiClient {
         
         void shutdown() {
             shutdown = true;
+            synchronized (this) {
+                notifyAll();
+            }
         }
 
         void start() {
@@ -245,8 +248,10 @@ public class AbstractApiClient {
                         //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
                     }
                 } catch (InterruptedException ignored) {
+                    LOG.debug(ignored.getMessage());
                 }
             }
+            LOG.info("Shut down connection guard");
         }
     }
 }
