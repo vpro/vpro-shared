@@ -19,13 +19,7 @@ public class ResortedSortedSetTest {
         Collection<String> test = new ArrayList<>();
         test.addAll(Arrays.asList("b", "a"));
 
-        SortedSet<String> resorted = new ResortedSortedSet<>(test, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o1.compareTo(o2);
-
-            }
-        });
+        SortedSet<String> resorted = new ResortedSortedSet<>(test, String::compareTo);
         {
             Iterator<String> i = resorted.iterator();
             assertThat(i.next()).isEqualTo("a");
