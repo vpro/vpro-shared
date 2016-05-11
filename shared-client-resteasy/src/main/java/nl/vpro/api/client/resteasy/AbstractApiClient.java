@@ -50,7 +50,8 @@ public class AbstractApiClient {
 
     private static Logger LOG = LoggerFactory.getLogger(AbstractApiClient.class);
 
-    private static final Thread connectionGuardThread;
+    private static Thread connectionGuardThread;
+    private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
     private static final ConnectionGuard GUARD = new ConnectionGuard();
     static {
         try {
@@ -70,9 +71,7 @@ public class AbstractApiClient {
         } catch (Throwable t) {
             LOG.error(t.getClass().getName() + " " + t.getMessage());
         }
-        ThreadFactory threadFactory = ThreadPools.createThreadFactory("API Client purge idle connections", false, Thread.NORM_PRIORITY);
-        connectionGuardThread = threadFactory.newThread(GUARD);
-        connectionGuardThread.start();
+
     }
 
     protected final ClientHttpEngine clientHttpEngine;
@@ -200,20 +199,38 @@ public class AbstractApiClient {
         }
     }
 
-    private void watchIdleConnections() {
+    private synchronized void watchIdleConnections() {
         LOG.info("Watching idle connections in {}", connectionManager);
         GUARD.connectionManagers.add(connectionManager);
+        if (connectionGuardThread == null) {
+            GUARD.start();
+            connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
+            connectionGuardThread.start();
+        }
     }
 
-    private void unwatchIdleConnections() {
+    private synchronized void unwatchIdleConnections() {
         LOG.info("Unwatching idle connections in {}", connectionManager);
         GUARD.connectionManagers.remove(connectionManager);
+        if (GUARD.connectionManagers.isEmpty()) {
+            connectionGuardThread.interrupt();
+            GUARD.shutdown();
+            connectionGuardThread = null;
+        }
     }
 
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
         private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
+        
+        void shutdown() {
+            shutdown = true;
+        }
+
+        void start() {
+            shutdown = false;
+        }
         @Override
         public void run() {
             while (!shutdown) {
