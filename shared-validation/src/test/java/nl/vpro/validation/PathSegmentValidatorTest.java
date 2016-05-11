@@ -1,0 +1,29 @@
+package nl.vpro.validation;
+
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+/**
+ * @author Michiel Meeuwissen
+ * @since 4.4
+ */
+public class PathSegmentValidatorTest {
+    
+    
+    @Test
+    public void testUrlEncode() {
+       String withEncoding = "/de-vloer-op/19-08-2005/HUMAN_20050819%20vloer";
+        
+        assertThat(PathSegmentValidator.isValid(withEncoding)).isTrue();
+    }
+
+    @Test
+    public void testUrlUnencode() {
+        String withEncoding = "/de-vloer-op/19-08-2005/HUMAN_20050819 vloer";
+
+        assertThat(PathSegmentValidator.isValid(withEncoding)).isTrue();
+    }
+
+}

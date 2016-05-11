@@ -71,6 +71,8 @@
     <module>shared-logging</module>
     <module>shared-hibernate</module>
     <module>shared-persistence</module>
+    <module>shared-validation</module>
+
   </modules>
 
   <scm>
