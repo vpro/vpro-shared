@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReflectionUtils {
 
+
     private static Logger LOG = LoggerFactory.getLogger(ReflectionUtils.class);
 
 
@@ -58,7 +59,7 @@ public class ReflectionUtils {
         configured(null, instance, configFiles);
     }
 
-    public static void configured(String env, Object instance, String... configFiles) throws IOException {
+    public static void configured(Env env, Object instance, String... configFiles) throws IOException {
         Properties properties = filtered(env, getProperties(configFiles));
         LOG.debug("Configuring with {}", properties);
         properties.forEach((k, v) -> ReflectionUtils.setProperty(instance, k, v));
@@ -85,7 +86,7 @@ public class ReflectionUtils {
         }
         return properties;
     }
-    public static  Properties filtered(String env, Properties properties) {
+    public static  Properties filtered(Env env, Properties properties) {
         Properties result = new Properties();
         properties.forEach((k, v) -> {
             String key = (String) k;
@@ -101,7 +102,7 @@ public class ReflectionUtils {
                 }
                 result.put(key, explicitValue);
             } else {
-                if ((env == null && split[1].equals("test")) || split[1].equals(env)) {
+                if ((env == null && split[1].equals("test")) || (env != null && split[1].toUpperCase().equals(env.name()))) {
                     result.put(split[0], value);
                 }
             }
