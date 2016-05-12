@@ -70,6 +70,9 @@ public class DateUtils {
     }
 
     public static Instant toInstant(Date date) {
+        if (date instanceof java.sql.Date || date instanceof  java.sql.Time) {
+            date = new Date(date.getTime());
+        }
         return date == null ? null : date.toInstant();
     }
 }
