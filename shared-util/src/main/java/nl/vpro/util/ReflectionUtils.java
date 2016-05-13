@@ -101,11 +101,17 @@ public class ReflectionUtils {
                     }
                 }
                 result.put(key, explicitValue);
-            } else {
-                if ((env == null && split[1].equals("test")) || (env != null && split[1].toUpperCase().equals(env.name()))) {
-                    result.put(split[0], value);
-                }
             }
+        });
+        properties.forEach((k, v) -> {
+                String key = (String) k;
+                String value = (String) v;
+                String[] split = key.split("\\.", 2);
+                if (split.length > 1) {
+                    if ((env == null && split[1].equals("test") && ! result.containsKey(split[0])) || (env != null && split[1].toUpperCase().equals(env.name()))) {
+                        result.put(split[0], value);
+                    }
+                }
         });
         return result;
     }
