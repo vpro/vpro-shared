@@ -62,6 +62,7 @@ public class URLResource<T> {
     private long notCheckedCount = 0;
     private long checkedCount = 0;
     private long changesCount = 0;
+    private long errorCount = 0;
     private boolean async = false;
     private T empty = null;
 
@@ -224,6 +225,7 @@ public class URLResource<T> {
                 }
                 lastLoad = Instant.now();
                 lastModified = null;
+                errorCount++;
                 expires = Instant.now().plus(errorCache);
                 LOG.warn(code + ":" +  url + ": (caching until " + expires + ")");
 
@@ -265,6 +267,10 @@ public class URLResource<T> {
 
     public long getCheckedCount() {
         return checkedCount;
+    }
+
+    public long getErrorCount() {
+        return errorCount;
     }
 
     public Duration getMaxAge() {
