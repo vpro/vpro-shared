@@ -9,7 +9,7 @@ import java.time.Instant;
  * @author Michiel Meeuwissen
  * @since 0.36
  */
-@Converter
+@Converter(autoApply = true)
 public class InstantToTimestampConverter implements AttributeConverter<Instant, Timestamp> {
 
     @Override
