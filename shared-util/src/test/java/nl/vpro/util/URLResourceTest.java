@@ -2,6 +2,7 @@ package nl.vpro.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLConnection;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Test;
+import org.mockito.stubbing.Answer;
 
 import static nl.vpro.util.URLResource.PROPERTIES;
 import static org.junit.Assert.assertEquals;
@@ -74,8 +76,8 @@ public class URLResourceTest {
     @Test
     public void broadcasters503() throws IOException {
         HttpURLConnection connection = mock(HttpURLConnection.class);
-        when(connection.getResponseCode()).thenReturn(503, 200);
-        when(connection.getInputStream()).thenReturn(new ByteArrayInputStream("VPRO=VPRO".getBytes()));
+        when(connection.getResponseCode()).thenReturn(503, 200, 500, 200);
+        when(connection.getInputStream()).thenAnswer((Answer<InputStream>) invocation -> new ByteArrayInputStream("VPRO=VPRO".getBytes()));
 
         URLResource<Properties> broadcasters = new URLResource<Properties>(URI.create("http://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
             @Override
@@ -90,10 +92,24 @@ public class URLResourceTest {
         assertEquals(0, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());
         assertEquals(0, broadcasters.getNotCheckedCount());
+        assertEquals(1, broadcasters.getErrorCount());
         Properties props = broadcasters.get();
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());
         assertEquals(0, broadcasters.getNotCheckedCount());
+        assertEquals(1, broadcasters.getErrorCount());
+        assertEquals(1, props.size());
+        props = broadcasters.get();
+        assertEquals(1, broadcasters.getChangesCount());
+        assertEquals(0, broadcasters.getNotModifiedCount());
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertEquals(2, broadcasters.getErrorCount());
+        assertEquals(1, props.size());
+        props = broadcasters.get();
+        assertEquals(2, broadcasters.getChangesCount());
+        assertEquals(0, broadcasters.getNotModifiedCount());
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertEquals(2, broadcasters.getErrorCount());
         assertEquals(1, props.size());
     }
 }
