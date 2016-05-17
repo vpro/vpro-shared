@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -30,11 +31,11 @@ public class URLResource<T> {
 
 
     public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {
-        return new URLResource<>(url, PROPERTIES, callbacks);
+        return new URLResource<>(url, PROPERTIES, new Properties(), callbacks);
     }
 
     public static URLResource<Map<String, String>> map(URI url, Consumer<Map<String, String>>... callbacks) {
-        return new URLResource<>(url, MAP, callbacks);
+        return new URLResource<>(url, MAP, new HashMap<>(), callbacks);
     }
     private static final int SC_OK = 200;
     private static final int SC_NOT_MODIFIED = 304;
@@ -49,6 +50,7 @@ public class URLResource<T> {
     private Instant expires = null;
     private Duration maxAge = Duration.of(1, ChronoUnit.HOURS);
     private Duration minAge = Duration.of(5, ChronoUnit.MINUTES);
+    private Duration errorCache = Duration.of(1, ChronoUnit.MINUTES);
 
 
     private final Function<InputStream, T> reader;
@@ -61,23 +63,37 @@ public class URLResource<T> {
     private long checkedCount = 0;
     private long changesCount = 0;
     private boolean async = false;
+    private T empty = null;
 
     private ScheduledFuture<?> future = null;
     private Consumer<T>[] callbacks;
 
 
-    public URLResource(URI url, Function<InputStream, T> reader, Consumer<T>... callbacks) {
+
+    public URLResource(URI url, Function<InputStream, T> reader, T empty, Consumer<T>... callbacks) {
         this.url = url;
+        this.empty = empty;
         this.reader = reader;
         this.callbacks = callbacks;
 
     }
 
 
+    public URLResource(URI url, Function<InputStream, T> reader, Consumer<T>... callbacks) {
+        this(url, reader, null, callbacks);
+    }
+
+
     public T get() {
-        if (! async || result == null) {
+        if (result == null) {
+            if (async) {
+                return empty;
+            }
+        }
+        if (! async) {
             getCachedResource();
         }
+
         return result;
     }
 
@@ -92,13 +108,17 @@ public class URLResource<T> {
             if (this.url.getScheme().equals("classpath")) {
                 getCachedResource(this.url.toString().substring("classpath:".length() + 1));
             } else {
-                URLConnection connection = url.toURL().openConnection();
+                URLConnection connection = openConnection();
                 getCachedResource(connection);
 
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    URLConnection openConnection() throws IOException {
+        return url.toURL().openConnection();
     }
 
     void getCachedResource(String resource) {
@@ -135,14 +155,15 @@ public class URLResource<T> {
             LOG.info("Not loading {} as it is not yet expired", url);
             return;
         }
-        boolean ifModifiedCheck = connection instanceof HttpURLConnection;
-        if (ifModifiedCheck && lastModified != null) {
+        boolean httpUrl = connection instanceof HttpURLConnection;
+        if (httpUrl && lastModified != null) {
             if (lastLoad == null || lastLoad.isAfter(Instant.now().minus(maxAge))) {
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
             } else {
-                // last load was pretty long ago, simply do a normal request always.
-                ifModifiedCheck = false;
+                LOG.debug("last load was pretty long ago, simply do a normal request");
             }
+        }
+        if (httpUrl) {
             code = ((HttpURLConnection) connection).getResponseCode();
         } else {
             code = SC_OK;
@@ -184,35 +205,29 @@ public class URLResource<T> {
                     expires = maxExpires;
                 }
                 T newResult = reader.apply(stream);
-                if (ifModifiedCheck) {
-                    if (newResult != null) {
-                        if (result == null) {
-                            LOG.info("Loaded {} -> {}", url, lastModified);
-                        } else {
-                            LOG.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod , lastModified);
-                        }
-                        changesCount++;
-                        result = newResult;
-                        callBack();
+                if (newResult != null) {
+                    if (result == null) {
+                        LOG.info("Loaded {} -> {}", url, lastModified);
+                    } else {
+                        LOG.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod , lastModified);
                     }
-                } else {
-                    if (newResult != null) {
-                        if (result != null && !Objects.equals(result, newResult)) {
-                            result = newResult;
-                            callBack();
-                            changesCount++;
-                            LOG.info("Reloaded {}. It is modified since {} (Reason unknown)", url, lastModified);
-                        } else {
-                            result = newResult;
-                        }
-                    }
-
+                    changesCount++;
+                    result = newResult;
+                    callBack();
                 }
                 stream.close();
                 lastLoad = Instant.now();
                 break;
             default:
-                LOG.error(code + ":" + connection);
+                if (result == null) {
+                    result = empty;
+                }
+                lastLoad = Instant.now();
+                lastModified = null;
+                expires = Instant.now().plus(errorCache);
+                LOG.warn(code + ":" +  url + ": (caching until " + expires + ")");
+
+
         }
 
     }
@@ -270,6 +285,14 @@ public class URLResource<T> {
         return this;
     }
 
+    public Duration getErrorCache() {
+        return errorCache;
+    }
+
+    public URLResource<T> setErrorCache(Duration errorCache) {
+        this.errorCache = errorCache;
+        return this;
+    }
 
     public URLResource<T> setCallbacks(Consumer<T>... callbacks) {
         this.callbacks = callbacks;
@@ -282,8 +305,15 @@ public class URLResource<T> {
 
     public URLResource<T> setAsync(boolean async) {
         this.async = async;
-        if (this.async && future == null) {
-            future = ThreadPools.backgroundExecutor.scheduleAtFixedRate(new ScheduledRunnable(), 0, 10, TimeUnit.SECONDS);
+        if (this.async) {
+            if (future == null) {
+                future = ThreadPools.backgroundExecutor.scheduleAtFixedRate(new ScheduledRunnable(), 0, 10, TimeUnit.SECONDS);
+            }
+        } else {
+            if (future != null) {
+                future.cancel(true);
+                future = null;
+            }
         }
         return this;
     }
@@ -293,7 +323,11 @@ public class URLResource<T> {
         @Override
         public void run() {
             if (async) {
-                URLResource.this.getCachedResource();
+                try {
+                    URLResource.this.getCachedResource();
+                } catch (Exception e) {
+                    LOG.error(e.getMessage());
+                }
             }
         }
     }

@@ -1,14 +1,21 @@
 package nl.vpro.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URLConnection;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Test;
 
+import static nl.vpro.util.URLResource.PROPERTIES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -62,5 +69,33 @@ public class URLResourceTest {
         assertEquals(0, broadcasters.getNotCheckedCount());
         broadcasters.get();
         assertEquals(1, broadcasters.getNotCheckedCount());
+    }
+
+    @Test
+    public void broadcasters503() throws IOException {
+        HttpURLConnection connection = mock(HttpURLConnection.class);
+        when(connection.getResponseCode()).thenReturn(503, 200);
+        when(connection.getInputStream()).thenReturn(new ByteArrayInputStream("VPRO=VPRO".getBytes()));
+
+        URLResource<Properties> broadcasters = new URLResource<Properties>(URI.create("http://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
+            @Override
+            public URLConnection openConnection() {
+                return connection;
+            }
+        }.setMinAge(Duration.ZERO).setErrorCache(Duration.ZERO);
+
+
+
+
+
+        assertTrue(broadcasters.get().size() == 0);
+        assertEquals(0, broadcasters.getChangesCount());
+        assertEquals(0, broadcasters.getNotModifiedCount());
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        Properties props = broadcasters.get();
+        assertEquals(1, broadcasters.getChangesCount());
+        assertEquals(0, broadcasters.getNotModifiedCount());
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertEquals(1, props.size());
     }
 }
