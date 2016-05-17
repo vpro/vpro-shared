@@ -86,8 +86,6 @@ public class URLResourceTest {
 
 
 
-
-
         assertTrue(broadcasters.get().size() == 0);
         assertEquals(0, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());
