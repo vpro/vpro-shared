@@ -4,9 +4,12 @@
  */
 package nl.vpro.validation;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.net.URISyntaxException;
 
 /**
  * @author rico
@@ -25,6 +28,7 @@ public class PathSegmentValidator implements ConstraintValidator<PathSegment, St
             return false;
         }
 
+
         java.net.URI url;
         try {
             url = new java.net.URI(pathSegment);
@@ -32,6 +36,10 @@ public class PathSegmentValidator implements ConstraintValidator<PathSegment, St
             return false;
         }
 
-        return pathSegment.equals(url.getPath());
+        try {
+            return URLDecoder.decode(pathSegment, "UTF-8").equals(url.getPath());
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
     }
 }

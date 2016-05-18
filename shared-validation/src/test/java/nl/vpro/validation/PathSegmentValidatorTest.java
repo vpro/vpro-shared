@@ -31,7 +31,7 @@ public class PathSegmentValidatorTest {
     public void testUrlUnencode() {
         String withEncoding = "/de-vloer-op/19-08-2005/HUMAN_20050819 vloer";
 
-        assertThat(PathSegmentValidator.isValid(withEncoding)).isTrue();
+        assertThat(PathSegmentValidator.isValid(withEncoding)).isFalse();
     }
 
 }
