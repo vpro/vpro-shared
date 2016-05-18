@@ -99,7 +99,7 @@ public class URLResource<T> {
     }
 
     void getCachedResource() {
-        if (result != null && lastLoad.plus(minAge).isAfter(Instant.now())) {
+        if (result != null && lastLoad != null && lastLoad.plus(minAge).isAfter(Instant.now())) {
             notCheckedCount++;
             return;
         }
@@ -153,7 +153,7 @@ public class URLResource<T> {
 
     void getCachedResource(URLConnection connection) throws IOException {
         if (result != null && expires != null && Instant.now().isBefore(expires)) {
-            LOG.info("Not loading {} as it is not yet expired", url);
+            LOG.debug("Not loading {} as it is not yet expired", url);
             return;
         }
         boolean httpUrl = connection instanceof HttpURLConnection;
