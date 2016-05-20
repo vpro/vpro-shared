@@ -5,7 +5,7 @@
   <parent>
     <artifactId>shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.42.1-SNAPSHOT</version>
+    <version>0.42.1</version>
   </parent>
 
   <artifactId>shared-jackson2</artifactId>
