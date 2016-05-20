@@ -11,7 +11,7 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.configuration.AbstractConfiguration;
+import org.apache.commons.configuration2.AbstractConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -66,7 +66,12 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
     @Override
-    public Iterator<String> getKeys() {
+    protected void clearPropertyDirect(String s) {
+        properties.remove(s);
+    }
+
+    @Override
+    public Iterator<String> getKeysInternal() {
         final Iterator<Object> i = properties.keySet().iterator();
         return new Iterator<String>() {
             @Override
@@ -87,20 +92,22 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         };
     }
 
+
     @Override
-    public Object getProperty(String s) {
+    public Object getPropertyInternal(String s) {
         return properties.getProperty(s);
     }
 
     @Override
-    public boolean containsKey(String s) {
+    public boolean containsKeyInternal(String s) {
         return properties.containsKey(s);
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyInternal() {
         return properties.isEmpty();
     }
+
 
     @Override
     public boolean exists() {
