@@ -30,10 +30,12 @@ import org.slf4j.LoggerFactory;
 public class URLResource<T> {
 
 
+    @SafeVarargs
     public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {
         return new URLResource<>(url, PROPERTIES, new Properties(), callbacks);
     }
 
+    @SafeVarargs
     public static URLResource<Map<String, String>> map(URI url, Consumer<Map<String, String>>... callbacks) {
         return new URLResource<>(url, MAP, new HashMap<>(), callbacks);
     }
@@ -70,7 +72,7 @@ public class URLResource<T> {
     private Consumer<T>[] callbacks;
 
 
-
+    @SafeVarargs
     public URLResource(URI url, Function<InputStream, T> reader, T empty, Consumer<T>... callbacks) {
         this.url = url;
         this.empty = empty;
@@ -79,7 +81,7 @@ public class URLResource<T> {
 
     }
 
-
+    @SafeVarargs
     public URLResource(URI url, Function<InputStream, T> reader, Consumer<T>... callbacks) {
         this(url, reader, null, callbacks);
     }
@@ -313,7 +315,8 @@ public class URLResource<T> {
         return this;
     }
 
-    public URLResource<T> setCallbacks(Consumer<T>... callbacks) {
+    @SafeVarargs
+    public final URLResource<T> setCallbacks(Consumer<T>... callbacks) {
         this.callbacks = callbacks;
         return this;
     }
