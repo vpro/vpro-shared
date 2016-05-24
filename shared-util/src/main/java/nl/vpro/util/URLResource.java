@@ -113,7 +113,11 @@ public class URLResource<T> {
                 getCachedResource(connection);
 
             }
+        } catch(java.net.UnknownHostException uhe) {
+            errorCount++;
+            LOG.warn(uhe.getClass().getName() + " " + uhe.getMessage());
         } catch (IOException e) {
+            errorCount++;
             LOG.error(e.getMessage(), e);
         }
     }
@@ -157,6 +161,7 @@ public class URLResource<T> {
             return;
         }
         boolean httpUrl = connection instanceof HttpURLConnection;
+        code = -1;
         if (httpUrl && lastModified != null) {
             if (lastLoad == null || lastLoad.isAfter(Instant.now().minus(maxAge))) {
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
@@ -271,6 +276,14 @@ public class URLResource<T> {
 
     public long getErrorCount() {
         return errorCount;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public Instant getExpires() {
+        return expires;
     }
 
     public Duration getMaxAge() {
