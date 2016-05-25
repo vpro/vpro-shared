@@ -47,33 +47,37 @@ public class ViewRefresher implements Runnable {
         init(classes, false);
     }
     private void init(List<Class<?>> classes, boolean resolveFields) {
-        ThreadPools.backgroundExecutor.scheduleAtFixedRate(this, 0, scheduleRate, TimeUnit.MINUTES);
-        for (Class<?> c : classes) {
-            for (Method m : c.getMethods()) {
-                View view = m.getAnnotation(View.class);
-                if (view != null) {
-                    String name = view.name();
-                    if (name.length() > 0) {
-                        views.add(name);
+        if (scheduleRate > 0) {
+            ThreadPools.backgroundExecutor.scheduleAtFixedRate(this, 0, scheduleRate, TimeUnit.MINUTES);
+            for (Class<?> c : classes) {
+                for (Method m : c.getMethods()) {
+                    View view = m.getAnnotation(View.class);
+                    if (view != null) {
+                        String name = view.name();
+                        if (name.length() > 0) {
+                            views.add(name);
+                        }
+                    }
+                }
+                if (resolveFields) {
+                    try {
+                        Field field = c.getDeclaredField(designDocumentId);
+                        field.setAccessible(true);
+                        Class<?> t = field.getType();
+                        if (t == String.class) {
+                            LOG.info("{} is a constant in {}, taking its value {}", designDocumentId, c, field.get(null));
+                            designDocumentId = (String) field.get(null);
+                        }
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        LOG.debug(e.getMessage());
                     }
                 }
             }
-            if (resolveFields) {
-                try {
-                    Field field = c.getDeclaredField(designDocumentId);
-                    field.setAccessible(true);
-                    Class<?> t = field.getType();
-                    if (t == String.class) {
-                        LOG.info("{} is a constant in {}, taking its value {}", designDocumentId, c, field.get(null));
-                        designDocumentId = (String) field.get(null);
-                    }
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    LOG.debug(e.getMessage());
-                }
-            }
-        }
 
-        LOG.info("Refreshing views {}: {}", couchDbConnector.getDatabaseName(), views);
+            LOG.info("Refreshing views {}: {}", couchDbConnector.getDatabaseName(), views);
+        } else {
+            LOG.info("Schedule rate < 0, not scheduling, not doing anything");
+        }
     }
 
     @Override
