@@ -72,7 +72,7 @@
     <module>shared-hibernate</module>
     <module>shared-persistence</module>
     <module>shared-validation</module>
-
+    <module>shared-ektorp</module>
   </modules>
 
   <scm>
@@ -109,6 +109,8 @@
     -->
     <!-- Hibernate Search 5 updates to Lucene 4 and requires a full re-index -->
     <hibernate.search.version>4.5.2.Final</hibernate.search.version>
+
+    <ektorp.version>1.4.2</ektorp.version>
   </properties>
 
   <dependencyManagement>
