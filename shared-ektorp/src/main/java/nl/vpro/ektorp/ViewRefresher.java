@@ -36,7 +36,7 @@ public class ViewRefresher implements Runnable {
         this.scheduleRate = scheduleRate;
         this.designDocumentId = designDocumentId;
         List<Class<?>> classes = Arrays.stream(classNames).collect(Collectors.toList());
-        init(classes);
+        init(classes, true);
     }
 
     public ViewRefresher(CouchDbConnector masterDb, int scheduleRate, Class<?> documents, Class<?>... clas) {
@@ -44,9 +44,9 @@ public class ViewRefresher implements Runnable {
         this.scheduleRate = scheduleRate;
         this.designDocumentId = NameConventions.designDocName(documents);
         List<Class<?>> classes = Arrays.stream(clas).collect(Collectors.toList());
-        init(classes);
+        init(classes, false);
     }
-    public void init(List<Class<?>> classes) {
+    private void init(List<Class<?>> classes, boolean resolveFields) {
         ThreadPools.backgroundExecutor.scheduleAtFixedRate(this, 0, scheduleRate, TimeUnit.MINUTES);
         for (Class<?> c : classes) {
             for (Method m : c.getMethods()) {
@@ -58,16 +58,18 @@ public class ViewRefresher implements Runnable {
                     }
                 }
             }
-            try {
-                Field field = c.getDeclaredField(designDocumentId);
-                field.setAccessible(true);
-                Class<?> t = field.getType();
-                if (t == String.class) {
-                    LOG.info("{} is a constant in {}, taking its value {}", designDocumentId, c, field.get(null));
-                    designDocumentId = (String) field.get(null);
+            if (resolveFields) {
+                try {
+                    Field field = c.getDeclaredField(designDocumentId);
+                    field.setAccessible(true);
+                    Class<?> t = field.getType();
+                    if (t == String.class) {
+                        LOG.info("{} is a constant in {}, taking its value {}", designDocumentId, c, field.get(null));
+                        designDocumentId = (String) field.get(null);
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    LOG.debug(e.getMessage());
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                LOG.error(e.getMessage(), e);
             }
         }
 
