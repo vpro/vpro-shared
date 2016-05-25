@@ -21,7 +21,7 @@ public class ViewRefresherTest {
 
         }
     }
-
+    @Test
     public void test() {
         CouchDbConnector connector = mock(CouchDbConnector.class);
         ViewRefresher refresher = new ViewRefresher(connector, 1, "DOC", TestClass.class);
