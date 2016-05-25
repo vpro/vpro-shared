@@ -86,13 +86,13 @@ public class ViewRefresher implements Runnable {
                     .designDocId(designDocumentId)
                     .staleOkUpdateAfter();
                 couchDbConnector.queryView(unstale);
-                LOG.info("Refreshed {}", view);
+                LOG.debug("Refreshed {}", view);
                 ViewQuery unstaleReduce = new ViewQuery()
                     .viewName(view)
                     .designDocId(designDocumentId)
                     .reduce(true)
                     .staleOkUpdateAfter();
-                LOG.info("Refreshed reduces {}", view);
+                LOG.debug("Refreshed reduces {}", view);
                 couchDbConnector.queryView(unstaleReduce);
             } catch (Exception e) {
                 LOG.warn(e.getClass().getName() + " " + e.getMessage());
