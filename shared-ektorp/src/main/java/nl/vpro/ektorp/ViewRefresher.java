@@ -76,7 +76,7 @@ public class ViewRefresher implements Runnable {
 
             LOG.info("Refreshing views {}: {}", couchDbConnector.getDatabaseName(), views);
         } else {
-            LOG.info("Schedule rate < 0, not scheduling, not doing anything");
+            LOG.info("Schedule rate =< 0, not scheduling, not doing anything");
         }
     }
 
@@ -85,23 +85,14 @@ public class ViewRefresher implements Runnable {
         LOG.info("Now refreshing views {} {}", couchDbConnector.getDatabaseName(), views);
         for (String view : views) {
             try {
-                ViewQuery unstale = new ViewQuery()
-                    .viewName(view)
-                    .designDocId(designDocumentId)
-                    .staleOkUpdateAfter();
-                couchDbConnector.queryView(unstale);
+                couchDbConnector.queryView(new ViewQuery()
+                        .designDocId(designDocumentId)
+                        .viewName(view)
+                        .staleOkUpdateAfter());
                 LOG.debug("Refreshed {}", view);
-                ViewQuery unstaleReduce = new ViewQuery()
-                    .viewName(view)
-                    .designDocId(designDocumentId)
-                    .reduce(true)
-                    .staleOkUpdateAfter();
-                LOG.debug("Refreshed reduces {}", view);
-                couchDbConnector.queryView(unstaleReduce);
             } catch (Exception e) {
                 LOG.warn(e.getClass().getName() + " " + e.getMessage());
             }
         }
     }
-
 }
