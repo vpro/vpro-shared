@@ -76,9 +76,9 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/trunk</connection>
-    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/trunk</developerConnection>
-    <url>https://subversion.vpro.nl/viewvc/nl/vpro/shared/trunk</url>
+    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/branches/REL-0.44-SNAPSHOT</connection>
+    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/branches/REL-0.44-SNAPSHOT</developerConnection>
+    <url>https://subversion.vpro.nl/viewvc/nl/vpro/shared/branches/REL-0.44-SNAPSHOT</url>
   </scm>
 
   <properties>
