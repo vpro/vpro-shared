@@ -2,6 +2,7 @@ package nl.vpro.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLConnection;
@@ -10,10 +11,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -39,6 +37,13 @@ public class URLResource<T> {
     public static URLResource<Map<String, String>> map(URI url, Consumer<Map<String, String>>... callbacks) {
         return new URLResource<>(url, MAP, new HashMap<>(), callbacks);
     }
+
+
+    @SafeVarargs
+    public static <S> URLResource<List<S>> beansFromProperties(Function<String, S> constructor, URI url, Consumer<List<S>>... callbacks) {
+        return new URLResource<>(url, beansFromProperties(constructor), new ArrayList<>(), callbacks);
+    }
+
     private static final int SC_OK = 200;
     private static final int SC_NOT_MODIFIED = 304;
 
@@ -93,7 +98,7 @@ public class URLResource<T> {
                 return empty;
             }
         }
-        if (! async) {
+        if (!async) {
             getCachedResource();
         }
 
@@ -115,7 +120,7 @@ public class URLResource<T> {
                 getCachedResource(connection);
 
             }
-        } catch(java.net.UnknownHostException uhe) {
+        } catch (java.net.UnknownHostException uhe) {
             errorCount++;
             LOG.warn(uhe.getClass().getName() + " " + uhe.getMessage());
         } catch (IOException e) {
@@ -134,7 +139,7 @@ public class URLResource<T> {
             if (result == null) {
                 lastLoad = Instant.now();
                 lastModified = Instant.now();
-                LOG.info("Loaded {} from {}",  newResult , this.url);
+                LOG.info("Loaded {} from {}", newResult, this.url);
             } else {
                 if (!Objects.equals(result, newResult)) {
                     LOG.info("Reloaded {} from {}", newResult, this.url);
@@ -217,7 +222,7 @@ public class URLResource<T> {
                     if (result == null) {
                         LOG.info("Loaded {} -> {}", url, lastModified);
                     } else {
-                        LOG.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod , lastModified);
+                        LOG.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod, lastModified);
                     }
                     changesCount++;
                     result = newResult;
@@ -234,7 +239,7 @@ public class URLResource<T> {
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
-                LOG.warn(code + ":" +  url + ": (caching until " + expires + ")");
+                LOG.warn(code + ":" + url + ": (caching until " + expires + ")");
 
 
         }
@@ -374,4 +379,28 @@ public class URLResource<T> {
         }
         return props.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue())));
     };
+
+    public static <S> Function<InputStream, List<S>> beansFromProperties(Function<String, S> constructor) {
+        return
+            inputStream -> {
+                Map<String, String> properties = MAP.apply(inputStream);
+                Map<String, S> result = new LinkedHashMap<>();
+                properties.entrySet().forEach(e ->
+                    {
+                        String[] key = e.getKey().split("\\.", 2);
+                        S g = result.get(key[0]);
+                        if (g == null) {
+                            g = constructor.apply(key[0]);
+                            result.put(key[0], g);
+                        }
+                        if (key.length > 1) {
+                            ReflectionUtils.setProperty(g, key[1], e.getValue());
+                        }
+                    }
+
+                );
+                return new ArrayList<>(result.values());
+            };
+
+    }
 }
