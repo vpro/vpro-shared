@@ -26,10 +26,11 @@ public class ReflectionUtils {
         String k = (String) key;
         String v = (String) value;
         String setter = "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+        Class<?> parameterClass = null;
         for (Method m : methods) {
             if (m.getName().equals(setter) && m.getParameterCount() == 1) {
                 try {
-                    Class<?> parameterClass = m.getParameters()[0].getType();
+                    parameterClass = m.getParameters()[0].getType();
                     if (String.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, v);
                     } else if (boolean.class.isAssignableFrom(parameterClass)) {
@@ -41,7 +42,7 @@ public class ReflectionUtils {
                     } else if (double.class.isAssignableFrom(parameterClass) || Double.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, Double.valueOf(v));
                     } else {
-                        LOG.warn("Unrecognized parameter type");
+                        LOG.debug("Unrecognized parameter type " + parameterClass);
                         continue;
                     }
                     LOG.debug("Set {} from config file", key);
@@ -50,7 +51,9 @@ public class ReflectionUtils {
                     LOG.error(e.getMessage(), e);
                 }
             }
-
+        }
+        if (parameterClass != null) {
+            LOG.warn("Unrecognized parameter type " + parameterClass);
         }
         LOG.error("Unrecognized property {} on {}", key, instance.getClass());
     }
