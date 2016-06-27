@@ -2,7 +2,6 @@ package nl.vpro.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLConnection;
@@ -377,7 +376,9 @@ public class URLResource<T> {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
-        return props.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue())));
+        return props.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()), (u, v) -> {
+            throw new IllegalStateException(String.format("Duplicate key %s", u));
+        } ,  LinkedHashMap::new));
     };
 
     public static <S> Function<InputStream, List<S>> beansFromProperties(Function<String, S> constructor) {
