@@ -1,11 +1,13 @@
 package nl.vpro.xml.bind;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+import nl.vpro.util.TimeUtils;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
@@ -33,32 +35,7 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
 
     @Override
     public Instant unmarshal(String dateValue) {
-        if (dateValue == null) {
-            return null;
-        }
-
-
-        try {
-            return LocalDate.parse(dateValue).atStartOfDay().atZone(ZONE).toInstant();
-        } catch (DateTimeParseException dpe) {
-
-        }
-        try {
-            return LocalDateTime.parse(dateValue).atZone(ZONE).toInstant();
-        } catch (DateTimeParseException dpe) {
-
-        }
-        //return Instant.parse(dateValue);
-        try {
-            return OffsetDateTime.parse(dateValue).toInstant();
-        } catch (DateTimeParseException dtp) {
-
-        }
-        try {
-            return Instant.parse(dateValue);
-        } catch (DateTimeParseException dtp) {
-            return Instant.ofEpochMilli(Long.parseLong(dateValue));
-        }
+        return TimeUtils.parse(dateValue).orElse(null);
     }
 
     @Override
