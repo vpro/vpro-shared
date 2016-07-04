@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static nl.vpro.util.URLResource.PROPERTIES;
@@ -109,5 +110,21 @@ public class URLResourceTest {
         assertEquals(0, broadcasters.getNotCheckedCount());
         assertEquals(2, broadcasters.getErrorCount());
         assertEquals(1, props.size());
+    }
+
+    @Test
+    @Ignore
+    public void broadcastersReal() {
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://localhost:8071/broadcasters/"));
+        broadcasters.setMinAge(Duration.ZERO);
+        assertTrue(broadcasters.get().size() > 0);
+        assertEquals(1, broadcasters.getChangesCount());
+        assertEquals(0, broadcasters.getNotModifiedCount());
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        broadcasters.get();
+        assertEquals(1, broadcasters.getChangesCount());
+        assertEquals(1, broadcasters.getNotModifiedCount());
+        assertEquals(0, broadcasters.getNotCheckedCount());
+        System.out.println(broadcasters.get());
     }
 }
