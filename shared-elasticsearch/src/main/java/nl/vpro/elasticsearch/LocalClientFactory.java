@@ -19,7 +19,7 @@ public class LocalClientFactory implements ESClientFactory {
 
     private Client client;
 
-    private String path = "/tmp";
+    private String path = null;
 
     public synchronized Node node() {
         if(node == null) {
@@ -29,8 +29,9 @@ public class LocalClientFactory implements ESClientFactory {
                 .put("index.store.type", "memory");
 
             if (path != null) {
-//                .put("index.store.type", "simplefs")
-                builder.put("path.home", path).build();
+                builder
+                    .put("index.store.type", "simplefs")
+                    .put("path.home", path).build();
             }
 
             node = NodeBuilder.nodeBuilder()
