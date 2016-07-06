@@ -6,7 +6,6 @@ package nl.vpro.elasticsearch;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 
@@ -24,16 +23,19 @@ public class LocalClientFactory implements ESClientFactory {
 
     public synchronized Node node() {
         if(node == null) {
-            Settings settings = ImmutableSettings.settingsBuilder()
+            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder()
                 .put("http.enabled", "true")
                 .put("gateway.type", "none")
-                .put("index.store.type", "memory")
+                .put("index.store.type", "memory");
+
+            if (path != null) {
 //                .put("index.store.type", "simplefs")
-                .put("path.home", path).build();
+                builder.put("path.home", path).build();
+            }
 
             node = NodeBuilder.nodeBuilder()
                 .local(true)
-                .settings(settings)
+                .settings(builder)
                 .node();
         }
 
