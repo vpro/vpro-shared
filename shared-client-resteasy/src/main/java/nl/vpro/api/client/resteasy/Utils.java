@@ -16,7 +16,7 @@ public class Utils {
     private static Logger LOG = LoggerFactory.getLogger(Utils.class);
 
 
-    static <T> Optional<T> wrapNotFound(Supplier<T> t) {
+    public static <T> Optional<T> wrapNotFound(Supplier<T> t) {
 
         try {
             return Optional.ofNullable(t.get());
