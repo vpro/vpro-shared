@@ -12,8 +12,9 @@ import nl.vpro.util.UrlProvider;
 @Ignore("required running es")
 public class JoinClusterClientFactoryTest {
 
-    int port = 9302;
-    String clusterName = "elasticsearch_acceptatie";
+    int port = 9202;
+    //String clusterName = "elasticsearch_acceptatie";
+    String clusterName = "poms10aas";
 
     @Test
     public void join() {
@@ -37,5 +38,17 @@ public class JoinClusterClientFactoryTest {
         Client client = factory.client("test");
 
         System.out.println(client.prepareCount("test").get().getCount());
+    }
+
+
+    @Test
+    public void join3() {
+        ESClientFactoryImpl factory = new ESClientFactoryImpl();
+        factory.setTransportAddresses(Collections.singletonList(new UrlProvider("localhost", port)));
+        factory.setSniffCluster(false);
+        factory.setIgnoreClusterName(true);
+
+
+        Client client = factory.client("test");
     }
 }
