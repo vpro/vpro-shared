@@ -3,11 +3,10 @@ package nl.vpro.elasticsearch;
 import java.util.Collections;
 import java.util.Map;
 
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import nl.vpro.util.UrlProvider;
@@ -16,6 +15,7 @@ import nl.vpro.util.UrlProvider;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
+@Ignore("Requires actualy es connection")
 public class ElasticSearchIteratorTest {
 
     Client client;
@@ -29,7 +29,7 @@ public class ElasticSearchIteratorTest {
         client = factory.client("test");
     }
 
-    
+
     @Test
     public void test() {
         ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, SearchHit::getSource);
