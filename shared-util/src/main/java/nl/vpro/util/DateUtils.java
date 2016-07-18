@@ -5,6 +5,8 @@
 package nl.vpro.util;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -74,5 +76,15 @@ public class DateUtils {
             date = new Date(date.getTime());
         }
         return date == null ? null : date.toInstant();
+    }
+
+
+    public static Date toDate (Instant date) {
+        return date == null ? null : Date.from(date);
+    }
+
+
+    public static Date toDate(LocalDateTime date, ZoneId zoneId) {
+        return date == null ? null : Date.from(date.atZone(zoneId).toInstant());
     }
 }
