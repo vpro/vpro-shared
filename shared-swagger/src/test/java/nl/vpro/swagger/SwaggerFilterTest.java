@@ -20,10 +20,11 @@ public class SwaggerFilterTest {
         JsonFilter.Replacement<String> replacement = new JsonFilter.Replacement<>("basePath", "${api.basePath}", "bla");
         SwaggerFilter filter = new SwaggerFilter();
         OutputStream out = filter.transform(System.out, Arrays.asList(replacement));
-
         out.write(input.getBytes());
-
         out.close();
+
+
+
 
     }
 

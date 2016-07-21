@@ -57,8 +57,14 @@ public class AbstractApiClient {
         try {
             ResteasyProviderFactory resteasyProviderFactory = ResteasyProviderFactory.getInstance();
             try {
-                JacksonContextResolver jacksonContextResolver = new JacksonContextResolver();
-                resteasyProviderFactory.registerProviderInstance(jacksonContextResolver);
+
+
+                if (! resteasyProviderFactory.isRegistered(JacksonContextResolver.class)) {
+                    JacksonContextResolver jacksonContextResolver = new JacksonContextResolver();
+                    resteasyProviderFactory.registerProviderInstance(jacksonContextResolver);
+                } else {
+                    LOG.info("Already registered {}", JacksonContextResolver.class);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -225,7 +231,7 @@ public class AbstractApiClient {
 
         private boolean shutdown = false;
         private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
-        
+
         void shutdown() {
             shutdown = true;
             synchronized (this) {
