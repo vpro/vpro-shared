@@ -54,9 +54,19 @@ public class TimeUtils {
 
         }
         try {
-            return Optional.of(Instant.parse(dateValue));
+            return Optional.of(ZonedDateTime.parse(dateValue).toInstant());
         } catch (DateTimeParseException dtp) {
+        }
+        DateTimeParseException dtp;
+        try {
+            return Optional.of(Instant.parse(dateValue));
+        } catch (DateTimeParseException e) {
+            dtp = e;
+        }
+        try {
             return Optional.of(Instant.ofEpochMilli(Long.parseLong(dateValue)));
+        } catch (NumberFormatException nfe) {
+            throw dtp;
         }
 
     }
