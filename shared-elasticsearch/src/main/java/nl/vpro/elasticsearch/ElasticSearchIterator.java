@@ -1,6 +1,5 @@
 package nl.vpro.elasticsearch;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
@@ -17,8 +16,8 @@ import nl.vpro.util.CountedIterator;
 
 /**
  * A wrapper around the Elastic Search scroll interface.
- * 
- * See 
+ *
+ * See
  * @author Michiel Meeuwissen
  * @since 0.47
  */
@@ -34,12 +33,12 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     SearchResponse response;
     SearchHit[] hits;
     private long count = -1;
-    
+
     boolean hasNext;
     int i = -1;
     T next;
     boolean needsNext = true;
-    
+
 
     public ElasticSearchIterator(Client client, Function<SearchHit, T> adapt) {
         this.adapt = adapt;
@@ -114,6 +113,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
     @Override
     public Optional<Long> getSize() {
+        findNext();
         return Optional.of(response.getHits().getTotalHits());
     }
 
@@ -121,5 +121,5 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     public Long getCount() {
         return count;
     }
- 
+
 }
