@@ -30,9 +30,13 @@ public class TailAdder<T> implements Iterator<T> {
     Boolean adderHasNext = null;
     T last = null;
 
-
+    @SuppressWarnings("unchecked")
     public static <T> TailAdder withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
         return new TailAdder(wrapped, false, (Function<T, T>[]) adder);
+    }
+
+    public static <T> TailAdder withFunctions(Iterator<T> wrapped, Function<T, T> adder) {
+        return new TailAdder(wrapped, false, new Function[] { adder});
     }
 
     @SafeVarargs
