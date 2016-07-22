@@ -6,12 +6,17 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.17
  */
 public class TailAdder<T> implements Iterator<T> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TailAdder.class);
 
     private final boolean onlyIfEmpty;
 
@@ -94,8 +99,11 @@ public class TailAdder<T> implements Iterator<T> {
                         nextFromAdder = adder[addercount++].apply(getLast());
                         adderHasNext = true;
                         break;
-                    } catch (Exception e) {
+                    } catch (NoSuchElementException nse) {
                         // ignore
+                    } catch (Exception e) {
+                        LOG.warn(e.getMessage());
+
                     }
 
                 }
