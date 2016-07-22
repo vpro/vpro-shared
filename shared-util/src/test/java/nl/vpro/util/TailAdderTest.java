@@ -23,7 +23,7 @@ public class TailAdderTest {
     @Test
     public void onlyIfEmptyOnNotEmpty() {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
-        TailAdder<String> adder = new TailAdder<>(i, true, (last) -> "c");
+        TailAdder<String> adder = new TailAdder<>(i, true, () -> "c");
         assertEquals("a", adder.next());
         assertEquals("b", adder.next());
         assertEquals(false, adder.hasNext());

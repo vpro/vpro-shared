@@ -30,14 +30,19 @@ public class TailAdder<T> implements Iterator<T> {
     Boolean adderHasNext = null;
     T last = null;
 
+
+    public static <T> TailAdder withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
+        return new TailAdder(wrapped, false, (Function<T, T>[]) adder);
+    }
+
     @SafeVarargs
-    public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, T>... adder) {
+    private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, T>... adder) {
         this.wrapped = wrapped;
         this.onlyIfEmpty = onlyIfEmpty;
         this.adder = adder;
     }
 
-    public TailAdder(Iterator<T> wrapped, Function<T, T>... adder) {
+    private TailAdder(Iterator<T> wrapped, Function<T, T>... adder) {
         this(wrapped, false, adder);
     }
 
