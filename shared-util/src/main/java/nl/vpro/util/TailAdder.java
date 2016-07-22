@@ -3,7 +3,6 @@ package nl.vpro.util;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
@@ -16,7 +15,7 @@ public class TailAdder<T> implements Iterator<T> {
 
     private final boolean onlyIfEmpty;
 
-    private final Function<T, Optional<T>>[] adder;
+    private final Function<T, T>[] adder;
 
     private final Iterator<T> wrapped;
 
@@ -27,13 +26,13 @@ public class TailAdder<T> implements Iterator<T> {
     T last = null;
 
     @SafeVarargs
-    public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, Optional<T>>... adder) {
+    public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, T>... adder) {
         this.wrapped = wrapped;
         this.onlyIfEmpty = onlyIfEmpty;
         this.adder = adder;
     }
 
-    public TailAdder(Iterator<T> wrapped, Function<T, Optional<T>>... adder) {
+    public TailAdder(Iterator<T> wrapped, Function<T, T>... adder) {
         this(wrapped, false, adder);
     }
 
@@ -42,11 +41,13 @@ public class TailAdder<T> implements Iterator<T> {
     @SafeVarargs
     @Deprecated
     public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Callable<T>... adder) {
-        this(wrapped, onlyIfEmpty, Arrays.stream(adder).map(c -> {
+        this(wrapped, onlyIfEmpty, Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
             try {
-                return Optional.ofNullable(c.call());
+                return c.call();
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
-                return Optional.empty();
+                throw new RuntimeException(e);
             }
         }).toArray(Function[]::new));
     }
@@ -89,12 +90,14 @@ public class TailAdder<T> implements Iterator<T> {
             adderHasNext = false;
             if (wrapcount == 0 || ! onlyIfEmpty) {
                 while (addercount < adder.length) {
-                    Optional<T> next = adder[addercount++].apply(getLast());
-                    if (next.isPresent()) {
-                        nextFromAdder = next.get();
+                    try {
+                        nextFromAdder = adder[addercount++].apply(getLast());
                         adderHasNext = true;
                         break;
+                    } catch (Exception e) {
+                        // ignore
                     }
+
                 }
             }
         }
