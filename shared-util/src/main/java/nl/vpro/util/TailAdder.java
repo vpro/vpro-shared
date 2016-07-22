@@ -46,7 +46,7 @@ public class TailAdder<T> implements Iterator<T> {
     @SafeVarargs
     @Deprecated
     public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Callable<T>... adder) {
-        this(wrapped, onlyIfEmpty, Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
+        this(wrapped, onlyIfEmpty, (Function[]) Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
             try {
                 return c.call();
             } catch (RuntimeException e) {
