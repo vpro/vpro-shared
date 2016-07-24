@@ -34,11 +34,7 @@ public class TailAdder<T> implements Iterator<T> {
     public static <T> TailAdder withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
         return new TailAdder(wrapped, false, (Function<T, T>[]) adder);
     }
-
-    public static <T> TailAdder withFunctions(Iterator<T> wrapped, Function<T, T> adder) {
-        return new TailAdder(wrapped, false, new Function[] { adder});
-    }
-
+    
     @SafeVarargs
     private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, T>... adder) {
         this.wrapped = wrapped;
