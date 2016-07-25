@@ -4,6 +4,7 @@
  */
 package nl.vpro.util;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -81,6 +82,11 @@ public class DateUtils {
 
     public static Date toDate (Instant date) {
         return date == null ? null : Date.from(date);
+    }
+
+
+    public static Date toDate(Duration duration) {
+        return duration == null ? null : new Date(duration.toMillis());
     }
 
 
