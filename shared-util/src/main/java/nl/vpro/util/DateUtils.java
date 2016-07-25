@@ -84,6 +84,14 @@ public class DateUtils {
         return date == null ? null : Date.from(date);
     }
 
+    public static Long toLong(Instant instant) {
+        return instant == null ? null : instant.toEpochMilli();
+    }
+
+    public static Long toLong(Date date) {
+        return date == null ? null : date.getTime();
+    }
+
 
     public static Date toDate(Duration duration) {
         return duration == null ? null : new Date(duration.toMillis());
