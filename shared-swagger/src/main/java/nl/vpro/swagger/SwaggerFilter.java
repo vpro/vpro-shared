@@ -15,6 +15,10 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.ws.rs.core.MediaType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.JsonFilter;
 
@@ -24,6 +28,8 @@ import nl.vpro.jackson2.JsonFilter;
  * @since 0.21
  */
 public class SwaggerFilter implements Filter {
+
+    private static Logger LOG = LoggerFactory.getLogger(SwaggerFilter.class);
 
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -35,6 +41,27 @@ public class SwaggerFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
+
+        String accept = req.getHeader("accept");
+        if (accept != null) {
+            boolean json = false;
+            try {
+                String[] mtypes = accept.split(";", 2)[0].split(",");
+                for (String mtype : mtypes) {
+                    if (MediaType.valueOf(mtype).isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+                        json = true;
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                LOG.warn(e.getMessage());
+            }
+            if (! json) {
+                LOG.debug("Not json");
+                chain.doFilter(request, response);
+                return;
+            }
+        }
         String scheme = req.getHeader("X-Forwarded-Proto");
         long serverPort = req.getServerPort();
         if (scheme == null) {
@@ -51,7 +78,7 @@ public class SwaggerFilter implements Filter {
 		if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
 			newValue.append(':').append(serverPort);
 		}
-		newValue.append( req.getContextPath()).append("/api");
+		newValue.append(req.getContextPath()).append("/api");
         JsonFilter.Replacement<String> replacement =
 				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
         List<JsonFilter.Replacement> replacements = Collections.singletonList(replacement);
