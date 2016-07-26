@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 
 /**
+ * Adaption for xml:lang.
  * @author Michiel Meeuwissen
  * @since 0.47
  */
