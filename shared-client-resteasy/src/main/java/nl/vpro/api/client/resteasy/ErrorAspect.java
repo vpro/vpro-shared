@@ -75,14 +75,14 @@ public class ErrorAspect<T> implements InvocationHandler {
             l.error("Error for {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
-                Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
+                args == null ? "(no args)" : Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
                 mes);
         } else {
 
             l.info("For {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
-                Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
+                args == null ? "(no args)" : Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
                 mes);
         }
         throw t;
