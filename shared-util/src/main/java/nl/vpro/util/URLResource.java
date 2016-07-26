@@ -370,7 +370,7 @@ public class URLResource<T> {
 
     public static Function<InputStream, Map<String, String>> MAP = inputStream -> {
 
-        Properties props = new Properties();
+        Properties props = new LinkedProperties();
         try {
             props.load(inputStream);
         } catch (IOException e) {
