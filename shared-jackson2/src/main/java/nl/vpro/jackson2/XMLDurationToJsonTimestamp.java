@@ -56,4 +56,11 @@ public class XMLDurationToJsonTimestamp {
             return null;
         }
     }
+
+    public static class DeserializerJavaDuration extends JsonDeserializer<java.time.Duration> {
+        @Override
+        public java.time.Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            return java.time.Duration.ofMillis(jp.getLongValue());
+        }
+    }
 }
