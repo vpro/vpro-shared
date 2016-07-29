@@ -14,8 +14,16 @@
   </properties>
   <dependencies>
     <dependency>
+      <!-- contains javax.validation -->
       <groupId>javax</groupId>
       <artifactId>javaee-api</artifactId>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.mail</groupId>
+          <artifactId>javax.mail</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
