@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * A simple http client wrapping exactly one external resource, keeping track of cache headers.
  * @author Michiel Meeuwissen
  * @since 0.37
  */
