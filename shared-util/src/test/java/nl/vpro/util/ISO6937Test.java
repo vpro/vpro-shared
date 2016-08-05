@@ -67,5 +67,7 @@ public class ISO6937Test {
         assertEquals(
             string.toString(),
             new String(out.toByteArray(), "ISO-6937"));
+
+        assertEquals(string.toString().getBytes("ISO-6937"), out.toByteArray());
     }
 }
