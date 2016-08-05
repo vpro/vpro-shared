@@ -6,6 +6,7 @@ package nl.vpro.test.util.jackson2;
 
 import net.sf.json.test.JSONAssert;
 
+import java.io.IOException;
 import java.io.StringWriter;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -41,6 +42,12 @@ public class Jackson2TestUtil {
 
     public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
         return roundTripAndSimilar(input, expected, Jackson2Mapper.getInstance().getTypeFactory().constructType(input.getClass()));
+    }
+
+
+    public static <T> T assertJsonEquals(String text, String expected, Class<T> typeReference) throws IOException {
+        JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected, expected, text);
+        return MAPPER.readValue(text, typeReference);
     }
 
 

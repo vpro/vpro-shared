@@ -48,7 +48,7 @@ public class JAXBTestUtil {
         }
         return writer.toString();
     }
-    
+
 
 
     private static Marshaller getMarshallerForUnknownClasses(Class<?>... clazz) throws JAXBException {
@@ -142,6 +142,11 @@ public class JAXBTestUtil {
         } else {
             assertThat(diff.identical()).isTrue();
         }
+    }
+
+    public static <T> T similar(String input, String expected, Class<T> result) throws IOException, SAXException {
+        similar(input, expected);
+        return unmarshal(input, result);
     }
 
     public static void similar(InputStream input, String expected) throws IOException, SAXException {
