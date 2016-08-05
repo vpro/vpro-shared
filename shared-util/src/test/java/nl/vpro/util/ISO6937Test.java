@@ -38,6 +38,10 @@ public class ISO6937Test {
 
     }
     @Test
+    public void deconversion() {
+        assertEquals("Atat\u00fcrk".getBytes(ISO6937CharsetProvider.ISO6937), new byte[]{'A', 't', 'a', 't', (byte) 0xc8, 'u', 'r', 'k'});
+    }
+    @Test
     public void longStrings() throws IOException {
         // Testing whether everything works ok on the buffer boundaries.
 
