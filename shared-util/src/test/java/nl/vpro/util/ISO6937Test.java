@@ -7,6 +7,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import static nl.vpro.util.ISO6937CharsetProvider.ISO6937;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -19,7 +21,7 @@ public class ISO6937Test {
     public void registration() {
         Charset charset = Charset.availableCharsets().get("ISO-6937");
         assertNotNull(charset);
-        assertEquals(ISO6937CharsetProvider.ISO6937, charset);
+        assertEquals(ISO6937, charset);
     }
 
     @Test
@@ -28,18 +30,18 @@ public class ISO6937Test {
             "\u00fc",
             new String(
                 new byte[] { (byte) 0xc8, (byte) 'u'},
-                ISO6937CharsetProvider.ISO6937));
+                ISO6937));
         assertEquals(
             "Atat\u00fcrk",
             new String(
                 new byte[] { 'A', 't', 'a', 't', (byte) 0xc8, 'u', 'r', 'k'},
-                ISO6937CharsetProvider.ISO6937));
+                ISO6937));
 
 
     }
     @Test
     public void deconversion() {
-        assertEquals("Atat\u00fcrk".getBytes(ISO6937CharsetProvider.ISO6937), new byte[]{'A', 't', 'a', 't', (byte) 0xc8, 'u', 'r', 'k'});
+        assertArrayEquals("Atat\u00fcrk".getBytes(ISO6937), new byte[]{'A', 't', 'a', 't', (byte) 0xc8, 'u', 'r', 'k'});
     }
     @Test
     public void longStrings() throws IOException {
@@ -68,6 +70,6 @@ public class ISO6937Test {
             string.toString(),
             new String(out.toByteArray(), "ISO-6937"));
 
-        assertEquals(string.toString().getBytes("ISO-6937"), out.toByteArray());
+        assertArrayEquals(string.toString().getBytes("ISO-6937"), out.toByteArray());
     }
 }
