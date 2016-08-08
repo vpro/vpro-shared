@@ -13,6 +13,7 @@ import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.NOPLogger;
 
 /**
  * Simply join the cluster. That is perhaps the best implementation.
@@ -56,7 +57,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private Settings getSettings(Logger logger) {
         if (logger == null) {
-            logger = LoggerFactory.getLogger(JoinClusterClientFactory.class);
+            logger = NOPLogger.NOP_LOGGER;
         }
         ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder()
             .put("http.enabled", httpEnabled);
