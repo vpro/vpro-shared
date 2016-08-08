@@ -39,7 +39,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
     private synchronized Node node(Logger logger) {
         if (node == null) {
 
-            Settings settings = getSettings();
+            Settings settings = getSettings(logger);
             logger.info("Creating es node for {}", this);
             node = NodeBuilder.nodeBuilder()
 
@@ -54,7 +54,10 @@ public class JoinClusterClientFactory implements ESClientFactory {
         return node;
     }
 
-    private Settings getSettings() {
+    private Settings getSettings(Logger logger) {
+        if (logger == null) {
+            logger = LoggerFactory.getLogger(JoinClusterClientFactory.class);
+        }
         ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder()
             .put("http.enabled", httpEnabled);
 
@@ -62,10 +65,15 @@ public class JoinClusterClientFactory implements ESClientFactory {
             settings.put("discovery.zen.ping.multicast.enabled", false);
             settings.put("discovery.zen.ping.unicast.enabled", true);
             settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
+        } else {
+            logger.warn("No unicast hosts set. Will use multicast");
+            settings.put("discovery.zen.ping.multicast.enabled", true);
+            settings.put("discovery.zen.ping.unicast.enabled", false);
         }
         if (nodeName != null) {
             settings.put("node.name", nodeName);
-
+        } else {
+            logger.info("node name not set");
         }
         settings.put("transport.tcp.port", tcpPort);
         return settings.build();
@@ -158,7 +166,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
     @Override
     public String toString() {
 
-        return "ES " + (nodeName == null ? "" : (nodeName + "@")) + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings().getAsMap();
+        return "ES " + (nodeName == null ? "" : (nodeName + "@")) + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings(null).getAsMap();
     }
 
 
