@@ -53,4 +53,9 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
         return configured;
     }
 
+    @Override
+    public String toString() {
+        return String.valueOf(map) + " (" + configured + ")";
+    }
+
 }
