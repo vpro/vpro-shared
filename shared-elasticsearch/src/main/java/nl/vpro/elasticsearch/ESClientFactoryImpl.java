@@ -58,7 +58,14 @@ public class ESClientFactoryImpl implements  ESClientFactory {
     @Override
     public Client client(String logName){
         if (client == null) {
-            client = constructClient(logName);
+            synchronized (this) {
+                if (client == null) {
+                    LOG.info("Building client on behalf of {}", logName);
+                    client = constructClient(logName);
+                } else {
+                    LOG.info("Building client on behalf of {} not needed (already happend in other thread)", logName);
+                }
+            }
         }
         return client;
 
