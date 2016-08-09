@@ -47,6 +47,8 @@ public class ESClientFactoryImpl implements  ESClientFactory {
      */
     private Integer pingIntervalInSeconds;
 
+    private boolean implicitHttpToJavaPort = false;
+
     private Client client = null;
 
     Client buildClient() {
@@ -81,7 +83,12 @@ public class ESClientFactoryImpl implements  ESClientFactory {
 
         TransportClient transportClient = new TransportClient(builder.build());
         for (UrlProvider urlProvider : transportAddresses) {
-            transportClient.addTransportAddress(new InetSocketTransportAddress(urlProvider.getHost(), urlProvider.getPort()));
+            int port = urlProvider.getPort();
+            if (implicitHttpToJavaPort && port < 9300 && port >= 9200) {
+                LOG.info("Port is configured {}, but we need a java protocol port. Taking {}", port, port + 100);
+                port += 100;
+            }
+            transportClient.addTransportAddress(new InetSocketTransportAddress(urlProvider.getHost(), port));
         }
         LOG.info("Build es client {} {} ({})", logName, transportAddresses, clusterName);
 
@@ -125,6 +132,10 @@ public class ESClientFactoryImpl implements  ESClientFactory {
     public void setPingIntervalInSeconds(Integer pingIntervalInSeconds) {
         reset();
         this.pingIntervalInSeconds = pingIntervalInSeconds;
+    }
+
+    public void setImplicitHttpToJavaPort(boolean implicitHttpToJavaPort) {
+        this.implicitHttpToJavaPort = implicitHttpToJavaPort;
     }
 
     private void reset() {
