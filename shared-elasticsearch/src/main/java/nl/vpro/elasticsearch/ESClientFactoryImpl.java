@@ -60,10 +60,10 @@ public class ESClientFactoryImpl implements  ESClientFactory {
         if (client == null) {
             synchronized (this) {
                 if (client == null) {
-                    LOG.info("Building client on behalf of {}", logName);
+                    LOG.info("Constructing client on behalf of {}", logName);
                     client = constructClient(logName);
                 } else {
-                    LOG.info("Building client on behalf of {} not needed (already happend in other thread)", logName);
+                    LOG.info("Construction client on behalf of {} not needed (already happend in other thread)", logName);
                 }
             }
         }
