@@ -15,14 +15,21 @@ public class UrlProviderTest {
         assertEquals("a", provider.getHost());
         assertEquals(80, provider.getPort());
 
-        provider.setUri("bla"); // uri?
+        provider.setPath("bla"); // uri?
 
-        assertEquals("bla", provider.getUri());
+        assertEquals("bla", provider.getPath());
 
         assertEquals("http://a/bla", provider.getUrl());
 
         provider = new UrlProvider("a", 81);
         assertEquals("http://a:81/", provider.getUrl());
+
+    }
+
+    @Test
+    public void testUrl() throws Exception {
+        UrlProvider provider = UrlProvider.fromUrl("http://a:81/b");
+        assertEquals("http://a:81/b", provider.getUrl());
 
     }
 
