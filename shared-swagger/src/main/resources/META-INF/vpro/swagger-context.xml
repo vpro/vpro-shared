@@ -3,7 +3,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+  <!--
   <bean class="io.swagger.jaxrs.listing.ApiListingResourceJSON"/>
+  
+  -->
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
 
@@ -17,13 +20,12 @@
     <property name="initParameters">
       <props>
         <prop key="api.version">${api.version}</prop>
-        <!-- Very silly, swagger is stupid. It could simply get this from the requests -->
-        <prop key="swagger.api.basepath">${api.basePath}</prop>
       </props>
     </property>
   </bean>
 
  <!-- Swagger Providers -->
-  <bean class="io.swagger.jaxrs.listing.ResourceListingProvider"/>
-  <bean class="io.swagger.jaxrs.listing.ApiDeclarationProvider"/>
+  <bean class="io.swagger.jaxrs.listing.SwaggerSerializers"/>
+  <bean class="io.swagger.jaxrs.listing.ApiListingResource"/>
+  <bean class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource" />
 </beans>

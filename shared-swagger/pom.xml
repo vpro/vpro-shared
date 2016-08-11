@@ -46,6 +46,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
+        <version>2.2</version>
         <configuration>
           <attachClasses>true</attachClasses>
           <packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
