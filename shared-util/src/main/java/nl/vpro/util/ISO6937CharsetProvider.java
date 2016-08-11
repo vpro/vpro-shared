@@ -675,7 +675,11 @@ public class ISO6937CharsetProvider extends CharsetProvider {
                     return CoderResult.OVERFLOW;
                 }
 
-                byteBuffer.put(ArrayUtils.toPrimitive(convert(charBuffer.array())));
+                byte[] array = ArrayUtils.toPrimitive(convert(charBuffer.array()));
+                if (array.length > byteBuffer.remaining()) {
+                    return CoderResult.OVERFLOW;
+                }
+                byteBuffer.put(array);
                 charBuffer.position(charBuffer.length());
             }
             return CoderResult.UNDERFLOW;
