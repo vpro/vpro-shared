@@ -145,7 +145,7 @@
 
         SwaggerApi.prototype.buildFrom1_1Spec = function(response) {
             var api, isApi, newName, operation, res, resource, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
-            console.log("This API is using a deprecated version of Swagger!  Please see http://github.com/wordnik/swagger-core/wiki for more info");
+            console.log("This API is using a deprecated version of Swagger!  Please see http://github.io.swagger-core/wiki for more info");
             if(response.apiVersion != null) {
                 this.apiVersion = response.apiVersion;
             }

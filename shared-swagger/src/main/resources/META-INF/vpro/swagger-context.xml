@@ -3,13 +3,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <bean class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON"/>
+  <bean class="io.swagger.jaxrs.listing.ApiListingResourceJSON"/>
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
 
   <bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
     <property name="servletClass">
-      <value>com.wordnik.swagger.jaxrs.config.DefaultJaxrsConfig</value>
+      <value>io.swagger.jaxrs.config.DefaultJaxrsConfig</value>
     </property>
     <property name="servletName">
       <value>SwaggerConfig</value>
@@ -24,6 +24,6 @@
   </bean>
 
  <!-- Swagger Providers -->
-  <bean class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"/>
-  <bean class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"/>
+  <bean class="io.swagger.jaxrs.listing.ResourceListingProvider"/>
+  <bean class="io.swagger.jaxrs.listing.ApiDeclarationProvider"/>
 </beans>
