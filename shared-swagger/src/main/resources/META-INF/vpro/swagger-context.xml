@@ -5,7 +5,7 @@
 
   <!--
   <bean class="io.swagger.jaxrs.listing.ApiListingResourceJSON"/>
-  
+
   -->
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
@@ -20,6 +20,7 @@
     <property name="initParameters">
       <props>
         <prop key="api.version">${api.version}</prop>
+        <prop key="swagger.api.basepath">${api.basePath}</prop>
       </props>
     </property>
   </bean>
