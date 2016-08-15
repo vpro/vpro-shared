@@ -11,12 +11,15 @@ import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 
+import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.Fail;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import nl.vpro.test.util.TestClass;
+import nl.vpro.test.util.jackson2.Jackson2TestUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -162,4 +165,64 @@ public class JAXBTestUtil {
             assertThat(input).isEqualTo(expected);
         }
     }
+
+
+    public static <S extends JAXBTestUtil.XMLObjectAssert<S, T>, T> XMLObjectAssert<S, T> assertThatXml(T o) {
+        return new XMLObjectAssert<>(o);
+    }
+
+    public static JAXBTestUtil.XMLStringAssert assertThatXml(String o) {
+        return new XMLStringAssert(o);
+    }
+
+
+    public static class XMLObjectAssert<S extends XMLObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
+
+        A rounded;
+
+        protected XMLObjectAssert(A actual) {
+            super(actual, Jackson2TestUtil.JsonObjectAssert.class);
+        }
+
+        public S isSimilarTo(String expected) {
+            try {
+                rounded = roundTripAndSimilar(actual, expected);
+            } catch (Exception e) {
+                Fail.fail(e.getMessage());
+            }
+            return myself;
+        }
+
+        public AbstractObjectAssert<?, A> andRounded() {
+            if (rounded == null) {
+                throw new IllegalStateException("No similation was done already.");
+            }
+            return assertThat(rounded);
+        }
+
+        public A get() {
+            if (rounded == null) {
+                throw new IllegalStateException("No similation was done already.");
+            }
+            return rounded;
+        }
+
+    }
+
+    public static class XMLStringAssert extends AbstractObjectAssert<XMLStringAssert, CharSequence> {
+
+        protected XMLStringAssert(CharSequence actual) {
+            super(actual, Jackson2TestUtil.JsonStringAssert.class);
+        }
+
+        public XMLStringAssert isSimilarTo(String expected) {
+            try {
+                similar(expected, String.valueOf(actual));
+            } catch (SAXException | IOException e) {
+                Fail.fail(e.getMessage());
+            }
+            return myself;
+        }
+    }
+
 }
