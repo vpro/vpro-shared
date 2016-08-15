@@ -9,6 +9,9 @@ import net.sf.json.test.JSONAssert;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.Fail;
+
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -73,6 +76,42 @@ public class Jackson2TestUtil {
         TestClass<T> result = roundTripAndSimilar(embed, "{\"value\": " + expected + "}", type);
 
         return result.value;
+    }
+
+    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> jsonAssertThat(T o) {
+        return new JsonObjectAssert<>(o);
+    }
+
+    public static JsonStringAssert jsonAssertThat(String o) {
+        return new JsonStringAssert(o);
+    }
+
+    public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
+
+        protected JsonObjectAssert(A actual) {
+            super(actual, JsonObjectAssert.class);
+        }
+
+        public S isSimilarTo(String expected) {
+            try {
+                roundTripAndSimilar(actual, expected);
+            } catch (Exception e) {
+                Fail.fail(e.getMessage());
+            }
+            return myself;
+        }
+    }
+
+    public static class JsonStringAssert extends AbstractObjectAssert<JsonStringAssert, CharSequence> {
+
+        protected JsonStringAssert(CharSequence actual) {
+            super(actual, JsonStringAssert.class);
+        }
+
+        public JsonStringAssert isSimilarTo(String expected) {
+            JSONAssert.assertJsonEquals("\n" + actual + "\nis different from expected\n" + expected, expected, String.valueOf(actual));
+            return myself;
+        }
     }
 
 }
