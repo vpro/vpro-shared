@@ -82,6 +82,10 @@ public class Jackson2TestUtil {
         return new JsonObjectAssert<>(o);
     }
 
+    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(Class<T> o, String value) {
+        return new JsonObjectAssert<>(o, value);
+    }
+
     public static JsonStringAssert assertThatJson(String o) {
         return new JsonStringAssert(o);
     }
@@ -93,6 +97,20 @@ public class Jackson2TestUtil {
 
         protected JsonObjectAssert(A actual) {
             super(actual, JsonObjectAssert.class);
+        }
+
+
+        protected JsonObjectAssert(Class<A> actual, String string) {
+            super(read(actual, string), JsonObjectAssert.class);
+        }
+
+        protected static <A> A read(Class<A> actual, String string) {
+            try {
+                return MAPPER.readValue(string, actual);
+            } catch (IOException e) {
+                Fail.fail(e.getMessage());
+                return null;
+            }
         }
 
         public S isSimilarTo(String expected) {
