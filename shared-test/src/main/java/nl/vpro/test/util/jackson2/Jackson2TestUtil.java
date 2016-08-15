@@ -78,15 +78,18 @@ public class Jackson2TestUtil {
         return result.value;
     }
 
-    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> jsonAssertThat(T o) {
+    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(T o) {
         return new JsonObjectAssert<>(o);
     }
 
-    public static JsonStringAssert jsonAssertThat(String o) {
+    public static JsonStringAssert assertThatJson(String o) {
         return new JsonStringAssert(o);
     }
 
+
     public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
+
+        A rounded;
 
         protected JsonObjectAssert(A actual) {
             super(actual, JsonObjectAssert.class);
@@ -94,12 +97,25 @@ public class Jackson2TestUtil {
 
         public S isSimilarTo(String expected) {
             try {
-                roundTripAndSimilar(actual, expected);
+                rounded = roundTripAndSimilar(actual, expected);
             } catch (Exception e) {
                 Fail.fail(e.getMessage());
             }
             return myself;
         }
+        public AbstractObjectAssert<?, A> andRounded() {
+            if (rounded == null) {
+                throw new IllegalStateException("No similation was done already.");
+            }
+            return assertThat(rounded);
+        }
+        public A get() {
+            if (rounded == null) {
+                throw new IllegalStateException("No similation was done already.");
+            }
+            return rounded;
+        }
+
     }
 
     public static class JsonStringAssert extends AbstractObjectAssert<JsonStringAssert, CharSequence> {
