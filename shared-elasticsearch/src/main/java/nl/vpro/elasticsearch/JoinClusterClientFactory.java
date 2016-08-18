@@ -1,9 +1,10 @@
 package nl.vpro.elasticsearch;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.annotation.PreDestroy;
-
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
@@ -35,6 +36,11 @@ public class JoinClusterClientFactory implements ESClientFactory {
     private String unicastHosts = null;
 
     private String tcpPort = "9350-9400";
+
+    private String networkName = null;
+
+
+    private Map<String, String> additionalSettings = new HashMap<>();
 
 
     private synchronized Node node(Logger logger) {
@@ -76,7 +82,12 @@ public class JoinClusterClientFactory implements ESClientFactory {
         } else {
             logger.info("node name not set");
         }
+        if (networkName != null) {
+            settings.put("network.name", networkName);
+        }
         settings.put("transport.tcp.port", tcpPort);
+
+        settings.put(additionalSettings);
         return settings.build();
     }
 
@@ -146,6 +157,24 @@ public class JoinClusterClientFactory implements ESClientFactory {
     public void setNodeName(String nodeName) {
         reset();
         this.nodeName = nodeName;
+    }
+
+    public String getNetworkName() {
+        return networkName;
+    }
+
+    public void setNetworkName(String networkName) {
+        reset();
+        this.networkName = networkName;
+    }
+
+    public Map<String, String> getAdditionalSettings() {
+        return additionalSettings;
+    }
+
+    public void setAdditionalSettings(Map<String, String> additionalSettings) {
+        reset();
+        this.additionalSettings = additionalSettings;
     }
 
     @Override
