@@ -37,7 +37,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private String tcpPort = "9350-9400";
 
-    private String networkName = null;
+    private String networkHost = null;
 
 
     private Map<String, String> additionalSettings = new HashMap<>();
@@ -82,8 +82,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
         } else {
             logger.info("node name not set");
         }
-        if (networkName != null) {
-            settings.put("network.name", networkName);
+        if (networkHost != null) {
+            settings.put("network.host", networkHost);
         }
         settings.put("transport.tcp.port", tcpPort);
 
@@ -159,13 +159,13 @@ public class JoinClusterClientFactory implements ESClientFactory {
         this.nodeName = nodeName;
     }
 
-    public String getNetworkName() {
-        return networkName;
+    public String getNetworkHost() {
+        return networkHost;
     }
 
-    public void setNetworkName(String networkName) {
+    public void setNetworkHost(String networkName) {
         reset();
-        this.networkName = networkName;
+        this.networkHost = networkName;
     }
 
     public Map<String, String> getAdditionalSettings() {
