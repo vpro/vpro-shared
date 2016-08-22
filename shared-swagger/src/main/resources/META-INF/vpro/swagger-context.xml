@@ -26,6 +26,7 @@
   </bean>
 
  <!-- Swagger Providers -->
+  <bean class="nl.vpro.swagger.model.SwaggerReaderListener" />
   <bean class="io.swagger.jaxrs.listing.SwaggerSerializers"/>
   <bean class="io.swagger.jaxrs.listing.ApiListingResource"/>
   <bean class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource" />

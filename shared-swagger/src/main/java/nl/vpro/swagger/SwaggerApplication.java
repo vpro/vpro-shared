@@ -4,11 +4,17 @@
  */
 package nl.vpro.swagger;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.util.ParameterDeserializer;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
+
+import nl.vpro.swagger.model.InstantParamProcessor;
 
 
 /**
@@ -18,8 +24,17 @@ import javax.ws.rs.core.Application;
  * @author Roelof Jan Koekoek
  * @since 2.0
  */
+@ApiModel
 public class SwaggerApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
+    
+    {
+      /*  this.addDeserializer(Parameter.class, new InstantParamProcessor());
+
+        ParameterDeserializer.getInstance().addConverter(new InstantParamProcessor());
+*/
+    }
+    
 
     @Override
     public Set<Class<?>> getClasses() {
