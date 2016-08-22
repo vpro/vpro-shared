@@ -195,7 +195,6 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     @Override
     public String toString() {
-
         return "ES " + (nodeName == null ? "" : (nodeName + "@")) + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings(null).getAsMap();
     }
 
