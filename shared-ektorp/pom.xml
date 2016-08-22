@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>shared-parent</artifactId>
-    <version>0.48.1-SNAPSHOT</version>
+    <version>0.48.1</version>
   </parent>
 
   <artifactId>shared-ektorp</artifactId>
