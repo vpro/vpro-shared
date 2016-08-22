@@ -111,7 +111,7 @@
     <hibernate.search.version>4.5.2.Final</hibernate.search.version>
 
     <ektorp.version>1.4.2</ektorp.version>
-    <swagger.version>1.5.9</swagger.version>
+    <swagger.version>1.5.10</swagger.version>
   </properties>
 
   <dependencyManagement>
