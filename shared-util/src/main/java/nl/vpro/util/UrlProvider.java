@@ -56,6 +56,9 @@ public class UrlProvider {
         URI uri = URI.create(url);
         this.host = uri.getHost();
         this.port = uri.getPort();
+        if (this.port == -1) {
+            this.port = 80;
+        }
         this.path = uri.getPath();
         if (this.path.startsWith("/")) {
             this.path = this.path.substring(1);
