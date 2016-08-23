@@ -5,6 +5,7 @@
 package nl.vpro.swagger;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.jaxrs.config.ReaderConfig;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.util.ParameterDeserializer;
 
