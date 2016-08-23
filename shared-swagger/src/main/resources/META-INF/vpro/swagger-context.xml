@@ -21,12 +21,13 @@
       <props>
         <prop key="api.version">${api.version}</prop>
         <prop key="swagger.api.basepath">${api.basePath}</prop>
+        <prop key="scan.all.resources">true</prop>
       </props>
     </property>
   </bean>
 
  <!-- Swagger Providers -->
-  <bean class="nl.vpro.swagger.model.SwaggerReaderListener" />
+ <!-- <bean class="nl.vpro.swagger.model.SwaggerReaderListener" />-->
   <bean class="io.swagger.jaxrs.listing.SwaggerSerializers"/>
   <bean class="io.swagger.jaxrs.listing.ApiListingResource"/>
   <bean class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource" />

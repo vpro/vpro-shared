@@ -15,11 +15,11 @@ import nl.vpro.swagger.SwaggerApplication;
 public class SwaggerReaderListener implements ReaderListener{
     
     {
-        SwaggerApplication.inject(this);
+        //SwaggerApplication.inject(this);
     }
     @Override
     public void beforeScan(Reader reader, Swagger swagger) {
-
+        reader.getConfig();
     }
 
     @Override
