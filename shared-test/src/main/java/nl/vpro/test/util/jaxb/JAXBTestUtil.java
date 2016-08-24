@@ -4,12 +4,11 @@
  */
 package nl.vpro.test.util.jaxb;
 
-import java.io.*;
-import java.lang.annotation.Annotation;
-
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import java.io.*;
+import java.lang.annotation.Annotation;
 
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
@@ -19,7 +18,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import nl.vpro.test.util.TestClass;
-import nl.vpro.test.util.jackson2.Jackson2TestUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +30,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
+    
+    static {
+        XMLUnit.setIgnoreWhitespace(true);
+
+    }
 
     public static <T> String marshal(T object) {
         StringWriter writer = new StringWriter();
@@ -176,12 +179,13 @@ public class JAXBTestUtil {
     }
 
 
+
     public static class XMLObjectAssert<S extends XMLObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
         A rounded;
 
         protected XMLObjectAssert(A actual) {
-            super(actual, Jackson2TestUtil.JsonObjectAssert.class);
+            super(actual, XMLObjectAssert.class);
         }
 
         public S isSimilarTo(String expected) {
@@ -212,7 +216,7 @@ public class JAXBTestUtil {
     public static class XMLStringAssert extends AbstractObjectAssert<XMLStringAssert, CharSequence> {
 
         protected XMLStringAssert(CharSequence actual) {
-            super(actual, Jackson2TestUtil.JsonStringAssert.class);
+            super(actual, XMLStringAssert.class);
         }
 
         public XMLStringAssert isSimilarTo(String expected) {
