@@ -179,6 +179,14 @@ public class JAXBTestUtil {
     }
 
 
+    public static JAXBTestUtil.XMLStringAssert assertThatXml(ByteArrayOutputStream o) throws UnsupportedEncodingException {
+        return assertThatXml(o.toByteArray());
+    }
+
+    public static JAXBTestUtil.XMLStringAssert assertThatXml(byte[] o) throws UnsupportedEncodingException {
+        return new XMLStringAssert(new String(o, "UTF-8"));
+    }
+
 
     public static class XMLObjectAssert<S extends XMLObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
