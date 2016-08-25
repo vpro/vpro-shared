@@ -125,5 +125,19 @@ public class Location  {
         this.neboId = neboId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        Location location = (Location) o;
+
+        if (ceresUpdate != location.ceresUpdate) return false;
+        if (programUrl != null ? !programUrl.equals(location.programUrl) : location.programUrl != null) return false;
+        if (subtitles != null ? !subtitles.equals(location.subtitles) : location.subtitles != null) return false;
+        if (offset != null ? !offset.equals(location.offset) : location.offset != null) return false;
+        if (duration != null ? !duration.equals(location.duration) : location.duration != null) return false;
+        return neboId != null ? neboId.equals(location.neboId) : location.neboId == null;
+
+    }
 }
