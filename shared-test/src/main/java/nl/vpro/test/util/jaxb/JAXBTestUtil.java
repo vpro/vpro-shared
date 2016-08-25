@@ -110,7 +110,6 @@ public class JAXBTestUtil {
             /// make sure unmarshalling worked too, by marshalling the result again.
             String xmlAfter = marshal(result);
             similar(xmlAfter, xml);
-            assertThat(result).isEqualTo(input);
             return result;
         } catch (SAXParseException spe) {
             throw new RuntimeException(
@@ -118,6 +117,12 @@ public class JAXBTestUtil {
                 "expected: " + expected, spe);
         }
 
+    }
+
+    public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
+        T result = roundTripAndSimilar(input, expected);
+        assertThat(result).isEqualTo(input);
+        return result;
     }
 
     public static <T> T roundTripAndSimilarValue(T input, String expected) throws IOException, SAXException, JAXBException {

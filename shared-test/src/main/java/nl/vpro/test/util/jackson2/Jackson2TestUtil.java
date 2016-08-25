@@ -47,6 +47,11 @@ public class Jackson2TestUtil {
         return roundTripAndSimilar(input, expected, Jackson2Mapper.getInstance().getTypeFactory().constructType(input.getClass()));
     }
 
+    public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
+        T result = roundTripAndSimilar(input, expected);
+        assertThat(result).isEqualTo(input);
+        return result;
+    }
 
     public static <T> T assertJsonEquals(String text, String expected, Class<T> typeReference) throws IOException {
         JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected, expected, text);
@@ -62,10 +67,9 @@ public class Jackson2TestUtil {
 
         JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected, expected, text);
         T result = MAPPER.readValue(text, typeReference);
-        assertThat(result).isEqualTo(input);
         return result;
-
     }
+
 
     /**
      * Can be used if the input is not a stand alone json object.
