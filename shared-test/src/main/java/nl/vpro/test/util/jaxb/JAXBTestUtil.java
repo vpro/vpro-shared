@@ -4,11 +4,12 @@
  */
 package nl.vpro.test.util.jaxb;
 
+import java.io.*;
+import java.lang.annotation.Annotation;
+
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
-import java.io.*;
-import java.lang.annotation.Annotation;
 
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
@@ -30,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
-    
+
     static {
         XMLUnit.setIgnoreWhitespace(true);
 
@@ -109,6 +110,7 @@ public class JAXBTestUtil {
             /// make sure unmarshalling worked too, by marshalling the result again.
             String xmlAfter = marshal(result);
             similar(xmlAfter, xml);
+            assertThat(result).isEqualTo(input);
             return result;
         } catch (SAXParseException spe) {
             throw new RuntimeException(

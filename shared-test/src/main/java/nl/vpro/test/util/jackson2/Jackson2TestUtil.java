@@ -61,7 +61,9 @@ public class Jackson2TestUtil {
         String text = writer.toString();
 
         JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected, expected, text);
-        return MAPPER.readValue(text, typeReference);
+        T result = MAPPER.readValue(text, typeReference);
+        assertThat(result).isEqualTo(input);
+        return result;
 
     }
 
