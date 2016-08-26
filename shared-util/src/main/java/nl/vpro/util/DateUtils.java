@@ -4,10 +4,7 @@
  */
 package nl.vpro.util;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -82,6 +79,10 @@ public class DateUtils {
 
     public static Date toDate (Instant date) {
         return date == null ? null : Date.from(date);
+    }
+
+    public static Date toDate(ZonedDateTime date) {
+        return date == null ? null : Date.from(date.toInstant());
     }
 
     public static Long toLong(Instant instant) {
