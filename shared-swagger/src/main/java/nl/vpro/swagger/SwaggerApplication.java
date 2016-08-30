@@ -5,17 +5,12 @@
 package nl.vpro.swagger;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.jaxrs.config.ReaderConfig;
-import io.swagger.models.parameters.Parameter;
-import io.swagger.util.ParameterDeserializer;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.core.Application;
-
-import nl.vpro.swagger.model.InstantParamProcessor;
 
 
 /**
@@ -28,7 +23,7 @@ import nl.vpro.swagger.model.InstantParamProcessor;
 @ApiModel
 public class SwaggerApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
-    
+
     {
       /*  this.addDeserializer(Parameter.class, new InstantParamProcessor());
 
