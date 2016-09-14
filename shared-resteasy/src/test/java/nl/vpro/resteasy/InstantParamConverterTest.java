@@ -39,6 +39,12 @@ public class InstantParamConverterTest {
 
 
     @Test
+    public void fromString4plus() throws Exception {
+        assertThat(instance.fromString("2016-07-21T17:13:16 02:00[Europe/Amsterdam]")).isEqualTo(ZonedDateTime.of(LocalDate.of(2016, 7, 21), LocalTime.of(17, 13, 16), ZoneId.of("Europe/Amsterdam")).toInstant());
+    }
+
+
+    @Test
     public void fromString5() throws Exception {
         assertThat(instance.fromString("2000-01-01")).isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(0, 0), TimeUtils.ZONE_ID).toInstant());
     }

@@ -27,10 +27,9 @@ public class InstantParamConverter implements ParamConverter<Instant> {
         if (value == null || value.length() == 0) {
             return null;
         }
-
+        // zo kunnen we het gewoon op de URL copy/pasten. + -> " " -> +....
+        value = value.replaceAll(" ", "+");
         return TimeUtils.parse(value).orElse(null);
-
-
     }
 
     @Override
