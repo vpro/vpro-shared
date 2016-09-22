@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -124,6 +126,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         return result;
     }
 
+
     @Override
     public Long getCount() {
         return count;
@@ -220,6 +223,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     public Optional<Long> getTotalSize() {
         return Optional.ofNullable(totalSize);
     }
+
+
 
     public static class ValueReadException extends RuntimeException {
 

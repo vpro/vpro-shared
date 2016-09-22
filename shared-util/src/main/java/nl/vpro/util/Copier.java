@@ -20,15 +20,45 @@ public class Copier implements Runnable {
     private final InputStream in;
     private final OutputStream out;
 
-    public Copier(InputStream i, OutputStream o) {
+    private final Logger log;
+    private final String tempFile;
+    private final long batch;
+
+    public Copier(InputStream i, OutputStream o, Logger log, String tempFile, long batch) {
         in = i;
         out = o;
+        this.log = log;
+        this.tempFile = tempFile;
+        this.batch = batch;
+    }
+
+    public Copier(InputStream i, OutputStream o) {
+        this(i, o, null, null, 0L);
     }
 
     @Override
     public void run() {
         try {
-            count = IOUtils.copy(in, out);
+            if (log == null) {
+                count = IOUtils.copyLarge(in, out);
+            } else {
+                // Download changes locally before streaming them to avoid network timeouts
+                count = 0;
+                while (true) {
+                    long result = IOUtils.copyLarge(in, out, 0, batch);
+                    count += result;
+                    if (result < batch) {
+                        if (count > batch) {
+                            log.info("Created {} ({} bytes written)", tempFile, count);
+                        } else {
+                            log.debug("Created {} ({} bytes written)", tempFile, count);
+                        }
+                        break;
+                    } else {
+                        log.info("Creating {} ({} bytes written)", tempFile, count);
+                    }
+                }
+            }
         } catch (Throwable t) {
             LOG.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
         }
@@ -40,8 +70,14 @@ public class Copier implements Runnable {
 
     public void waitFor() throws InterruptedException {
         synchronized (this) {
-            while (!ready) wait();
+            while (!ready) {
+                wait();
+            }
         }
+    }
+
+    public boolean isReady() {
+        return ready;
     }
 
 
