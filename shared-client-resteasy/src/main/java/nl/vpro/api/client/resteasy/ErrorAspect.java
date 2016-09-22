@@ -55,7 +55,8 @@ public class ErrorAspect<T> implements InvocationHandler {
         final boolean error;
         try {
             try {
-                return method.invoke(proxied, args);
+                Object object = method.invoke(proxied, args);
+                return object;
             } catch (InvocationTargetException itc) {
                 throw itc.getCause();
             }
