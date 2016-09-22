@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Builder;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -23,15 +25,24 @@ public class Copier implements Runnable {
     private final Logger log;
     private final String tempFile;
     private final long batch;
+    private final Runnable afterReady;
+
 
     public Copier(InputStream i, OutputStream o, Logger log, String tempFile, long batch) {
-        in = i;
-        out = o;
-        this.log = log;
-        this.tempFile = tempFile;
-        this.batch = batch;
+        this(i, o, log, tempFile, batch, () -> {
+        });
     }
 
+    @Builder
+    private Copier(InputStream input, OutputStream output, Logger log, String tempFile, long batch, Runnable afterReady) {
+        in = input;
+        out = output;
+        this.log = log;
+        this.tempFile = tempFile;
+        this.batch = batch == 0 ? 8192: batch; 
+        this.afterReady = afterReady;
+    }
+    
     public Copier(InputStream i, OutputStream o) {
         this(i, o, null, null, 0L);
     }
@@ -64,6 +75,9 @@ public class Copier implements Runnable {
         }
         synchronized (this) {
             ready = true;
+            if (afterReady != null) {
+                afterReady.run();
+            }
             notifyAll();
         }
     }
