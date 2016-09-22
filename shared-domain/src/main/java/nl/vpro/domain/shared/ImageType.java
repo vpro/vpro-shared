@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
  * Supported image types.
  *
  * @author peter
- * @version $Id$
  */
 @XmlEnum
 @XmlType(name = "imageTypeEnum")
@@ -55,10 +54,6 @@ public enum ImageType {
         return ImageType.valueOf(extension.toUpperCase());
     }
 
-    /**
-     * @param extension
-     * @return
-     */
     private static boolean isJPGPermutation(String extension) {
         return JPEG_EXT.equalsIgnoreCase(extension) || PJPEG_EXT.equalsIgnoreCase(extension);
     }
