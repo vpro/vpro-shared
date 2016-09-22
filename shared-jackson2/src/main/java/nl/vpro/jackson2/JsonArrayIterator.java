@@ -4,16 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
@@ -35,7 +32,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private boolean needsFindNext = true;
 
-    private final Class<T> clazz;
+    private final BiFunction<JsonParser, TreeNode, T> valueCreator;
 
     private Runnable callback;
 
@@ -55,9 +52,22 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         this(inputStream, clazz, null);
 
     }
-    public JsonArrayIterator(InputStream inputStream, Class<T> clazz, Runnable callback) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
+        this(inputStream, (jp, tree) -> {
+            try {
+                return jp.getCodec().treeToValue(tree, clazz);
+            } catch (JsonProcessingException e) {
+                throw new ValueReadException(e);
+            }
+        }, callback);
+    }
+
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
+        this(inputStream, valueCreator, null);
+    }
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode,  T> valueCreator, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
-        this.clazz = clazz;
+        this.valueCreator = valueCreator;
         Long tmpSize = null;
         Long tmpTotalSize = null;
         String fieldName = null;
@@ -138,11 +148,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                                 count += foundNulls;
                             }
 
-                            next = jp.getCodec().treeToValue(tree, clazz);
+                            next = valueCreator.apply(jp, tree);
                         }
                         foundNulls = 0;
                         break;
-                    } catch (JsonMappingException jme) {
+                    } catch (ValueReadException jme) {
                         count++;
                         log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
@@ -209,5 +219,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     @Override
     public Optional<Long> getTotalSize() {
         return Optional.ofNullable(totalSize);
+    }
+
+    public static class ValueReadException extends RuntimeException {
+
+        public ValueReadException(JsonProcessingException e) {
+            super(e);
+        }
     }
 }
