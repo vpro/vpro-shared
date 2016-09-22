@@ -24,7 +24,6 @@ public class FileCachingInputStream extends PipedInputStream {
 
     InputStream input;
     private int count = 0;
-    private int bufferSize = 8192;
 
     @Builder
     private FileCachingInputStream(
@@ -39,9 +38,8 @@ public class FileCachingInputStream extends PipedInputStream {
             null);
         OutputStream out = Files.newOutputStream(tempFile);
         copier = new Copier(input, new BufferedStream(out, bufferSize));
-        copier.run();
+        ThreadPools.copyExecutor.execute(copier);
         this.input = new BufferedInputStream(Files.newInputStream(tempFile));
-        //ThreadPools.copyExecutor.execute(new Copier(input, new BufferedStream(out, bufferSize)));
 
     }
  
@@ -50,7 +48,11 @@ public class FileCachingInputStream extends PipedInputStream {
     public int read() throws IOException {
         int result = input.read();
         if (result == -1 && (count < copier.getCount() || ! copier.isReady())) {
-            
+            try {
+                copier.waitFor();
+            } catch (InterruptedException e) {
+                throw new IOException(e);
+            }
         }
         return result;
 
