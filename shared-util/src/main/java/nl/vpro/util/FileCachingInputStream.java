@@ -3,25 +3,30 @@ package nl.vpro.util;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
  *
- * It will buffer the result to memory, until that becomes to large, than a file buffer will be created.
+ * It will buffer the result to memory, until that becomes too large, then a file buffer will be created.
  *
  * @author Michiel Meeuwissen
  * @since 0.50
  */
 
+@Slf4j
 public class FileCachingInputStream extends PipedInputStream {
 
     final Copier copier;
 
+    final Path tempFile;
     InputStream input;
     private int count = 0;
 
@@ -29,15 +34,23 @@ public class FileCachingInputStream extends PipedInputStream {
     private FileCachingInputStream(
         InputStream input, 
         Path path, 
-        String filePrefix, 
+        String filePrefix,
+        int memoryBufferSize,
         int bufferSize) throws IOException {
         super();
-        final Path tempFile = Files.createTempFile(
+        tempFile = Files.createTempFile(
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path, 
             filePrefix == null ? "file-caching-inputstream" : filePrefix, 
             null);
-        OutputStream out = Files.newOutputStream(tempFile);
-        copier = new Copier(input, new BufferedStream(out, bufferSize));
+        OutputStream out = new BufferedStream(Files.newOutputStream(tempFile), bufferSize);
+        copier = Copier.builder()
+            .input(input)
+            .output(out)
+            .log(log)
+            .afterReady(() -> IOUtils.closeQuietly(out))
+            .batch(bufferSize)
+            .build()
+        ;
         ThreadPools.copyExecutor.execute(copier);
         this.input = new BufferedInputStream(Files.newInputStream(tempFile));
 
@@ -50,6 +63,8 @@ public class FileCachingInputStream extends PipedInputStream {
         if (result == -1 && (count < copier.getCount() || ! copier.isReady())) {
             try {
                 copier.waitFor();
+                
+                this.input = new BufferedInputStream(Files.newInputStream(tempFile));
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }

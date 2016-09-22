@@ -18,9 +18,10 @@ public class FileCachingInputStreamTest {
 	
 	@Test
 	public void test() throws IOException {
-	    byte[] in = new byte[] {1,2,3,4,5,6,7,8};
+	    byte[] in = new byte[] {1,2,3,4,5,6,7,8, 9};
 		FileCachingInputStream inputStream  = FileCachingInputStream.builder()
             .bufferSize(2)
+            .memoryBufferSize(2)
             .input(new ByteArrayInputStream(in))
             .build();
         
