@@ -1,8 +1,6 @@
 package nl.vpro.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -25,6 +23,16 @@ public interface CountedIterator<T> extends Iterator<T> {
      */
     default Optional<Long> getTotalSize() {
         return getSize();
+    }
+
+
+    default Spliterator<T> spliterator() {
+        Optional<Long> size = getSize();
+        if (size.isPresent()) {
+            return Spliterators.spliterator(this, getSize().get(), Spliterator.SIZED);
+        } else {
+            return Spliterators.spliteratorUnknownSize(this, 0);
+        }
     }
 }
 
