@@ -1,8 +1,13 @@
 package nl.vpro.util;
 
+import lombok.Builder;
+import lombok.Singular;
+import lombok.experimental.FieldDefaults;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
@@ -12,28 +17,40 @@ import java.nio.file.Path;
  * @author Michiel Meeuwissen
  * @since 0.50
  */
-public class FileCachingInputStream extends InputStream {
+
+public class FileCachingInputStream extends PipedInputStream {
 
     final Copier copier;
 
-    FileInputStream input;
-    int count = 0;
+    InputStream input;
+    private int count = 0;
+    private int bufferSize = 8192;
 
-    public FileCachingInputStream(InputStream inputStream, Path path, String filePrefix) throws IOException {
+    @Builder
+    private FileCachingInputStream(
+        InputStream input, 
+        Path path, 
+        String filePrefix, 
+        int bufferSize) throws IOException {
         super();
-        final Path tempFile = Files.createTempFile(path, filePrefix, null);
+        final Path tempFile = Files.createTempFile(
+            path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path, 
+            filePrefix == null ? "file-caching-inputstream" : filePrefix, 
+            null);
         OutputStream out = Files.newOutputStream(tempFile);
-        copier = new Copier(inputStream, new BufferedStream(out, 8192));
-        InputStream in = new BufferedInputStream(Files.newInputStream(tempFile));
-        ThreadPools.copyExecutor.execute(new Copier(inputStream, new BufferedStream(out, 8192)));
+        copier = new Copier(input, new BufferedStream(out, bufferSize));
+        copier.run();
+        this.input = new BufferedInputStream(Files.newInputStream(tempFile));
+        //ThreadPools.copyExecutor.execute(new Copier(input, new BufferedStream(out, bufferSize)));
 
     }
+ 
 
     @Override
     public int read() throws IOException {
         int result = input.read();
         if (result == -1 && (count < copier.getCount() || ! copier.isReady())) {
-
+            
         }
         return result;
 
@@ -49,5 +66,6 @@ public class FileCachingInputStream extends InputStream {
             return buf;
         }
     }
+  
 
 }
