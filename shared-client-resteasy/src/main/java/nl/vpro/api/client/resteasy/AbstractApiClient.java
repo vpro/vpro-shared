@@ -143,7 +143,8 @@ public class AbstractApiClient {
             .setConnectionManager(connectionManager)
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
-            .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
+            .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy())
+            ;
 
         if (trustAll){
             try {
