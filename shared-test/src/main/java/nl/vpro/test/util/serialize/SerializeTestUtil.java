@@ -24,9 +24,10 @@ public class SerializeTestUtil {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
         ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
-        T result = null;
+        T result;
         try {
             result = (T) in.readObject();
         } catch (ClassNotFoundException e) {
@@ -36,7 +37,6 @@ public class SerializeTestUtil {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     public static  <T> T roundTrip(T input) throws IOException {
         return (T) deserialize(serialize(input), input.getClass());
     }
