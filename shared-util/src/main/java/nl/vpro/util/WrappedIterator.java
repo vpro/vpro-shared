@@ -53,4 +53,10 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
 
     }
 
+    @Override
+    public void close() throws Exception {
+        if (wrapped instanceof AutoCloseable) {
+            ((AutoCloseable) wrapped).close();
+        }
+    }
 }
