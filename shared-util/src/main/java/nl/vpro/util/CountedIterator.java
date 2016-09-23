@@ -34,5 +34,10 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
             return Spliterators.spliteratorUnknownSize(this, 0);
         }
     }
+
+    @Override
+    default void close() throws Exception {
+
+    }
 }
 
