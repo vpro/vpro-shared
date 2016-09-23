@@ -56,6 +56,7 @@ public class Copier implements Runnable {
                 count = IOUtils.copyLarge(in, out);
             } else {
                 count = 0;
+                batchConsumer.accept(this);
                 while (true) {
                     long result = IOUtils.copyLarge(in, out, 0, batch);
                     count += result;
