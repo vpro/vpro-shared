@@ -6,7 +6,7 @@ import java.util.*;
  * @author Michiel Meeuwissen
  * @since 0.31
  */
-public interface CountedIterator<T> extends Iterator<T> {
+public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
 
     static <S> CountedIterator<S> of(Collection<S> wrapped) {
         return new BasicWrappedIterator<S>(wrapped);
