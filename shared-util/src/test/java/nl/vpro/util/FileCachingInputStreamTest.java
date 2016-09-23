@@ -1,10 +1,11 @@
 package nl.vpro.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,12 +17,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class FileCachingInputStreamTest {
 
+
+    @Test
+    public void testRead() throws IOException {
+        byte[] in = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .input(new ByteArrayInputStream(in))
+            .build();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int r;
+        while ((r = inputStream.read()) != -1) {
+            out.write(r);
+        }
+
+        assertThat(out.toByteArray()).containsExactly(in);
+    }
+
 	@Test
 	public void test() throws IOException {
 	    byte[] in = new byte[] {1,2,3,4,5,6,7,8, 9};
 		FileCachingInputStream inputStream  = FileCachingInputStream.builder()
             .outputBuffer(2)
-            .batchSize(5)
+            .batchSize(3)
             .input(new ByteArrayInputStream(in))
             .build();
 
@@ -31,5 +52,40 @@ public class FileCachingInputStreamTest {
 
         assertThat(out.toByteArray()).containsExactly(in);
 	}
+
+	@Test
+    @Ignore
+    public void performance() throws IOException {
+        Instant now = Instant.now();
+        try(
+            FileCachingInputStream inputStream = FileCachingInputStream
+                .builder()
+                .input(new BufferedInputStream(new FileInputStream(new File("/tmp/pageupdates.json"))))
+                .batchSize(1000000000L)
+                .build();
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
+        ) {
+            IOUtils.copyLarge(inputStream, out);
+            System.out.println("Duration " + Duration.between(now, Instant.now()));
+        }
+
+
+    }
+
+    @Test
+    @Ignore
+    public void performanceBenchmark() throws IOException {
+        Instant now = Instant.now();
+        try (
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(new File("/tmp/pageupdates.json")));
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
+        ) {
+            IOUtils.copyLarge(inputStream, out);
+            System.out.println("Duration " + Duration.between(now, Instant.now()));
+        }
+
+
+    }
+
 
 }

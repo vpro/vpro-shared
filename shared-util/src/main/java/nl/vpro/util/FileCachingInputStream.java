@@ -22,9 +22,10 @@ import org.apache.commons.io.IOUtils;
 @Slf4j
 public class FileCachingInputStream extends InputStream {
 
+    private static final int EOF = -1;
     private final Copier copier;
     private final Path tempFile;
-    private InputStream file;
+    private final InputStream file;
     private int count = 0;
 
     @Builder
@@ -32,7 +33,7 @@ public class FileCachingInputStream extends InputStream {
         InputStream input,
         Path path,
         String filePrefix,
-        int batchSize,
+        long  batchSize,
         int outputBuffer) throws IOException {
 
         super();
@@ -40,7 +41,8 @@ public class FileCachingInputStream extends InputStream {
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
             filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null);
-        OutputStream out = new BufferedStream(Files.newOutputStream(tempFile), outputBuffer);
+
+        OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer == 0 ? 8192 : outputBuffer);
 
         copier = Copier.builder()
             .input(input)
@@ -56,7 +58,7 @@ public class FileCachingInputStream extends InputStream {
             .build()
             .execute()
         ;
-        this.file= new BufferedInputStream(Files.newInputStream(tempFile));
+        this.file = new BufferedInputStream(Files.newInputStream(tempFile));
 
     }
 
@@ -64,48 +66,62 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public int read() throws IOException {
         int result = file.read();
-        if (result == -1) {
-            log.debug("Closing {}", tempFile);
-            file.close();
-
+        while (result == EOF) {
             synchronized (copier) {
-                while(! copier.isReady()) {
+                while(! copier.isReady() && result == EOF) {
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
                     }
-                    if (count < copier.getCount()) {
-                        break;
-                    } else {
-                        return -1;
+                    result = file.read();
+                    if (copier.isReady() && count == copier.getCount()) {
+                        return EOF;
                     }
                 }
             }
-            if (count < copier.getCount()) {
-                log.debug("Opening file {} from {}", tempFile, count);
-                file = new BufferedInputStream(Files.newInputStream(tempFile));
-                file.skip(count);
-                result = file.read();
-            } else {
-                return -1;
-            }
+
         }
         count++;
+        log.debug("returing {}", result);
         return result;
 
     }
 
-    class BufferedStream extends BufferedOutputStream {
+  @Override
+  public int read(byte b[]) throws IOException {
+      if (copier.isReady() && count == copier.getCount()) {
+          return EOF;
+      }
+      int totalresult = Math.max(file.read(b, 0, b.length), 0);
 
-        public BufferedStream(OutputStream out, int size) {
-            super(out, size);
-        }
+      if(totalresult < b.length) {
+          synchronized (copier) {
+              while (!copier.isReady() && totalresult < b.length) {
+                  try {
+                      copier.wait(1000);
+                  } catch (InterruptedException e) {
+                      log.error(e.getMessage(), e);
+                  }
+                  int subresult = Math.max(file.read(b, totalresult, b.length - totalresult), 0);
+                  totalresult += subresult;
+                  if (copier.isReady() && count + totalresult == copier.getCount()) {
+                      break;
+                  }
+              }
+          }
+      }
+      count += totalresult;
+      log.debug("returing {}", totalresult);
+      return totalresult;
+  }
 
-        byte[] getBuffer() {
-            return buf;
-        }
+    @Override
+    public void close() throws IOException {
+        file.close();
+        Files.deleteIfExists(tempFile);
     }
+
 
 
 }
