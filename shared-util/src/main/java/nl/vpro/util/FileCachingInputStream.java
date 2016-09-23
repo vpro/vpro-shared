@@ -90,11 +90,14 @@ public class FileCachingInputStream extends InputStream {
                         return EOF;
                     }
                 }
+                if (copier.isReady() && count == copier.getCount()) {
+                    return EOF;
+                }
             }
 
         }
         count++;
-        log.debug("returing {}", result);
+        log.debug("returning {}", result);
         return result;
 
     }
