@@ -127,7 +127,7 @@ public class FileCachingInputStream extends InputStream {
           }
       }
       count += totalresult;
-      log.debug("returing {}", totalresult);
+      log.debug("returning {}", totalresult);
       return totalresult;
   }
 
