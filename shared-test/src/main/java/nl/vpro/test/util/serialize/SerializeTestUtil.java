@@ -14,7 +14,7 @@ import java.io.*;
  */
 public class SerializeTestUtil {
 
-    public static <T extends Serializable> byte[] serialize(T object) throws IOException {
+    public static <T> byte[] serialize(T object) throws IOException {
 
         ByteArrayOutputStream bytes  = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bytes);
@@ -24,7 +24,7 @@ public class SerializeTestUtil {
 
     }
 
-    public static <T extends Serializable> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+    public static <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
         ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
         T result = null;
         try {
@@ -37,7 +37,7 @@ public class SerializeTestUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static  <T extends Serializable> T roundTrip(T input) throws IOException {
+    public static  <T> T roundTrip(T input) throws IOException {
         return (T) deserialize(serialize(input), input.getClass());
     }
 
