@@ -15,7 +15,6 @@ import java.io.*;
 public class SerializeTestUtil {
 
     public static <T> byte[] serialize(T object) throws IOException {
-
         ByteArrayOutputStream bytes  = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bytes);
         out.writeObject(object);
@@ -26,15 +25,11 @@ public class SerializeTestUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
-        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
-        T result;
-        try {
-            result = (T) in.readObject();
+        try(ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (T) in.readObject();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        in.close();
-        return result;
     }
 
     public static  <T> T roundTrip(T input) throws IOException {
