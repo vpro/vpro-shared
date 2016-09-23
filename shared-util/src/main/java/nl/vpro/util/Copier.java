@@ -1,22 +1,20 @@
 package nl.vpro.util;
 
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
 * @author Michiel Meeuwissen
 * @since 3.1
 */
+@Slf4j
 public class Copier implements Runnable {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Copier.class);
 
     private boolean ready;
     private long count = 0;
@@ -67,13 +65,14 @@ public class Copier implements Runnable {
                 }
             }
         } catch (Throwable t) {
-            LOG.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
+            log.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
         }
         synchronized (this) {
             ready = true;
             if (callback != null) {
                 callback.accept(this);
             }
+            log.debug("notifying listeners");
             notifyAll();
         }
     }
