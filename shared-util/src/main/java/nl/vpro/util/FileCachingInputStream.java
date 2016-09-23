@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -69,7 +70,7 @@ public class FileCachingInputStream extends InputStream {
             .build()
             .execute()
         ;
-        this.file = new BufferedInputStream(Files.newInputStream(tempFile));
+        this.file = new BufferedInputStream(Files.newInputStream(tempFile, StandardOpenOption.DELETE_ON_CLOSE));
 
     }
 
@@ -133,7 +134,6 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public void close() throws IOException {
         file.close();
-        Files.deleteIfExists(tempFile);
     }
 
 
