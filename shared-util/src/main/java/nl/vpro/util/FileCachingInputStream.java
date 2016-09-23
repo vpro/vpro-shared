@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * It will buffer the result to a temporary file.
  *
  * Use this if you want to consume an inputstream as fast as possible, while handing it at a slower pace. The cost is the creation of the temporary file.
- * 
+ *
  *
  * @author Michiel Meeuwissen
  * @since 0.50

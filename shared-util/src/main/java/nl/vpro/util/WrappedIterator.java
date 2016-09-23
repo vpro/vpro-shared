@@ -33,6 +33,7 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<Long> getSize() {
         if (wrapped instanceof CountedIterator) {
@@ -42,6 +43,7 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<Long> getTotalSize() {
         if (wrapped instanceof CountedIterator) {
