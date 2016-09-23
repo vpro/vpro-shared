@@ -4,6 +4,7 @@ import lombok.Builder;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -21,53 +22,47 @@ public class Copier implements Runnable {
     private long count = 0;
     private final InputStream in;
     private final OutputStream out;
-
-    private final Logger log;
-    private final String tempFile;
     private final long batch;
-    private final Runnable afterReady;
+    private final Consumer<Copier> callback;
+    private final Consumer<Copier> batchConsumer;
 
 
-    public Copier(InputStream i, OutputStream o, Logger log, String tempFile, long batch) {
-        this(i, o, log, tempFile, batch, () -> {
-        });
+    public Copier(InputStream i, OutputStream o, long batch) {
+        this(i, o, batch, null, null);
     }
 
     @Builder
-    private Copier(InputStream input, OutputStream output, Logger log, String tempFile, long batch, Runnable afterReady) {
+    private Copier(
+        InputStream input,
+        OutputStream output,
+        long batch,
+        Consumer<Copier> batchConsumer,
+        Consumer<Copier> callback) {
         in = input;
         out = output;
-        this.log = log;
-        this.tempFile = tempFile;
-        this.batch = batch == 0 ? 8192: batch; 
-        this.afterReady = afterReady;
+        this.batch = batch == 0 ? 8192: batch;
+        this.callback = callback;
+        this.batchConsumer = batchConsumer;
     }
-    
+
     public Copier(InputStream i, OutputStream o) {
-        this(i, o, null, null, 0L);
+        this(i, o, 8192L);
     }
 
     @Override
     public void run() {
         try {
-            if (log == null) {
+            if (batchConsumer == null || batch < 1) {
                 count = IOUtils.copyLarge(in, out);
             } else {
-                // Download changes locally before streaming them to avoid network timeouts
                 count = 0;
                 while (true) {
                     long result = IOUtils.copyLarge(in, out, 0, batch);
                     count += result;
                     if (result < batch) {
-                        if (count > batch) {
-                            log.info("Created {} ({} bytes written)", tempFile, count);
-                        } else {
-                            log.debug("Created {} ({} bytes written)", tempFile, count);
-                        }
                         break;
-                    } else {
-                        log.info("Creating {} ({} bytes written)", tempFile, count);
                     }
+                    batchConsumer.accept(this);
                 }
             }
         } catch (Throwable t) {
@@ -75,8 +70,8 @@ public class Copier implements Runnable {
         }
         synchronized (this) {
             ready = true;
-            if (afterReady != null) {
-                afterReady.run();
+            if (callback != null) {
+                callback.accept(this);
             }
             notifyAll();
         }
@@ -97,6 +92,11 @@ public class Copier implements Runnable {
 
     public long getCount() {
         return count;
+    }
+
+    public Copier execute() {
+        ThreadPools.copyExecutor.execute(this);
+        return this;
     }
 
 }

@@ -1,8 +1,6 @@
 package nl.vpro.util;
 
 import lombok.Builder;
-import lombok.Singular;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -22,53 +20,78 @@ import org.apache.commons.io.IOUtils;
  */
 
 @Slf4j
-public class FileCachingInputStream extends PipedInputStream {
+public class FileCachingInputStream extends InputStream {
 
-    final Copier copier;
-
-    final Path tempFile;
-    InputStream input;
+    private final Copier copier;
+    private final Path tempFile;
+    private InputStream file;
     private int count = 0;
 
     @Builder
     private FileCachingInputStream(
-        InputStream input, 
-        Path path, 
+        InputStream input,
+        Path path,
         String filePrefix,
-        int memoryBufferSize,
-        int bufferSize) throws IOException {
+        int batchSize,
+        int outputBuffer) throws IOException {
+
         super();
         tempFile = Files.createTempFile(
-            path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path, 
-            filePrefix == null ? "file-caching-inputstream" : filePrefix, 
+            path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
+            filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null);
-        OutputStream out = new BufferedStream(Files.newOutputStream(tempFile), bufferSize);
+        OutputStream out = new BufferedStream(Files.newOutputStream(tempFile), outputBuffer);
+
         copier = Copier.builder()
             .input(input)
             .output(out)
-            .log(log)
-            .afterReady(() -> IOUtils.closeQuietly(out))
-            .batch(bufferSize)
+            .callback(c -> {
+                IOUtils.closeQuietly(out);
+                log.info("Created {} ({} bytes written)", tempFile, c.getCount());
+            })
+            .batch(batchSize)
+            .batchConsumer(c ->
+                log.info("Creating {} ({} bytes written)", tempFile, c.getCount())
+            )
             .build()
+            .execute()
         ;
-        ThreadPools.copyExecutor.execute(copier);
-        this.input = new BufferedInputStream(Files.newInputStream(tempFile));
+        this.file= new BufferedInputStream(Files.newInputStream(tempFile));
 
     }
- 
+
 
     @Override
     public int read() throws IOException {
-        int result = input.read();
-        if (result == -1 && (count < copier.getCount() || ! copier.isReady())) {
-            try {
-                copier.waitFor();
-                
-                this.input = new BufferedInputStream(Files.newInputStream(tempFile));
-            } catch (InterruptedException e) {
-                throw new IOException(e);
+        int result = file.read();
+        if (result == -1) {
+            log.debug("Closing {}", tempFile);
+            file.close();
+
+            synchronized (copier) {
+                while(! copier.isReady()) {
+                    try {
+                        copier.wait(1000);
+                    } catch (InterruptedException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                    if (count < copier.getCount()) {
+                        break;
+                    } else {
+                        return -1;
+                    }
+                }
+            }
+            if (count < copier.getCount()) {
+                log.debug("Opening file {} from {}", tempFile, count);
+                file = new BufferedInputStream(Files.newInputStream(tempFile));
+                file.skip(count);
+                result = file.read();
+            } else {
+                return -1;
             }
         }
+        count++;
         return result;
 
     }
@@ -83,6 +106,6 @@ public class FileCachingInputStream extends PipedInputStream {
             return buf;
         }
     }
-  
+
 
 }
