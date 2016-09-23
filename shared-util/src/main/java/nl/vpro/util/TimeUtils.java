@@ -63,8 +63,14 @@ public class TimeUtils {
         } catch (DateTimeParseException e) {
             dtp = e;
         }
+
         try {
-            return Optional.of(Instant.ofEpochMilli(Long.parseLong(dateValue)));
+            Long longValue = Long.parseLong(dateValue);
+            if (longValue > 1000 && longValue < 9999) {
+                return Optional.of(LocalDate.of(longValue.intValue(), 1, 1).atStartOfDay().atZone(ZONE_ID).toInstant());
+            } else {
+                return Optional.of(Instant.ofEpochMilli(Long.parseLong(dateValue)));
+            }
         } catch (NumberFormatException nfe) {
             throw dtp;
         }
