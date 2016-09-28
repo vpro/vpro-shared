@@ -5,6 +5,7 @@
 package nl.vpro.api.client.resteasy;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
@@ -46,7 +47,7 @@ import nl.vpro.util.XTrustProvider;
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
-public class AbstractApiClient {
+public class AbstractApiClient implements  AbstractApiClientMBean {
 
     private static Logger LOG = LoggerFactory.getLogger(AbstractApiClient.class);
 
@@ -80,22 +81,74 @@ public class AbstractApiClient {
 
     }
 
-    protected final ClientHttpEngine clientHttpEngine;
-    protected final ClientHttpEngine clientHttpEngineNoTimeout;
+    protected ClientHttpEngine clientHttpEngine;
+    protected ClientHttpEngine clientHttpEngineNoTimeout;
 
     private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
-
     private boolean shutdown = false;
-
     private boolean trustAll = false;
 
-    public AbstractApiClient(int connectionTimeoutMillis, int maxConnections, int connectionInPoolTTL) {
-        clientHttpEngine = buildHttpEngine(connectionTimeoutMillis, maxConnections, connectionInPoolTTL);
-        clientHttpEngineNoTimeout = buildHttpEngine(0/*value of zero is interpreted as infinite timeout*/, 3, -1);
+    Duration connectionRequestTimeout;
+    Duration connectTimeout;
+    Duration socketTimeout;
+
+    private int maxConnections;
+    Duration connectionInPoolTTL;
+
+    public AbstractApiClient(
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        int maxConnections,
+        Duration connectionInPoolTTL) {
+
+        this.connectionRequestTimeout = connectionRequestTimeout;
+        this.connectTimeout = connectTimeout;
+        this.socketTimeout = socketTimeout;
+        this.maxConnections = maxConnections;
+        this.connectionInPoolTTL = connectionInPoolTTL;
     }
 
-    protected ApacheHttpClient4Engine buildHttpEngine(int connectionTimeoutMillis, int maxConnections, int connectionInPoolTTL) {
-        return new ApacheHttpClient4Engine(getHttpClient43(connectionTimeoutMillis, maxConnections, connectionInPoolTTL));
+    public AbstractApiClient(Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
+        this(Duration.ofMillis(connectionTimeout), Duration.ofMillis(connectionTimeout), Duration.ofMillis(connectionTimeout), maxConnections, Duration.ofMillis(connectionInPoolTTL));
+    }
+
+
+    protected synchronized void invalidate() {
+        this.clientHttpEngine = null;
+    }
+
+    @Override
+    public Duration getConnectionRequestTimeout() {
+        return connectionRequestTimeout;
+    }
+
+    @Override
+    public synchronized void setConnectionRequestTimeout(Duration connectionRequestTimeout) {
+        this.connectionRequestTimeout = connectionRequestTimeout;
+        invalidate();
+    }
+
+    @Override
+    public Duration getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    @Override
+    public synchronized void setConnectTimeout(Duration connectTimeout) {
+        this.connectTimeout = connectTimeout;
+        invalidate();
+    }
+
+    @Override
+    public Duration getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    @Override
+    public synchronized void setSocketTimeout(Duration socketTimeout) {
+        this.socketTimeout = socketTimeout;
+        invalidate();
     }
 
     public void setTrustAll(boolean b) {
@@ -105,24 +158,34 @@ public class AbstractApiClient {
         }
     }
 
+
+
     // See https://issues.jboss.org/browse/RESTEASY-975
     // You _must_ use httpclient 4.2.1 syntax.  Otherwise timeout settings will simply not work
     // See also https://jira.vpro.nl/browse/MGNL-11312
     // This code can be used when this will be fixed in resteasy.
-    private HttpClient getHttpClient43(int connectionTimeoutMillis, int maxConnections, int connectionInPoolTTL) {
+    private  HttpClient getHttpClient43(
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        int maxConnections,
+        Duration connectionInPoolTTL) {
         SocketConfig socketConfig = SocketConfig.custom()
             .setTcpNoDelay(true)
             .setSoKeepAlive(true)
             .setSoReuseAddress(true)
             .build();
 
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL, TimeUnit.MILLISECONDS);
-        connectionManager.setDefaultMaxPerRoute(maxConnections);
-        connectionManager.setMaxTotal(maxConnections);
-        connectionManager.setDefaultSocketConfig(socketConfig);
+        PoolingHttpClientConnectionManager connectionManager = null;
+        if (connectionInPoolTTL != null) {
+            connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
+            connectionManager.setDefaultMaxPerRoute(maxConnections);
+            connectionManager.setMaxTotal(maxConnections);
+            connectionManager.setDefaultSocketConfig(socketConfig);
 
-        if (maxConnections > 1) {
-            watchIdleConnections(connectionManager);
+            if (maxConnections > 1) {
+                watchIdleConnections(connectionManager);
+            }
         }
 
 
@@ -130,9 +193,9 @@ public class AbstractApiClient {
             .setExpectContinueEnabled(true)
             .setStaleConnectionCheckEnabled(false)
             .setMaxRedirects(100)
-            .setConnectionRequestTimeout(connectionTimeoutMillis)
-            .setConnectTimeout(connectionTimeoutMillis)
-            .setSocketTimeout(connectionTimeoutMillis)
+            .setConnectionRequestTimeout(connectionRequestTimeout == null ? 0 : (int) connectionRequestTimeout.toMillis())
+            .setConnectTimeout(connectTimeout == null ? 0 : (int) connectTimeout.toMillis())
+            .setSocketTimeout(socketTimeout == null ? 0 : (int) socketTimeout.toMillis())
             .build();
 
         List<Header> defaultHeaders = new ArrayList<>();
@@ -140,11 +203,13 @@ public class AbstractApiClient {
 
 
         HttpClientBuilder client = HttpClients.custom()
-            .setConnectionManager(connectionManager)
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy())
             ;
+        if (connectionManager != null){
+            client.setConnectionManager(connectionManager);
+        }
 
         if (trustAll){
             try {
@@ -157,8 +222,38 @@ public class AbstractApiClient {
         return client.build();
     }
 
-    public ClientHttpEngine getClientHttpEngine() {
+    public synchronized ClientHttpEngine getClientHttpEngine() {
+        if (clientHttpEngine == null) {
+            clientHttpEngine = new ApacheHttpClient4Engine(getHttpClient43(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, connectionInPoolTTL));
+        }
         return clientHttpEngine;
+    }
+
+    public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
+        if (clientHttpEngineNoTimeout == null) {
+            clientHttpEngineNoTimeout = new ApacheHttpClient4Engine(getHttpClient43(connectionRequestTimeout, connectTimeout, null, 3, null));
+        }
+        return clientHttpEngineNoTimeout;
+
+    }
+
+
+    public int getMaxConnections() {
+        return maxConnections;
+    }
+
+    public void setMaxConnections(int maxConnections) {
+        this.maxConnections = maxConnections;
+        clientHttpEngine = null;
+    }
+
+    public Duration getConnectionInPoolTTL() {
+        return connectionInPoolTTL;
+    }
+
+    public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
+        this.connectionInPoolTTL = connectionInPoolTTL;
+        clientHttpEngine = null;
     }
 
     @PreDestroy
