@@ -28,6 +28,7 @@ public class FileCachingInputStream extends InputStream {
 
     private static final int EOF = -1;
     private final Copier copier;
+    private final byte[] buffer;
     private final Path tempFile;
     private final InputStream file;
     private int count = 0;
@@ -43,16 +44,38 @@ public class FileCachingInputStream extends InputStream {
         long  batchSize,
         int outputBuffer,
         Logger logger,
-        @Singular List<OpenOption> openOptions
+        @Singular List<OpenOption> openOptions,
+        int initialBuffer
         ) throws IOException {
 
         super();
+        int len = 0;
+        if (initialBuffer > 0) {
+            byte[] buf = new byte[initialBuffer];
+            len = input.read(buf, 0, buf.length);
+
+            if (len < initialBuffer) {
+                buffer = new byte[len];
+                copier = null;
+                tempFile = null;
+                file = null;
+                return;
+            } else {
+                buffer = buf;
+            }
+        } else {
+            buffer = null;
+        }
+
         tempFile = Files.createTempFile(
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
             filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null);
 
         OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer == 0 ? 8192 : outputBuffer);
+        if (buffer != null) {
+            out.write(buffer);
+        }
         if (logger != null) {
             this.log = logger;
         }
@@ -71,16 +94,20 @@ public class FileCachingInputStream extends InputStream {
             .build()
             .execute()
         ;
+
         if (openOptions == null) {
             openOptions = Collections.singletonList(StandardOpenOption.DELETE_ON_CLOSE);
         }
         this.file = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
-
     }
 
 
     @Override
     public int read() throws IOException {
+        if (count < buffer.length) {
+            count++;
+            return buffer[count];
+        }
         int result = file.read();
         while (result == EOF) {
             synchronized (copier) {

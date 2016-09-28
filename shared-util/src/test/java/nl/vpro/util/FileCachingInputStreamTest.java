@@ -46,6 +46,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(in))
                 .clearOpenOptions()
+                //.initialBuffer(4)
                 .build();) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
