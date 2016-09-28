@@ -51,7 +51,8 @@ public class FileCachingInputStream extends InputStream {
         Integer outputBuffer,
         Logger logger,
         @Singular List<OpenOption> openOptions,
-        Integer initialBuffer
+        Integer initialBuffer,
+        Boolean startImmediately
         ) throws IOException {
 
         super();
@@ -103,9 +104,10 @@ public class FileCachingInputStream extends InputStream {
             .batchConsumer(c ->
                 log.info("Creating {} ({} bytes written)", tempFile, c.getCount())
             )
-            .build()
-            .execute()
-        ;
+            .build();
+        if (startImmediately == null || startImmediately) {
+            copier.execute();
+        }
         
         if (openOptions == null) {
             openOptions = Collections.singletonList(StandardOpenOption.DELETE_ON_CLOSE);
@@ -166,6 +168,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     private int readFromFile() throws IOException {
+        copier.executeIfNotRunning();
         int result = file.read();
         while (result == EOF) {
             synchronized (copier) {
@@ -192,6 +195,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     private int readFromFile(byte b[]) throws IOException {
+        copier.executeIfNotRunning();
         if (copier.isReady() && count == copier.getCount()) {
             return EOF;
         }

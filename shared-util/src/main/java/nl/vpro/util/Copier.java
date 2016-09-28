@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
@@ -23,6 +24,7 @@ public class Copier implements Runnable {
     private final long batch;
     private final Consumer<Copier> callback;
     private final Consumer<Copier> batchConsumer;
+    private Future<?> future;
 
 
     public Copier(InputStream i, OutputStream o, long batch) {
@@ -64,6 +66,9 @@ public class Copier implements Runnable {
                         break;
                     }
                     batchConsumer.accept(this);
+                    if (Thread.currentThread().isInterrupted()) {
+                        break;
+                    }
                 }
             }
         } catch (Throwable t) {
@@ -97,8 +102,22 @@ public class Copier implements Runnable {
     }
 
     public Copier execute() {
-        ThreadPools.copyExecutor.execute(this);
+        if (future != null) {
+            throw new IllegalStateException("Already running");
+        }
+        future = ThreadPools.copyExecutor.submit(this);
         return this;
+    }
+
+    public Copier executeIfNotRunning() {
+        if (future == null) {
+            execute();
+        }
+        return this;
+    }
+
+    public void interrupt() {
+        future.cancel(true);
     }
 
 }

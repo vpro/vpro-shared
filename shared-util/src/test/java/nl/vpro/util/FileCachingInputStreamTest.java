@@ -16,16 +16,37 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 0.50
  */
 public class FileCachingInputStreamTest {
+    byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
 
 
     @Test
     public void testRead() throws IOException {
-        byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .input(new ByteArrayInputStream(in))
             .initialBuffer(4)
+            .startImmediately(true)
+            .build();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int r;
+        while ((r = inputStream.read()) != -1) {
+            out.write(r);
+        }
+
+        assertThat(out.toByteArray()).containsExactly(in);
+    }
+
+    @Test
+    public void testReadNoAutoStart() throws IOException {
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .input(new ByteArrayInputStream(in))
+            .initialBuffer(4)
+            .startImmediately(false)
             .build();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -41,7 +62,7 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void testReadLargeBuffer() throws IOException {
-        byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+      
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -61,7 +82,6 @@ public class FileCachingInputStreamTest {
 
 	@Test
 	public void test() throws IOException {
-	    byte[] in = new byte[] {'h','e','l','l','o',' ','w', 'o',  'r', 'l', 'd'};
         try (
             FileCachingInputStream inputStream  = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -69,6 +89,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(in))
                 .clearOpenOptions()
                 .initialBuffer(4)
+                .startImmediately(true)
                 .build();) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -80,8 +101,27 @@ public class FileCachingInputStreamTest {
 	}
 
     @Test
+    public void testNoAutostart() throws IOException {
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .input(new ByteArrayInputStream(in))
+                .clearOpenOptions()
+                .initialBuffer(4)
+                .startImmediately(false)
+                .build();) {
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            IOUtils.copy(inputStream, out);
+
+            assertThat(out.toByteArray()).containsExactly(in);
+        }
+    }
+
+    @Test
     public void testWithLargeBuffer() throws IOException {
-        byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
