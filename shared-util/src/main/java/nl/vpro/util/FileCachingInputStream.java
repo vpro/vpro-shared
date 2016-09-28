@@ -1,12 +1,12 @@
 package nl.vpro.util;
 
 import lombok.Builder;
+import lombok.Singular;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -42,7 +42,8 @@ public class FileCachingInputStream extends InputStream {
         String filePrefix,
         long  batchSize,
         int outputBuffer,
-        Logger logger
+        Logger logger,
+        @Singular List<OpenOption> openOptions
         ) throws IOException {
 
         super();
@@ -70,7 +71,10 @@ public class FileCachingInputStream extends InputStream {
             .build()
             .execute()
         ;
-        this.file = new BufferedInputStream(Files.newInputStream(tempFile, StandardOpenOption.DELETE_ON_CLOSE));
+        if (openOptions == null) {
+            openOptions = Collections.singletonList(StandardOpenOption.DELETE_ON_CLOSE);
+        }
+        this.file = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
 
     }
 
@@ -134,6 +138,7 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public void close() throws IOException {
         file.close();
+        Files.deleteIfExists(tempFile);
     }
 
 
