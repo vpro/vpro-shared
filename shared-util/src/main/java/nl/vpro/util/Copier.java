@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 public class Copier implements Runnable {
 
     private boolean ready;
-    private long count = 0;
+    private long count;
     private final InputStream in;
     private final OutputStream out;
     private final long batch;
@@ -26,7 +26,7 @@ public class Copier implements Runnable {
 
 
     public Copier(InputStream i, OutputStream o, long batch) {
-        this(i, o, batch, null, null);
+        this(i, o, batch, null, null, 0);
     }
 
     @Builder
@@ -35,12 +35,15 @@ public class Copier implements Runnable {
         OutputStream output,
         long batch,
         Consumer<Copier> batchConsumer,
-        Consumer<Copier> callback) {
+        Consumer<Copier> callback,
+        int offset
+        ) {
         in = input;
         out = output;
         this.batch = batch == 0 ? 8192: batch;
         this.callback = callback;
         this.batchConsumer = batchConsumer;
+        this.count = offset;
     }
 
     public Copier(InputStream i, OutputStream o) {
@@ -51,9 +54,8 @@ public class Copier implements Runnable {
     public void run() {
         try {
             if (batchConsumer == null || batch < 1) {
-                count = IOUtils.copyLarge(in, out);
+                count += IOUtils.copyLarge(in, out);
             } else {
-                count = 0;
                 batchConsumer.accept(this);
                 while (true) {
                     long result = IOUtils.copyLarge(in, out, 0, batch);

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
  *
- * It will buffer the result to a temporary file.
+ * It will first buffer to an internal byte array (if the initial buffer size > 0, defaults to 2048). If that is too small it will buffer the result to a temporary file.
  *
  * Use this if you want to consume an inputstream as fast as possible, while handing it at a slower pace. The cost is the creation of the temporary file.
  *
@@ -25,10 +25,16 @@ import org.slf4j.LoggerFactory;
  */
 
 public class FileCachingInputStream extends InputStream {
+    
+    private static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
+    private static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
+
 
     private static final int EOF = -1;
     private final Copier copier;
     private final byte[] buffer;
+    private final int bufferLength;
+    
     private final Path tempFile;
     private final InputStream file;
     private int count = 0;
@@ -42,20 +48,23 @@ public class FileCachingInputStream extends InputStream {
         Path path,
         String filePrefix,
         long  batchSize,
-        int outputBuffer,
+        Integer outputBuffer,
         Logger logger,
         @Singular List<OpenOption> openOptions,
-        int initialBuffer
+        Integer initialBuffer
         ) throws IOException {
 
         super();
-        int len = 0;
+        if (initialBuffer == null) {
+            initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
+        }
         if (initialBuffer > 0) {
             byte[] buf = new byte[initialBuffer];
-            len = input.read(buf, 0, buf.length);
+            bufferLength = input.read(buf, 0, buf.length);
 
-            if (len < initialBuffer) {
-                buffer = new byte[len];
+            if (bufferLength < initialBuffer) {
+                buffer = buf;
+                System.arraycopy(buf, 0, buffer, 0, bufferLength);
                 copier = null;
                 tempFile = null;
                 file = null;
@@ -64,6 +73,7 @@ public class FileCachingInputStream extends InputStream {
                 buffer = buf;
             }
         } else {
+            bufferLength = 0;
             buffer = null;
         }
 
@@ -71,8 +81,10 @@ public class FileCachingInputStream extends InputStream {
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
             filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null);
-
-        OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer == 0 ? 8192 : outputBuffer);
+        if (outputBuffer == null) {
+            outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
+        }
+        OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
         if (buffer != null) {
             out.write(buffer);
         }
@@ -81,7 +93,7 @@ public class FileCachingInputStream extends InputStream {
         }
 
         copier = Copier.builder()
-            .input(input)
+            .input(input).offset(bufferLength)
             .output(out)
             .callback(c -> {
                 IOUtils.closeQuietly(out);
@@ -94,7 +106,7 @@ public class FileCachingInputStream extends InputStream {
             .build()
             .execute()
         ;
-
+        
         if (openOptions == null) {
             openOptions = Collections.singletonList(StandardOpenOption.DELETE_ON_CLOSE);
         }
@@ -104,14 +116,60 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        if (count < buffer.length) {
-            count++;
-            return buffer[count];
+        if (file == null) {
+            return readFromBuffer();
+        } else {
+            return readFromFile();
         }
+
+    }
+  
+
+    @Override
+    public int read(byte b[]) throws IOException {
+      if (file == null) {
+          return readFromBuffer(b);
+      } else {
+          return readFromFile(b);
+      }
+     
+  }
+
+    @Override
+    public void close() throws IOException {
+        if (file != null) {
+            file.close();
+            Files.deleteIfExists(tempFile);
+        }
+        
+    }
+
+
+    private int readFromBuffer() {
+        if (count < bufferLength) {
+            return buffer[count++];
+        } else {
+            return EOF;
+        }
+    }
+
+    
+    private int readFromBuffer(byte b[]) throws IOException {
+        int toCopy = Math.min(b.length, bufferLength - count);
+        if (toCopy > 0) {
+            System.arraycopy(buffer, count, b, 0, toCopy);
+            count += toCopy;
+            return toCopy;
+        } else {
+            return EOF;
+        }
+    }
+
+    private int readFromFile() throws IOException {
         int result = file.read();
         while (result == EOF) {
             synchronized (copier) {
-                while(! copier.isReady() && result == EOF) {
+                while (!copier.isReady() && result == EOF) {
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
@@ -131,43 +189,34 @@ public class FileCachingInputStream extends InputStream {
         count++;
         log.debug("returning {}", result);
         return result;
-
     }
 
-  @Override
-  public int read(byte b[]) throws IOException {
-      if (copier.isReady() && count == copier.getCount()) {
-          return EOF;
-      }
-      int totalresult = Math.max(file.read(b, 0, b.length), 0);
+    private int readFromFile(byte b[]) throws IOException {
+        if (copier.isReady() && count == copier.getCount()) {
+            return EOF;
+        }
+        int totalresult = Math.max(file.read(b, 0, b.length), 0);
 
-      if(totalresult < b.length) {
-          synchronized (copier) {
-              while (!copier.isReady() && totalresult < b.length) {
-                  try {
-                      copier.wait(1000);
-                  } catch (InterruptedException e) {
-                      log.error(e.getMessage(), e);
-                  }
-                  int subresult = Math.max(file.read(b, totalresult, b.length - totalresult), 0);
-                  totalresult += subresult;
-                  if (copier.isReady() && count + totalresult == copier.getCount()) {
-                      break;
-                  }
-              }
-          }
-      }
-      count += totalresult;
-      log.debug("returning {}", totalresult);
-      return totalresult;
-  }
-
-    @Override
-    public void close() throws IOException {
-        file.close();
-        Files.deleteIfExists(tempFile);
+        if (totalresult < b.length) {
+            synchronized (copier) {
+                while (!copier.isReady() && totalresult < b.length) {
+                    try {
+                        copier.wait(1000);
+                    } catch (InterruptedException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                    int subresult = Math.max(file.read(b, totalresult, b.length - totalresult), 0);
+                    totalresult += subresult;
+                    if (copier.isReady() && count + totalresult == copier.getCount()) {
+                        break;
+                    }
+                }
+            }
+        }
+        count += totalresult;
+        log.debug("returning {}", totalresult);
+        return totalresult;
     }
-
 
 
 }

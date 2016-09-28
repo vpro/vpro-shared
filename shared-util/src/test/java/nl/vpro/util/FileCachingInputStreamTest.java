@@ -20,11 +20,33 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void testRead() throws IOException {
-        byte[] in = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .input(new ByteArrayInputStream(in))
+            .initialBuffer(4)
+            .build();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int r;
+        while ((r = inputStream.read()) != -1) {
+            out.write(r);
+        }
+
+        assertThat(out.toByteArray()).containsExactly(in);
+    }
+
+
+    @Test
+    public void testReadLargeBuffer() throws IOException {
+        byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .input(new ByteArrayInputStream(in))
+            .initialBuffer(1024)
             .build();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -46,7 +68,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(in))
                 .clearOpenOptions()
-                //.initialBuffer(4)
+                .initialBuffer(4)
                 .build();) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -56,6 +78,26 @@ public class FileCachingInputStreamTest {
             assertThat(out.toByteArray()).containsExactly(in);
         }
 	}
+
+    @Test
+    public void testWithLargeBuffer() throws IOException {
+        byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .input(new ByteArrayInputStream(in))
+                .initialBuffer(2048)
+                .build();) {
+            
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            IOUtils.copy(inputStream, out);
+
+            assertThat(out.toByteArray()).containsExactly(in);
+        }
+    }
 
 	@Test
     @Ignore
