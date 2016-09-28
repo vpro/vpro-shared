@@ -39,18 +39,21 @@ public class FileCachingInputStreamTest {
 
 	@Test
 	public void test() throws IOException {
-	    byte[] in = new byte[] {1,2,3,4,5,6,7,8, 9};
-		FileCachingInputStream inputStream  = FileCachingInputStream.builder()
-            .outputBuffer(2)
-            .batchSize(3)
-            .input(new ByteArrayInputStream(in))
-            .build();
+	    byte[] in = new byte[] {'h','e','l','l','o',' ','w', 'o',  'r', 'l', 'd'};
+        try (
+            FileCachingInputStream inputStream  = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .input(new ByteArrayInputStream(in))
+                .clearOpenOptions()
+                .build();) {
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        IOUtils.copy(inputStream, out);
+            IOUtils.copy(inputStream, out);
 
-        assertThat(out.toByteArray()).containsExactly(in);
+            assertThat(out.toByteArray()).containsExactly(in);
+        }
 	}
 
 	@Test
