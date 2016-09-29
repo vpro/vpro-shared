@@ -24,6 +24,7 @@ import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -206,7 +207,12 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy())
-            ;
+
+
+        ;
+        if (trustAll) {
+            client.setHostnameVerifier(new AllowAllHostnameVerifier());
+        }
         if (connectionManager != null){
             client.setConnectionManager(connectionManager);
         }
@@ -214,7 +220,8 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
         if (trustAll){
             try {
                 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-                client.setSSLSocketFactory(sslsf);
+
+                    client.setSSLSocketFactory(sslsf);
             } catch (NoSuchAlgorithmException e) {
                 LOG.error(e.getMessage(), e);
             }
