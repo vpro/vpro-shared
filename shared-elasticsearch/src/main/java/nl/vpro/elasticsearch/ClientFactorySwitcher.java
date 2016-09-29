@@ -1,11 +1,13 @@
 package nl.vpro.elasticsearch;
 
-import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.management.*;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 
 import org.elasticsearch.client.Client;
 
@@ -29,9 +31,9 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
 
     @PostConstruct
     public void init() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        /*MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName oname = new ObjectName("nl.vpro.elasticsearch:name=" + name);
-        mbs.registerMBean(this, oname);
+        mbs.registerMBean(this, oname);*/
     }
 
     @Override
