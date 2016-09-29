@@ -1,6 +1,5 @@
 package nl.vpro.swagger.model;
 
-import io.swagger.models.parameters.AbstractSerializableParameter;
 import io.swagger.util.ParameterProcessor;
 
 /**
