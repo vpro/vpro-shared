@@ -345,6 +345,14 @@ public class URLResource<T> {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "URLResource{" +
+            "url=" + url +
+            ", lastModified=" + lastModified +
+            '}';
+    }
+
     private class ScheduledRunnable implements Runnable {
 
         @Override
