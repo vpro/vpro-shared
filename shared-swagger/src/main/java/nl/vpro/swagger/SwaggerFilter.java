@@ -42,24 +42,26 @@ public class SwaggerFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
 
-        String accept = req.getHeader("accept");
-        if (accept != null) {
-            boolean json = false;
-            try {
-                String[] mtypes = accept.split(";", 2)[0].split(",");
-                for (String mtype : mtypes) {
-                    if (MediaType.valueOf(mtype).isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
-                        json = true;
-                        break;
+        if (! req.getPathInfo().endsWith(".json")) {
+            String accept = req.getHeader("accept");
+            if (accept != null) {
+                boolean json = false;
+                try {
+                    String[] mtypes = accept.split(";", 2)[0].split(",");
+                    for (String mtype : mtypes) {
+                        if (MediaType.valueOf(mtype).isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+                            json = true;
+                            break;
+                        }
                     }
+                } catch (Exception e) {
+                    LOG.warn(e.getMessage());
                 }
-            } catch (Exception e) {
-                LOG.warn(e.getMessage());
-            }
-            if (! json) {
-                LOG.debug("Not json");
-                chain.doFilter(request, response);
-                return;
+                if (!json) {
+                    LOG.debug("Not json");
+                    chain.doFilter(request, response);
+                    return;
+                }
             }
         }
         String scheme = req.getHeader("X-Forwarded-Proto");
