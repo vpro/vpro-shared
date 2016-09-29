@@ -82,8 +82,8 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
 
     }
 
-    protected ClientHttpEngine clientHttpEngine;
-    protected ClientHttpEngine clientHttpEngineNoTimeout;
+    private ClientHttpEngine clientHttpEngine;
+    private ClientHttpEngine clientHttpEngineNoTimeout;
 
     private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
     private boolean shutdown = false;
@@ -111,7 +111,11 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     public AbstractApiClient(Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
-        this(Duration.ofMillis(connectionTimeout), Duration.ofMillis(connectionTimeout), Duration.ofMillis(connectionTimeout), maxConnections, Duration.ofMillis(connectionInPoolTTL));
+        this(Duration.ofMillis(connectionTimeout), 
+            Duration.ofMillis(connectionTimeout), 
+            Duration.ofMillis(connectionTimeout), 
+            maxConnections, 
+            Duration.ofMillis(connectionInPoolTTL));
     }
 
 
@@ -210,9 +214,7 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
 
 
         ;
-        if (trustAll) {
-            client.setHostnameVerifier(new AllowAllHostnameVerifier());
-        }
+      
         if (connectionManager != null){
             client.setConnectionManager(connectionManager);
         }
