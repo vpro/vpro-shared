@@ -2,30 +2,28 @@ package nl.vpro.util;
 
 import lombok.Builder;
 import lombok.Singular;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
- *
+ * <p>
  * It will first buffer to an internal byte array (if the initial buffer size > 0, defaults to 2048). If that is too small it will buffer the result to a temporary file.
- *
+ * <p>
  * Use this if you want to consume an inputstream as fast as possible, while handing it at a slower pace. The cost is the creation of the temporary file.
- *
  *
  * @author Michiel Meeuwissen
  * @since 0.50
  */
 
 public class FileCachingInputStream extends InputStream {
-    
+
     private static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
     private static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
 
@@ -34,7 +32,7 @@ public class FileCachingInputStream extends InputStream {
     private final Copier copier;
     private final byte[] buffer;
     private final int bufferLength;
-    
+
     private final Path tempFile;
     private final InputStream file;
     private int count = 0;
@@ -47,13 +45,13 @@ public class FileCachingInputStream extends InputStream {
         InputStream input,
         Path path,
         String filePrefix,
-        long  batchSize,
+        long batchSize,
         Integer outputBuffer,
         Logger logger,
         @Singular List<OpenOption> openOptions,
         Integer initialBuffer,
         Boolean startImmediately
-        ) throws IOException {
+    ) throws IOException {
 
         super();
         if (initialBuffer == null) {
@@ -61,7 +59,17 @@ public class FileCachingInputStream extends InputStream {
         }
         if (initialBuffer > 0) {
             byte[] buf = new byte[initialBuffer];
-            bufferLength = input.read(buf, 0, buf.length);
+
+            int bufferOffset = 0;
+            int numRead;
+            do {
+                numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
+                if (numRead > -1) {
+                    bufferOffset += numRead;
+                }
+            } while (numRead != -1 && bufferOffset < buf.length);
+
+            bufferLength = bufferOffset;
 
             if (bufferLength < initialBuffer) {
                 buffer = buf;
@@ -108,7 +116,7 @@ public class FileCachingInputStream extends InputStream {
         if (startImmediately == null || startImmediately) {
             copier.execute();
         }
-        
+
         if (openOptions == null) {
             openOptions = Collections.singletonList(StandardOpenOption.DELETE_ON_CLOSE);
         }
@@ -125,17 +133,17 @@ public class FileCachingInputStream extends InputStream {
         }
 
     }
-  
+
 
     @Override
     public int read(byte b[]) throws IOException {
-      if (file == null) {
-          return readFromBuffer(b);
-      } else {
-          return readFromFile(b);
-      }
-     
-  }
+        if (file == null) {
+            return readFromBuffer(b);
+        } else {
+            return readFromFile(b);
+        }
+
+    }
 
     @Override
     public void close() throws IOException {
@@ -143,7 +151,7 @@ public class FileCachingInputStream extends InputStream {
             file.close();
             Files.deleteIfExists(tempFile);
         }
-        
+
     }
 
 
@@ -155,7 +163,7 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
-    
+
     private int readFromBuffer(byte b[]) throws IOException {
         int toCopy = Math.min(b.length, bufferLength - count);
         if (toCopy > 0) {
