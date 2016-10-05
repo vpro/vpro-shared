@@ -4,15 +4,14 @@
  */
 package nl.vpro.api.client.resteasy;
 
+import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLContext;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PreDestroy;
-import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -24,7 +23,6 @@ import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -253,7 +251,7 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
 
     public void setMaxConnections(int maxConnections) {
         this.maxConnections = maxConnections;
-        clientHttpEngine = null;
+        invalidate();
     }
 
     public Duration getConnectionInPoolTTL() {
@@ -261,6 +259,7 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
+        invalidate();
         this.connectionInPoolTTL = connectionInPoolTTL;
         clientHttpEngine = null;
     }
