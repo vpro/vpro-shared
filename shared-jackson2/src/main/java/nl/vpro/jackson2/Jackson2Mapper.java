@@ -4,9 +4,6 @@
  */
 package nl.vpro.jackson2;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -17,15 +14,14 @@ import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Rico
  * @author Michiel Meeuwissen
  */
-
+@Slf4j
 public class Jackson2Mapper extends ObjectMapper {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Jackson2Mapper.class);
 
     private static boolean loggedAboutAvro = false;
 
@@ -34,12 +30,11 @@ public class Jackson2Mapper extends ObjectMapper {
     public static Jackson2Mapper STRICT = new Jackson2Mapper();
     public static Jackson2Mapper PRETTY = new Jackson2Mapper();
 
-
     static {
-        LENIENT.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
-        STRICT.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-        PRETTY.configure(SerializationFeature.INDENT_OUTPUT, true);
-        //PRETTY.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
+        LENIENT.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
+        //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
     }
 
     public static Jackson2Mapper getInstance() {
@@ -65,15 +60,12 @@ public class Jackson2Mapper extends ObjectMapper {
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         setAnnotationIntrospector(introspector);
 
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
+        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
 
-
-        configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true);
-
-
+        enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+        enable(JsonParser.Feature.ALLOW_COMMENTS);
+        enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+        enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         registerModule(javaTimeModule);
@@ -82,7 +74,7 @@ public class Jackson2Mapper extends ObjectMapper {
             registerModule(new SerializeAvroModule());
         } catch (NoClassDefFoundError ncdfe) {
             if (! loggedAboutAvro) {
-                LOG.info("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
+                log.info("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
             }
             loggedAboutAvro = true;
         }
