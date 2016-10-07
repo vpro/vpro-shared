@@ -6,10 +6,7 @@ package nl.vpro.jackson2;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -66,6 +63,7 @@ public class Jackson2Mapper extends ObjectMapper {
         enable(JsonParser.Feature.ALLOW_COMMENTS);
         enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
         enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
+        enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         registerModule(javaTimeModule);
