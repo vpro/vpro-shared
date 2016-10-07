@@ -27,7 +27,6 @@ public class FileCachingInputStream extends InputStream {
     private static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
     private static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
 
-
     private static final int EOF = -1;
     private final Copier copier;
     private final byte[] buffer;
@@ -38,7 +37,6 @@ public class FileCachingInputStream extends InputStream {
     private int count = 0;
 
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
-
 
     @Builder
     private FileCachingInputStream(
@@ -123,7 +121,6 @@ public class FileCachingInputStream extends InputStream {
         this.file = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
     }
 
-
     @Override
     public int read() throws IOException {
         if (file == null) {
@@ -131,9 +128,7 @@ public class FileCachingInputStream extends InputStream {
         } else {
             return readFromFile();
         }
-
     }
-
 
     @Override
     public int read(byte b[]) throws IOException {
@@ -142,7 +137,6 @@ public class FileCachingInputStream extends InputStream {
         } else {
             return readFromFile(b);
         }
-
     }
 
     @Override
@@ -151,9 +145,7 @@ public class FileCachingInputStream extends InputStream {
             file.close();
             Files.deleteIfExists(tempFile);
         }
-
     }
-
 
     private int readFromBuffer() {
         if (count < bufferLength) {
@@ -162,7 +154,6 @@ public class FileCachingInputStream extends InputStream {
             return EOF;
         }
     }
-
 
     private int readFromBuffer(byte b[]) throws IOException {
         int toCopy = Math.min(b.length, bufferLength - count);
@@ -195,7 +186,6 @@ public class FileCachingInputStream extends InputStream {
                     return EOF;
                 }
             }
-
         }
         count++;
         log.debug("returning {}", result);
@@ -229,6 +219,4 @@ public class FileCachingInputStream extends InputStream {
         log.debug("returning {}", totalresult);
         return totalresult;
     }
-
-
 }
