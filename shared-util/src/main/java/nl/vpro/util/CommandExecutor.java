@@ -3,6 +3,7 @@ package nl.vpro.util;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.concurrent.Future;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,10 @@ public interface CommandExecutor {
      * @return the exit code
      */
     int execute(String... args);
+
+    default Future<Integer> submit(String... args) {
+        return ThreadPools.copyExecutor.submit(() -> execute(args));
+    }
 
     /**
      * Executes the command
@@ -54,5 +59,11 @@ public interface CommandExecutor {
      * @return The exit code
      */
     int execute(InputStream in, OutputStream out, OutputStream error, String... args);
+
+
+    default Future<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
+        return ThreadPools.copyExecutor.submit(() -> execute(in, out, error, args));
+    }
+
 
 }
