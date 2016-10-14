@@ -42,7 +42,11 @@ public class InstantToJsonTimestamp {
                 return Instant.ofEpochMilli(jp.getLongValue());
             } catch (JsonParseException jpe) {
                 try {
-                    return Instant.parse(jp.getValueAsString());
+                    String s = jp.getValueAsString();
+                    if (s == null) {
+                        return null;
+                    }
+                    return Instant.parse(s);
                 } catch (DateTimeParseException dtps) {
                     return ZonedDateTime.parse(jp.getValueAsString()).toInstant();
                 }
