@@ -3,12 +3,12 @@
 
   <parent>
     <groupId>nl.vpro.shared</groupId>
-    <artifactId>shared-parent</artifactId>
-    <version>0.54-SNAPSHOT</version>
+    <artifactId>vpro-shared-parent</artifactId>
+    <version>1.54-SNAPSHOT</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
-  <artifactId>shared-integration</artifactId>
+  <artifactId>vpro-shared-integration</artifactId>
 
   <name>shared-integration</name>
   <description>Module containing DAO classes to be shared among other integration modules</description>
@@ -16,7 +16,7 @@
   <dependencies>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>shared-domain</artifactId>
+      <artifactId>vpro-shared-domain</artifactId>
     </dependency>
   </dependencies>
 </project>

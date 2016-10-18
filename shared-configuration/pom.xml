@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>shared-parent</artifactId>
+    <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.54-SNAPSHOT</version>
+    <version>1.54-SNAPSHOT</version>
   </parent>
-  <artifactId>shared-configuration</artifactId>
+  <artifactId>vpro-shared-configuration</artifactId>
 
   <name>shared-configuration</name>
 

@@ -3,11 +3,11 @@
 
   <parent>
     <groupId>nl.vpro.shared</groupId>
-    <artifactId>shared-parent</artifactId>
-    <version>0.54-SNAPSHOT</version>
+    <artifactId>vpro-shared-parent</artifactId>
+    <version>1.54-SNAPSHOT</version>
   </parent>
 
-  <artifactId>shared-services</artifactId>
+  <artifactId>vpro-shared-services</artifactId>
 
   <name>shared-services</name>
   <description>This module contains service classes to be shared to be shared among other modules</description>
