@@ -4,14 +4,17 @@
  */
 package nl.vpro.api.client.resteasy;
 
-import javax.annotation.PreDestroy;
-import javax.net.ssl.SSLContext;
+import java.lang.management.ManagementFactory;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PreDestroy;
+import javax.management.*;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -106,13 +109,14 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
         this.socketTimeout = socketTimeout;
         this.maxConnections = maxConnections;
         this.connectionInPoolTTL = connectionInPoolTTL;
+        registerBean();
     }
 
     public AbstractApiClient(Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
-        this(Duration.ofMillis(connectionTimeout), 
-            Duration.ofMillis(connectionTimeout), 
-            Duration.ofMillis(connectionTimeout), 
-            maxConnections, 
+        this(Duration.ofMillis(connectionTimeout),
+            Duration.ofMillis(connectionTimeout),
+            Duration.ofMillis(connectionTimeout),
+            maxConnections,
             Duration.ofMillis(connectionInPoolTTL));
     }
 
@@ -161,6 +165,15 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
         }
     }
 
+    private void registerBean() {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName name = new ObjectName("nl.vpro.api.client.resteasy:name=" + getClass().getSimpleName());
+            mbs.registerMBean(this, name);
+        } catch (MalformedObjectNameException | NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
 
     // See https://issues.jboss.org/browse/RESTEASY-975
@@ -212,7 +225,7 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
 
 
         ;
-      
+
         if (connectionManager != null){
             client.setConnectionManager(connectionManager);
         }
