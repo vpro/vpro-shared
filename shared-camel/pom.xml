@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>shared-parent</artifactId>
+    <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.54-SNAPSHOT</version>
+    <version>1.54-SNAPSHOT</version>
   </parent>
 
-  <artifactId>shared-camel</artifactId>
+  <artifactId>vpro-shared-camel</artifactId>
   <name>shared-camel</name>
 
   <dependencies>
@@ -35,7 +35,7 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>shared-jackson2</artifactId>
+      <artifactId>vpro-shared-jackson2</artifactId>
     </dependency>
   </dependencies>
 </project>

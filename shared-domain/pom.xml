@@ -3,10 +3,10 @@
 
   <parent>
     <groupId>nl.vpro.shared</groupId>
-    <artifactId>shared-parent</artifactId>
-    <version>0.54-SNAPSHOT</version>
+    <artifactId>vpro-shared-parent</artifactId>
+    <version>1.54-SNAPSHOT</version>
   </parent>
-  <artifactId>shared-domain</artifactId>
+  <artifactId>vpro-shared-domain</artifactId>
 
   <name>shared-domain</name>
   <description>This module contains domain objects to be shared among other modules</description>

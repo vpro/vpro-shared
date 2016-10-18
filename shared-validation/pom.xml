@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>shared-parent</artifactId>
+    <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.54-SNAPSHOT</version>
+    <version>1.54-SNAPSHOT</version>
   </parent>
 
-  <artifactId>shared-validation</artifactId>
+  <artifactId>vpro-shared-validation</artifactId>
 
   <properties>
   </properties>
@@ -27,7 +27,7 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>shared-util</artifactId>
+      <artifactId>vpro-shared-util</artifactId>
     </dependency>
   </dependencies>
 </project>

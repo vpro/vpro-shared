@@ -3,17 +3,17 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>shared-parent</artifactId>
+    <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>0.54-SNAPSHOT</version>
+    <version>1.54-SNAPSHOT</version>
   </parent>
 
-  <artifactId>shared-xml</artifactId>
+  <artifactId>vpro-shared-xml</artifactId>
 
   <dependencies>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>shared-util</artifactId>
+      <artifactId>vpro-shared-util</artifactId>
       <scope>compile</scope>
     </dependency>
   </dependencies>

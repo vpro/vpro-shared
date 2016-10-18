@@ -3,12 +3,12 @@
 
   <parent>
     <groupId>nl.vpro.shared</groupId>
-    <artifactId>shared-parent</artifactId>
+    <artifactId>vpro-shared-parent</artifactId>
     <version>0.10-SNAPSHOT</version>
   </parent>
 
   <groupId>nl.vpro.shared</groupId>
-  <artifactId>shared-integration-mmvpro</artifactId>
+  <artifactId>vpro-shared-integration-mmvpro</artifactId>
 
   <name>shared-integration-mmvpro</name>
   <description>This module offers the integration of shared domain on mmbase content</description>
@@ -21,7 +21,7 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>shared-integration</artifactId>
+      <artifactId>vpro-shared-integration</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.ibatis</groupId>
