@@ -5,6 +5,7 @@
 package nl.vpro.api.client.resteasy;
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Proxy;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PreDestroy;
 import javax.management.*;
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -35,6 +37,7 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
@@ -42,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.resteasy.JacksonContextResolver;
+import nl.vpro.util.LeaveDefaultsProxyHandler;
 import nl.vpro.util.ThreadPools;
 import nl.vpro.util.TimeUtils;
 import nl.vpro.util.XTrustProvider;
@@ -50,7 +54,7 @@ import nl.vpro.util.XTrustProvider;
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
-public class AbstractApiClient implements  AbstractApiClientMBean {
+public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     private static Logger LOG = LoggerFactory.getLogger(AbstractApiClient.class);
 
@@ -84,6 +88,9 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
 
     }
 
+
+    final String baseUrl;
+
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
 
@@ -98,7 +105,8 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
     private int maxConnections;
     Duration connectionInPoolTTL;
 
-    public AbstractApiClient(
+    AbstractApiClient(
+        String baseUrl,
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
@@ -110,11 +118,12 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
         this.socketTimeout = socketTimeout;
         this.maxConnections = maxConnections;
         this.connectionInPoolTTL = connectionInPoolTTL;
+        this.baseUrl = baseUrl;
         registerBean();
     }
 
-    public AbstractApiClient(Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
-        this(Duration.ofMillis(connectionTimeout),
+    AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
+        this(baseUrl, Duration.ofMillis(connectionTimeout),
             Duration.ofMillis(connectionTimeout),
             Duration.ofMillis(connectionTimeout),
             maxConnections,
@@ -276,6 +285,48 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
         invalidate();
         this.connectionInPoolTTL = connectionInPoolTTL;
         clientHttpEngine = null;
+    }
+
+    protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService) {
+        T proxy;
+        if (restEasyService == null) {
+            proxy = builderResteasy(engine, service);
+        } else {
+            S resteasy = builderResteasy(engine, restEasyService);
+            proxy = (T) Proxy.newProxyInstance(AbstractApiClient.class.getClassLoader(),
+                new Class[]{restEasyService, service}, new LeaveDefaultsProxyHandler(resteasy));
+        }
+
+        return
+            ErrorAspect.proxyErrors(
+                LOG,
+                AbstractApiClient.this::getInfo,
+                service,
+                proxy);
+    }
+
+    protected <T> T build(ClientHttpEngine engine, Class<T> service) {
+        return build(engine, service, null);
+    }
+
+    private <T> T builderResteasy(ClientHttpEngine engine, Class<T> service) {
+        return getTarget(engine)
+            .proxyBuilder(service)
+            .defaultConsumes(MediaType.APPLICATION_XML)
+            .defaultProduces(MediaType.APPLICATION_XML)
+            .build();
+    }
+
+    protected abstract ResteasyWebTarget getTarget(ClientHttpEngine engine);
+
+
+    protected String getInfo() {
+        return getBaseUrl() + "/";
+    }
+
+
+    public final String getBaseUrl() {
+        return baseUrl;
     }
 
     @PreDestroy
