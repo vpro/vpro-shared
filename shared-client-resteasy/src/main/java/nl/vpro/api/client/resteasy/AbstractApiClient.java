@@ -309,6 +309,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         return build(engine, service, null);
     }
 
+    protected <T> T build(Class<T> service) {
+        return build(getClientHttpEngine(), service);
+    }
+
     private <T> T builderResteasy(ClientHttpEngine engine, Class<T> service) {
         return getTarget(engine)
             .proxyBuilder(service)
