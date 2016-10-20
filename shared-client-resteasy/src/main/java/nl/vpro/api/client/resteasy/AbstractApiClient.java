@@ -89,7 +89,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
 
-    final String baseUrl;
+    protected final String baseUrl;
 
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
@@ -105,7 +105,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     private int maxConnections;
     Duration connectionInPoolTTL;
 
-    AbstractApiClient(
+    protected AbstractApiClient(
         String baseUrl,
         Duration connectionRequestTimeout,
         Duration connectTimeout,
@@ -122,7 +122,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         registerBean();
     }
 
-    AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
+    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
         this(baseUrl, Duration.ofMillis(connectionTimeout),
             Duration.ofMillis(connectionTimeout),
             Duration.ofMillis(connectionTimeout),
