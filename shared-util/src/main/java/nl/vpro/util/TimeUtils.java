@@ -77,4 +77,25 @@ public class TimeUtils {
 
     }
 
+    public static Optional<Duration> parseDuration(String d) {
+        if (StringUtils.isBlank(d)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Duration.parse(d));
+        } catch (DateTimeParseException dtp) {
+            try {
+                return Optional.of(Duration.ofMillis(Long.parseLong(d)));
+            } catch (NumberFormatException nfe) {
+                // ignore
+            }
+            if (!d.startsWith("P")) {
+                return parseDuration("P" + d);
+            } else if (!d.startsWith("PT")){
+                return parseDuration("PT" + d.substring(1));
+            }
+            throw dtp;
+        }
+    }
+
 }
