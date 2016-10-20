@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import nl.vpro.resteasy.JacksonContextResolver;
 import nl.vpro.util.ThreadPools;
+import nl.vpro.util.TimeUtils;
 import nl.vpro.util.XTrustProvider;
 
 /**
@@ -126,35 +127,35 @@ public class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     @Override
-    public Duration getConnectionRequestTimeout() {
-        return connectionRequestTimeout;
+    public String getConnectionRequestTimeout() {
+        return String.valueOf(connectionRequestTimeout);
     }
 
     @Override
-    public synchronized void setConnectionRequestTimeout(Duration connectionRequestTimeout) {
-        this.connectionRequestTimeout = connectionRequestTimeout;
+    public synchronized void setConnectionRequestTimeout(String connectionRequestTimeout) {
+        this.connectionRequestTimeout = TimeUtils.parseDuration(connectionRequestTimeout).orElse(null);
         invalidate();
     }
 
     @Override
-    public Duration getConnectTimeout() {
-        return connectTimeout;
+    public String getConnectTimeout() {
+        return String.valueOf(connectTimeout);
     }
 
     @Override
-    public synchronized void setConnectTimeout(Duration connectTimeout) {
-        this.connectTimeout = connectTimeout;
+    public synchronized void setConnectTimeout(String connectTimeout) {
+        this.connectTimeout = TimeUtils.parseDuration(connectTimeout).orElse(null);
         invalidate();
     }
 
     @Override
-    public Duration getSocketTimeout() {
-        return socketTimeout;
+    public String getSocketTimeout() {
+        return String.valueOf(socketTimeout);
     }
 
     @Override
-    public synchronized void setSocketTimeout(Duration socketTimeout) {
-        this.socketTimeout = socketTimeout;
+    public synchronized void setSocketTimeout(String socketTimeout) {
+        this.socketTimeout = TimeUtils.parseDuration(socketTimeout).orElse(null);
         invalidate();
     }
 

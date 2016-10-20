@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -12,7 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.45
  */
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class TimeUtilsTest {
+
+
     @Test
     public void parseZoned() throws Exception {
 
@@ -36,6 +40,17 @@ public class TimeUtilsTest {
     public void parse() throws Exception {
 
         assertThat(TimeUtils.parse("2000-07-11T14:00:33.556+02:00").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 7, 11), LocalTime.of(14, 0, 33, 556000000), TimeUtils.ZONE_ID).toInstant());
+
+    }
+
+    @Test
+    public void parseDuration() throws Exception {
+        assertThat(TimeUtils.parseDuration("PT5M").get()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(TimeUtils.parseDuration("T5M").get()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(TimeUtils.parseDuration("5M").get()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(TimeUtils.parseDuration("5000").get()).isEqualTo(Duration.ofMillis(5000));
+        assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
+
 
     }
 
