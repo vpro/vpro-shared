@@ -4,10 +4,10 @@ import javax.persistence.*;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.55
  */
-@Entity
-public class B extends A {
+@MappedSuperclass
+public abstract class B extends A {
 
 
     protected String bField = "b";
