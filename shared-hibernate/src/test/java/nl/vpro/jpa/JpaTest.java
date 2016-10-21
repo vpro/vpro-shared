@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -21,10 +21,19 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
  */
 public class JpaTest {
 
-    public EntityManagerFactory postgresqlEntityManagerFactory;
-    public EntityManagerFactory hsqlEntityManagerFactory;
-    @Before
-    public void setupPostgresql() {
+
+    @Test
+    @Ignore("Requires a postgresql instance")
+    public void testPostgresql() {
+        testManager(setupPostgresql());
+    }
+
+    @Test
+    public void testHsql() {
+        testManager(setupHsql());
+    }
+
+    protected EntityManagerFactory setupPostgresql() {
 
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setDatabaseName("test");
@@ -36,10 +45,9 @@ public class JpaTest {
         properties.put("hibernate.connection.driver_class", org.postgresql.Driver.class);
         properties.put("hibernate.hbm2ddl.auto", "create");
 
-        postgresqlEntityManagerFactory = createFactory(dataSource, properties);
+        return  createFactory(dataSource, properties);
     }
-    @Before
-    public void setupHsql() {
+    public EntityManagerFactory setupHsql() {
 
         JDBCDataSource dataSource = new JDBCDataSource();
         dataSource.setUrl("jdbc:hsqldb:/tmp/testDB");
@@ -50,8 +58,7 @@ public class JpaTest {
         properties.put("hibernate.dialect", HSQLDialect.class);
         properties.put("hibernate.connection.driver_class", org.hsqldb.jdbc.JDBCDriver.class);
         properties.put("hibernate.hbm2ddl.auto", "create");
-
-        hsqlEntityManagerFactory = createFactory(dataSource, properties);
+        return createFactory(dataSource, properties);
 
 
     }
@@ -69,15 +76,6 @@ public class JpaTest {
         return em.getObject();
     }
 
-    @Test
-    public void testPostgresql() {
-        testManager(postgresqlEntityManagerFactory);
-    }
-
-    @Test
-    public void testHsql() {
-        testManager(hsqlEntityManagerFactory);
-    }
 
     protected void testManager(EntityManagerFactory factory) {
         EntityManager manager = factory.createEntityManager();
