@@ -50,9 +50,9 @@ public class JpaTest {
     public void test() {
         EntityManager manager = entityManagerFactory.createEntityManager();
         manager.getTransaction().begin();
-        manager.merge(new B(1L));
-        manager.merge(new C(2L));
-        manager.merge(new D(3L));
+        manager.merge(new B());
+        manager.merge(new C());
+        manager.merge(new D());
         manager.getTransaction().commit();
         manager.close();
     }

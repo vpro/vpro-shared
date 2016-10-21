@@ -1,6 +1,6 @@
 package nl.vpro.jpa;
 
-import javax.persistence.Entity;
+import javax.persistence.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -9,13 +9,12 @@ import javax.persistence.Entity;
 @Entity
 public class B extends A {
 
+
     protected String bField = "b";
+
 
 
     public B() {
 
-    }
-    public B(Long i) {
-        super(i);
     }
 }
