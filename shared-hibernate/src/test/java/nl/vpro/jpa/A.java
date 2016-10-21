@@ -1,9 +1,6 @@
 package nl.vpro.jpa;
 
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -14,14 +11,15 @@ import javax.persistence.MappedSuperclass;
 public abstract class A {
 
     @Id
+    @SequenceGenerator(name = "hibernate_sequences", sequenceName = "hibernate_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequences")
     public Long id;
+
 
     protected String aField = "a";
 
     A() {
 
     }
-    A(Long i) {
-        this.id = i;
-    }
+
 }

@@ -15,8 +15,5 @@ public class D extends C {
 
     }
 
-    public D(Long i) {
-        super(i);
-    }
 
 }
