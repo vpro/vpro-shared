@@ -27,13 +27,21 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
@@ -94,7 +102,8 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
+    private List<PoolingHttpClientConnectionManager> connectionManagers43 = new ArrayList<>();
+    private List<ClientConnectionManager > connectionManagers42 = new ArrayList<>();
     private boolean shutdown = false;
     private boolean trustAll = false;
 
@@ -122,12 +131,13 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         registerBean();
     }
 
-    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int connectionInPoolTTL) {
-        this(baseUrl, Duration.ofMillis(connectionTimeout),
-            Duration.ofMillis(connectionTimeout),
-            Duration.ofMillis(connectionTimeout),
+    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, Integer connectionInPoolTTL) {
+        this(baseUrl,
+            Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
+            Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
+            Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
-            Duration.ofMillis(connectionInPoolTTL));
+            Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL));
     }
 
 
@@ -179,18 +189,40 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             ObjectName name = new ObjectName("nl.vpro.api.client.resteasy:name=" + getClass().getSimpleName());
+            if (mbs.isRegistered(name)) {
+                try {
+                    mbs.unregisterMBean(name);
+                } catch (InstanceNotFoundException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
             mbs.registerMBean(this, name);
+
         } catch (MalformedObjectNameException | NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
 
+    private  HttpClient getHttpClient(
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        int maxConnections,
+        Duration connectionInPoolTTL) {
+        return getHttpClient42(
+            connectionRequestTimeout,
+            connectTimeout,
+            connectTimeout,
+            maxConnections,
+            connectionInPoolTTL);
+    }
+
     // See https://issues.jboss.org/browse/RESTEASY-975
     // You _must_ use httpclient 4.2.1 syntax.  Otherwise timeout settings will simply not work
     // See also https://jira.vpro.nl/browse/MGNL-11312
     // This code can be used when this will be fixed in resteasy.
-    private  HttpClient getHttpClient43(
+    private HttpClient getHttpClient43(
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
@@ -252,16 +284,49 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         return client.build();
     }
 
+
+    // should be used as long as resteasy uses http client < 4.3
+    private HttpClient getHttpClient42(
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        int maxConnections,
+        Duration connectionInPoolTTL) {
+
+        PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
+            connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
+        poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
+        poolingClientConnectionManager.setMaxTotal(maxConnections);
+
+        if (maxConnections > 1 && connectionInPoolTTL.toMillis() > 0) {
+            watchIdleConnections(poolingClientConnectionManager);
+        }
+
+        HttpParams httpParams = new BasicHttpParams();
+
+        if (connectTimeout.toMillis() > 0) {
+            HttpConnectionParams.setConnectionTimeout(httpParams, (int) connectTimeout.toMillis());
+        }
+        if (socketTimeout.toMillis() > 0) {
+            HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
+        }
+
+        return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
+
+    }
+
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = new ApacheHttpClient4Engine(getHttpClient43(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, connectionInPoolTTL));
+            clientHttpEngine = new ApacheHttpClient4Engine(
+                getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, connectionInPoolTTL)
+            );
         }
         return clientHttpEngine;
     }
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = new ApacheHttpClient4Engine(getHttpClient43(connectionRequestTimeout, connectTimeout, null, 3, null));
+            clientHttpEngineNoTimeout = new ApacheHttpClient4Engine(getHttpClient(connectionRequestTimeout, connectTimeout, null, 3, null));
         }
         return clientHttpEngineNoTimeout;
 
@@ -337,7 +402,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     public void shutdown() {
         if(!shutdown) {
             shutdown = true;
-            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
+            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers43) {
+                unwatchIdleConnections(connectionManager);
+            }
+            for (ClientConnectionManager connectionManager : connectionManagers42) {
                 unwatchIdleConnections(connectionManager);
             }
         }
@@ -381,8 +449,8 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     private synchronized void watchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         LOG.debug("Watching idle connections in {}", connectionManager);
-        GUARD.connectionManagers.add(connectionManager);
-        connectionManagers.add(connectionManager);
+        GUARD.connectionManagers43.add(connectionManager);
+        connectionManagers43.add(connectionManager);
         if (connectionGuardThread == null) {
             GUARD.start();
             connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
@@ -390,10 +458,30 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         }
     }
 
+    private synchronized void watchIdleConnections(PoolingClientConnectionManager connectionManager) {
+        LOG.debug("Watching idle connections in {}", connectionManager);
+        GUARD.connectionManagers42.add(connectionManager);
+        connectionManagers42.add(connectionManager);
+        if (connectionGuardThread == null) {
+            GUARD.start();
+            connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
+            connectionGuardThread.start();
+        }
+    }
     private synchronized void unwatchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         LOG.debug("Unwatching idle connections in {}", connectionManager);
-        GUARD.connectionManagers.remove(connectionManager);
-        if (GUARD.connectionManagers.isEmpty()) {
+        GUARD.connectionManagers43.remove(connectionManager);
+        if (GUARD.connectionManagers42.isEmpty() && GUARD.connectionManagers43.isEmpty()) {
+            connectionGuardThread.interrupt();
+            GUARD.shutdown();
+            connectionGuardThread = null;
+        }
+    }
+
+    private synchronized void unwatchIdleConnections(ClientConnectionManager connectionManager) {
+        LOG.debug("Unwatching idle connections in {}", connectionManager);
+        GUARD.connectionManagers42.remove(connectionManager);
+        if (GUARD.connectionManagers42.isEmpty() && GUARD.connectionManagers43.isEmpty()) {
             connectionGuardThread.interrupt();
             GUARD.shutdown();
             connectionGuardThread = null;
@@ -403,7 +491,9 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
-        private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
+        private List<HttpClientConnectionManager> connectionManagers43 = new ArrayList<>();
+        private List<ClientConnectionManager> connectionManagers42 = new ArrayList<>();
+
 
         void shutdown() {
             shutdown = true;
@@ -421,7 +511,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 try {
                     synchronized (this) {
                         wait(5000);
-                        for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
+                        for (HttpClientConnectionManager connectionManager : connectionManagers43) {
+                            connectionManager.closeExpiredConnections();
+                        }
+                        for (ClientConnectionManager connectionManager : connectionManagers42) {
                             connectionManager.closeExpiredConnections();
                         }
                         //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
