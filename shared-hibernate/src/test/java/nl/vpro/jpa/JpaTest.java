@@ -43,7 +43,7 @@ public class JpaTest {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQL82Dialect.class);
         properties.put("hibernate.connection.driver_class", org.postgresql.Driver.class);
-        properties.put("hibernate.hbm2ddl.auto", "create");
+        properties.put("hibernate.hbm2ddl.auto", "create-drop");
 
         return  createFactory(dataSource, properties);
     }
@@ -69,7 +69,7 @@ public class JpaTest {
         em.setPackagesToScan("nl.vpro.jpa");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.setJpaProperties(properties);
-        em.setPersistenceUnitName("mytestdomain");
+        em.setPersistenceUnitName("abcde-domain");
         em.setPersistenceProviderClass(HibernatePersistenceProvider.class);
         em.afterPropertiesSet();
 
@@ -80,7 +80,6 @@ public class JpaTest {
     protected void testManager(EntityManagerFactory factory) {
         EntityManager manager = factory.createEntityManager();
         manager.getTransaction().begin();
-        manager.merge(new C());
         manager.merge(new D());
         manager.merge(new E());
         manager.getTransaction().commit();

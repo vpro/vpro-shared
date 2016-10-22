@@ -10,13 +10,19 @@ import java.util.*;
  */
 public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>, Serializable {
 
-    private static final long serialVersionUID = 0l;
+    private static final long serialVersionUID = 0L;
 
     final Collection<T> wrapped;
     final SortedSet<T> set;
 
     public ResortedSortedSet(Collection<T> wrapped, Comparator<T> comparator) {
         set = new TreeSet<>(comparator);
+        set.addAll(wrapped);
+        this.wrapped = wrapped;
+    }
+
+    public ResortedSortedSet(Collection<T> wrapped) {
+        set = new TreeSet<>();
         set.addAll(wrapped);
         this.wrapped = wrapped;
     }
