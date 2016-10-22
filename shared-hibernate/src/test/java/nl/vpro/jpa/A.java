@@ -15,9 +15,11 @@ public abstract class A implements I {
     protected Long id;
 
 
-
     @Column(nullable = false)
     protected String aField;
+
+    @Column(nullable = false)
+    protected String a2Field;
 
     A() {
 
@@ -31,5 +33,10 @@ public abstract class A implements I {
     public A setId(Long id) {
         this.id = id;
         return this;
+    }
+
+    @PrePersist
+    public void setA2() {
+        a2Field = "AAA2";
     }
 }
