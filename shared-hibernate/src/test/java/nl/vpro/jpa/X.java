@@ -4,22 +4,14 @@ import javax.persistence.*;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.55
  */
-@MappedSuperclass
-public abstract class A implements I {
-
+@Entity
+public class X  implements I {
     @Id
     @SequenceGenerator(name = "hibernate_sequences", sequenceName = "hibernate_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_sequences")
     protected Long id;
-
-
-    protected String aField = "a";
-
-    A() {
-
-    }
 
     @Override
     public Long getId() {
@@ -27,8 +19,10 @@ public abstract class A implements I {
     }
 
     @Override
-    public A setId(Long id) {
+    public X setId(Long id) {
         this.id = id;
         return this;
     }
+
+
 }
