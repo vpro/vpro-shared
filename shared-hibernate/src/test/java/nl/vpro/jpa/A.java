@@ -15,12 +15,13 @@ public abstract class A implements I {
     protected Long id;
 
 
-    protected String aField = "a";
+
+    @Column(nullable = false)
+    protected String aField;
 
     A() {
 
     }
-
     @Override
     public Long getId() {
         return id;
