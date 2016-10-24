@@ -50,7 +50,7 @@ public class JpaTest {
     public EntityManagerFactory setupHsql() {
 
         JDBCDataSource dataSource = new JDBCDataSource();
-        dataSource.setUrl("jdbc:hsqldb:/tmp/testDB");
+        dataSource.setUrl("jdbc:hsqldb:mem:testDB");
         dataSource.setUser("sa");
         dataSource.setPassword("");
         Properties properties = new Properties();
