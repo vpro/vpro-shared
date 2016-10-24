@@ -89,7 +89,13 @@ public class ReflectionUtils {
         }
         return properties;
     }
-    public static  Properties filtered(Env env, Properties properties) {
+    public static  Properties filtered(Env e, Properties properties) {
+        if (e == null) {
+            if (System.getProperty("env") != null) {
+                e = Env.valueOf(System.getProperty("env").toUpperCase());
+            }
+        }
+        final Env env = e;
         Properties result = new Properties();
         properties.forEach((k, v) -> {
             String key = (String) k;
