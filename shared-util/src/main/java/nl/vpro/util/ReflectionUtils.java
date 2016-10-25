@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Properties;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +22,15 @@ public class ReflectionUtils {
 
     private static Logger LOG = LoggerFactory.getLogger(ReflectionUtils.class);
 
+    public static Function<String, String> SETTER = k -> "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    public static Function<String, String> IDENTITY = k -> k;
 
-    public static void setProperty(Object instance, Object key, Object value) {
+
+    public static void setProperty(Object instance, Object key, Object value, Function<String, String> setterName) {
         Method[] methods = instance.getClass().getMethods();
         String k = (String) key;
         String v = (String) value;
-        String setter = "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+        String setter = setterName.apply(k);
         Class<?> parameterClass = null;
         for (Method m : methods) {
             if (m.getName().equals(setter) && m.getParameterCount() == 1) {
@@ -58,17 +63,53 @@ public class ReflectionUtils {
         LOG.error("Unrecognized property {} on {}", key, instance.getClass());
     }
 
+    public static void setProperty(Object instance, Object key, Object value) {
+        setProperty(instance, key, value, SETTER);
+    }
+
     public static void configured(Object instance, String... configFiles) {
         configured(null, instance, configFiles);
     }
 
     public static void configured(Env env, Object instance, String... configFiles) {
         try {
-            Properties properties = filtered(env, getProperties(configFiles));
-            LOG.debug("Configuring with {}", properties);
-            properties.forEach((k, v) -> ReflectionUtils.setProperty(instance, k, v));
+            Properties properties = getProperties(configFiles);
+            configured(env, instance, properties);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
+        }
+    }
+
+    public static void configured(Env env, Object instance, Properties properties, Function<String, String> setterName) {
+        Properties filtered = filtered(env, properties);
+        LOG.debug("Configuring with {}", filtered);
+        filtered.forEach((k, v) -> ReflectionUtils.setProperty(instance, k, v, setterName));
+    }
+
+    public static void configured(Env env, Object instance, Properties properties) {
+        configured(env, instance, properties, SETTER);
+    }
+
+    public static <T> T lombok(Env env, Class<T> clazz, Properties properties) {
+        try {
+            Method builder = clazz.getDeclaredMethod("builder");
+            if (Modifier.isStatic(builder.getModifiers())) {
+                Object o = builder.invoke(null);
+                configured(env, o, properties, IDENTITY);
+                Method build = o.getClass().getMethod("build");
+                return (T) build.invoke(o);
+            }
+            throw new RuntimeException("Cant build since no static builder method found in " +  clazz);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException("Cant build ", e);
+        }
+    }
+
+    public static <T> T lombok(Env env, Class<T> clazz, String... configFiles) {
+        try {
+            return lombok(env, clazz, getProperties(configFiles));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
