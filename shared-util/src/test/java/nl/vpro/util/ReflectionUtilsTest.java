@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Builder;
+
 import java.util.Properties;
 
 import org.junit.Before;
@@ -14,10 +16,37 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 0.41
  */
 public class ReflectionUtilsTest {
-    
-    
+
+    public static class AWithLombok {
+        private String a = "A";
+        private Integer b;
+        @Builder
+        public AWithLombok(String a, Integer b) {
+            this.a = a;
+            this.b = b;
+        }
+
+    }
+
+    public static class AWithSetters {
+        private String a = "A";
+        private Integer b;
+
+        public AWithSetters() {
+        }
+
+        public void setA(String a) {
+            this.a = a;
+        }
+
+        public void setB(Integer b) {
+            this.b = b;
+        }
+    }
+
+
     Properties properties;
-    
+
     @Before
     public void init() {
         properties = new Properties();
@@ -93,5 +122,35 @@ public class ReflectionUtilsTest {
 
     }
 
+    @Test
+    public void testConfigured() {
+        AWithSetters a = new AWithSetters();
+        ReflectionUtils.configured(Env.PROD, a, properties);
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
+
+    @Test
+    public void testConfiguredWithFile() {
+        AWithSetters a = new AWithSetters();
+        ReflectionUtils.configured(Env.PROD, a, "classpath:/reflectionutilstest.properties");
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
+
+    @Test
+    public void testConfiguredWithLombok() {
+        AWithLombok a = ReflectionUtils.lombok(Env.PROD, AWithLombok.class, properties);
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
+
+
+    @Test
+    public void testConfiguredWithLombokAndFile() {
+        AWithLombok a = ReflectionUtils.lombok(Env.PROD, AWithLombok.class, "classpath:/reflectionutilstest.properties");
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
 
 }
