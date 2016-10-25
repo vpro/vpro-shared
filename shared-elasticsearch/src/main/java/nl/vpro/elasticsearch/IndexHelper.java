@@ -43,6 +43,10 @@ public class IndexHelper {
         return this;
     }
 
+    public static IndexHelper of(Logger log, ESClientFactory client, String indexName, String objectType) {
+        return new IndexHelper(log, client, indexName, "es/setting.json").mapping(objectType, String.format("es/%s.json", objectType));
+    }
+
     private Client client() {
         return client.client(IndexHelper.class.getName() + "." + indexName);
     }
@@ -141,6 +145,4 @@ public class IndexHelper {
         IOUtils.copy(input, writer, "utf-8");
         return writer.toString();
     }
-
-
 }
