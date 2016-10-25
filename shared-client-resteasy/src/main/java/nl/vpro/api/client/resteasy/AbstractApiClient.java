@@ -6,7 +6,10 @@ package nl.vpro.api.client.resteasy;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +33,9 @@ import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -293,8 +298,9 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         int maxConnections,
         Duration connectionInPoolTTL) {
 
-        PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
-            connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
+        PoolingClientConnectionManager poolingClientConnectionManager =
+            new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
+                connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
         poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
         poolingClientConnectionManager.setMaxTotal(maxConnections);
 
@@ -311,7 +317,17 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
             HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
         }
 
-        return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
+        if (trustAll) {
+            try {
+                SSLSocketFactory sslsf = new SSLSocketFactory((chain, authType) -> true, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+                poolingClientConnectionManager.getSchemeRegistry().register(new Scheme("https", 443, sslsf));
+            } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        DefaultHttpClient client = new DefaultHttpClient(poolingClientConnectionManager, httpParams);
+
+        return client;
 
     }
 
