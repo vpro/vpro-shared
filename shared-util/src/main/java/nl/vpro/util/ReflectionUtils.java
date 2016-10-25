@@ -58,14 +58,18 @@ public class ReflectionUtils {
         LOG.error("Unrecognized property {} on {}", key, instance.getClass());
     }
 
-    public static void configured(Object instance, String... configFiles) throws IOException {
+    public static void configured(Object instance, String... configFiles) {
         configured(null, instance, configFiles);
     }
 
-    public static void configured(Env env, Object instance, String... configFiles) throws IOException {
-        Properties properties = filtered(env, getProperties(configFiles));
-        LOG.debug("Configuring with {}", properties);
-        properties.forEach((k, v) -> ReflectionUtils.setProperty(instance, k, v));
+    public static void configured(Env env, Object instance, String... configFiles) {
+        try {
+            Properties properties = filtered(env, getProperties(configFiles));
+            LOG.debug("Configuring with {}", properties);
+            properties.forEach((k, v) -> ReflectionUtils.setProperty(instance, k, v));
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
     }
 
     public static Properties getProperties(String... configFiles) throws IOException {

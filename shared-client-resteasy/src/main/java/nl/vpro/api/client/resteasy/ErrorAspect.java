@@ -1,9 +1,6 @@
 package nl.vpro.api.client.resteasy;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +55,19 @@ public class ErrorAspect<T> implements InvocationHandler {
                 Object object = method.invoke(proxied, args);
                 return object;
             } catch (InvocationTargetException itc) {
-                throw itc.getCause();
+                Throwable throwable = itc;
+                while(true) {
+                    if (throwable instanceof  InvocationTargetException) {
+                        throwable = ((InvocationTargetException) throwable).getTargetException();
+                        continue;
+                    }
+                    if (throwable instanceof UndeclaredThrowableException) {
+                        throwable = ((UndeclaredThrowableException) throwable).getUndeclaredThrowable();
+                        continue;
+                    }
+                    break;
+                }
+                throw throwable;
             }
         } catch (WebApplicationException wea) {
             int status = wea.getResponse().getStatus();
@@ -92,7 +101,16 @@ public class ErrorAspect<T> implements InvocationHandler {
                 args == null ? "(no args)" : Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
                 mes);
         }
-        throw t;
+        if (t instanceof RuntimeException) {
+            throw t;
+        }
+        for (Class<?> et : method.getExceptionTypes()) {
+            if (et.isAssignableFrom(t.getClass())) {
+                throw t;
+            }
+        }
+
+        throw new RuntimeException(t);
     }
 
     Logger getLogger(int status) {
