@@ -21,6 +21,9 @@ public abstract class A implements I {
     @Column(nullable = false)
     protected String a2Field;
 
+    @Column(nullable = false)
+    protected String a3Field;
+
     A() {
 
     }
