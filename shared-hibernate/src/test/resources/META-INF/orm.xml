@@ -6,11 +6,13 @@
   <entity class="nl.vpro.jpa.D">
     <entity-listeners>
       <entity-listener class="nl.vpro.jpa.AListener"/>
+      <entity-listener class="nl.vpro.jpa.A3Listener"/>
     </entity-listeners>
   </entity>
   <entity class="nl.vpro.jpa.E">
     <entity-listeners>
       <entity-listener class="nl.vpro.jpa.AListener"/>
+      <entity-listener class="nl.vpro.jpa.A3Listener"/>
     </entity-listeners>
   </entity>
 </entity-mappings>
