@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,45 +28,8 @@ public class ReflectionUtils {
     public static Function<String, String> IDENTITY = k -> k;
 
 
-    public static void setProperty(Object instance, Object key, Object value, Function<String, String> setterName) {
-        Method[] methods = instance.getClass().getMethods();
-        String k = (String) key;
-        String v = (String) value;
-        String setter = setterName.apply(k);
-        Class<?> parameterClass = null;
-        for (Method m : methods) {
-            if (m.getName().equals(setter) && m.getParameterCount() == 1) {
-                try {
-                    parameterClass = m.getParameters()[0].getType();
-                    if (String.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, v);
-                    } else if (boolean.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Boolean.valueOf(v));
-                    } else if (int.class.isAssignableFrom(parameterClass) || Integer.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Integer.valueOf(v));
-                    } else if (long.class.isAssignableFrom(parameterClass) || Long.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Long.valueOf(v));
-                    } else if (double.class.isAssignableFrom(parameterClass) || Double.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Double.valueOf(v));
-                    } else {
-                        LOG.debug("Unrecognized parameter type " + parameterClass);
-                        continue;
-                    }
-                    LOG.debug("Set {} from config file", key);
-                    return;
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        }
-        if (parameterClass != null) {
-            LOG.warn("Unrecognized parameter type " + parameterClass);
-        }
-        LOG.error("Unrecognized property {} on {}", key, instance.getClass());
-    }
-
-    public static void setProperty(Object instance, Object key, Object value) {
-        setProperty(instance, key, value, SETTER);
+    public static void setProperty(Object instance, String key, Object value) {
+        setProperty(instance, Arrays.asList(SETTER.apply(key), IDENTITY.apply(key)), value);
     }
 
     public static void configured(Object instance, String... configFiles) {
@@ -80,35 +45,60 @@ public class ReflectionUtils {
         }
     }
 
-    public static void configured(Env env, Object instance, Properties properties, Function<String, String> setterName) {
+    public static void configured(Env env, Object instance, Properties properties, Collection<Function<String, String>> setterName) {
         Properties filtered = filtered(env, properties);
         LOG.debug("Configuring with {}", filtered);
-        filtered.forEach((k, v) -> ReflectionUtils.setProperty(instance, k, v, setterName));
+        filtered.forEach((k, v) -> ReflectionUtils.setProperty(instance,
+            setterName.stream().map(f -> f.apply(String.valueOf(k))).collect(Collectors.toList()), v));
     }
 
     public static void configured(Env env, Object instance, Properties properties) {
-        configured(env, instance, properties, SETTER);
+        configured(env, instance, properties, Arrays.asList(SETTER, IDENTITY));
     }
 
-    public static <T> T lombok(Env env, Class<T> clazz, Properties properties) {
+    public static <T> T configured(Env env, Class<T> clazz, Properties properties) {
         try {
-            Method builder = clazz.getDeclaredMethod("builder");
-            if (Modifier.isStatic(builder.getModifiers())) {
-                Object o = builder.invoke(null);
-                configured(env, o, properties, IDENTITY);
-                Method build = o.getClass().getMethod("build");
-                return (T) build.invoke(o);
+            Method builderMethod = clazz.getDeclaredMethod("builder");
+            if (Modifier.isStatic(builderMethod.getModifiers())) {
+                Object builder = builderMethod.invoke(null);
+                configured(env, builder, properties, Collections.singletonList(IDENTITY));
+                Method objectMethod = builder.getClass().getMethod("build");
+                return (T) objectMethod.invoke(builder);
             }
-            throw new RuntimeException("Cant build since no static builder method found in " +  clazz);
+            LOG.debug("No static builder method found");
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException("Cant build ", e);
+            LOG.debug("Canot build with builder because ", e);
+        }
+        try {
+            Constructor<T> constructor = clazz.getConstructor();
+            constructor.setAccessible(true);
+            T object = constructor.newInstance();
+            configured(env, object, properties);
+            return object;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            LOG.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
-    public static <T> T lombok(Env env, Class<T> clazz, String... configFiles) {
+    public static <T> T configured(Env env, Class<T> clazz, String... configFiles) {
         try {
-            return lombok(env, clazz, getProperties(configFiles));
+            return configured(env, clazz, getProperties(configFiles));
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T configured(Class<T> clazz, Properties properties) {
+        return configured(getEnv(properties), clazz, properties);
+    }
+
+    public static <T> T configured(Class<T> clazz, String... configfiles) {
+        try {
+            Properties properties = getProperties(configfiles);
+            return configured(getEnv(properties), clazz, properties);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -169,4 +159,46 @@ public class ReflectionUtils {
         });
         return result;
     }
+
+    private static Env getEnv(Properties properties) {
+        return Env.valueOf(
+            Optional.ofNullable(properties.getProperty("env")).orElse("test").toUpperCase());
+    }
+
+    private static boolean setProperty(Object instance, Collection<String> setterNames, Object value) {
+        Method[] methods = instance.getClass().getMethods();
+        String v = (String) value;
+        Class<?> parameterClass = null;
+        for (Method m : methods) {
+            if (setterNames.contains(m.getName()) && m.getParameterCount() == 1) {
+                try {
+                    parameterClass = m.getParameters()[0].getType();
+                    if (String.class.isAssignableFrom(parameterClass)) {
+                        m.invoke(instance, v);
+                    } else if (boolean.class.isAssignableFrom(parameterClass)) {
+                        m.invoke(instance, Boolean.valueOf(v));
+                    } else if (int.class.isAssignableFrom(parameterClass) || Integer.class.isAssignableFrom(parameterClass)) {
+                        m.invoke(instance, Integer.valueOf(v));
+                    } else if (long.class.isAssignableFrom(parameterClass) || Long.class.isAssignableFrom(parameterClass)) {
+                        m.invoke(instance, Long.valueOf(v));
+                    } else if (double.class.isAssignableFrom(parameterClass) || Double.class.isAssignableFrom(parameterClass)) {
+                        m.invoke(instance, Double.valueOf(v));
+                    } else {
+                        LOG.debug("Unrecognized parameter type " + parameterClass);
+                        continue;
+                    }
+                    LOG.debug("Set {} from config file", m.getName());
+                    return true;
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        if (parameterClass != null) {
+            LOG.warn("Unrecognized parameter type " + parameterClass);
+        }
+        LOG.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
+        return false;
+    }
+
 }
