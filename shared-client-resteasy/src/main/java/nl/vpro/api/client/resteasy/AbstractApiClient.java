@@ -298,15 +298,16 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         Duration socketTimeout,
         int maxConnections,
         Duration connectionInPoolTTL) {
-
-        PoolingClientConnectionManager poolingClientConnectionManager =
-            new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
-                connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
-        poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
-        poolingClientConnectionManager.setMaxTotal(maxConnections);
-
-        if (maxConnections > 1 && connectionInPoolTTL.toMillis() > 0) {
-            watchIdleConnections(poolingClientConnectionManager);
+        PoolingClientConnectionManager poolingClientConnectionManager = null;
+        if (connectionInPoolTTL != null) {
+            poolingClientConnectionManager =
+                new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
+                    connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
+            poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
+            poolingClientConnectionManager.setMaxTotal(maxConnections);
+            if (maxConnections > 1 && connectionInPoolTTL.toMillis() > 0) {
+                watchIdleConnections(poolingClientConnectionManager);
+            }
         }
 
         HttpParams httpParams = new BasicHttpParams();
@@ -318,7 +319,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
             HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
         }
 
-        if (trustAll) {
+        if (connectionInPoolTTL != null && trustAll) {
             try {
                 SSLSocketFactory sslsf = new SSLSocketFactory((chain, authType) -> true, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
                 poolingClientConnectionManager.getSchemeRegistry().register(new Scheme("https", 443, sslsf));
@@ -326,10 +327,11 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 LOG.error(e.getMessage(), e);
             }
         }
-        DefaultHttpClient client = new DefaultHttpClient(poolingClientConnectionManager, httpParams);
-
-        return client;
-
+        if (connectionInPoolTTL != null) {
+            return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
+        } else {
+            return new DefaultHttpClient(httpParams);
+        }
     }
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
