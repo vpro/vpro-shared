@@ -140,7 +140,7 @@ public class ReflectionUtilsTest {
 
     @Test
     public void testConfiguredWithLombok() {
-        AWithLombok a = ReflectionUtils.lombok(Env.PROD, AWithLombok.class, properties);
+        AWithLombok a = ReflectionUtils.configured(Env.PROD, AWithLombok.class, properties);
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
     }
@@ -148,7 +148,29 @@ public class ReflectionUtilsTest {
 
     @Test
     public void testConfiguredWithLombokAndFile() {
-        AWithLombok a = ReflectionUtils.lombok(Env.PROD, AWithLombok.class, "classpath:/reflectionutilstest.properties");
+        AWithLombok a = ReflectionUtils.configured(Env.PROD, AWithLombok.class, "classpath:/reflectionutilstest.properties");
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
+
+    @Test
+    public void testConfiguredWithConstructor() {
+        AWithSetters a = ReflectionUtils.configured(Env.PROD, AWithSetters.class, properties);
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
+
+    @Test
+    public void testConfiguredWithConstructorAndDefaultEnv() {
+        AWithSetters a = ReflectionUtils.configured(AWithSetters.class, properties);
+        assertThat(a.a).isEqualTo("2");
+        assertThat(a.b).isEqualTo(1);
+    }
+
+
+    @Test
+    public void testConfiguredWithLomokAndFileAndDefaultEnv() {
+        AWithLombok a = ReflectionUtils.configured(AWithLombok.class, "classpath:/reflectionutilstest.properties");
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
     }
