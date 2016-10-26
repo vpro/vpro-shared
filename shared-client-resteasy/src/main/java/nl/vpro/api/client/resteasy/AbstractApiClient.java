@@ -188,6 +188,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         if (trustAll) {
             XTrustProvider.install();
         }
+        invalidate();
     }
 
     private void registerBean() {
