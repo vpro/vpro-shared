@@ -301,13 +301,15 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         PoolingClientConnectionManager poolingClientConnectionManager = null;
         if (connectionInPoolTTL != null) {
             poolingClientConnectionManager =
-                new PoolingClientConnectionManager(SchemeRegistryFactory.createDefault(),
-                    connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
-            poolingClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
-            poolingClientConnectionManager.setMaxTotal(maxConnections);
+                new PoolingClientConnectionManager(
+                    SchemeRegistryFactory.createDefault(),
+                    connectionInPoolTTL.toMillis(),
+                    TimeUnit.MILLISECONDS);
             if (maxConnections > 1 && connectionInPoolTTL.toMillis() > 0) {
                 watchIdleConnections(poolingClientConnectionManager);
             }
+        } else {
+            poolingClientConnectionManager = new PoolingClientConnectionManager();
         }
 
         HttpParams httpParams = new BasicHttpParams();
@@ -319,7 +321,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
             HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
         }
 
-        if (connectionInPoolTTL != null && trustAll) {
+        if (trustAll) {
             try {
                 SSLSocketFactory sslsf = new SSLSocketFactory((chain, authType) -> true, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
                 poolingClientConnectionManager.getSchemeRegistry().register(new Scheme("https", 443, sslsf));
@@ -327,11 +329,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 LOG.error(e.getMessage(), e);
             }
         }
-        if (connectionInPoolTTL != null) {
-            return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
-        } else {
-            return new DefaultHttpClient(httpParams);
-        }
+        return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
     }
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
@@ -345,7 +343,9 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = new ApacheHttpClient4Engine(getHttpClient(connectionRequestTimeout, connectTimeout, null, 3, null));
+            clientHttpEngineNoTimeout = new ApacheHttpClient4Engine(
+                getHttpClient(connectionRequestTimeout, connectTimeout, null, 3, null)
+            );
         }
         return clientHttpEngineNoTimeout;
 
