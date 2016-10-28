@@ -298,7 +298,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         Duration socketTimeout,
         int maxConnections,
         Duration connectionInPoolTTL) {
-        PoolingClientConnectionManager poolingClientConnectionManager = null;
+        PoolingClientConnectionManager poolingClientConnectionManager ;
         if (connectionInPoolTTL != null) {
             poolingClientConnectionManager =
                 new PoolingClientConnectionManager(
