@@ -181,6 +181,8 @@ public class ReflectionUtils {
                         m.invoke(instance, Integer.valueOf(v));
                     } else if (long.class.isAssignableFrom(parameterClass) || Long.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, Long.valueOf(v));
+                    } else if (float.class.isAssignableFrom(parameterClass) || Float.class.isAssignableFrom(parameterClass)) {
+                        m.invoke(instance, Float.valueOf(v));
                     } else if (double.class.isAssignableFrom(parameterClass) || Double.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, Double.valueOf(v));
                     } else {
