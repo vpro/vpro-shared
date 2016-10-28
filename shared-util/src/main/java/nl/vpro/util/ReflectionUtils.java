@@ -175,7 +175,7 @@ public class ReflectionUtils {
                     parameterClass = m.getParameters()[0].getType();
                     if (String.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, v);
-                    } else if (boolean.class.isAssignableFrom(parameterClass)) {
+                    } else if (boolean.class.isAssignableFrom(parameterClass) || Boolean.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, Boolean.valueOf(v));
                     } else if (int.class.isAssignableFrom(parameterClass) || Integer.class.isAssignableFrom(parameterClass)) {
                         m.invoke(instance, Integer.valueOf(v));
