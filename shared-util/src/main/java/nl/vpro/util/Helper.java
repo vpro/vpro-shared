@@ -196,7 +196,9 @@ public class Helper {
     /**
      * @param str a string
      * @return true when the string is null or only contains whitespace
+     * @deprecated Use {@link StringUtils#isBlank(CharSequence)}
      */
+    @Deprecated
     public static boolean isTrimmedEmpty(String str) {
         return str == null || str.trim().length() == 0;
     }
@@ -204,7 +206,9 @@ public class Helper {
     /**
      * @param str a string
      * @return true when the string contains non-whitespace characters
+     * @deprecated Use {@link StringUtils#isBlank(CharSequence)}
      */
+    @Deprecated
     public static boolean isTrimmedNotEmpty(String str) {
         return !isTrimmedEmpty(str);
     }
@@ -260,7 +264,9 @@ public class Helper {
      * @param <T> the type to case to
      * @param o the object to cast
      * @return o
+     * @deprecated Use generics
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static <T> T uncheckedCast(Object o) {
         return (T) o;
