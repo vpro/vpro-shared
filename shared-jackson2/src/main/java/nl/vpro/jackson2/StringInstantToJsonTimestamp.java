@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
+ * These can be used in conjuction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
+ * (this is what we normally do)
  * @author Michiel Meeuwissen
  * @since 0.39
  */
