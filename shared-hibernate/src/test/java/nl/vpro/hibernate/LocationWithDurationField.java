@@ -3,7 +3,6 @@ package nl.vpro.hibernate;
 import java.time.Duration;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.*;
@@ -14,6 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import nl.vpro.jackson2.XMLDurationToJsonTimestamp;
+import nl.vpro.xml.bind.DurationXmlAdapter;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -37,13 +37,14 @@ public class LocationWithDurationField {
     @Temporal(TemporalType.TIME)
     @Column(name = "start_offset")
     @XmlJavaTypeAdapter(DurationXmlAdapter.class)
-    @JsonDeserialize(using = XMLDurationToJsonTimestamp.DeserializerDate.class)
     @JsonSerialize(using = XMLDurationToJsonTimestamp.Serializer.class)
+    @JsonDeserialize(using = XMLDurationToJsonTimestamp.DeserializerDate.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     protected Duration offset;
 
     @Temporal(TemporalType.TIME)
     @XmlElement
+    @XmlJavaTypeAdapter(DurationXmlAdapter.class)
     @JsonSerialize(using = XMLDurationToJsonTimestamp.Serializer.class)
     @JsonDeserialize(using = XMLDurationToJsonTimestamp.DeserializerDate.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
