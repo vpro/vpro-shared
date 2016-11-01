@@ -119,7 +119,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     private int maxConnections;
     Duration connectionInPoolTTL;
-    private final ErrorAspect.Counter counter = new ErrorAspect.Counter();
+    protected final ErrorAspect.Counter counter = new ErrorAspect.Counter();
 
     protected AbstractApiClient(
         String baseUrl,
