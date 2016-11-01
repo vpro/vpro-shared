@@ -11,6 +11,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,28 +33,39 @@ public class ReflectionUtils {
         setProperty(instance, Arrays.asList(SETTER.apply(key), IDENTITY.apply(key)), value);
     }
 
-    public static void configured(Object instance, String... configFiles) {
-        configured(null, instance, configFiles);
+    public static <T> T configured(T  instance, String... configFiles) {
+        return configured(null, instance, configFiles);
     }
 
-    public static void configured(Env env, Object instance, String... configFiles) {
+    public static <T> T configuredInHome(T instance, String... configFiles) {
+
+        return configured(instance,
+            Stream.concat(
+                Arrays.stream(configFiles).map(c -> "classpath:" + c),
+                Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
+            ).toArray(String[]::new)
+        );
+    }
+
+    public static <T> T configured(Env env, T instance, String... configFiles) {
         try {
             Properties properties = getProperties(configFiles);
-            configured(env, instance, properties);
+            return configured(env, instance, properties);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
     }
 
-    public static void configured(Env env, Object instance, Properties properties, Collection<Function<String, String>> setterName) {
+    public static <T> T  configured(Env env, T instance, Properties properties, Collection<Function<String, String>> setterName) {
         Properties filtered = filtered(env, properties);
         LOG.debug("Configuring with {}", filtered);
         filtered.forEach((k, v) -> ReflectionUtils.setProperty(instance,
             setterName.stream().map(f -> f.apply(String.valueOf(k))).collect(Collectors.toList()), v));
+        return instance;
     }
 
-    public static void configured(Env env, Object instance, Properties properties) {
-        configured(env, instance, properties, Arrays.asList(SETTER, IDENTITY));
+    public static <T> T configured(Env env, T instance, Properties properties) {
+        return configured(env, instance, properties, Arrays.asList(SETTER, IDENTITY));
     }
 
     public static <T> T configured(Env env, Class<T> clazz, Properties properties) {
