@@ -4,6 +4,8 @@
  */
 package nl.vpro.api.client.resteasy;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Proxy;
 import java.security.KeyManagementException;
@@ -54,8 +56,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nl.vpro.resteasy.JacksonContextResolver;
 import nl.vpro.util.LeaveDefaultsProxyHandler;
@@ -67,9 +67,9 @@ import nl.vpro.util.XTrustProvider;
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
+@Slf4j()
 public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
-    private static Logger LOG = LoggerFactory.getLogger(AbstractApiClient.class);
 
     private static Thread connectionGuardThread;
     private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
@@ -84,7 +84,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                     JacksonContextResolver jacksonContextResolver = new JacksonContextResolver();
                     resteasyProviderFactory.registerProviderInstance(jacksonContextResolver);
                 } else {
-                    LOG.info("Already registered {}", JacksonContextResolver.class);
+                    log.info("Already registered {}", JacksonContextResolver.class);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -96,7 +96,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
             RegisterBuiltin.register(resteasyProviderFactory);
         } catch (Throwable t) {
-            LOG.error(t.getClass().getName() + " " + t.getMessage());
+            log.error(t.getClass().getName() + " " + t.getMessage());
         }
 
     }
@@ -199,13 +199,13 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 try {
                     mbs.unregisterMBean(name);
                 } catch (InstanceNotFoundException e) {
-                    LOG.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
             mbs.registerMBean(this, name);
 
         } catch (MalformedObjectNameException | NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -284,7 +284,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
                     client.setSSLSocketFactory(sslsf);
             } catch (NoSuchAlgorithmException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
         return client.build();
@@ -326,7 +326,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 SSLSocketFactory sslsf = new SSLSocketFactory((chain, authType) -> true, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
                 poolingClientConnectionManager.getSchemeRegistry().register(new Scheme("https", 443, sslsf));
             } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
         return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
@@ -383,7 +383,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
         return
             ErrorAspect.proxyErrors(
-                LOG,
+                log,
                 AbstractApiClient.this::getInfo,
                 service,
                 proxy);
@@ -467,7 +467,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     private synchronized void watchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
-        LOG.debug("Watching idle connections in {}", connectionManager);
+        log.debug("Watching idle connections in {}", connectionManager);
         GUARD.connectionManagers43.add(connectionManager);
         connectionManagers43.add(connectionManager);
         if (connectionGuardThread == null) {
@@ -478,7 +478,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     private synchronized void watchIdleConnections(PoolingClientConnectionManager connectionManager) {
-        LOG.debug("Watching idle connections in {}", connectionManager);
+        log.debug("Watching idle connections in {}", connectionManager);
         GUARD.connectionManagers42.add(connectionManager);
         connectionManagers42.add(connectionManager);
         if (connectionGuardThread == null) {
@@ -488,7 +488,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         }
     }
     private synchronized void unwatchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
-        LOG.debug("Unwatching idle connections in {}", connectionManager);
+        log.debug("Unwatching idle connections in {}", connectionManager);
         GUARD.connectionManagers43.remove(connectionManager);
         if (GUARD.connectionManagers42.isEmpty() && GUARD.connectionManagers43.isEmpty()) {
             connectionGuardThread.interrupt();
@@ -498,7 +498,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     private synchronized void unwatchIdleConnections(ClientConnectionManager connectionManager) {
-        LOG.debug("Unwatching idle connections in {}", connectionManager);
+        log.debug("Unwatching idle connections in {}", connectionManager);
         GUARD.connectionManagers42.remove(connectionManager);
         if (GUARD.connectionManagers42.isEmpty() && GUARD.connectionManagers43.isEmpty()) {
             connectionGuardThread.interrupt();
@@ -539,10 +539,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                         //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
                     }
                 } catch (InterruptedException ignored) {
-                    LOG.debug(ignored.getMessage());
+                    log.debug(ignored.getMessage());
                 }
             }
-            LOG.info("Shut down connection guard");
+            log.info("Shut down connection guard");
         }
     }
 }
