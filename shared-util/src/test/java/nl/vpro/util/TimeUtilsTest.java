@@ -54,5 +54,10 @@ public class TimeUtilsTest {
 
     }
 
+    @Test
+    public void testLarger() {
+        assertThat(TimeUtils.isLarger(TimeUtils.parseDuration("PT6M").get(), TimeUtils.parseDuration("PT5M").get())).isTrue();
+    }
+
 
 }

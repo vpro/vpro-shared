@@ -98,4 +98,11 @@ public class TimeUtils {
         }
     }
 
+    public static boolean isLarger(Duration duration1, Duration duration2) {
+        if (duration1 == null || duration2 == null) {
+            return false;
+        }
+        return duration1.compareTo(duration2) > 0;
+    }
+
 }
