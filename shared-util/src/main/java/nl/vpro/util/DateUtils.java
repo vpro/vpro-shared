@@ -102,4 +102,12 @@ public class DateUtils {
     public static Date toDate(LocalDateTime date, ZoneId zoneId) {
         return date == null ? null : Date.from(date.atZone(zoneId).toInstant());
     }
+
+    public static boolean isAfter(Instant instant1, Instant instant2) {
+        if (instant1 == null || instant2 == null) {
+            return false;
+        }
+        return instant1.isAfter(instant2);
+    }
+
 }
