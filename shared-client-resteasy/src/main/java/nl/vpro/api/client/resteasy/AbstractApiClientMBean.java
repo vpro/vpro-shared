@@ -12,4 +12,10 @@ public interface AbstractApiClientMBean {
     String getSocketTimeout();
     void setSocketTimeout(String socketTimeout);
 
+    String getCounts();
+
+    long getCount(String method);
+
+    long getTotalCount();
+
 }
