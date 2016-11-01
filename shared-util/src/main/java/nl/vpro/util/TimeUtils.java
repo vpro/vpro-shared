@@ -98,6 +98,14 @@ public class TimeUtils {
         }
     }
 
+
+    public static Duration between(Instant instant1, Instant instant2) {
+        if (instant1 == null || instant2 == null) {
+            return null;
+        }
+        return Duration.between(instant1, instant2);
+    }
+
     public static boolean isLarger(Duration duration1, Duration duration2) {
         if (duration1 == null || duration2 == null) {
             return false;
