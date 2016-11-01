@@ -1,9 +1,8 @@
 package nl.vpro.api.client.resteasy;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import javax.ws.rs.WebApplicationException;
@@ -20,7 +19,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Wraps all calls to log client errors.
+ * Wraps all calls to log client errors, and to register some statistics.
  *
  * @author Michiel Meeuwissen
  * @since 4.2
@@ -36,11 +35,29 @@ public class ErrorAspect<T> implements InvocationHandler {
 
     private final Class<?> errorClass;
 
-    ErrorAspect(T proxied, Logger log, Supplier<String> string, Class<?> errorClass) {
+
+    public static class Counter extends HashMap<Method, AtomicLong> {
+        @Override
+        public AtomicLong get(Object key) {
+            AtomicLong atomicLong = super.get(key);
+            if (atomicLong == null) {
+                AtomicLong newLong = new AtomicLong(0);
+                put((Method) key, newLong);
+                return newLong;
+            } else {
+                return atomicLong;
+            }
+        }
+    }
+
+    private final Counter counts;
+
+    ErrorAspect(T proxied, Logger log, Supplier<String> string, Class<?> errorClass, Counter counter) {
         this.proxied = proxied;
         this.log = log;
         this.string = string;
         this.errorClass = errorClass;
+        this.counts = counter;
     }
 
 
@@ -52,6 +69,9 @@ public class ErrorAspect<T> implements InvocationHandler {
         final boolean error;
         try {
             try {
+                if (counts != null) {
+                    counts.get(method).incrementAndGet();
+                }
                 Object object = method.invoke(proxied, args);
                 return object;
             } catch (InvocationTargetException itc) {
@@ -176,12 +196,13 @@ public class ErrorAspect<T> implements InvocationHandler {
     }
 
 
-    public static <T> T proxyErrors(Logger logger, Supplier<String> info, Class<T> restInterface, T service, Class<?> errorClass) {
-        return (T) Proxy.newProxyInstance(restInterface.getClassLoader(), new Class[]{restInterface}, new ErrorAspect<T>(service, logger, info, errorClass));
+    public static <T> T proxyErrors(Logger logger, Supplier<String> info, Class<T> restInterface, T service, Class<?> errorClass, Counter counter) {
+        return (T) Proxy.newProxyInstance(restInterface.getClassLoader(), new Class[]{restInterface}, new ErrorAspect<T>(service, logger, info, errorClass, counter));
     }
 
+
     public static <T> T proxyErrors(Logger logger, Supplier<String> info, Class<T> restInterface, T service) {
-        return proxyErrors(logger, info, restInterface, service, null);
+        return proxyErrors(logger, info, restInterface, service, null, null);
     }
 
 }

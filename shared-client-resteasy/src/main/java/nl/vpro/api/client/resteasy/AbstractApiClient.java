@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PreDestroy;
 import javax.management.*;
@@ -118,6 +119,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     private int maxConnections;
     Duration connectionInPoolTTL;
+    private final ErrorAspect.Counter counter = new ErrorAspect.Counter();
 
     protected AbstractApiClient(
         String baseUrl,
@@ -377,8 +379,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
             proxy = builderResteasy(engine, service);
         } else {
             S resteasy = builderResteasy(engine, restEasyService);
-            proxy = (T) Proxy.newProxyInstance(AbstractApiClient.class.getClassLoader(),
-                new Class[]{restEasyService, service}, new LeaveDefaultsProxyHandler(resteasy));
+            proxy = (T) Proxy.newProxyInstance(
+                AbstractApiClient.class.getClassLoader(),
+                new Class[]{restEasyService, service},
+                new LeaveDefaultsProxyHandler(resteasy));
         }
 
         return
@@ -415,6 +419,21 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     public final String getBaseUrl() {
         return baseUrl;
+    }
+
+    @Override
+    public String getCounts() {
+        return counter.toString();
+    }
+
+    @Override
+    public long getCount(String method) {
+        return counter.get(method).longValue();
+    }
+
+    @Override
+    public long getTotalCount() {
+        return counter.values().stream().mapToLong(AtomicLong::longValue).sum();
     }
 
     @PreDestroy

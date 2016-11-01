@@ -6,11 +6,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 /**
+ * Support for java 8 'default' methods. Resteasy won't honour them. Wrapping around this proxy reinstalls them.
+ *
  * @author Michiel Meeuwissen
  * @since 1.8
  */
 public class LeaveDefaultsProxyHandler implements InvocationHandler {
-    
+
     private final Object delegate;
     final static Constructor<MethodHandles.Lookup> CONSTRUCTOR;
     static {
