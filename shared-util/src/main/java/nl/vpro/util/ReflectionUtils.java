@@ -193,7 +193,7 @@ public class ReflectionUtils {
 
 
     private static Env getEnv(Map<String, String> properties) {
-        return Env.valueOf(properties.getOrDefault("env", "test").toUpperCase());
+        return Env.valueOf(System.getProperty("env", properties.getOrDefault("env", "test")).toUpperCase());
     }
 
     private static boolean setProperty(Object instance, Collection<String> setterNames, Object value) {
