@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 import javax.management.*;
@@ -425,7 +426,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     @Override
     public String getCounts() {
-        return counter.toString();
+        return counter.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
     }
 
     @Override
