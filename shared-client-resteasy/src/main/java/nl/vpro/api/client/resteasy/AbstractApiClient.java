@@ -7,14 +7,14 @@ package nl.vpro.api.client.resteasy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -426,12 +426,28 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     @Override
     public String getCounts() {
-        return counter.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n"));
+        return getCountMap()
+            .entrySet()
+            .stream()
+            .map(Objects::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     @Override
     public long getCount(String method) {
-        return counter.get(method).longValue();
+        return getCountMap()
+            .entrySet()
+            .stream()
+            .filter(e -> e.getKey().equals(method))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElse(0L);
+    }
+
+    private Map<String, Long> getCountMap() {
+        return counter.entrySet()
+            .stream()
+            .collect(Collectors.toMap(e -> this.methodToString(e.getKey()), e->  e.getValue().longValue()));
     }
 
     @Override
@@ -456,6 +472,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     protected void finalize() throws Throwable {
         shutdown();
         super.finalize();
+    }
+
+    private String methodToString(Method m) {
+        return m.getDeclaringClass().getSimpleName() + "." + m.getName();
     }
 
     private class MyConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
