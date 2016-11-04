@@ -390,7 +390,9 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 log,
                 AbstractApiClient.this::getInfo,
                 service,
-                proxy);
+                proxy,
+                counter
+                );
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {

@@ -201,8 +201,8 @@ public class ErrorAspect<T> implements InvocationHandler {
     }
 
 
-    public static <T> T proxyErrors(Logger logger, Supplier<String> info, Class<T> restInterface, T service) {
-        return proxyErrors(logger, info, restInterface, service, null, null);
+    public static <T> T proxyErrors(Logger logger, Supplier<String> info, Class<T> restInterface, T service, Counter counter) {
+        return proxyErrors(logger, info, restInterface, service, null, counter);
     }
 
 }
