@@ -8,5 +8,9 @@ public enum Env {
     LOCALHOST,
     DEV,
     TEST,
-    PROD
+    TESTA,
+    TESTB,
+    PROD,
+    PRODA,
+    PRODB
 }
