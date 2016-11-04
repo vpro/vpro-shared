@@ -40,8 +40,13 @@ public class ReflectionUtils {
     }
 
     public static <T> T configuredInHome(T instance, String... configFiles) {
+        return configuredInHome(null, instance, configFiles);
+    }
 
-        return configured(instance,
+    public static <T> T configuredInHome(Env env, T instance, String... configFiles) {
+        return configured(
+            env,
+            instance,
             Stream.concat(
                 Arrays.stream(configFiles).map(c -> "classpath:" + c),
                 Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
@@ -52,6 +57,9 @@ public class ReflectionUtils {
     public static <T> T configured(Env env, T instance, String... configFiles) {
         try {
             Map<String, String> properties = getProperties(configFiles);
+            if (env == null) {
+                env = getEnv(properties);
+            }
             return configured(env, instance, properties);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);

@@ -14,7 +14,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -60,10 +63,7 @@ import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import nl.vpro.resteasy.JacksonContextResolver;
-import nl.vpro.util.LeaveDefaultsProxyHandler;
-import nl.vpro.util.ThreadPools;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.XTrustProvider;
+import nl.vpro.util.*;
 
 /**
  * @author Roelof Jan Koekoek
@@ -145,7 +145,8 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
-            Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL));
+            Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL)
+        );
     }
 
 
