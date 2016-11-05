@@ -18,8 +18,8 @@ public class WindowedEventRateTest {
     @Test
     public void test() throws InterruptedException {
         WindowedEventRate rate = WindowedEventRate.builder()
-            .windowCount(5)
-            .windowSize(Duration.ofSeconds(1)).build();
+            .bucketCount(5)
+            .window(Duration.ofSeconds(5)).build();
         long start = System.currentTimeMillis();
 
         for (int i = 0; i < 1000; i++) {
@@ -42,8 +42,8 @@ public class WindowedEventRateTest {
     @Test
     public void testAccuracyDuringWarmup() throws InterruptedException {
         WindowedEventRate rate = WindowedEventRate.builder()
-            .windowCount(15)
-            .windowSize(Duration.ofMillis(100)).build();
+            .window(Duration.ofMillis(1500))
+            .bucketCount(15).build();
 
         assertThat(rate.getTotalDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
 

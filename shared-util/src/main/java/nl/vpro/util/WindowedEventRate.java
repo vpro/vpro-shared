@@ -8,6 +8,10 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Keeps track of an event rate in a current window of a given duration
+ * E.g. If you want to report a certain event rate average for the last 5 minutes.
+ *
+ *
  * @author Michiel Meeuwissen
  * @since 0.38
  */
@@ -15,7 +19,7 @@ public class WindowedEventRate {
 
     protected final int bucketCount;
     private final long[] buckets;
-    private final long windowSize;
+    private final long bucketDuration;
     private final long totalDuration;
     private long currentBucketTime = System.currentTimeMillis();
     private int currentBucket = 0;
@@ -23,16 +27,19 @@ public class WindowedEventRate {
     private boolean warmingUp = true;
 
     @Builder
-    public WindowedEventRate(Duration windowSize, int windowCount) {
-        buckets = new long[windowCount];
+    public WindowedEventRate(Duration window, Integer bucketCount) {
+        buckets = new long[bucketCount];
         Arrays.fill(buckets, 0L);
-        this.windowSize = windowSize.toMillis();
-        this.bucketCount = windowCount;
-        this.totalDuration = windowCount * this.windowSize;
+        this.totalDuration = window == null ? Duration.ofMinutes(5).toMillis() : window.toMillis();
+        this.bucketCount = bucketCount == null ? 20 : bucketCount;
+        this.bucketDuration = this.totalDuration / this.bucketCount;
+
+
     }
 
+
     public WindowedEventRate(int unit, TimeUnit timeUnit, int bucketCount) {
-        this(Duration.ofMillis(TimeUnit.MILLISECONDS.convert(unit, timeUnit)), bucketCount);
+        this(Duration.ofMillis(TimeUnit.MILLISECONDS.convert(unit, timeUnit) * bucketCount), bucketCount);
     }
     public WindowedEventRate(int unit, TimeUnit timeUnit) {
         this(unit, timeUnit, 100);
@@ -59,8 +66,8 @@ public class WindowedEventRate {
         final long relevantDuration;
         if (isWarmingUp()) {
             long relevantDurationInMillis = Duration.between(start, Instant.now()).toMillis();
-            long numberOfBuckets = relevantDurationInMillis / windowSize;
-            relevantDuration = windowSize * numberOfBuckets;
+            long numberOfBuckets = relevantDurationInMillis / bucketDuration;
+            relevantDuration = bucketDuration * numberOfBuckets;
         } else {
             relevantDuration = totalDuration;
         }
@@ -75,11 +82,11 @@ public class WindowedEventRate {
         long currentTime = System.currentTimeMillis();
         long afterBucketBegin = currentTime - currentBucketTime;
         int i = 0;
-        while (afterBucketBegin > windowSize && (i++) < buckets.length) {
+        while (afterBucketBegin > bucketDuration && (i++) < buckets.length) {
             currentBucket++;
             currentBucket %= buckets.length;
             buckets[currentBucket] = 0;
-            afterBucketBegin -= windowSize;
+            afterBucketBegin -= bucketDuration;
             currentBucketTime = currentTime;
         }
     }
