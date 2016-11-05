@@ -16,10 +16,12 @@ import nl.vpro.util.WindowedEventRate;
 @MXBean
 public class Counter implements CounterMXBean{
 
+    protected static int WINDOW_IN_MINUTES = 30;
+
 
     private final AtomicLong count = new AtomicLong(0L);
     private final WindowedEventRate rate = WindowedEventRate.builder()
-        .window(Duration.ofMinutes(15))
+        .window(Duration.ofMinutes(WINDOW_IN_MINUTES))
         .build();
 
     public Counter(ObjectName name) {

@@ -17,7 +17,7 @@ public interface CounterMXBean {
     long getCount();
 
 
-    @Description("Current event rate")
+    @Description("Current event rate averaged over last 30 minutes")
     @Units("events/minute")
     double getRate();
 }
