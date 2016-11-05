@@ -17,7 +17,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -476,13 +475,13 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     private Map<String, Long> getCountMap() {
         return counter.entrySet()
             .stream()
-            .collect(Collectors.toMap(e -> this.methodToString(e.getKey()), e->  e.getValue().longValue()));
+            .collect(Collectors.toMap(e -> this.methodToString(e.getKey()), e->  e.getValue().getCount()));
     }
 
     @Override
     public long getTotalCount() {
         return counter.values().stream()
-            .mapToLong(AtomicLong::longValue)
+            .mapToLong(Counter::getCount)
             .sum();
     }
 
