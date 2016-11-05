@@ -218,7 +218,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     protected ObjectName getObjectName() {
         try {
-            return new ObjectName("nl.vpro.api.client.resteasy:type=" + getClass().getSimpleName());
+            return new ObjectName("nl.vpro.api.client:type=" + getClass().getSimpleName());
 
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException(e);
