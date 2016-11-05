@@ -28,10 +28,10 @@ public class WindowedEventRate {
 
     @Builder
     public WindowedEventRate(Duration window, Integer bucketCount) {
-        buckets = new long[bucketCount];
+        this.bucketCount = bucketCount == null ? 20 : bucketCount;
+        buckets = new long[this.bucketCount];
         Arrays.fill(buckets, 0L);
         long tempTotalDuration = window == null ? Duration.ofMinutes(5).toMillis() : window.toMillis();
-        this.bucketCount = bucketCount == null ? 20 : bucketCount;
         this.bucketDuration = tempTotalDuration / this.bucketCount;
         this.totalDuration = this.bucketDuration * this.bucketCount;
 
