@@ -10,6 +10,9 @@ public enum Env {
     TEST,
     TESTA,
     TESTB,
+    ACC,
+    ACCA,
+    ACCB,
     PROD,
     PRODA,
     PRODB
