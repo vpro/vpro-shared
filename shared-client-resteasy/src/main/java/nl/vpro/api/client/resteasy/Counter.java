@@ -19,8 +19,7 @@ public class Counter implements CounterMXBean{
 
     private final AtomicLong count = new AtomicLong(0L);
     private final WindowedEventRate rate = WindowedEventRate.builder()
-        .windowCount(30)
-        .windowSize(Duration.ofMinutes(1))
+        .window(Duration.ofMinutes(15))
         .build();
 
     public Counter(ObjectName name) {
