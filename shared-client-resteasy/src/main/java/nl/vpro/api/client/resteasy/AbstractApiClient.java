@@ -14,10 +14,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,7 +60,10 @@ import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import nl.vpro.resteasy.JacksonContextResolver;
-import nl.vpro.util.*;
+import nl.vpro.util.LeaveDefaultsProxyHandler;
+import nl.vpro.util.ThreadPools;
+import nl.vpro.util.TimeUtils;
+import nl.vpro.util.XTrustProvider;
 
 /**
  * @author Roelof Jan Koekoek
@@ -120,7 +120,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     private int maxConnections;
     Duration connectionInPoolTTL;
-    protected final ErrorAspect.Counter counter = new ErrorAspect.Counter();
+    protected final Map<Method, Counter> counter = new HashMap<>();
 
     protected AbstractApiClient(
         String baseUrl,
@@ -196,9 +196,12 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     private void registerBean() {
+        registerBean(getObjectName(), this);
+    }
+
+    protected static void registerBean(ObjectName name, Object object) {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("nl.vpro.api.client.resteasy:name=" + getClass().getSimpleName());
             if (mbs.isRegistered(name)) {
                 try {
                     mbs.unregisterMBean(name);
@@ -206,10 +209,19 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                     log.error(e.getMessage(), e);
                 }
             }
-            mbs.registerMBean(this, name);
-
-        } catch (MalformedObjectNameException | NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+            mbs.registerMBean(object, name);
+        } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+
+    protected ObjectName getObjectName() {
+        try {
+            return new ObjectName("nl.vpro.api.client.resteasy:type=" + getClass().getSimpleName());
+
+        } catch (MalformedObjectNameException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -387,14 +399,33 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
                 new LeaveDefaultsProxyHandler(resteasy));
         }
 
-        return
-            ErrorAspect.proxyErrors(
-                log,
-                AbstractApiClient.this::getInfo,
-                service,
-                proxy,
-                counter
-                );
+        return proxyErrorsAndCount(service, proxy);
+    }
+
+    protected <T> T proxyErrorsAndCount(Class<T> service, T proxy) {
+        return proxyCounter(service,
+            proxyErrors(service, proxy)
+        );
+    }
+
+    protected <T> T proxyErrorsAndCount(Class<T> service, T proxy, Class<?> errorClass) {
+        return proxyCounter(service,
+            proxyErrors(service, proxy, errorClass)
+        );
+    }
+
+    protected <T> T proxyErrors(Class<T> service, T proxy) {
+        return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy);
+    }
+
+    protected <T> T proxyErrors(Class<T> service, T proxy, Class<?> errorClass) {
+        return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy, errorClass);
+    }
+
+
+    protected <T> T proxyCounter(Class<T> service, T proxy) {
+        return CountAspect.proxyCounter(counter, getObjectName(), service, proxy);
+
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
@@ -453,7 +484,9 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
     @Override
     public long getTotalCount() {
-        return counter.values().stream().mapToLong(AtomicLong::longValue).sum();
+        return counter.values().stream()
+            .mapToLong(AtomicLong::longValue)
+            .sum();
     }
 
     @PreDestroy
@@ -475,7 +508,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         super.finalize();
     }
 
-    private String methodToString(Method m) {
+    static String methodToString(Method m) {
         return m.getDeclaringClass().getSimpleName() + "." + m.getName();
     }
 
