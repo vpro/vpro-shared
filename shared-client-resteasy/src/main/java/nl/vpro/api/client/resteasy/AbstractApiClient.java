@@ -69,7 +69,7 @@ import nl.vpro.util.XTrustProvider;
  * @since 3.0
  */
 @Slf4j()
-public abstract class AbstractApiClient implements  AbstractApiClientMBean {
+public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     private static Thread connectionGuardThread;
@@ -482,6 +482,13 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     public long getTotalCount() {
         return counter.values().stream()
             .mapToLong(Counter::getCount)
+            .sum();
+    }
+
+    @Override
+    public double getRate() {
+        return counter.values().stream()
+            .mapToDouble(Counter::getRate)
             .sum();
     }
 

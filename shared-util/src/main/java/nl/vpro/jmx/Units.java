@@ -11,7 +11,7 @@ import static java.lang.annotation.ElementType.*;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.57
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
