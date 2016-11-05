@@ -43,22 +43,22 @@ public class WindowedEventRateTest {
     public void testAccuracyDuringWarmup() throws InterruptedException {
         WindowedEventRate rate = WindowedEventRate.builder()
             .window(Duration.ofMillis(1500))
-            .bucketCount(100).build();
+            .bucketCount(50).build();
 
         assertThat(rate.getTotalDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
 
         for (int i = 0; i < 10; i++) {
-            rate.newEvent();
+            rate.newEvents(10);
             Thread.sleep(100);
         }
         assertThat(rate.isWarmingUp()).isTrue();
-        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(10.0, withPercentage(10));
+        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(100.0, withPercentage(20));
         for (int i = 0; i < 10; i++) {
-            rate.newEvent();
+            rate.newEvents(10);
             Thread.sleep(100);
         }
         assertThat(rate.isWarmingUp()).isFalse();
-        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(10.0, withPercentage(10));
+        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(100.0, withPercentage(20));
     }
 
 }
