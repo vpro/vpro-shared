@@ -330,10 +330,10 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
 
         HttpParams httpParams = new BasicHttpParams();
 
-        if (connectTimeout.toMillis() > 0) {
+        if (connectTimeout != null && connectTimeout.toMillis() > 0) {
             HttpConnectionParams.setConnectionTimeout(httpParams, (int) connectTimeout.toMillis());
         }
-        if (socketTimeout.toMillis() > 0) {
+        if (socketTimeout != null && socketTimeout.toMillis() > 0) {
             HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
         }
 
@@ -403,15 +403,11 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
     }
 
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy) {
-        return proxyCounter(service,
-            proxyErrors(service, proxy)
-        );
+        return proxyErrors(service, proxyCounter(service, proxy));
     }
 
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy, Class<?> errorClass) {
-        return proxyCounter(service,
-            proxyErrors(service, proxy, errorClass)
-        );
+        return proxyErrors(service, proxyCounter(service, proxy), errorClass);
     }
 
     protected <T> T proxyErrors(Class<T> service, T proxy) {
