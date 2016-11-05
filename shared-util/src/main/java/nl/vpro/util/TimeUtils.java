@@ -98,6 +98,10 @@ public class TimeUtils {
         }
     }
 
+    public static Optional<Duration> durationOfMillis(Integer i) {
+        return Optional.ofNullable(i == null ? null : Duration.ofMillis(i));
+    }
+
 
     public static Duration between(Instant instant1, Instant instant2) {
         if (instant1 == null || instant2 == null) {
