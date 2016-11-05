@@ -136,6 +136,7 @@ public abstract class AbstractApiClient implements  AbstractApiClientMBean {
         this.maxConnections = maxConnections;
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.baseUrl = baseUrl;
+        log.info("Created api client {} {}", getClass().getSimpleName(), baseUrl);
         registerBean();
     }
 
