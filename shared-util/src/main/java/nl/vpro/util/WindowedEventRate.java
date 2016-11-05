@@ -30,9 +30,10 @@ public class WindowedEventRate {
     public WindowedEventRate(Duration window, Integer bucketCount) {
         buckets = new long[bucketCount];
         Arrays.fill(buckets, 0L);
-        this.totalDuration = window == null ? Duration.ofMinutes(5).toMillis() : window.toMillis();
+        long tempTotalDuration = window == null ? Duration.ofMinutes(5).toMillis() : window.toMillis();
         this.bucketCount = bucketCount == null ? 20 : bucketCount;
-        this.bucketDuration = this.totalDuration / this.bucketCount;
+        this.bucketDuration = tempTotalDuration / this.bucketCount;
+        this.totalDuration = this.bucketDuration * this.bucketCount;
 
 
     }
@@ -63,18 +64,18 @@ public class WindowedEventRate {
     public double getRate(TimeUnit unit) {
         shiftBuckets();
 
-        final long relevantDuration;
-        if (isWarmingUp()) {
-            long relevantDurationInMillis = Duration.between(start, Instant.now()).toMillis();
-            long numberOfBuckets = relevantDurationInMillis / bucketDuration;
-            relevantDuration = bucketDuration * numberOfBuckets;
-        } else {
-            relevantDuration = totalDuration;
-        }
         long totalCount = 0;
         for (long bucket : buckets) {
             totalCount += bucket;
         }
+
+        final long relevantDuration;
+        if (isWarmingUp()) {
+            relevantDuration = Duration.between(start, Instant.now()).toMillis();
+        } else {
+            relevantDuration = totalDuration;
+        }
+
         return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / relevantDuration;
     }
 
