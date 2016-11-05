@@ -43,7 +43,7 @@ public class WindowedEventRateTest {
     public void testAccuracyDuringWarmup() throws InterruptedException {
         WindowedEventRate rate = WindowedEventRate.builder()
             .window(Duration.ofMillis(1500))
-            .bucketCount(15).build();
+            .bucketCount(100).build();
 
         assertThat(rate.getTotalDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
 
