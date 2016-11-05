@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Builder;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -18,13 +20,19 @@ public class WindowedEventRate {
     private long currentBucketTime = System.currentTimeMillis();
     private int currentBucket = 0;
     private final Instant start = Instant.now();
+    private boolean warmingUp = true;
+
+    @Builder
+    public WindowedEventRate(Duration windowSize, int windowCount) {
+        buckets = new long[windowCount];
+        Arrays.fill(buckets, 0L);
+        this.windowSize = windowSize.toMillis();
+        this.bucketCount = windowCount;
+        this.totalDuration = windowCount * this.windowSize;
+    }
 
     public WindowedEventRate(int unit, TimeUnit timeUnit, int bucketCount) {
-        buckets = new long[bucketCount];
-        Arrays.fill(buckets, 0L);
-        windowSize = TimeUnit.MILLISECONDS.convert(unit, timeUnit);
-        this.bucketCount = bucketCount;
-        this.totalDuration = bucketCount * windowSize;
+        this(Duration.ofMillis(TimeUnit.MILLISECONDS.convert(unit, timeUnit)), bucketCount);
     }
     public WindowedEventRate(int unit, TimeUnit timeUnit) {
         this(unit, timeUnit, 100);
@@ -47,11 +55,20 @@ public class WindowedEventRate {
 
     public double getRate(TimeUnit unit) {
         shiftBuckets();
+
+        final long relevantDuration;
+        if (isWarmingUp()) {
+            long relevantDurationInMillis = Duration.between(start, Instant.now()).toMillis();
+            long numberOfBuckets = relevantDurationInMillis / windowSize;
+            relevantDuration = windowSize * numberOfBuckets;
+        } else {
+            relevantDuration = totalDuration;
+        }
         long totalCount = 0;
         for (long bucket : buckets) {
             totalCount += bucket;
         }
-        return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / totalDuration;
+        return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / relevantDuration;
     }
 
     private void shiftBuckets() {
@@ -76,7 +93,10 @@ public class WindowedEventRate {
     }
 
     public boolean isWarmingUp() {
-        return Instant.now().isBefore(start.plus(getTotalDuration()));
+        if (warmingUp) {
+            warmingUp = Instant.now().isBefore(start.plus(getTotalDuration()));
+        }
+        return warmingUp;
     }
 
 

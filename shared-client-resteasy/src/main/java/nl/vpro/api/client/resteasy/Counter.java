@@ -1,5 +1,6 @@
 package nl.vpro.api.client.resteasy;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -17,8 +18,10 @@ public class Counter implements CounterMXBean{
 
 
     private final AtomicLong count = new AtomicLong(0L);
-    private final WindowedEventRate rate =
-        new WindowedEventRate(5, TimeUnit.MINUTES, 100);
+    private final WindowedEventRate rate = WindowedEventRate.builder()
+        .windowCount(5)
+        .windowSize(Duration.ofMinutes(1))
+        .build();
 
     public Counter(ObjectName name) {
         AbstractApiClient.registerBean(name, this);

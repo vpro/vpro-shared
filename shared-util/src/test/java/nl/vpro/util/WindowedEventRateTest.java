@@ -1,10 +1,12 @@
 package nl.vpro.util;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Percentage.withPercentage;
 
 /**
  * @author Michiel Meeuwissen
@@ -15,7 +17,9 @@ public class WindowedEventRateTest {
 
     @Test
     public void test() throws InterruptedException {
-        WindowedEventRate rate = new WindowedEventRate(1, TimeUnit.SECONDS, 5);
+        WindowedEventRate rate = WindowedEventRate.builder()
+            .windowCount(5)
+            .windowSize(Duration.ofSeconds(1)).build();
         long start = System.currentTimeMillis();
 
         for (int i = 0; i < 1000; i++) {
@@ -32,6 +36,29 @@ public class WindowedEventRateTest {
 
         assertThat(rate.isWarmingUp()).isFalse();
 
+    }
+
+
+    @Test
+    public void testAccuracyDuringWarmup() throws InterruptedException {
+        WindowedEventRate rate = WindowedEventRate.builder()
+            .windowCount(15)
+            .windowSize(Duration.ofMillis(100)).build();
+
+        assertThat(rate.getTotalDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
+
+        for (int i = 0; i < 10; i++) {
+            rate.newEvent();
+            Thread.sleep(100);
+        }
+        assertThat(rate.isWarmingUp()).isTrue();
+        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(10.0, withPercentage(10));
+        for (int i = 0; i < 10; i++) {
+            rate.newEvent();
+            Thread.sleep(100);
+        }
+        assertThat(rate.isWarmingUp()).isFalse();
+        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(10.0, withPercentage(10));
     }
 
 }
