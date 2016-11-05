@@ -48,7 +48,7 @@ public class ReflectionUtils {
             env,
             instance,
             Stream.concat(
-                Arrays.stream(configFiles).map(c -> "classpath:" + c),
+                Arrays.stream(configFiles).map(c -> "classpath:/" + c),
                 Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
             ).toArray(String[]::new)
         );
