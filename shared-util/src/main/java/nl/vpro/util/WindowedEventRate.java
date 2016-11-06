@@ -17,25 +17,23 @@ import java.util.concurrent.TimeUnit;
  */
 public class WindowedEventRate {
 
-    protected final int bucketCount;
     private final long[] buckets;
     private final long bucketDuration;
     private final long totalDuration;
+    private final Instant start = Instant.now();
+
+    private boolean warmingUp = true;
     private long currentBucketTime = System.currentTimeMillis();
     private int currentBucket = 0;
-    private final Instant start = Instant.now();
-    private boolean warmingUp = true;
 
     @Builder
     public WindowedEventRate(Duration window, Integer bucketCount) {
-        this.bucketCount = bucketCount == null ? 20 : bucketCount;
-        buckets = new long[this.bucketCount];
+        int bucketCount1 = bucketCount == null ? 20 : bucketCount;
+        buckets = new long[bucketCount1];
         Arrays.fill(buckets, 0L);
         long tempTotalDuration = window == null ? Duration.ofMinutes(5).toMillis() : window.toMillis();
-        this.bucketDuration = tempTotalDuration / this.bucketCount;
-        this.totalDuration = this.bucketDuration * this.bucketCount;
-
-
+        this.bucketDuration = tempTotalDuration / bucketCount1;
+        this.totalDuration = this.bucketDuration * bucketCount1;
     }
 
 
@@ -49,7 +47,6 @@ public class WindowedEventRate {
     public WindowedEventRate(TimeUnit timeUnit) {
         this(1, timeUnit);
     }
-
 
     public void newEvent() {
         shiftBuckets();
@@ -79,19 +76,6 @@ public class WindowedEventRate {
         return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / relevantDuration;
     }
 
-    private void shiftBuckets() {
-        long currentTime = System.currentTimeMillis();
-        long afterBucketBegin = currentTime - currentBucketTime;
-        int i = 0;
-        while (afterBucketBegin > bucketDuration && (i++) < buckets.length) {
-            currentBucket++;
-            currentBucket %= buckets.length;
-            buckets[currentBucket] = 0;
-            afterBucketBegin -= bucketDuration;
-            currentBucketTime = currentTime;
-        }
-    }
-
     public String toString() {
         return "" + getRate(TimeUnit.SECONDS) + " /s" + (isWarmingUp() ? " (warming up)" : "");
     }
@@ -105,6 +89,20 @@ public class WindowedEventRate {
             warmingUp = Instant.now().isBefore(start.plus(getTotalDuration()));
         }
         return warmingUp;
+    }
+
+
+    private void shiftBuckets() {
+        long currentTime = System.currentTimeMillis();
+        long afterBucketBegin = currentTime - currentBucketTime;
+        int i = 0;
+        while (afterBucketBegin > bucketDuration && (i++) < buckets.length) {
+            currentBucket++;
+            currentBucket %= buckets.length;
+            buckets[currentBucket] = 0;
+            afterBucketBegin -= bucketDuration;
+            currentBucketTime = currentTime;
+        }
     }
 
 
