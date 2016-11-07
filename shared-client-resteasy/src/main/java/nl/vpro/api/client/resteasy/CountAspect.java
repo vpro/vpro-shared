@@ -3,6 +3,7 @@ package nl.vpro.api.client.resteasy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
@@ -21,11 +22,13 @@ public class CountAspect<T> implements InvocationHandler {
 
     private final Map<Method, Counter> counts;
     private final ObjectName name;
+    private final Duration countWindow;
 
-    CountAspect(T proxied, Map<Method, Counter> counter, ObjectName name) {
+    CountAspect(T proxied, Map<Method, Counter> counter, Duration countWindow, ObjectName name) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
+        this.countWindow = countWindow;
     }
 
 
@@ -44,10 +47,10 @@ public class CountAspect<T> implements InvocationHandler {
     }
 
 
-    public static <T> T proxyCounter(Map<Method, Counter> counter, ObjectName name, Class<T> restInterface, T service) {
+    public static <T> T proxyCounter(Map<Method, Counter> counter, Duration countWindow, ObjectName name, Class<T> restInterface, T service) {
         return (T) Proxy.newProxyInstance(CountAspect.class.getClassLoader(),
             new Class[]{restInterface},
-            new CountAspect<T>(service, counter, name));
+            new CountAspect<T>(service, counter, countWindow, name));
     }
 
 }

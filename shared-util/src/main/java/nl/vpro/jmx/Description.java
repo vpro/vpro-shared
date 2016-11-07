@@ -19,4 +19,5 @@ import static java.lang.annotation.ElementType.*;
 public @interface Description {
     @DescriptorKey("description")
     String value();
+
 }

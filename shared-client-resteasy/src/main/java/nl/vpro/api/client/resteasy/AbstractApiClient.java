@@ -120,6 +120,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private int maxConnections;
     Duration connectionInPoolTTL;
     protected final Map<Method, Counter> counter = new HashMap<>();
+    private Duration countWindow = Duration.ofMillis(15);
 
     protected AbstractApiClient(
         String baseUrl,
@@ -127,7 +128,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectTimeout,
         Duration socketTimeout,
         int maxConnections,
-        Duration connectionInPoolTTL) {
+        Duration connectionInPoolTTL,
+        Duration countWindow
+        ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
         this.connectTimeout = connectTimeout;
@@ -135,6 +138,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.maxConnections = maxConnections;
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.baseUrl = baseUrl;
+        this.countWindow = countWindow;
         log.info("Created api client {} {}", getClass().getSimpleName(), baseUrl);
         registerBean();
     }
@@ -145,7 +149,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
-            Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL)
+            Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL),
+            Duration.ofMinutes(15)
         );
     }
 
@@ -387,6 +392,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         clientHttpEngine = null;
     }
 
+    public Duration getCountWindow() {
+        return countWindow;
+    }
+
+    public void setCountWindow(Duration countWindow) {
+        invalidate();
+        this.countWindow = countWindow;
+    }
+
     protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService) {
         T proxy;
         if (restEasyService == null) {
@@ -420,7 +434,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, getObjectName(), service, proxy);
+        return CountAspect.proxyCounter(counter, countWindow, getObjectName(), service, proxy);
 
     }
 
