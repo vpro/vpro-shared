@@ -1,5 +1,7 @@
 package nl.vpro.api.client.resteasy;
 
+import java.time.Duration;
+
 import javax.management.MXBean;
 
 import nl.vpro.jmx.Description;
@@ -17,7 +19,12 @@ public interface CounterMXBean {
     long getCount();
 
 
-    @Description("Current event rate averaged over last 30 minutes")
+    @Description("Current event rate averaged over a period")
     @Units("events/minute")
     double getRate();
+
+
+    @Description("Window of the getRate call")
+    @Units("a duration")
+    String getRateWindow();
 }
