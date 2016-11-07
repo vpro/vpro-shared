@@ -34,7 +34,7 @@ public class CountAspect<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        counts.computeIfAbsent(method, (m) -> new Counter(getObjectName(m))).incrementAndGet();
+        counts.computeIfAbsent(method, (m) -> new Counter(getObjectName(m), countWindow)).incrementAndGet();
         return method.invoke(proxied, args);
     }
 
