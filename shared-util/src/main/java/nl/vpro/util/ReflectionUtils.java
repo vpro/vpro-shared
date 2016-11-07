@@ -166,7 +166,7 @@ public class ReflectionUtils {
             }
         }
         final Env env = e;
-        LOG.info("Running in {}", e);
+        LOG.info("Configuring {} in {}", prefix, e);
         Map<String, String> result = new HashMap<>();
         properties.forEach((key, value) -> {
             String[] split = key.split("\\.", 3);
