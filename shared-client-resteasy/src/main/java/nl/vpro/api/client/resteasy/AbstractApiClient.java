@@ -404,9 +404,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService, Class<?> errorClass) {
         T proxy;
         if (restEasyService == null) {
-            proxy = builderResteasy(engine, service);
+            proxy = buildResteasy(engine, service);
         } else {
-            S resteasy = builderResteasy(engine, restEasyService);
+            S resteasy = buildResteasy(engine, restEasyService);
             proxy = (T) Proxy.newProxyInstance(
                 AbstractApiClient.class.getClassLoader(),
                 new Class[]{restEasyService, service},
@@ -459,7 +459,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return build(getClientHttpEngine(), service);
     }
 
-    private <T> T builderResteasy(ClientHttpEngine engine, Class<T> service) {
+    private <T> T buildResteasy(ClientHttpEngine engine, Class<T> service) {
         return getTarget(engine)
             .proxyBuilder(service)
             .defaultConsumes(MediaType.APPLICATION_XML)
