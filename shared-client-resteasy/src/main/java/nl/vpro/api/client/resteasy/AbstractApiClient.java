@@ -401,7 +401,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.countWindow = countWindow;
     }
 
-    protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService) {
+    protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService, Class<?> errorClass) {
         T proxy;
         if (restEasyService == null) {
             proxy = builderResteasy(engine, service);
@@ -413,7 +413,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 new LeaveDefaultsProxyHandler(resteasy));
         }
 
-        return proxyErrorsAndCount(service, proxy);
+        return proxyErrorsAndCount(service, proxy, errorClass);
     }
 
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy) {
@@ -440,6 +440,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
         return build(engine, service, null);
+    }
+
+    protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
+        return build(engine, service, null, errorClass);
     }
 
     protected <T> T build(Class<T> service) {
