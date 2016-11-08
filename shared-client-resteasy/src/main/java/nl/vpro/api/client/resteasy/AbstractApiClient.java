@@ -122,6 +122,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected final Map<Method, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofMillis(15);
 
+    private List<Locale> acceptableLanguages = Arrays.asList();
+
     protected AbstractApiClient(
         String baseUrl,
         Duration connectionRequestTimeout,
