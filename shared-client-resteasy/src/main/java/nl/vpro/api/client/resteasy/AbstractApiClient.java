@@ -442,10 +442,19 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return build(engine, service, null);
     }
 
-    protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
-        return build(engine, service, null, errorClass);
+
+    protected <T, S> T build(ClientHttpEngine engine, Class<T> service,  Class<S> restEasyInterface) {
+        return build(engine, service, restEasyInterface, null);
     }
 
+    protected <T, S> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<S> restEasyInterface, Class<?> errorClass) {
+        return build(engine, service, restEasyInterface, errorClass);
+    }
+
+
+    protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
+        return buildWithErrorClass(engine, service, null, errorClass);
+    }
     protected <T> T build(Class<T> service) {
         return build(getClientHttpEngine(), service);
     }
