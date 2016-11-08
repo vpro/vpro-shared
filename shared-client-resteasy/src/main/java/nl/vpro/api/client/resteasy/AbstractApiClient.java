@@ -53,6 +53,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -122,7 +123,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected final Map<Method, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofMillis(15);
 
-    private List<Locale> acceptableLanguages = Arrays.asList();
+    private List<Locale> acceptableLanguages = new ArrayList<>();
 
     protected AbstractApiClient(
         String baseUrl,
@@ -131,7 +132,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration socketTimeout,
         int maxConnections,
         Duration connectionInPoolTTL,
-        Duration countWindow
+        Duration countWindow,
+        List<Locale> acceptableLanguages
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -141,6 +143,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.baseUrl = baseUrl;
         this.countWindow = countWindow;
+        this.acceptableLanguages = acceptableLanguages;
         log.info("Created api client {} {}", getClass().getSimpleName(), baseUrl);
         registerBean();
     }
@@ -152,7 +155,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
             Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL),
-            Duration.ofMinutes(15)
+            Duration.ofMinutes(15),
+            null
         );
     }
 
@@ -389,9 +393,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
-        invalidate();
         this.connectionInPoolTTL = connectionInPoolTTL;
         clientHttpEngine = null;
+        invalidate();
     }
 
     public Duration getCountWindow() {
@@ -399,8 +403,17 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setCountWindow(Duration countWindow) {
-        invalidate();
         this.countWindow = countWindow;
+        invalidate();
+    }
+
+    public List<Locale> getAcceptableLanguages() {
+        return acceptableLanguages;
+    }
+
+    public void setAcceptableLanguages(List<Locale> acceptableLanguages) {
+        this.acceptableLanguages = acceptableLanguages;
+        invalidate();
     }
 
     protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService, Class<?> errorClass) {
@@ -469,7 +482,20 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             .build();
     }
 
-    protected abstract ResteasyWebTarget getTarget(ClientHttpEngine engine);
+    protected ResteasyClientBuilder resteasyClientBuilder(ClientHttpEngine engine) {
+        ResteasyClientBuilder builder =
+            new ResteasyClientBuilder()
+                .httpEngine(engine)
+                .register(JacksonContextResolver.class);
+        buildResteasy(builder);
+        return builder;
+    }
+    protected abstract void buildResteasy(ResteasyClientBuilder builder);
+
+
+    protected final ResteasyWebTarget getTarget(ClientHttpEngine engine) {
+        return resteasyClientBuilder(engine).build().target(baseUrl);
+    }
 
 
     protected String getInfo() {

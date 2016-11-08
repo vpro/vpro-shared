@@ -4,15 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +45,15 @@ public class ReflectionUtils {
         return configured(
             env,
             instance,
-            Stream.concat(
-                Arrays.stream(configFiles).map(c -> "classpath:/" + c),
-                Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
-            ).toArray(String[]::new)
+            getConfigFilesInHome(configFiles)
         );
+    }
+
+    public static String[] getConfigFilesInHome(String... configFiles) {
+        return Stream.concat(
+            Arrays.stream(configFiles).map(c -> "classpath:/" + c),
+            Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
+        ).toArray(String[]::new);
     }
 
     public static <T> T configured(Env env, T instance, String... configFiles) {
@@ -207,27 +209,12 @@ public class ReflectionUtils {
     private static boolean setProperty(Object instance, Collection<String> setterNames, Object value) {
         Method[] methods = instance.getClass().getMethods();
         String v = (String) value;
-        Class<?> parameterClass = null;
+        Parameter parameterClass = null;
         for (Method m : methods) {
             if (setterNames.contains(m.getName()) && m.getParameterCount() == 1) {
                 try {
-                    parameterClass = m.getParameters()[0].getType();
-                    if (String.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, v);
-                    } else if (boolean.class.isAssignableFrom(parameterClass) || Boolean.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Boolean.valueOf(v));
-                    } else if (int.class.isAssignableFrom(parameterClass) || Integer.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Integer.valueOf(v));
-                    } else if (long.class.isAssignableFrom(parameterClass) || Long.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Long.valueOf(v));
-                    } else if (float.class.isAssignableFrom(parameterClass) || Float.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Float.valueOf(v));
-                    } else if (double.class.isAssignableFrom(parameterClass) || Double.class.isAssignableFrom(parameterClass)) {
-                        m.invoke(instance, Double.valueOf(v));
-                    } else {
-                        LOG.debug("Unrecognized parameter type " + parameterClass);
-                        continue;
-                    }
+                    parameterClass = m.getParameters()[0];
+                    m.invoke(instance, convert(v, parameterClass));
                     LOG.debug("Set {} from config file", m.getName());
                     return true;
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -240,6 +227,42 @@ public class ReflectionUtils {
         }
         LOG.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
         return false;
+    }
+
+    private static <T> Object convert(String o, Parameter parameter) {
+        return convert(o, parameter.getParameterizedType());
+    }
+    private static <T> Object convert(String o, Type parameterType)  {
+        Class<?> parameterClass;
+        if (parameterType instanceof  Class) {
+            parameterClass = (Class) parameterType;
+        } else if (parameterType instanceof ParameterizedType) {
+            parameterClass = (Class) ((ParameterizedType) parameterType).getRawType();
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        if (String.class.isAssignableFrom(parameterClass)) {
+            return o;
+        } else if (boolean.class.equals(parameterClass) || parameterClass.isAssignableFrom(Boolean.class)) {
+            return Boolean.valueOf(o);
+        } else if (int.class.equals(parameterClass) || parameterClass.isAssignableFrom(Integer.class)) {
+            return Integer.valueOf(o);
+        } else if (long.class.equals(parameterClass) || parameterClass.isAssignableFrom(Long.class)) {
+            return Long.valueOf(o);
+        } else if (float.class.equals(parameterClass) || parameterClass.isAssignableFrom(Float.class)) {
+            return Float.valueOf(o);
+        } else if (double.class.equals(parameterClass) || parameterClass.isAssignableFrom(Double.class)) {
+            return Double.valueOf(o);
+        } else if (parameterClass.isAssignableFrom(Locale.class)) {
+            return LocaleUtils.toLocale(o);
+        } else if (parameterClass.isAssignableFrom(List.class)) {
+            ParameterizedType parameterizedType = (ParameterizedType) parameterType;
+            return Arrays.stream(o.split("\\s*,\\s*"))
+                .map(s -> convert(s, parameterizedType.getActualTypeArguments()[0]))
+                .collect(Collectors.toList());
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
 }
