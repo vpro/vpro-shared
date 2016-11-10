@@ -1,12 +1,12 @@
 package nl.vpro.jackson2;
 
+import lombok.Builder;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
-import java.util.Spliterator;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -34,7 +34,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private boolean needsFindNext = true;
 
-    private final BiFunction<JsonParser, TreeNode, T> valueCreator;
+    private Boolean hasNext;
+
+    private final BiFunction<JsonParser, TreeNode, ? extends T> valueCreator;
 
     private Runnable callback;
 
@@ -67,6 +69,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
         this(inputStream, valueCreator, null);
     }
+    @Builder
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode,  T> valueCreator, Runnable callback) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.valueCreator = valueCreator;
@@ -107,7 +110,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     @Override
     public boolean hasNext() {
         findNext();
-        return next != null;
+        return hasNext;
     }
 
     @Override
@@ -122,6 +125,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         T result = next;
         next = null;
         needsFindNext = true;
+        hasNext = null;
         count++;
         return result;
     }
@@ -144,7 +148,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     try {
                         if (tree == null) {
                             callback();
-                            next = null;
+                            hasNext = false;
                         } else {
                             if (foundNulls > 0) {
                                 log.warn("Found {} nulls. Will be skipped", foundNulls);
@@ -152,6 +156,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                             }
 
                             next = valueCreator.apply(jp, tree);
+                            hasNext = true;
                         }
                         foundNulls = 0;
                         break;
@@ -163,6 +168,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     callback();
                     next = null;
                     needsFindNext = false;
+                    hasNext = false;
                     throw new RuntimeException(e);
                 }
             }
