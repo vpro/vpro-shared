@@ -5,7 +5,6 @@ import java.util.Optional;
 
 /**
  * @author Michiel Meeuwissen
- * @since
  */
 public class CallbackIterator<T> implements CountedIterator<T> {
 
