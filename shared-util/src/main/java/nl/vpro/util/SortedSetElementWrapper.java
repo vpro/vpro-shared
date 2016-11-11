@@ -14,6 +14,9 @@ public abstract class SortedSetElementWrapper<T, S> extends AbstractSet<S> imple
     protected final SortedSet<T> wrapped;
 
     public SortedSetElementWrapper(SortedSet<T> wrapped) {
+        if (wrapped == null) {
+            throw new IllegalArgumentException("Cannot wrap null");
+        }
         this.wrapped = wrapped;
     }
 
