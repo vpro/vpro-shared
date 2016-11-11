@@ -2,6 +2,7 @@ package nl.vpro.jackson2;
 
 import lombok.Builder;
 
+import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -63,28 +64,35 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
             } catch (JsonProcessingException e) {
                 throw new ValueReadException(e);
             }
-        }, callback);
+        }, callback, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null);
+        this(inputStream, valueCreator, null, null, null);
     }
     @Builder
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode,  T> valueCreator, Runnable callback) throws IOException {
+    @ConstructorProperties({"inputStream", "valueCreator",  "callback", "sizeField", "totalSizeField"})
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode,  T> valueCreator, Runnable callback, String sizeField, String totalSizeField) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
         this.valueCreator = valueCreator;
         Long tmpSize = null;
         Long tmpTotalSize = null;
         String fieldName = null;
+        if (sizeField == null) {
+            sizeField = "size";
+        }
+        if (totalSizeField == null) {
+            totalSizeField = "totalSize";
+        }
         while(true) {
             JsonToken token = jp.nextToken();
             if (token == JsonToken.FIELD_NAME) {
                 fieldName = jp.getCurrentName();
             }
-            if (token == JsonToken.VALUE_NUMBER_INT && "size".equals(fieldName)) {
+            if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
                 tmpSize = jp.getLongValue();
             }
-            if (token == JsonToken.VALUE_NUMBER_INT && "totalSize".equals(fieldName)) {
+            if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
                 tmpTotalSize = jp.getLongValue();
             }
             if (token == JsonToken.START_ARRAY) break;
