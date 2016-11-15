@@ -73,7 +73,7 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
                     }
                     if (size == 0) {
                         LOG.warn("Cannot store JSON representation of object type " + object.getClass().getName() + ": even first item in array already too large (maxlength = " + MAX_LENGTH + ")");
-                        return "{}";
+                        return "[]";
                     } else {
                         LOG.warn("Truncated JSON representation of object type {}: {} -> {} ", object.getClass().getName(), originalSize, size);
                     }
