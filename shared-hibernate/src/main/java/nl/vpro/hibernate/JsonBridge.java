@@ -6,16 +6,17 @@ package nl.vpro.hibernate;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import org.hibernate.search.bridge.ParameterizedBridge;
 import org.hibernate.search.bridge.TwoWayStringBridge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import nl.vpro.jackson2.Jackson2Mapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -46,7 +47,7 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
     }
 
     @Override
-    public String objectToString(Object object) {
+    public String objectToString(final Object object) {
         if (object == null) {
             return null;
         }
@@ -55,18 +56,26 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
 
             int len = ret.length();
             if (len > MAX_LENGTH) {
-                if (object instanceof Object[]) {
-                    LOG.warn("Cannot store JSON representation of object type " + object.getClass().getName() + ": trying shorter version");
-                    int size = ((Object[]) object).length;
-                    while (len > MAX_LENGTH && size > 0) {
-                        object = Arrays.copyOfRange((Object[]) object, 0, --size);
-                        ret = Jackson2Mapper.getInstance().writeValueAsString(object);
+                if (object instanceof Collection || object instanceof Object[]) {
+
+                    Object[] array;
+                    if (object instanceof Object[]) {
+                        array = (Object[]) object;
+                    } else {
+                        array = ((Collection) object).stream().toArray(i -> new Object[((Collection) object).size()]);
+                    }
+                    int originalSize = array.length;
+                    int size = array.length;
+                    while (len > MAX_LENGTH && array.length > 0) {
+                        array = Arrays.copyOfRange(array, 0, --size);
+                        ret = Jackson2Mapper.getInstance().writeValueAsString(array);
                         len = ret.length();
                     }
-
                     if (size == 0) {
                         LOG.warn("Cannot store JSON representation of object type " + object.getClass().getName() + ": even first item in array already too large (maxlength = " + MAX_LENGTH + ")");
                         return "{}";
+                    } else {
+                        LOG.warn("Truncated JSON representation of object type {}: {} -> {} ", object.getClass().getName(), originalSize, size);
                     }
                 } else {
                     LOG.warn("Cannot store JSON representation of object type " + object.getClass().getName() + ": " + object + " (maxlength = " + MAX_LENGTH + ")");
