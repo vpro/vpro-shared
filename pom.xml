@@ -99,9 +99,8 @@
     <guava.version>19.0</guava.version>
     <javassist.version>3.18.2-GA</javassist.version>
     <wss4j.version>2.1.4</wss4j.version>
-    <httpcomponents.version>4.3.6</httpcomponents.version>
-    <!-- resteasy doesn't support bigger than this. See https://issues.jboss.org/browse/RESTEASY-975, and https://jira.vpro.nl/browse/MGNL-11312 -->
-    <httpcomponentscore.version>4.3.3</httpcomponentscore.version>
+    <httpcomponents.version>4.5.2</httpcomponents.version>
+    <httpcomponentscore.version>4.4.5</httpcomponentscore.version>
 
 
     <hibernate.version>5.0.11.Final</hibernate.version>
