@@ -111,6 +111,6 @@ public class JsonBridgeTest {
 
         JsonBridge bridge = new JsonBridge();
         String ret = bridge.objectToString(new String[] { buf.toString() });
-        Assert.assertEquals("{}", ret);
+        Assert.assertEquals("[]", ret);
     }
 }
