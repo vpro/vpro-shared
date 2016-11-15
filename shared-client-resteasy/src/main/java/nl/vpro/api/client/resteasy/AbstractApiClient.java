@@ -125,6 +125,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private List<Locale> acceptableLanguages = new ArrayList<>();
 
+    private MediaType mediaType;
+
     protected AbstractApiClient(
         String baseUrl,
         Duration connectionRequestTimeout,
@@ -133,7 +135,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         int maxConnections,
         Duration connectionInPoolTTL,
         Duration countWindow,
-        List<Locale> acceptableLanguages
+        List<Locale> acceptableLanguages,
+        MediaType mediaType
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -144,6 +147,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.baseUrl = baseUrl;
         this.countWindow = countWindow;
         this.acceptableLanguages = acceptableLanguages;
+        this.mediaType = mediaType;
         log.info("Created api client {} {}", getClass().getSimpleName(), baseUrl);
         registerBean();
     }
@@ -156,6 +160,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             maxConnections,
             Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL),
             Duration.ofMinutes(15),
+            null,
             null
         );
     }
@@ -196,6 +201,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public synchronized void setSocketTimeout(String socketTimeout) {
         this.socketTimeout = TimeUtils.parseDuration(socketTimeout).orElse(null);
         invalidate();
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(MediaType mediaType) {
+        this.mediaType = mediaType;
+        this.invalidate();
     }
 
     public void setTrustAll(boolean b) {
@@ -487,6 +501,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             new ResteasyClientBuilder()
                 .httpEngine(engine)
                 .register(JacksonContextResolver.class);
+        builder.register(new AcceptRequestFilter(mediaType));
+        builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
         buildResteasy(builder);
         return builder;
     }
@@ -530,7 +546,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private Map<String, Long> getCountMap() {
         return counter.entrySet()
             .stream()
-            .collect(Collectors.toMap(e -> this.methodToString(e.getKey()), e->  e.getValue().getCount()));
+            .collect(Collectors.toMap(e -> methodToString(e.getKey()), e->  e.getValue().getCount()));
     }
 
     @Override

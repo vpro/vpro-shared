@@ -5,10 +5,13 @@
 package nl.vpro.api.client.resteasy;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.HttpHeaders;
 
 
 /**
@@ -16,15 +19,23 @@ import javax.ws.rs.client.ClientRequestFilter;
  */
 public class AcceptLanguageRequestFilter implements ClientRequestFilter {
 
-    private final Locale locale;
+    private final List<Locale> locale;
 
-    public AcceptLanguageRequestFilter(Locale locale) {
+    public AcceptLanguageRequestFilter(List<Locale> locale) {
         this.locale = locale;
     }
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        requestContext.getAcceptableLanguages().add(locale);
+        List<Object> current = requestContext.getHeaders().get(HttpHeaders.ACCEPT_LANGUAGE);
+
+        List<String> localesAsString = locale.stream().map(Locale::toString).collect(Collectors.toList());
+        if (current != null) {
+            current.addAll(0, localesAsString);
+        } else {
+            requestContext.getHeaders().add(HttpHeaders.ACCEPT_LANGUAGE, localesAsString);
+
+        }
     }
 
 }
