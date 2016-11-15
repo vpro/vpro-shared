@@ -92,7 +92,7 @@
     <junit.version>4.12</junit.version>
     <mockito.version>1.9.5</mockito.version>
     <mycila.version>2.9.ga</mycila.version>
-    <resteasy.version>3.0.19.Final</resteasy.version>
+    <resteasy.version>3.1.0.CR3</resteasy.version>
     <slf4j.version>1.7.5</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <camel.version>2.17.0</camel.version>
