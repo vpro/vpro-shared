@@ -83,10 +83,10 @@ public class URLResource<T> {
 
     @Setter
     @Getter
-    private Duration connectTimeout = Duration.ofMillis(500);
+    private Duration connectTimeout = Duration.ofMillis(1000);
     @Setter
     @Getter
-    private Duration readTimeout = Duration.ofMillis(500);
+    private Duration readTimeout = Duration.ofMillis(5000);
 
 
     @SafeVarargs
@@ -197,7 +197,7 @@ public class URLResource<T> {
             try {
                 code = httpURLConnection.getResponseCode();
             } catch (SocketTimeoutException ste) {
-                LOG.warn(ste.getMessage());
+                LOG.warn("For {} (readTimeout: {}, connectTimeout: {}. {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
                 code = -1;
             }
         } else {
