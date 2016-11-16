@@ -30,14 +30,11 @@ public class SwaggerApplication extends Application {
         ParameterDeserializer.getInstance().addConverter(new InstantParamProcessor());
 */
     }
-    
+
 
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> set = new HashSet<>();
-        for(Object singleton : singletons) {
-            set.add(singleton.getClass());
-        }
         return set;
     }
 
