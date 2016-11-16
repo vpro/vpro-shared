@@ -1,8 +1,12 @@
 package nl.vpro.util;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URLConnection;
 import java.time.Duration;
@@ -53,6 +57,7 @@ public class URLResource<T> {
     private Instant lastLoad = null;
     private Integer code = null;
     private final URI url;
+
     private Instant lastModified = null;
     private Instant expires = null;
     private Duration maxAge = Duration.of(1, ChronoUnit.HOURS);
@@ -75,6 +80,13 @@ public class URLResource<T> {
 
     private ScheduledFuture<?> future = null;
     private Consumer<T>[] callbacks;
+
+    @Setter
+    @Getter
+    private Duration connectTimeout = Duration.ofMillis(500);
+    @Setter
+    @Getter
+    private Duration readTimeout = Duration.ofMillis(500);
 
 
     @SafeVarargs
@@ -177,7 +189,17 @@ public class URLResource<T> {
             }
         }
         if (httpUrl) {
-            code = ((HttpURLConnection) connection).getResponseCode();
+            HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
+            httpURLConnection.setConnectTimeout((int) connectTimeout.toMillis());
+            httpURLConnection.setReadTimeout((int) readTimeout.toMillis());
+            httpURLConnection.setInstanceFollowRedirects(true);
+
+            try {
+                code = httpURLConnection.getResponseCode();
+            } catch (SocketTimeoutException ste) {
+                LOG.warn(ste.getMessage());
+                code = -1;
+            }
         } else {
             code = SC_OK;
         }
@@ -319,6 +341,8 @@ public class URLResource<T> {
         this.errorCache = errorCache;
         return this;
     }
+
+
 
     @SafeVarargs
     public final URLResource<T> setCallbacks(Consumer<T>... callbacks) {
