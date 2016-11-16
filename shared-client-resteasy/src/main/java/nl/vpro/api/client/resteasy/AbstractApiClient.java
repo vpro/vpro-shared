@@ -136,7 +136,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectionInPoolTTL,
         Duration countWindow,
         List<Locale> acceptableLanguages,
-        MediaType mediaType
+        MediaType mediaType,
+        Boolean trustAll
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -148,6 +149,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.countWindow = countWindow;
         this.acceptableLanguages = acceptableLanguages;
         this.mediaType = mediaType;
+        if (trustAll != null) {
+            setTrustAll(trustAll);
+        }
         log.info("Created api client {} {}", getClass().getSimpleName(), baseUrl);
         registerBean();
     }
@@ -161,7 +165,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL),
             Duration.ofMinutes(15),
             null,
-            null
+            null,
+            false
         );
     }
 
