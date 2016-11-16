@@ -136,7 +136,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectionInPoolTTL,
         Duration countWindow,
         List<Locale> acceptableLanguages,
-        MediaType mediaType,
+        MediaType accept,
         Boolean trustAll
         ) {
 
@@ -148,11 +148,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.baseUrl = baseUrl;
         this.countWindow = countWindow;
         this.acceptableLanguages = acceptableLanguages;
-        this.mediaType = mediaType;
+        this.mediaType = accept;
         if (trustAll != null) {
             setTrustAll(trustAll);
         }
-        log.info("Created api client {} {}", getClass().getSimpleName(), baseUrl);
         registerBean();
     }
 
@@ -208,11 +207,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         invalidate();
     }
 
-    public MediaType getMediaType() {
+    public MediaType getAccept() {
         return mediaType;
     }
 
-    public void setMediaType(MediaType mediaType) {
+    public void setAccept(MediaType mediaType) {
         this.mediaType = mediaType;
         this.invalidate();
     }
@@ -446,7 +445,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 new Class[]{restEasyService, service},
                 new LeaveDefaultsProxyHandler(resteasy));
         }
-
+        log.info("Created api client {}/{} {} ({})", getClass().getSimpleName(), service.getSimpleName(), baseUrl, mediaType);
         return proxyErrorsAndCount(service, proxy, errorClass);
     }
 
