@@ -197,7 +197,7 @@ public class URLResource<T> {
             try {
                 code = httpURLConnection.getResponseCode();
             } catch (SocketTimeoutException ste) {
-                LOG.warn("For {} (readTimeout: {}, connectTimeout: {}. {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
+                LOG.warn("For {} (readTimeout: {}, connectTimeout: {}): {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
                 code = -1;
             }
         } else {
