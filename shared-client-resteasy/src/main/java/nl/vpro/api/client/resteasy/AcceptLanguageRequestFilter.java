@@ -33,7 +33,7 @@ public class AcceptLanguageRequestFilter implements ClientRequestFilter {
             if (current != null) {
                 current.addAll(0, localesAsString);
             } else {
-                requestContext.getHeaders().add(HttpHeaders.ACCEPT_LANGUAGE, localesAsString);
+                requestContext.getHeaders().addAll(HttpHeaders.ACCEPT_LANGUAGE, localesAsString);
 
             }
         }
