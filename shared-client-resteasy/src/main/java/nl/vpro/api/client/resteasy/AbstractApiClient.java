@@ -170,7 +170,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
 
-    protected synchronized void invalidate() {
+    public synchronized void invalidate() {
         this.clientHttpEngine = null;
     }
 
