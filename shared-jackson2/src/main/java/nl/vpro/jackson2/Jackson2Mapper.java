@@ -4,6 +4,8 @@
  */
 package nl.vpro.jackson2;
 
+import lombok.extern.slf4j.Slf4j;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
@@ -11,7 +13,6 @@ import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Rico
@@ -72,7 +73,7 @@ public class Jackson2Mapper extends ObjectMapper {
             registerModule(new SerializeAvroModule());
         } catch (NoClassDefFoundError ncdfe) {
             if (! loggedAboutAvro) {
-                log.info("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
+                log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
             }
             loggedAboutAvro = true;
         }
