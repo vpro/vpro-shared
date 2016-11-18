@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,8 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.LocaleUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -20,10 +20,8 @@ import com.google.common.collect.Maps;
  * @author Michiel Meeuwissen
  * @since 0.40
  */
+@Slf4j
 public class ReflectionUtils {
-
-
-    private static Logger LOG = LoggerFactory.getLogger(ReflectionUtils.class);
 
     public static Function<String, String> SETTER = k -> "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
     public static Function<String, String> IDENTITY = k -> k;
@@ -71,7 +69,7 @@ public class ReflectionUtils {
 
     public static <T> T  configured(Env env, T instance, Map<String, String> properties, Collection<Function<String, String>> setterName) {
         Map<String, String> filtered = filtered(env, null, properties);
-        LOG.debug("Configuring with {}", filtered);
+        log.debug("Configuring with {}", filtered);
         filtered.forEach((k, v) -> ReflectionUtils.setProperty(instance,
             setterName.stream().map(f -> f.apply(String.valueOf(k))).collect(Collectors.toList()), v));
         return instance;
@@ -96,9 +94,9 @@ public class ReflectionUtils {
                 Method objectMethod = builder.getClass().getMethod("build");
                 return (T) objectMethod.invoke(builder);
             }
-            LOG.debug("No static builder method found");
+            log.debug("No static builder method found");
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            LOG.debug("Canot build with builder because ", e);
+            log.debug("Canot build with builder because ", e);
         }
         try {
             Constructor<T> constructor = clazz.getConstructor();
@@ -107,7 +105,7 @@ public class ReflectionUtils {
             configured(env, object, properties);
             return object;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -129,7 +127,7 @@ public class ReflectionUtils {
             Map<String, String> properties = getProperties(configfiles);
             return configured(getEnv(properties), clazz, properties);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -141,16 +139,16 @@ public class ReflectionUtils {
             if (configFile.startsWith("classpath:")) {
                 InputStream in = ReflectionUtils.class.getResourceAsStream(configFile.substring("classpath:".length()));
                 if (in != null) {
-                    LOG.info("Reading properties from classpath {}", configFile);
+                    log.info("Reading properties from classpath {}", configFile);
                     properties.load(in);
                     continue;
                 }
             }
             File file = new File(configFile);
             if (!file.canRead()) {
-                LOG.info("The file {} cannot be read", file);
+                log.info("The file {} cannot be read", file);
             } else {
-                LOG.info("Reading properties from {}", file);
+                log.info("Reading properties from {}", file);
                 properties.load(new FileInputStream(file));
             }
         }
@@ -168,7 +166,7 @@ public class ReflectionUtils {
             }
         }
         final Env env = e;
-        LOG.info("Configuring {} in {}", prefix, e);
+        log.debug("Filtering{}for {}", prefix == null ? "" : prefix + " ", e);
         Map<String, String> result = new HashMap<>();
         properties.forEach((key, value) -> {
             String[] split = key.split("\\.", 3);
@@ -215,17 +213,17 @@ public class ReflectionUtils {
                 try {
                     parameterClass = m.getParameters()[0];
                     m.invoke(instance, convert(v, parameterClass));
-                    LOG.debug("Set {} from config file", m.getName());
+                    log.debug("Set {} from config file", m.getName());
                     return true;
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    LOG.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
         if (parameterClass != null) {
-            LOG.warn("Unrecognized parameter type " + parameterClass);
+            log.warn("Unrecognized parameter type " + parameterClass);
         }
-        LOG.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
+        log.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
         return false;
     }
 
