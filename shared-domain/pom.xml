@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>vpro-shared-parent</artifactId>
-    <version>1.58-SNAPSHOT</version>
+    <version>1.58.0</version>
   </parent>
   <artifactId>vpro-shared-domain</artifactId>
 
