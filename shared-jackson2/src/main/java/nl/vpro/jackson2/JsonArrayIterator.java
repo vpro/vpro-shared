@@ -192,6 +192,15 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     }
 
+    @Override
+    public void finalize() {
+        if (! callBackHasRun && callback != null) {
+            log.warn("Callback not run in finalize. Did you not close the iterator?");
+            callback.run();
+
+        }
+    }
+
     protected void callback() {
         if (! callBackHasRun) {
             if (callback != null) {
