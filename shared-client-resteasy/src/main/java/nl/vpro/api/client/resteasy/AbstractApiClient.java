@@ -264,7 +264,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return getHttpClient42(
             connectionRequestTimeout,
             connectTimeout,
-            connectTimeout,
+            socketTimeout,
             maxConnections,
             connectionInPoolTTL);
     }
