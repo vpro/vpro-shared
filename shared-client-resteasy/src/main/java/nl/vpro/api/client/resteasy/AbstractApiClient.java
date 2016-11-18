@@ -361,9 +361,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
         if (connectTimeout != null && connectTimeout.toMillis() > 0) {
             HttpConnectionParams.setConnectionTimeout(httpParams, (int) connectTimeout.toMillis());
+        } else {
+            // infinite connection timeout.
+            HttpConnectionParams.setConnectionTimeout(httpParams, 0);
         }
         if (socketTimeout != null && socketTimeout.toMillis() > 0) {
             HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
+        } else {
+            HttpConnectionParams.setSoTimeout(httpParams, 0);
+
         }
 
         if (trustAll) {
