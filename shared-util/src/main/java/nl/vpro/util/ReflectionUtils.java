@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -253,6 +254,8 @@ public class ReflectionUtils {
             return Double.valueOf(o);
         } else if (parameterClass.isAssignableFrom(Locale.class)) {
             return LocaleUtils.toLocale(o);
+        } else if (parameterClass.isAssignableFrom(Duration.class)) {
+            return TimeUtils.parseDuration(o).orElse(null);
         } else if (parameterClass.isAssignableFrom(List.class)) {
             ParameterizedType parameterizedType = (ParameterizedType) parameterType;
             return Arrays.stream(o.split("\\s*,\\s*"))
