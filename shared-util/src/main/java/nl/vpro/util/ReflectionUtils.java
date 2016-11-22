@@ -252,10 +252,14 @@ public class ReflectionUtils {
             return Float.valueOf(o);
         } else if (double.class.equals(parameterClass) || parameterClass.isAssignableFrom(Double.class)) {
             return Double.valueOf(o);
+        } else if (Enum.class.isAssignableFrom(parameterClass)) {
+            return Enum.valueOf((Class<? extends Enum>) parameterClass, o);
         } else if (parameterClass.isAssignableFrom(Locale.class)) {
             return LocaleUtils.toLocale(o);
         } else if (parameterClass.isAssignableFrom(Duration.class)) {
             return TimeUtils.parseDuration(o).orElse(null);
+        } else if (Enum.class.isAssignableFrom(parameterClass)) {
+            return Enum.valueOf((Class<? extends Enum>) parameterClass, o);
         } else if (parameterClass.isAssignableFrom(List.class)) {
             ParameterizedType parameterizedType = (ParameterizedType) parameterType;
             return Arrays.stream(o.split("\\s*,\\s*"))

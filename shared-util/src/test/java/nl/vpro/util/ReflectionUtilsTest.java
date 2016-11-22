@@ -3,6 +3,7 @@ package nl.vpro.util;
 import lombok.Builder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -18,13 +19,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ReflectionUtilsTest {
 
+
+    public enum E {
+        e,
+        f;
+    }
+
     public static class AWithLombok {
         private String a = "A";
         private Integer b;
+        private List<E> enums;
         @Builder
-        public AWithLombok(String a, Integer b) {
+        public AWithLombok(String a, Integer b, List<E> enums) {
             this.a = a;
             this.b = b;
+            this.enums = enums;
         }
 
     }
@@ -46,6 +55,7 @@ public class ReflectionUtilsTest {
     }
 
 
+
     Map<String, String> properties;
 
     @Before
@@ -57,12 +67,14 @@ public class ReflectionUtilsTest {
         properties.put("b.test", "1");
         properties.put("b.prod", "2");
         properties.put("c", "1");
+        properties.put("enums", "e,f");
     }
     @Test
     public void testFilteredANull() {
         assertThat(ReflectionUtils.filtered(null, properties).get("a")).isEqualTo("1");
         assertThat(ReflectionUtils.filtered(null, properties).get("a.test")).isNull();
         assertThat(ReflectionUtils.filtered(null, properties).get("a.prod")).isNull();
+
     }
 
     @Test
@@ -142,6 +154,7 @@ public class ReflectionUtilsTest {
         AWithLombok a = ReflectionUtils.configured(Env.PROD, AWithLombok.class, properties);
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
+        assertThat(a.enums).containsExactly(E.e, E.f);
     }
 
 
