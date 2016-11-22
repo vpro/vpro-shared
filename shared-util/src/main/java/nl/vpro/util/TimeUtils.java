@@ -2,6 +2,7 @@ package nl.vpro.util;
 
 import java.time.*;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -98,8 +99,17 @@ public class TimeUtils {
         }
     }
 
-    public static Optional<Duration> durationOfMillis(Integer i) {
+    public static Optional<Duration> durationOf(Integer i) {
         return Optional.ofNullable(i == null ? null : Duration.ofMillis(i));
+    }
+
+
+    public static Optional<Duration> durationOf(Date i) {
+        return Optional.ofNullable(i == null ? null : Duration.ofMillis(i.getTime()));
+    }
+
+    public static Date asDate(Duration duration) {
+        return duration == null ? null : new Date(duration.toMillis());
     }
 
 
