@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.SortedNumericDocValuesField;
+import org.apache.lucene.document.NumericDocValuesField;
 import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
 import org.hibernate.search.bridge.MetadataProvidingFieldBridge;
@@ -45,7 +45,7 @@ public class CollectionSizeBridge<T> implements FieldBridge, MetadataProvidingFi
             name = field;
         }
         luceneOptions.addNumericFieldToDocument(name, longValue, document);
-        document.add(new SortedNumericDocValuesField(name, longValue));
+        document.add(new NumericDocValuesField(name, longValue));
     }
 
 
