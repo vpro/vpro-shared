@@ -145,7 +145,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.socketTimeout = socketTimeout;
         this.maxConnections = maxConnections;
         this.connectionInPoolTTL = connectionInPoolTTL;
-        this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl == null ? null : (baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1): baseUrl);
         this.countWindow = countWindow;
         this.acceptableLanguages = acceptableLanguages;
         this.mediaType = accept;
