@@ -39,7 +39,9 @@ public class ObjectFilterTest {
 
         List<A> col = new ArrayList<>(Arrays.asList(a1, a2));
 
-        List<A> clone = ObjectFilter.filter(col, (o) -> true).get();
+        ObjectFilter.Result<List<A>> result = ObjectFilter.filter(col, (o) -> true);
+        assertThat(result.filterCount()).isEqualTo(1);
+        List<A> clone = result.get();
         assertThat(clone.get(0).field1).isEqualTo("aa");
         assertThat(clone.get(0).field2.field).isEqualTo("b");
         assertThat(clone.get(0).field2.parent.field1).isEqualTo("aa");
