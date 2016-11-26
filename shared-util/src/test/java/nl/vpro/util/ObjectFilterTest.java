@@ -17,6 +17,7 @@ public class ObjectFilterTest {
     public static class A {
         private String field1 = "a";
         private B field2 = new B(this);
+        private List<String> list = new ArrayList<>();
 
     }
 
@@ -36,15 +37,19 @@ public class ObjectFilterTest {
         a1.field1 = "aa";
         A a2 = new A();
         a2.field2.field = "c";
+        a1.list.addAll(Arrays.asList("a", "aa", "aaa"));
 
         List<A> col = new ArrayList<>(Arrays.asList(a1, a2));
 
-        ObjectFilter.Result<List<A>> result = ObjectFilter.filter(col, (o) -> true);
+        ObjectFilter.Result<List<A>> result = ObjectFilter.filter(col,
+            (o) -> (! (o instanceof String)) || ((String) o).length() <= 2);
         assertThat(result.filterCount()).isEqualTo(1);
         List<A> clone = result.get();
         assertThat(clone.get(0).field1).isEqualTo("aa");
         assertThat(clone.get(0).field2.field).isEqualTo("b");
         assertThat(clone.get(0).field2.parent.field1).isEqualTo("aa");
+        assertThat(clone.get(0).list).containsExactly("a", "aa");
+
         assertThat(clone.get(1).field1).isEqualTo("a");
         assertThat(clone.get(1).field2.field).isEqualTo("c");
     }
