@@ -70,7 +70,7 @@ public class JAXBTestUtil {
         return writer.toString();
     }
 
-    public static <T> T unmarshal(String xml, Class<T> clazz) {
+    public static <T> T unmarshal(String xml, Class<? extends T> clazz) {
         return JAXB.unmarshal(new StringReader(xml), clazz);
     }
 
@@ -106,7 +106,8 @@ public class JAXBTestUtil {
         try {
             xml = marshal(input);
             similar(xml, expected);
-            T result = (T) JAXB.unmarshal(new StringReader(xml), input.getClass());
+            Class<? extends T> clazz = (Class<? extends T>) input.getClass();
+            T result = unmarshal(xml, clazz);
             /// make sure unmarshalling worked too, by marshalling the result again.
             String xmlAfter = marshal(result);
             similar(xmlAfter, xml);
