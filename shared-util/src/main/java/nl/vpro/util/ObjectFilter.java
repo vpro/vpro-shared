@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -11,6 +13,7 @@ import java.util.function.Supplier;
  * @author Michiel Meeuwissen
  * @since 1.59
  */
+@Slf4j
 public class ObjectFilter {
 
     public static class Result<T> {
@@ -30,15 +33,15 @@ public class ObjectFilter {
         }
     }
 
-
     public static <T> Result<T> filter(T object, Predicate<Object> predicate) {
         AtomicInteger count = new AtomicInteger(0);
         T v = _filter(object, predicate, new HashMap<>(), count);
         return new Result<>(v, count.get());
     }
 
+
     @SuppressWarnings("unchecked")
-    protected static <T> Collection<T> filterCollection(
+    private static <T> Collection<T> filterCollection(
         Collection<T> object,
         Supplier<Collection> constructor,
         Predicate<Object> predicate,
@@ -58,13 +61,18 @@ public class ObjectFilter {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T _filter(final T object, final Predicate<Object> predicate, final Map<Integer, Object> objects, AtomicInteger filterCount)  {
+    private static <T> T _filter(
+        final T object, final Predicate<Object> predicate,
+        final Map<Integer, Object> objects,
+        AtomicInteger filterCount)  {
         if (object == null) {
             return null;
         } else if (object instanceof List) {
             return (T) filterCollection((List) object, ArrayList::new, predicate, objects, filterCount);
+        } else if (object instanceof SortedSet) {
+            return (T) filterCollection((SortedSet) object, TreeSet::new, predicate, objects, filterCount);
         } else if (object instanceof Set) {
-            return (T) filterCollection((Set) object, TreeSet::new, predicate, objects, filterCount);
+            return (T) filterCollection((Set) object, HashSet::new, predicate, objects, filterCount);
         } else if (object instanceof CharSequence) {
             return object;
         } else if (object instanceof Number) {
@@ -81,10 +89,11 @@ public class ObjectFilter {
                     T copy = clazz.newInstance();
                     objects.put(hash, copy);
                     for (Field f : listAllFields(clazz)) {
-                        if (Modifier.isStatic(f.getModifiers())) {
+                        int modifiers = f.getModifiers();
+                        if (Modifier.isStatic(modifiers)) {
                             continue;
                         }
-                        if (Modifier.isTransient(f.getModifiers())) {
+                        if (Modifier.isTransient(modifiers)) {
                             continue;
                         }
                         f.setAccessible(true);
@@ -94,7 +103,9 @@ public class ObjectFilter {
 
                     return copy;
                 } catch (IllegalAccessException | InstantiationException e) {
-                    throw new RuntimeException(e);
+                    log.warn(e.getMessage());
+                    objects.put(hash, object);
+                    return object;
                 }
             } else {
                 return (T) objects.get(hash);
@@ -103,7 +114,7 @@ public class ObjectFilter {
         }
     }
 
-    protected static List<Field> listAllFields(Class clazz) {
+    private static List<Field> listAllFields(Class clazz) {
         List<Field> fieldList = new ArrayList<>();
         Class tmpClass = clazz;
         while (tmpClass != null) {
