@@ -3,6 +3,7 @@ package nl.vpro.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -12,21 +13,44 @@ import java.util.function.Supplier;
  */
 public class ObjectFilter {
 
-    /**
-     * Filters a PublishableObject. Removes all subobject which dont' have a correct workflow.
-     *
-     * @TODO work in progres. This may replace the hibernate filter solution now in place (but probably broken right now MSE-3526 ?)
-     */
-    public static <T> T filter(T object, Predicate<Object> predicate) {
-        return _filter(object, predicate, new HashMap<>());
+    public static class Result<T> {
+        final T value;
+        final int filtered;
+
+        public Result(T value, int filtered) {
+            this.value = value;
+            this.filtered = filtered;
+        }
+
+        public T get() {
+            return value;
+        }
+        public int filterCount() {
+            return filtered;
+        }
+    }
+
+
+    public static <T> Result<T> filter(T object, Predicate<Object> predicate) {
+        AtomicInteger count = new AtomicInteger(0);
+        T v = _filter(object, predicate, new HashMap<>(), count);
+        return new Result<>(v, count.get());
     }
 
     @SuppressWarnings("unchecked")
-    protected static <T> Collection<T> filterCollection(Collection<T> object, Supplier<Collection> constructor, Predicate<Object> predicate, Map<Integer, Object> objects) {
+    protected static <T> Collection<T> filterCollection(
+        Collection<T> object,
+        Supplier<Collection> constructor,
+        Predicate<Object> predicate,
+        Map<Integer, Object> objects,
+        AtomicInteger filterCount
+    ) {
         Collection<T> copyOfList = constructor.get();
         for (T o : object) {
             if (predicate.test(o)) {
-                copyOfList.add(_filter(o, predicate, objects));
+                copyOfList.add(_filter(o, predicate, objects, filterCount));
+            } else {
+                filterCount.incrementAndGet();
             }
         }
         return copyOfList;
@@ -34,13 +58,13 @@ public class ObjectFilter {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T _filter(final T object, final Predicate<Object> predicate, final Map<Integer, Object> objects)  {
+    public static <T> T _filter(final T object, final Predicate<Object> predicate, final Map<Integer, Object> objects, AtomicInteger filterCount)  {
         if (object == null) {
             return null;
         } else if (object instanceof List) {
-            return (T) filterCollection((List) object, ArrayList::new, predicate, objects);
+            return (T) filterCollection((List) object, ArrayList::new, predicate, objects, filterCount);
         } else if (object instanceof Set) {
-            return (T) filterCollection((Set) object, TreeSet::new, predicate, objects);
+            return (T) filterCollection((Set) object, TreeSet::new, predicate, objects, filterCount);
         } else if (object instanceof CharSequence) {
             return object;
         } else if (object instanceof Number) {
@@ -64,7 +88,7 @@ public class ObjectFilter {
                             continue;
                         }
                         f.setAccessible(true);
-                        Object cloned = _filter(f.get(object), predicate, objects);
+                        Object cloned = _filter(f.get(object), predicate, objects, filterCount);
                         f.set(copy, cloned);
                     }
 
