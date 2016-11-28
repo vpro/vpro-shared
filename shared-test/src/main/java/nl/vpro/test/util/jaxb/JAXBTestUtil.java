@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import javax.xml.transform.stream.StreamSource;
 
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
@@ -34,6 +35,7 @@ public class JAXBTestUtil {
 
     static {
         XMLUnit.setIgnoreWhitespace(true);
+        XMLUnit.setIgnoreAttributeOrder(true);
 
     }
 
@@ -218,6 +220,11 @@ public class JAXBTestUtil {
                 throw new IllegalStateException("No similation was done already.");
             }
             return assertThat(rounded);
+        }
+
+        public S isValid (javax.xml.validation.Validator validator) throws SAXException, IOException {
+            validator.validate(new StreamSource(new StringReader(marshal(rounded))));
+            return myself;
         }
 
         public A get() {
