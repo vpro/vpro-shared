@@ -24,13 +24,6 @@ import javax.ws.rs.core.Application;
 public class SwaggerApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
 
-    {
-      /*  this.addDeserializer(Parameter.class, new InstantParamProcessor());
-
-        ParameterDeserializer.getInstance().addConverter(new InstantParamProcessor());
-*/
-    }
-
 
     @Override
     public Set<Class<?>> getClasses() {
