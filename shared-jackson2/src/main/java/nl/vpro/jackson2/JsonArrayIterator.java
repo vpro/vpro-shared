@@ -173,17 +173,23 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
-                    callback();
-                    next = null;
-                    needsFindNext = false;
-                    hasNext = false;
-                    throw new RuntimeException(e);
+                    callbackBeforeThrow(new RuntimeException(e));
+                } catch (RuntimeException rte) {
+                    callbackBeforeThrow(rte);
                 }
             }
             needsFindNext = false;
         }
     }
 
+
+    private void callbackBeforeThrow(RuntimeException e) {
+        callback();
+        next = null;
+        needsFindNext = false;
+        hasNext = false;
+        throw e;
+    }
 
     @Override
     public void close() throws IOException {
