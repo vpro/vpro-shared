@@ -4,8 +4,6 @@
  */
 package nl.vpro.swagger;
 
-import io.swagger.annotations.ApiModel;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +18,6 @@ import javax.ws.rs.core.Application;
  * @author Roelof Jan Koekoek
  * @since 2.0
  */
-@ApiModel
 public class SwaggerApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
 
