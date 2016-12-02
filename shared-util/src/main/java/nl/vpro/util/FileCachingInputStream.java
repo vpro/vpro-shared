@@ -1,16 +1,14 @@
 package nl.vpro.util;
 
 import lombok.Builder;
-import lombok.Singular;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
@@ -47,7 +45,7 @@ public class FileCachingInputStream extends InputStream {
         long batchSize,
         Integer outputBuffer,
         Logger logger,
-        @Singular("") List<OpenOption> openOptions,
+        List<OpenOption> openOptions,
         Integer initialBuffer,
         Boolean startImmediately
     ) throws IOException {
@@ -117,11 +115,8 @@ public class FileCachingInputStream extends InputStream {
             copier.execute();
         }
 
-        // https://github.com/rzwitserloot/lombok/issues/1071 ?
         if (openOptions == null) {
             openOptions = new ArrayList<>();
-        }
-        if (openOptions.isEmpty()) {
             openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
         }
         this.file = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
