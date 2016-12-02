@@ -1,12 +1,12 @@
 package nl.vpro.util;
 
-import java.io.*;
-import java.time.Duration;
-import java.time.Instant;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,7 +62,7 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void testReadLargeBuffer() throws IOException {
-      
+
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -80,14 +80,13 @@ public class FileCachingInputStreamTest {
         assertThat(out.toByteArray()).containsExactly(in);
     }
 
-	@Test
-	public void test() throws IOException {
+    @Test
+    public void test() throws IOException {
         try (
-            FileCachingInputStream inputStream  = FileCachingInputStream.builder()
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
                 .input(new ByteArrayInputStream(in))
-                .clearOpenOptions()
                 .initialBuffer(4)
                 .startImmediately(true)
                 .build();) {
@@ -98,7 +97,7 @@ public class FileCachingInputStreamTest {
 
             assertThat(out.toByteArray()).containsExactly(in);
         }
-	}
+    }
 
     @Test
     public void testNoAutostart() throws IOException {
@@ -107,7 +106,6 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .input(new ByteArrayInputStream(in))
-                .clearOpenOptions()
                 .initialBuffer(4)
                 .startImmediately(false)
                 .build();) {
@@ -129,7 +127,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(in))
                 .initialBuffer(2048)
                 .build();) {
-            
+
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -139,11 +137,11 @@ public class FileCachingInputStreamTest {
         }
     }
 
-	@Test
+    @Test
     @Ignore
     public void performance() throws IOException {
         Instant now = Instant.now();
-        try(
+        try (
             FileCachingInputStream inputStream = FileCachingInputStream
                 .builder()
                 .input(new BufferedInputStream(new FileInputStream(new File("/tmp/pageupdates.json"))))
@@ -152,6 +150,27 @@ public class FileCachingInputStreamTest {
             OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
         ) {
             IOUtils.copyLarge(inputStream, out);
+            System.out.println("Duration " + Duration.between(now, Instant.now()));
+        }
+
+
+    }
+
+    @Test
+    @Ignore
+    public void verify() throws IOException {
+        Instant now = Instant.now();
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream
+                .builder()
+                .input(new DelayedInputStream(new BufferedInputStream(new FileInputStream(new File("/tmp/changes.json"))), 50L))
+                .batchSize(1000000000L)
+                .build();
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
+        ) {
+            IOUtils.copyLarge(inputStream, out);
+            out.close();
+            assertThat(IOUtils.contentEquals(new FileInputStream(new File("/tmp/changes.json")), new FileInputStream(new File("/tmp/copy.json")))).isTrue();
             System.out.println("Duration " + Duration.between(now, Instant.now()));
         }
 
