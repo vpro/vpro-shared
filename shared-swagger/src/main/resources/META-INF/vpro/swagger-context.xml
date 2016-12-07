@@ -11,12 +11,8 @@
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
 
   <bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
-    <property name="servletClass">
-      <value>io.swagger.jaxrs.config.DefaultJaxrsConfig</value>
-    </property>
-    <property name="servletName">
-      <value>SwaggerConfig</value>
-    </property>
+    <property name="servletClass" value="io.swagger.jaxrs.config.DefaultJaxrsConfig"/>
+    <property name="servletName" value="SwaggerConfig"/>
     <property name="initParameters">
       <props>
         <prop key="api.version">${api.version}</prop>
@@ -28,7 +24,9 @@
 
  <!-- Swagger Providers -->
  <!-- <bean class="nl.vpro.swagger.model.SwaggerReaderListener" />-->
+  <!--
   <bean class="io.swagger.jaxrs.listing.SwaggerSerializers"/>
+  -->
   <bean class="io.swagger.jaxrs.listing.ApiListingResource"/>
   <bean class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource" />
 </beans>
