@@ -24,8 +24,6 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer {
 
     private Map<String, String> logMap = new HashMap<>();
 
-    private Map<String, String> copyMap = new HashMap<>();
-
 
     private String[] systemProperties;
 
@@ -56,10 +54,6 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer {
 
     public void setLog(Map<String, String> map) {
         this.logMap = map;
-    }
-
-    public void setCopy(Map<String, String> map) {
-        this.copyMap = map;
     }
 
     @Override
@@ -116,5 +110,10 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer {
                 }
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "PropertiesUtil " + propertiesMap.keySet();
     }
 }
