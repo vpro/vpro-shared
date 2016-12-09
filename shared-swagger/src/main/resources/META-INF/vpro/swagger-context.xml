@@ -4,30 +4,5 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
-
-
-
-  <bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
-    <property name="servletClass" value="io.swagger.jaxrs.config.DefaultJaxrsConfig"/>
-    <property name="servletName" value="SwaggerConfig"/>
-    <property name="initParameters">
-      <props>
-        <prop key="api.version">${api.version}</prop>
-        <prop key="swagger.api.basepath">${api.basePath}</prop>
-        <prop key="scan.all.resources">true</prop>
-      </props>
-    </property>
-  </bean>
-
-
-
-  <!-- Swagger Providers -->
- <!-- <bean class="nl.vpro.swagger.model.SwaggerReaderListener" />-->
-  <!--
-  <bean class="io.swagger.jaxrs.listing.SwaggerSerializers"/>
-  -->
-  <!--
-  <bean class="io.swagger.jaxrs.listing.ApiListingResource"/>
-  -->
   <bean class="nl.vpro.swagger.SwaggerListingResource" />
 </beans>
