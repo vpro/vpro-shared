@@ -3,12 +3,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <!--
-  <bean class="io.swagger.jaxrs.listing.ApiListingResourceJSON"/>
-
-  -->
-
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
+
+
 
   <bean id="swaggerConfigWrapper" class="org.springframework.web.servlet.mvc.ServletWrappingController">
     <property name="servletClass" value="io.swagger.jaxrs.config.DefaultJaxrsConfig"/>
@@ -22,11 +19,15 @@
     </property>
   </bean>
 
- <!-- Swagger Providers -->
+
+
+  <!-- Swagger Providers -->
  <!-- <bean class="nl.vpro.swagger.model.SwaggerReaderListener" />-->
   <!--
   <bean class="io.swagger.jaxrs.listing.SwaggerSerializers"/>
   -->
+  <!--
   <bean class="io.swagger.jaxrs.listing.ApiListingResource"/>
-  <bean class="io.swagger.jaxrs.listing.AcceptHeaderApiListingResource" />
+  -->
+  <bean class="nl.vpro.swagger.SwaggerListingResource" />
 </beans>
