@@ -58,23 +58,29 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     }
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
-        this(inputStream, (jp, tree) -> {
-            try {
-                return jp.getCodec().treeToValue(tree, clazz);
-            } catch (JsonProcessingException e) {
-                throw new ValueReadException(e);
-            }
-        }, callback, null, null);
+        this(inputStream, null, clazz, callback, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null);
     }
+
+
+    // TODO Lombok/Intellij and generic suck: https://github.com/mplushnikov/lombok-intellij-plugin/issues/127
     @Builder
-    @ConstructorProperties({"inputStream", "valueCreator",  "callback", "sizeField", "totalSizeField"})
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode,  T> valueCreator, Runnable callback, String sizeField, String totalSizeField) throws IOException {
+    @ConstructorProperties({"inputStream", "valueCreator", "valueClass",  "callback", "sizeField", "totalSizeField"})
+    public JsonArrayIterator(
+        InputStream inputStream,
+        final BiFunction<JsonParser, TreeNode,  T> valueCreator,
+        final Class<T> valueClass,
+        Runnable callback,
+        String sizeField,
+        String totalSizeField) throws IOException {
         this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
-        this.valueCreator = valueCreator;
+        this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
+        if (valueCreator != null && valueClass != null) {
+            throw new IllegalArgumentException();
+        }
         Long tmpSize = null;
         Long tmpTotalSize = null;
         String fieldName = null;
@@ -101,6 +107,17 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         this.totalSize = tmpTotalSize;
         jp.nextToken();
         this.callback = callback;
+    }
+
+    private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
+        return (jp, tree) -> {
+            try {
+                return jp.getCodec().treeToValue(tree, clazz);
+            } catch (JsonProcessingException e) {
+                throw new ValueReadException(e);
+            }
+        };
+
     }
 
     public void setLogger(Logger log) {
