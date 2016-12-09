@@ -31,6 +31,12 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
             .withLocale(Locale.US)
             .withZone(ZONE);
 
+    private final DateTimeFormatter formatterNoMillis =
+        DateTimeFormatter
+            .ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
+            .withLocale(Locale.US)
+            .withZone(ZONE);
+
 
 
     @Override
@@ -40,6 +46,13 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
 
     @Override
     public String marshal(Instant value) {
-        return value != null ? formatter.format(value) : null;
+        if (value == null) {
+            return null;
+        }
+        if (value.getNano() == 0) {
+            return formatterNoMillis.format(value);
+        } else {
+            return formatter.format(value);
+        }
     }
 }
