@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -81,6 +82,8 @@ public class ObjectFilter {
             return object;
         } else if (object instanceof Boolean) {
             return object;
+        } else if (object instanceof Instant) {
+            return object;
         } else {
             int hash = object.hashCode();
             if (!objects.containsKey(hash)) {
@@ -103,7 +106,7 @@ public class ObjectFilter {
 
                     return copy;
                 } catch (IllegalAccessException | InstantiationException e) {
-                    log.warn(e.getMessage());
+                    log.warn(e.getClass().getName() + " " + e.getMessage());
                     objects.put(hash, object);
                     return object;
                 }
