@@ -83,8 +83,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>4.2.6.RELEASE</spring.version>
-    <spring-security.version>4.1.0.RELEASE</spring-security.version>
+    <spring.version>4.3.4.RELEASE</spring.version>
+    <spring-security.version>4.2.0.RELEASE</spring-security.version>
 
     <elasticsearch.version>1.1.0</elasticsearch.version><!-- tied to server version -->
     <jackson2.version>2.8.4</jackson2.version>    <!-- equals to poms-parent -->
