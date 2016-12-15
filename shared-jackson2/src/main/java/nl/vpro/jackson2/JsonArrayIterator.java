@@ -92,6 +92,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         }
         while(true) {
             JsonToken token = jp.nextToken();
+            if (token == null) {
+                break;
+            }
             if (token == JsonToken.FIELD_NAME) {
                 fieldName = jp.getCurrentName();
             }
