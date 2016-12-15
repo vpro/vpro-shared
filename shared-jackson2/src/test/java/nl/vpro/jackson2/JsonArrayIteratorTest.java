@@ -1,12 +1,13 @@
 package nl.vpro.jackson2;
 
-import org.junit.Test;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -65,6 +66,14 @@ public class JsonArrayIteratorTest {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/incomplete_changes.json"), Change.class);
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> { while (it.hasNext()) it.next(); });
+        assertThat(it.hasNext()).isFalse();
+    }
+
+
+    @Test
+    public void testZeroBytes() throws IOException {
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream(new byte[0]), Change.class);
+
         assertThat(it.hasNext()).isFalse();
     }
 
