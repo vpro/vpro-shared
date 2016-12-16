@@ -136,6 +136,9 @@ public class JoinClusterClientFactory implements ESClientFactory {
         return unicastHosts;
     }
 
+    /**
+     * The hosts to connect to via unicast. If empty, then multicast is used.
+     */
     public void setUnicastHosts(String unicastHosts) {
         reset();
         this.unicastHosts = unicastHosts;
