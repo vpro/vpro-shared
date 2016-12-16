@@ -14,15 +14,26 @@ public class JoinClusterClientFactoryTest {
 
     int port = 9202;
     //String clusterName = "elasticsearch_acceptatie";
-    String clusterName = "poms10aas";
+    //String clusterName = "poms10aas";
+    String clusterName = "elasticsearch";
 
     @Test
-    public void join() {
+    public void joinUnicast() {
         JoinClusterClientFactory factory = new JoinClusterClientFactory();
         factory.setClusterName(clusterName);
         factory.setUnicastHosts("localhost[" + port + "]");
-        Client client = factory.client("test");
+        Client client = factory.client("media");
         System.out.println(client.prepareCount("test").get().getCount());
+    }
+
+
+    @Test
+    public void joinMulticast() {
+        JoinClusterClientFactory factory = new JoinClusterClientFactory();
+        factory.setClusterName(clusterName);
+        factory.setUnicastHosts("");
+        Client client = factory.client("media");
+        System.out.println(client.prepareCount("media").get().getCount());
     }
 
 
