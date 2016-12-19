@@ -13,11 +13,10 @@ import com.google.common.base.Joiner;
  */
 public class ConstraintViolations {
 
-    public static  String humanReadable(Iterable<?> violations) {
+    public static  String humanReadable(Iterable<ConstraintViolation<?>> violations) {
         StringBuilder builder = new StringBuilder();
         List<String> propsWithHtml = new ArrayList<>();
-        for (Object o : violations) {
-            ConstraintViolation violation = (ConstraintViolation) o;
+        for (ConstraintViolation<?> violation : violations) {
             if (violation.getConstraintDescriptor().getAnnotation().annotationType().isAssignableFrom(NoHtml.class)) {
                 String prop = violation.getPropertyPath().toString();
                 if (! propsWithHtml.contains(prop)) { // e.g. sometimes several descriptions have the same error.
