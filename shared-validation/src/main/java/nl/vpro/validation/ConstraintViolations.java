@@ -13,7 +13,7 @@ import com.google.common.base.Joiner;
  */
 public class ConstraintViolations {
 
-    public static  String humanReadable(Iterable violations) {
+    public static  String humanReadable(Iterable<?> violations) {
         StringBuilder builder = new StringBuilder();
         List<String> propsWithHtml = new ArrayList<>();
         for (Object o : violations) {
