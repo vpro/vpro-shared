@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.slf4j.LoggerFactory;
@@ -27,15 +29,30 @@ public interface CommandExecutor {
      */
     int execute(String... args);
 
-    default Future<Integer> submit(String... args) {
-        return ThreadPools.copyExecutor.submit(() -> execute(args));
+    default Future<Integer> submit(Consumer<Integer> callback, String... args) {
+        return ThreadPools.copyExecutor.submit(() -> {
+            Integer result = null;
+            try {
+                result = execute(args);
+                return result;
+            } finally {
+                if (callback != null) {
+                    callback.accept(result);
+                }
+            }
+        });
     }
+
+    default Future<Integer> submit(String... args) {
+        return submit(null, args);
+    }
+
 
     /**
      * Executes the command
      *
      * @param out Stdout of the command will be written to this.
-     * @param error Stderr of the comman will be written to this. To log errors use {@link nl.vpro.logging.LoggerOutputStream#error(org.slf4j.Logger)}
+     * @param error Stderr of the command will be written to this. To log errors use {@link nl.vpro.logging.LoggerOutputStream#error(org.slf4j.Logger)}
      * @param args The command and its arguments to be executed on the remote server
      * @return The exit code
      */
@@ -61,9 +78,28 @@ public interface CommandExecutor {
     int execute(InputStream in, OutputStream out, OutputStream error, String... args);
 
 
-    default Future<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
-        return ThreadPools.copyExecutor.submit(() -> execute(in, out, error, args));
+    default Future<Integer> submit(InputStream in, OutputStream out, OutputStream error, Consumer<Integer> callback, String... args) {
+        return ThreadPools.copyExecutor.submit(() -> {
+            Integer result = null;
+            try {
+                result = execute(in, out, error, args);
+                return result;
+            } finally {
+                if (callback != null) {
+                    callback.accept(result);
+                }
+            }
+        });
     }
 
+    default Future<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
+        return submit(in, out, error, null, args);
+    }
+    
+    Stream<String> lines(InputStream in, OutputStream errors, String... args);
+
+    default Stream<String> lines(String... args) {
+        return lines(null, LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+    }
 
 }

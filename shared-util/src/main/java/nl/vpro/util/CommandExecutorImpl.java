@@ -1,11 +1,12 @@
 package nl.vpro.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.*;
+import java.util.*;
+import java.util.stream.Stream;
+
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +19,8 @@ import nl.vpro.logging.LoggerOutputStream;
   * @author Michiel Meeuwissen
  * @since 1.6
  */
+@Slf4j
 public class CommandExecutorImpl implements CommandExecutor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CommandExecutorImpl.class);
 
     private final String binary;
 
@@ -65,7 +65,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         Process p;
         try {
             Collections.addAll(command, args);
-            LOG.info(toString(command));
+            log.info(toString(command));
             p = pb.start();
 
             final ProcessTimeoutHandle handle;
@@ -89,7 +89,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             errorCopier.waitFor();
             int result = p.exitValue();
             if (result != 0) {
-                LOG.error("Error {} occurred while calling {}", result, command);
+                log.error("Error {} occurred while calling {}", result, command);
             }
             if (out != null) {
                 out.flush();
@@ -102,8 +102,31 @@ public class CommandExecutorImpl implements CommandExecutor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Stream<String> lines(InputStream in, OutputStream errors, String... args) {
+        try {
+            PipedInputStream reader = new PipedInputStream();
+            PipedOutputStream writer = new PipedOutputStream(reader);
+
+            BufferedReader result = new BufferedReader(new InputStreamReader(reader));
+            submit(in, writer, errors, (i) -> {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (IOException iae) {
+                    
+                }
+            },  args);
+            return result.lines();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+            
         }
     }
 
@@ -176,7 +199,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 monitoredProcess.exitValue();
             } catch (IllegalThreadStateException itse) {
                 // wasn't terminated, kill it
-                LOG.warn("The process {} took too long, killing it.", command);
+                log.warn("The process {} took too long, killing it.", command);
                 monitoredProcess.destroy();
             }
         }
