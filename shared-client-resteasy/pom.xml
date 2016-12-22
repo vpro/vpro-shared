@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>1.60.2</version>
+    <version>1.60.3-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-client-resteasy</artifactId>
   <dependencies>
