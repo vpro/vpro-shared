@@ -163,7 +163,7 @@ public class FileCachingInputStreamTest {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream
                 .builder()
-                .input(new DelayedInputStream(new BufferedInputStream(new FileInputStream(new File("/tmp/changes.json"))), 50L))
+                .input(new DelayedInputStream(new BufferedInputStream(new FileInputStream(new File("/tmp/changes.json"))), Duration.ofMillis(50)))
                 .batchSize(1000000000L)
                 .build();
             OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))

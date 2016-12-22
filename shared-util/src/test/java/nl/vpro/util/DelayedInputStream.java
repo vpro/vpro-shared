@@ -6,19 +6,19 @@ package nl.vpro.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 
 /**
  * @author rico
- * @date 05/10/2016
  */
 public class DelayedInputStream extends InputStream {
-    InputStream source;
+    private final InputStream source;
 
-    long delay;
+    private final long delay;
 
-    public DelayedInputStream(InputStream source, long delay) {
+    public DelayedInputStream(InputStream source, Duration delay) {
         this.source = source;
-        this.delay = delay;
+        this.delay = delay.toMillis();
     }
 
     @Override
