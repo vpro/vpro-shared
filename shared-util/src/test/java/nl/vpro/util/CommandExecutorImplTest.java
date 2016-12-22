@@ -30,7 +30,7 @@ public class CommandExecutorImplTest {
     @Test
     public void lines() {
         CommandExecutorImpl instance = new CommandExecutorImpl("/usr/bin/env");
-        instance.lines("ps").forEach(System.out::println);
+        instance.lines("find",".").forEach(System.out::println);
     }
 
 }
