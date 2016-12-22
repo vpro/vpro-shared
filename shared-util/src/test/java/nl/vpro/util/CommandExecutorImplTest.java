@@ -27,6 +27,10 @@ public class CommandExecutorImplTest {
         Logger logger = new CommandExecutorImpl("/usr/bin/env").getLogger();
         assertEquals(CommandExecutorImpl.class.getName() + ".env.bin.usr", logger.getName());
     }
-
+    @Test
+    public void lines() {
+        CommandExecutorImpl instance = new CommandExecutorImpl("/usr/bin/env");
+        instance.lines("find",".").forEach(System.out::println);
+    }
 
 }
