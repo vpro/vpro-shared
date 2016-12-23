@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
@@ -33,23 +30,15 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
@@ -69,9 +58,8 @@ import nl.vpro.util.XTrustProvider;
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
-@Slf4j()
+@Slf4j
 public abstract class AbstractApiClient implements AbstractApiClientMXBean {
-
 
     private static Thread connectionGuardThread;
     private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
@@ -80,8 +68,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         try {
             ResteasyProviderFactory resteasyProviderFactory = ResteasyProviderFactory.getInstance();
             try {
-
-
                 if (! resteasyProviderFactory.isRegistered(JacksonContextResolver.class)) {
                     JacksonContextResolver jacksonContextResolver = new JacksonContextResolver();
                     resteasyProviderFactory.registerProviderInstance(jacksonContextResolver);
@@ -95,22 +81,18 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             //resteasyProviderFactory.addClientErrorInterceptor(new NpoApiClientErrorInterceptor());
             //resteasyProviderFactory.addClientExceptionMapper(new ExceptionMapper());
 
-
             RegisterBuiltin.register(resteasyProviderFactory);
         } catch (Throwable t) {
             log.error(t.getClass().getName() + " " + t.getMessage());
         }
-
     }
-
 
     protected final String baseUrl;
 
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private List<PoolingHttpClientConnectionManager> connectionManagers43 = new ArrayList<>();
-    private List<ClientConnectionManager > connectionManagers42 = new ArrayList<>();
+    private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
     private boolean shutdown = false;
     private boolean trustAll = false;
 
@@ -168,7 +150,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             false
         );
     }
-
 
     public synchronized void invalidate() {
         this.clientHttpEngine = null;
@@ -244,7 +225,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
     }
 
-
     protected ObjectName getObjectName() {
         try {
             return new ObjectName("nl.vpro.api.client:type=" + getClass().getSimpleName());
@@ -254,26 +234,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
     }
 
-
-    private  HttpClient getHttpClient(
-        Duration connectionRequestTimeout,
-        Duration connectTimeout,
-        Duration socketTimeout,
-        int maxConnections,
-        Duration connectionInPoolTTL) {
-        return getHttpClient42(
-            connectionRequestTimeout,
-            connectTimeout,
-            socketTimeout,
-            maxConnections,
-            connectionInPoolTTL);
-    }
-
-    // See https://issues.jboss.org/browse/RESTEASY-975
-    // You _must_ use httpclient 4.2.1 syntax.  Otherwise timeout settings will simply not work
-    // See also https://jira.vpro.nl/browse/MGNL-11312
-    // This code can be used when this will be fixed in resteasy.
-    private HttpClient getHttpClient43(
+    private HttpClient getHttpClient(
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
@@ -297,10 +258,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             }
         }
 
-
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setExpectContinueEnabled(true)
-            .setStaleConnectionCheckEnabled(false)
             .setMaxRedirects(100)
             .setConnectionRequestTimeout(connectionRequestTimeout == null ? 0 : (int) connectionRequestTimeout.toMillis())
             .setConnectTimeout(connectTimeout == null ? 0 : (int) connectTimeout.toMillis())
@@ -310,14 +269,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         List<Header> defaultHeaders = new ArrayList<>();
         defaultHeaders.add(new BasicHeader("Keep-Alive", "timeout=1000, max=500"));
 
-
         HttpClientBuilder client = HttpClients.custom()
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
-            .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy())
-
-
-        ;
+            .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
 
         if (connectionManager != null){
             client.setConnectionManager(connectionManager);
@@ -325,62 +280,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
         if (trustAll){
             try {
-                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-                    client.setSSLSocketFactory(sslsf);
+                SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(SSLContext.getDefault(), NoopHostnameVerifier.INSTANCE);
+                client.setSSLSocketFactory(sslsf);
             } catch (NoSuchAlgorithmException e) {
                 log.error(e.getMessage(), e);
             }
         }
         return client.build();
-    }
-
-
-    // should be used as long as resteasy uses http client < 4.3
-    private HttpClient getHttpClient42(
-        Duration connectionRequestTimeout,
-        Duration connectTimeout,
-        Duration socketTimeout,
-        int maxConnections,
-        Duration connectionInPoolTTL) {
-        PoolingClientConnectionManager poolingClientConnectionManager ;
-        if (connectionInPoolTTL != null) {
-            poolingClientConnectionManager =
-                new PoolingClientConnectionManager(
-                    SchemeRegistryFactory.createDefault(),
-                    connectionInPoolTTL.toMillis(),
-                    TimeUnit.MILLISECONDS);
-            if (maxConnections > 1 && connectionInPoolTTL.toMillis() > 0) {
-                watchIdleConnections(poolingClientConnectionManager);
-            }
-        } else {
-            poolingClientConnectionManager = new PoolingClientConnectionManager();
-        }
-
-        HttpParams httpParams = new BasicHttpParams();
-
-        if (connectTimeout != null && connectTimeout.toMillis() > 0) {
-            HttpConnectionParams.setConnectionTimeout(httpParams, (int) connectTimeout.toMillis());
-        } else {
-            // infinite connection timeout.
-            HttpConnectionParams.setConnectionTimeout(httpParams, 0);
-        }
-        if (socketTimeout != null && socketTimeout.toMillis() > 0) {
-            HttpConnectionParams.setSoTimeout(httpParams, (int) socketTimeout.toMillis());
-        } else {
-            HttpConnectionParams.setSoTimeout(httpParams, 0);
-
-        }
-
-        if (trustAll) {
-            try {
-                SSLSocketFactory sslsf = new SSLSocketFactory((chain, authType) -> true, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-                poolingClientConnectionManager.getSchemeRegistry().register(new Scheme("https", 443, sslsf));
-            } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-        return new DefaultHttpClient(poolingClientConnectionManager, httpParams);
     }
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
@@ -399,9 +305,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             );
         }
         return clientHttpEngineNoTimeout;
-
     }
-
 
     public int getMaxConnections() {
         return maxConnections;
@@ -471,10 +375,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy, errorClass);
     }
 
-
     protected <T> T proxyCounter(Class<T> service, T proxy) {
         return CountAspect.proxyCounter(counter, countWindow, getObjectName(), service, proxy);
-
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
@@ -489,7 +391,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected <T, S> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<S> restEasyInterface, Class<?> errorClass) {
         return build(engine, service, restEasyInterface, errorClass);
     }
-
 
     protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
         return buildWithErrorClass(engine, service, null, errorClass);
@@ -516,18 +417,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         buildResteasy(builder);
         return builder;
     }
-    protected abstract void buildResteasy(ResteasyClientBuilder builder);
 
+    protected abstract void buildResteasy(ResteasyClientBuilder builder);
 
     protected final ResteasyWebTarget getTarget(ClientHttpEngine engine) {
         return resteasyClientBuilder(engine).build().target(baseUrl);
     }
 
-
     protected String getInfo() {
         return getBaseUrl() + "/";
     }
-
 
     public final String getBaseUrl() {
         return baseUrl;
@@ -556,7 +455,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private Map<String, Long> getCountMap() {
         return counter.entrySet()
             .stream()
-            .collect(Collectors.toMap(e -> methodToString(e.getKey()), e->  e.getValue().getCount()));
+            .collect(Collectors.toMap(e -> methodToString(e.getKey()), e -> e.getValue().getCount()));
     }
 
     @Override
@@ -577,10 +476,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public void shutdown() {
         if(!shutdown) {
             shutdown = true;
-            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers43) {
-                unwatchIdleConnections(connectionManager);
-            }
-            for (ClientConnectionManager connectionManager : connectionManagers42) {
+            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
                 unwatchIdleConnections(connectionManager);
             }
         }
@@ -628,8 +524,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private synchronized void watchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         log.debug("Watching idle connections in {}", connectionManager);
-        GUARD.connectionManagers43.add(connectionManager);
-        connectionManagers43.add(connectionManager);
+        GUARD.connectionManagers.add(connectionManager);
+        connectionManagers.add(connectionManager);
         if (connectionGuardThread == null) {
             GUARD.start();
             connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
@@ -637,30 +533,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
     }
 
-    private synchronized void watchIdleConnections(PoolingClientConnectionManager connectionManager) {
-        log.debug("Watching idle connections in {}", connectionManager);
-        GUARD.connectionManagers42.add(connectionManager);
-        connectionManagers42.add(connectionManager);
-        if (connectionGuardThread == null) {
-            GUARD.start();
-            connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
-            connectionGuardThread.start();
-        }
-    }
     private synchronized void unwatchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         log.debug("Unwatching idle connections in {}", connectionManager);
-        GUARD.connectionManagers43.remove(connectionManager);
-        if (GUARD.connectionManagers42.isEmpty() && GUARD.connectionManagers43.isEmpty()) {
-            connectionGuardThread.interrupt();
-            GUARD.shutdown();
-            connectionGuardThread = null;
-        }
-    }
-
-    private synchronized void unwatchIdleConnections(ClientConnectionManager connectionManager) {
-        log.debug("Unwatching idle connections in {}", connectionManager);
-        GUARD.connectionManagers42.remove(connectionManager);
-        if (GUARD.connectionManagers42.isEmpty() && GUARD.connectionManagers43.isEmpty()) {
+        GUARD.connectionManagers.remove(connectionManager);
+        if (GUARD.connectionManagers.isEmpty()) {
             connectionGuardThread.interrupt();
             GUARD.shutdown();
             connectionGuardThread = null;
@@ -670,9 +546,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
-        private List<HttpClientConnectionManager> connectionManagers43 = new ArrayList<>();
-        private List<ClientConnectionManager> connectionManagers42 = new ArrayList<>();
-
+        private List<HttpClientConnectionManager> connectionManagers = new ArrayList<>();
 
         void shutdown() {
             shutdown = true;
@@ -684,19 +558,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         void start() {
             shutdown = false;
         }
+
         @Override
         public void run() {
             while (!shutdown) {
                 try {
                     synchronized (this) {
                         wait(5000);
-                        for (HttpClientConnectionManager connectionManager : connectionManagers43) {
+                        for (HttpClientConnectionManager connectionManager : connectionManagers) {
                             connectionManager.closeExpiredConnections();
                         }
-                        for (ClientConnectionManager connectionManager : connectionManagers42) {
-                            connectionManager.closeExpiredConnections();
-                        }
-                        //connectionManager.closeIdleConnections(connectionTimeoutMillis, TimeUnit.MILLISECONDS);
                     }
                 } catch (InterruptedException ignored) {
                     log.debug(ignored.getMessage());
