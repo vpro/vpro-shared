@@ -3,7 +3,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>1.61-SNAPSHOT</version>
+  <version>1.62-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>shared-parent</name>
@@ -76,9 +76,9 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/branches/REL-1.61-SNAPSHOT</connection>
-    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/branches/REL-1.61-SNAPSHOT</developerConnection>
-    <url>https://subversion.vpro.nl/viewvc/nl/vpro/shared/branches/REL-1.61-SNAPSHOT</url>
+    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/trunk</connection>
+    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/shared/trunk</developerConnection>
+    <url>https://subversion.vpro.nl/viewvc/nl/vpro/shared/trunk</url>
   </scm>
 
   <properties>
