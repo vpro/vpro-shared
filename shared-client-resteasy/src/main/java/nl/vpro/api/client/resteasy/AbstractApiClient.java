@@ -101,6 +101,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     Duration socketTimeout;
 
     private int maxConnections;
+    private int maxConnectionsPerRoute;
     Duration connectionInPoolTTL;
     protected final Map<Method, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofMillis(15);
@@ -115,6 +116,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectTimeout,
         Duration socketTimeout,
         int maxConnections,
+        int maxConnectionsPerRoute,
         Duration connectionInPoolTTL,
         Duration countWindow,
         List<Locale> acceptableLanguages,
@@ -126,6 +128,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.connectTimeout = connectTimeout;
         this.socketTimeout = socketTimeout;
         this.maxConnections = maxConnections;
+        this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.baseUrl = baseUrl == null ? null : (baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1): baseUrl);
         this.countWindow = countWindow;
@@ -137,12 +140,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         registerBean();
     }
 
-    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, Integer connectionInPoolTTL) {
+    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(baseUrl,
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
+            maxConnectionsPerRoute,
             Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL),
             Duration.ofMinutes(15),
             null,
@@ -239,6 +243,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectTimeout,
         Duration socketTimeout,
         int maxConnections,
+        int maxConnectionsPerRoute,
         Duration connectionInPoolTTL) {
         SocketConfig socketConfig = SocketConfig.custom()
             .setTcpNoDelay(true)
@@ -249,8 +254,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         PoolingHttpClientConnectionManager connectionManager = null;
         if (connectionInPoolTTL != null) {
             connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
-            connectionManager.setDefaultMaxPerRoute(maxConnections);
             connectionManager.setMaxTotal(maxConnections);
+            connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
             connectionManager.setDefaultSocketConfig(socketConfig);
 
             if (maxConnections > 1) {
@@ -292,7 +297,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
             clientHttpEngine = new ApacheHttpClient4Engine(
-                getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, connectionInPoolTTL)
+                getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL)
             );
         }
         return clientHttpEngine;
@@ -301,7 +306,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
             clientHttpEngineNoTimeout = new ApacheHttpClient4Engine(
-                getHttpClient(connectionRequestTimeout, connectTimeout, null, 3, null)
+                getHttpClient(connectionRequestTimeout, connectTimeout, null, 3, 3, null)
             );
         }
         return clientHttpEngineNoTimeout;
@@ -313,6 +318,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     public void setMaxConnections(int maxConnections) {
         this.maxConnections = maxConnections;
+        invalidate();
+    }
+
+    public int getMaxConnectionsPerRoute() {
+        return maxConnectionsPerRoute;
+    }
+
+    public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
+        this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         invalidate();
     }
 
