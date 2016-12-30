@@ -6,7 +6,7 @@
   <version>1.62-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>shared-parent</name>
+  <name>vpro-shared-parent</name>
 
   <build>
     <defaultGoal>install</defaultGoal>
@@ -50,29 +50,29 @@
   </build>
 
   <modules>
-    <module>shared-configuration</module>
-    <module>shared-camel</module>
-    <module>shared-domain</module>
-    <module>shared-elasticsearch</module>
-    <module>shared-integration</module>
-    <module>shared-jackson2</module>
-    <module>shared-newrelic</module>
-    <module>shared-services</module>
-    <module>shared-swagger</module>
-    <module>shared-web</module>
-    <module>shared-ws</module>
-    <module>shared-rs</module>
-    <module>shared-util</module>
-    <module>shared-resteasy</module>
-    <module>shared-client-resteasy</module>
-    <module>shared-test</module>
-    <module>shared-transfer</module>
-    <module>shared-xml</module>
-    <module>shared-logging</module>
-    <module>shared-hibernate</module>
-    <module>shared-persistence</module>
-    <module>shared-validation</module>
-    <module>shared-ektorp</module>
+    <module>vpro-shared-camel</module>
+    <module>vpro-shared-client-resteasy</module>
+    <module>vpro-shared-configuration</module>
+    <module>vpro-shared-domain</module>
+    <module>vpro-shared-ektorp</module>
+    <module>vpro-shared-elasticsearch</module>
+    <module>vpro-shared-hibernate</module>
+    <module>vpro-shared-integration</module>
+    <module>vpro-shared-jackson2</module>
+    <module>vpro-shared-logging</module>
+    <module>vpro-shared-newrelic</module>
+    <module>vpro-shared-persistence</module>
+    <module>vpro-shared-resteasy</module>
+    <module>vpro-shared-rs</module>
+    <module>vpro-shared-services</module>
+    <module>vpro-shared-swagger</module>
+    <module>vpro-shared-test</module>
+    <module>vpro-shared-transfer</module>
+    <module>vpro-shared-util</module>
+    <module>vpro-shared-validation</module>
+    <module>vpro-shared-web</module>
+    <module>vpro-shared-ws</module>
+    <module>vpro-shared-xml</module>
   </modules>
 
   <scm>
