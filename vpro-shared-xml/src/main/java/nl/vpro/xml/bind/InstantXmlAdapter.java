@@ -23,6 +23,8 @@ import nl.vpro.util.TimeUtils;
  */
 public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
 
+    public static final ThreadLocal<Boolean> OMIT_MILLIS_IF_ZERO = ThreadLocal.withInitial(() -> true);
+
     public static ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
 
     private final DateTimeFormatter formatter =
@@ -49,7 +51,7 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
         if (value == null) {
             return null;
         }
-        if (value.getNano() == 0) {
+        if (value.getNano() == 0 && OMIT_MILLIS_IF_ZERO.get()) {
             return formatterNoMillis.format(value);
         } else {
             return formatter.format(value);
