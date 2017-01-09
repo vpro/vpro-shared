@@ -19,31 +19,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class InstantXmlAdapterTest {
 
     private Instant in;
-    private String out;
+    private String xml;
+    private String xmlomitisfalse;
     private boolean marshal;
 
     InstantXmlAdapter instance = new InstantXmlAdapter();
 
     static Object[][] CASES = {
         // Instant                   XML-value
-        {"2016-01-20T10:48:09.954Z", "2016-01-20T11:48:09.954+01:00", true},
-        {"2016-01-20T10:48:00.000Z", "2016-01-20T11:48:00+01:00", true},
-        {"2016-01-20T10:59:00.733Z", "1453287540733", false},
-        {"2016-01-19T23:00:00Z", "2016-01-20", false},
-        {"2016-01-19T23:00:00Z", "2016-01-20T00:00:00", false}
+        {"2016-01-20T10:48:09.954Z", "2016-01-20T11:48:09.954+01:00", null, true},
+        {"2016-01-20T10:48:00.000Z", "2016-01-20T11:48:00+01:00", "2016-01-20T11:48:00.000+01:00", true},
+        {"2016-01-20T10:59:00.733Z", "1453287540733", null, false},
+        {"2016-01-19T23:00:00Z", "2016-01-20", null, false},
+        {"2016-01-19T23:00:00Z", "2016-01-20T00:00:00", null, false}
     };
 
 
     public InstantXmlAdapterTest(String in,
-                                 String out,
+                                 String xml,
+                                 String xml2,
                                  boolean marshal) {
         this.in = Instant.parse(in);
-        this.out = out;
+        this.xml = xml;
+        if (xml2 == null) {
+            xmlomitisfalse = xml;
+        } else {
+            xmlomitisfalse = xml2;
+        }
         this.marshal = marshal;
     }
 
     @Parameterized.Parameters
-    public static Collection primeNumbers() {
+    public static Collection parameters() {
         return Arrays.asList(CASES);
     }
 
@@ -51,12 +58,16 @@ public class InstantXmlAdapterTest {
     @Test
     public void testMarshal() {
         Assume.assumeTrue(marshal);
-        assertThat(instance.marshal(in)).isEqualTo(out);
+        InstantXmlAdapter.OMIT_MILLIS_IF_ZERO.remove();
+        assertThat(instance.marshal(in)).isEqualTo(xml);
+        InstantXmlAdapter.OMIT_MILLIS_IF_ZERO.set(false);
+        assertThat(instance.marshal(in)).isEqualTo(xmlomitisfalse);
 
     }
     @Test
     public void testUnmarshal() {
-        assertThat(instance.unmarshal(out)).isEqualTo(in);
+        assertThat(instance.unmarshal(xml)).isEqualTo(in);
+        assertThat(instance.unmarshal(xmlomitisfalse)).isEqualTo(in);
     }
 
 }
