@@ -126,7 +126,11 @@ public class ErrorAspect<T> implements InvocationHandler {
         StringBuilder mes = new StringBuilder();
         try {
             Response response = we.getResponse();
-            response.bufferEntity();
+            try {
+                response.bufferEntity();
+            } catch (IllegalStateException ise) {
+                log.debug(ise.getMessage());
+            }
 
             if (errorClass != null) {
                 try {
@@ -155,7 +159,7 @@ public class ErrorAspect<T> implements InvocationHandler {
                 }
             }
         } catch (Exception e) {
-            log.warn(e.getClass() + " " + e.getMessage());
+            log.warn(we + ": " + e.getClass() + " " + e.getMessage());
             mes.append(we.getMessage());
         }
 
