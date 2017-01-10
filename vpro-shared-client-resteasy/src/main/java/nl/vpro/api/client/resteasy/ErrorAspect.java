@@ -136,11 +136,11 @@ public class ErrorAspect<T> implements InvocationHandler {
                 try {
                     Object error = response.readEntity(errorClass);
                     mes.append(error.toString());
-                } catch(Exception e) {
+                } catch (Exception e) {
                     // ignore and marshal to string
                 }
             }
-            switch(we.getResponse().getStatus()) {
+            switch (we.getResponse().getStatus()) {
                 case HttpResponseCodes.SC_SERVICE_UNAVAILABLE:
                     mes.append(we.getMessage());
 
@@ -158,8 +158,11 @@ public class ErrorAspect<T> implements InvocationHandler {
                     mes.append(v.stream().map(Objects::toString).collect(joining(",")));
                 }
             }
+        } catch (IllegalStateException ise) {
+            log.warn(we + ": " + ise.getClass().getName() + " " + ise.getMessage(), ise);
+            mes.append(we.getMessage());
         } catch (Exception e) {
-            log.warn(we + ": " + e.getClass() + " " + e.getMessage());
+            log.warn(we + ": " + e.getClass().getName() + " " + e.getMessage());
             mes.append(we.getMessage());
         }
 
