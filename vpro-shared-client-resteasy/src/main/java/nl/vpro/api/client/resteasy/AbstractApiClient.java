@@ -291,7 +291,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 log.error(e.getMessage(), e);
             }
         }
-        return client.build();
+
+        HttpClient built  = client.build();
+
+        return built;
     }
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
@@ -414,6 +417,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     private <T> T buildResteasy(ClientHttpEngine engine, Class<T> service) {
+
         return getTarget(engine)
             .proxyBuilder(service)
             .defaultConsumes(MediaType.APPLICATION_XML)
@@ -435,7 +439,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected abstract void buildResteasy(ResteasyClientBuilder builder);
 
     protected final ResteasyWebTarget getTarget(ClientHttpEngine engine) {
-        return resteasyClientBuilder(engine).build().target(baseUrl);
+        return resteasyClientBuilder(engine)
+            .build()
+            .target(baseUrl);
     }
 
     protected String getInfo() {
