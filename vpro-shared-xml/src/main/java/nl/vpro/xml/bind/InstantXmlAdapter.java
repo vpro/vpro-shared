@@ -3,6 +3,7 @@ package nl.vpro.xml.bind;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -51,10 +52,13 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
         if (value == null) {
             return null;
         }
-        if (value.getNano() == 0 && OMIT_MILLIS_IF_ZERO.get()) {
+        if (value.getNano() < 500000  && OMIT_MILLIS_IF_ZERO.get()) {
             return formatterNoMillis.format(value);
         } else {
-            return formatter.format(value);
+            return formatter.format(
+                // round to millis
+                value.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS)
+            );
         }
     }
 }
