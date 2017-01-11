@@ -254,8 +254,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         PoolingHttpClientConnectionManager connectionManager = null;
         if (connectionInPoolTTL != null) {
             connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
-            connectionManager.setMaxTotal(maxConnections);
-            connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
+            if (maxConnections > 0) {
+                connectionManager.setMaxTotal(maxConnections);
+            }
+            if (maxConnectionsPerRoute > 0) {
+                connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
+            }
             connectionManager.setDefaultSocketConfig(socketConfig);
 
             if (maxConnections > 1) {
