@@ -78,7 +78,11 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             boolean newHasNext = i < hits.length;
             if (!newHasNext) {
                 if (response.getScrollId() != null) {
-                    response = client.prepareSearchScroll(response.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+                    response = client
+                        .prepareSearchScroll(response.getScrollId())
+                        .setScroll(new TimeValue(60000))
+                        .execute()
+                        .actionGet();
                     hits = response.getHits().getHits();
                     i = 0;
                     if (hits.length == 0) {
