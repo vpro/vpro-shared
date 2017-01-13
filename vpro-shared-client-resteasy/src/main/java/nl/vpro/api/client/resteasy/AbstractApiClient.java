@@ -155,6 +155,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         );
     }
 
+    protected AbstractApiClient(String baseUrl, Integer connectionTimeout) {
+        this(baseUrl, connectionTimeout, 0, 0, null);
+    }
+
     public synchronized void invalidate() {
         this.clientHttpEngine = null;
     }
