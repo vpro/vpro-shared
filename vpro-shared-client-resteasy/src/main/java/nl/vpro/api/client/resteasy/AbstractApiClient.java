@@ -147,7 +147,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
             maxConnectionsPerRoute,
-            Duration.ofMillis(connectionInPoolTTL == null ? -1 : connectionInPoolTTL),
+            connectionInPoolTTL == null ? null : Duration.ofMillis(connectionInPoolTTL),
             Duration.ofMinutes(15),
             null,
             null,
