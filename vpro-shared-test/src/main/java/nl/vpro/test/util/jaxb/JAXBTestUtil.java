@@ -244,7 +244,7 @@ public class JAXBTestUtil {
 
         public XMLStringAssert isSimilarTo(String expected) {
             try {
-                similar(expected, String.valueOf(actual));
+                similar(String.valueOf(actual), expected);
             } catch (SAXException | IOException e) {
                 Fail.fail(e.getMessage());
             }
