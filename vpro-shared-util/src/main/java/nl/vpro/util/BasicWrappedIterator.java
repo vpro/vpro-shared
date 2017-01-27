@@ -28,6 +28,10 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     }
 
 
+    public BasicWrappedIterator(Long totalSize, Iterator<T> wrapped) {
+        this(totalSize, totalSize, wrapped);
+    }
+
     public BasicWrappedIterator(Collection<T> wrapped) {
         super(wrapped.iterator());
         this.size = Optional.of((long) wrapped.size());
