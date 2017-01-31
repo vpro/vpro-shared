@@ -7,13 +7,9 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-swagger</artifactId>
   <packaging>war</packaging>
-
-  <name>shared-swagger</name>
-  <description>Provides a war overlay with basic Swagger resources. You have to set-up the web.xml wiring yourself.
-  </description>
+  <description>Provides a war overlay with basic Swagger resources. You have to set-up the web.xml wiring yourself.</description>
 
   <properties>
   </properties>

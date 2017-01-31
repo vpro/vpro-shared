@@ -6,13 +6,8 @@
     <artifactId>vpro-shared-parent</artifactId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
-  <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-integration</artifactId>
-
-  <name>shared-integration</name>
   <description>Module containing DAO classes to be shared among other integration modules</description>
-
   <dependencies>
     <dependency>
       <groupId>nl.vpro.shared</groupId>

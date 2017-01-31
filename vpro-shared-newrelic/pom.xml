@@ -7,11 +7,8 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-newrelic</artifactId>
-  <name>shared-newrelic</name>
-
-  <dependencies>
+   <dependencies>
     <dependency>
       <groupId>ext.newrelic</groupId>
       <artifactId>newrelic-plugin</artifactId>

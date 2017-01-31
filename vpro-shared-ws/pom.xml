@@ -7,12 +7,8 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-ws</artifactId>
-
-  <name>shared-ws</name>
   <description>Contains resources for webservices. This module does not provide any libraries.</description>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.wss4j</groupId>

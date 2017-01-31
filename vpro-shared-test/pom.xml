@@ -8,11 +8,8 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-test</artifactId>
   <packaging>jar</packaging>
-
-  <name>shared-test</name>
   <description>Contains some functionality required by JUnit tests (Mycila spring plugin, ...)</description>
 
   <properties>

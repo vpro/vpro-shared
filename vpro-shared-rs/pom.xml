@@ -7,11 +7,7 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-rs</artifactId>
-
-  <name>shared-rs</name>
-
   <dependencies>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
