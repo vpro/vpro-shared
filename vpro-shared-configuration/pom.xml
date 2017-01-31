@@ -8,9 +8,6 @@
     <version>1.63-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-configuration</artifactId>
-
-  <name>shared-configuration</name>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>

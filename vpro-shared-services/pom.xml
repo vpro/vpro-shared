@@ -6,9 +6,6 @@
     <artifactId>vpro-shared-parent</artifactId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-services</artifactId>
-
-  <name>shared-services</name>
   <description>This module contains service classes to be shared to be shared among other modules</description>
 </project>

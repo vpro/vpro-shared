@@ -7,12 +7,8 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-camel</artifactId>
-  <name>shared-camel</name>
-
   <dependencies>
-
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>

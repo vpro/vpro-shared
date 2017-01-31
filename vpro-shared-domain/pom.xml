@@ -7,10 +7,7 @@
     <version>1.63-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-domain</artifactId>
-
-  <name>shared-domain</name>
   <description>This module contains domain objects to be shared among other modules</description>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>

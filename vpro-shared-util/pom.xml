@@ -10,8 +10,6 @@
 
   <artifactId>vpro-shared-util</artifactId>
 
-  <name>shared-util</name>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

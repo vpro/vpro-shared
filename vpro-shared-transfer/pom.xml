@@ -7,10 +7,7 @@
     <groupId>nl.vpro.shared</groupId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-transfer</artifactId>
-
-  <name>shared-transfer</name>
   <description>This module contains the base definitions
     for object (DTO's) that are to be published to the world.
   </description>

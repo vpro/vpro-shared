@@ -6,12 +6,8 @@
     <artifactId>vpro-shared-parent</artifactId>
     <version>1.63-SNAPSHOT</version>
   </parent>
-
   <artifactId>vpro-shared-web</artifactId>
-
-  <name>shared-web</name>
   <description>This modules contains web utils and classes to be shared among other modules.</description>
-
   <dependencies>
     <dependency>
       <groupId>commons-lang</groupId>

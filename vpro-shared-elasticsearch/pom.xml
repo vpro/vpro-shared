@@ -32,5 +32,12 @@
       <artifactId>slf4j-log4j12</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${lucene.elasticsearch.version}</version>
+    </dependency>
+
   </dependencies>
 </project>
