@@ -18,7 +18,7 @@ import org.springframework.util.PropertyPlaceholderHelper;
  *
  * @author Michiel Meeuwissen
  */
-public class PropertiesUtil extends PropertyPlaceholderConfigurer {
+public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     private Map<String, String> propertiesMap;
 
