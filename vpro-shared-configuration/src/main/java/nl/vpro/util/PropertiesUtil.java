@@ -27,6 +27,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     private String[] systemProperties;
 
+    private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
+
     @Override
     protected void processProperties(ConfigurableListableBeanFactory beanFactory,
                                      Properties props) throws BeansException {
@@ -57,6 +59,13 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     }
 
     @Override
+    public void setSystemPropertiesMode(int systemPropertiesMode) {
+        super.setSystemPropertiesMode(systemPropertiesMode);
+        this.systemPropertiesMode = systemPropertiesMode;
+
+    }
+
+    @Override
     public void setLocations(Resource[] locations) {
 
         System.out.println("Configuring with");
@@ -78,7 +87,9 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     private void initMap(Properties props) {
 
         Properties p = new Properties();
-        p.putAll(System.getProperties());
+        if (this.systemPropertiesMode != SYSTEM_PROPERTIES_MODE_NEVER) {
+            p.putAll(System.getProperties());
+        }
         p.putAll(props);
 
         PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
