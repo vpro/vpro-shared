@@ -2,6 +2,7 @@ package nl.vpro.util;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,14 +22,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
  * @author Michiel Meeuwissen
  * @since 0.37
  */
+@Slf4j
 public class URLResource<T> {
 
 
@@ -50,9 +49,6 @@ public class URLResource<T> {
 
     private static final int SC_OK = 200;
     private static final int SC_NOT_MODIFIED = 304;
-
-
-    private static final Logger LOG = LoggerFactory.getLogger(URLResource.class);
 
     private Instant lastLoad = null;
     private Integer code = null;
@@ -123,7 +119,7 @@ public class URLResource<T> {
             return;
         }
         checkedCount++;
-        LOG.debug("Loading from {}", this.url);
+        log.debug("Loading from {}", this.url);
         try {
             if (this.url.getScheme().equals("classpath")) {
                 getCachedResource(this.url.toString().substring("classpath:".length() + 1));
@@ -134,10 +130,10 @@ public class URLResource<T> {
             }
         } catch (java.net.UnknownHostException uhe) {
             errorCount++;
-            LOG.warn(uhe.getClass().getName() + " " + uhe.getMessage());
+            log.warn(uhe.getClass().getName() + " " + uhe.getMessage());
         } catch (IOException e) {
             errorCount++;
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -151,10 +147,10 @@ public class URLResource<T> {
             if (result == null) {
                 lastLoad = Instant.now();
                 lastModified = Instant.now();
-                LOG.info("Loaded {} from {}", newResult, this.url);
+                log.info("Loaded {} from {}", newResult, this.url);
             } else {
                 if (!Objects.equals(result, newResult)) {
-                    LOG.info("Reloaded {} from {}", newResult, this.url);
+                    log.info("Reloaded {} from {}", newResult, this.url);
                     lastModified = Instant.now();
                     changesCount++;
                 }
@@ -164,7 +160,7 @@ public class URLResource<T> {
             result = newResult;
             callBack();
         } else {
-            LOG.warn("Loading from {} resulted null", this.url);
+            log.warn("Loading from {} resulted null", this.url);
         }
     }
 
@@ -176,7 +172,7 @@ public class URLResource<T> {
 
     void getCachedResource(URLConnection connection) throws IOException {
         if (result != null && expires != null && Instant.now().isBefore(expires)) {
-            LOG.debug("Not loading {} as it is not yet expired", url);
+            log.debug("Not loading {} as it is not yet expired", url);
             return;
         }
         boolean httpUrl = connection instanceof HttpURLConnection;
@@ -185,7 +181,7 @@ public class URLResource<T> {
             if (lastLoad == null || lastLoad.isAfter(Instant.now().minus(maxAge))) {
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
             } else {
-                LOG.debug("last load was pretty long ago, simply do a normal request");
+                log.debug("last load was pretty long ago, simply do a normal request");
             }
         }
         if (httpUrl) {
@@ -197,7 +193,7 @@ public class URLResource<T> {
             try {
                 code = httpURLConnection.getResponseCode();
             } catch (SocketTimeoutException ste) {
-                LOG.warn("For {} (readTimeout: {}, connectTimeout: {}): {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
+                log.warn("For {} (readTimeout: {}, connectTimeout: {}): {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
                 code = -1;
             }
         } else {
@@ -205,7 +201,7 @@ public class URLResource<T> {
         }
         switch (code) {
             case SC_NOT_MODIFIED:
-                LOG.debug("Not modified {}", url);
+                log.debug("Not modified {}", url);
                 notModifiedCount++;
                 break;
             case SC_OK:
@@ -226,25 +222,25 @@ public class URLResource<T> {
                                 if (ma.length == 2) {
                                     expires = Instant.now().plus(Duration.of(Integer.parseInt(ma[1]), ChronoUnit.SECONDS));
                                 } else {
-                                    LOG.warn("Could not parse " + s);
+                                    log.warn("Could not parse " + s);
                                 }
                             } catch (Exception e) {
-                                LOG.warn("Could not parse " + s + " " + e.getMessage());
+                                log.warn("Could not parse " + s + " " + e.getMessage());
                             }
                         }
                     }
                 }
                 Instant maxExpires = Instant.now().plus(maxAge);
                 if (expires != null && expires.isAfter(maxExpires)) {
-                    LOG.info("Found expiry {} for {} truncated to {}", expires, url, maxExpires);
+                    log.info("Found expiry {} for {} truncated to {}", expires, url, maxExpires);
                     expires = maxExpires;
                 }
                 T newResult = reader.apply(stream);
                 if (newResult != null) {
                     if (result == null) {
-                        LOG.info("Loaded {} -> {}", url, lastModified);
+                        log.info("Loaded {} -> {}", url, lastModified);
                     } else {
-                        LOG.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod, lastModified);
+                        log.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod, lastModified);
                     }
                     changesCount++;
                     result = newResult;
@@ -261,7 +257,7 @@ public class URLResource<T> {
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
-                LOG.warn(code + ":" + url + ": (caching until " + expires + ")");
+                log.warn(code + ":" + url + ": (caching until " + expires + ")");
 
 
         }
@@ -385,7 +381,7 @@ public class URLResource<T> {
                 try {
                     URLResource.this.getCachedResource();
                 } catch (Exception e) {
-                    LOG.error(e.getMessage());
+                    log.error(e.getMessage());
                 }
             }
         }
@@ -396,7 +392,7 @@ public class URLResource<T> {
         try {
             props.load(inputStream);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return props;
     };
@@ -407,7 +403,7 @@ public class URLResource<T> {
         try {
             props.load(inputStream);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return props.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()), (u, v) -> {
             throw new IllegalStateException(String.format("Duplicate key %s", u));
