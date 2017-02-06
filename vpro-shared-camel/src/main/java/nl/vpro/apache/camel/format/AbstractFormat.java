@@ -4,6 +4,9 @@
  */
 package nl.vpro.apache.camel.format;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spi.DataFormat;
@@ -20,6 +23,22 @@ public abstract class AbstractFormat {
         JaxbDataFormat jaxb = new JaxbDataFormat(contextPath);
         jaxb.setPrettyPrint(prettyPrint);
         return jaxb;
+    }
+
+
+    protected static DataFormat getJaxb(Class<?> clazz) {
+        return getJaxb(clazz, false);
+    }
+
+
+    protected static DataFormat getJaxb(Class clazz, boolean prettyPrint) {
+        try {
+            JaxbDataFormat jaxb = new JaxbDataFormat(JAXBContext.newInstance(clazz));
+            jaxb.setPrettyPrint(prettyPrint);
+            return jaxb;
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected static DataFormat getJson(Class clazz) {
