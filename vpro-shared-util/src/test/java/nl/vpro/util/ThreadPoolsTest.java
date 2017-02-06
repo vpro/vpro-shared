@@ -24,7 +24,7 @@ public class ThreadPoolsTest {
             for (int i = 1; i < 100; i++) {
                 final int j = k + i;
                 futures.add(te.submit(() -> {
-                    Thread.sleep(100);
+                    Thread.sleep(1000);
                     System.out.println(j);
                     return j;
                 }));
@@ -36,4 +36,24 @@ public class ThreadPoolsTest {
         ThreadPools.shutdown();
     }
 
+
+    @Test
+    public void background2() throws ExecutionException, InterruptedException {
+      Future<?> f1 = ThreadPools.backgroundExecutor.submit(() -> {
+          Thread.sleep(10000);
+          return null;
+          }
+        );
+        Future<?> f2 = ThreadPools.backgroundExecutor.submit(() -> {
+            Thread.sleep(10000);
+            return null;
+            }
+        );
+
+        System.out.println("");
+        f1.get();
+        f2.get();
+
+        ThreadPools.shutdown();
+    }
 }
