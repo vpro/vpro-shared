@@ -42,10 +42,10 @@ public final class ThreadPools {
                 Thread.NORM_PRIORITY));
 
     public static final ScheduledExecutorService backgroundExecutor =
-        Executors.newScheduledThreadPool(1,
+        Executors.newScheduledThreadPool(5,
             ThreadPools.createThreadFactory(
                 "nl.vpro-util-Background",
-                false,
+                true,
                 Thread.MIN_PRIORITY));
 
     public static final ThreadPoolExecutor startUpExecutor =
