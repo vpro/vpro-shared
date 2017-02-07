@@ -146,8 +146,12 @@ public class ErrorAspect<T> implements InvocationHandler {
 
             }
             if (mes.length() == 0) {
-                String m = response.readEntity(String.class);
-                mes.append(response.getStatus()).append(':').append(m);
+                try {
+                    String m = response.readEntity(String.class);
+                    mes.append(response.getStatus()).append(':').append(m);
+                } catch (IllegalStateException is) {
+                    mes.append(response.getStatus()).append(':').append(is.getMessage());
+                }
             }
             for (String s : HEADERS) {
                 List<Object> v = response.getMetadata().get(s);
