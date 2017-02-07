@@ -14,6 +14,7 @@ import org.junit.Test;
  * @author Michiel Meeuwissen
  * @since 0.53
  */
+@Ignore("Doest assert anything, just trying out")
 public class ThreadPoolsTest {
 
     @Test
