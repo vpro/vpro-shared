@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -24,7 +25,7 @@ public class ThreadPoolsTest {
             for (int i = 1; i < 100; i++) {
                 final int j = k + i;
                 futures.add(te.submit(() -> {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                     System.out.println(j);
                     return j;
                 }));
@@ -38,6 +39,7 @@ public class ThreadPoolsTest {
 
 
     @Test
+    @Ignore
     public void background2() throws ExecutionException, InterruptedException {
       Future<?> f1 = ThreadPools.backgroundExecutor.submit(() -> {
           Thread.sleep(10000);
