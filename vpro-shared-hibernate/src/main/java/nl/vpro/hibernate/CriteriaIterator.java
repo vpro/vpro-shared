@@ -1,6 +1,7 @@
 package nl.vpro.hibernate;
 
-import java.util.Iterator;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
@@ -8,11 +9,14 @@ import org.hibernate.Criteria;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 
+import nl.vpro.util.CloseableIterator;
+
 /**
  * @author Michiel Meeuwissen
  * @since 1.63
  */
-public class CriteriaIterator<T> implements Iterator<T> {
+@Slf4j
+public class CriteriaIterator<T> implements CloseableIterator<T> {
 
     private final ScrollableResults scrollableResults;
     private final Function<ScrollableResults, T> adapter;
@@ -52,9 +56,19 @@ public class CriteriaIterator<T> implements Iterator<T> {
             hasNext = scrollableResults.next();
             if (hasNext) {
                 next = adapter.apply(scrollableResults);
+            } else {
+                try {
+                    close();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
     }
 
 
+    @Override
+    public void close()  {
+        this.scrollableResults.close();
+    }
 }
