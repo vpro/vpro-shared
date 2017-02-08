@@ -11,6 +11,10 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     static <S> CountedIterator<S> of(Collection<S> wrapped) {
         return new BasicWrappedIterator<S>(wrapped);
     }
+    static <S> CountedPeekingIterator<S> peeking(CountedIterator<S> wrapped){
+        return wrapped == null ? null : wrapped.peeking();
+
+    }
 
     Optional<Long> getSize();
 
@@ -38,6 +42,10 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     @Override
     default void close() throws Exception {
 
+    }
+
+    default CountedPeekingIterator<T> peeking() {
+        return new CountedPeekingIteratorImpl<T>(this);
     }
 }
 
