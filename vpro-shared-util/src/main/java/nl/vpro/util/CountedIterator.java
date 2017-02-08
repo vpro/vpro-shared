@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Michiel Meeuwissen
@@ -14,6 +15,11 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     static <S> CountedPeekingIterator<S> peeking(CountedIterator<S> wrapped){
         return wrapped == null ? null : wrapped.peeking();
 
+    }
+
+    static <S> CountedIterator<S> of(Stream<S> wrapped) {
+        Spliterator<S> spliterator = wrapped.spliterator();
+        return new BasicWrappedIterator<S>(spliterator.getExactSizeIfKnown(), Spliterators.iterator(spliterator));
     }
 
     Optional<Long> getSize();
