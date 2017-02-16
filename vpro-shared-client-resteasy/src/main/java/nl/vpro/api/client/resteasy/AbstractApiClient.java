@@ -266,6 +266,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             }
             connectionManager.setDefaultSocketConfig(socketConfig);
 
+
             if (maxConnections > 1) {
                 watchIdleConnections(connectionManager);
             }
@@ -322,19 +323,23 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return clientHttpEngineNoTimeout;
     }
 
+    @Override
     public int getMaxConnections() {
         return maxConnections;
     }
 
+    @Override
     public void setMaxConnections(int maxConnections) {
         this.maxConnections = maxConnections;
         invalidate();
     }
 
+    @Override
     public int getMaxConnectionsPerRoute() {
         return maxConnectionsPerRoute;
     }
 
+    @Override
     public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         invalidate();
