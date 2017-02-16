@@ -21,6 +21,13 @@ public interface AbstractApiClientMXBean {
     String getCounts();
     long getCount(String method);
     long getTotalCount();
+
+    int getMaxConnections();
+    void setMaxConnections(int maxConnections);
+    int getMaxConnectionsPerRoute();
+    void setMaxConnectionsPerRoute(int maxConnectionsPerRoute);
+
+
     @Units("events/minute")
     double getRate();
 
