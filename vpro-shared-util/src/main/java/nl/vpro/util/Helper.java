@@ -10,15 +10,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,7 +66,7 @@ public class Helper {
      */
     @Deprecated
     public static <T> boolean notEquals(T o1, T o2) {
-        return !equals(o1, o2);
+        return ! Objects.equals(o1, o2);
     }
 
     /**
@@ -405,7 +397,7 @@ public class Helper {
         int i = 0;
         int n = array.length;
 
-        while ((i < n) && !equals(array[i], element)) {
+        while ((i < n) && !Objects.equals(array[i], element)) {
             i++;
         }
 
