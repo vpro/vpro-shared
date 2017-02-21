@@ -20,6 +20,18 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class ISO6937CharsetProvider extends CharsetProvider {
 
+    private static ISO6937CharsetProvider INSTANCE = new ISO6937CharsetProvider();
+
+    public static Charset forName(String charset) {
+
+        Charset result = INSTANCE.charsetForName(charset);
+        if (result != null) {
+            return result;
+        } else {
+            return Charset.forName(charset);
+        }
+    }
+
 
     public static final Charset ISO6937 = new Charset("ISO-6937", new String[]{"iso-6937"}) {
         @Override
