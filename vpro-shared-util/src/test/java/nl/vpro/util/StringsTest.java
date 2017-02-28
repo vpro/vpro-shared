@@ -32,6 +32,11 @@ public class StringsTest {
         writer.close();
         List<String> result = Strings.strings("a,b", tempFile.toString(), "c,d").collect(Collectors.toList());
         assertThat(result).containsExactly("a", "b", "f1", "f2", "c", "d");
-    }
+
+		assertThat(Strings.strings("a,b", tempFile.toString(), "c,d")
+            .sorted().collect(Collectors.toList()))
+            .containsExactly("a", "b", "c", "d", "f1", "f2");
+
+	}
 
 }
