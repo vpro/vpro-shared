@@ -116,8 +116,8 @@ public class Copier implements Runnable {
         return this;
     }
 
-    public void interrupt() {
-        future.cancel(true);
+    public boolean interrupt() {
+        return future != null && future.cancel(true);
     }
 
 }

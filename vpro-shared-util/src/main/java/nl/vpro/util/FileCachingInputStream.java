@@ -1,14 +1,16 @@
 package nl.vpro.util;
 
 import lombok.Builder;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
@@ -43,6 +45,7 @@ public class FileCachingInputStream extends InputStream {
         Path path,
         String filePrefix,
         long batchSize,
+        BiConsumer<FileCachingInputStream, Copier> batchConsumer,
         Integer outputBuffer,
         Logger logger,
         List<OpenOption> openOptions,
@@ -51,17 +54,21 @@ public class FileCachingInputStream extends InputStream {
     ) throws IOException {
 
         super();
+        if(logger != null) {
+            this.log = logger;
+        }
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
         if (initialBuffer > 0) {
+            // first use an initial buffer of memory only
             byte[] buf = new byte[initialBuffer];
 
             int bufferOffset = 0;
             int numRead;
             do {
                 numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
-                if (numRead > -1) {
+                if (numRead > 0) {
                     bufferOffset += numRead;
                 }
             } while (numRead != -1 && bufferOffset < buf.length);
@@ -69,8 +76,12 @@ public class FileCachingInputStream extends InputStream {
             bufferLength = bufferOffset;
 
             if (bufferLength < initialBuffer) {
+                // the buffer was not completely filled.
+                // there will be no need for a file at all.
                 buffer = buf;
                 System.arraycopy(buf, 0, buffer, 0, bufferLength);
+
+                // don't use file later on
                 copier = null;
                 tempFile = null;
                 file = null;
@@ -82,23 +93,31 @@ public class FileCachingInputStream extends InputStream {
             bufferLength = 0;
             buffer = null;
         }
-
+        // if arriving here, a temp file will be needed
         tempFile = Files.createTempFile(
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
             filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null);
 
+        log.debug("Using {}", tempFile);
         if (outputBuffer == null) {
             outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
         }
         OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
         if (buffer != null) {
+            // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
             out.write(buffer);
         }
-        if (logger != null) {
-            this.log = logger;
-        }
+        final BiConsumer<FileCachingInputStream, Copier> bc;
+        if (batchConsumer == null) {
+            bc = (t, c) ->
+                log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
 
+        } else {
+            bc = batchConsumer;
+        }
+        // The copier is responsible for copying the remaining of the stream to the file
+        // in a separate thread
         copier = Copier.builder()
             .input(input).offset(bufferLength)
             .output(out)
@@ -107,11 +126,12 @@ public class FileCachingInputStream extends InputStream {
                 log.info("Created {} ({} bytes written)", tempFile, c.getCount());
             })
             .batch(batchSize)
-            .batchConsumer(c ->
-                log.info("Creating {} ({} bytes written)", tempFile, c.getCount())
-            )
+            .batchConsumer(c -> {
+                bc.accept(this, c);
+            })
             .build();
         if (startImmediately == null || startImmediately) {
+            // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
             copier.execute();
         }
 
@@ -119,12 +139,14 @@ public class FileCachingInputStream extends InputStream {
             openOptions = new ArrayList<>();
             openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
         }
-        this.file = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
+        this.file = new BufferedInputStream(
+            Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
     }
 
     @Override
     public int read() throws IOException {
         if (file == null) {
+            // the stream was small, we are reading from the memory buffer
             return readFromBuffer();
         } else {
             return readFromFile();
@@ -142,10 +164,23 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public void close() throws IOException {
+        if (copier != null) {
+            // if somewhy close when copier is not ready yet, it can be interrupted, because we will not be using it any more.
+            copier.interrupt();
+        }
         if (file != null) {
             file.close();
-            Files.deleteIfExists(tempFile);
+            if (Files.deleteIfExists(tempFile)) {
+                log.debug("Deleted {}", tempFile);
+            } else {
+                log.warn("Could not delete {}", tempFile);
+            }
+
         }
+    }
+
+    public Path getTempFile() {
+        return tempFile;
     }
 
     private int readFromBuffer() {
@@ -173,23 +208,27 @@ public class FileCachingInputStream extends InputStream {
         while (result == EOF) {
             synchronized (copier) {
                 while (!copier.isReady() && result == EOF) {
+                    log.debug("Copier not yet ready");
+                    // copier is still busy, wait a second, and try again.
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
                     }
                     result = file.read();
-                    if (copier.isReady() && count == copier.getCount()) {
-                        return EOF;
-                    }
                 }
-                if (copier.isReady() && count == copier.getCount()) {
+                if (copier.isReady() && result == EOF) {
+                    // the copier did not return any new results
+                    // don't increase count but return now.
                     return EOF;
                 }
             }
         }
+        //noinspection ConstantConditions
+        assert result != EOF;
+
         count++;
-        log.debug("returning {}", result);
+        //log.debug("returning {}", result);
         return result;
     }
 
@@ -198,26 +237,24 @@ public class FileCachingInputStream extends InputStream {
         if (copier.isReady() && count == copier.getCount()) {
             return EOF;
         }
-        int totalresult = Math.max(file.read(b, 0, b.length), 0);
+        int totalResult = Math.max(file.read(b, 0, b.length), 0);
 
-        if (totalresult < b.length) {
+        if (totalResult == 0) {
             synchronized (copier) {
-                while (!copier.isReady() && totalresult < b.length) {
+                while (!copier.isReady() && totalResult == 0) {
+                    log.debug("Copier not yet ready");
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
                     }
-                    int subresult = Math.max(file.read(b, totalresult, b.length - totalresult), 0);
-                    totalresult += subresult;
-                    if (copier.isReady() && count + totalresult == copier.getCount()) {
-                        break;
-                    }
+                    int subResult = Math.max(file.read(b, totalResult, b.length - totalResult), 0);
+                    totalResult += subResult;
                 }
             }
         }
-        count += totalresult;
-        log.debug("returning {}", totalresult);
-        return totalresult;
+        count += totalResult;
+        //log.debug("returning {} bytes", totalResult);
+        return totalResult;
     }
 }
