@@ -1,12 +1,14 @@
 package nl.vpro.util;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
+
+import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,19 +17,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.50
  */
+@Slf4j
 public class FileCachingInputStreamTest {
-    byte[] in = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
+    byte[] hello = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
+    byte[] in;
+    {
+        int ncopies = 100;
+        in = new byte[hello.length * ncopies];
+        for (int i = 0; i < ncopies; i++) {
+            System.arraycopy(hello, 0, in, i * hello.length, hello.length);
+        }
+    }
 
 
     @Test
     public void testRead() throws IOException {
-        FileCachingInputStream inputStream = FileCachingInputStream.builder()
-            .outputBuffer(2)
-            .batchSize(3)
-            .input(new ByteArrayInputStream(in))
-            .initialBuffer(4)
-            .startImmediately(true)
-            .build();
+
+        FileCachingInputStream inputStream =  slowReader();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -37,6 +43,76 @@ public class FileCachingInputStreamTest {
         }
 
         assertThat(out.toByteArray()).containsExactly(in);
+    }
+
+
+    @Test
+    public void testReadBuffer() throws IOException {
+
+        FileCachingInputStream inputStream = slowReader();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int r;
+        byte[] buffer = new byte[10];
+        while ((r = inputStream.read(buffer)) != -1) {
+            out.write(buffer, 0, r);
+        }
+
+        assertThat(out.toByteArray()).containsExactly(in);
+    }
+
+
+    @Test(expected = IOException.class)
+    public void testReadFileGetsBroken() throws IOException {
+
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .batchConsumer((f, c) -> {
+                if (c.getCount() > 300) {
+                    try {
+                        f.close();
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
+
+                }
+            })
+            .input(new ByteArrayInputStream(in))
+            .initialBuffer(4)
+            .startImmediately(true)
+            .build();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int r;
+        byte[] buffer = new byte[10];
+        while ((r = inputStream.read(buffer)) != -1) {
+            out.write(buffer, 0, r);
+        }
+
+        assertThat(out.toByteArray()).containsExactly(in);
+    }
+
+    protected FileCachingInputStream slowReader() throws IOException {
+        return
+        FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .batchConsumer((f, c) -> {
+                try {
+                    //log.info("sleeping");
+                    Thread.sleep(5L);
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage(), e);
+                }
+                //log.info("count:" + c.getCount());
+            })
+            .input(new ByteArrayInputStream(in))
+            .initialBuffer(4)
+            .startImmediately(true)
+            .build();
     }
 
     @Test
@@ -124,7 +200,7 @@ public class FileCachingInputStreamTest {
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
-                .input(new ByteArrayInputStream(in))
+                .input(new ByteArrayInputStream(hello))
                 .initialBuffer(2048)
                 .build();) {
 
@@ -133,7 +209,26 @@ public class FileCachingInputStreamTest {
 
             IOUtils.copy(inputStream, out);
 
-            assertThat(out.toByteArray()).containsExactly(in);
+            assertThat(out.toByteArray()).containsExactly(hello);
+        }
+    }
+
+    @Test
+    public void testWithBufferEdge() throws IOException {
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(1)
+                .input(new ByteArrayInputStream(hello))
+                .initialBuffer(hello.length)
+                .build();) {
+
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            IOUtils.copy(inputStream, out);
+
+            assertThat(out.toByteArray()).containsExactly(hello);
         }
     }
 
