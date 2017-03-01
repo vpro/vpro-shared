@@ -53,6 +53,11 @@ public class TimeUtilsTest {
         assertThat(TimeUtils.parseDuration("5000").get()).isEqualTo(Duration.ofMillis(5000));
         assertThat(TimeUtils.parseDuration("PT300s").get()).isEqualTo(Duration.ofSeconds(300));
 
+        assertThat(TimeUtils.parseDuration("PT-300s").get()).isEqualTo(Duration.ofSeconds(-300));
+        assertThat(TimeUtils.parseDuration("-300s").get()).isEqualTo(Duration.ofSeconds(-300));
+        assertThat(TimeUtils.parseDuration("-2M").get()).isEqualTo(Duration.ofSeconds(-120));
+
+
         assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
 
 
