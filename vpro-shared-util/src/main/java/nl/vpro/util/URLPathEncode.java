@@ -34,7 +34,7 @@ public class URLPathEncode {
 
     private static boolean isSafe(char ch) {
         return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || // ALPHA
-            (ch >= '0' && ch <= '0') || // DIGIT
+            (ch >= '0' && ch <= '9') || // DIGIT
             ch == '-' || ch == '.'  || ch == '_' || ch ==  '~'  || // unreserved
             ch == ':' || ch == '@'; // pchar
 
