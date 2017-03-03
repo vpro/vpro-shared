@@ -20,7 +20,7 @@ public class URLPathEncodeTest {
 
     @Test
     public void encodePath() throws Exception {
-        assertThat(URLPathEncode.encodePath("test/bla/1234")).isEqualToIgnoringCase("test/bla/1234");
+        assertThat(URLPathEncode.encodePath("test/bla/1234/jcr:node/@vpro/ /ĥ/")).isEqualToIgnoringCase("test/bla/1234/jcr:node/@vpro/+/%I5/");
 
     }
 }

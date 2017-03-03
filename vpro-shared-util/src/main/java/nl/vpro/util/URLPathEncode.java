@@ -25,7 +25,10 @@ public class URLPathEncode {
         return resultStr.toString();
     }
     public static String encodePath(String input) {
-        return Arrays.stream(input.split("/")).map(URLPathEncode::encode).collect(Collectors.joining("/"));
+        return Arrays.stream(
+            input.split("/", -1))
+            .map(URLPathEncode::encode)
+            .collect(Collectors.joining("/"));
     }
 
     private static char toHex(int ch) {
