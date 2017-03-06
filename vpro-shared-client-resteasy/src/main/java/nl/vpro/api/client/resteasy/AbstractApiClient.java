@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
+import javax.cache.Cache;
 import javax.management.*;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +45,8 @@ import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
+import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
@@ -109,6 +112,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private List<Locale> acceptableLanguages = new ArrayList<>();
 
     private MediaType mediaType;
+
+    private Cache<?, ?> browserCache;
 
     protected AbstractApiClient(
         String baseUrl,
@@ -444,6 +449,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 .register(JacksonContextResolver.class);
         builder.register(new AcceptRequestFilter(mediaType));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
+        BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
+        if (browserCache != null) {
+            browserCacheFeature.setCache(new JavaBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
+            log.info("Set browser cache to ", browserCache);
+        }
+        builder.register(browserCacheFeature);
         buildResteasy(builder);
         return builder;
     }
@@ -502,6 +513,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return counter.values().stream()
             .mapToDouble(Counter::getRate)
             .sum();
+    }
+
+
+    public Cache<?, ?> getBrowserCache() {
+        return browserCache;
+    }
+
+    public void setBrowserCache(Cache<?, ?> browserCache) {
+        this.browserCache = browserCache;
+        invalidate();
     }
 
     @PreDestroy
