@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -113,7 +114,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private MediaType mediaType;
 
-    private Cache<?, ?> browserCache;
+    private Supplier<Cache<?, ?>> browserCache;
 
     protected AbstractApiClient(
         String baseUrl,
@@ -450,8 +451,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         builder.register(new AcceptRequestFilter(mediaType));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
-        if (browserCache != null) {
-            browserCacheFeature.setCache(new JavaBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
+        Cache<?, ?> cache = browserCache.get();
+        if (cache != null) {
+            browserCacheFeature.setCache(new JavaBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) cache));
             log.info("Set browser cache to ", browserCache);
         }
         builder.register(browserCacheFeature);
@@ -517,10 +519,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     public Cache<?, ?> getBrowserCache() {
-        return browserCache;
+        return browserCache.get();
     }
 
-    public void setBrowserCache(Cache<?, ?> browserCache) {
+    public void setBrowserCache(Supplier<Cache<?, ?>> browserCache) {
         this.browserCache = browserCache;
         invalidate();
     }
