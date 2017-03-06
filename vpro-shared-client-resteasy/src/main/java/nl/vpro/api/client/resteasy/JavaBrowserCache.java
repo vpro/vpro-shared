@@ -28,9 +28,13 @@ public class JavaBrowserCache implements BrowserCache  {
     @Override
     public Entry getAny(String key) {
         Map<String, Entry> parent = backing.get(key);
-        if (parent == null) return null;
+        if (parent == null) {
+            return null;
+        }
         Iterator<Entry> iterator = parent.values().iterator();
-        if (iterator.hasNext()) return iterator.next();
+        if (iterator.hasNext()) {
+            return iterator.next();
+        }
         return null;
     }
 
@@ -73,7 +77,6 @@ public class JavaBrowserCache implements BrowserCache  {
 
     @Override
     public Entry remove(String key, MediaType type) {
-
         Map<String, Entry> data = backing.get(key);
         if (data == null) return null;
         Entry removed = data.remove(type.toString());
