@@ -41,6 +41,7 @@ public class JavaBrowserCache implements BrowserCache  {
     @Override
     public Entry get(String key, MediaType accept) {
         Map<String, Entry> parent = backing.get(key);
+
         if (parent == null || parent.isEmpty()) {
             return null;
         }
@@ -69,9 +70,10 @@ public class JavaBrowserCache implements BrowserCache  {
     }
 
     @Override
-    public Entry put(String key, MediaType mediaType,
-                     MultivaluedMap<String, String> headers, byte[] cached, int expires,
-                     String etag, String lastModified) {
+    public Entry put(
+        String key, MediaType mediaType,
+        MultivaluedMap<String, String> headers, byte[] cached, int expires,
+        String etag, String lastModified) {
         return put(new CacheEntry(key, headers, cached, expires, etag, lastModified, mediaType));
     }
 
