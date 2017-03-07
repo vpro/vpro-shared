@@ -109,6 +109,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     Duration connectionInPoolTTL;
     protected final Map<Method, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofMillis(15);
+    private Duration warnThreshold = Duration.ofMillis(100);
 
     private List<Locale> acceptableLanguages = new ArrayList<>();
 
@@ -125,6 +126,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         int maxConnectionsPerRoute,
         Duration connectionInPoolTTL,
         Duration countWindow,
+        Duration warnThreshold,
         List<Locale> acceptableLanguages,
         MediaType accept,
         Boolean trustAll
@@ -137,7 +139,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.baseUrl = baseUrl == null ? null : (baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1): baseUrl);
-        this.countWindow = countWindow;
+        this.countWindow = countWindow == null ? this.countWindow : countWindow;
+        this.warnThreshold = warnThreshold == null ? this.warnThreshold : warnThreshold;
         this.acceptableLanguages = acceptableLanguages;
         this.mediaType = accept;
         if (trustAll != null) {
@@ -155,6 +158,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             maxConnectionsPerRoute,
             connectionInPoolTTL == null ? null : Duration.ofMillis(connectionInPoolTTL),
             Duration.ofMinutes(15),
+            null,
             null,
             null,
             false
@@ -370,6 +374,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         invalidate();
     }
 
+    public Duration getWarnThreshold() {
+        return warnThreshold;
+    }
+
+    public void setWarnThreshold(Duration warnThreshold) {
+        this.warnThreshold = warnThreshold;
+        invalidate();
+    }
+
     public List<Locale> getAcceptableLanguages() {
         return acceptableLanguages;
     }
@@ -411,7 +424,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, countWindow, getObjectName(), service, proxy);
+        return CountAspect.proxyCounter(counter, countWindow, warnThreshold, getObjectName(), service, proxy);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
