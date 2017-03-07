@@ -4,6 +4,8 @@
  */
 package nl.vpro.test.util.jaxb;
 
+import junit.framework.ComparisonFailure;
+
 import java.io.*;
 import java.lang.annotation.Annotation;
 
@@ -12,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 import org.custommonkey.xmlunit.Diff;
@@ -154,7 +157,7 @@ public class JAXBTestUtil {
         Diff diff = XMLUnit.compareXML(expected, input);
 
         if (!diff.identical()) {
-            assertThat(input).isEqualTo(expected);
+            throw new ComparisonFailure(diff.toString(), expected, input);
         } else {
             assertThat(diff.identical()).isTrue();
         }
@@ -166,16 +169,22 @@ public class JAXBTestUtil {
     }
 
     public static void similar(InputStream input, String expected) throws IOException, SAXException {
-        Diff diff = XMLUnit.compareXML(expected, new InputStreamReader(input));
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        IOUtils.copy(input, bytes);
+        Diff diff = XMLUnit.compareXML(expected, new InputStreamReader(new ByteArrayInputStream(bytes.toByteArray())));
         if (!diff.identical()) {
-            assertThat(input).isEqualTo(expected);
+            throw new ComparisonFailure(diff.toString(), expected, bytes.toString());
         }
     }
 
     public static void similar(InputStream input, InputStream expected) throws IOException, SAXException {
-        Diff diff = XMLUnit.compareXML(new InputStreamReader(expected), new InputStreamReader(input));
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        IOUtils.copy(input, bytes);
+        ByteArrayOutputStream expectedBytes = new ByteArrayOutputStream();
+        IOUtils.copy(expected, expectedBytes);
+        Diff diff = XMLUnit.compareXML(new InputStreamReader(new ByteArrayInputStream(expectedBytes.toByteArray())), new InputStreamReader(new ByteArrayInputStream(bytes.toByteArray())));
         if (!diff.identical()) {
-            assertThat(input).isEqualTo(expected);
+            throw new ComparisonFailure(diff.toString(), expectedBytes.toString(), bytes.toString());
         }
     }
 
