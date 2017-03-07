@@ -1,5 +1,8 @@
 package nl.vpro.api.client.resteasy;
 
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +19,8 @@ import org.jboss.resteasy.client.jaxrs.cache.CacheEntry;
  * @author Michiel Meeuwissen
  * @since 1.65
  */
+@ToString
+@Slf4j
 public class JavaBrowserCache implements BrowserCache  {
 
     private final Cache<String, Map<String, Entry>> backing;

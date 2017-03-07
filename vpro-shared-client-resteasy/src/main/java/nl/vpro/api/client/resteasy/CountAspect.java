@@ -26,7 +26,6 @@ public class CountAspect<T> implements InvocationHandler {
     private final Duration countWindow;
     private final Duration warnThreshold;
 
-
     CountAspect(T proxied, Map<Method, Counter> counter, Duration countWindow, Duration warnThreshold, ObjectName name) {
         this.proxied = proxied;
         this.counts = counter;
@@ -35,16 +34,17 @@ public class CountAspect<T> implements InvocationHandler {
         this.warnThreshold = warnThreshold;
     }
 
-
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         counts.computeIfAbsent(method,
             (m) -> new Counter(getObjectName(m), countWindow)).incrementAndGet();
         long start = System.nanoTime();
+
         Object o =  method.invoke(proxied, args);
+
         Duration duration = Duration.ofNanos(System.nanoTime() - start);
         if (duration.compareTo(warnThreshold) > 0) {
-            log.warn("Took: {}, {} {}", duration, method, Arrays.asList(args));
+            log.warn("Took {}: {} {} {}", duration, method, Arrays.asList(args));
         }
         return o;
     }

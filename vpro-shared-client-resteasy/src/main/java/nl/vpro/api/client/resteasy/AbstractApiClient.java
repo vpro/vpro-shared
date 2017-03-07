@@ -149,6 +149,26 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         registerBean();
     }
 
+    /**
+     * @deprecated Will be dropped soon
+     */
+    @Deprecated
+    protected AbstractApiClient(
+        String baseUrl,
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        int maxConnections,
+        int maxConnectionsPerRoute,
+        Duration connectionInPoolTTL,
+        Duration countWindow,
+        List<Locale> acceptableLanguages,
+        MediaType accept,
+        Boolean trustAll
+    ) {
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, acceptableLanguages, accept, trustAll);
+    }
+
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(baseUrl,
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
