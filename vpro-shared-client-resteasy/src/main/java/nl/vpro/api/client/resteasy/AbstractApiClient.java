@@ -190,6 +190,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public synchronized void invalidate() {
+        counter.values().forEach(Counter::shutdown);
+        counter.clear();
         this.clientHttpEngine = null;
     }
 
@@ -250,15 +252,26 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected static void registerBean(ObjectName name, Object object) {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            unregister(name);
+            mbs.registerMBean(object, name);
+        } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    protected static void unregister(ObjectName name) {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             if (mbs.isRegistered(name)) {
                 try {
                     mbs.unregisterMBean(name);
                 } catch (InstanceNotFoundException e) {
                     log.error(e.getMessage(), e);
                 }
+            } else {
+                log.debug("Not registered");
             }
-            mbs.registerMBean(object, name);
-        } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+        } catch (MBeanRegistrationException e) {
             log.error(e.getMessage(), e);
         }
     }

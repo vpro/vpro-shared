@@ -19,11 +19,13 @@ public class Counter implements CounterMXBean{
 
     private final AtomicLong count = new AtomicLong(0L);
     private final WindowedEventRate rate;
+    private final ObjectName name;
 
     public Counter(ObjectName name, Duration countWindow) {
-        AbstractApiClient.registerBean(name, this);
+        this.name = name;
         rate = WindowedEventRate.builder()
             .window(countWindow).build();
+        AbstractApiClient.registerBean(name, this);
     }
 
 
@@ -48,4 +50,9 @@ public class Counter implements CounterMXBean{
         rate.newEvent();
         return count.incrementAndGet();
     }
+
+    void shutdown() {
+        AbstractApiClient.unregister(name);
+    }
+
 }
