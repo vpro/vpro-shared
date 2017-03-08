@@ -24,14 +24,14 @@ public class CountAspect<T> implements InvocationHandler {
     private final Map<Method, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
-    private final Duration warnThreshold;
+    private final long warnThresholdNanos;
 
     CountAspect(T proxied, Map<Method, Counter> counter, Duration countWindow, Duration warnThreshold, ObjectName name) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
         this.countWindow = countWindow;
-        this.warnThreshold = warnThreshold;
+        this.warnThresholdNanos = warnThreshold.toNanos();
     }
 
     @Override
@@ -42,9 +42,11 @@ public class CountAspect<T> implements InvocationHandler {
 
         Object o =  method.invoke(proxied, args);
 
-        Duration duration = Duration.ofNanos(System.nanoTime() - start);
-        if (duration.compareTo(warnThreshold) > 0) {
-            log.warn("Took {}: {} {} {}", duration, method, Arrays.asList(args));
+        long duration = System.nanoTime() - start;
+        if (duration > warnThresholdNanos) {
+            log.warn("Took {}: {} {} {}",
+                Duration.ofNanos(duration),
+                method, args == null ? "" : Arrays.asList(args));
         }
         return o;
     }
