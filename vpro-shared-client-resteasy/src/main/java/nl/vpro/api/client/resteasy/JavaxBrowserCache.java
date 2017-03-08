@@ -21,11 +21,11 @@ import org.jboss.resteasy.client.jaxrs.cache.CacheEntry;
  */
 @ToString
 @Slf4j
-public class JavaBrowserCache implements BrowserCache  {
+public class JavaxBrowserCache implements BrowserCache  {
 
     private final Cache<String, Map<String, Entry>> backing;
 
-    public JavaBrowserCache(Cache<String, Map<String, Entry>> backing) {
+    public JavaxBrowserCache(Cache<String, Map<String, Entry>> backing) {
         this.backing = backing;
     }
 
