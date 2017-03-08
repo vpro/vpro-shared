@@ -108,7 +108,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private int maxConnectionsPerRoute;
     Duration connectionInPoolTTL;
     protected final Map<String, Counter> counter = new HashMap<>();
-    private Duration countWindow = Duration.ofMillis(15);
+    private Duration countWindow = Duration.ofSeconds(30);
     private Duration warnThreshold = Duration.ofMillis(100);
 
     private List<Locale> acceptableLanguages = new ArrayList<>();
@@ -386,12 +386,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         invalidate();
     }
 
-    public Duration getCountWindow() {
-        return countWindow;
+    @Override
+    public String getCountWindow() {
+        return countWindow.toString();
     }
-
-    public void setCountWindow(Duration countWindow) {
-        this.countWindow = countWindow;
+    @Override
+    public void setCountWindow(String countWindow) {
+        this.countWindow = TimeUtils.parseDuration(countWindow).orElse(Duration.ofSeconds(30));
         invalidate();
     }
 
