@@ -40,15 +40,15 @@ public class CountAspect<T> implements InvocationHandler {
         try {
             Object o = method.invoke(proxied, args);
 
-            if (! local.counted) {
+
+            return o;
+        } finally {
+            if (!local.counted) {
+                // Not counted by CountFilter? Count ourselves
                 counts.computeIfAbsent(AbstractApiClient.methodToString(method),
                     (m) -> new Counter(getObjectName(m), countWindow))
                     .incrementAndGet();
             }
-            long start = System.nanoTime();
-
-            return o;
-        } finally {
             currentThreadLocal.remove();
         }
 
