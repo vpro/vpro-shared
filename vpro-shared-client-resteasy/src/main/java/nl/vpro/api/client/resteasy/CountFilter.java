@@ -18,7 +18,7 @@ import javax.ws.rs.client.ClientResponseFilter;
  * @since 1.65
  */
 @Slf4j
-public class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
+class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
 
     private final Map<String, Counter> counts;
     private final ObjectName name;

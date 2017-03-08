@@ -17,7 +17,7 @@ import javax.management.ObjectName;
  * @since 1.57
  */
 @Slf4j
-public class CountAspect<T> implements InvocationHandler {
+class CountAspect<T> implements InvocationHandler {
 
     static ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
 
