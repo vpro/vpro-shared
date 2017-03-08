@@ -495,8 +495,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
         Cache<?, ?> cache = browserCache == null ? null : browserCache.get();
         if (cache != null) {
-            browserCacheFeature.setCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) cache));
-            log.info("Set browser cache to ", browserCache);
+            BrowserCache browserCache = new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) cache);
+            browserCacheFeature.setCache(browserCache);
+            log.info("Set browser cache to {}", browserCache);
         }
         builder.register(browserCacheFeature);
         buildResteasy(builder);
