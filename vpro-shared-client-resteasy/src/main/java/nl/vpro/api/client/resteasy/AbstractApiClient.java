@@ -107,7 +107,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private int maxConnections;
     private int maxConnectionsPerRoute;
     Duration connectionInPoolTTL;
-    protected final Map<Method, Counter> counter = new HashMap<>();
+    protected final Map<String, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofMillis(15);
     private Duration warnThreshold = Duration.ofMillis(100);
 
@@ -425,15 +425,19 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 new LeaveDefaultsProxyHandler(resteasy));
         }
         log.info("Created api client {}/{} {} ({})", getClass().getSimpleName(), service.getSimpleName(), baseUrl, mediaType);
-        return proxyErrorsAndCount(service, proxy, errorClass);
+        return proxyErrors(service, proxy, errorClass);
     }
 
+    @Deprecated
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy) {
-        return proxyErrors(service, proxyCounter(service, proxy));
+        //return proxyErrors(service, proxyCounter(service, proxy));
+        return proxyErrors(service, proxy);
     }
 
+    @Deprecated
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy, Class<?> errorClass) {
-        return proxyErrors(service, proxyCounter(service, proxy), errorClass);
+        //return proxyErrors(service, proxyCounter(service, proxy), errorClass);
+        return proxyErrors(service, proxy, errorClass);
     }
 
     protected <T> T proxyErrors(Class<T> service, T proxy) {
@@ -484,6 +488,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 .register(JacksonContextResolver.class);
         builder.register(new AcceptRequestFilter(mediaType));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
+        builder.register(new CountFilter(counter, countWindow, warnThreshold, getObjectName()));
+
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 
         Cache<?, ?> cache = browserCache == null ? null : browserCache.get();
@@ -535,7 +541,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private Map<String, Long> getCountMap() {
         return counter.entrySet()
             .stream()
-            .collect(Collectors.toMap(e -> methodToString(e.getKey()), e -> e.getValue().getCount()));
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getCount()));
     }
 
     @Override

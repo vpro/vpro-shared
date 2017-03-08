@@ -16,17 +16,19 @@ import javax.management.ObjectName;
  * Wraps all calls to register some statistics.
  * @author Michiel Meeuwissen
  * @since 1.57
+ * @deprecated We now use {@Link CountFilter}
  */
 @Slf4j
+@Deprecated
 public class CountAspect<T> implements InvocationHandler {
 
     private final T proxied;
-    private final Map<Method, Counter> counts;
+    private final Map<String, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
     private final long warnThresholdNanos;
 
-    CountAspect(T proxied, Map<Method, Counter> counter, Duration countWindow, Duration warnThreshold, ObjectName name) {
+    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Duration warnThreshold, ObjectName name) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
@@ -36,8 +38,9 @@ public class CountAspect<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        counts.computeIfAbsent(method,
-            (m) -> new Counter(getObjectName(m), countWindow)).incrementAndGet();
+        counts.computeIfAbsent(AbstractApiClient.methodToString(method),
+            (m) -> new Counter(getObjectName(m), countWindow))
+            .incrementAndGet();
         long start = System.nanoTime();
 
         Object o =  method.invoke(proxied, args);
@@ -51,9 +54,9 @@ public class CountAspect<T> implements InvocationHandler {
         return o;
     }
 
-    ObjectName getObjectName(Method m) {
+    ObjectName getObjectName(String m) {
         try {
-            return new ObjectName(name.toString() + ",name=" + AbstractApiClient.methodToString(m));
+            return new ObjectName(name.toString() + ",name=" + m);
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException(e);
         }
@@ -61,7 +64,7 @@ public class CountAspect<T> implements InvocationHandler {
 
 
     static <T> T proxyCounter(
-        Map<Method, Counter> counter,
+        Map<String, Counter> counter,
         Duration countWindow,
         Duration warnThreshold,
         ObjectName name, Class<T> restInterface, T service) {
