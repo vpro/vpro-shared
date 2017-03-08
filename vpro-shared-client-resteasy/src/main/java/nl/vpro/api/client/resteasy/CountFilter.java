@@ -40,7 +40,8 @@ public class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
 
     @Override
     public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-        String key = requestContext.getUri().getPath();
+        CountAspect.Local local = CountAspect.currentThreadLocal.get();
+        String key = AbstractApiClient.methodToString(local.method);
         if (responseContext.getStatus() != 200) {
             key += "/" + responseContext.getStatus();
         }
@@ -48,6 +49,7 @@ public class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
         if (cached != null) {
             key += "/" + cached;
         }
+        local.counted = true;
         counts.computeIfAbsent(key,
             (m) -> new Counter(getObjectName(m), countWindow))
             .incrementAndGet();

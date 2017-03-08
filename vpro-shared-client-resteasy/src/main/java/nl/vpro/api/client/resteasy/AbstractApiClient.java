@@ -425,19 +425,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 new LeaveDefaultsProxyHandler(resteasy));
         }
         log.info("Created api client {}/{} {} ({})", getClass().getSimpleName(), service.getSimpleName(), baseUrl, mediaType);
-        return proxyErrors(service, proxy, errorClass);
+        return proxyErrorsAndCount(service, proxy, errorClass);
     }
 
-    @Deprecated
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy) {
-        //return proxyErrors(service, proxyCounter(service, proxy));
-        return proxyErrors(service, proxy);
+        return proxyErrors(service, proxyCounter(service, proxy));
     }
 
-    @Deprecated
     protected <T> T proxyErrorsAndCount(Class<T> service, T proxy, Class<?> errorClass) {
-        //return proxyErrors(service, proxyCounter(service, proxy), errorClass);
-        return proxyErrors(service, proxy, errorClass);
+        return proxyErrors(service, proxyCounter(service, proxy), errorClass);
     }
 
     protected <T> T proxyErrors(Class<T> service, T proxy) {
@@ -448,9 +444,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy, errorClass);
     }
 
-    @Deprecated
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, countWindow, warnThreshold, getObjectName(), service, proxy);
+        return CountAspect.proxyCounter(counter, countWindow, getObjectName(), service, proxy);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
