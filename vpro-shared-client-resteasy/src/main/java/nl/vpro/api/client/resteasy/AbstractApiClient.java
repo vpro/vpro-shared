@@ -448,6 +448,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy, errorClass);
     }
 
+    @Deprecated
     protected <T> T proxyCounter(Class<T> service, T proxy) {
         return CountAspect.proxyCounter(counter, countWindow, warnThreshold, getObjectName(), service, proxy);
     }
