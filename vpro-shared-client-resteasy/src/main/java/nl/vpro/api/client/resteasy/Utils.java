@@ -1,19 +1,19 @@
 package nl.vpro.api.client.resteasy;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.ws.rs.NotFoundException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author Michiel Meeuwissen
  * @since 0.47
  */
+
+@Slf4j
 public class Utils {
-    private static Logger LOG = LoggerFactory.getLogger(Utils.class);
 
 
     public static <T> Optional<T> wrapNotFound(Supplier<T> t) {
@@ -21,7 +21,7 @@ public class Utils {
         try {
             return Optional.ofNullable(t.get());
         } catch (NotFoundException nfe) {
-            LOG.debug(nfe.getMessage());
+            log.debug(nfe.getMessage());
             return Optional.empty();
         }
     }
