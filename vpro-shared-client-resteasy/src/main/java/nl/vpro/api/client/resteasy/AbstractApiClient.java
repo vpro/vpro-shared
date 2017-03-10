@@ -115,7 +115,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private MediaType mediaType;
 
-    private Supplier<Cache<?, ?>> browserCache;
+    private BrowserCache resteasyBrowserCache;
+
 
     protected AbstractApiClient(
         String baseUrl,
@@ -502,14 +503,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 
-        Cache<?, ?> cache = browserCache == null ? null : browserCache.get();
-        if (cache != null) {
-            BrowserCache browserCache = new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) cache);
-            browserCacheFeature.setCache(browserCache);
-            log.info("Set browser cache to {}", browserCache);
+        if (this.resteasyBrowserCache != null) {
+            browserCacheFeature.setCache(this.resteasyBrowserCache);
         }
         builder.register(browserCacheFeature);
         buildResteasy(builder);
+        this.resteasyBrowserCache = browserCacheFeature.getCache();
+        log.info("Set browser cache to {}", this.resteasyBrowserCache);
         return builder;
     }
 
@@ -570,14 +570,18 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
 
-    public Cache<?, ?> getBrowserCache() {
-        return browserCache.get();
+    public BrowserCache getBrowserCache() {
+        return resteasyBrowserCache;
     }
 
     public void setBrowserCache(Supplier<Cache<?, ?>> browserCache) {
-        this.browserCache = browserCache;
+        setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
+    }
+    public void setBrowserCache(BrowserCache browserCache) {
+        this.resteasyBrowserCache = browserCache;
         invalidate();
     }
+
 
     @PreDestroy
     public void shutdown() {
