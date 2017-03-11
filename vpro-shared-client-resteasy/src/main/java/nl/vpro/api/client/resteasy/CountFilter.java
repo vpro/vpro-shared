@@ -50,10 +50,12 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
             key += "/" + cached;
         }
         local.counted = true;
-        counts.computeIfAbsent(key,
-            (m) -> new Counter(getObjectName(m), countWindow))
-            .incrementAndGet();
+        Counter counter = counts.computeIfAbsent(key,
+            (m) -> new Counter(getObjectName(m), countWindow));
+        counter.incrementAndGet();
         long duration = System.nanoTime() - (long) requestContext.getProperty("startTime");
+        counter.getDurations().accept(duration);
+
         if (duration > warnThresholdNanos) {
             log.warn("Took {}: {} {}",
                 Duration.ofNanos(duration),
