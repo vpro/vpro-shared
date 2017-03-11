@@ -22,11 +22,9 @@ public class WindowedLongSummaryStatisticsTest {
                 .bucketDuration(Duration.ofSeconds(1))
                 .build();
 
-        instance.accept(100L);
-        instance.accept(200L);
+        instance.accept(100L, 200L);
         Thread.sleep(1000L);
-        instance.accept(200L);
-        instance.accept(300L);
+        instance.accept(200L, 300L);
         LongSummaryStatistics[] bucket = instance.getBuckets();
         assertThat(instance.getBuckets()[0].getAverage()).isCloseTo(250, Offset.offset(0.1));
         assertThat(instance.getBuckets()[1].getAverage()).isCloseTo(150, Offset.offset(0.1));

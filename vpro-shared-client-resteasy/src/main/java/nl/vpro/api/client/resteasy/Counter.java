@@ -25,7 +25,9 @@ public class Counter implements CounterMXBean {
     private final WindowedLongSummaryStatistics durations;
     private final ObjectName name;
 
-    public Counter(ObjectName name, Duration countWindow) {
+    public Counter(
+        ObjectName name,
+        Duration countWindow) {
         this.name = name;
         rate = WindowedEventRate.builder()
             .window(countWindow)
@@ -57,7 +59,9 @@ public class Counter implements CounterMXBean {
     @Override
     public String getAverageDuration() {
         return
-            Duration.ofMillis((long) (durations.getCombined().getAverage() * 1000L)).toString();
+            Duration.ofMillis((long) (durations.getCombined().getAverage() * 1000L)).toString()
+            // No standard deviation (introduces commons-math for that?)
+            ;
     }
     @Override
     public Map<String, String> getAverageDurations()  {
@@ -74,9 +78,14 @@ public class Counter implements CounterMXBean {
         return durations;
     }
 
-    public long incrementAndGet() {
+    protected void incrementAndGet() {
         rate.newEvent();
-        return count.incrementAndGet();
+        count.incrementAndGet();
+    }
+
+    void eventAndDuration(Duration duration) {
+        incrementAndGet();
+        durations.accept(duration.toMillis());
     }
 
     void shutdown() {

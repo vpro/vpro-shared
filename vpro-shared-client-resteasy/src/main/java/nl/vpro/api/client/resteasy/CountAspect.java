@@ -37,6 +37,7 @@ class CountAspect<T> implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Local local = new Local(method);
         currentThreadLocal.set(local);
+        long start = System.nanoTime();
         try {
             Object o = method.invoke(proxied, args);
 
@@ -47,7 +48,7 @@ class CountAspect<T> implements InvocationHandler {
                 // Not counted by CountFilter? Count ourselves
                 counts.computeIfAbsent(AbstractApiClient.methodToString(method),
                     (m) -> new Counter(getObjectName(m), countWindow))
-                    .incrementAndGet();
+                    .eventAndDuration(Duration.ofNanos(System.nanoTime() - start));
             }
             currentThreadLocal.remove();
         }
