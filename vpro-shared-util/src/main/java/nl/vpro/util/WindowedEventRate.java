@@ -4,8 +4,8 @@ import lombok.Builder;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Keeps track of an event rate in a current window of a given duration
@@ -15,30 +15,28 @@ import java.util.concurrent.TimeUnit;
  * @author Michiel Meeuwissen
  * @since 0.38
  */
-public class WindowedEventRate {
-
-    private final long[] buckets;
-    private final long bucketDuration;
-    private final long totalDuration;
-    private final Instant start = Instant.now();
-
-    private boolean warmingUp = true;
-    private long currentBucketTime = System.currentTimeMillis();
-    private int currentBucket = 0;
+public class WindowedEventRate extends Windowed<AtomicLong> {
 
     @Builder
-    public WindowedEventRate(Duration window, Integer bucketCount) {
-        int bucketCount1 = bucketCount == null ? 20 : bucketCount;
-        buckets = new long[bucketCount1];
-        Arrays.fill(buckets, 0L);
-        long tempTotalDuration = window == null ? Duration.ofMinutes(5).toMillis() : window.toMillis();
-        this.bucketDuration = tempTotalDuration / bucketCount1;
-        this.totalDuration = this.bucketDuration * bucketCount1;
+    public WindowedEventRate(Duration window, Duration bucketDuration, Integer bucketCount) {
+        super(window, bucketDuration, bucketCount);
     }
 
+    @Override
+    AtomicLong[] newBuckets(int bucketCount) {
+        return new AtomicLong[bucketCount];
+    }
+
+    @Override
+    AtomicLong initialValue() {
+        return new AtomicLong(0L);
+
+    }
 
     public WindowedEventRate(int unit, TimeUnit timeUnit, int bucketCount) {
-        this(Duration.ofMillis(TimeUnit.MILLISECONDS.convert(unit, timeUnit) * bucketCount), bucketCount);
+        this(Duration.ofMillis(
+            TimeUnit.MILLISECONDS.convert(unit, timeUnit) * bucketCount),
+            null, bucketCount);
     }
     public WindowedEventRate(int unit, TimeUnit timeUnit) {
         this(unit, timeUnit, 100);
@@ -49,21 +47,19 @@ public class WindowedEventRate {
     }
 
     public void newEvent() {
-        shiftBuckets();
-        buckets[currentBucket]++;
+        currentBucket().incrementAndGet();
     }
 
     public void newEvents(int count) {
-        shiftBuckets();
-        buckets[currentBucket]+= count;
+        currentBucket().addAndGet(count);
     }
 
     public double getRate(TimeUnit unit) {
         shiftBuckets();
 
         long totalCount = 0;
-        for (long bucket : buckets) {
-            totalCount += bucket;
+        for (AtomicLong bucket : buckets) {
+            totalCount += bucket.get();
         }
 
         final long relevantDuration;
@@ -80,30 +76,6 @@ public class WindowedEventRate {
         return "" + getRate(TimeUnit.SECONDS) + " /s" + (isWarmingUp() ? " (warming up)" : "");
     }
 
-    public Duration getTotalDuration() {
-        return Duration.ofMillis(totalDuration);
-    }
-
-    public boolean isWarmingUp() {
-        if (warmingUp) {
-            warmingUp = Instant.now().isBefore(start.plus(getTotalDuration()));
-        }
-        return warmingUp;
-    }
-
-
-    private void shiftBuckets() {
-        long currentTime = System.currentTimeMillis();
-        long afterBucketBegin = currentTime - currentBucketTime;
-        int i = 0;
-        while (afterBucketBegin > bucketDuration && (i++) < buckets.length) {
-            currentBucket++;
-            currentBucket %= buckets.length;
-            buckets[currentBucket] = 0;
-            afterBucketBegin -= bucketDuration;
-            currentBucketTime = currentTime;
-        }
-    }
 
 
 }

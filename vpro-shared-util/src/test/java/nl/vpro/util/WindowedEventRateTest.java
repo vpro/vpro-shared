@@ -35,7 +35,7 @@ public class WindowedEventRateTest {
         Thread.sleep(201L);
 
         assertThat(rate.isWarmingUp()).isFalse();
-
+        System.out.println(rate.getRanges());
     }
 
 
