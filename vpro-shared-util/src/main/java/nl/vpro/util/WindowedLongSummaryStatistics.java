@@ -4,6 +4,7 @@ import lombok.Builder;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.LongSummaryStatistics;
 
 /**
@@ -21,18 +22,19 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
     }
 
     @Override
-    LongSummaryStatistics[] newBuckets(int bucketCount) {
+    protected LongSummaryStatistics[] newBuckets(int bucketCount) {
         return new LongSummaryStatistics[bucketCount];
 
     }
 
     @Override
-    LongSummaryStatistics initialValue() {
+    protected LongSummaryStatistics initialValue() {
         return new LongSummaryStatistics();
     }
 
-    public void accept(Long value) {
-        currentBucket().accept(value);
+    public void accept(Long... value) {
+        Arrays.stream(value)
+            .forEach(l -> currentBucket().accept(l));
     }
 
     public LongSummaryStatistics getCombined() {
