@@ -12,6 +12,9 @@ import java.util.TreeMap;
 import com.google.common.collect.Range;
 
 /**
+ * Maintains values duration a certain time window. This window is divided up in a certain number of 'buckets', of which every time the oldest bucket expires and is discarded.
+ * The idea is that the values in the buckets can be used to calculate averages which are based on sufficiently long times, though sufficiently sensitive for changes.
+ *
  * @author Michiel Meeuwissen
  * @since 1.66
  */
@@ -27,6 +30,11 @@ public abstract class Windowed<T> {
     protected long currentBucketTime = System.currentTimeMillis();
     protected int currentBucket = 0;
 
+    /**
+     * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
+     * @param bucketDuration The duration of one bucket (or <code>null</code> if window specified).
+     * @param bucketCount    The number of buckets the total window time is to be divided in.
+     */
     protected Windowed(
         Duration window,
         Duration bucketDuration,

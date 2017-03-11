@@ -17,18 +17,26 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class WindowedEventRate extends Windowed<AtomicLong> {
 
+    /**
+     * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
+     * @param bucketDuration The duration of one bucket (or <code>null</code> if window specified).
+     * @param bucketCount    The number of buckets the total window time is to be divided in.
+     */
     @Builder
-    public WindowedEventRate(Duration window, Duration bucketDuration, Integer bucketCount) {
+    public WindowedEventRate(
+        Duration window,
+        Duration bucketDuration,
+        Integer bucketCount) {
         super(window, bucketDuration, bucketCount);
     }
 
     @Override
-    AtomicLong[] newBuckets(int bucketCount) {
+    protected AtomicLong[] newBuckets(int bucketCount) {
         return new AtomicLong[bucketCount];
     }
 
     @Override
-    AtomicLong initialValue() {
+    protected AtomicLong initialValue() {
         return new AtomicLong(0L);
 
     }
