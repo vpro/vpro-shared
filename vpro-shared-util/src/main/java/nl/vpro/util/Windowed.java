@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -42,7 +41,9 @@ public abstract class Windowed<T> {
         ) {
         int bucketCount1 = bucketCount == null ? 20 : bucketCount;
         buckets = newBuckets(bucketCount1);
-        Arrays.fill(buckets, initialValue());
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = initialValue();
+        }
         if (window == null && bucketDuration == null) {
             window = Duration.ofMinutes(5);
         }
