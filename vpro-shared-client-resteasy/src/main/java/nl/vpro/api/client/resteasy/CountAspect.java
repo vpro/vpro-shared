@@ -25,12 +25,14 @@ class CountAspect<T> implements InvocationHandler {
     private final Map<String, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
+    private final Integer bucketCount;
 
-    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, ObjectName name) {
+    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
         this.countWindow = countWindow;
+        this.bucketCount = bucketCount;
     }
 
     @Override
@@ -47,7 +49,12 @@ class CountAspect<T> implements InvocationHandler {
             if (!local.counted) {
                 // Not counted by CountFilter? Count ourselves
                 counts.computeIfAbsent(AbstractApiClient.methodToString(method),
-                    (m) -> new Counter(getObjectName(m), countWindow))
+                    (m) -> Counter.builder()
+                        .name(getObjectName(m))
+                        .countWindow(countWindow)
+                        .bucketCount(bucketCount)
+                        .build()
+                )
                     .eventAndDuration(Duration.ofNanos(System.nanoTime() - start));
             }
             currentThreadLocal.remove();
@@ -68,10 +75,11 @@ class CountAspect<T> implements InvocationHandler {
     static <T> T proxyCounter(
         Map<String, Counter> counter,
         Duration countWindow,
+        Integer bucketCount,
         ObjectName name, Class<T> restInterface, T service) {
         return (T) Proxy.newProxyInstance(CountAspect.class.getClassLoader(),
             new Class[]{restInterface},
-            new CountAspect<T>(service, counter, countWindow, name));
+            new CountAspect<T>(service, counter, countWindow, bucketCount, name));
     }
 
     static class Local {

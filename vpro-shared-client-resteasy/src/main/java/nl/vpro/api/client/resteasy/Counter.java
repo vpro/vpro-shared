@@ -1,5 +1,7 @@
 package nl.vpro.api.client.resteasy;
 
+import lombok.Builder;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -25,15 +27,20 @@ public class Counter implements CounterMXBean {
     private final WindowedLongSummaryStatistics durations;
     private final ObjectName name;
 
-    public Counter(
+    @Builder
+    protected Counter(
         ObjectName name,
-        Duration countWindow) {
+        Duration countWindow,
+        int bucketCount
+        ) {
         this.name = name;
         rate = WindowedEventRate.builder()
             .window(countWindow)
+            .bucketCount(bucketCount)
             .build();
         durations = WindowedLongSummaryStatistics.builder()
             .window(countWindow)
+            .bucketCount(bucketCount)
             .build();
         AbstractApiClient.registerBean(name, this);
     }
