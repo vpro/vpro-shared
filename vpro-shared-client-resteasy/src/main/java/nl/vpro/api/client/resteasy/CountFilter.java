@@ -23,13 +23,16 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
     private final Map<String, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
+    private final Integer bucketCount;
     private final long warnThresholdNanos;
 
 
-    CountFilter(Map<String, Counter> counter, Duration countWindow, Duration warnThreshold, ObjectName name) {
+
+    CountFilter(Map<String, Counter> counter, Duration countWindow, Integer bucketCount, Duration warnThreshold, ObjectName name) {
         this.counts = counter;
         this.name = name;
         this.countWindow = countWindow;
+        this.bucketCount = bucketCount;
         this.warnThresholdNanos = warnThreshold.toNanos();
     }
 
@@ -52,7 +55,7 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
         local.counted = true;
         long duration = System.nanoTime() - (long) requestContext.getProperty("startTime");
         counts.computeIfAbsent(key,
-            (m) -> new Counter(getObjectName(m), countWindow))
+            (m) -> new Counter(getObjectName(m), countWindow, bucketCount))
             .eventAndDuration(Duration.ofNanos(duration));
         ;
         if (duration > warnThresholdNanos) {

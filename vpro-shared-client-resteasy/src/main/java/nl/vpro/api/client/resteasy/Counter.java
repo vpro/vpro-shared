@@ -64,20 +64,19 @@ public class Counter implements CounterMXBean {
     }
 
     @Override
-    public String getAverageDuration() {
+    public Duration getAverageDuration() {
         return
-            Duration.ofMillis((long) (durations.getCombined().getAverage() * 1000L)).toString()
+            Duration.ofMillis((long) (durations.getCombined().getAverage() * 1000L));
             // No standard deviation (introduces commons-math for that?)
-            ;
     }
     @Override
-    public Map<String, String> getAverageDurations()  {
+    public Map<String, Duration> getAverageDurations()  {
         return durations.getRanges()
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
                 e -> e.getKey().toString(),
-                e -> Duration.ofMillis((long) (e.getValue().getAverage() * 1000L)).toString()
+                e -> Duration.ofMillis((long) (e.getValue().getAverage() * 1000L))
             ));
     }
 
