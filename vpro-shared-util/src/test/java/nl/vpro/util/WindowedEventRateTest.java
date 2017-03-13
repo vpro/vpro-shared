@@ -54,6 +54,9 @@ public class WindowedEventRateTest {
         }
         // got 100 events in about 1 second.
         assertThat(rate.isWarmingUp()).isTrue();
+        assertThat(rate.getTotalCount()).isEqualTo(100);
+        assertThat(rate.getRelevantDuration().toMillis()).isCloseTo(1000, withPercentage(20));
+
         double rateDuringWarmup = rate.getRate(TimeUnit.SECONDS);
         System.out.println(rateDuringWarmup + " ~ 100 /s");
 
@@ -62,6 +65,8 @@ public class WindowedEventRateTest {
             Thread.sleep(100);
         }
         assertThat(rate.isWarmingUp()).isFalse();
+        assertThat(rate.getRelevantDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
+
         double rateAfterWarmup = rate.getRate(TimeUnit.SECONDS);
         System.out.println(rateAfterWarmup + " ~ 100 /s");
         assertThat(rateAfterWarmup).isCloseTo(100.0, withPercentage(20));

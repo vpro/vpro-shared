@@ -64,23 +64,28 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         currentBucket().addAndGet(count);
     }
 
-    public double getRate(TimeUnit unit) {
+    public long getTotalCount() {
         shiftBuckets();
-
         long totalCount = 0;
         for (AtomicLong bucket : buckets) {
             totalCount += bucket.get();
         }
+        return totalCount;
+    }
 
-        final long relevantDurationNanos;
+    public Duration getRelevantDuration() {
+        shiftBuckets();
         if (isWarmingUp()) {
-            relevantDurationNanos = Duration.between(start, Instant.now()).toNanos();
-            log.info("Relevant duration {}", relevantDurationNanos);
+            return Duration.between(start, Instant.now());
         } else {
-            relevantDurationNanos = TimeUnit.NANOSECONDS.convert(totalDuration, TimeUnit.MILLISECONDS);
+            return getTotalDuration();
         }
+    }
 
-        return ((double) totalCount * TimeUnit.NANOSECONDS.convert(1, unit)) / relevantDurationNanos;
+    public double getRate(TimeUnit unit) {
+        long totalCount = getTotalCount();
+        Duration relevantDuration = getRelevantDuration();
+        return ((double) totalCount * TimeUnit.NANOSECONDS.convert(1, unit)) / relevantDuration.toNanos();
     }
 
     public String toString() {
