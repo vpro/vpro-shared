@@ -31,7 +31,7 @@ public interface CounterMXBean {
     String getRateWindow();
 
     @Description("Gets the average duration per bucket")
-    Map<String, Duration> getAverageDurations();
+    Map<String, String> getAverageDurations();
 
     @Description("Gets the average duration in ms per bucket")
     default Map<String, Long> getAverageDurationsMs() {
@@ -39,19 +39,19 @@ public interface CounterMXBean {
             .stream().collect(
                 Collectors.toMap(
                     Map.Entry::getKey,
-                    e -> e.getValue().toMillis()
+                    e -> Duration.parse(e.getValue()).toMillis()
                 ));
 
 
     }
 
     @Description("Gets the average duration")
-    Duration getAverageDuration();
+    String getAverageDuration();
 
 
     @Description("Gets the average duration in ms")
     default long getAverageDurationMs() {
-        return getAverageDuration().toMillis();
+        return Duration.parse(getAverageDuration()).toMillis();
     }
 
 
