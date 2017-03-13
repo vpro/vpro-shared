@@ -41,11 +41,10 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
         Instant now = Instant.now();
         LongSummaryStatistics result = new LongSummaryStatistics();
         LongSummaryStatistics[] b = getBuckets();
-        for (int i = 0 ; i < b.length ; i++) {
+        int j = 0;
+        for (int i = b.length -1 ; i >= 0; i--) {
             result.combine(b[i]);
-            if (now.isBefore(start.plusMillis((i + 1) * bucketDuration))) {
-                break;
-            }
+
         }
         return result;
     }

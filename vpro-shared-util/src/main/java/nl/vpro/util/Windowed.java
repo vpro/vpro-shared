@@ -23,10 +23,10 @@ public abstract class Windowed<T> {
     protected final T[] buckets;
     protected final long bucketDuration;
     protected final long totalDuration;
-    protected final Instant start = Instant.now();
+    protected final Instant start = Instant.now(); //.truncatedTo(ChronoUnit.SECONDS);
 
     private boolean warmingUp = true;
-    protected long currentBucketTime = System.currentTimeMillis();
+    protected long currentBucketTime = start.toEpochMilli();
     protected int currentBucket = 0;
 
     /**
@@ -76,6 +76,9 @@ public abstract class Windowed<T> {
     public Duration getBucketDuration() {
         return Duration.ofMillis(bucketDuration);
     }
+    public Instant getStart() {
+        return start;
+    }
 
     public boolean isWarmingUp() {
         if (warmingUp) {
@@ -92,8 +95,8 @@ public abstract class Windowed<T> {
         shiftBuckets();
         T[] result = newBuckets(buckets.length);
         int j = buckets.length;
-        for (int i = currentBucket; i > currentBucket - buckets.length; i--) {
-            result[--j] = buckets[(buckets.length + i) % buckets.length];
+        for (int i = 0; i < buckets.length; i++) {
+            result[buckets.length - 1 - i] = buckets[(currentBucket - i + buckets.length) % buckets.length];
         }
         return result;
     }
@@ -106,11 +109,11 @@ public abstract class Windowed<T> {
         shiftBuckets();
         Instant now = Instant.now();
         SortedMap<Range<Instant>, T> result = new TreeMap<>(Comparator.comparing(Range::lowerEndpoint));
-        Instant end = now;
-        int j = 0;
-        for (int i = currentBucket; i > currentBucket - buckets.length; i--) {
-            Instant begin = end.minusMillis((++j) * bucketDuration);
-            result.put(Range.closedOpen(begin, end), buckets[(buckets.length + i) % buckets.length]);
+        Instant end = Instant.ofEpochMilli(currentBucketTime)
+            .plusMillis(bucketDuration);
+        for (int i = 0; i < buckets.length; i++) {
+            Instant begin = end.minusMillis(bucketDuration);
+            result.put(Range.closedOpen(begin, end), buckets[(currentBucket - i + buckets.length) % buckets.length]);
             end = begin;
         }
         return result;
@@ -128,7 +131,7 @@ public abstract class Windowed<T> {
             currentBucket %= buckets.length;
             buckets[currentBucket] = initialValue();
             afterBucketBegin -= bucketDuration;
-            currentBucketTime = currentTime;
+            currentBucketTime += bucketDuration;
         }
     }
 

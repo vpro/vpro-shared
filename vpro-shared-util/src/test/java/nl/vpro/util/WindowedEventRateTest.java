@@ -27,8 +27,8 @@ public class WindowedEventRateTest {
         WindowedEventRate rate = WindowedEventRate.builder()
             .bucketCount(5)
             .bucketDuration(Duration.ofSeconds(1)).build();
-        long start = System.currentTimeMillis();
 
+        assertThat(rate.getBucketDuration().toMillis()).isEqualTo(1000);
         rate.newEvent();
         Thread.sleep(1001);
         rate.newEvents(2);
@@ -43,6 +43,9 @@ public class WindowedEventRateTest {
         assertThat(ranges.get(buckets.length - 1).getValue().longValue()).isEqualTo(2); // current bucket
         assertThat(ranges.get(buckets.length - 2).getValue().longValue()).isEqualTo(1); // one buckedDuration ago
         assertThat(ranges.get(buckets.length - 3).getValue().longValue()).isEqualTo(0); // longer ago
+
+        assertThat(ranges.get(buckets.length - 2).getKey()
+            .lowerEndpoint()).isEqualByComparingTo(rate.getStart()); // This bucket was the first one
 
         for (int i = 0; i < ranges.size() - 1; i++) {
             assertThat(ranges.get(i).getKey().lowerEndpoint())
@@ -105,7 +108,9 @@ public class WindowedEventRateTest {
             Thread.sleep(100);
         }
         assertThat(rate.isWarmingUp()).isFalse();
-        assertThat(rate.getRelevantDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
+        Long relevantDuration = rate.getRelevantDuration().toMillis();
+        assertThat(relevantDuration).isLessThan(1500);
+        assertThat(relevantDuration).isGreaterThan(1500 - rate.getBucketDuration().toMillis());
 
         double rateAfterWarmup = rate.getRate(TimeUnit.SECONDS);
         System.out.println(rateAfterWarmup + " ~ 100 /s");
