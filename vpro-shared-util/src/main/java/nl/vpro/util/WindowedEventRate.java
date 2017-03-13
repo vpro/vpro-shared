@@ -40,7 +40,12 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
     @Override
     protected AtomicLong initialValue() {
         return new AtomicLong(0L);
+    }
 
+    @Override
+    protected boolean resetValue(AtomicLong value) {
+        value.set(0);
+        return true;
     }
 
     public WindowedEventRate(int unit, TimeUnit timeUnit, int bucketCount) {

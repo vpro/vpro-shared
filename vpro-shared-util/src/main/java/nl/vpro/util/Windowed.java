@@ -138,6 +138,15 @@ public abstract class Windowed<T> {
 
     abstract T initialValue();
 
+    /**
+     * If values can be reset, this method can do it.
+     * @param value to reset if possible
+     * @return <code>true</code> if the value was reset. <code>false</code> otherwise and a new {@link #initialValue()} will be used
+     */
+    protected boolean resetValue(T value) {
+        return false;
+    }
+
     protected T currentBucket() {
         shiftBuckets();
         return buckets[currentBucket];
@@ -151,7 +160,9 @@ public abstract class Windowed<T> {
             currentBucket++;
             //log.debug("Shifting buckets");
             currentBucket %= buckets.length;
-            buckets[currentBucket] = initialValue();
+            if (!resetValue(buckets[currentBucket])) {
+                buckets[currentBucket] = initialValue();
+            }
             afterBucketBegin -= bucketDuration;
             currentBucketTime += bucketDuration;
         }
