@@ -113,7 +113,7 @@ public abstract class Windowed<T> {
         int i = 0;
         while (afterBucketBegin > bucketDuration && (i++) < buckets.length) {
             currentBucket++;
-            log.debug("Shifting buckets");
+            //log.debug("Shifting buckets");
             currentBucket %= buckets.length;
             buckets[currentBucket] = initialValue();
             afterBucketBegin -= bucketDuration;
