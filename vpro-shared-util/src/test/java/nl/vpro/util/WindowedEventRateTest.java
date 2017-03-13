@@ -49,6 +49,7 @@ public class WindowedEventRateTest {
         assertThat(rate.getTotalDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
 
         for (int i = 0; i < 10; i++) {
+            assertThat(rate.getTotalCount()).isEqualTo(i * 10);
             rate.newEvents(10);
             Thread.sleep(100);
         }
