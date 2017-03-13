@@ -61,25 +61,38 @@ public abstract class Windowed<T> {
         }
     }
 
-    abstract T[] newBuckets(int bucketCount);
 
-    abstract T initialValue();
-
-    protected T currentBucket() {
-        shiftBuckets();
-        return buckets[currentBucket];
-    }
-
+    /**
+     * The total duration, or 'window' we are looking at.
+     */
     public Duration getTotalDuration() {
         return Duration.ofMillis(totalDuration);
     }
+
+    /**
+     * The duration of one bucket
+     */
     public Duration getBucketDuration() {
         return Duration.ofMillis(bucketDuration);
     }
+
+    /**
+     * The number of buckets this window is divided in
+     */
+    public int getBucketCount() {
+        return buckets.length;
+    }
+
+    /**
+     * At which instant the measurements started
+     */
     public Instant getStart() {
         return start;
     }
 
+    /**
+     * We are still warming up, if since {@link #getStart()} not yet {@link #getTotalDuration()} has elapsed
+     */
     public boolean isWarmingUp() {
         if (warmingUp) {
             warmingUp = Instant.now().isBefore(start.plus(getTotalDuration()));
@@ -120,6 +133,15 @@ public abstract class Windowed<T> {
 
     }
 
+
+    abstract T[] newBuckets(int bucketCount);
+
+    abstract T initialValue();
+
+    protected T currentBucket() {
+        shiftBuckets();
+        return buckets[currentBucket];
+    }
 
     protected void shiftBuckets() {
         long currentTime = System.currentTimeMillis();
