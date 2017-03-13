@@ -25,11 +25,12 @@ public class WindowedLongSummaryStatisticsTest {
         instance.accept(100L, 200L);
         Thread.sleep(1000L);
         instance.accept(200L, 300L);
-        LongSummaryStatistics[] bucket = instance.getBuckets();
-        assertThat(instance.getBuckets()[0].getAverage()).isCloseTo(250, Offset.offset(0.1));
-        assertThat(instance.getBuckets()[1].getAverage()).isCloseTo(150, Offset.offset(0.1));
+        LongSummaryStatistics[] buckets = instance.getBuckets();
+        LongSummaryStatistics combined = instance.getCombined();
+        assertThat(buckets[buckets.length - 1].getAverage()).isCloseTo(250, Offset.offset(0.001));
+        assertThat(buckets[buckets.length - 2].getAverage()).isCloseTo(150, Offset.offset(0.001));
 
-        assertThat(instance.getCombined().getAverage()).isCloseTo(200, Offset.offset(0.1));
+        assertThat(combined.getAverage()).isCloseTo(200, Offset.offset(0.001));
         System.out.println(instance.getRanges());
     }
 
