@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Michiel Meeuwissen
  * @since 0.38
  */
+@Slf4j
 public class WindowedEventRate extends Windowed<AtomicLong> {
 
     /**
@@ -73,6 +75,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         final long relevantDuration;
         if (isWarmingUp()) {
             relevantDuration = Duration.between(start, Instant.now()).toMillis();
+            log.info("Relevant duration {}", relevantDuration);
         } else {
             relevantDuration = totalDuration;
         }

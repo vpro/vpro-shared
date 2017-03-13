@@ -45,20 +45,27 @@ public class WindowedEventRateTest {
             .window(Duration.ofMillis(1500))
             .bucketCount(50).build();
 
+        assertThat(rate.getBuckets()).hasSize(50);
         assertThat(rate.getTotalDuration()).isEqualByComparingTo(Duration.ofMillis(1500));
 
         for (int i = 0; i < 10; i++) {
             rate.newEvents(10);
             Thread.sleep(100);
         }
+        // cot 100 events in about 1 second.
+
         assertThat(rate.isWarmingUp()).isTrue();
-        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(100.0, withPercentage(20));
+        double rateDuringWarmup = rate.getRate(TimeUnit.SECONDS);
+        System.out.println(rateDuringWarmup + " ~ 100 /s");
+        assertThat(rateDuringWarmup).isCloseTo(100.0, withPercentage(20));
         for (int i = 0; i < 10; i++) {
             rate.newEvents(10);
             Thread.sleep(100);
         }
         assertThat(rate.isWarmingUp()).isFalse();
-        assertThat(rate.getRate(TimeUnit.SECONDS)).isCloseTo(100.0, withPercentage(20));
+        double rateAfterWarmup = rate.getRate(TimeUnit.SECONDS);
+        System.out.println(rateAfterWarmup + " ~ 100 /s");
+        assertThat(rateAfterWarmup).isCloseTo(100.0, withPercentage(20));
     }
 
 }
