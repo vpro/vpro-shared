@@ -504,7 +504,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 .register(JacksonContextResolver.class);
         builder.register(new AcceptRequestFilter(mediaType));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
-        builder.register(new CountFilter(counter, countWindow, warnThreshold, getObjectName()));
+        builder.register(new CountFilter(counter, countWindow, bucketCount, warnThreshold, getObjectName()));
 
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 

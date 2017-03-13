@@ -1,6 +1,8 @@
 package nl.vpro.api.client.resteasy;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.management.MXBean;
 
@@ -29,8 +31,30 @@ public interface CounterMXBean {
     String getRateWindow();
 
     @Description("Gets the average duration per bucket")
-    Map<String, String> getAverageDurations();
+    Map<String, Duration> getAverageDurations();
+
+    @Description("Gets the average duration in ms per bucket")
+    default Map<String, Long> getAverageDurationsMs() {
+        return getAverageDurations().entrySet()
+            .stream().collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> e.getValue().toMillis()
+                ));
+
+
+    }
 
     @Description("Gets the average duration")
-    String getAverageDuration();
+    Duration getAverageDuration();
+
+
+    @Description("Gets the average duration in ms")
+    default long getAverageDurationMs() {
+        return getAverageDuration().toMillis();
+    }
+
+
+
+
 }
