@@ -56,7 +56,7 @@ public class WindowedEventRateTest {
         assertThat(rate.isWarmingUp()).isTrue();
         double rateDuringWarmup = rate.getRate(TimeUnit.SECONDS);
         System.out.println(rateDuringWarmup + " ~ 100 /s");
-        assertThat(rateDuringWarmup).isCloseTo(100.0, withPercentage(20));
+
         for (int i = 0; i < 10; i++) {
             rate.newEvents(10);
             Thread.sleep(100);
@@ -65,6 +65,8 @@ public class WindowedEventRateTest {
         double rateAfterWarmup = rate.getRate(TimeUnit.SECONDS);
         System.out.println(rateAfterWarmup + " ~ 100 /s");
         assertThat(rateAfterWarmup).isCloseTo(100.0, withPercentage(20));
+
+        assertThat(rateDuringWarmup).isCloseTo(100.0, withPercentage(20));
     }
 
 }
