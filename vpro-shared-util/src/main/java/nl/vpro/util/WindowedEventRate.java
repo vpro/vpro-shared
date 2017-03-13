@@ -72,15 +72,15 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
             totalCount += bucket.get();
         }
 
-        final long relevantDuration;
+        final long relevantDurationNanos;
         if (isWarmingUp()) {
-            relevantDuration = Duration.between(start, Instant.now()).toMillis();
-            log.info("Relevant duration {}", relevantDuration);
+            relevantDurationNanos = Duration.between(start, Instant.now()).toNanos();
+            log.info("Relevant duration {}", relevantDurationNanos);
         } else {
-            relevantDuration = totalDuration;
+            relevantDurationNanos = TimeUnit.NANOSECONDS.convert(totalDuration, TimeUnit.MILLISECONDS);
         }
 
-        return ((double) totalCount * TimeUnit.MILLISECONDS.convert(1, unit)) / relevantDuration;
+        return ((double) totalCount * TimeUnit.NANOSECONDS.convert(1, unit)) / relevantDurationNanos;
     }
 
     public String toString() {
