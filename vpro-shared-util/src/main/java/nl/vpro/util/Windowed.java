@@ -84,24 +84,34 @@ public abstract class Windowed<T> {
         return warmingUp;
     }
 
+    /**
+     * Returns the current buckets, ordered by time. This means that the first one is the oldest one, and the last one is
+     * the newest (current) one.
+     */
     public T[] getBuckets() {
         shiftBuckets();
         T[] result = newBuckets(buckets.length);
-        for (int i = currentBucket; i < currentBucket + buckets.length; i++) {
-            result[i - currentBucket] = buckets[i % buckets.length];
+        int j = buckets.length;
+        for (int i = currentBucket; i > currentBucket - buckets.length; i--) {
+            result[--j] = buckets[(buckets.length + i) % buckets.length];
         }
         return result;
     }
+
+    /**
+     * Returns the current buckets, as a map, where the keys are the period to which they apply.
+     * @return SortedMap with the oldest buckets first.
+     */
     public SortedMap<Range<Instant>, T> getRanges() {
         shiftBuckets();
         Instant now = Instant.now();
         SortedMap<Range<Instant>, T> result = new TreeMap<>(Comparator.comparing(Range::lowerEndpoint));
-        Instant begin = now;
-        for (int i = currentBucket; i < currentBucket + buckets.length; i++) {
-            Instant end = begin;
-            begin = end.minusMillis((i - currentBucket) * bucketDuration);
-            result.put(Range.closedOpen(begin, end), buckets[i % buckets.length]);
-            begin = end;
+        Instant end = now;
+        int j = 0;
+        for (int i = currentBucket; i > currentBucket - buckets.length; i--) {
+            Instant begin = end.minusMillis((++j) * bucketDuration);
+            result.put(Range.closedOpen(begin, end), buckets[(buckets.length + i) % buckets.length]);
+            end = begin;
         }
         return result;
 

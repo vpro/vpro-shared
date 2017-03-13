@@ -41,8 +41,6 @@ public interface CounterMXBean {
                     Map.Entry::getKey,
                     e -> Duration.parse(e.getValue()).toMillis()
                 ));
-
-
     }
 
     @Description("Gets the average duration")
