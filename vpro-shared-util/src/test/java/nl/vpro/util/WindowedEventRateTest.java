@@ -52,8 +52,7 @@ public class WindowedEventRateTest {
             rate.newEvents(10);
             Thread.sleep(100);
         }
-        // cot 100 events in about 1 second.
-
+        // got 100 events in about 1 second.
         assertThat(rate.isWarmingUp()).isTrue();
         double rateDuringWarmup = rate.getRate(TimeUnit.SECONDS);
         System.out.println(rateDuringWarmup + " ~ 100 /s");
