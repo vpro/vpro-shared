@@ -1,9 +1,16 @@
 package nl.vpro.util;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
+
+import com.google.common.collect.Range;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
@@ -13,6 +20,38 @@ import static org.assertj.core.data.Percentage.withPercentage;
  * @since 0.38
  */
 public class WindowedEventRateTest {
+
+
+    @Test
+    public void testBuckets() throws InterruptedException {
+        WindowedEventRate rate = WindowedEventRate.builder()
+            .bucketCount(5)
+            .bucketDuration(Duration.ofSeconds(1)).build();
+        long start = System.currentTimeMillis();
+
+        rate.newEvent();
+        Thread.sleep(1001);
+        rate.newEvents(2);
+
+        AtomicLong[] buckets = rate.getBuckets();
+        assertThat(buckets[buckets.length - 1].get()).isEqualTo(2); // current bucket
+        assertThat(buckets[buckets.length - 2].get()).isEqualTo(1); // one buckedDuration ago
+        assertThat(buckets[buckets.length - 3].get()).isEqualTo(0); // longer ago
+
+        List<Map.Entry<Range<Instant>, AtomicLong>> ranges =
+            new ArrayList<>(rate.getRanges().entrySet());
+        assertThat(ranges.get(buckets.length - 1).getValue().longValue()).isEqualTo(2); // current bucket
+        assertThat(ranges.get(buckets.length - 2).getValue().longValue()).isEqualTo(1); // one buckedDuration ago
+        assertThat(ranges.get(buckets.length - 3).getValue().longValue()).isEqualTo(0); // longer ago
+
+        for (int i = 0; i < ranges.size() - 1; i++) {
+            assertThat(ranges.get(i).getKey().lowerEndpoint())
+                .isLessThanOrEqualTo(ranges.get(i + 1).getKey().lowerEndpoint());
+            assertThat(ranges.get(i).getKey().upperEndpoint())
+                .isEqualByComparingTo(ranges.get(i + 1).getKey().lowerEndpoint());
+        }
+
+    }
 
 
     @Test
