@@ -62,11 +62,11 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
     }
 
     public void newEvent() {
-        currentBucket().incrementAndGet();
+        currentBucket().getAndIncrement();
     }
 
     public void newEvents(int count) {
-        currentBucket().addAndGet(count);
+        currentBucket().getAndAdd(count);
     }
 
     public long getTotalCount() {

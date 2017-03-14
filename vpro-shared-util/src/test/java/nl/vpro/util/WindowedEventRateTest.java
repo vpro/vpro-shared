@@ -35,7 +35,7 @@ public class WindowedEventRateTest {
 
         AtomicLong[] buckets = rate.getBuckets();
         assertThat(buckets[buckets.length - 1].get()).isEqualTo(2); // current bucket
-        assertThat(buckets[buckets.length - 2].get()).isEqualTo(1); // one buckedDuration ago
+        assertThat(buckets[buckets.length - 2].get()).isEqualTo(1); // one bucketDuration ago
         assertThat(buckets[buckets.length - 3].get()).isEqualTo(0); // longer ago
 
         List<Map.Entry<Range<Instant>, AtomicLong>> ranges =
