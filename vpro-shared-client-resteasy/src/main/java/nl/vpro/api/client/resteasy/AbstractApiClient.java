@@ -14,7 +14,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -579,7 +578,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return resteasyBrowserCache;
     }
 
-    public void setBrowserCache(Supplier<Cache<?, ?>> browserCache) {
+    public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
     public void setBrowserCache(BrowserCache browserCache) {
