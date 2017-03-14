@@ -45,20 +45,27 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
     @Override
     public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
         CountAspect.Local local = CountAspect.currentThreadLocal.get();
-        String key = AbstractApiClient.methodToString(local.method);
-        if (responseContext.getStatus() != 200) {
-            key += "/" + responseContext.getStatus();
+        String key = null;
+        if (local != null) {
+            key = AbstractApiClient.methodToString(local.method);
+            if (responseContext.getStatus() != 200) {
+                key += "/" + responseContext.getStatus();
+            }
+            String cached = (String) requestContext.getProperty("cached");
+            if (cached != null) {
+                key += "/" + cached;
+            }
+            local.counted = true;
+        } else {
+            log.warn("No count aspect local found for {}", requestContext.getUri());
         }
-        String cached = (String) requestContext.getProperty("cached");
-        if (cached != null) {
-            key += "/" + cached;
-        }
-        local.counted = true;
         long duration = System.nanoTime() - (long) requestContext.getProperty("startTime");
-        counts.computeIfAbsent(key,
-            (m) -> new Counter(getObjectName(m), countWindow, bucketCount))
-            .eventAndDuration(Duration.ofNanos(duration));
-        ;
+        if (key != null) {
+            counts.computeIfAbsent(key,
+                (m) -> new Counter(getObjectName(m), countWindow, bucketCount))
+                .eventAndDuration(Duration.ofNanos(duration));
+        }
+
         if (duration > warnThresholdNanos) {
             log.warn("Took {}: {} {}",
                 Duration.ofMillis(TimeUnit.MILLISECONDS.convert(duration, TimeUnit.NANOSECONDS)), // round to ms.
