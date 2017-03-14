@@ -61,7 +61,7 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
         ;
         if (duration > warnThresholdNanos) {
             log.warn("Took {}: {} {}",
-                Duration.ofMillis(10 * (TimeUnit.MILLISECONDS.convert(duration, TimeUnit.NANOSECONDS) / 10)), // round to 10 ms.
+                Duration.ofMillis(TimeUnit.MILLISECONDS.convert(duration, TimeUnit.NANOSECONDS)), // round to ms.
                 key,
                 requestContext.getUri());
         }
