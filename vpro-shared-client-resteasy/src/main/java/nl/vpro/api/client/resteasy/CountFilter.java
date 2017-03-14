@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -60,7 +61,7 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
         ;
         if (duration > warnThresholdNanos) {
             log.warn("Took {}: {} {}",
-                Duration.ofNanos(duration),
+                Duration.ofMillis(10 * (TimeUnit.MILLISECONDS.convert(duration, TimeUnit.NANOSECONDS) / 10)), // round to 10 ms.
                 key,
                 requestContext.getUri());
         }
