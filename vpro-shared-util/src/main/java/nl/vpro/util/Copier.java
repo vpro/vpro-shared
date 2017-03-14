@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.Builder;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 * @since 3.1
 */
 @Slf4j
+@ToString
 public class Copier implements Runnable {
 
     private boolean ready;
@@ -66,9 +68,6 @@ public class Copier implements Runnable {
                         break;
                     }
                     batchConsumer.accept(this);
-                    if (Thread.currentThread().isInterrupted()) {
-                        break;
-                    }
                 }
             }
         } catch (Throwable t) {
