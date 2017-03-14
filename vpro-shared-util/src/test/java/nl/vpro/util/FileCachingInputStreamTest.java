@@ -3,10 +3,12 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.channels.ClosedByInterruptException;
 import java.time.Duration;
 import java.time.Instant;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -29,6 +31,10 @@ public class FileCachingInputStreamTest {
         }
     }
 
+    @Before
+    public void before() {
+        Thread.interrupted();
+    }
 
     @Test
     public void testRead() throws IOException {
@@ -65,7 +71,6 @@ public class FileCachingInputStreamTest {
 
     @Test(expected = IOException.class)
     public void testReadFileGetsBroken() throws IOException {
-
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -92,7 +97,33 @@ public class FileCachingInputStreamTest {
             out.write(buffer, 0, r);
         }
 
-        assertThat(out.toByteArray()).containsExactly(in);
+    }
+
+
+    @Test(expected = ClosedByInterruptException.class)
+    public void testReadFileGetsInterrupted() throws IOException {
+        Thread thisThread = Thread.currentThread();
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .batchConsumer((f, c) -> {
+                if (c.getCount() > 300) {
+                    log.info("Interrupting");
+                    thisThread.interrupt();
+                }
+            })
+            .input(new ByteArrayInputStream(in))
+            .initialBuffer(4)
+            .startImmediately(true)
+            .build();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        int r;
+        byte[] buffer = new byte[10];
+        while ((r = inputStream.read(buffer)) != -1) {
+            out.write(buffer, 0, r);
+        }
     }
 
     protected FileCachingInputStream slowReader() throws IOException {
