@@ -11,8 +11,9 @@ import java.util.TreeMap;
 import com.google.common.collect.Range;
 
 /**
- * Maintains values duration a certain time window. This window is divided up in a certain number of 'buckets', of which every time the oldest bucket expires and is discarded.
- * The idea is that the values in the buckets can be used to calculate averages which are based on sufficiently long times, though sufficiently sensitive for changes.
+ * Maintains values duration a certain time window. This window is divided up in a certain number of 'buckets', of which the oldest bucket expires every time after <window duration>/<number of buckets> and is discarded.
+ *
+ * The idea is that the values in the buckets can be used to calculate averages which are based on sufficiently long times, though sufficiently sensitive for changes. So you actually look at a window in time that slides gradually forward.
  *
  * @author Michiel Meeuwissen
  * @since 1.66
@@ -21,13 +22,13 @@ import com.google.common.collect.Range;
 public abstract class Windowed<T> {
 
     protected final T[] buckets;
-    protected final long bucketDuration;
-    protected final long totalDuration;
+    protected final long bucketDuration; // ms
+    protected final long totalDuration;  // ms
     protected final Instant start = Instant.now(); //.truncatedTo(ChronoUnit.SECONDS);
 
     private boolean warmingUp = true;
-    protected long currentBucketTime = start.toEpochMilli();
-    protected int currentBucket = 0;
+    protected long  currentBucketTime = start.toEpochMilli();
+    protected int   currentBucket = 0;
 
     /**
      * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
