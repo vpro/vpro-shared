@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -118,6 +119,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private BrowserCache resteasyBrowserCache;
 
+    private Instant initializationInstant = Instant.now();
+
 
     protected AbstractApiClient(
         String baseUrl,
@@ -218,7 +221,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public synchronized void invalidate() {
         counter.values().forEach(Counter::shutdown);
         counter.clear();
+        this.initializationInstant = Instant.now();
         this.clientHttpEngine = null;
+    }
+
+    @Override
+    public String getInitializationInstant() {
+        return initializationInstant.toString();
     }
 
     @Override
