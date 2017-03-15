@@ -559,6 +559,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return getBaseUrl() + "/";
     }
 
+    @Override
     public final String getBaseUrl() {
         return baseUrl;
     }

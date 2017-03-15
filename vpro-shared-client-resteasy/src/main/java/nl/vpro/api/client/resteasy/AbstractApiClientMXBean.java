@@ -11,6 +11,9 @@ import nl.vpro.jmx.Units;
 @MXBean
 public interface AbstractApiClientMXBean {
 
+
+    String getBaseUrl();
+
     @Units("duration")
     String getConnectionRequestTimeout();
     void setConnectionRequestTimeout(String connectionRequestTimeout);
