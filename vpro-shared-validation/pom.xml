@@ -17,7 +17,7 @@
       <!-- contains javax.validation -->
       <groupId>javax</groupId>
       <artifactId>javaee-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>com.sun.mail</groupId>
