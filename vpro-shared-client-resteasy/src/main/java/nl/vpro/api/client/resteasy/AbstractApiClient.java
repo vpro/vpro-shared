@@ -237,8 +237,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Override
     public synchronized void setConnectionRequestTimeout(String connectionRequestTimeout) {
-        this.connectionRequestTimeout = TimeUtils.parseDuration(connectionRequestTimeout).orElse(null);
-        invalidate();
+        Duration toSet = TimeUtils.parseDuration(connectionRequestTimeout).orElse(null);
+        if (! Objects.equals(this.connectionRequestTimeout, toSet)) {
+            this.connectionRequestTimeout = toSet;
+            invalidate();
+        }
     }
 
     @Override
@@ -259,8 +262,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Override
     public synchronized void setSocketTimeout(String socketTimeout) {
-        this.socketTimeout = TimeUtils.parseDuration(socketTimeout).orElse(null);
-        invalidate();
+        Duration toSet = TimeUtils.parseDuration(socketTimeout).orElse(null);
+        if (! Objects.equals(this.socketTimeout, toSet)) {
+            this.socketTimeout = toSet;
+            invalidate();
+        }
     }
 
     public MediaType getAccept() {
@@ -409,8 +415,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Override
     public void setMaxConnections(int maxConnections) {
-        this.maxConnections = maxConnections;
-        invalidate();
+        if (this.maxConnections != maxConnections) {
+            this.maxConnections = maxConnections;
+            invalidate();
+        }
     }
 
     @Override
@@ -420,8 +428,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Override
     public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
-        this.maxConnectionsPerRoute = maxConnectionsPerRoute;
-        invalidate();
+        if (this.maxConnectionsPerRoute != maxConnectionsPerRoute) {
+            this.maxConnectionsPerRoute = maxConnectionsPerRoute;
+            invalidate();
+        }
     }
 
     public Duration getConnectionInPoolTTL() {
@@ -440,8 +450,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
     @Override
     public void setCountWindow(String countWindow) {
-        this.countWindow = TimeUtils.parseDuration(countWindow).orElse(Duration.ofSeconds(30));
-        invalidate();
+        Duration toSet = TimeUtils.parseDuration(countWindow).orElse(Duration.ofSeconds(30));
+        if (! Objects.equals(toSet, this.countWindow)) {
+            this.countWindow = toSet;
+            invalidate();
+        }
     }
 
     @Override
@@ -451,8 +464,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Override
     public void setBucketCount(Integer bucketCount) {
-        this.bucketCount = bucketCount;
-        invalidate();
+        if (! Objects.equals(this.bucketCount, bucketCount)) {
+            this.bucketCount = bucketCount;
+            invalidate();
+        }
     }
 
     public Duration getWarnThreshold() {
