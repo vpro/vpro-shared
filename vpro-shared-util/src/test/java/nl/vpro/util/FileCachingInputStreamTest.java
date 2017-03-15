@@ -103,26 +103,32 @@ public class FileCachingInputStreamTest {
     @Test(expected = ClosedByInterruptException.class)
     public void testReadFileGetsInterrupted() throws IOException {
         Thread thisThread = Thread.currentThread();
-        FileCachingInputStream inputStream = FileCachingInputStream.builder()
-            .outputBuffer(2)
-            .batchSize(3)
-            .batchConsumer((f, c) -> {
-                if (c.getCount() > 300) {
-                    log.info("Interrupting");
-                    thisThread.interrupt();
-                }
-            })
-            .input(new ByteArrayInputStream(in))
-            .initialBuffer(4)
-            .startImmediately(true)
-            .build();
+        try {
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .batchConsumer((f, c) -> {
+                    if (c.getCount() > 300) {
+                        log.info("Interrupting");
+                        thisThread.interrupt();
+                    }
+                })
+                .input(new ByteArrayInputStream(in))
+                .initialBuffer(4)
+                .startImmediately(true)
+                .build();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        int r;
-        byte[] buffer = new byte[10];
-        while ((r = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, r);
+            int r;
+            byte[] buffer = new byte[10];
+            while ((r = inputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, r);
+            }
+        } catch (ClosedByInterruptException ie) {
+            throw ie;
+        } finally {
+            Thread.interrupted();
         }
     }
 
@@ -196,7 +202,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(in))
                 .initialBuffer(4)
                 .startImmediately(true)
-                .build();) {
+                .build()) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
