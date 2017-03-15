@@ -11,6 +11,9 @@ import nl.vpro.jmx.Units;
 @MXBean
 public interface AbstractApiClientMXBean {
 
+
+    String getBaseUrl();
+
     @Units("duration")
     String getConnectionRequestTimeout();
     void setConnectionRequestTimeout(String connectionRequestTimeout);
@@ -24,6 +27,8 @@ public interface AbstractApiClientMXBean {
 
     String getCountWindow();
     void setCountWindow(String s);
+    Integer getBucketCount();
+    void setBucketCount(Integer bucketCount);
 
     int getMaxConnections();
     void setMaxConnections(int maxConnections);

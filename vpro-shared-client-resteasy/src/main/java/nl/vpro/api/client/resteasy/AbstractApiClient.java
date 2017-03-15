@@ -444,6 +444,17 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         invalidate();
     }
 
+    @Override
+    public Integer getBucketCount() {
+        return bucketCount;
+    }
+
+    @Override
+    public void setBucketCount(Integer bucketCount) {
+        this.bucketCount = bucketCount;
+        invalidate();
+    }
+
     public Duration getWarnThreshold() {
         return warnThreshold;
     }
@@ -559,6 +570,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return getBaseUrl() + "/";
     }
 
+    @Override
     public final String getBaseUrl() {
         return baseUrl;
     }
