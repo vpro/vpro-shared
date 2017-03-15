@@ -27,6 +27,8 @@ public interface AbstractApiClientMXBean {
 
     String getCountWindow();
     void setCountWindow(String s);
+    Integer getBucketCount();
+    void setBucketCount(Integer bucketCount);
 
     int getMaxConnections();
     void setMaxConnections(int maxConnections);
