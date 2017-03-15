@@ -34,4 +34,6 @@ public interface AbstractApiClientMXBean {
     @Units("events/minute")
     double getRate();
 
+    String getInitializationInstant();
+
 }
