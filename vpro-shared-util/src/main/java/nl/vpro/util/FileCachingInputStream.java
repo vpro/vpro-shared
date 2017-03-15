@@ -145,20 +145,30 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        if (file == null) {
-            // the stream was small, we are reading from the memory buffer
-            return readFromBuffer();
-        } else {
-            return readFromFile();
+        try {
+            if (file == null) {
+                // the stream was small, we are reading from the memory buffer
+                return readFromBuffer();
+            } else {
+                return readFromFile();
+            }
+        } catch(IOException ioe) {
+            close();
+            throw  ioe;
         }
     }
 
     @Override
     public int read(byte b[]) throws IOException {
-        if (file == null) {
-            return readFromBuffer(b);
-        } else {
-            return readFromFile(b);
+        try {
+            if (file == null) {
+                return readFromBuffer(b);
+            } else {
+                return readFromFile(b);
+            }
+        } catch (IOException ioe){
+            close();
+            throw ioe;
         }
     }
 
