@@ -126,9 +126,7 @@ public class FileCachingInputStream extends InputStream {
                 log.info("Created {} ({} bytes written)", tempFile, c.getCount());
             })
             .batch(batchSize)
-            .batchConsumer(c -> {
-                bc.accept(this, c);
-            })
+            .batchConsumer(c -> bc.accept(this, c))
             .build();
         if (startImmediately == null || startImmediately) {
             // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
