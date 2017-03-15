@@ -33,8 +33,9 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
     }
 
     public void accept(Long... value) {
+        LongSummaryStatistics currentBucket = currentBucket();
         Arrays.stream(value)
-            .forEach(l -> currentBucket().accept(l));
+            .forEach(currentBucket::accept);
     }
 
     public LongSummaryStatistics getCombined() {
