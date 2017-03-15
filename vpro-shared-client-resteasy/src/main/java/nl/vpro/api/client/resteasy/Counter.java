@@ -42,7 +42,9 @@ public class Counter implements CounterMXBean {
             .window(countWindow)
             .bucketCount(bucketCount)
             .build();
-        AbstractApiClient.registerBean(name, this);
+        if (name != null) {
+            AbstractApiClient.registerBean(name, this);
+        }
     }
 
 
@@ -84,18 +86,20 @@ public class Counter implements CounterMXBean {
         return durations;
     }
 
-    protected void incrementAndGet() {
+    private void increment() {
         rate.newEvent();
-        count.incrementAndGet();
+        count.getAndIncrement();
     }
 
     void eventAndDuration(Duration duration) {
-        incrementAndGet();
+        increment();
         durations.accept(duration.toMillis());
     }
 
     void shutdown() {
-        AbstractApiClient.unregister(name);
+        if (name != null) {
+            AbstractApiClient.unregister(name);
+        }
     }
 
 }
