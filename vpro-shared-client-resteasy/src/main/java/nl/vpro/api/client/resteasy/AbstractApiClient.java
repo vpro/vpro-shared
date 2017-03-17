@@ -91,7 +91,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
     }
 
-    protected final String baseUrl;
+    protected String baseUrl;
 
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
@@ -144,7 +144,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.maxConnections = maxConnections;
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         this.connectionInPoolTTL = connectionInPoolTTL;
-        this.baseUrl = baseUrl == null ? null : (baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1): baseUrl);
+        setBaseUrl(baseUrl);
         this.countWindow = countWindow == null ? this.countWindow : countWindow;
         this.bucketCount = bucketCount == null ? this.bucketCount : bucketCount;
         this.warnThreshold = warnThreshold == null ? this.warnThreshold : warnThreshold;
@@ -589,6 +589,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public final String getBaseUrl() {
         return baseUrl;
     }
+
+    @Override
+    public void setBaseUrl(String url) {
+        url = url == null ? null : (url.endsWith("/") ? url.substring(0, url.length() - 1) : url);
+        if (! Objects.equals(url, this.baseUrl)) {
+            this.baseUrl = url;
+            invalidate();
+        }
+    }
+
 
     @Override
     public String getCounts() {
