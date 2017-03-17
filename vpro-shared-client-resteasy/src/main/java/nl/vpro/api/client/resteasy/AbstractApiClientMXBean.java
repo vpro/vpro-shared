@@ -13,6 +13,7 @@ public interface AbstractApiClientMXBean {
 
 
     String getBaseUrl();
+    void setBaseUrl(String url);
 
     @Units("duration")
     String getConnectionRequestTimeout();
