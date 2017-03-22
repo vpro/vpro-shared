@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch;
 
+import lombok.ToString;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -20,6 +22,7 @@ import org.slf4j.Logger;
  * @author Michiel Meeuwissen
  * @since 0.24
  */
+@ToString
 public class IndexHelper {
 
     private final Logger log;

@@ -4,6 +4,8 @@
  */
 package nl.vpro.elasticsearch;
 
+import lombok.ToString;
+
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.node.Node;
@@ -13,6 +15,7 @@ import org.elasticsearch.node.NodeBuilder;
  * @author Roelof Jan Koekoek
  * @since 3.6
  */
+@ToString
 public class LocalClientFactory implements ESClientFactory {
 
     private Node node;
