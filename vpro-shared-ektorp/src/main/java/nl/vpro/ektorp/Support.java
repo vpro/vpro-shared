@@ -1,5 +1,7 @@
 package nl.vpro.ektorp;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.impl.NameConventions;
@@ -11,16 +13,15 @@ import org.slf4j.LoggerFactory;
  * @author Michiel Meeuwissen
  * @since 3.6
  */
+@Slf4j
 public class Support<T> extends CouchDbRepositorySupport<T> {
-    private static final Logger LOG = LoggerFactory.getLogger(Support.class);
-
 
     public static <T> Support<T> getInstance(String logInfo, Class<T> type, CouchDbConnector db, boolean createIfNotExists) {
         try {
             return new Support<>(type, db, createIfNotExists);
         } catch (DbAccessException dbe) {
-            LOG.error(logInfo + " " + db.getDatabaseName() + ": " + dbe.getClass().getName() + " " + dbe.getMessage());
-            LOG.info("Will create a connector to couchdb without trying to check and create the database (supposing it is temporary down now");
+            log.error(logInfo + " " + db.getDatabaseName() + ": " + dbe.getClass().getName() + " " + dbe.getMessage());
+            log.info("Will create a connector to couchdb without trying to check and create the database (supposing it is temporary down now");
             return new Support<>(type, db, false);
         }
     }
