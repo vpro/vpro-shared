@@ -15,7 +15,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 /**
  *
  * @author roekoe
- * @version $Id$
  */
 @SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.FIELD)

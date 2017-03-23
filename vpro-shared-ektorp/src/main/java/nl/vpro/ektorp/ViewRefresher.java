@@ -1,5 +1,7 @@
 package nl.vpro.ektorp;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -21,9 +23,8 @@ import nl.vpro.util.ThreadPools;
  * @author Michiel Meeuwissen
  * @since 0.43
  */
+@Slf4j
 public class ViewRefresher implements Runnable {
-
-    private final Logger LOG = LoggerFactory.getLogger(ViewRefresher.class);
 
     final List<String> views = new ArrayList<>();
     final CouchDbConnector couchDbConnector;
@@ -65,33 +66,33 @@ public class ViewRefresher implements Runnable {
                         field.setAccessible(true);
                         Class<?> t = field.getType();
                         if (t == String.class) {
-                            LOG.info("{} is a constant in {}, taking its value {}", designDocumentId, c, field.get(null));
+                            log.info("{} is a constant in {}, taking its value {}", designDocumentId, c, field.get(null));
                             designDocumentId = (String) field.get(null);
                         }
                     } catch (NoSuchFieldException | IllegalAccessException e) {
-                        LOG.debug(e.getMessage());
+                        log.debug(e.getMessage());
                     }
                 }
             }
 
-            LOG.info("Refreshing views {}: {}", couchDbConnector.getDatabaseName(), views);
+            log.info("Refreshing views {}: {}", couchDbConnector.getDatabaseName(), views);
         } else {
-            LOG.info("Schedule rate =< 0, not scheduling, not doing anything");
+            log.info("Schedule rate =< 0, not scheduling, not doing anything");
         }
     }
 
     @Override
     public void run() {
-        LOG.info("Now refreshing views {} {}", couchDbConnector.getDatabaseName(), views);
+        log.info("Now refreshing views {} {}", couchDbConnector.getDatabaseName(), views);
         for (String view : views) {
             try {
                 couchDbConnector.queryView(new ViewQuery()
                         .designDocId(designDocumentId)
                         .viewName(view)
                         .staleOkUpdateAfter());
-                LOG.debug("Refreshed {}", view);
+                log.debug("Refreshed {}", view);
             } catch (Exception e) {
-                LOG.warn(e.getClass().getName() + " " + e.getMessage());
+                log.warn(e.getClass().getName() + " " + e.getMessage());
             }
         }
     }
