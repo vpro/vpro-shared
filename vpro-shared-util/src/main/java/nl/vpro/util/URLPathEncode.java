@@ -11,7 +11,7 @@ public class URLPathEncode {
 
 
     /**
-     * Escapes every character of the input string save the path parth of an URL.
+     * Escapes every character of the input string for the path part of an URL.
      */
     public static String encode(String input) {
         StringBuilder resultStr = new StringBuilder();
@@ -30,8 +30,8 @@ public class URLPathEncode {
     }
 
     /**
-     * Escapes every character of the input string save the path parth of an URL, but only after splitting it by /.
-     * Afterwards join with '/' again. This avoid that the / itself is escaped too, and this function can be used to escape all the constituents of a path seperately.
+     * Escapes every character of the input string for the path part of an URL, but only after splitting it by /.
+     * Afterwards join with '/' again. This avoids that the / itself is escaped too, and this function can be used to escape all the constituents of a path seperately.
      */
     public static String encodePath(String input) {
         return Arrays.stream(
