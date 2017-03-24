@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
  */
 public class URLPathEncode {
 
+
+    /**
+     * Escapes every character of the input string save the path parth of an URL.
+     */
     public static String encode(String input) {
         StringBuilder resultStr = new StringBuilder();
         for (char ch : input.toCharArray()) {
@@ -24,6 +28,11 @@ public class URLPathEncode {
         }
         return resultStr.toString();
     }
+
+    /**
+     * Escapes every character of the input string save the path parth of an URL, but only after splitting it by /.
+     * Afterwards join with '/' again. This avoid that the / itself is escaped too, and this function can be used to escape all the constituents of a path seperately.
+     */
     public static String encodePath(String input) {
         return Arrays.stream(
             input.split("/", -1))
