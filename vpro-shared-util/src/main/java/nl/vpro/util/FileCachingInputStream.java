@@ -13,11 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * When wrapping this around your inputstream, it will be read as fast a possible, but you can consume from it slower.
- * <p>
- * It will first buffer to an internal byte array (if the initial buffer size > 0, defaults to 2048). If that is too small it will buffer the result to a temporary file.
- * <p>
- * Use this if you want to consume an inputstream as fast as possible, while handing it at a slower pace. The cost is the creation of the temporary file.
+ * <p>When wrapping this around your inputstream, it will be read as fast a possible, but you can
+ * consume from it slower. </p>
+ * 
+ * <p>It will first buffer to an internal byte array (if the initial buffer size > 0, defaults to 2048). If that is too small it will buffer the result to a temporary file.
+ * </p>
+ * <p>Use this if you want to consume an inputstream as fast as possible, while handing it at a 
+ *  slower pace. The cost is the creation of the temporary file.</p>
  *
  * @author Michiel Meeuwissen
  * @since 0.50
