@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.Builder;
+import lombok.ToString;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -12,6 +13,7 @@ import java.util.function.BiFunction;
  * @author Michiel Meeuwissen
  * @since 1.68
  */
+@ToString
 public class SkippingIterator<T> implements Iterator<T> {
 
     private final Iterator<T> wrapped;
