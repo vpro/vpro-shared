@@ -1,7 +1,5 @@
 package nl.vpro.api.client.resteasy;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
@@ -14,11 +12,12 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 
+import org.slf4j.Logger;
+
 /**
  * @author Michiel Meeuwissen
  * @since 1.65
  */
-@Slf4j
 class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
 
     private final Map<String, Counter> counts;
@@ -26,15 +25,17 @@ class CountFilter implements ClientRequestFilter, ClientResponseFilter  {
     private final Duration countWindow;
     private final Integer bucketCount;
     private final long warnThresholdNanos;
+    private final Logger log;
 
 
 
-    CountFilter(Map<String, Counter> counter, Duration countWindow, Integer bucketCount, Duration warnThreshold, ObjectName name) {
+    CountFilter(Map<String, Counter> counter, Duration countWindow, Integer bucketCount, Duration warnThreshold, ObjectName name, Logger log) {
         this.counts = counter;
         this.name = name;
         this.countWindow = countWindow;
         this.bucketCount = bucketCount;
         this.warnThresholdNanos = warnThreshold.toNanos();
+        this.log = log;
     }
 
     @Override
