@@ -104,8 +104,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     Duration connectTimeout;
     Duration socketTimeout;
 
-    private int maxConnections;
-    private int maxConnectionsPerRoute;
+    private Integer maxConnections;
+    private Integer maxConnectionsPerRoute;
     Duration connectionInPoolTTL;
     protected final Map<String, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofSeconds(300);
@@ -165,8 +165,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
-        int maxConnections,
-        int maxConnectionsPerRoute,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
         Duration connectionInPoolTTL,
         Duration countWindow,
         Duration warnThreshold,
@@ -186,8 +186,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
-        int maxConnections,
-        int maxConnectionsPerRoute,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
         Duration connectionInPoolTTL,
         Duration countWindow,
         List<Locale> acceptableLanguages,
@@ -197,7 +197,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, trustAll);
     }
 
-    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, int maxConnections, int maxConnectionsPerRoute, Integer connectionInPoolTTL) {
+    protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(baseUrl,
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
@@ -330,8 +330,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
-        int maxConnections,
-        int maxConnectionsPerRoute,
+        Integer maxConnections,
+        Integer  maxConnectionsPerRoute,
         Duration connectionInPoolTTL) {
         SocketConfig socketConfig = SocketConfig.custom()
             .setTcpNoDelay(true)
@@ -340,6 +340,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             .build();
 
         PoolingHttpClientConnectionManager connectionManager = null;
+        if (maxConnections == null) {
+            maxConnections = 0;
+        }
+        if (maxConnectionsPerRoute == null) {
+            maxConnectionsPerRoute = 0;
+        }
         if (connectionInPoolTTL != null) {
             connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
             if (maxConnections > 0) {
