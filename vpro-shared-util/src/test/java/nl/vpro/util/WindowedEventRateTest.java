@@ -109,7 +109,7 @@ public class WindowedEventRateTest {
         }
         assertThat(rate.isWarmingUp()).isFalse();
         Long relevantDuration = rate.getRelevantDuration().toMillis();
-        assertThat(relevantDuration).isLessThan(1500);
+        assertThat(relevantDuration).isLessThanOrEqualTo(1500);
         assertThat(relevantDuration).isGreaterThan(1500 - rate.getBucketDuration().toMillis());
 
         double rateAfterWarmup = rate.getRate(TimeUnit.SECONDS);
