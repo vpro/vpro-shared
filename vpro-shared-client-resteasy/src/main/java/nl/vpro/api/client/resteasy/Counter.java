@@ -31,7 +31,7 @@ public class Counter implements CounterMXBean {
     protected Counter(
         ObjectName name,
         Duration countWindow,
-        int bucketCount
+        Integer bucketCount
         ) {
         this.name = name;
         rate = WindowedEventRate.builder()
