@@ -1,7 +1,5 @@
 package nl.vpro.api.client.resteasy;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -11,28 +9,31 @@ import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.slf4j.Logger;
+
 /**
  * Wraps all calls to register some statistics.
  * @author Michiel Meeuwissen
  * @since 1.57
  */
-@Slf4j
 class CountAspect<T> implements InvocationHandler {
 
     static ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
 
+    private final Logger log;
     private final T proxied;
     private final Map<String, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
     private final Integer bucketCount;
 
-    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name) {
+    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name, Logger log) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
         this.countWindow = countWindow;
         this.bucketCount = bucketCount;
+        this.log = log;
     }
 
     @Override
@@ -76,10 +77,13 @@ class CountAspect<T> implements InvocationHandler {
         Map<String, Counter> counter,
         Duration countWindow,
         Integer bucketCount,
-        ObjectName name, Class<T> restInterface, T service) {
+        ObjectName name, Class<T> restInterface,
+        T service,
+        Logger log
+        ) {
         return (T) Proxy.newProxyInstance(CountAspect.class.getClassLoader(),
             new Class[]{restInterface},
-            new CountAspect<T>(service, counter, countWindow, bucketCount, name));
+            new CountAspect<T>(service, counter, countWindow, bucketCount, name, log));
     }
 
     static class Local {

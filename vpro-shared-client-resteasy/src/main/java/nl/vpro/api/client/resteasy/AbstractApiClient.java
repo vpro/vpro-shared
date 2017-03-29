@@ -127,8 +127,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
-        int maxConnections,
-        int maxConnectionsPerRoute,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
         Duration connectionInPoolTTL,
         Duration countWindow,
         Integer bucketCount,
@@ -520,7 +520,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy);
+        return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
@@ -559,7 +559,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 .register(JacksonContextResolver.class);
         builder.register(new AcceptRequestFilter(mediaType));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
-        builder.register(new CountFilter(counter, countWindow, bucketCount, warnThreshold, getObjectName()));
+        builder.register(new CountFilter(counter, countWindow, bucketCount, warnThreshold, getObjectName(), log));
 
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 
