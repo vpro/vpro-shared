@@ -8,6 +8,9 @@ import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 
 /**
+ * Given some API which supplies only 'batched' retrieval (so with offset and max/batchsize parameters),
+ * access such an API as an iterator to visit all elements.
+ *
  * @author Michiel Meeuwissen
  * @since 1.68
  */
