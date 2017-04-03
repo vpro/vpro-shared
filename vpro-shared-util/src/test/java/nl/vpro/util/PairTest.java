@@ -11,13 +11,16 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 public class PairTest {
 
     @Test
-    public void tostring() {
+    public void test() {
         Pair<String, String> pair = Pair.<String, String>builder()
             .first("a")
             .second("b")
             .build();
 
         assertThat(pair.toString()).isEqualTo("(first=a, second=b)");
+        assertThat(pair.getFirst()).isEqualTo("a");
+        assertThat(pair.getSecond()).isEqualTo("b");
+
 
     }
 
