@@ -13,9 +13,11 @@ import lombok.Data;
 @Builder
 public class Pair<F, S> {
     private F first;
+    @Builder.Default
     private String firstDescription = "first";
 
     private S second;
+    @Builder.Default
     private String secondDescription = "second";
 
     @Override
