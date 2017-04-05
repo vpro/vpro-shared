@@ -58,6 +58,9 @@ public class TimeUtilsTest {
         assertThat(TimeUtils.parseDuration("-2M").get()).isEqualTo(Duration.ofSeconds(-120));
 
 
+        assertThat(TimeUtils.parseDuration("P10D").get()).isEqualTo(Duration.ofHours(240));
+
+
         assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
 
 
