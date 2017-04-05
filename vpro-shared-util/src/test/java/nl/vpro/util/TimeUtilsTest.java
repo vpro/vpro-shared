@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.45
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class TimeUtilsTest {
 
 
