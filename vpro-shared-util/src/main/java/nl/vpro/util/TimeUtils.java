@@ -108,6 +108,10 @@ public class TimeUtils {
         return Optional.ofNullable(i == null ? null : Duration.ofMillis(i.getTime()));
     }
 
+    public static Duration durationOf(javax.xml.datatype.Duration d) {
+        return d == null ? null : Duration.parse(d.toString());
+    }
+
     public static Date asDate(Duration duration) {
         return duration == null ? null : new Date(duration.toMillis());
     }
