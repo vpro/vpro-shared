@@ -1,9 +1,9 @@
 package nl.vpro.api.client.resteasy;
 
-import java.time.Duration;
-
 import org.assertj.core.data.Percentage;
 import org.junit.Test;
+
+import java.time.Duration;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -25,7 +25,7 @@ public class CounterTest {
         Thread.sleep(500);
 
         // 1 event in .5 seconds is about 120 /min.
-        assertThat(counter.getRate()).isCloseTo(120, Percentage.withPercentage(20));
+        assertThat(counter.getRate()).isCloseTo(120, Percentage.withPercentage(30));
 
         assertThat(counter.getAverageDuration()).isEqualTo("PT0.5S");
 
