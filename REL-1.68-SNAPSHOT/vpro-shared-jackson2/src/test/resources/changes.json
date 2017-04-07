@@ -1,0 +1,780 @@
+{
+    "size": 14,
+    "changes": [
+    {
+        "sequence": 724,
+        "revision": 2,
+        "mid": "POMS_NCRV_1138990",
+        "deleted": true
+    },
+      "Een string",
+      null,
+    {
+        "sequence": 3660,
+        "revision": 2,
+        "mid": "POMS_AVRO_1138559",
+        "deleted": true
+    },
+    "some error",
+    {
+        "sequence": 3661,
+        "revision": 2,
+        "mid": "POMS_AVRO_1138560",
+        "deleted": true
+    },
+    {
+        "sequence": 4000,
+        "revision": 1,
+        "mid": "POMS_VPRO_1139774",
+        "deleted": false,
+        "media": {
+            "objectType": "program",
+            "mid": "POMS_VPRO_1139774",
+            "creationDate": 1396061002808,
+            "lastModified": 1398759143568,
+            "sortDate": 1398722400000,
+            "urn": "urn:vpro:media:program:39326270",
+            "embeddable": true,
+            "descriptions": [1]
+
+        }
+    },
+    {
+        "sequence": 5419,
+        "revision": 1,
+        "mid": "POMS_VPRO_1139774",
+        "deleted": false,
+        "media": {
+            "objectType": "program",
+            "mid": "POMS_VPRO_1139774",
+            "creationDate": 1396061002808,
+            "lastModified": 1398759143568,
+            "sortDate": 1398722400000,
+            "urn": "urn:vpro:media:program:39326270",
+            "embeddable": true,
+            "episodeOf": [
+                {
+                    "midRef": "POMS_S_VPRO_449041",
+                    "urnRef": "urn:vpro:media:group:33644950",
+                    "type": "SERIES",
+                    "index": 1,
+                    "highlighted": false,
+                    "added": 1396061004445
+                }
+            ],
+            "crids": ["crid://broadcast.radiobox2/278049"],
+            "broadcasters": [
+                {
+                    "id": "VPRO",
+                    "value": "VPRO"
+                }
+            ],
+            "titles": [
+                {
+                    "value": "Nooit Meer Slapen",
+                    "owner": "RADIOBOX",
+                    "type": "MAIN"
+                }
+            ],
+            "descriptions": [
+                {
+                    "value": "Actrice, columniste en schrijfster Tosca Niterink is in het eerste uur te gast om te vertellen over haar boek 'De Vergeetclub'. En Jungle by Night presenteerde afgelopen weekend hun tweede plaat 'The Hunt', en trapte een internationale tournee af. Botte Jellema bezocht het optreden en sprak daar met de band. Verder reageert schrijfster Saskia de Coster met fictie op het nieuws van de dag en correspondent Eva de Valk bericht vanuit San Francisco over de muurschilderingen in Mission District. Ook onderzoeken we het fenomeen 'indie games' met journalist Niels 't Hooft en game-ontwikkelaar Rami Ismail.",
+                    "owner": "RADIOBOX",
+                    "type": "MAIN"
+                }
+            ],
+            "genres": [],
+            "countries": [],
+            "languages": [],
+            "duration": 7200000,
+            "descendantOf": [
+                {
+                    "midRef": "POMS_S_VPRO_449041",
+                    "urnRef": "urn:vpro:media:group:33644950",
+                    "type": "SERIES"
+                }
+            ],
+            "email": ["nooitmeerslapen@vpro.nl"],
+            "websites": [
+                {
+                    "value": "http://www.radio1.nl/nooitmeerslapen"
+                }
+            ],
+            "locations": [
+                {
+                    "programUrl": "http://download.omroep.nl/audiologging/r1/2014/04/29/0000_0200_nooit_meer_slapen_20140429.mp3",
+                    "avAttributes": {
+                        "avFileFormat": "MP3"
+                    },
+                    "duration": 7200000,
+                    "creationDate": 1398759137893,
+                    "lastModified": 1398759143567,
+                    "workflow": "PUBLISHED",
+                    "owner": "RADIOBOX",
+                    "urn": "urn:vpro:media:location:40652422"
+                }
+            ],
+            "scheduleEvents": [
+                {
+                    "start": 1398722400000,
+                    "duration": 7200000,
+                    "poProgID": "POMS_VPRO_1139774",
+                    "channel": "RAD1",
+                    "urnRef": "urn:vpro:media:program:39326270",
+                    "midRef": "POMS_VPRO_1139774"
+                }
+            ],
+            "images": [
+                {
+                    "title": "nms_itunes_profiel.jpg",
+                    "description": "Nooit Meer Slapen",
+                    "imageUri": "urn:vpro:image:226081",
+                    "creationDate": 1398757654108,
+                    "lastModified": 1398757656461,
+                    "workflow": "PUBLISHED",
+                    "owner": "RADIOBOX",
+                    "type": "PICTURE",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:40644427"
+                }
+            ],
+            "workflow": "PUBLISHED",
+            "type": "BROADCAST",
+            "avType": "AUDIO"
+        }
+    },
+    {
+        "sequence": 6629,
+        "revision": 4,
+        "mid": "POMS_VPRO_1139787",
+        "deleted": false,
+        "media": {
+            "objectType": "program",
+            "mid": "POMS_VPRO_1139787",
+            "creationDate": 1396061002808,
+            "lastModified": 1398760426214,
+            "sortDate": 1398722400000,
+            "urn": "urn:vpro:media:program:39326270",
+            "embeddable": true,
+            "episodeOf": [
+                {
+                    "midRef": "POMS_S_VPRO_449041",
+                    "urnRef": "urn:vpro:media:group:33644950",
+                    "type": "SERIES",
+                    "index": 1,
+                    "highlighted": false,
+                    "added": 1396061004445
+                }
+            ],
+            "crids": ["crid://broadcast.radiobox2/278049"],
+            "broadcasters": [
+                {
+                    "id": "VPRO",
+                    "value": "VPRO"
+                }
+            ],
+            "titles": [
+                {
+                    "value": "Nooit Meer Slapen",
+                    "owner": "RADIOBOX",
+                    "type": "MAIN"
+                }
+            ],
+            "descriptions": [
+                {
+                    "value": "Actrice, columniste en schrijfster Tosca Niterink is in het eerste uur te gast om te vertellen over haar boek 'De Vergeetclub'. En Jungle by Night presenteerde afgelopen weekend hun tweede plaat 'The Hunt', en trapte een internationale tournee af. Botte Jellema bezocht het optreden en sprak daar met de band. Verder reageert schrijfster Saskia de Coster met fictie op het nieuws van de dag en correspondent Eva de Valk bericht vanuit San Francisco over de muurschilderingen in Mission District. Ook onderzoeken we het fenomeen 'indie games' met journalist Niels 't Hooft en game-ontwikkelaar Rami Ismail.",
+                    "owner": "RADIOBOX",
+                    "type": "MAIN"
+                }
+            ],
+            "genres": [],
+            "countries": [],
+            "languages": [],
+            "duration": 7200000,
+            "descendantOf": [
+                {
+                    "midRef": "POMS_S_VPRO_449041",
+                    "urnRef": "urn:vpro:media:group:33644950",
+                    "type": "SERIES"
+                }
+            ],
+            "email": ["nooitmeerslapen@vpro.nl"],
+            "websites": [
+                {
+                    "value": "http://www.radio1.nl/nooitmeerslapen"
+                }
+            ],
+            "locations": [
+                {
+                    "programUrl": "http://download.omroep.nl/audiologging/r1/2014/04/29/0000_0200_nooit_meer_slapen_20140429.mp3",
+                    "avAttributes": {
+                        "avFileFormat": "MP3"
+                    },
+                    "duration": 7200000,
+                    "creationDate": 1398759137893,
+                    "lastModified": 1398759143567,
+                    "workflow": "PUBLISHED",
+                    "owner": "RADIOBOX",
+                    "urn": "urn:vpro:media:location:40652422"
+                }
+            ],
+            "scheduleEvents": [
+                {
+                    "start": 1398722400000,
+                    "duration": 7200000,
+                    "poProgID": "POMS_VPRO_1139787",
+                    "channel": "RAD1",
+                    "urnRef": "urn:vpro:media:program:39326270",
+                    "midRef": "POMS_VPRO_1139787"
+                }
+            ],
+            "images": [
+                {
+                    "title": "nms_itunes_profiel.jpg",
+                    "description": "Nooit Meer Slapen",
+                    "imageUri": "urn:vpro:image:226081",
+                    "creationDate": 1398757654108,
+                    "lastModified": 1398757656461,
+                    "workflow": "PUBLISHED",
+                    "owner": "RADIOBOX",
+                    "type": "PICTURE",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:40644427"
+                }
+            ],
+            "workflow": "PUBLISHED",
+            "segments": [
+                {
+                    "objectType": "segment",
+                    "mid": "POMS_VPRO_1139788",
+                    "creationDate": 1398760359009,
+                    "lastModified": 1398760426214,
+                    "sortDate": 1398722400000,
+                    "urn": "urn:vpro:media:segment:40658898",
+                    "embeddable": true,
+                    "crids": ["crid://fragment.radiobox2/142297"],
+                    "broadcasters": [
+                        {
+                            "id": "VPRO",
+                            "value": "VPRO"
+                        }
+                    ],
+                    "titles": [
+                        {
+                            "value": "Tosca Niterink's nieuwe boek: De Vergeetclub",
+                            "owner": "RADIOBOX",
+                            "type": "MAIN"
+                        }
+                    ],
+                    "descriptions": [
+                        {
+                            "value": "De dementerende moeder van Tosca Niterink doet samen met acht andere dames op leeftijd aan kleinschalig wonen achter een cijferslot, voor hun eigen veiligheid. In het boek 'De Vergeetclub' beschrijft de actrice, die vooral bekend werd door haar aandeel in 'Theo en Thea', 'Kreatief met Kurk' en 'Borreltijd', met oog voor het absurde, de uitgesproken karakters van de dames en de verwikkelingen die daaruit voortkomen. Actrice, columniste en schrijfster Tosca Niterink vertelt over haar boek.",
+                            "owner": "RADIOBOX",
+                            "type": "MAIN"
+                        }
+                    ],
+                    "genres": [],
+                    "countries": [],
+                    "languages": [],
+                    "duration": 3365000,
+                    "descendantOf": [
+                        {
+                            "midRef": "POMS_S_VPRO_449041",
+                            "urnRef": "urn:vpro:media:group:33644950",
+                            "type": "SERIES"
+                        },
+                        {
+                            "midRef": "POMS_VPRO_1139787",
+                            "urnRef": "urn:vpro:media:program:39326270",
+                            "type": "BROADCAST"
+                        }
+                    ],
+                    "locations": [
+                        {
+                            "programUrl": "http://radiobox2.omroep.nl/audiofragment/file/142297/fragment.mp3",
+                            "avAttributes": {
+                                "avFileFormat": "MP3"
+                            },
+                            "duration": 3365000,
+                            "creationDate": 1398760346008,
+                            "lastModified": 1398760359138,
+                            "workflow": "PUBLISHED",
+                            "owner": "RADIOBOX",
+                            "urn": "urn:vpro:media:location:40658902"
+                        }
+                    ],
+                    "images": [
+                        {
+                            "title": "devergeetclub.jpg",
+                            "description": "Tosca Niterink's nieuwe boek: De Vergeetclub",
+                            "imageUri": "urn:vpro:image:251307",
+                            "creationDate": 1398760357411,
+                            "lastModified": 1398760359137,
+                            "workflow": "PUBLISHED",
+                            "owner": "RADIOBOX",
+                            "type": "PICTURE",
+                            "highlighted": false,
+                            "urn": "urn:vpro:media:image:40658900"
+                        }
+                    ],
+                    "workflow": "PUBLISHED",
+                    "start": 159000,
+                    "urnRef": "urn:vpro:media:program:39326270",
+                    "midRef": "POMS_VPRO_1139787",
+                    "type": "SEGMENT",
+                    "avType": "AUDIO"
+                },
+                {
+                    "objectType": "segment",
+                    "mid": "POMS_VPRO_1139789",
+                    "creationDate": 1398760397576,
+                    "lastModified": 1398760426214,
+                    "sortDate": 1398722400000,
+                    "urn": "urn:vpro:media:segment:40658921",
+                    "embeddable": true,
+                    "crids": ["crid://fragment.radiobox2/142299"],
+                    "broadcasters": [
+                        {
+                            "id": "VPRO",
+                            "value": "VPRO"
+                        }
+                    ],
+                    "titles": [
+                        {
+                            "value": "De kleinschalige kant van de game industrie: 'indie games'",
+                            "owner": "RADIOBOX",
+                            "type": "MAIN"
+                        }
+                    ],
+                    "descriptions": [
+                        {
+                            "value": "Videogames zijn een miljardenindustrie geworden. Maar deze industrie heeft ook een meer kleinschalige kant: 'indie games'. Nederland is sterk vertegenwoordigd in dit genre. Het zijn video games die door individuen of kleine teams worden ontwikkeld, meestal zonder financiële steun van een uitgever. We onderzoeken het fenomeen met journalist Niels 't Hooft en game-ontwikkelaar Rami Ismail.",
+                            "owner": "RADIOBOX",
+                            "type": "MAIN"
+                        }
+                    ],
+                    "genres": [],
+                    "countries": [],
+                    "languages": [],
+                    "duration": 971000,
+                    "descendantOf": [
+                        {
+                            "midRef": "POMS_S_VPRO_449041",
+                            "urnRef": "urn:vpro:media:group:33644950",
+                            "type": "SERIES"
+                        },
+                        {
+                            "midRef": "POMS_VPRO_1139787",
+                            "urnRef": "urn:vpro:media:program:39326270",
+                            "type": "BROADCAST"
+                        }
+                    ],
+                    "locations": [
+                        {
+                            "programUrl": "http://radiobox2.omroep.nl/audiofragment/file/142299/fragment.mp3",
+                            "avAttributes": {
+                                "avFileFormat": "MP3"
+                            },
+                            "duration": 971000,
+                            "creationDate": 1398760371060,
+                            "lastModified": 1398760397659,
+                            "workflow": "PUBLISHED",
+                            "owner": "RADIOBOX",
+                            "urn": "urn:vpro:media:location:40658925"
+                        }
+                    ],
+                    "images": [
+                        {
+                            "title": "indiegames.jpg",
+                            "description": "De kleinschalige kant van de game industrie: 'indie games'",
+                            "imageUri": "urn:vpro:image:251308",
+                            "creationDate": 1398760386849,
+                            "lastModified": 1398760397658,
+                            "workflow": "PUBLISHED",
+                            "owner": "RADIOBOX",
+                            "type": "PICTURE",
+                            "highlighted": false,
+                            "urn": "urn:vpro:media:image:40658923"
+                        }
+                    ],
+                    "workflow": "PUBLISHED",
+                    "start": 4336000,
+                    "urnRef": "urn:vpro:media:program:39326270",
+                    "midRef": "POMS_VPRO_1139787",
+                    "type": "SEGMENT",
+                    "avType": "AUDIO"
+                },
+                {
+                    "objectType": "segment",
+                    "mid": "POMS_VPRO_1139790",
+                    "creationDate": 1398760397577,
+                    "lastModified": 1398760426214,
+                    "sortDate": 1398722400000,
+                    "urn": "urn:vpro:media:segment:40658927",
+                    "embeddable": true,
+                    "crids": ["crid://fragment.radiobox2/142298"],
+                    "broadcasters": [
+                        {
+                            "id": "VPRO",
+                            "value": "VPRO"
+                        }
+                    ],
+                    "titles": [
+                        {
+                            "value": "Jungle by Night's tweede album The Hunt",
+                            "owner": "RADIOBOX",
+                            "type": "MAIN"
+                        }
+                    ],
+                    "descriptions": [
+                        {
+                            "value": "Negen Amsterdamse jongens bestormden drie jaar geleden alle festivalpodia van Nederland en ver daarbuiten. Ze waren een opvallend succes met hun Afrobeat. Jungle by Night presenteerde afgelopen weekend hun tweede plaat, The Hunt, en trapte een internationale tournee af. Botte Jellema bezocht het optreden en sprak daar met de band.",
+                            "owner": "RADIOBOX",
+                            "type": "MAIN"
+                        }
+                    ],
+                    "genres": [],
+                    "countries": [],
+                    "languages": [],
+                    "duration": 921000,
+                    "descendantOf": [
+                        {
+                            "midRef": "POMS_S_VPRO_449041",
+                            "urnRef": "urn:vpro:media:group:33644950",
+                            "type": "SERIES"
+                        },
+                        {
+                            "midRef": "POMS_VPRO_1139787",
+                            "urnRef": "urn:vpro:media:program:39326270",
+                            "type": "BROADCAST"
+                        }
+                    ],
+                    "locations": [
+                        {
+                            "programUrl": "http://radiobox2.omroep.nl/audiofragment/file/142298/fragment.mp3",
+                            "avAttributes": {
+                                "avFileFormat": "MP3"
+                            },
+                            "duration": 921000,
+                            "creationDate": 1398760371060,
+                            "lastModified": 1398760397662,
+                            "workflow": "PUBLISHED",
+                            "owner": "RADIOBOX",
+                            "urn": "urn:vpro:media:location:40658931"
+                        }
+                    ],
+                    "images": [
+                        {
+                            "title": "junglebynight.jpg",
+                            "description": "Jungle by Night's tweede album The Hunt",
+                            "imageUri": "urn:vpro:image:251309",
+                            "creationDate": 1398760395326,
+                            "lastModified": 1398760397661,
+                            "workflow": "PUBLISHED",
+                            "owner": "RADIOBOX",
+                            "type": "PICTURE",
+                            "highlighted": false,
+                            "urn": "urn:vpro:media:image:40658929"
+                        }
+                    ],
+                    "workflow": "PUBLISHED",
+                    "start": 6230000,
+                    "urnRef": "urn:vpro:media:program:39326270",
+                    "midRef": "POMS_VPRO_1139787",
+                    "type": "SEGMENT",
+                    "avType": "AUDIO"
+                }
+            ],
+            "type": "BROADCAST",
+            "avType": "AUDIO"
+        }
+    },
+    {
+        "sequence": 10553,
+        "revision": 2,
+        "mid": "POW_00039706",
+        "deleted": false,
+        "media": {
+            "objectType": "program",
+            "mid": "POW_00039706",
+            "creationDate": 1279283049485,
+            "lastModified": 1398764908532,
+            "sortDate": 1140732900000,
+            "urn": "urn:vpro:media:program:3030437",
+            "embeddable": true,
+            "episodeOf": [
+                {
+                    "midRef": "POW_00039674",
+                    "urnRef": "urn:vpro:media:group:19690815",
+                    "type": "SEASON",
+                    "index": 3,
+                    "highlighted": false,
+                    "added": 1359627207372
+                }
+            ],
+            "crids": ["crid://tmp.program.omroep.nl/2621725"],
+            "broadcasters": [
+                {
+                    "id": "VPRO",
+                    "value": "VPRO"
+                },
+                {
+                    "id": "IKON",
+                    "value": "IKON"
+                }
+            ],
+            "titles": [
+                {
+                    "value": "De Donderdag Documentaire",
+                    "owner": "BROADCASTER",
+                    "type": "MAIN"
+                },
+                {
+                    "value": "De Donderdag Documentaire: Dorpsbelangen",
+                    "owner": "NEBO",
+                    "type": "MAIN"
+                },
+                {
+                    "value": "Dorpsbelangen",
+                    "owner": "BROADCASTER",
+                    "type": "SUB"
+                }
+            ],
+            "descriptions": [
+                {
+                    "value": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "owner": "BROADCASTER",
+                    "type": "MAIN"
+                },
+                {
+                    "value": "Documentaire aan de vooravond van de gemeenteraadsverkiezingen van 2006. 'Als ik hier de baas was, zou ik de boel al lang hebben volgebouwd! We moeten niet van heel Nederland een natuurgebied willen maken.' Eric van der Veen, gemeenteraadslid van Maasdriel, zit op de bank bij collega-gemeenteraadslid Ko Hooijmans. Het uitzicht is adembenemend: natuur zo ver je kijken kunt. Hooijmans haalt wat gegeneerd zijn schouders op. Gaat zijn collega niet wat ver voor het oog van de camera? In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Filmmaakster Marieke van der Winden dompelde zich een jaar lang onder in de gemeentelijke politiek van Maasdriel en portretteerde vier gemeenteraadsleden. Ondernemer Eric van der Veen heeft als fractievoorzitter van Gemeentebelangen Maasdriel een flinke vinger in de pap van de plaatselijke politiek. Hij is onder meer eigenaar van de apparatuur van de plaatselijke omroep. Zijn nieuwste plan is de plaatsing van een zendmast. Hij realiseert zich maar al te goed hoe belangrijk de media zijn voor zijn positie. Van der Veen is een echte lobbyist en netwerker. Net als veel andere gemeenteraadsleden én de burgemeester doet hij bij de plaatselijke kapper de laatste dorpsnieuwtjes en -roddels op. Aannemer Jan van Boxtel van het CDA weet heel goed hoe hij zijn achterban aan zich kan binden: via de kerk. In het parochiebestuur én in de gemeenteraad beijvert hij zich onder meer voor het onderhoud van de kerk en andere monumenten. Daar vloeien vaak ook weer leuke opdrachten uit voort. Daarnaast doet hij, samen met zijn vrouw, goede werken zoals het rondbrengen van warme maaltijden. Het levert deze man van geen woorden maar daden veel goodwill én stemmen op. Naast de bouwsector is de agrarische sector een belangrijke economische tak van sport in dit gebied. Ook Ko Hooijmans van de VVD verdient er als champignonkweker een goede boterham in. Op de plek van het huis van zijn ouders heeft hij onlangs een villa laten neerzetten. Hooijmans laat",
+                    "owner": "NEBO",
+                    "type": "MAIN"
+                },
+                {
+                    "value": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "owner": "BROADCASTER",
+                    "type": "SHORT"
+                },
+                {
+                    "value": "Documentaire over een jaar lang gemeentelijke politiek in Maasdriel. Met portretten van vier gemeenteraadsleden. Hier gelden andere, meer persoonlijke belangen. Als je een invloedrijke familie hebt, eigenaar bent van een bedrijf of aan het hoofd staat van de kerk, heb je een streepje voor.",
+                    "owner": "NEBO",
+                    "type": "SHORT"
+                },
+                {
+                    "value": "Titel: Dorpsbelangen - Documentaire aan de vooravond van de gemeenteraadsverkiezingen van 2006. 'Als ik hier de baas was, zou ik de boel al lang hebben volgebouwd! We moeten niet van heel Nederland een natuurgebied willen maken.' Eric van der Veen, gemeenteraadslid van Maasdriel, zit op de bank bij collega-gemeenteraadslid Ko Hooijmans. Het uitzicht is adembenemend: natuur zo ver je kijken kunt. Hooijmans haalt wat gegeneerd zijn schouders op. Gaat zijn collega niet wat ver voor het oog van de camera? In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Filmmaakster Marieke van der Winden dompelde zich een jaar lang onder in de gemeentelijke politiek van Maasdriel en portretteerde vier gemeenteraadsleden.",
+                    "owner": "BROADCASTER",
+                    "type": "EPISODE"
+                },
+                {
+                    "value": "Documentaire aan de vooravond van de gemeenteraadsverkiezingen van 2006. 'Als ik hier de baas was, zou ik de boel al lang hebben volgebouwd! We moeten niet van heel Nederland een natuurgebied willen maken.' Eric van der Veen, gemeenteraadslid van Maasdriel, zit op de bank bij collega-gemeenteraadslid Ko Hooijmans. Het uitzicht is adembenemend: natuur zo ver je kijken kunt. Hooijmans haalt wat gegeneerd zijn schouders op. Gaat zijn collega niet wat ver voor het oog van de camera? In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Filmmaakster Marieke van der Winden dompelde zich een jaar lang onder in de gemeentelijke politiek van Maasdriel en portretteerde vier gemeenteraadsleden. Ondernemer Eric van der Veen heeft als fractievoorzitter van Gemeentebelangen Maasdriel een flinke vinger in de pap van de plaatselijke politiek. Hij is onder meer eigenaar van de apparatuur van de plaatselijke omroep. Zijn nieuwste plan is de plaatsing van een zendmast. Hij realiseert zich maar al te goed hoe belangrijk de media zijn voor zijn positie. Van der Veen is een echte lobbyist en netwerker. Net als veel andere gemeenteraadsleden én de burgemeester doet hij bij de plaatselijke kapper de laatste dorpsnieuwtjes en -roddels op. Aannemer Jan van Boxtel van het CDA weet heel goed hoe hij zijn achterban aan zich kan binden: via de kerk. In het parochiebestuur én in de gemeenteraad beijvert hij zich onder meer voor het onderhoud van de kerk en andere monumenten. Daar vloeien vaak ook weer leuke opdrachten uit voort. Daarnaast doet hij, samen met zijn vrouw, goede werken zoals het rondbrengen van warme maaltijden. Het levert deze man van geen woorden maar daden veel goodwill én stemmen op. Naast de bouwsector is de agrarische sector een belangrijke economische tak van sport in dit gebied. Ook Ko Hooijmans van de VVD verdient er als champignonkweker een goede boterham in. Op de plek van het huis van zijn ouders heeft hij onlangs een villa laten neerzetten. Hooijmans laat Regie: Marieke van der Winden.",
+                    "owner": "NEBO",
+                    "type": "EPISODE"
+                }
+            ],
+            "genres": [
+                {
+                    "id": "3.0.1.8",
+                    "terms": ["Documentaire"]
+                }
+            ],
+            "countries": [],
+            "languages": [],
+            "avAttributes": {
+                "videoAttributes": {
+                    "aspectRatio": "4:3"
+                }
+            },
+            "duration": 3300000,
+            "descendantOf": [
+                {
+                    "midRef": "POW_00039674",
+                    "urnRef": "urn:vpro:media:group:19690815",
+                    "type": "SEASON"
+                },
+                {
+                    "midRef": "POMS_S_HUMAN_105498",
+                    "urnRef": "urn:vpro:media:group:3029741",
+                    "type": "SERIES"
+                }
+            ],
+            "ageRating": "ALL",
+            "predictions": [
+                {
+                    "state": "REALIZED",
+                    "publishStart": 1136070000000,
+                    "platform": "INTERNETVOD"
+                }
+            ],
+            "locations": [
+                {
+                    "programUrl": "http://cgi.omroep.nl/cgi-bin/streams?/tv/ikon/dedonderdagdocumentaire/sb.20060223.asf",
+                    "avAttributes": {
+                        "bitrate": 204800,
+                        "avFileFormat": "WM",
+                        "videoAttributes": {
+                            "videoCoding": "WM",
+                            "aspectRatio": "4:3"
+                        }
+                    },
+                    "creationDate": 1279283049534,
+                    "lastModified": 1359627207340,
+                    "publishStart": 1136070000000,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "urn": "urn:vpro:media:location:3030448"
+                },
+                {
+                    "programUrl": "http://cgi.omroep.nl/cgi-bin/streams?/tv/ikon/dedonderdagdocumentaire/bb.20060223.asf",
+                    "avAttributes": {
+                        "bitrate": 512000,
+                        "avFileFormat": "WM",
+                        "videoAttributes": {
+                            "videoCoding": "WM",
+                            "aspectRatio": "4:3"
+                        }
+                    },
+                    "creationDate": 1279283049546,
+                    "lastModified": 1359627207340,
+                    "publishStart": 1136070000000,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "urn": "urn:vpro:media:location:3030451"
+                }
+            ],
+            "scheduleEvents": [
+                {
+                    "avAttributes": {
+                        "bitrate": 0,
+                        "avFileFormat": "WM",
+                        "videoAttributes": {
+                            "videoCoding": "WM",
+                            "aspectRatio": "4:3"
+                        }
+                    },
+                    "textSubtitles": "Teletekst ondertitels",
+                    "start": 1140732900000,
+                    "duration": 3300000,
+                    "poProgID": "POW_00039706",
+                    "channel": "NED1",
+                    "urnRef": "urn:vpro:media:program:3030437",
+                    "midRef": "POW_00039706"
+                }
+            ],
+            "images": [
+                {
+                    "title": "Dorpsbelangen",
+                    "imageUri": "urn:vpro.image:7012",
+                    "height": 266,
+                    "width": 400,
+                    "creationDate": 1279800000433,
+                    "lastModified": 1306252549650,
+                    "workflow": "PUBLISHED",
+                    "owner": "BROADCASTER",
+                    "type": "PICTURE",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:3213689"
+                },
+                {
+                    "title": "Dorpsbelangen",
+                    "description": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "imageUri": "urn:vpro:image:70792",
+                    "creationDate": 1335362453307,
+                    "lastModified": 1335362453790,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "type": "STILL",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:13886727"
+                },
+                {
+                    "title": "Dorpsbelangen",
+                    "description": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "imageUri": "urn:vpro:image:70793",
+                    "creationDate": 1335362453536,
+                    "lastModified": 1335362453790,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "type": "STILL",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:13886728"
+                },
+                {
+                    "title": "Dorpsbelangen",
+                    "description": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "imageUri": "urn:vpro:image:70794",
+                    "creationDate": 1335362453788,
+                    "lastModified": 1335362453791,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "type": "STILL",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:13886729"
+                },
+                {
+                    "title": "De Donderdag Documentaire",
+                    "description": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "imageUri": "urn:vpro:image:328108",
+                    "creationDate": 1389030464312,
+                    "lastModified": 1389030498441,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "type": "STILL",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:35057598"
+                },
+                {
+                    "title": "De Donderdag Documentaire",
+                    "description": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "imageUri": "urn:vpro:image:328109",
+                    "creationDate": 1389030481417,
+                    "lastModified": 1389030498442,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "type": "STILL",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:35057599"
+                },
+                {
+                    "title": "De Donderdag Documentaire",
+                    "description": "In de gemeentelijke politiek gelden andere regels en wetten dan in de landelijke. Aan de vooravond van de gemeenteraadsverkiezingen in 2006 portretteert filmmaakster Marieke van der Winden vier gemeenteraadsleden in Maasdriel.  ",
+                    "imageUri": "urn:vpro:image:328110",
+                    "creationDate": 1389030498300,
+                    "lastModified": 1389030498443,
+                    "workflow": "PUBLISHED",
+                    "owner": "NEBO",
+                    "type": "STILL",
+                    "highlighted": false,
+                    "urn": "urn:vpro:media:image:35057600"
+                }
+            ],
+            "workflow": "PUBLISHED",
+            "type": "BROADCAST",
+            "avType": "VIDEO"
+        }
+    },
+    {
+        "sequence": 10687,
+        "revision": 2,
+        "mid": "POMS_NCRV_1141275",
+        "deleted": true
+    },
+    {
+        "sequence": 10730,
+        "revision": 2,
+        "mid": "POMS_KRO_1140821",
+        "deleted": true
+    },
+    {
+        "sequence": 10738,
+        "revision": 2,
+        "mid": "POMS_EO_1140308",
+        "deleted": true
+    },
+    {
+        "sequence": 10748,
+        "revision": 2,
+        "mid": "POMS_VPRO_1139788",
+        "deleted": true
+    }
+]}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="1.0" xmlns="http://java.sun.com/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
+    http://java.sun.com/xml/ns/persistence/orm_1_0.xsd">
+  <entity class="nl.vpro.jpa.D">
+    <entity-listeners>
+      <entity-listener class="nl.vpro.jpa.AListener"/>
+      <entity-listener class="nl.vpro.jpa.A3Listener"/>
+    </entity-listeners>
+  </entity>
+  <entity class="nl.vpro.jpa.E">
+    <entity-listeners>
+      <entity-listener class="nl.vpro.jpa.AListener"/>
+      <entity-listener class="nl.vpro.jpa.A3Listener"/>
+    </entity-listeners>
+  </entity>
+</entity-mappings>
