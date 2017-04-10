@@ -28,14 +28,11 @@ public class AcceptLanguageRequestFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         if (locale != null) {
-            List<Object> current = requestContext.getHeaders().get(HttpHeaders.ACCEPT_LANGUAGE);
             List<String> localesAsString = locale.stream().map(Locale::toString).collect(Collectors.toList());
-            if (current != null) {
-                current.addAll(0, localesAsString);
-            } else {
-                requestContext.getHeaders().addAll(HttpHeaders.ACCEPT_LANGUAGE, localesAsString);
+            requestContext.getHeaders()
+                .putSingle(HttpHeaders.ACCEPT_LANGUAGE, localesAsString.stream()
+                    .collect(Collectors.joining(", ")));
 
-            }
         }
     }
 

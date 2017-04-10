@@ -237,8 +237,10 @@ public class ReflectionUtils {
             parameterClass = (Class) parameterType;
         } else if (parameterType instanceof ParameterizedType) {
             parameterClass = (Class) ((ParameterizedType) parameterType).getRawType();
+        } else if (parameterType instanceof WildcardType) {
+            parameterClass = (Class) ((WildcardType) parameterType).getUpperBounds()[0];
         } else {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("Cannot convert " + o + " to " + parameterType);
         }
         if (String.class.isAssignableFrom(parameterClass)) {
             return o;
