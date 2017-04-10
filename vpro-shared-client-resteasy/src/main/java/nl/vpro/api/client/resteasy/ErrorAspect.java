@@ -48,8 +48,8 @@ public class ErrorAspect<T> implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Throwable t;
         String mes;
-        final Logger l;
-        final boolean error;
+        Logger l;
+        boolean error;
         try {
             try {
                 Object object = method.invoke(proxied, args);
