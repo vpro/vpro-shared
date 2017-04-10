@@ -30,7 +30,7 @@ public class JacksonContextResolver extends JacksonJaxbJsonProvider implements C
 
     @Override
     public ObjectMapper getContext(Class<?> objectType) {
-        return mapper;
+        return mapper == null ? Jackson2Mapper.LENIENT : mapper;
     }
 }
 
