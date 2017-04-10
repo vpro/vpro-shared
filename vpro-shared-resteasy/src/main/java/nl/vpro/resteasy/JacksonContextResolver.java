@@ -19,12 +19,18 @@ import nl.vpro.jackson2.Jackson2Mapper;
 @Produces({"application/*+json", "text/json"})
 public class JacksonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
 
+    private final ObjectMapper mapper;
+
     public JacksonContextResolver() throws Exception {
+        this(Jackson2Mapper.LENIENT);
+    }
+    public JacksonContextResolver(ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 
     @Override
     public ObjectMapper getContext(Class<?> objectType) {
-        return Jackson2Mapper.INSTANCE;
+        return mapper;
     }
 }
 
