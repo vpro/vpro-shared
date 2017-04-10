@@ -4,6 +4,7 @@
  */
 package nl.vpro.api.client.resteasy;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
@@ -49,9 +50,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.resteasy.JacksonContextResolver;
 import nl.vpro.util.LeaveDefaultsProxyHandler;
 import nl.vpro.util.ThreadPools;
@@ -68,7 +68,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private static Thread connectionGuardThread;
     private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
     private static final ConnectionGuard GUARD = new ConnectionGuard();
-    static {
+  /*  static {
         try {
             ResteasyProviderFactory resteasyProviderFactory = ResteasyProviderFactory.getInstance();
             try {
@@ -89,7 +89,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         } catch (Throwable t) {
             log.error(t.getClass().getName() + " " + t.getMessage());
         }
-    }
+    }*/
 
     protected String baseUrl;
 
@@ -122,6 +122,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private Instant initializationInstant = Instant.now();
 
 
+    @lombok.Builder.Default
+    @Getter
+    private Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
+
     protected AbstractApiClient(
         String baseUrl,
         Duration connectionRequestTimeout,
@@ -135,7 +139,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration warnThreshold,
         List<Locale> acceptableLanguages,
         MediaType accept,
-        Boolean trustAll
+        Boolean trustAll,
+        Jackson2Mapper objectMapper
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -153,7 +158,28 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         if (trustAll != null) {
             setTrustAll(trustAll);
         }
+        this.objectMapper = objectMapper;
         registerBean();
+    }
+
+    @Deprecated
+    protected AbstractApiClient(
+        String baseUrl,
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
+        Duration connectionInPoolTTL,
+        Duration countWindow,
+        Integer bucketCount,
+        Duration warnThreshold,
+        List<Locale> acceptableLanguages,
+        MediaType accept,
+        Boolean trustAll
+    ) {
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, trustAll, null);
+
     }
 
     /**
@@ -174,7 +200,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, trustAll);
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, trustAll, Jackson2Mapper.getLenientInstance());
     }
 
     /**
@@ -194,7 +220,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, trustAll);
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, trustAll, Jackson2Mapper.getLenientInstance());
     }
 
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
@@ -210,7 +236,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             null,
             null,
             null,
-            false
+            false,
+            Jackson2Mapper.getLenientInstance()
         );
     }
 
@@ -283,6 +310,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         if (trustAll) {
             XTrustProvider.install();
         }
+        invalidate();
+    }
+
+
+    public void setObjectMapper(Jackson2Mapper objectMapper) {
+        this.objectMapper = objectMapper;
         invalidate();
     }
 
@@ -562,7 +595,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         ResteasyClientBuilder builder =
             new ResteasyClientBuilder()
                 .httpEngine(engine)
-                .register(JacksonContextResolver.class);
+                .register(new JacksonContextResolver(objectMapper));
         builder.register(new AcceptRequestFilter(mediaType));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
         builder.register(new CountFilter(counter, countWindow, bucketCount, warnThreshold, getObjectName(), log));
