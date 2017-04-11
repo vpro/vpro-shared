@@ -5,6 +5,7 @@
 package nl.vpro.api.client.resteasy;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -23,6 +24,10 @@ public class AcceptLanguageRequestFilter implements ClientRequestFilter {
 
     public AcceptLanguageRequestFilter(List<Locale> locale) {
         this.locale = locale;
+    }
+
+    public AcceptLanguageRequestFilter(Locale... locale) {
+        this.locale = Arrays.asList(locale);
     }
 
     @Override
