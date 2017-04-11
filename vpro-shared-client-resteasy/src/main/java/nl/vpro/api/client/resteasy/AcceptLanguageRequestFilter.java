@@ -27,7 +27,7 @@ public class AcceptLanguageRequestFilter implements ClientRequestFilter {
     }
 
     public AcceptLanguageRequestFilter(Locale... locale) {
-        this.locale = Arrays.asList(locale);
+        this(Arrays.asList(locale));
     }
 
     @Override
