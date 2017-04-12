@@ -6,10 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URLConnection;
+import java.net.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -120,8 +117,11 @@ public class URLResource<T> {
         }
         checkedCount++;
         log.debug("Loading from {}", this.url);
+        if (this.url == null){
+            throw new IllegalStateException("URL not set in " + this);
+        }
         try {
-            if (this.url.getScheme().equals("classpath")) {
+            if ("classpath".equals(this.url.getScheme())) {
                 getCachedResource(this.url.toString().substring("classpath:".length() + 1));
             } else {
                 URLConnection connection = openConnection();
@@ -138,7 +138,12 @@ public class URLResource<T> {
     }
 
     URLConnection openConnection() throws IOException {
-        return url.toURL().openConnection();
+        try {
+            return url.toURL().openConnection();
+        } catch (IllegalArgumentException ia) {
+            log.error("For " + url + " " + ia.getMessage());
+            throw ia;
+        }
     }
 
     void getCachedResource(String resource) {
@@ -195,6 +200,10 @@ public class URLResource<T> {
             } catch (SocketTimeoutException ste) {
                 log.warn("For {} (readTimeout: {}, connectTimeout: {}): {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
                 code = -1;
+            } catch (IOException ce) {
+                log.error("For " + connection + " " + ce.getMessage());
+                throw ce;
+
             }
         } else {
             code = SC_OK;
