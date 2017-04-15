@@ -115,7 +115,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private List<Locale> acceptableLanguages = new ArrayList<>();
 
-    private MediaType mediaType;
+    private MediaType accept;
+
+    private MediaType contentType;
 
     private BrowserCache resteasyBrowserCache;
 
@@ -139,6 +141,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration warnThreshold,
         List<Locale> acceptableLanguages,
         MediaType accept,
+        MediaType contentType,
         Boolean trustAll,
         Jackson2Mapper objectMapper
         ) {
@@ -154,7 +157,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.bucketCount = bucketCount == null ? this.bucketCount : bucketCount;
         this.warnThreshold = warnThreshold == null ? this.warnThreshold : warnThreshold;
         this.acceptableLanguages = acceptableLanguages;
-        this.mediaType = accept;
+        this.accept = accept;
+        this.contentType = contentType;
         if (trustAll != null) {
             setTrustAll(trustAll);
         }
@@ -178,7 +182,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, trustAll, null);
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, null, trustAll, null);
 
     }
 
@@ -200,7 +204,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, trustAll, Jackson2Mapper.getLenientInstance());
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance());
     }
 
     /**
@@ -220,7 +224,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, trustAll, Jackson2Mapper.getLenientInstance());
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance());
     }
 
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
@@ -231,6 +235,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             maxConnections,
             maxConnectionsPerRoute,
             connectionInPoolTTL == null ? null : Duration.ofMillis(connectionInPoolTTL),
+            null,
             null,
             null,
             null,
@@ -297,11 +302,21 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public MediaType getAccept() {
-        return mediaType;
+        return accept;
     }
 
     public void setAccept(MediaType mediaType) {
-        this.mediaType = mediaType;
+        this.accept = mediaType;
+        this.invalidate();
+    }
+
+
+    public MediaType getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(MediaType mediaType) {
+        this.contentType = mediaType;
         this.invalidate();
     }
 
@@ -538,7 +553,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                 new Class[]{restEasyService, service},
                 new LeaveDefaultsProxyHandler(resteasy));
         }
-        log.info("Created api client {}/{} {} ({})", getClass().getSimpleName(), service.getSimpleName(), baseUrl, mediaType);
+        log.info("Created api client {}/{} {} ({})", getClass().getSimpleName(), service.getSimpleName(), baseUrl, accept);
         return proxyErrorsAndCount(service, proxy, errorClass);
     }
 
@@ -592,11 +607,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     protected ResteasyClientBuilder resteasyClientBuilder(ClientHttpEngine engine) {
-        ResteasyClientBuilder builder =
-            new ResteasyClientBuilder()
-                .httpEngine(engine)
-                .register(new JacksonContextResolver(objectMapper));
-        builder.register(new AcceptRequestFilter(mediaType));
+        ResteasyClientBuilder builder = new ResteasyClientBuilder()
+            .httpEngine(engine);
+        builder.register(new JacksonContextResolver(objectMapper));
+        builder.register(new AcceptRequestFilter(accept));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
         builder.register(new CountFilter(counter, countWindow, bucketCount, warnThreshold, getObjectName(), log));
 
