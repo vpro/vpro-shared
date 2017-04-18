@@ -37,7 +37,9 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
         final Iterator<T> i = set.iterator();
         return new Iterator<T>() {
 
-            T lastElement = null;
+            T lastElement;
+            boolean hasElementToRemove = false;
+
             @Override
             public boolean hasNext() {
                 return i.hasNext();
@@ -47,14 +49,18 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
             @Override
             public T next() {
                 lastElement = i.next();
+                hasElementToRemove = true;
                 return lastElement;
             }
 
             @Override
             public void remove() {
                 i.remove();
-                if (lastElement != null) {
+                if (hasElementToRemove) {
                     wrapped.remove(lastElement);
+                    hasElementToRemove = false;
+                } else {
+                    throw new IllegalStateException();
                 }
 
             }
@@ -69,8 +75,11 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
     }
     @Override
     public boolean add(T element) {
-        set.add(element);
-        return wrapped.add(element);
+        boolean result = set.add(element);
+        if (result) {
+            wrapped.add(element);
+        }
+        return result;
     }
 
     @Override
