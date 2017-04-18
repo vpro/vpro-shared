@@ -124,7 +124,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private Instant initializationInstant = Instant.now();
 
 
-    @lombok.Builder.Default
     @Getter
     private Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
 
@@ -162,7 +161,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         if (trustAll != null) {
             setTrustAll(trustAll);
         }
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
         registerBean();
     }
 
