@@ -84,6 +84,7 @@ public class JAXBTestUtil {
         return (T)JAXB.unmarshal(new StringReader(marshal(input)), input.getClass());
     }
 
+
     /**
      * !!!@Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
      *
@@ -106,6 +107,24 @@ public class JAXBTestUtil {
     }
 
 
+    public static <T> T roundTripAndSimilar(Class<? extends T> inputClazz, String input) throws IOException, SAXException {
+        try {
+            T result = unmarshal(input, inputClazz);
+            String xmlAfter = marshal(result);
+            similar(xmlAfter, input);
+            return result;
+        } catch (SAXParseException spe) {
+            throw new RuntimeException(
+                "input: " + input, spe
+            );
+        }
+
+    }
+
+    /**
+     * Marshalls input and checks if it is similar to given string.
+     * Then unmarshals it, and marshalls it another time. The result XMl should still be similar.
+     */
     public static <T> T roundTripAndSimilar(T input, String expected) throws IOException, SAXException {
         String xml = null;
         try {
