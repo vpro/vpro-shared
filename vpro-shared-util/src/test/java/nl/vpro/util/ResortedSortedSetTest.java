@@ -4,8 +4,7 @@ import java.util.*;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -80,24 +79,15 @@ public class ResortedSortedSetTest {
 
         assertThat(resorted).containsExactly("b");
 
-        try {
-            i.remove();
-            fail("Should have thrown IllegalStateEcxception");
-        } catch (IllegalStateException ignore) {
+        assertThatThrownBy(i::remove).isInstanceOf(IllegalStateException.class);
 
-        }
         String b = i.next();
         assertThat(b).isEqualTo("b");
         i.remove();
         assertThat(resorted).isEmpty();
         assertThat(i.hasNext()).isFalse();
 
-        try {
-            i.next();
-            fail("Should have thrown NoSuchElementException");
-        } catch (NoSuchElementException ignore) {
-
-        }
+        assertThatThrownBy(i::next).isInstanceOf(NoSuchElementException.class);
 
     }
 }
