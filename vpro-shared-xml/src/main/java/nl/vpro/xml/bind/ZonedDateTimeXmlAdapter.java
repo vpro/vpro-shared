@@ -11,7 +11,7 @@ import static nl.vpro.xml.bind.InstantXmlAdapter.ZONE;
  * @author Michiel Meeuwissen
  * @since 0.21
  */
-public class ZoneDateTimeXmlAdapter extends XmlAdapter<String, ZonedDateTime> {
+public class ZonedDateTimeXmlAdapter extends XmlAdapter<String, ZonedDateTime> {
 
 
 
