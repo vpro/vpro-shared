@@ -214,7 +214,7 @@ public class ReflectionUtils {
                 try {
                     parameterClass = m.getParameters()[0];
                     m.invoke(instance, convert(v, parameterClass));
-                    log.debug("Set {} from config file", m.getName());
+                    log.debug("Set {}#{} to {} from config file", instance, m.getName(), v);
                     return true;
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     log.error(e.getMessage(), e);

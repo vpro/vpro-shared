@@ -620,8 +620,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
         builder.register(browserCacheFeature);
         buildResteasy(builder);
-        this.resteasyBrowserCache = browserCacheFeature.getCache();
-        log.info("Set browser cache to {}", this.resteasyBrowserCache);
+        if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
+            this.resteasyBrowserCache = browserCacheFeature.getCache();
+            log.info("Set browser cache to {}", this.resteasyBrowserCache);
+        } else {
+            log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+        }
         return builder;
     }
 
