@@ -107,7 +107,7 @@ public class JAXBTestUtil {
     }
 
 
-    public static <T> T roundTripAndSimilar(Class<? extends T> inputClazz, String input) throws IOException, SAXException {
+    public static <T> T roundTripAndSimilar(String input, Class<? extends T> inputClazz) throws IOException, SAXException {
         try {
             T result = unmarshal(input, inputClazz);
             String xmlAfter = marshal(result);
