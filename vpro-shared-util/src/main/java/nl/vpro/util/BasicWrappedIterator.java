@@ -3,6 +3,7 @@ package nl.vpro.util;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Michiel Meeuwissen
@@ -10,8 +11,8 @@ import java.util.Optional;
  */
 public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
-    private final Optional<Long> size;
-    private final Optional<Long> totalSize;
+    private final Optional<AtomicLong> size;
+    private final Optional<AtomicLong> totalSize;
 
     private long count;
 
@@ -23,25 +24,34 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     public BasicWrappedIterator(Long size, Long totalSize, Iterator<T> wrapped) {
         super(wrapped);
+        this.size = size == null ? Optional.empty() : Optional.of(new AtomicLong(size));
+        this.totalSize = totalSize == null ? Optional.empty() : Optional.of(new AtomicLong(totalSize));
+    }
+
+    public BasicWrappedIterator(AtomicLong size, AtomicLong totalSize, Iterator<T> wrapped) {
+        super(wrapped);
         this.size = Optional.ofNullable(size);
         this.totalSize = Optional.ofNullable(totalSize);
     }
-
 
     public BasicWrappedIterator(Long totalSize, Iterator<T> wrapped) {
         this(totalSize, totalSize, wrapped);
     }
 
+    public BasicWrappedIterator(AtomicLong totalSize, Iterator<T> wrapped) {
+        this(totalSize, totalSize, wrapped);
+    }
+
     public BasicWrappedIterator(Collection<T> wrapped) {
         super(wrapped.iterator());
-        this.size = Optional.of((long) wrapped.size());
-        this.totalSize = Optional.of((long) wrapped.size());
+        this.size = Optional.of(new AtomicLong(wrapped.size()));
+        this.totalSize = Optional.of(new AtomicLong(wrapped.size()));
     }
 
     @Override
     public Optional<Long> getSize() {
         if (size.isPresent()) {
-            return size;
+            return size.map(AtomicLong::longValue);
         } else {
             return super.getSize();
         }
@@ -50,7 +60,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     @Override
     public Optional<Long> getTotalSize() {
         if (totalSize.isPresent()) {
-            return totalSize;
+            return totalSize.map(AtomicLong::longValue);
         } else {
             return super.getTotalSize();
         }
