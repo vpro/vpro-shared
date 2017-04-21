@@ -40,10 +40,17 @@ public class BatchedReceiver<T> implements Iterator<T> {
 
 	public static class Builder<T>  {
 
+        /**
+         *
+         * @param batchGetter A function to get the next batch, the paramters are the current the necessary offset, and batch size
+         */
 	    public Builder batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
 	        return _batchGetter(batchGetter);
         }
 
+        /**
+         * @param batchGetter For 'resumption token' like functionality, the offset and max argument can be irrelevant.
+         */
         public Builder batchGetter(final Supplier<Iterator<T>> batchGetter) {
             return _batchGetter((offset, max) -> batchGetter.get());
         }
@@ -71,6 +78,10 @@ public class BatchedReceiver<T> implements Iterator<T> {
 		if (hasNext == null) {
 			if (subIterator == null) {
 				subIterator = batchGetter.apply(offset, batchSize);
+                if (subIterator == null) {
+                    hasNext = false;
+                    return;
+                }
 			}
 			if (subIterator.hasNext()) {
 				next = subIterator.next();
@@ -78,6 +89,10 @@ public class BatchedReceiver<T> implements Iterator<T> {
 			} else {
 				offset += batchSize;
 				subIterator = batchGetter.apply(offset, batchSize);
+                if (subIterator == null) {
+                    hasNext = false;
+                    return;
+                }
 				hasNext = subIterator.hasNext();
 				if (hasNext) {
 					next = subIterator.next();
