@@ -121,6 +121,12 @@ public class JAXBTestUtil {
 
     }
 
+    public static <T> T roundTripAndSimilar(InputStream input, Class<? extends T> inputClazz) throws IOException, SAXException {
+        StringWriter write = new StringWriter();
+        IOUtils.copy(input, write, "UTF-8");
+        return roundTripAndSimilar(write.toString(), inputClazz);
+    }
+
     /**
      * Marshalls input and checks if it is similar to given string.
      * Then unmarshals it, and marshalls it another time. The result XMl should still be similar.
