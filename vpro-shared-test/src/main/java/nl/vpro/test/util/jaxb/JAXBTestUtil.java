@@ -21,7 +21,9 @@ import org.assertj.core.api.Fail;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
 
 import nl.vpro.test.util.TestClass;
 
@@ -37,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
+
+    public static Consumer<DiffBuilder> IGNORE_ELEMENT_ORDER = df ->df.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText));
 
 
     public static <T> String marshal(T object) {
