@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Roelof Jan Koekoek
  * @since 1.6
  */
+@SuppressWarnings("ALL")
 public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
@@ -175,8 +176,9 @@ public class JAXBTestUtil {
     }
 
     public static void similar(String input, String expected, Consumer<DiffBuilder>... build) throws IOException, SAXException {
-        DiffBuilder builder = DiffBuilder.compare(input)
-            .withTest(expected)
+        DiffBuilder builder = DiffBuilder
+            .compare(expected)
+            .withTest(input)
             .ignoreWhitespace()
             .checkForSimilar()
             ;
@@ -200,9 +202,9 @@ public class JAXBTestUtil {
 
     public static void similar(InputStream input, String expected) throws IOException, SAXException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        IOUtils.copy(input, bytes);
-        Diff diff = DiffBuilder.compare(bytes)
-            .withTest(expected)
+        Diff diff = DiffBuilder
+            .compare(expected)
+            .withTest(input)
             .ignoreComments()
             .checkForSimilar()
             .build();
@@ -216,8 +218,9 @@ public class JAXBTestUtil {
         IOUtils.copy(input, bytes);
         ByteArrayOutputStream expectedBytes = new ByteArrayOutputStream();
         IOUtils.copy(expected, expectedBytes);
-        Diff diff = DiffBuilder.compare(input)
-            .withTest(expected)
+        Diff diff = DiffBuilder
+            .compare(expected)
+            .withTest(input)
             .checkForSimilar()
             .build();
         if (diff.hasDifferences()) {
