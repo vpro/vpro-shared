@@ -1,11 +1,11 @@
 package nl.vpro.util;
 
-import lombok.Builder;
 import lombok.ToString;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * Given some API which supplies only 'batched' retrieval (so with offset and max/batchsize parameters),
@@ -27,16 +27,28 @@ public class BatchedReceiver<T> implements Iterator<T> {
 	T next;
 
 
-	@Builder
+	@lombok.Builder(builderClassName = "Builder")
 	public BatchedReceiver(
 			Integer batchSize,
 			Long offset,
-			BiFunction<Long, Integer, Iterator<T>> batchGetter) {
+			BiFunction<Long, Integer, Iterator<T>> _batchGetter) {
 		this.batchSize = batchSize == null ? 100 : batchSize;
-		this.batchGetter = batchGetter;
+		this.batchGetter = _batchGetter;
 		this.offset = offset == null ? 0L : offset;
 	}
 
+
+	public static class Builder<T>  {
+
+	    public Builder batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
+	        return _batchGetter(batchGetter);
+        }
+
+        public Builder batchGetter(final Supplier<Iterator<T>> batchGetter) {
+            return _batchGetter((offset, max) -> batchGetter.get());
+        }
+
+    }
 
 
 	@Override

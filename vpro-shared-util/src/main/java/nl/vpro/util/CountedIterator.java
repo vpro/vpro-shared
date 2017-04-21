@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 /**
@@ -14,12 +15,19 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     }
     static <S> CountedPeekingIterator<S> peeking(CountedIterator<S> wrapped){
         return wrapped == null ? null : wrapped.peeking();
-
     }
 
     static <S> CountedIterator<S> of(Stream<S> wrapped) {
         Spliterator<S> spliterator = wrapped.spliterator();
         return new BasicWrappedIterator<S>(spliterator.getExactSizeIfKnown(), Spliterators.iterator(spliterator));
+    }
+
+    static <C> CountedIterator<C> of(Long size, Iterator<C> wrapped) {
+        return new BasicWrappedIterator<C>(size, wrapped);
+    }
+
+    static <C> CountedIterator<C> of(AtomicLong size, Iterator<C> wrapped) {
+        return new BasicWrappedIterator<C>(size, wrapped);
     }
 
     Optional<Long> getSize();
