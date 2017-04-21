@@ -8,6 +8,7 @@ import junit.framework.ComparisonFailure;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.util.function.Consumer;
 
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,10 +18,10 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.Diff;
 
 import nl.vpro.test.util.TestClass;
 
@@ -36,11 +37,6 @@ public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
 
-    static {
-        XMLUnit.setIgnoreWhitespace(true);
-        XMLUnit.setIgnoreAttributeOrder(true);
-
-    }
 
     public static <T> String marshal(T object) {
         StringWriter writer = new StringWriter();
@@ -107,11 +103,11 @@ public class JAXBTestUtil {
     }
 
 
-    public static <T> T roundTripAndSimilar(String input, Class<? extends T> inputClazz) throws IOException, SAXException {
+    public static <T> T roundTripAndSimilar(String input, Class<? extends T> inputClazz, Consumer<DiffBuilder>... build) throws IOException, SAXException {
         try {
             T result = unmarshal(input, inputClazz);
             String xmlAfter = marshal(result);
-            similar(xmlAfter, input);
+            similar(xmlAfter, input, build);
             return result;
         } catch (SAXParseException spe) {
             throw new RuntimeException(
@@ -121,10 +117,10 @@ public class JAXBTestUtil {
 
     }
 
-    public static <T> T roundTripAndSimilar(InputStream input, Class<? extends T> inputClazz) throws IOException, SAXException {
+    public static <T> T roundTripAndSimilar(InputStream input, Class<? extends T> inputClazz, Consumer<DiffBuilder>... build) throws IOException, SAXException {
         StringWriter write = new StringWriter();
         IOUtils.copy(input, write, "UTF-8");
-        return roundTripAndSimilar(write.toString(), inputClazz);
+        return roundTripAndSimilar(write.toString(), inputClazz, build);
     }
 
     /**
@@ -178,13 +174,22 @@ public class JAXBTestUtil {
 
     }
 
-    public static void similar(String input, String expected) throws IOException, SAXException {
-        Diff diff = XMLUnit.compareXML(expected, input);
+    public static void similar(String input, String expected, Consumer<DiffBuilder>... build) throws IOException, SAXException {
+        DiffBuilder builder = DiffBuilder.compare(input)
+            .withTest(expected)
+            .ignoreWhitespace()
+            .checkForSimilar()
+            ;
 
-        if (!diff.identical()) {
+        for (Consumer<DiffBuilder> b : build) {
+            b.accept(builder);
+        }
+
+        Diff diff = builder.build();
+        if (diff.hasDifferences()) {
             throw new ComparisonFailure(diff.toString(), expected, input);
         } else {
-            assertThat(diff.identical()).isTrue();
+            assertThat(diff.hasDifferences()).isFalse();
         }
     }
 
@@ -196,8 +201,12 @@ public class JAXBTestUtil {
     public static void similar(InputStream input, String expected) throws IOException, SAXException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         IOUtils.copy(input, bytes);
-        Diff diff = XMLUnit.compareXML(expected, new InputStreamReader(new ByteArrayInputStream(bytes.toByteArray())));
-        if (!diff.identical()) {
+        Diff diff = DiffBuilder.compare(bytes)
+            .withTest(expected)
+            .ignoreComments()
+            .checkForSimilar()
+            .build();
+        if (diff.hasDifferences()) {
             throw new ComparisonFailure(diff.toString(), expected, bytes.toString());
         }
     }
@@ -207,8 +216,11 @@ public class JAXBTestUtil {
         IOUtils.copy(input, bytes);
         ByteArrayOutputStream expectedBytes = new ByteArrayOutputStream();
         IOUtils.copy(expected, expectedBytes);
-        Diff diff = XMLUnit.compareXML(new InputStreamReader(new ByteArrayInputStream(expectedBytes.toByteArray())), new InputStreamReader(new ByteArrayInputStream(bytes.toByteArray())));
-        if (!diff.identical()) {
+        Diff diff = DiffBuilder.compare(input)
+            .withTest(expected)
+            .checkForSimilar()
+            .build();
+        if (diff.hasDifferences()) {
             throw new ComparisonFailure(diff.toString(), expectedBytes.toString(), bytes.toString());
         }
     }
