@@ -9,6 +9,7 @@ import net.sf.json.test.JSONAssert;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.apache.commons.lang.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 
@@ -33,20 +34,47 @@ public class Jackson2TestUtil {
         return roundTrip(input, "");
     }
 
+    /**
+     * <p>Marshalls input, checks whether it contains a string, and unmarshall it.</p>
+     * 
+     * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
+     * 
+     * @param input
+     * @param contains 
+     */
     public static  <T> T roundTrip(T input, String contains) throws Exception {
         StringWriter writer = new StringWriter();
         MAPPER.writeValue(writer, input);
 
         String text = writer.toString();
-        assertThat(text).contains(contains);
+        if (StringUtils.isNotEmpty(contains)) {
+            assertThat(text).contains(contains);
+        }
 
         return (T) MAPPER.readValue(text, input.getClass());
     }
 
+    /**
+     * <p>Marshalls input, checks whether it is similar to expected string, and unmarshall it.
+     * </p>
+     * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
+     *
+     * @param input
+     * @param expected
+     */
     public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
-        return roundTripAndSimilar(input, expected, Jackson2Mapper.getInstance().getTypeFactory().constructType(input.getClass()));
+        return roundTripAndSimilar(input, expected, 
+            MAPPER.getTypeFactory().constructType(input.getClass()));
     }
 
+    /**
+     * Marshalls input, checks whether it is similar to expected string, and unmarshall it. This unmarshalled result must be equal to the input.
+     * <p>
+     * Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.
+     *
+     * @param input
+     * @param expected
+     */
     public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
         T result = roundTripAndSimilar(input, expected);
         assertThat(result).isEqualTo(input);

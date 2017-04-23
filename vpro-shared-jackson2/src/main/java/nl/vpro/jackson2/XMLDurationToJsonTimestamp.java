@@ -1,5 +1,7 @@
 package nl.vpro.jackson2;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,9 +23,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+@Slf4j
 public class XMLDurationToJsonTimestamp {
-
-    private static final Logger LOG = LoggerFactory.getLogger(XMLDurationToJsonTimestamp.class);
 
 
     public static class Serializer extends JsonSerializer<Duration> {
@@ -51,7 +52,7 @@ public class XMLDurationToJsonTimestamp {
                 datatypeFactory = DatatypeFactory.newInstance();
                 return datatypeFactory.newDuration(jp.getLongValue());
             } catch (DatatypeConfigurationException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
             return null;
         }
