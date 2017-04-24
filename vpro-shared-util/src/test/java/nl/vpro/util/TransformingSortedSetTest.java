@@ -36,6 +36,7 @@ public class TransformingSortedSetTest {
             new TransformingSortedSet<>(set, i -> new StringBuilder(String.valueOf(i)), stringBuilder -> Integer.parseInt(stringBuilder.toString()));
         transforming.add(new StringBuilder("3"));
 
+
         assertThat(set).containsExactly(3);
     }
 
@@ -67,6 +68,17 @@ public class TransformingSortedSetTest {
         set = transforming.produce();
 
         assertThat(set).containsExactly(2, 10);
+
+    }
+
+    @Test
+    public void testComparator() {
+        SortedSet<Integer> set = new TreeSet<>();
+
+        TransformingSortedSet<StringBuilder, Integer> transforming =
+            new TransformingSortedSet<>(set, i -> new StringBuilder(String.valueOf(i)), stringBuilder -> Integer.parseInt(stringBuilder.toString()));
+
+        assertThat(transforming.comparator().compare(new StringBuilder("01"), new StringBuilder("2"))).isLessThan(0);
 
     }
 }
