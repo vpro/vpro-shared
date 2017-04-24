@@ -17,7 +17,11 @@ public class TransformingSortedSet<T, S> extends AbstractSet<T> implements Sorte
     private final Comparator<T> comparator = new Comparator<T>() {
         @Override
         public int compare (T o1, T o2){
-            return wrapped.comparator().compare(producer.apply(o1), producer.apply(o2));
+            Comparator<? super S> wrappedComparator = wrapped.comparator();
+            if (wrappedComparator == null) {
+                wrappedComparator = (Comparator <? super S>) Comparator.naturalOrder();
+            }
+            return wrappedComparator.compare(producer.apply(o1), producer.apply(o2));
         }
     };
 

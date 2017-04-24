@@ -25,7 +25,18 @@ public class TransformingSortedSetTest {
         transforming.add(new StringBuilder("3"));
 
         assertThat(set).containsExactly(1, 2, 3);
+    }
 
+
+    @Test
+    public void testAddToEmpty() {
+        SortedSet<Integer> set = new TreeSet<>();
+        assertThat(set.comparator()).isNull();
+        TransformingSortedSet<StringBuilder, Integer> transforming =
+            new TransformingSortedSet<>(set, i -> new StringBuilder(String.valueOf(i)), stringBuilder -> Integer.parseInt(stringBuilder.toString()));
+        transforming.add(new StringBuilder("3"));
+
+        assertThat(set).containsExactly(3);
     }
 
 
