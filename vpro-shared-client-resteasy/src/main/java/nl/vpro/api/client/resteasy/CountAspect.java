@@ -1,5 +1,7 @@
 package nl.vpro.api.client.resteasy;
 
+import lombok.Data;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -86,6 +88,7 @@ class CountAspect<T> implements InvocationHandler {
             new CountAspect<T>(service, counter, countWindow, bucketCount, name, log));
     }
 
+    @Data
     static class Local {
         final Method method;
         boolean counted = false;
