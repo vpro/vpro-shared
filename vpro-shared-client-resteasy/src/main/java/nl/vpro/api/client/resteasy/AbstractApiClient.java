@@ -498,14 +498,18 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     @Override
-    public String getCountWindow() {
+    public String getCountWindowString() {
         return countWindow.toString();
     }
     @Override
-    public void setCountWindow(String countWindow) {
+    public void setCountWindowString(String countWindow) {
         Duration toSet = TimeUtils.parseDuration(countWindow).orElse(Duration.ofSeconds(30));
-        if (! Objects.equals(toSet, this.countWindow)) {
-            this.countWindow = toSet;
+        setCountWindow(toSet);
+    }
+
+    public void setCountWindow(Duration countWindow) {
+        if (!Objects.equals(countWindow, this.countWindow)) {
+            this.countWindow = countWindow;
             invalidate();
         }
     }
@@ -521,6 +525,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             this.bucketCount = bucketCount;
             invalidate();
         }
+    }
+
+    @Override
+    public String getWarnThresholdString() {
+        return warnThreshold.toString();
+    }
+
+    @Override
+    public void setWarnThresholdString(String warnThreshold) {
+        setWarnThreshold(TimeUtils.parseDuration(warnThreshold).orElse(Duration.ofMillis(100)));
     }
 
     public Duration getWarnThreshold() {
