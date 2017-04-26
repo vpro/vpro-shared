@@ -4,13 +4,12 @@
  */
 package nl.vpro.jackson2;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.time.Instant;
 
 import javax.xml.bind.DatatypeConverter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -26,9 +25,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  * @author Michiel Meeuwissen
  * @since 0.39
  */
+@Slf4j
 public class StringInstantToJsonTimestamp {
-
-    private static final Logger LOG = LoggerFactory.getLogger(StringInstantToJsonTimestamp.class);
 
     public static class Serializer extends JsonSerializer<String> {
         public static StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
@@ -41,7 +39,7 @@ public class StringInstantToJsonTimestamp {
                 try {
                     jgen.writeNumber(DatatypeConverter.parseTime(value).toInstant().toEpochMilli());
                 } catch (IllegalArgumentException iae) {
-                    LOG.warn("Could not parse {}. Writing null to json", value);
+                    log.warn("Could not parse {}. Writing null to json", value);
                     jgen.writeNull();
                 }
             }
@@ -64,11 +62,11 @@ public class StringInstantToJsonTimestamp {
                     try {
                         return DatatypeConverter.parseTime(jp.getText()).toInstant();
                     } catch (IllegalArgumentException iae) {
-                        LOG.warn("Could not parse {}. Writing null to json", jp.getText());
+                        log.warn("Could not parse {}. Writing null to json", jp.getText());
                         return null;
                     }
                 default:
-                    LOG.warn("Could not parse {} to instant. Returing null", jp.toString());
+                    log.warn("Could not parse {} to instant. Returing null", jp.toString());
                     return null;
             }
         }
