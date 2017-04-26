@@ -2,10 +2,10 @@ package nl.vpro.jackson2;
 
 import lombok.Builder;
 
-import java.beans.ConstructorProperties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -68,7 +68,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
 
     @Builder
-    @ConstructorProperties({"inputStream", "valueCreator", "valueClass",  "callback", "sizeField", "totalSizeField"})
     private JsonArrayIterator(
         InputStream inputStream,
         final BiFunction<JsonParser, TreeNode,  T> valueCreator,
@@ -78,6 +77,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         String totalSizeField,
         ObjectMapper objectMapper
         ) throws IOException {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("No inputStream given");
+        }
         this.jp = (objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper).getFactory().createParser(inputStream);
         this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
         if (valueCreator != null && valueClass != null) {
@@ -152,6 +154,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     @Override
     public T next() {
         findNext();
+        if (! hasNext) {
+            throw new NoSuchElementException();
+        }
         T result = next;
         next = null;
         needsFindNext = true;
