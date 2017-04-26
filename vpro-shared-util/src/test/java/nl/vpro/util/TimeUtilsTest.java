@@ -75,8 +75,11 @@ public class TimeUtilsTest {
     @Test
     public void roundMillis() {
         Duration duration = Duration.ofSeconds(4).plusNanos(600_000); // 4 seconds 0.6 ms
+        assertThat(duration.toMillis()).isEqualTo(4000);
+
         System.out.println(duration);
         assertThat(TimeUtils.roundToMillis(duration).toString()).isEqualTo("PT4.001S");
+        assertThat(TimeUtils.roundToMillis(duration).toMillis()).isEqualTo(4001);
 
     }
 

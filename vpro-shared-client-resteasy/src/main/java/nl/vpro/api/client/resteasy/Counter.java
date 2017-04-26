@@ -16,6 +16,8 @@ import javax.management.ObjectName;
 import nl.vpro.util.WindowedEventRate;
 import nl.vpro.util.WindowedLongSummaryStatistics;
 
+import static nl.vpro.util.TimeUtils.roundToMillis;
+
 /**
  * @author Michiel Meeuwissen
  * @since 1.57
@@ -98,7 +100,7 @@ public class Counter implements CounterMXBean {
     void eventAndDuration(Duration duration) {
         increment();
         log.debug("{} Duration {}", this, duration);
-        durations.accept(duration.toMillis());
+        durations.accept(roundToMillis(duration).toMillis());
     }
 
     void shutdown() {
