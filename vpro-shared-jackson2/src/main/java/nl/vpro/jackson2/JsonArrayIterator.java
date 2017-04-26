@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
@@ -58,25 +59,26 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     }
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
-        this(inputStream, null, clazz, callback, null, null);
+        this(inputStream, null, clazz, callback, null, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null, null);
     }
 
 
-    // TODO Lombok/Intellij and generic suck: https://github.com/mplushnikov/lombok-intellij-plugin/issues/127
     @Builder
     @ConstructorProperties({"inputStream", "valueCreator", "valueClass",  "callback", "sizeField", "totalSizeField"})
-    public JsonArrayIterator(
+    private JsonArrayIterator(
         InputStream inputStream,
         final BiFunction<JsonParser, TreeNode,  T> valueCreator,
         final Class<T> valueClass,
         Runnable callback,
         String sizeField,
-        String totalSizeField) throws IOException {
-        this.jp = Jackson2Mapper.getInstance().getFactory().createParser(inputStream);
+        String totalSizeField,
+        ObjectMapper objectMapper
+        ) throws IOException {
+        this.jp = (objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper).getFactory().createParser(inputStream);
         this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
         if (valueCreator != null && valueClass != null) {
             throw new IllegalArgumentException();
