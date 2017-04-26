@@ -131,6 +131,9 @@ public class TimeUtils {
         return duration1.compareTo(duration2) > 0;
     }
 
+    /**
+     * Rounds the duration to the nearest millis (This may round up half a millis).
+     */
     public static Duration roundToMillis(Duration duration) {
         return duration == null ? null : Duration.ofMillis(duration.plus(Duration.ofNanos(500_000)).toMillis());
 
