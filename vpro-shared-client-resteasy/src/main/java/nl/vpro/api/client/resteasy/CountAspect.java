@@ -5,6 +5,7 @@ import lombok.Data;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 
@@ -27,15 +28,17 @@ class CountAspect<T> implements InvocationHandler {
     private final Map<String, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
+    private final Duration warnThreshold;
     private final Integer bucketCount;
 
-    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name, Logger log) {
+    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name, Logger log, Duration warnThreshold) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
         this.countWindow = countWindow;
         this.bucketCount = bucketCount;
         this.log = log;
+        this.warnThreshold = warnThreshold;
     }
 
     @Override
@@ -45,21 +48,26 @@ class CountAspect<T> implements InvocationHandler {
         long start = System.nanoTime();
         try {
             Object o = method.invoke(proxied, args);
-
-
+            local.responseEnd();
             return o;
         } finally {
-            if (!local.counted) {
-                // Not counted by CountFilter? Count ourselves
-                counts.computeIfAbsent(AbstractApiClient.methodToString(method),
-                    (m) -> Counter.builder()
-                        .name(getObjectName(m))
-                        .countWindow(countWindow)
-                        .bucketCount(bucketCount)
-                        .build()
-                )
-                    .eventAndDuration(Duration.ofNanos(System.nanoTime() - start));
+            Duration totalDuration = local.getTotalDuration();
+            counts.computeIfAbsent(local.key,
+                (m) -> Counter.builder()
+                    .name(getObjectName(m))
+                    .countWindow(countWindow)
+                    .bucketCount(bucketCount)
+                    .build()
+            )
+                .eventAndDuration(local.getTotalDuration());
+            if (totalDuration.compareTo(warnThreshold) > 0) {
+                log.warn("Took {}/{}: {} {}",
+                    Duration.ofMillis(local.getRequestDuration().toMillis()), // round to ms.
+                    Duration.ofMillis(totalDuration.toMillis()), // round to ms.
+                    local.key,
+                    local.requestUri);
             }
+
             currentThreadLocal.remove();
         }
 
@@ -81,20 +89,43 @@ class CountAspect<T> implements InvocationHandler {
         Integer bucketCount,
         ObjectName name, Class<T> restInterface,
         T service,
-        Logger log
+        Logger log,
+        Duration warnThreshold
         ) {
         return (T) Proxy.newProxyInstance(CountAspect.class.getClassLoader(),
             new Class[]{restInterface},
-            new CountAspect<T>(service, counter, countWindow, bucketCount, name, log));
+            new CountAspect<T>(service, counter, countWindow, bucketCount, name, log, warnThreshold));
     }
 
     @Data
     static class Local {
         final Method method;
-        boolean counted = false;
+        private final long start = System.nanoTime();
+        private long requestEnd;
+        private long responseEnd;
+        private URI requestUri;
+        private String key;
+
 
         Local(Method method) {
             this.method = method;
+        }
+
+        public Duration getRequestDuration() {
+            return Duration.ofNanos(requestEnd - start);
+        }
+
+        public Duration getTotalDuration() {
+            return Duration.ofNanos(responseEnd - start);
+        }
+
+        public void requestEnd(URI  requestUri, String key) {
+            this.requestEnd = System.nanoTime();
+            this.requestUri = requestUri;
+            this.key = key;
+        }
+        public void responseEnd() {
+            this.responseEnd = System.nanoTime();
         }
     }
 

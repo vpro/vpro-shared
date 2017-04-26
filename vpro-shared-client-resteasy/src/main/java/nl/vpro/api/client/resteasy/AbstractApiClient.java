@@ -587,7 +587,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log);
+        return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log, warnThreshold);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
@@ -625,7 +625,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         builder.register(new JacksonContextResolver(objectMapper));
         builder.register(new AcceptRequestFilter(accept));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
-        builder.register(new CountFilter(counter, countWindow, bucketCount, warnThreshold, getObjectName(), log));
+        builder.register(new CountFilter(getObjectName(), log));
 
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 

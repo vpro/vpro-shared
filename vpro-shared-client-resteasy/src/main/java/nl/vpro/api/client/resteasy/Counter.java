@@ -1,6 +1,8 @@
 package nl.vpro.api.client.resteasy;
 
 import lombok.Builder;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.Map;
@@ -19,6 +21,8 @@ import nl.vpro.util.WindowedLongSummaryStatistics;
  * @since 1.57
  */
 @MXBean
+@Slf4j
+@ToString
 public class Counter implements CounterMXBean {
 
 
@@ -93,6 +97,7 @@ public class Counter implements CounterMXBean {
 
     void eventAndDuration(Duration duration) {
         increment();
+        log.debug("{} Duration {}", this, duration);
         durations.accept(duration.toMillis());
     }
 
