@@ -69,9 +69,8 @@ public class JsonArrayIteratorTest {
     public void testIncompleteJson() throws IOException {
         InputStream input = getClass().getResourceAsStream("/incomplete_changes.json");
         JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
-            .inputStream(getClass().getResourceAsStream("incomplete_changes.json"))
+            .inputStream(input)
             .valueClass(Change.class)
-            .objectMapper(Jackson2Mapper.getInstance())
             .build();
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> { while (it.hasNext()) it.next(); });
