@@ -2,6 +2,8 @@ package nl.vpro.jackson2;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,8 +11,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class JsonArrayIteratorTest {
@@ -19,7 +20,7 @@ public class JsonArrayIteratorTest {
     public void test() throws IOException {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
-        JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class);
+        JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson2Mapper.getInstance()).build();
         assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
         assertThat(it.getCount()).isEqualTo(1);
         assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
@@ -46,6 +47,7 @@ public class JsonArrayIteratorTest {
         assertThat(it.hasNext()).isFalse();
         assertThat(it.hasNext()).isFalse();
         assertThat(it.getCount()).isEqualTo(0);
+        assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -59,14 +61,22 @@ public class JsonArrayIteratorTest {
         assertThat(it.getCount()).isEqualTo(4);
         assertThat(it.hasNext()).isFalse();
         assertThat(it.getCount()).isEqualTo(4);
+        assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
+
     }
 
     @Test
     public void testIncompleteJson() throws IOException {
-        JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/incomplete_changes.json"), Change.class);
+        InputStream input = getClass().getResourceAsStream("/incomplete_changes.json");
+        JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
+            .inputStream(getClass().getResourceAsStream("incomplete_changes.json"))
+            .valueClass(Change.class)
+            .objectMapper(Jackson2Mapper.getInstance())
+            .build();
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> { while (it.hasNext()) it.next(); });
         assertThat(it.hasNext()).isFalse();
+        assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
     }
 
 
@@ -75,6 +85,7 @@ public class JsonArrayIteratorTest {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream(new byte[0]), Change.class);
 
         assertThat(it.hasNext()).isFalse();
+        assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
