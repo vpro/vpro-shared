@@ -14,6 +14,8 @@ import javax.management.ObjectName;
 
 import org.slf4j.Logger;
 
+import static nl.vpro.util.TimeUtils.roundToMillis;
+
 /**
  * Wraps all calls to register some statistics.
  * @author Michiel Meeuwissen
@@ -43,14 +45,12 @@ class CountAspect<T> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Local local = new Local(method);
-        currentThreadLocal.set(local);
-        long start = System.nanoTime();
+        Local local = start(method);
         try {
             Object o = method.invoke(proxied, args);
-            local.responseEnd();
             return o;
         } finally {
+            local.responseEnd();
             Duration totalDuration = local.getTotalDuration();
             counts.computeIfAbsent(local.key,
                 (m) -> Counter.builder()
@@ -62,8 +62,8 @@ class CountAspect<T> implements InvocationHandler {
                 .eventAndDuration(local.getTotalDuration());
             if (totalDuration.compareTo(warnThreshold) > 0) {
                 log.warn("Took {}/{}: {} {}",
-                    Duration.ofMillis(local.getRequestDuration().toMillis()), // round to ms.
-                    Duration.ofMillis(totalDuration.toMillis()), // round to ms.
+                    roundToMillis(local.getRequestDuration()),
+                    roundToMillis(totalDuration),
                     local.key,
                     local.requestUri);
             }
@@ -97,8 +97,14 @@ class CountAspect<T> implements InvocationHandler {
             new CountAspect<T>(service, counter, countWindow, bucketCount, name, log, warnThreshold));
     }
 
+    private Local start(Method method) {
+        Local local = new Local(method);
+        currentThreadLocal.set(local);
+        return local;
+    }
     @Data
     static class Local {
+
         final Method method;
         private final long start = System.nanoTime();
         private long requestEnd;
