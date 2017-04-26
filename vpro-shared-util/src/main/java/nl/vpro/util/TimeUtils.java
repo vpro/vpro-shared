@@ -22,7 +22,7 @@ public class TimeUtils {
         }
         try {
             return Optional.of(ZonedDateTime.parse(parse));
-        } catch (DateTimeParseException dtf) {
+        } catch (DateTimeParseException ignored) {
 
         }
         Instant instant = parse(parse).orElse(null);
@@ -40,23 +40,23 @@ public class TimeUtils {
 
         try {
             return Optional.of(LocalDate.parse(dateValue).atStartOfDay().atZone(ZONE_ID).toInstant());
-        } catch (DateTimeParseException dpe) {
+        } catch (DateTimeParseException ignored) {
 
         }
         try {
             return Optional.of(LocalDateTime.parse(dateValue).atZone(ZONE_ID).toInstant());
-        } catch (DateTimeParseException dpe) {
+        } catch (DateTimeParseException ignored) {
 
         }
         //return Instant.parse(dateValue);
         try {
             return Optional.of(OffsetDateTime.parse(dateValue).toInstant());
-        } catch (DateTimeParseException dtp) {
+        } catch (DateTimeParseException ignored) {
 
         }
         try {
             return Optional.of(ZonedDateTime.parse(dateValue).toInstant());
-        } catch (DateTimeParseException dtp) {
+        } catch (DateTimeParseException ignored) {
         }
         DateTimeParseException dtp;
         try {
