@@ -72,5 +72,13 @@ public class TimeUtilsTest {
         assertThat(TimeUtils.isLarger(TimeUtils.parseDuration("PT6M").get(), TimeUtils.parseDuration("PT5M").get())).isTrue();
     }
 
+    @Test
+    public void roundMillis() {
+        Duration duration = Duration.ofSeconds(4).plusNanos(600_000); // 4 seconds 0.6 ms
+        System.out.println(duration);
+        assertThat(TimeUtils.roundToMillis(duration).toString()).isEqualTo("PT4.001S");
+
+    }
+
 
 }
