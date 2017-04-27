@@ -2,7 +2,7 @@
  * Copyright (C) 2012 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.hibernate;
+package nl.vpro.hibernate.search;
 
 import org.hibernate.search.bridge.StringBridge;
 

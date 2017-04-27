@@ -2,7 +2,7 @@
  * Copyright (C) 2010 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.hibernate;
+package nl.vpro.hibernate.search;
 
 import java.util.Collection;
 import java.util.function.Function;
