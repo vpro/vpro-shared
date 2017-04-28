@@ -50,4 +50,9 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
         return result;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ":" + getCombined().toString();
+    }
+
 }

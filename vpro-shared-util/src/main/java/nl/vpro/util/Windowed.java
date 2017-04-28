@@ -169,6 +169,11 @@ public abstract class Windowed<T> {
         }
     }
 
+    @Override
+    public String toString() {
+        return getStart() + " - " + getStart().plus(getTotalDuration()) + " (" + getBucketCount() + " buckets)" ;
+    }
+
 
 
 }

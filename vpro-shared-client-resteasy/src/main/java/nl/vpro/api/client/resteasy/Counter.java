@@ -5,6 +5,8 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,13 +26,13 @@ import static nl.vpro.util.TimeUtils.roundToMillis;
  */
 @MXBean
 @Slf4j
-@ToString
+@ToString(exclude = "name")
 public class Counter implements CounterMXBean {
 
 
     private final AtomicLong count = new AtomicLong(0L);
     private final WindowedEventRate rate;
-    private final WindowedLongSummaryStatistics durations;
+    private final List<WindowedLongSummaryStatistics> durationStatistics = new ArrayList<>();
     private final ObjectName name;
 
     @Builder
@@ -44,15 +46,22 @@ public class Counter implements CounterMXBean {
             .window(countWindow)
             .bucketCount(bucketCount)
             .build();
-        durations = WindowedLongSummaryStatistics.builder()
+        durationStatistics.add(WindowedLongSummaryStatistics.builder()
             .window(countWindow)
             .bucketCount(bucketCount)
-            .build();
+            .build());
         if (name != null) {
             AbstractApiClient.registerBean(name, this);
         }
     }
 
+    private WindowedLongSummaryStatistics newStatistics() {
+        WindowedLongSummaryStatistics template = durationStatistics.get(0);
+        return WindowedLongSummaryStatistics.builder()
+            .window(template.getTotalDuration())
+            .bucketCount(template.getBucketCount())
+            .build();
+    }
 
     @Override
     public long getCount() {
@@ -74,12 +83,12 @@ public class Counter implements CounterMXBean {
     @Override
     public String getAverageDuration() {
         return
-            Duration.ofMillis((long) (durations.getCombined().getAverage())).toString();
+            Duration.ofMillis((long) (getDurationStatistics().getCombined().getAverage())).toString();
             // No standard deviation (introduces commons-math for that?)
     }
     @Override
     public Map<String, String> getAverageDurations()  {
-        return durations.getRanges()
+        return getDurationStatistics().getRanges()
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
@@ -88,19 +97,29 @@ public class Counter implements CounterMXBean {
             ));
     }
 
-    public WindowedLongSummaryStatistics getDurations() {
-        return durations;
+    public WindowedLongSummaryStatistics getDurationStatistics() {
+        return getDurationStatistics(0);
     }
 
+    public WindowedLongSummaryStatistics getDurationStatistics(int index) {
+        return durationStatistics.get(index);
+    }
     private void increment() {
         rate.newEvent();
         count.getAndIncrement();
     }
 
-    void eventAndDuration(Duration duration) {
+    void eventAndDuration(Duration duration, Duration... durations) {
         increment();
         log.debug("{} Duration {}", this, duration);
-        durations.accept(roundToMillis(duration).toMillis());
+        getDurationStatistics().accept(roundToMillis(duration).toMillis());
+        int i = 1;
+        for(Duration dur : durations) {
+            if (this.durationStatistics.size() <= i) {
+                this.durationStatistics.add(newStatistics());
+            }
+            this.durationStatistics.get(i++).accept(roundToMillis(dur).toMillis());
+        }
     }
 
     void shutdown() {
