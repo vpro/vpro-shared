@@ -66,7 +66,7 @@ public class StringInstantToJsonTimestamp {
                         return null;
                     }
                 default:
-                    log.warn("Could not parse {} to instant. Returing null", jp.toString());
+                    log.warn("Could not parse {} to instant. Returning null", jp.toString());
                     return null;
             }
         }
