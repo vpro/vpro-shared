@@ -78,6 +78,8 @@
     <module>vpro-shared-web</module>
     <module>vpro-shared-ws</module>
     <module>vpro-shared-xml</module>
+    <module>vpro-shared-guice</module>
+
   </modules>
 
   <scm>
