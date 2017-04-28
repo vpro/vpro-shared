@@ -59,7 +59,7 @@ class CountAspect<T> implements InvocationHandler {
                     .bucketCount(bucketCount)
                     .build()
             )
-                .eventAndDuration(totalDuration);
+                .eventAndDuration(totalDuration, local.getRequestDuration());
 
             if (totalDuration.compareTo(warnThreshold) > 0) {
                 log.warn("Took {}/{}: {} {}",
