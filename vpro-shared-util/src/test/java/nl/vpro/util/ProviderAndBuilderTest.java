@@ -37,7 +37,7 @@ public class ProviderAndBuilderTest {
         // This would be the way for guice to optionally inject
         private Optional<String> a;
         private Integer b;
-        private String duration;
+        private Duration duration;
 
         @Override
         public A get() {
@@ -76,7 +76,7 @@ public class ProviderAndBuilderTest {
     @Test
     public void buildDuration() throws Exception {
         AProvider a = new AProvider();
-        a.setDuration("5s");
+        a.setDuration(TimeUtils.parseDuration("5s").orElse(null));
         a.setB(null);
 
 
