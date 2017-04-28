@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.Duration;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.junit.Test;
@@ -24,13 +27,17 @@ public class ProviderAndBuilderTest {
     public static class A {
         private String a;
         private Integer b;
+        private Duration duration;
 
     }
     @Data
     public static class AProvider implements Provider<A> {
 
+        @Named("foo.bar") @Inject
+        // This would be the way for guice to optionally inject
         private Optional<String> a;
         private Integer b;
+        private String duration;
 
         @Override
         public A get() {
@@ -64,5 +71,17 @@ public class ProviderAndBuilderTest {
 
         assertThat(built.getA()).isNull();
         assertThat(built.getB()).isNull();
+    }
+
+    @Test
+    public void buildDuration() throws Exception {
+        AProvider a = new AProvider();
+        a.setDuration("5s");
+        a.setB(null);
+
+
+        A built = a.get();
+
+        assertThat(built.getDuration()).isEqualTo(Duration.ofSeconds(5));
     }
 }
