@@ -3,6 +3,7 @@ package nl.vpro.util;
 import java.util.Iterator;
 
 /**
+ * An iterator that is also {@link AutoCloseable}.
  * @author Michiel Meeuwissen
  * @since 1.1
  */

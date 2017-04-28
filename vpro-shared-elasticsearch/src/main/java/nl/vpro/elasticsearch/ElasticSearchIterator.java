@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
@@ -9,22 +11,17 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nl.vpro.util.CountedIterator;
 
 /**
  * A wrapper around the Elastic Search scroll interface.
- *
- * See
+
  * @author Michiel Meeuwissen
  * @since 0.47
  */
+@Slf4j
 public class ElasticSearchIterator<T>  implements CountedIterator<T> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIterator.class);
-
 
     final Function<SearchHit, T> adapt;
     final Client client;
@@ -91,7 +88,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                         hasNext = true;
                     }
                 } else {
-                    LOG.warn("No scroll id found, so not possible to scroll next batch");
+                    log.warn("No scroll id found, so not possible to scroll next batch");
                     hasNext = false;
                 }
             } else {

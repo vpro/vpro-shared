@@ -12,6 +12,7 @@ import org.hibernate.ScrollableResults;
 import nl.vpro.util.CloseableIterator;
 
 /**
+ * Executes a {@link Criteria} and makes the result accessible as a {@link CloseableIterator}.
  * @author Michiel Meeuwissen
  * @since 1.63
  */
