@@ -3,15 +3,22 @@ package nl.vpro.guice;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
+
+import nl.vpro.util.DefaultValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,23 +32,37 @@ public class DurationConvertorTest {
         @Inject
         @Named("duration")
         public Duration duration;
+
+        @Inject
+        @Named("optionalduration")
+        @DefaultValue("0.1S")
+        public Optional<Duration> optionalDuration;
+
+        @Inject
+        @Named("optionaldurationwithoutdefault")
+        public Optional<Duration> optionalDurationWithoutDefault;
     }
 
     private Injector injector;
     @Before
     public void setup() {
 
-        injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                Map<String, String> properties = new HashMap<>();
-                properties.put("duration", "10S");
+        injector = Guice.createInjector(
+            new AbstractModule() {
+                @Override
+                protected void configure() {
 
-                Names.bindProperties(binder(), properties);
-                binder().convertToTypes(Matchers.only(TypeLiteral.get(Duration.class)), new DurationConvertor());
+                    Map<String, String> properties1 = new HashMap<>();
+                    properties1.put("duration", "20S");
+                    Names.bindProperties(binder(), properties1);
 
-            }
-        });
+                    binder().convertToTypes(Matchers.only(TypeLiteral.get(Duration.class)), new DurationConvertor());
+
+
+                }
+            },
+            new OptionalModule(A.class)
+        );
 
 
 
@@ -50,7 +71,10 @@ public class DurationConvertorTest {
     @Test
     public void test() {
         A a = injector.getInstance(A.class);
-        assertThat(a.duration).isEqualTo(Duration.ofSeconds(10));
+        assertThat(a.duration).isEqualTo(Duration.ofSeconds(20));
+        assertThat(a.optionalDuration.get()).isEqualTo(Duration.ofMillis(100));
+        assertThat(a.optionalDurationWithoutDefault.isPresent()).isFalse();
+
 
     }
 
