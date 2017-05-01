@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,6 +17,7 @@ import javax.inject.Provider;
  * @author Michiel Meeuwissen
  * @since 1.69
  */
+@Slf4j
 public class ProviderAndBuilder {
 
 
@@ -24,14 +27,20 @@ public class ProviderAndBuilder {
         for (Field f : clazz.getDeclaredFields()) {
             f.setAccessible(true);
             Class<?> fieldType = f.getType();
+            if (fieldType.equals(builderClass)) {
+                continue;
+            }
             Object fieldValue = f.get(provider);
             if (Optional.class.isAssignableFrom(fieldType)) {
                 fieldType = Class.forName(((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0].getTypeName());
                 fieldValue = fieldValue == null ? null : ((Optional) fieldValue).orElse(null);
             }
-
-            Method m = builderClass.getMethod(f.getName(), fieldType);
-            m.invoke(builder, fieldValue);
+            try {
+                Method m = builderClass.getMethod(f.getName(), fieldType);
+                m.invoke(builder, fieldValue);
+            } catch (NoSuchMethodException nsm) {
+                log.info("Ignored {}", f);
+            }
         }
         return builder;
     }
