@@ -14,8 +14,6 @@ import org.junit.Test;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.TypeLiteral;
-import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 
 import nl.vpro.util.DefaultValue;
@@ -24,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.69
  */
 public class DurationConvertorTest {
 
@@ -51,16 +49,12 @@ public class DurationConvertorTest {
             new AbstractModule() {
                 @Override
                 protected void configure() {
-
                     Map<String, String> properties1 = new HashMap<>();
                     properties1.put("duration", "20S");
                     Names.bindProperties(binder(), properties1);
-
-                    binder().convertToTypes(Matchers.only(TypeLiteral.get(Duration.class)), new DurationConvertor());
-
-
                 }
             },
+            new Convertors(),
             new OptionalModule(A.class)
         );
 
