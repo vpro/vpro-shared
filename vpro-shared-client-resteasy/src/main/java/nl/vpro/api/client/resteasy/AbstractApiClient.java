@@ -123,6 +123,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private Instant initializationInstant = Instant.now();
 
+    private String mbeanName = null;
+
 
     @Getter
     private Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
@@ -142,7 +144,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         MediaType contentType,
         Boolean trustAll,
-        Jackson2Mapper objectMapper
+        Jackson2Mapper objectMapper,
+        String mbeanName
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -162,6 +165,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             setTrustAll(trustAll);
         }
         this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
+        this.mbeanName = mbeanName;
         registerBean();
     }
 
@@ -181,7 +185,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, null, trustAll, null);
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, null, trustAll, null, null);
 
     }
 
@@ -203,7 +207,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance());
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance(), null);
     }
 
     /**
@@ -223,7 +227,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType accept,
         Boolean trustAll
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance());
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance(), null);
     }
 
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
@@ -241,7 +245,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             null,
             null,
             false,
-            Jackson2Mapper.getLenientInstance()
+            Jackson2Mapper.getLenientInstance(),
+            null
         );
     }
 
@@ -351,6 +356,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             if (mbs.isRegistered(name)) {
+                log.info("Unregistering mbean {}", name);
                 try {
                     mbs.unregisterMBean(name);
                 } catch (InstanceNotFoundException e) {
@@ -366,7 +372,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     protected ObjectName getObjectName() {
         try {
-            return new ObjectName("nl.vpro.api.client:type=" + getClass().getSimpleName());
+            if (mbeanName == null) {
+                mbeanName = getClass().getSimpleName();
+            }
+            return new ObjectName("nl.vpro.api.client:type=" + mbeanName);
 
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException(e);

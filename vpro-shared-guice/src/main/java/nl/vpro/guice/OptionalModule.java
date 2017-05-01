@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.inject.Named;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Names;
@@ -19,7 +20,7 @@ import nl.vpro.util.TimeUtils;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.69
  */
 @Slf4j
 public class OptionalModule extends AbstractModule {
@@ -32,6 +33,11 @@ public class OptionalModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        configure(binder(), classes);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void configure(Binder binder, Class... classes) {
         for (Class clazz : classes) {
             for (Field f : clazz.getDeclaredFields()) {
                 if (Optional.class.isAssignableFrom(f.getType())) {
@@ -40,7 +46,7 @@ public class OptionalModule extends AbstractModule {
                         Named annotation = f.getAnnotation(Named.class);
                         if (annotation != null) {
 
-                            OptionalBinder optionalBinder = OptionalBinder.newOptionalBinder(binder(),
+                            OptionalBinder optionalBinder = OptionalBinder.newOptionalBinder(binder,
                                 Key.get(valueClass, Names.named(annotation.value())));
                             DefaultValue defaultValue = f.getAnnotation(DefaultValue.class);
                             if (defaultValue != null) {
@@ -48,11 +54,10 @@ public class OptionalModule extends AbstractModule {
                                 // TODO don't we have access to guice type convertors?
                                 if (valueClass.isInstance(value)) {
                                     optionalBinder.setDefault().toInstance(value);
-                                } else if (Duration.class.isAssignableFrom(valueClass)){
+                                } else if (Duration.class.isAssignableFrom(valueClass)) {
                                     optionalBinder.setDefault().toInstance(TimeUtils.parseDuration(value).orElse(null));
 
                                 }
-
                             }
                         }
                     } catch (ClassNotFoundException e) {
@@ -61,6 +66,5 @@ public class OptionalModule extends AbstractModule {
                 }
             }
         }
-
     }
 }
