@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.69
  */
-public class DurationConvertorTest {
+public class DurationConvertorAndOptionalModuleTest {
 
     public static class A {
         @Inject
@@ -39,6 +39,13 @@ public class DurationConvertorTest {
         @Inject
         @Named("optionaldurationwithoutdefault")
         public Optional<Duration> optionalDurationWithoutDefault;
+
+        final Duration constructorArgument;
+
+        @Inject
+        public A(@Named("constructorArgument") Optional<Duration> duration) {
+            this.constructorArgument = duration.orElse(null);
+        }
     }
 
     private Injector injector;
@@ -68,6 +75,7 @@ public class DurationConvertorTest {
         assertThat(a.duration).isEqualTo(Duration.ofSeconds(20));
         assertThat(a.optionalDuration.get()).isEqualTo(Duration.ofMillis(100));
         assertThat(a.optionalDurationWithoutDefault.isPresent()).isFalse();
+        assertThat(a.constructorArgument).isNull();
 
 
     }
