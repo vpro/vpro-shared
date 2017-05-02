@@ -26,6 +26,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DurationConvertorAndOptionalModuleTest {
 
+    public static class B {
+
+    }
+
+    public static class C {
+
+    }
+
+    public static class D {
+
+    }
+
     public static class A {
         @Inject
         @Named("duration")
@@ -41,6 +53,15 @@ public class DurationConvertorAndOptionalModuleTest {
         public Optional<Duration> optionalDurationWithoutDefault;
 
         final Duration constructorArgument;
+
+        @Inject
+        Optional<B> b;
+
+        @Inject
+        C c;
+
+        @Inject
+        Optional<D> d;
 
         @Inject
         public A(@Named("constructorArgument") Optional<Duration> duration) {
@@ -59,6 +80,7 @@ public class DurationConvertorAndOptionalModuleTest {
                     Map<String, String> properties1 = new HashMap<>();
                     properties1.put("duration", "20S");
                     Names.bindProperties(binder(), properties1);
+                    binder().bind(D.class).toInstance(new D());
                 }
             },
             new Convertors(),
@@ -76,6 +98,9 @@ public class DurationConvertorAndOptionalModuleTest {
         assertThat(a.optionalDuration.get()).isEqualTo(Duration.ofMillis(100));
         assertThat(a.optionalDurationWithoutDefault.isPresent()).isFalse();
         assertThat(a.constructorArgument).isNull();
+        assertThat(a.b.isPresent()).isFalse();
+        assertThat(a.c).isNotNull();
+        assertThat(a.d.isPresent()).isTrue();
 
 
     }
