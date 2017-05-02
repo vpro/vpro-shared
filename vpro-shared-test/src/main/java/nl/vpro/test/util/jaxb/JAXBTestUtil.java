@@ -108,6 +108,7 @@ public class JAXBTestUtil {
     }
 
 
+    @SafeVarargs
     public static <T> T roundTripAndSimilar(String input, Class<? extends T> inputClazz, Consumer<DiffBuilder>... build) throws IOException, SAXException {
         try {
             T result = unmarshal(input, inputClazz);
