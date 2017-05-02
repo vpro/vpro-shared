@@ -108,8 +108,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     private Integer maxConnectionsPerRoute;
     Duration connectionInPoolTTL;
     protected final Map<String, Counter> counter = new HashMap<>();
-    private Duration countWindow = Duration.ofSeconds(300);
-    private Integer bucketCount = 20;
+    private Duration countWindow = Duration.ofHours(24);
+    private Integer bucketCount = 24;
 
     private Duration warnThreshold = Duration.ofMillis(100);
 
