@@ -31,10 +31,11 @@ public class TailAdder<T> implements Iterator<T> {
     T last = null;
 
     @SuppressWarnings("unchecked")
-    public static <T> TailAdder withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
-        return new TailAdder(wrapped, false, (Function<T, T>[]) adder);
+    @SafeVarargs
+    public static <T> TailAdder<T> withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
+        return new TailAdder<T>(wrapped, false, (Function<T, T>[]) adder);
     }
-    
+
     @SafeVarargs
     private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, T>... adder) {
         this.wrapped = wrapped;
@@ -62,6 +63,7 @@ public class TailAdder<T> implements Iterator<T> {
         }).toArray(Function[]::new));
     }
 
+    @Deprecated
     public TailAdder(Iterator<T> wrapped, Callable<T> adder) {
         this(wrapped, false, adder);
     }
