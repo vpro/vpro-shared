@@ -54,21 +54,24 @@ public class OptionalModule extends AbstractModule {
     protected static void bind(Binder binder, AnnotatedElement f, Class<?> type, Type parameterizedType) {
         if (Optional.class.isAssignableFrom(type)) {
             try {
+                OptionalBinder optionalBinder;
+                Class valueClass = Class.forName(((ParameterizedType) parameterizedType).getActualTypeArguments()[0].getTypeName());
                 Named annotation = f.getAnnotation(Named.class);
                 if (annotation != null) {
-                    Class valueClass = Class.forName(((ParameterizedType) parameterizedType).getActualTypeArguments()[0].getTypeName());
-                    OptionalBinder optionalBinder = OptionalBinder.newOptionalBinder(binder,
-                        Key.get(valueClass, Names.named(annotation.value())));
-                    DefaultValue defaultValue = f.getAnnotation(DefaultValue.class);
-                    if (defaultValue != null) {
-                        String value = defaultValue.value();
-                        // TODO don't we have access to guice type convertors?
-                        if (valueClass.isInstance(value)) {
-                            optionalBinder.setDefault().toInstance(value);
-                        } else if (Duration.class.isAssignableFrom(valueClass)) {
-                            optionalBinder.setDefault().toInstance(TimeUtils.parseDuration(value).orElse(null));
+                    String name = annotation.value();
+                    optionalBinder = OptionalBinder.newOptionalBinder(binder, Key.get(valueClass, Names.named(name)));
+                } else {
+                    optionalBinder = OptionalBinder.newOptionalBinder(binder, valueClass);
+                }
+                DefaultValue defaultValue = f.getAnnotation(DefaultValue.class);
+                if (defaultValue != null) {
+                    String value = defaultValue.value();
+                    // TODO don't we have access to guice type convertors?
+                    if (valueClass.isInstance(value)) {
+                        optionalBinder.setDefault().toInstance(value);
+                    } else if (Duration.class.isAssignableFrom(valueClass)) {
+                        optionalBinder.setDefault().toInstance(TimeUtils.parseDuration(value).orElse(null));
 
-                        }
                     }
                 }
             } catch (ClassNotFoundException e) {

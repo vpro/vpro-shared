@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -342,7 +343,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         registerBean(getObjectName(), this);
     }
 
-    protected static void registerBean(ObjectName name, Object object) {
+    protected static synchronized void registerBean(ObjectName name, Object object) {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             unregister(name);
@@ -380,6 +381,26 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    /**
+     * Checks wether supplier has null, if so produces it while locking, so it happens only on
+     */
+    protected <T> T produceIfNull(Supplier<T> supplier, Supplier<T> producer) {
+        T t = supplier.get();
+        if (t == null) {
+            synchronized (this) {
+                T found = supplier.get();
+                if (found == null) {
+                    t = producer.get();
+                } else {
+                    t = found;
+                }
+            }
+        }
+        return t;
+
     }
 
     private HttpClient getHttpClient(
