@@ -28,6 +28,7 @@ public class ProviderAndBuilderTest {
         private String a;
         private Integer b;
         private Duration duration;
+        private Duration anotherDuration;
 
     }
     @Data
@@ -38,6 +39,7 @@ public class ProviderAndBuilderTest {
         private Optional<String> a;
         private Integer b;
         private Duration duration;
+        private Optional<String> anotherDuration;
 
         @Override
         public A get() {
@@ -51,12 +53,14 @@ public class ProviderAndBuilderTest {
         AProvider a = new AProvider();
         a.setA(Optional.of("X"));
         a.setB(8);
+        a.setAnotherDuration(Optional.of("10s"));
 
 
         A built = a.get();
 
         assertThat(built.getA()).isEqualTo("X");
         assertThat(built.getB()).isEqualTo(8);
+        assertThat(built.getAnotherDuration()).isEqualTo(Duration.ofSeconds(10));
     }
 
 

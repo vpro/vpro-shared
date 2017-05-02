@@ -22,24 +22,24 @@ public class ProviderAndBuilder {
 
 
     public static <T, S> S fill(Provider<T> provider, S builder) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
-        Class<?> clazz = provider.getClass();
+        Class<?> providerClass = provider.getClass();
         Class<?> builderClass = builder.getClass();
-        for (Field f : clazz.getDeclaredFields()) {
-            f.setAccessible(true);
-            Class<?> fieldType = f.getType();
+        for (Field providerField : providerClass.getDeclaredFields()) {
+            providerField.setAccessible(true);
+            Class<?> fieldType = providerField.getType();
             if (fieldType.equals(builderClass)) {
                 continue;
             }
-            Object fieldValue = f.get(provider);
+            Object fieldValue = providerField.get(provider);
             if (Optional.class.isAssignableFrom(fieldType)) {
-                fieldType = Class.forName(((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0].getTypeName());
+                fieldType = Class.forName(((ParameterizedType) providerField.getGenericType()).getActualTypeArguments()[0].getTypeName());
                 fieldValue = fieldValue == null ? null : ((Optional) fieldValue).orElse(null);
             }
             try {
-                Method m = builderClass.getMethod(f.getName(), fieldType);
-                m.invoke(builder, fieldValue);
+                Method builderMethod = builderClass.getMethod(providerField.getName(), fieldType);
+                builderMethod.invoke(builder, fieldValue);
             } catch (NoSuchMethodException nsm) {
-                log.info("Ignored {}", f);
+                log.info("Ignored {}", providerField);
             }
         }
         return builder;
