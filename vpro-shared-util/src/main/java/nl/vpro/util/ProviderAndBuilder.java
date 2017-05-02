@@ -26,18 +26,18 @@ public class ProviderAndBuilder {
         Class<?> builderClass = builder.getClass();
         for (Field providerField : providerClass.getDeclaredFields()) {
             providerField.setAccessible(true);
-            Class<?> fieldType = providerField.getType();
-            if (fieldType.equals(builderClass)) {
+            Class<?> providerType = providerField.getType();
+            if (providerType.equals(builderClass)) {
                 continue;
             }
-            Object fieldValue = providerField.get(provider);
-            if (Optional.class.isAssignableFrom(fieldType)) {
-                fieldType = Class.forName(((ParameterizedType) providerField.getGenericType()).getActualTypeArguments()[0].getTypeName());
-                fieldValue = fieldValue == null ? null : ((Optional) fieldValue).orElse(null);
+            Object providerValue = providerField.get(provider);
+            if (Optional.class.isAssignableFrom(providerType)) {
+                providerType = Class.forName(((ParameterizedType) providerField.getGenericType()).getActualTypeArguments()[0].getTypeName());
+                providerValue = providerValue == null ? null : ((Optional) providerValue).orElse(null);
             }
             try {
-                Method builderMethod = builderClass.getMethod(providerField.getName(), fieldType);
-                builderMethod.invoke(builder, fieldValue);
+                Method builderMethod = builderClass.getMethod(providerField.getName(), providerType);
+                builderMethod.invoke(builder, providerValue);
             } catch (NoSuchMethodException nsm) {
                 log.info("Ignored {}", providerField);
             }
