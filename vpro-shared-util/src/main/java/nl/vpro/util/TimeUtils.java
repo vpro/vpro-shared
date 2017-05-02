@@ -16,7 +16,7 @@ public class TimeUtils {
     public static ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
 
 
-    public static Optional<ZonedDateTime> parseZoned(String parse) {
+    public static Optional<ZonedDateTime> parseZoned(CharSequence parse) {
         if (StringUtils.isBlank(parse)) {
             return Optional.empty();
         }
@@ -32,7 +32,7 @@ public class TimeUtils {
         return Optional.of(instant.atZone(ZONE_ID));
     }
 
-    public static Optional<Instant> parse(String dateValue) {
+    public static Optional<Instant> parse(CharSequence dateValue) {
         if (StringUtils.isBlank(dateValue)) {
             return Optional.empty();
         }
@@ -66,11 +66,11 @@ public class TimeUtils {
         }
 
         try {
-            Long longValue = Long.parseLong(dateValue);
+            Long longValue = Long.parseLong(dateValue.toString());
             if (longValue > 1000 && longValue < 9999) {
                 return Optional.of(LocalDate.of(longValue.intValue(), 1, 1).atStartOfDay().atZone(ZONE_ID).toInstant());
             } else {
-                return Optional.of(Instant.ofEpochMilli(Long.parseLong(dateValue)));
+                return Optional.of(Instant.ofEpochMilli(Long.parseLong(dateValue.toString())));
             }
         } catch (NumberFormatException nfe) {
             throw dtp;
@@ -78,24 +78,26 @@ public class TimeUtils {
 
     }
 
-    public static Optional<Duration> parseDuration(String d) {
+    public static Optional<Duration> parseDuration(CharSequence d) {
         if (StringUtils.isBlank(d)) {
             return Optional.empty();
         }
+
         try {
             return Optional.of(Duration.parse(d));
         } catch (DateTimeParseException dtp) {
+            String ds = d.toString();
             try {
-                return Optional.of(Duration.ofMillis(Long.parseLong(d)));
+                return Optional.of(Duration.ofMillis(Long.parseLong(ds)));
             } catch (NumberFormatException nfe) {
                 // ignore
             }
-            if (!d.startsWith("P")) {
-                return parseDuration("P" + d);
-            } else if (!d.startsWith("PT")){
-                return parseDuration("PT" + d.substring(1));
+            if (!ds.startsWith("P")) {
+                return parseDuration("P" + ds);
+            } else if (!d.toString().startsWith("PT")){
+                return parseDuration("PT" + ds.substring(1));
             }
-            throw new RuntimeException("for " + d, dtp);
+            throw new RuntimeException("for " + ds, dtp);
         }
     }
 

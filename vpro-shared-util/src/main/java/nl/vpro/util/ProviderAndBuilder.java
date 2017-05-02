@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.time.Duration;
 import java.util.Optional;
 
 import javax.inject.Provider;
@@ -35,14 +36,49 @@ public class ProviderAndBuilder {
                 providerType = Class.forName(((ParameterizedType) providerField.getGenericType()).getActualTypeArguments()[0].getTypeName());
                 providerValue = providerValue == null ? null : ((Optional) providerValue).orElse(null);
             }
-            try {
-                Method builderMethod = builderClass.getMethod(providerField.getName(), providerType);
-                builderMethod.invoke(builder, providerValue);
-            } catch (NoSuchMethodException nsm) {
+            Method builderMethod = getBuilderMethod(builderClass, providerField.getName(), providerType);
+            if (builderMethod != null) {
+                try {
+                    builderMethod.invoke(builder, convert(providerValue, builderMethod.getParameterTypes()[0]));
+                } catch (IllegalArgumentException ia) {
+                    throw new IllegalArgumentException(builderMethod + " (" + providerValue + "):"  + ia.getMessage(), ia);
+                }
+            } else {
                 log.info("Ignored {}", providerField);
             }
+
         }
         return builder;
+    }
+
+    protected static Object convert(Object o, Class<?> dest) {
+        if (o == null) {
+            return null;
+        }
+        if (CharSequence.class.isInstance(o) && dest.isAssignableFrom(Duration.class)) {
+            return TimeUtils.parseDuration((CharSequence) o).orElse(null);
+        }
+        return o;
+    }
+
+    protected static Method getBuilderMethod(Class<?> builderClass, String name, Class<?> type) {
+        Method candidate = null;
+        for (Method method : builderClass.getMethods()) {
+            if (method.getName().equals(name)) {
+                if (method.getParameterCount() == 1) {
+                    if (candidate == null) {
+                        candidate = method;
+                     } else {
+                        if (method.getParameterTypes()[0].isAssignableFrom(type)) {
+                            candidate = method;
+                        }
+                    }
+                }
+            }
+
+        }
+        return candidate;
+
     }
 
     public static <T, S> S fillAndCatch(Provider<T> provider, S builder) {
