@@ -2,8 +2,7 @@ package nl.vpro.guice;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -19,6 +18,7 @@ import nl.vpro.util.DefaultValue;
 import nl.vpro.util.TimeUtils;
 
 /**
+ @ Uses {@link OptionalBinder} to provide <code>null</code>'s or <code>@DefaultValue</code>'s for <code>@Named</code> parameters of the type <code>Optional</code>
  * @author Michiel Meeuwissen
  * @since 1.69
  */
@@ -36,35 +36,46 @@ public class OptionalModule extends AbstractModule {
         configure(binder(), classes);
     }
 
-    @SuppressWarnings("unchecked")
+
     public static void configure(Binder binder, Class... classes) {
         for (Class clazz : classes) {
             for (Field f : clazz.getDeclaredFields()) {
-                if (Optional.class.isAssignableFrom(f.getType())) {
-                    try {
-                        Class valueClass = Class.forName(((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0].getTypeName());
-                        Named annotation = f.getAnnotation(Named.class);
-                        if (annotation != null) {
-
-                            OptionalBinder optionalBinder = OptionalBinder.newOptionalBinder(binder,
-                                Key.get(valueClass, Names.named(annotation.value())));
-                            DefaultValue defaultValue = f.getAnnotation(DefaultValue.class);
-                            if (defaultValue != null) {
-                                String value = defaultValue.value();
-                                // TODO don't we have access to guice type convertors?
-                                if (valueClass.isInstance(value)) {
-                                    optionalBinder.setDefault().toInstance(value);
-                                } else if (Duration.class.isAssignableFrom(valueClass)) {
-                                    optionalBinder.setDefault().toInstance(TimeUtils.parseDuration(value).orElse(null));
-
-                                }
-                            }
-                        }
-                    } catch (ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
-                    }
+                bind(binder, f, f.getType(), f.getGenericType());
+            }
+            for (Constructor c : clazz.getConstructors()) {
+                for (Parameter parameter : c.getParameters())  {
+                    bind(binder, parameter, parameter.getType(), parameter.getParameterizedType());
                 }
             }
         }
     }
+
+    @SuppressWarnings("unchecked")
+    protected static void bind(Binder binder, AnnotatedElement f, Class<?> type, Type parameterizedType) {
+        if (Optional.class.isAssignableFrom(type)) {
+            try {
+                Named annotation = f.getAnnotation(Named.class);
+                if (annotation != null) {
+                    Class valueClass = Class.forName(((ParameterizedType) parameterizedType).getActualTypeArguments()[0].getTypeName());
+                    OptionalBinder optionalBinder = OptionalBinder.newOptionalBinder(binder,
+                        Key.get(valueClass, Names.named(annotation.value())));
+                    DefaultValue defaultValue = f.getAnnotation(DefaultValue.class);
+                    if (defaultValue != null) {
+                        String value = defaultValue.value();
+                        // TODO don't we have access to guice type convertors?
+                        if (valueClass.isInstance(value)) {
+                            optionalBinder.setDefault().toInstance(value);
+                        } else if (Duration.class.isAssignableFrom(valueClass)) {
+                            optionalBinder.setDefault().toInstance(TimeUtils.parseDuration(value).orElse(null));
+
+                        }
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+
+    }
+
 }
