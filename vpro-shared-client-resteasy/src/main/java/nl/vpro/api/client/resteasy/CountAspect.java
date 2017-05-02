@@ -116,7 +116,9 @@ class CountAspect<T> implements InvocationHandler {
 
         Local(Method method) {
             this.method = method;
+            this.key = method.getName();
         }
+
 
         public Duration getRequestDuration() {
             return Duration.ofNanos(requestEnd - start);
