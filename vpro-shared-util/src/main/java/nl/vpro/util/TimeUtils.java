@@ -97,7 +97,7 @@ public class TimeUtils {
             } else if (!d.toString().startsWith("PT")){
                 return parseDuration("PT" + ds.substring(1));
             }
-            throw new RuntimeException("for " + ds, dtp);
+            throw new RuntimeException("for " + ds + ":" + dtp.getMessage(), dtp);
         }
     }
 
