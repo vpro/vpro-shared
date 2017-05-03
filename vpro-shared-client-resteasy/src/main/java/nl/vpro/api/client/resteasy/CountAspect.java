@@ -62,9 +62,11 @@ class CountAspect<T> implements InvocationHandler {
                 .eventAndDuration(totalDuration, local.getRequestDuration());
 
             if (totalDuration.compareTo(warnThreshold) > 0) {
-                log.warn("Took {}/{}: {} {}",
-                    roundToMillis(local.getRequestDuration()),
-                    roundToMillis(totalDuration),
+                String durationReport = (((float) totalDuration.toMillis()) / local.getRequestDuration().toMillis() > 1.5f) ?
+                    String.format("%s/%s", roundToMillis(local.getRequestDuration()), roundToMillis(totalDuration)) :
+                    roundToMillis(totalDuration).toString();
+                log.warn("Took {}: {} {}",
+                    durationReport,
                     local.key,
                     local.requestUri);
             }

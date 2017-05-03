@@ -14,6 +14,7 @@ import javax.inject.Provider;
 /**
  * If you have a provider implementation based on a builder, you can fill the fields of the provider to the builder using
  * reflection.
+ * Providers can come in usefull with IOC-frameworks like guice. The idea is to put {@Named} annotation on the fields of the Provider.
  *
  * @author Michiel Meeuwissen
  * @since 1.69
@@ -55,6 +56,7 @@ public class ProviderAndBuilder {
         if (o == null) {
             return null;
         }
+        // I couldn't get DurationConvertor working for providers in magnolia. For now let the provider use String's. It doesn't really matter.
         if (CharSequence.class.isInstance(o) && dest.isAssignableFrom(Duration.class)) {
             return TimeUtils.parseDuration((CharSequence) o).orElse(null);
         }
