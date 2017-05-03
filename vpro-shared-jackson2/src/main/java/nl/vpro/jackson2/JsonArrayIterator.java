@@ -1,6 +1,6 @@
 package nl.vpro.jackson2;
 
-import lombok.Builder;
+import lombok.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +9,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,23 +61,45 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     }
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
-        this(inputStream, null, clazz, callback, null, null, null);
+        this(inputStream, null, clazz, callback, null, null, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null, null, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null, null, null);
     }
 
 
-    @Builder
+    public static class Builder<T> {
+
+
+    }
+
+    /**
+     *
+     * @param inputStream     The inputstream containing the json
+     * @param valueCreator    A function which converts a json {@link TreeNode} to the desired objects in the iterator.
+     * @param valueClass      If valueCreator is not given, simply the class of the desired object can be given
+     *                        Json unmarshalling with the given objectMapper will happen.
+     * @param callback        If the iterator is ready, closed or error this callback will be called.
+     * @param sizeField       The size of the iterator, i.e. the size of the array represented in the json stream
+     * @param totalSizeField  Sometimes the array is part of something bigger, e.g. a page in a search result. The size
+     *                        of the 'complete' result can be in the beginning of the json in this field.
+     * @param objectMapper    Default the objectMapper {@link Jackson2Mapper#getLenientInstance()} will be used (in
+     *                        conjuction with <code>valueClass</code>, but you may specify another one
+     * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
+     * @throws IOException    If the json parser could not be created or the piece until the start of the array could
+     *                        not be tokenized.
+     */
+     @lombok.Builder(builderClassName = "Builder", builderMethodName = "builder")
     private JsonArrayIterator(
-        InputStream inputStream,
-        final BiFunction<JsonParser, TreeNode,  T> valueCreator,
-        final Class<T> valueClass,
-        Runnable callback,
-        String sizeField,
-        String totalSizeField,
-        ObjectMapper objectMapper
+        @NonNull  InputStream inputStream,
+        @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
+        @Nullable final Class<T> valueClass,
+        @Nullable Runnable callback,
+        @Nullable String sizeField,
+        @Nullable String totalSizeField,
+        @Nullable ObjectMapper objectMapper,
+        @Nullable Logger logger
         ) throws IOException {
         if (inputStream == null) {
             throw new IllegalArgumentException("No inputStream given");
@@ -85,6 +109,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         if (valueCreator != null && valueClass != null) {
             throw new IllegalArgumentException();
         }
+         if (logger != null) {
+             this.log = logger;
+         }
         Long tmpSize = null;
         Long tmpTotalSize = null;
         String fieldName = null;
@@ -94,6 +121,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         if (totalSizeField == null) {
             totalSizeField = "totalSize";
         }
+        // find the start of the array, where we will start iterating.
         while(true) {
             JsonToken token = jp.nextToken();
             if (token == null) {
