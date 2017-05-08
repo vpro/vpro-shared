@@ -34,7 +34,7 @@ public class DurationToTimeCESTConverter implements AttributeConverter<Duration,
 
         Duration duration = Duration.ofMillis(durationInMillis);
 
-        log.info("{} -> {} (using offset {})", timestamp, duration, OFFSET);
+        log.debug("{} -> {} (using offset {})", timestamp, duration, OFFSET);
         return duration;
     }
 }
