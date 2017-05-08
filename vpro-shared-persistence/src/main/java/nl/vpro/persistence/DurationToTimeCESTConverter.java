@@ -18,7 +18,7 @@ import javax.persistence.Converter;
 @Slf4j
 public class DurationToTimeCESTConverter implements AttributeConverter<Duration, Time> {
 
-    private static final long OFFSET = TimeZone.getTimeZone("CEST").getOffset(0);
+    private static final long OFFSET = TimeZone.getTimeZone("Europe/Amsterdam").getOffset(0);
     @Override
     public Time convertToDatabaseColumn(Duration duration) {
         return duration == null ? null : new Time(duration.toMillis());
@@ -30,7 +30,11 @@ public class DurationToTimeCESTConverter implements AttributeConverter<Duration,
         if (timestamp == null) {
             return null;
         }
-        long durationInMillis= timestamp.getTime() - OFFSET;
-        return Duration.ofMillis(durationInMillis);
+        long durationInMillis = timestamp.getTime() - OFFSET;
+
+        Duration duration = Duration.ofMillis(durationInMillis);
+
+        log.info("{} -> {} (using offset {})", timestamp, duration, OFFSET);
+        return duration;
     }
 }
