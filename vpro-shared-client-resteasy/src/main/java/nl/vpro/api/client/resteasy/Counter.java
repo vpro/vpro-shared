@@ -51,7 +51,7 @@ public class Counter implements CounterMXBean {
             .bucketCount(bucketCount)
             .build());
         if (name != null) {
-            AbstractApiClient.registerBean(name, this);
+            AbstractApiClient.registerBean(log, name, this);
         }
     }
 
@@ -124,7 +124,7 @@ public class Counter implements CounterMXBean {
 
     void shutdown() {
         if (name != null) {
-            AbstractApiClient.unregister(name);
+            AbstractApiClient.unregister(log, name);
         }
     }
 

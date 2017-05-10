@@ -51,6 +51,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.resteasy.JacksonContextResolver;
@@ -63,8 +65,9 @@ import nl.vpro.util.XTrustProvider;
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
-@Slf4j
 public abstract class AbstractApiClient implements AbstractApiClientMXBean {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private static Thread connectionGuardThread;
     private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
@@ -340,20 +343,20 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     private void registerBean() {
-        registerBean(getObjectName(), this);
+        registerBean(log, getObjectName(), this);
     }
 
-    protected static synchronized void registerBean(ObjectName name, Object object) {
+    protected static synchronized void registerBean(Logger log, ObjectName name, Object object) {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            unregister(name);
+            unregister(log, name);
             mbs.registerMBean(object, name);
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    protected static void unregister(ObjectName name) {
+    protected static void unregister(Logger log, ObjectName name) {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             if (mbs.isRegistered(name)) {
@@ -825,6 +828,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
     }
 
+    @Slf4j
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
