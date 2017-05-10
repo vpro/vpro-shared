@@ -67,7 +67,7 @@ import nl.vpro.util.XTrustProvider;
  */
 public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     private static Thread connectionGuardThread;
     private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
