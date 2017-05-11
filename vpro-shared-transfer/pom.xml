@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>1.69.2</version>
+    <version>1.69.3-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-transfer</artifactId>
   <description>This module contains the base definitions
