@@ -19,6 +19,7 @@ import javax.persistence.Converter;
 public class DurationToTimeCESTConverter implements AttributeConverter<Duration, Time> {
 
     private static final long OFFSET = TimeZone.getTimeZone("Europe/Amsterdam").getOffset(0);
+
     @Override
     public Time convertToDatabaseColumn(Duration duration) {
         return duration == null ? null : new Time(duration.toMillis() + OFFSET);
