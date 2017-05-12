@@ -21,7 +21,7 @@ public class DurationToTimeCESTConverter implements AttributeConverter<Duration,
     private static final long OFFSET = TimeZone.getTimeZone("Europe/Amsterdam").getOffset(0);
     @Override
     public Time convertToDatabaseColumn(Duration duration) {
-        return duration == null ? null : new Time(duration.toMillis());
+        return duration == null ? null : new Time(duration.toMillis() + OFFSET);
     }
 
     @SuppressWarnings("deprecation")
