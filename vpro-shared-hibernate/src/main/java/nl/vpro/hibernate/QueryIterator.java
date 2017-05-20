@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.function.Function;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 
@@ -16,10 +17,10 @@ import nl.vpro.util.CloseableIterator;
  * @since 1.63
  */
 @Slf4j
-public class CriteriaIterator<T> extends ScrollableResultsIterator<T> {
+public class QueryIterator<T> extends ScrollableResultsIterator<T> {
 
 
-    public CriteriaIterator(Criteria criteria, Function<ScrollableResults, T> adapter) {
+    public QueryIterator(Query criteria, Function<ScrollableResults, T> adapter) {
         super(criteria
             .setReadOnly(true)
             .setCacheable(false)
