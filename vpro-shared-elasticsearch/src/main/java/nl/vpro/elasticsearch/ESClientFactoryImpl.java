@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -10,17 +12,14 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nl.vpro.util.UrlProvider;
 
 /**
  * @author ernst
  */
+@Slf4j
 public class ESClientFactoryImpl implements  ESClientFactory {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ESClientFactoryImpl.class);
 
     private List<UrlProvider> transportAddresses = Collections.emptyList();
 
@@ -60,10 +59,10 @@ public class ESClientFactoryImpl implements  ESClientFactory {
         if (client == null) {
             synchronized (this) {
                 if (client == null) {
-                    LOG.info("Constructing client on behalf of {}", logName);
+                    log.info("Constructing client on behalf of {}", logName);
                     client = constructClient(logName);
                 } else {
-                    LOG.info("Construction client on behalf of {} not needed (already happend in other thread)", logName);
+                    log.info("Construction client on behalf of {} not needed (already happend in other thread)", logName);
                 }
             }
         }
@@ -92,12 +91,12 @@ public class ESClientFactoryImpl implements  ESClientFactory {
         for (UrlProvider urlProvider : transportAddresses) {
             int port = urlProvider.getPort();
             if (implicitHttpToJavaPort && port < 9300 && port >= 9200) {
-                LOG.info("Port is configured {}, but we need a java protocol port. Taking {}", port, port + 100);
+                log.info("Port is configured {}, but we need a java protocol port. Taking {}", port, port + 100);
                 port += 100;
             }
             transportClient.addTransportAddress(new InetSocketTransportAddress(urlProvider.getHost(), port));
         }
-        LOG.info("Build es client {} {} ({})", logName, transportAddresses, clusterName);
+        log.info("Build es client {} {} ({})", logName, transportAddresses, clusterName);
 
         return transportClient;
     }
