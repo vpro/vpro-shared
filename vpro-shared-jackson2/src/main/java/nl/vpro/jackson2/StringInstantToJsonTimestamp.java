@@ -37,7 +37,7 @@ public class StringInstantToJsonTimestamp {
                 jgen.writeNull();
             } else {
                 try {
-                    jgen.writeNumber(DatatypeConverter.parseTime(value).toInstant().toEpochMilli());
+                    jgen.writeNumber(parseDateTime(value).toEpochMilli());
                 } catch (IllegalArgumentException iae) {
                     log.warn("Could not parse {}. Writing null to json", value);
                     jgen.writeNull();
@@ -45,7 +45,9 @@ public class StringInstantToJsonTimestamp {
             }
         }
     }
-
+    static Instant parseDateTime(String value){
+        return DatatypeConverter.parseTime(value).toInstant();
+    }
 
     public static class Deserializer extends JsonDeserializer<Instant> {
 
