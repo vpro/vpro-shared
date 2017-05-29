@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>vpro-shared-parent</artifactId>
-    <version>1.69.3-SNAPSHOT</version>
+    <version>1.69.3</version>
   </parent>
   <artifactId>vpro-shared-domain</artifactId>
   <description>This module contains domain objects to be shared among other modules</description>
