@@ -1,5 +1,6 @@
 package nl.vpro.xml.bind;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -23,7 +24,11 @@ public abstract class EnumAdapter<T extends Enum<T>> extends XmlAdapter<String, 
         try {
             return Enum.valueOf(enumClass, v.trim());
         } catch (IllegalArgumentException iae) {
-            return Enum.valueOf(enumClass, v.trim().toUpperCase());
+            try {
+                return Enum.valueOf(enumClass, v.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new JAXBException(e);
+            }
         }
 
     }
