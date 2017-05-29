@@ -5,7 +5,7 @@ import java.sql.*;
 import java.time.Instant;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 
 /**
@@ -48,8 +48,10 @@ public class InstantToTimestampType implements UserType {
         return x.hashCode();
     }
 
+
+
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
+    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
         Timestamp ts = rs.getTimestamp(names[0]);
         if (ts == null) {
             return null;
@@ -58,7 +60,7 @@ public class InstantToTimestampType implements UserType {
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             st.setNull(index, Types.TIMESTAMP);
         } else {

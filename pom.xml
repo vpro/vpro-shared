@@ -111,9 +111,8 @@
     <httpcomponents.version>4.5.2</httpcomponents.version>
     <httpcomponentscore.version>4.4.5</httpcomponentscore.version>
 
-
-    <hibernate.version>5.0.11.Final</hibernate.version>
-    <hibernate.search.version>5.5.5.Final</hibernate.search.version>
+    <hibernate.version>5.2.10.Final</hibernate.version>
+    <hibernate.search.version>5.7.0.Final</hibernate.search.version>
 
     <!--
 
