@@ -3,7 +3,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>1.69.4</version>
+  <version>1.69.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -83,9 +83,9 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/tags/REL-1.69.4</connection>
-    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/tags/REL-1.69.4</developerConnection>
-    <url>https://subversion.vpro.nl/viewvc/nl/vpro/vpro-shared/tags/REL-1.69.4</url>
+    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/branches/REL-1.69-SNAPSHOT</connection>
+    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/branches/REL-1.69-SNAPSHOT</developerConnection>
+    <url>https://subversion.vpro.nl/viewvc/nl/vpro/vpro-shared/branches/REL-1.69-SNAPSHOT</url>
   </scm>
 
   <properties>
