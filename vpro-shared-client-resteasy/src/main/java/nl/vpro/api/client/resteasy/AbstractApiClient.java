@@ -360,7 +360,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             if (mbs.isRegistered(name)) {
-                log.info("Unregistering mbean {}", name);
+                log.debug("Unregistering mbean {}", name);
                 try {
                     mbs.unregisterMBean(name);
                 } catch (InstanceNotFoundException e) {
