@@ -12,9 +12,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,6 +19,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+
+import nl.vpro.util.TimeUtils;
 
 @Slf4j
 public class XMLDurationToJsonTimestamp {
@@ -55,6 +54,15 @@ public class XMLDurationToJsonTimestamp {
                 log.error(e.getMessage(), e);
             }
             return null;
+        }
+    }
+
+    public static class SerializerString extends JsonSerializer<String> {
+
+        @Override
+        public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+            java.time.Duration duration = TimeUtils.parseDuration(value).orElse(null);
+            jgen.writeNumber(duration.toMillis());
         }
     }
 
