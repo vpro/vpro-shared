@@ -94,10 +94,11 @@ public class TimeUtils {
             }
             if (!ds.startsWith("P")) {
                 return parseDuration("P" + ds);
-            } else if (!d.toString().startsWith("PT")){
+            } else if (!ds.startsWith("PT")){
+                // so it did start with P, just not with PT, and it couldn't be parsed
                 return parseDuration("PT" + ds.substring(1));
             }
-            throw new RuntimeException("for " + ds + ":" + dtp.getMessage(), dtp);
+            throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
         }
     }
 

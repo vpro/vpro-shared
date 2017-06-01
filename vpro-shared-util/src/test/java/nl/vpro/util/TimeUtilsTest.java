@@ -4,10 +4,12 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
@@ -63,6 +65,13 @@ public class TimeUtilsTest {
 
 
         assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
+
+        assertThatThrownBy(() -> TimeUtils.parseDuration("can't be parsed"))
+            .isExactlyInstanceOf(DateTimeParseException.class)
+            .hasMessage("PTcan't be parsed:Text cannot be parsed to a Duration")
+            .matches((dtm) -> {
+                return ((DateTimeParseException) dtm).getParsedString().equals("PTcan't be parsed");
+            }, "doest match");
 
 
     }
