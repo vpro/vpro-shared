@@ -12,13 +12,13 @@ import java.util.Set;
 /**
  * @author Arne
  * @author roekoe
- *
+ * @TODO WTF
  */
 public class Editor extends User {
 
-    private Set<UserGroup> groups = new HashSet<UserGroup>();
+    private Set<UserGroup> groups = new HashSet<>();
 
-    private Set<Role> roles = new HashSet<Role>();
+    private Set<Role> roles = new HashSet<>();
 
     /**
      * @return the groups
