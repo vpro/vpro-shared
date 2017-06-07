@@ -49,5 +49,9 @@
       <artifactId>javax.inject</artifactId>
       <version>1</version>
     </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-logging</artifactId>
+    </dependency>
   </dependencies>
 </project>
