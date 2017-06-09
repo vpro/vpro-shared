@@ -1,25 +1,20 @@
 package nl.vpro.jackson2;
 
-import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 
 /**
  * Newer jackson version suddenly recognized @XmlEnumValue. This makes it possible to fall back to old behaviour.
  * {@link nl.vpro.domain.media.support.Workflow}
  */
+@Slf4j
 public class BackwardsCompatibleJsonEnum {
-
-    private static final Logger LOG = LoggerFactory.getLogger(BackwardsCompatibleJsonEnum.class);
 
 
     public static class Serializer extends JsonSerializer<Enum> {
@@ -43,8 +38,16 @@ public class BackwardsCompatibleJsonEnum {
 
         @Override
         public T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            ctxt.getConfig().getTypeFactory();
-            return Enum.valueOf(enumClass, jp.getValueAsString());
+            try {
+                return Enum.valueOf(enumClass, jp.getValueAsString());
+            } catch(IllegalArgumentException iae) {
+                if (ctxt.getConfig().hasDeserializationFeatures(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL.getMask())) {
+                    return null;
+                } else {
+                    throw iae;
+                }
+
+            }
         }
 
     }
