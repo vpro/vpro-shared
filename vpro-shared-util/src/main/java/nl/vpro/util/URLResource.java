@@ -97,6 +97,8 @@ public class URLResource<T> {
     }
 
 
+
+
     public T get() {
         if (result == null) {
             if (async) {
@@ -212,6 +214,7 @@ public class URLResource<T> {
             case SC_NOT_MODIFIED:
                 log.debug("Not modified {}", url);
                 notModifiedCount++;
+                lastLoad = Instant.now();
                 break;
             case SC_OK:
                 okCount++;
@@ -318,6 +321,10 @@ public class URLResource<T> {
 
     public Instant getExpires() {
         return expires;
+    }
+
+    void expire() {
+        expires = null;
     }
 
     public Duration getMaxAge() {
