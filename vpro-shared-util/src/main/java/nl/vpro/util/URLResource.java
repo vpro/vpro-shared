@@ -46,10 +46,13 @@ public class URLResource<T> {
 
     private static final int SC_OK = 200;
     private static final int SC_NOT_MODIFIED = 304;
+    private static final int SC_FOUND = 302;
+    private static final int SC_MOVED_PERMANENTLY = 301;
+
 
     private Instant lastLoad = null;
     private Integer code = null;
-    private final URI url;
+    private URI url;
 
     private Instant lastModified = null;
     private Instant expires = null;
@@ -127,7 +130,7 @@ public class URLResource<T> {
                 getCachedResource(this.url.toString().substring("classpath:".length() + 1));
             } else {
                 URLConnection connection = openConnection();
-                getCachedResource(connection);
+                getCachedResource(connection, 0);
 
             }
         } catch (java.net.UnknownHostException uhe) {
@@ -177,7 +180,7 @@ public class URLResource<T> {
         }
     }
 
-    void getCachedResource(URLConnection connection) throws IOException {
+    void getCachedResource(URLConnection connection, int redirectCount) throws IOException {
         if (result != null && expires != null && Instant.now().isBefore(expires)) {
             log.debug("Not loading {} as it is not yet expired", url);
             return;
@@ -207,6 +210,8 @@ public class URLResource<T> {
                 throw ce;
 
             }
+
+
         } else {
             code = SC_OK;
         }
@@ -260,6 +265,17 @@ public class URLResource<T> {
                 }
                 stream.close();
                 lastLoad = Instant.now();
+                break;
+            case SC_FOUND:
+            case SC_MOVED_PERMANENTLY:
+                if (redirectCount < 10) {
+                    URI redirectTo = URI.create(connection.getHeaderField("Location"));
+                    log.info("{} is redirecting to {}", url, redirectTo);
+                    if (code == SC_MOVED_PERMANENTLY) {
+                        url = redirectTo;
+                    }
+                    getCachedResource(redirectTo.toURL().openConnection(), redirectCount + 1);
+                }
                 break;
             default:
                 if (result == null) {
