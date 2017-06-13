@@ -28,7 +28,7 @@ public class URLResourceTest {
 
     @Test
     public void broadcasters() throws InterruptedException {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create("https://poms.omroep.nl/broadcasters/"));
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://poms.omroep.nl/broadcasters/"));
 
         assertTrue(broadcasters.get().size() > 0);
         assertEquals(1, broadcasters.getChangesCount());
