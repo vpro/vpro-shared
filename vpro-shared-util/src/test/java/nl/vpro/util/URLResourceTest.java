@@ -34,7 +34,9 @@ public class URLResourceTest {
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());
         assertEquals(0, broadcasters.getNotCheckedCount());
+
         broadcasters.get();
+
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());
         assertEquals(1, broadcasters.getNotCheckedCount());
@@ -49,8 +51,8 @@ public class URLResourceTest {
         broadcasters.get();
 
         assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(1, broadcasters.getNotModifiedCount());
         assertEquals(2, broadcasters.getNotCheckedCount());
+        assertEquals(1, broadcasters.getNotModifiedCount());
         System.out.println(broadcasters.get());
 
     }
