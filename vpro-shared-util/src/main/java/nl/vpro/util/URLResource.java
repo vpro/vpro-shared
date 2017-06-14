@@ -50,14 +50,25 @@ public class URLResource<T> {
     private static final int SC_MOVED_PERMANENTLY = 301;
 
 
+    @Getter
     private Instant lastLoad = null;
+    @Getter
+    private Instant lastTry = null;
+
+    @Getter
     private Integer code = null;
+    @Getter
     private URI url;
 
+    @Getter
     private Instant lastModified = null;
+    @Getter
     private Instant expires = null;
+    @Getter
     private Duration maxAge = Duration.of(1, ChronoUnit.HOURS);
+    @Getter
     private Duration minAge = Duration.of(5, ChronoUnit.MINUTES);
+    @Getter
     private Duration errorCache = Duration.of(1, ChronoUnit.MINUTES);
 
 
@@ -65,12 +76,19 @@ public class URLResource<T> {
 
     private T result;
 
+    @Getter
     private long okCount = 0;
+    @Getter
     private long notModifiedCount = 0;
+    @Getter
     private long notCheckedCount = 0;
+    @Getter
     private long checkedCount = 0;
+    @Getter
     private long changesCount = 0;
+    @Getter
     private long errorCount = 0;
+    @Getter
     private boolean async = false;
     private T empty = null;
 
@@ -116,7 +134,7 @@ public class URLResource<T> {
     }
 
     void getCachedResource() {
-        if (result != null && lastLoad != null && lastLoad.plus(minAge).isAfter(Instant.now())) {
+        if (result != null && lastTry != null && lastTry.plus(minAge).isAfter(Instant.now())) {
             notCheckedCount++;
             return;
         }
@@ -154,19 +172,20 @@ public class URLResource<T> {
     void getCachedResource(String resource) {
         T newResult = reader.apply(getClass().getClassLoader().getResourceAsStream(resource));
         if (newResult != null) {
+            lastLoad = Instant.now();
+            lastTry = lastLoad;
             if (result == null) {
-                lastLoad = Instant.now();
-                lastModified = Instant.now();
+                lastModified = lastLoad;
                 log.info("Loaded {} from {}", newResult, this.url);
             } else {
                 if (!Objects.equals(result, newResult)) {
                     log.info("Reloaded {} from {}", newResult, this.url);
-                    lastModified = Instant.now();
+                    lastModified = lastLoad;
                     changesCount++;
                 }
-                lastLoad = Instant.now();
-
             }
+
+
             result = newResult;
             callBack();
         } else {
@@ -188,7 +207,7 @@ public class URLResource<T> {
         boolean httpUrl = connection instanceof HttpURLConnection;
         code = -1;
         if (httpUrl && lastModified != null) {
-            if (lastLoad == null || lastLoad.isAfter(Instant.now().minus(maxAge))) {
+            if (lastTry == null || lastTry.isAfter(Instant.now().minus(maxAge))) {
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
             } else {
                 log.debug("last load was pretty long ago, simply do a normal request");
@@ -215,11 +234,11 @@ public class URLResource<T> {
         } else {
             code = SC_OK;
         }
+        lastTry = Instant.now();
         switch (code) {
             case SC_NOT_MODIFIED:
                 log.debug("Not modified {}", url);
                 notModifiedCount++;
-                lastLoad = Instant.now();
                 break;
             case SC_OK:
                 okCount++;
@@ -293,76 +312,20 @@ public class URLResource<T> {
     }
 
 
-    public URI getUrl() {
-        return url;
-    }
-
-    public Instant getLastLoad() {
-        return lastLoad;
-    }
-
-    public Instant getLastModified() {
-        return lastModified;
-    }
-
-
-    public long getOkCount() {
-        return okCount;
-    }
-
-    public long getNotModifiedCount() {
-        return notModifiedCount;
-    }
-
-
-    public long getChangesCount() {
-        return changesCount;
-    }
-
-    public long getNotCheckedCount() {
-        return notCheckedCount;
-    }
-
-    public long getCheckedCount() {
-        return checkedCount;
-    }
-
-    public long getErrorCount() {
-        return errorCount;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public Instant getExpires() {
-        return expires;
-    }
 
     void expire() {
         expires = null;
     }
 
-    public Duration getMaxAge() {
-        return maxAge;
-    }
 
     public URLResource<T> setMaxAge(Duration maxAge) {
         this.maxAge = maxAge;
         return this;
     }
 
-    public Duration getMinAge() {
-        return minAge;
-    }
-
     public URLResource<T> setMinAge(Duration minAge) {
         this.minAge = minAge;
         return this;
-    }
-
-    public Duration getErrorCache() {
-        return errorCache;
     }
 
     public URLResource<T> setErrorCache(Duration errorCache) {
@@ -376,10 +339,6 @@ public class URLResource<T> {
     public final URLResource<T> setCallbacks(Consumer<T>... callbacks) {
         this.callbacks = callbacks;
         return this;
-    }
-
-    public boolean isAsync() {
-        return async;
     }
 
     public URLResource<T> setAsync(boolean async) {
