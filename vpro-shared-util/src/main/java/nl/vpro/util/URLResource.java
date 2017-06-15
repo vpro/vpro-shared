@@ -266,10 +266,10 @@ public class URLResource<T> {
                                 if (ma.length == 2) {
                                     expires = Instant.now().plus(Duration.of(Integer.parseInt(ma[1]), ChronoUnit.SECONDS));
                                 } else {
-                                    log.warn("Could not parse " + s);
+                                    log.warn("Could not parse {}", s);
                                 }
                             } catch (Exception e) {
-                                log.warn("Could not parse " + s + " " + e.getMessage());
+                                log.warn("Could not parse {}  because {}", s, e.getMessage());
                             }
                         }
                     }
@@ -312,7 +312,7 @@ public class URLResource<T> {
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
-                log.warn(code + ":" + url + ": (caching until " + expires + ")");
+                log.warn("{}:{}: (caching until {})", code, url, expires);
 
 
         }
