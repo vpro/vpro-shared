@@ -213,7 +213,7 @@ public class URLResource<T> {
         if (httpUrl && lastModified != null) {
             Instant alwaysRefreshIfAfter = lastTry.plus(maxAge);
             if (lastTry == null || Instant.now().isBefore(alwaysRefreshIfAfter)) {
-                log.debug("last tried at {}, check if modified", lastTry, new Exception());
+                log.debug("last tried at {}, check if modified", lastTry);
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
             } else {
                 log.debug("last try at {} was pretty long ago (> {}), simply do a normal request", lastTry, maxAge);
