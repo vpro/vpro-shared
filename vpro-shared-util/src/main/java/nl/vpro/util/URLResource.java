@@ -134,9 +134,13 @@ public class URLResource<T> {
     }
 
     void getCachedResource() {
-        if (result != null && lastTry != null && lastTry.plus(minAge).isAfter(Instant.now())) {
-            notCheckedCount++;
-            return;
+        if (result != null && lastTry != null) {
+            Instant dontCheckBefore = lastTry.plus(minAge);
+            if (Instant.now().isBefore(dontCheckBefore)) {
+                log.debug("Not trying as it is not yet {}", dontCheckBefore);
+                notCheckedCount++;
+                return;
+            }
         }
         checkedCount++;
         log.debug("Loading from {}", this.url);
@@ -207,10 +211,12 @@ public class URLResource<T> {
         boolean httpUrl = connection instanceof HttpURLConnection;
         code = -1;
         if (httpUrl && lastModified != null) {
-            if (lastTry == null || lastTry.isAfter(Instant.now().minus(maxAge))) {
+            Instant alwaysRefreshIfAfter = lastTry.plus(maxAge);
+            if (lastTry == null || Instant.now().isBefore(alwaysRefreshIfAfter)) {
+                log.debug("last tried at {}, check if modified", lastTry, new Exception());
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
             } else {
-                log.debug("last load was pretty long ago, simply do a normal request");
+                log.debug("last try at {} was pretty long ago (> {}), simply do a normal request", lastTry, maxAge);
             }
         }
         if (httpUrl) {
@@ -235,6 +241,7 @@ public class URLResource<T> {
             code = SC_OK;
         }
         lastTry = Instant.now();
+        log.info("Trying at {}", lastTry);
         switch (code) {
             case SC_NOT_MODIFIED:
                 log.debug("Not modified {}", url);
@@ -242,6 +249,7 @@ public class URLResource<T> {
                 break;
             case SC_OK:
                 okCount++;
+                log.debug("Loaded {}", url);
                 InputStream stream = connection.getInputStream();
                 Instant prevMod = lastModified;
                 lastModified = Instant.ofEpochMilli(connection.getHeaderFieldDate("Last-Modified", System.currentTimeMillis()));
@@ -283,7 +291,7 @@ public class URLResource<T> {
                     callBack();
                 }
                 stream.close();
-                lastLoad = Instant.now();
+                lastLoad = lastTry;
                 break;
             case SC_FOUND:
             case SC_MOVED_PERMANENTLY:
@@ -300,7 +308,7 @@ public class URLResource<T> {
                 if (result == null) {
                     result = empty;
                 }
-                lastLoad = Instant.now();
+                lastLoad = lastTry;
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
@@ -396,9 +404,14 @@ public class URLResource<T> {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        return props.entrySet().stream().collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()), (u, v) -> {
-            throw new IllegalStateException(String.format("Duplicate key %s", u));
-        } ,  LinkedHashMap::new));
+        return props
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue()),
+                (u, v) -> {
+                    throw new IllegalStateException(String.format("Duplicate key %s", u));
+                } ,  LinkedHashMap::new)
+            );
     };
 
     public static <S> Function<InputStream, List<S>> beansFromProperties(Function<String, S> constructor) {
@@ -406,20 +419,13 @@ public class URLResource<T> {
             inputStream -> {
                 Map<String, String> properties = MAP.apply(inputStream);
                 Map<String, S> result = new LinkedHashMap<>();
-                properties.entrySet().forEach(e ->
-                    {
-                        String[] key = e.getKey().split("\\.", 2);
-                        S g = result.get(key[0]);
-                        if (g == null) {
-                            g = constructor.apply(key[0]);
-                            result.put(key[0], g);
-                        }
-                        if (key.length > 1) {
-                            ReflectionUtils.setProperty(g, key[1], e.getValue());
-                        }
+                properties.forEach((key1, value) -> {
+                    String[] key = key1.split("\\.", 2);
+                    S g = result.computeIfAbsent(key[0], k -> constructor.apply(key[0]));
+                    if (key.length > 1) {
+                        ReflectionUtils.setProperty(g, key[1], value);
                     }
-
-                );
+                });
                 return new ArrayList<>(result.values());
             };
 

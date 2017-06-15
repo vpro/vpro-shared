@@ -40,19 +40,22 @@ public class URLResourceTest {
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(0, broadcasters.getNotModifiedCount());
         assertEquals(1, broadcasters.getNotCheckedCount());
+
         broadcasters.setMinAge(Duration.ofMillis(1));
         Thread.sleep(2);
         broadcasters.expire();
         broadcasters.get();
-
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(1, broadcasters.getNotModifiedCount());
         assertEquals(1, broadcasters.getNotCheckedCount());
-        broadcasters.get();
 
+        broadcasters.setMinAge(Duration.ofMinutes(5));
+
+        broadcasters.get();
         assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(2, broadcasters.getNotCheckedCount());
         assertEquals(1, broadcasters.getNotModifiedCount());
+        assertEquals(2, broadcasters.getNotCheckedCount());
+
         System.out.println(broadcasters.get());
 
     }

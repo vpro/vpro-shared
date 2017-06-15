@@ -8,7 +8,7 @@ import java.util.*;
  * @since 0.47
  */
 public class LinkedProperties extends Properties {
-    private final HashSet<Object> keys = new LinkedHashSet<Object>();
+    private final HashSet<Object> keys = new LinkedHashSet<>();
 
     public LinkedProperties() {
     }
