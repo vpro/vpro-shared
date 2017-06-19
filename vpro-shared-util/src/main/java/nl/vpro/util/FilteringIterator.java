@@ -41,6 +41,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         this(wrapped, filter, noKeepAlive());
     }
 
+    @lombok.Builder(builderClassName = "Builder")
     public FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter,
@@ -48,7 +49,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         this.wrapped = wrapped;
         if (wrapped == null) throw new IllegalArgumentException();
         this.filter = filter;
-        this.keepAlive = keepAlive;
+        this.keepAlive = keepAlive == null ? noKeepAlive() : keepAlive;
     }
 
 
