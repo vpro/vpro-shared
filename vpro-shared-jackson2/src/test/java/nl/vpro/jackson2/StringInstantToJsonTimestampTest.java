@@ -21,13 +21,18 @@ public class StringInstantToJsonTimestampTest {
 
     //@Test(expected = IllegalArgumentException.class)
     @Test // natty does succeed in parsing this
-    public void test() {
+    public void testOdd() {
         Instant instant = StringInstantToJsonTimestamp.parseDateTime("0737-05-22T14:35:55+00:19:32");     // Of course, that is a very odd timezone
 
         assertThat(instant).isEqualTo(LocalDateTime.of(737, 5, 26, 14, 16, 55).atZone(ZoneId.of("UTC")).toInstant());
 
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testNotOk() {
+        Instant instant = StringInstantToJsonTimestamp.parseDateTime("dit is echt geen datum");
+
+    }
 
 
 }
