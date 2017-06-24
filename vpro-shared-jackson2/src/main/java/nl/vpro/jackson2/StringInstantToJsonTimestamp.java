@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -18,6 +19,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
+
+import nl.vpro.util.DateUtils;
 
 /**
  * These can be used in conjuction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
@@ -45,8 +50,21 @@ public class StringInstantToJsonTimestamp {
             }
         }
     }
-    static Instant parseDateTime(String value){
-        return DatatypeConverter.parseTime(value).toInstant();
+    static Instant parseDateTime(String value) {
+        try {
+            return DatatypeConverter.parseTime(value).toInstant();
+        } catch (IllegalArgumentException iae) {
+            try {
+                Parser parser = new Parser();
+                List<DateGroup> groups = parser.parse(value);
+                if (groups.size() == 1) {
+                    return DateUtils.toInstant(groups.get(0).getDates().get(0));
+                }
+            } catch (Exception e) {
+                log.debug("Natty couldn't parse {}: {}", value, e.getMessage());
+            }
+            throw iae;
+        }
     }
 
     public static class Deserializer extends JsonDeserializer<Instant> {
@@ -62,7 +80,7 @@ public class StringInstantToJsonTimestamp {
                     return null;
                 case JsonTokenId.ID_STRING:
                     try {
-                        return DatatypeConverter.parseTime(jp.getText()).toInstant();
+                        return parseDateTime(jp.getText());
                     } catch (IllegalArgumentException iae) {
                         log.warn("Could not parse {}. Writing null to json", jp.getText());
                         return null;
