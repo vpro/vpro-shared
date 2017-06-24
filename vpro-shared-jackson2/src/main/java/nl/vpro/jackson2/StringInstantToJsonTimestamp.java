@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -33,6 +34,9 @@ import nl.vpro.util.DateUtils;
 @Slf4j
 public class StringInstantToJsonTimestamp {
 
+    private static Parser PARSER = new Parser(TimeZone.getTimeZone("Europe/Amsterdam"));
+
+
     public static class Serializer extends JsonSerializer<String> {
         public static StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
 
@@ -55,8 +59,7 @@ public class StringInstantToJsonTimestamp {
             return DatatypeConverter.parseTime(value).toInstant();
         } catch (IllegalArgumentException iae) {
             try {
-                Parser parser = new Parser();
-                List<DateGroup> groups = parser.parse(value);
+                List<DateGroup> groups = PARSER.parse(value);
                 if (groups.size() == 1) {
                     return DateUtils.toInstant(groups.get(0).getDates().get(0));
                 }
