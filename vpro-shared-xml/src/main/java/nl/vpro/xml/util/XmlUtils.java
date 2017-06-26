@@ -41,7 +41,13 @@ public class XmlUtils {
             return null;
         }
         if (in.getTimezone() == DatatypeConstants.FIELD_UNDEFINED) {
-            TimeZone zone = TimeZone.getTimeZone(defaultZoneId);
+            TimeZone zone;
+            if (defaultZoneId != null) {
+                zone = TimeZone.getTimeZone(defaultZoneId);
+            } else {
+                zone = DEFAULT_ZONE;
+                log.info("{} defines no timezone. Falling back to {}", in, DEFAULT_ZONE);
+            }
             return in.toGregorianCalendar(zone, Locale.US, in).getTime().toInstant();
         } else {
             return in.toGregorianCalendar().getTime().toInstant();
@@ -54,16 +60,7 @@ public class XmlUtils {
 
     @Deprecated
     public static Instant toInstant(XMLGregorianCalendar in) {
-        if (in == null) {
-            return null;
-        }
-        if (in.getTimezone() == DatatypeConstants.FIELD_UNDEFINED) {
-
-            log.info("{} defines to timezone. Falling back to {}", in, DEFAULT_ZONE);
-            return in.toGregorianCalendar(DEFAULT_ZONE, Locale.US, in).getTime().toInstant();
-        } else {
-            return in.toGregorianCalendar().getTime().toInstant();
-        }
+        return toInstant(null, in);
     }
 
     @Deprecated
@@ -80,7 +77,9 @@ public class XmlUtils {
         }
         GregorianCalendar c = new GregorianCalendar();
         c.setTime(Date.from(date));
-        c.setTimeZone(TimeZone.getTimeZone(zoneId));
+        if (zoneId != null) {
+            c.setTimeZone(TimeZone.getTimeZone(zoneId));
+        }
         return FACTORY.newXMLGregorianCalendar(c);
     }
 }
