@@ -3,7 +3,9 @@ package nl.vpro.xml.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -54,6 +56,14 @@ public class XmlUtils {
         }
     }
 
+    public static ZonedDateTime toZonedDateTime(ZoneId zoneId, XMLGregorianCalendar in) {
+        return toInstant(zoneId, in).atZone(zoneId);
+    }
+
+    public static OffsetDateTime toOffsetDateTime(ZoneId zoneId, XMLGregorianCalendar in) {
+        return toInstant(zoneId, in).atZone(zoneId).toOffsetDateTime();
+    }
+
     /**
      * @deprecated No explicit default time zone, makes parsing unreliable.
      */
@@ -81,4 +91,5 @@ public class XmlUtils {
         }
         return FACTORY.newXMLGregorianCalendar(c);
     }
+
 }

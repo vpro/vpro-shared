@@ -28,13 +28,13 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
 
     public static ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
 
-    private final DateTimeFormatter formatter =
+    private final static DateTimeFormatter formatter =
         DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ")
             .withLocale(Locale.US)
             .withZone(ZONE);
 
-    private final DateTimeFormatter formatterNoMillis =
+    private final static DateTimeFormatter formatterNoMillis =
         DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
             .withLocale(Locale.US)
@@ -49,6 +49,10 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
 
     @Override
     public String marshal(Instant value) {
+       return toXMLFormat(value);
+    }
+
+    public static String toXMLFormat(Instant value) {
         if (value == null) {
             return null;
         }
