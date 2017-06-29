@@ -1,7 +1,6 @@
 package nl.vpro.xml.bind;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -9,6 +8,7 @@ import java.util.Locale;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import nl.vpro.util.TimeUtils;
+import nl.vpro.xml.util.XmlUtils;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
@@ -26,19 +26,17 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
 
     public static final ThreadLocal<Boolean> OMIT_MILLIS_IF_ZERO = ThreadLocal.withInitial(() -> true);
 
-    public static ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
-
     private final static DateTimeFormatter formatter =
         DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ")
             .withLocale(Locale.US)
-            .withZone(ZONE);
+            .withZone(XmlUtils.DEFAULT_ZONE);
 
     private final static DateTimeFormatter formatterNoMillis =
         DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
             .withLocale(Locale.US)
-            .withZone(ZONE);
+            .withZone(XmlUtils.DEFAULT_ZONE);
 
 
 

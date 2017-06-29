@@ -15,6 +15,6 @@ public class FalseToNullAdapter extends XmlAdapter<Boolean, Boolean> {
 
     @Override
     public Boolean marshal(Boolean  bool) throws Exception {
-        return bool == null || !bool ? null : bool;
+        return bool == null || !bool ? null : true;
     }
 }

@@ -23,7 +23,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @Slf4j
 public class XmlUtils {
 
-    static final TimeZone DEFAULT_ZONE = TimeZone.getTimeZone("Europe/Amsterdam");
+    public static ZoneId DEFAULT_ZONE = ZoneId.of("Europe/Amsterdam");
     static final DatatypeFactory FACTORY;
     static {
         try {
@@ -47,7 +47,7 @@ public class XmlUtils {
             if (defaultZoneId != null) {
                 zone = TimeZone.getTimeZone(defaultZoneId);
             } else {
-                zone = DEFAULT_ZONE;
+                zone = TimeZone.getTimeZone(DEFAULT_ZONE);
                 log.info("{} defines no timezone. Falling back to {}", in, DEFAULT_ZONE);
             }
             return in.toGregorianCalendar(zone, Locale.US, in).getTime().toInstant();
@@ -77,7 +77,7 @@ public class XmlUtils {
         if (date == null) {
             return null;
         }
-        return toXml(DEFAULT_ZONE.toZoneId(), date.toInstant());
+        return toXml(DEFAULT_ZONE, date.toInstant());
     }
 
     public static XMLGregorianCalendar toXml(ZoneId zoneId, Instant date) {

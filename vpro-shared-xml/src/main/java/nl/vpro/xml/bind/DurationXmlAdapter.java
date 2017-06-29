@@ -1,9 +1,10 @@
 package nl.vpro.xml.bind;
 
+import java.time.Duration;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.time.Duration;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
@@ -22,8 +23,8 @@ public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, 
         }
     }
     @Override
-    public Duration unmarshal(javax.xml.datatype.Duration stringValue) {
-        return stringValue != null ? Duration.parse(stringValue.toString()) : null;
+    public Duration unmarshal(javax.xml.datatype.Duration xmlDurationValue) {
+        return xmlDurationValue != null ? Duration.parse(xmlDurationValue.toString()) : null;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, 
     protected javax.xml.datatype.Duration marshalDayTime(long time)  {
         return datatypeFactory.newDurationDayTime(time);
     }
-    
+
     protected javax.xml.datatype.Duration marshal(long time)  {
         return datatypeFactory.newDuration(time);
     }
