@@ -59,7 +59,7 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
         } else {
             return formatter.format(
                 // round to millis
-                value.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS)
+                value.plusNanos(500_000).truncatedTo(ChronoUnit.MILLIS)
             );
         }
     }
