@@ -1,13 +1,16 @@
 package nl.vpro.xml.bind;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import static nl.vpro.xml.bind.InstantXmlAdapter.ZONE;
+
+import static nl.vpro.xml.util.XmlUtils.DEFAULT_ZONE;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
@@ -35,12 +38,12 @@ public class ZonedDateTimeXmlAdapter extends XmlAdapter<String, ZonedDateTime> {
             return null;
         }
         try {
-            return LocalDate.parse(dateValue).atStartOfDay().atZone(ZONE);
+            return LocalDate.parse(dateValue).atStartOfDay().atZone(DEFAULT_ZONE);
         } catch (DateTimeParseException dpe) {
 
         }
         try {
-            return LocalDateTime.parse(dateValue).atZone(ZONE);
+            return LocalDateTime.parse(dateValue).atZone(DEFAULT_ZONE);
         } catch (DateTimeParseException dpe) {
 
         }
