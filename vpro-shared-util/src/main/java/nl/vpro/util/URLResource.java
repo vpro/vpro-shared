@@ -241,7 +241,7 @@ public class URLResource<T> {
             code = SC_OK;
         }
         lastTry = Instant.now();
-        log.info("Trying at {}", lastTry);
+        log.info("Trying {} at {}", url, lastTry);
         switch (code) {
             case SC_NOT_MODIFIED:
                 log.debug("Not modified {}", url);
