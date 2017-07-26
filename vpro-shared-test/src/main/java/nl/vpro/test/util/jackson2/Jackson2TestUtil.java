@@ -4,6 +4,7 @@
  */
 package nl.vpro.test.util.jackson2;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.json.test.JSONAssert;
 
 import java.io.IOException;
@@ -12,7 +13,6 @@ import java.io.StringWriter;
 import org.apache.commons.lang.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
-
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Roelof Jan Koekoek
  * @since 3.3
  */
+@Slf4j
 public class Jackson2TestUtil {
 
     private static final ObjectMapper MAPPER = Jackson2Mapper.getPrettyInstance();
@@ -36,11 +37,11 @@ public class Jackson2TestUtil {
 
     /**
      * <p>Marshalls input, checks whether it contains a string, and unmarshall it.</p>
-     * 
+     *
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
-     * 
+     *
      * @param input
-     * @param contains 
+     * @param contains
      */
     public static  <T> T roundTrip(T input, String contains) throws Exception {
         StringWriter writer = new StringWriter();
@@ -63,7 +64,7 @@ public class Jackson2TestUtil {
      * @param expected
      */
     public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
-        return roundTripAndSimilar(input, expected, 
+        return roundTripAndSimilar(input, expected,
             MAPPER.getTypeFactory().constructType(input.getClass()));
     }
 
@@ -93,6 +94,7 @@ public class Jackson2TestUtil {
 
         String text = writer.toString();
 
+        log.debug("Comparing {} with expected {}", text, expected);
         JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected,
             expected,
             text);
