@@ -35,6 +35,9 @@ public class Jackson2Mapper extends ObjectMapper {
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
         PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+        PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
+        //PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
+
 
         //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
     }
@@ -81,6 +84,7 @@ public class Jackson2Mapper extends ObjectMapper {
         registerModule(new DateModule());
 
         setConfig(getSerializationConfig().withView(Views.Normal.class));
+        setConfig(getDeserializationConfig().withView(Views.Normal.class));
 
 
         try {
