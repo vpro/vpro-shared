@@ -27,11 +27,15 @@ public class Jackson2Mapper extends ObjectMapper {
     public static Jackson2Mapper LENIENT = new Jackson2Mapper();
     public static Jackson2Mapper STRICT = new Jackson2Mapper();
     public static Jackson2Mapper PRETTY = new Jackson2Mapper();
+    public static Jackson2Mapper PUBLISHER = new Jackson2Mapper();
+
 
     static {
         LENIENT.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
+        PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+
         //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
     }
 
@@ -46,6 +50,12 @@ public class Jackson2Mapper extends ObjectMapper {
     public static Jackson2Mapper getPrettyInstance() {
         return PRETTY;
     }
+
+
+    public static Jackson2Mapper getPublisherInstance() {
+        return PUBLISHER;
+    }
+
 
     private Jackson2Mapper() {
 
@@ -69,6 +79,10 @@ public class Jackson2Mapper extends ObjectMapper {
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         registerModule(javaTimeModule);
         registerModule(new DateModule());
+
+        setConfig(getSerializationConfig().withView(Views.Normal.class));
+
+
         try {
             registerModule(new SerializeAvroModule());
         } catch (NoClassDefFoundError ncdfe) {
