@@ -12,6 +12,7 @@ import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.apache.camel.spi.DataFormat;
 
 import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson2.Views;
 
 public abstract class AbstractFormat {
 
@@ -42,7 +43,6 @@ public abstract class AbstractFormat {
     }
 
     protected static DataFormat getJson(Class clazz) {
-        final JacksonDataFormat mediaMapper = new JacksonDataFormat(Jackson2Mapper.getInstance(), clazz);
-        return mediaMapper;
+        return new JacksonDataFormat(Jackson2Mapper.getInstance(), clazz, Views.Normal.class);
     }
 }
