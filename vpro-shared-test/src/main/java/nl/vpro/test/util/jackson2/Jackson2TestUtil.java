@@ -64,8 +64,12 @@ public class Jackson2TestUtil {
      * @param expected
      */
     public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
-        return roundTripAndSimilar(input, expected,
-            MAPPER.getTypeFactory().constructType(input.getClass()));
+        return roundTripAndSimilar(MAPPER, input, expected);
+    }
+
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected) throws Exception {
+        return roundTripAndSimilar(mapper, input, expected,
+            mapper.getTypeFactory().constructType(input.getClass()));
     }
 
     /**
@@ -89,8 +93,12 @@ public class Jackson2TestUtil {
 
 
     protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference) throws Exception {
+        return roundTripAndSimilar(MAPPER, input, expected, typeReference);
+    }
+
+    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference) throws Exception {
         StringWriter writer = new StringWriter();
-        MAPPER.writeValue(writer, input);
+        mapper.writeValue(writer, input);
 
         String text = writer.toString();
 
@@ -98,10 +106,9 @@ public class Jackson2TestUtil {
         JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected,
             expected,
             text);
-        T result = MAPPER.readValue(text, typeReference);
+        T result = mapper.readValue(text, typeReference);
         return result;
     }
-
 
     /**
      * Can be used if the input is not a stand alone json object.

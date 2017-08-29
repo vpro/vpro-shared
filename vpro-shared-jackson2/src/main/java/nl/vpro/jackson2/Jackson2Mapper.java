@@ -28,6 +28,7 @@ public class Jackson2Mapper extends ObjectMapper {
     public static Jackson2Mapper STRICT = new Jackson2Mapper();
     public static Jackson2Mapper PRETTY = new Jackson2Mapper();
     public static Jackson2Mapper PUBLISHER = new Jackson2Mapper();
+    public static Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper();
 
 
     static {
@@ -36,7 +37,10 @@ public class Jackson2Mapper extends ObjectMapper {
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
         PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
         PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
-        //PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
+
+        PRETTY_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+        PRETTY_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
+        PRETTY_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
 
 
         //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
