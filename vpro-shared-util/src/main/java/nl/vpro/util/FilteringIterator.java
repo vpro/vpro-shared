@@ -1,10 +1,12 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
@@ -32,21 +34,38 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
     private long countForKeepAlive = 0;
     private long totalCountForKeepAlive = 0;
 
+    @Getter
+    private long skipped = 0;
+    @Getter
+    private long passed = 0;
+
+    private final Consumer<FilteringIterator<T>> callback;
+
+
     public FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter) {
         this(wrapped, filter, noKeepAlive());
     }
 
-    @lombok.Builder(builderClassName = "Builder")
     public FilteringIterator(
+        Iterator<? extends T> wrapped,
+        Predicate<? super T> filter,
+        KeepAlive keepAlive) {
+        this(wrapped, filter, keepAlive, null);
+    }
+    @lombok.Builder(builderClassName = "Builder")
+    private FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter,
-            KeepAlive keepAlive) {
+            KeepAlive keepAlive,
+            Consumer<FilteringIterator<T>> callback
+            ) {
         this.wrapped = wrapped;
         if (wrapped == null) throw new IllegalArgumentException();
         this.filter = filter;
         this.keepAlive = keepAlive == null ? noKeepAlive() : keepAlive;
+        this.callback = callback;
     }
 
 
@@ -97,12 +116,17 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
                     }
                     if (inFilter) {
                         hasNext = true;
+                        passed++;
                         return;
                     } else {
+                        skipped++;
                         log.debug("Skipping {} because of filter", next);
                     }
                 }
                 hasNext = false;
+                if (callback != null) {
+                    callback.accept(this);
+                }
             } catch (RuntimeException e) {
                 log.debug(e.getClass().getName() + " " + e.getMessage());
                 exception = e;
