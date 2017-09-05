@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7,18 +9,13 @@ import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.3
  */
+@Slf4j
 public class FilteringIterator<T> implements CloseableIterator<T> {
-
-    protected static final Logger LOG = LoggerFactory.getLogger(FilteringIterator.class);
-
 
     private final Iterator<? extends T> wrapped;
 
@@ -92,6 +89,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
                         Boolean mustBreak = keepAlive.callback.apply(countForKeepAlive);
                         if (mustBreak) {
                             hasNext = false;
+                            log.debug("Breaking");
                             return;
                         }
                         countForKeepAlive = 0;
@@ -100,11 +98,13 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
                     if (inFilter) {
                         hasNext = true;
                         return;
+                    } else {
+                        log.debug("Skipping {} because of filter", next);
                     }
                 }
                 hasNext = false;
             } catch (RuntimeException e) {
-                LOG.debug(e.getClass().getName() + " " + e.getMessage());
+                log.debug(e.getClass().getName() + " " + e.getMessage());
                 exception = e;
                 hasNext = true;
                 next = null;
