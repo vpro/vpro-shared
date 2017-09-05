@@ -1,6 +1,7 @@
 package nl.vpro.jackson2;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +14,6 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -28,9 +27,8 @@ import nl.vpro.util.CountedIterator;
  * @author Michiel Meeuwissen
  * @since 1.0
  */
+@Slf4j
 public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JsonArrayIterator.class);
 
     private final JsonParser jp;
 
@@ -52,7 +50,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private int foundNulls = 0;
 
-    private Logger log = LOG;
+    private Logger logger = log;
 
     private long count = 0;
 
@@ -110,7 +108,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
             throw new IllegalArgumentException();
         }
          if (logger != null) {
-             this.log = logger;
+             this.logger = logger;
          }
         Long tmpSize = null;
         Long tmpTotalSize = null;
@@ -156,7 +154,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     }
 
     public void setLogger(Logger log) {
-        this.log = log;
+        this.logger = log;
     }
 
     public void setCallback(Runnable callback) {
@@ -214,7 +212,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                             hasNext = false;
                         } else {
                             if (foundNulls > 0) {
-                                log.warn("Found {} nulls. Will be skipped", foundNulls);
+                                logger.warn("Found {} nulls. Will be skipped", foundNulls);
                                 count += foundNulls;
                             }
 
@@ -225,7 +223,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         break;
                     } catch (ValueReadException jme) {
                         count++;
-                        log.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                        logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
                     callbackBeforeThrow(new RuntimeException(e));
@@ -256,7 +254,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     @Override
     public void finalize() {
         if (! callBackHasRun && callback != null) {
-            log.warn("Callback not run in finalize. Did you not close the iterator?");
+            logger.warn("Callback not run in finalize. Did you not close the iterator?");
             callback.run();
 
         }
@@ -285,7 +283,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                     jg.writeNull();
                 }
             } catch (Exception e) {
-                log.warn(e.getMessage());
+                logger.warn(e.getMessage());
                 jg.writeObject(e.getMessage());
             }
             if (logging != null) {
