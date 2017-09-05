@@ -1,13 +1,12 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
 
@@ -16,12 +15,11 @@ import nl.vpro.logging.LoggerOutputStream;
  * @author Michiel Meeuwissen
  * @since 3.1
  */
+@Slf4j
 public class Ssh {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Ssh.class);
-
-    private final OutputStream STDOUT = LoggerOutputStream.debug(LOG);
-    private final OutputStream STDERR = LoggerOutputStream.error(LOG);
+    private final OutputStream STDOUT = LoggerOutputStream.debug(log);
+    private final OutputStream STDERR = LoggerOutputStream.error(log);
 
     private final String remote_host_name;// = "upload.omroep.nl";
     private final String remote_host_user; // = "vprosmc";
