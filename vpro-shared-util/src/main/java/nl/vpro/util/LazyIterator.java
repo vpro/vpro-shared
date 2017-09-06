@@ -14,9 +14,14 @@ public class LazyIterator<T> implements Iterator<T> {
 	private final Supplier<Iterator<T>> supplier;
 	private Iterator<T> iterator;
 
+	@lombok.Builder
 	public LazyIterator(Supplier<Iterator<T>> supplier) {
 		this.supplier = supplier;
 	}
+
+	public static <S> LazyIterator<S> of(Supplier<Iterator<S>> supplier) {
+	    return new LazyIterator<>(supplier);
+    }
 
 	@Override
 	public boolean hasNext() {
