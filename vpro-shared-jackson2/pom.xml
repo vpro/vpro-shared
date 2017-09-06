@@ -63,10 +63,6 @@
     <dependency>
       <groupId>com.joestelmach</groupId>
       <artifactId>natty</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.joestelmach</groupId>
-      <artifactId>natty</artifactId>
       <version>0.13</version>
     </dependency>
   </dependencies>
