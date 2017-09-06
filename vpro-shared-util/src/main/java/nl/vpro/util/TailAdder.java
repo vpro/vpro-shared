@@ -1,24 +1,25 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.17
  */
+@Slf4j
 public class TailAdder<T> implements Iterator<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TailAdder.class);
-
     private final boolean onlyIfEmpty;
+
+    private final boolean onlyIfNotEmpty;
 
     private final Function<T, T>[] adder;
 
@@ -33,18 +34,29 @@ public class TailAdder<T> implements Iterator<T> {
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> TailAdder<T> withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
-        return new TailAdder<T>(wrapped, false, (Function<T, T>[]) adder);
+        return new TailAdder<T>(wrapped, false, false, (Function<T, T>[]) adder);
     }
 
     @SafeVarargs
-    private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Function<T, T>... adder) {
+    private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, Function<T, T>... adder) {
         this.wrapped = wrapped;
         this.onlyIfEmpty = onlyIfEmpty;
+        this.onlyIfNotEmpty = onlyIfNotEmpty;
+        if (onlyIfEmpty && onlyIfNotEmpty) {
+            throw new IllegalArgumentException("Cant specify both onlyIfEmpty and onlyIfNotEmpty");
+        }
         this.adder = adder;
     }
 
+    @SuppressWarnings("unchecked")
+    @lombok.Builder
+    private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
+        this(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders.toArray(new Function[adders.size()]));
+    }
+
+    @SafeVarargs
     private TailAdder(Iterator<T> wrapped, Function<T, T>... adder) {
-        this(wrapped, false, adder);
+        this(wrapped, false, false, adder);
     }
 
 
@@ -52,7 +64,7 @@ public class TailAdder<T> implements Iterator<T> {
     @SafeVarargs
     @Deprecated
     public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Callable<T>... adder) {
-        this(wrapped, onlyIfEmpty, (Function[]) Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
+        this(wrapped, onlyIfEmpty, false, (Function[]) Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
             try {
                 return c.call();
             } catch (RuntimeException e) {
@@ -62,6 +74,8 @@ public class TailAdder<T> implements Iterator<T> {
             }
         }).toArray(Function[]::new));
     }
+
+
 
     @Deprecated
     public TailAdder(Iterator<T> wrapped, Callable<T> adder) {
@@ -100,7 +114,16 @@ public class TailAdder<T> implements Iterator<T> {
     private void findNext() {
         if (adderHasNext == null) {
             adderHasNext = false;
-            if (wrapcount == 0 || ! onlyIfEmpty) {
+            boolean addTail;
+            if (onlyIfNotEmpty) {
+                addTail = wrapcount > 0;
+            } else if (onlyIfEmpty) {
+                addTail = wrapcount == 0;
+            } else {
+                addTail = true;
+            }
+
+            if (addTail) {
                 while (addercount < adder.length) {
                     try {
                         nextFromAdder = adder[addercount++].apply(getLast());
@@ -109,7 +132,7 @@ public class TailAdder<T> implements Iterator<T> {
                     } catch (NoSuchElementException nse) {
                         // ignore
                     } catch (Exception e) {
-                        LOG.warn(e.getMessage());
+                        log.warn(e.getMessage());
 
                     }
 
