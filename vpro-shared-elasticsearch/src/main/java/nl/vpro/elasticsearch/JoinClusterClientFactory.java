@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -8,10 +10,9 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
@@ -21,11 +22,10 @@ import org.slf4j.helpers.NOPLogger;
  * @author Michiel Meeuwissen
  * @since 0.23
  */
+@Slf4j
 public class JoinClusterClientFactory implements ESClientFactory {
 
-    private Node node;
-
-    private Client client;
+    private TransportClient client;
 
     private String clusterName = "myCluster";
 
@@ -43,29 +43,12 @@ public class JoinClusterClientFactory implements ESClientFactory {
     private Map<String, String> additionalSettings = new HashMap<>();
 
 
-    private synchronized Node node(Logger logger) {
-        if (node == null) {
-
-            Settings settings = getSettings(logger);
-            logger.info("Creating es node for {}", this);
-            node = NodeBuilder.nodeBuilder()
-
-                .clusterName(clusterName)
-                .client(true)
-                .local(false)
-                .settings(settings)
-                .node();
-
-        }
-
-        return node;
-    }
 
     private Settings getSettings(Logger logger) {
         if (logger == null) {
             logger = NOPLogger.NOP_LOGGER;
         }
-        ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder()
+        Settings.Builder settings = Settings.builder()
             .put("http.enabled", httpEnabled);
 
         if (StringUtils.isNotEmpty(unicastHosts)) {
@@ -98,8 +81,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
             }
             synchronized (JoinClusterClientFactory.this) {
                 if (client == null) {
-                    Node n = node(logger);
-                    client = n.client();
+                    client = new PreBuiltTransportClient(getSettings(logger));
                 }
             }
             return client;
@@ -109,7 +91,6 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private void reset() {
         shutdown();
-        node = null;
         client = null;
     }
 
@@ -191,8 +172,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     @PreDestroy
     public void shutdown() {
-        if (node != null) {
-            node.close();
+        if (client != null) {
+            client.close();
         }
     }
 

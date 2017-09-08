@@ -2,6 +2,8 @@ package nl.vpro.elasticsearch;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,8 +12,9 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import nl.vpro.util.UrlProvider;
 
@@ -60,7 +63,11 @@ public class ESClientFactoryImpl implements  ESClientFactory {
             synchronized (this) {
                 if (client == null) {
                     log.info("Constructing client on behalf of {}", logName);
-                    client = constructClient(logName);
+                    try {
+                        client = constructClient(logName);
+                    } catch (UnknownHostException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     log.info("Construction client on behalf of {} not needed (already happend in other thread)", logName);
                 }
@@ -71,8 +78,8 @@ public class ESClientFactoryImpl implements  ESClientFactory {
 
     }
 
-    private Client constructClient(String logName) {
-        ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder()
+    private Client constructClient(String logName) throws UnknownHostException {
+        Settings.Builder builder = Settings.builder()
             .put("client.transport.ignore_cluster_name", ignoreClusterName)
             .put("client.transport.sniff", sniffCluster)
             .put("discovery.zen.ping.multicast.enabled", "false");
@@ -87,14 +94,14 @@ public class ESClientFactoryImpl implements  ESClientFactory {
             builder.put("client.transport.nodes_sampler_interval", pingIntervalInSeconds + "s");
         }
 
-        TransportClient transportClient = new TransportClient(builder.build());
+        TransportClient transportClient = new PreBuiltTransportClient(builder.build());
         for (UrlProvider urlProvider : transportAddresses) {
             int port = urlProvider.getPort();
             if (implicitHttpToJavaPort && port < 9300 && port >= 9200) {
                 log.info("Port is configured {}, but we need a java protocol port. Taking {}", port, port + 100);
                 port += 100;
             }
-            transportClient.addTransportAddress(new InetSocketTransportAddress(urlProvider.getHost(), port));
+            transportClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(urlProvider.getHost()), port));
         }
         log.info("Build es client {} {} ({})", logName, transportAddresses, clusterName);
 
