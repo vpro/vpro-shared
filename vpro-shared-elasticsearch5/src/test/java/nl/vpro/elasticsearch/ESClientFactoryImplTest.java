@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import nl.vpro.util.UrlProvider;
@@ -15,6 +16,7 @@ import static org.junit.Assert.assertEquals;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
+@Ignore("Work in progress")
 public class ESClientFactoryImplTest {
 
     @Test
