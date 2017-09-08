@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>1.72-SNAPSHOT</version>
+    <version>1.73-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-swagger</artifactId>
   <packaging>war</packaging>
