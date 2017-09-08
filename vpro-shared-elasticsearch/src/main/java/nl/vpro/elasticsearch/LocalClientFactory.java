@@ -7,9 +7,8 @@ package nl.vpro.elasticsearch;
 import lombok.ToString;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 /**
  * @author Roelof Jan Koekoek
@@ -18,17 +17,17 @@ import org.elasticsearch.node.NodeBuilder;
 @ToString
 public class LocalClientFactory implements ESClientFactory {
 
-    private Node node;
 
     private Client client;
 
     private String path = null;
 
-    public synchronized Node node() {
-        if(node == null) {
-            ImmutableSettings.Builder builder = ImmutableSettings.settingsBuilder()
+
+    public synchronized Client client() {
+        if(client == null) {
+            Settings.Builder builder = Settings.builder()
                 .put("http.enabled", "true")
-                .put("gateway.type", "none")
+                //.put("gateway.type", "none")
                 .put("index.store.type", "memory");
 
             if (path != null) {
@@ -37,18 +36,7 @@ public class LocalClientFactory implements ESClientFactory {
                     .put("path.home", path).build();
             }
 
-            node = NodeBuilder.nodeBuilder()
-                .local(true)
-                .settings(builder)
-                .node();
-        }
-
-        return node;
-    }
-
-    public synchronized Client client() {
-        if(client == null) {
-            client = node().client();
+            client = new PreBuiltTransportClient(builder.build());
         }
         return client;
     }
@@ -58,7 +46,6 @@ public class LocalClientFactory implements ESClientFactory {
     }
 
     public void setPath(String path) {
-        node = null;
         client = null;
         this.path = path;
     }
@@ -66,6 +53,13 @@ public class LocalClientFactory implements ESClientFactory {
     @Override
     public Client client(String logName) {
         return client();
+
+    }
+
+    public void shutdown() {
+        if (client != null) {
+
+        }
 
     }
 }
