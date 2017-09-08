@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>vpro-shared-parent</artifactId>
-    <version>1.72-SNAPSHOT</version>
+    <version>1.73-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-integration</artifactId>
   <description>Module containing DAO classes to be shared among other integration modules</description>
