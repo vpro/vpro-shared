@@ -8,17 +8,17 @@
     <version>1.72-SNAPSHOT</version>
   </parent>
 
-  <artifactId>vpro-shared-elasticsearch</artifactId>
+  <artifactId>vpro-shared-elasticsearch5</artifactId>
 
   <properties>
-    <elasticsearch.version>1.1.0</elasticsearch.version><!-- tied to server version -->
-    <lucene.elasticsearch.version>4.7.0</lucene.elasticsearch.version>
+    <elasticsearch.version>5.5.2</elasticsearch.version><!-- tied to server version -->
+    <lucene.elasticsearch.version>6.6.0</lucene.elasticsearch.version>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>transport</artifactId>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
@@ -37,14 +37,28 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
       <version>${elasticsearch.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>transport</artifactId>
+      <version>${elasticsearch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>rest</artifactId>
+      <version>${elasticsearch.version}</version>
     </dependency>
   </dependencies>
 </project>
