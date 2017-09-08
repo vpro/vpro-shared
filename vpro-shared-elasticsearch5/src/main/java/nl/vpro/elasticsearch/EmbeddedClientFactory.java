@@ -9,10 +9,8 @@ import java.util.concurrent.Callable;
 import javax.annotation.PreDestroy;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.node.Node;
-import org.elasticsearch.node.NodeBuilder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +20,6 @@ import org.slf4j.LoggerFactory;
  * @since 0.21
  */
 public class EmbeddedClientFactory implements ESClientFactory {
-
-    private Node node;
 
     private Client client;
 
@@ -36,32 +32,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
     private boolean httpEnabled = false;
 
 
-    public synchronized Node node() {
-        if(node == null) {
-            Settings settings = ImmutableSettings.settingsBuilder()
-                .put("http.enabled", httpEnabled)
-                .put("index.store.type", "niofs")
-                .put("client.transport.sniff", true)
-                .put("node.data", true)
-                .put("node.master", true)
-                .put("cluster.name", clusterName)
-                .put("index.number_of_shards", 2)
-                .put("index.number_of_replicas", 1)
-                .put("discovery.zen.minimum_master_nodes", numberOfMasters)
-                .put("discovery.zen.ping_timeout", 5)
-                .put("discovery.zen.ping.multicast.enabled", true)
-                .put("path.home", path).build();
-
-            node = NodeBuilder.nodeBuilder()
-                .local(false)
-                .settings(settings)
-                .node();
-
-        }
-
-        return node;
-    }
-
     public Callable<Client> client(Logger logger) {
         return () -> {
             if (client != null) {
@@ -70,7 +40,20 @@ public class EmbeddedClientFactory implements ESClientFactory {
             synchronized(EmbeddedClientFactory.this) {
                 if (client == null) {
                     logger.info("Creating client");
-                    client = node().client();
+                    Settings settings = Settings.builder()
+                        .put("http.enabled", httpEnabled)
+                        .put("index.store.type", "niofs")
+                        .put("client.transport.sniff", true)
+                        .put("node.data", true)
+                        .put("node.master", true)
+                        .put("cluster.name", clusterName)
+                        .put("index.number_of_shards", 2)
+                        .put("index.number_of_replicas", 1)
+                        .put("discovery.zen.minimum_master_nodes", numberOfMasters)
+                        .put("discovery.zen.ping_timeout", 5)
+                        .put("discovery.zen.ping.multicast.enabled", true)
+                        .put("path.home", path).build();
+                    client = new PreBuiltTransportClient(settings);
                     logger.info("Waiting for green");
                     client.admin().cluster().prepareHealth().setWaitForGreenStatus().get();
 
@@ -87,7 +70,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
     }
 
     public void setPath(String path) {
-        node = null;
         client = null;
         this.path = path;
     }
@@ -97,7 +79,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
     }
 
     public void setClusterName(String clusterName) {
-        node = null;
         client = null;
         this.clusterName = clusterName;
     }
@@ -133,9 +114,6 @@ public class EmbeddedClientFactory implements ESClientFactory {
         if (client != null) {
             client.admin().cluster().prepareHealth().setWaitForGreenStatus().get();
             client.close();
-        }
-        if (node != null) {
-            node.close();
         }
     }
 

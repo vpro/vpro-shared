@@ -23,7 +23,7 @@ public class JoinClusterClientFactoryTest {
         factory.setClusterName(clusterName);
         factory.setUnicastHosts("localhost[" + port + "]");
         Client client = factory.client("media");
-        System.out.println(client.prepareCount("test").get().getCount());
+        //System.out.println(client.prepareCount("test").get().getCount());
     }
 
 
@@ -33,7 +33,7 @@ public class JoinClusterClientFactoryTest {
         factory.setClusterName(clusterName);
         factory.setUnicastHosts("");
         Client client = factory.client("media");
-        System.out.println(client.prepareCount("media").get().getCount());
+        //System.out.println(client.prepareCount("media").get().getCount());
     }
 
 
@@ -48,7 +48,7 @@ public class JoinClusterClientFactoryTest {
 
         Client client = factory.client("test");
 
-        System.out.println(client.prepareCount("test").get().getCount());
+        //System.out.println(client.prepareCount("test").get().getCount());
     }
 
 

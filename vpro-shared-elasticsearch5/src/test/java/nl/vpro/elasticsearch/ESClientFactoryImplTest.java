@@ -1,5 +1,6 @@
 package nl.vpro.elasticsearch;
 
+import java.net.InetAddress;
 import java.util.Arrays;
 
 import org.elasticsearch.client.transport.TransportClient;
@@ -21,7 +22,7 @@ public class ESClientFactoryImplTest {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setTransportAddresses(Arrays.asList(new UrlProvider("a", 100), new UrlProvider("b", 101)));
         TransportClient client = (TransportClient) factory.buildClient();
-        assertEquals(Arrays.asList(new InetSocketTransportAddress("a", 100), new InetSocketTransportAddress("b", 101)), client.transportAddresses());
+        assertEquals(Arrays.asList(new InetSocketTransportAddress(InetAddress.getByName("a"), 100), new InetSocketTransportAddress(InetAddress.getByName("b"), 101)), client.transportAddresses());
     }
 
     @Test

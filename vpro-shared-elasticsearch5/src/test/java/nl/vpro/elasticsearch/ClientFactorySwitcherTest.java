@@ -27,7 +27,7 @@ public class ClientFactorySwitcherTest {
         map.put("direct", impl);
 
         ClientFactorySwitcher switcher = new ClientFactorySwitcher("direct", "name", map);
-        System.out.println(switcher.client("test").prepareCount("apimedia").get().getCount());
+        //System.out.println(switcher.client("test").prepareCount("apimedia").get().getCount());
     }
 
 }
