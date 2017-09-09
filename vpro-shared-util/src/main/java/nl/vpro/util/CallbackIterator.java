@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
+ * An iterator that can call a callback function it iteration finished.
  * @author Michiel Meeuwissen
  */
 public class CallbackIterator<T> implements CountedIterator<T> {
