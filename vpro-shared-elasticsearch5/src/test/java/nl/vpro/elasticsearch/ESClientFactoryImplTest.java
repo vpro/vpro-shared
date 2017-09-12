@@ -21,15 +21,15 @@ public class ESClientFactoryImplTest {
 
     @Test
     public void testSetTransportAddresses() throws Exception {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setTransportAddresses(Arrays.asList(new UrlProvider("a", 100), new UrlProvider("b", 101)));
+        TransportClientFactory factory = new TransportClientFactory();
+        factory.setTransportAddresses(new UrlProvider("a", 100), new UrlProvider("b", 101));
         TransportClient client = (TransportClient) factory.buildClient();
         assertEquals(Arrays.asList(new InetSocketTransportAddress(InetAddress.getByName("a"), 100), new InetSocketTransportAddress(InetAddress.getByName("b"), 101)), client.transportAddresses());
     }
 
     @Test
     public void testGetClusterName() throws Exception {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
+        TransportClientFactory factory = new TransportClientFactory();
         factory.setClusterName("vpro");
 
         TransportClient client = (TransportClient) factory.buildClient();
@@ -38,8 +38,8 @@ public class ESClientFactoryImplTest {
 
     @Test
     public void testSetSniffCluster() throws Exception {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setSniffCluster(false);
+        TransportClientFactory factory = new TransportClientFactory();
+        //factory.setSniffCluster(false);
 
         TransportClient client = (TransportClient) factory.buildClient();
         assertEquals("" + client.settings().getAsMap(), "false", client.settings().get("client.transport.sniff"));
@@ -47,8 +47,8 @@ public class ESClientFactoryImplTest {
 
     @Test
     public void testSetIgnoreClusterName() throws Exception {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setIgnoreClusterName(true);
+        TransportClientFactory factory = new TransportClientFactory();
+        //factory.setIgnoreClusterName(true);
 
         TransportClient client = (TransportClient) factory.buildClient();
         assertEquals("true", client.settings().get("client.transport.ignore_cluster_name"));
@@ -56,8 +56,8 @@ public class ESClientFactoryImplTest {
 
     @Test
     public void testSetPingTimeoutInSeconds() throws Exception {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setPingTimeoutInSeconds(10);
+        TransportClientFactory factory = new TransportClientFactory();
+        //factory.setPingTimeoutInSeconds(10);
 
         TransportClient client = (TransportClient) factory.buildClient();
         assertEquals("" + client.settings().getAsMap(), "10s", client.settings().get("client.transport.ping_timeout"));
@@ -65,8 +65,8 @@ public class ESClientFactoryImplTest {
 
     @Test
     public void testSetPingIntervalInSeconds() throws Exception {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setPingIntervalInSeconds(100);
+        TransportClientFactory factory = new TransportClientFactory();
+        //factory.setPingIntervalInSeconds(100);
 
         TransportClient client = (TransportClient) factory.buildClient();
         assertEquals("" + client.settings().getAsMap(), "100s", client.settings().get("client.transport.nodes_sampler_interval"));

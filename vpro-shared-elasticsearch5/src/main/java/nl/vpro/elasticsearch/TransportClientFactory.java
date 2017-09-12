@@ -4,12 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -19,35 +19,15 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import nl.vpro.util.UrlProvider;
 
 /**
- * @author ernst
  */
 @Slf4j
-public class ESClientFactoryImpl implements  ESClientFactory {
+public class TransportClientFactory implements  ESClientFactory {
 
     private List<UrlProvider> transportAddresses = Collections.emptyList();
 
 
     private String clusterName;
 
-    /**
-     * When set to true, other cluster nodes are detected automatically
-     */
-    private boolean sniffCluster = true;
-
-    /**
-     * Set to true to ignore cluster name validation of connected nodes
-     */
-    private boolean ignoreClusterName = false;
-
-    /**
-     * How often to sample / ping the nodes listed and connected
-     */
-    private Integer pingTimeoutInSeconds;
-
-    /**
-     * How often should the client check the given node?
-     */
-    private Integer pingIntervalInSeconds;
 
     private boolean implicitHttpToJavaPort = false;
 
@@ -79,21 +59,7 @@ public class ESClientFactoryImpl implements  ESClientFactory {
     }
 
     private Client constructClient(String logName) throws UnknownHostException {
-        Settings.Builder builder = Settings.builder()
-            .put("client.transport.ignore_cluster_name", ignoreClusterName)
-            .put("client.transport.sniff", sniffCluster)
-            .put("discovery.zen.ping.multicast.enabled", "false");
-
-        if (StringUtils.isNotBlank(clusterName)) {
-            builder.put("cluster.name", clusterName);
-        }
-        if (pingTimeoutInSeconds != null) {
-            builder.put("client.transport.ping_timeout", pingTimeoutInSeconds + "s");
-        }
-        if (pingIntervalInSeconds != null) {
-            builder.put("client.transport.nodes_sampler_interval", pingIntervalInSeconds + "s");
-        }
-
+        Settings.Builder builder = Settings.builder();
         TransportClient transportClient = new PreBuiltTransportClient(builder.build());
         for (UrlProvider urlProvider : transportAddresses) {
             int port = urlProvider.getPort();
@@ -110,9 +76,9 @@ public class ESClientFactoryImpl implements  ESClientFactory {
 
 
 
-    public void setTransportAddresses(List<UrlProvider> transportAddresses) {
+    public void setTransportAddresses(UrlProvider... transportAddresses) {
         reset();
-        this.transportAddresses = transportAddresses;
+        this.transportAddresses = Arrays.asList(transportAddresses);
     }
 
 
@@ -122,30 +88,6 @@ public class ESClientFactoryImpl implements  ESClientFactory {
     }
 
 
-
-    public void setSniffCluster(boolean sniffCluster) {
-        reset();
-        this.sniffCluster = sniffCluster;
-    }
-
-
-    public void setIgnoreClusterName(boolean ignoreClusterName) {
-        reset();
-        this.ignoreClusterName = ignoreClusterName;
-    }
-
-
-    public void setPingTimeoutInSeconds(Integer pingTimeoutInSeconds) {
-        reset();
-        this.pingTimeoutInSeconds = pingTimeoutInSeconds;
-    }
-
-
-
-    public void setPingIntervalInSeconds(Integer pingIntervalInSeconds) {
-        reset();
-        this.pingIntervalInSeconds = pingIntervalInSeconds;
-    }
 
     public void setImplicitHttpToJavaPort(boolean implicitHttpToJavaPort) {
         this.implicitHttpToJavaPort = implicitHttpToJavaPort;

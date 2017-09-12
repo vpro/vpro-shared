@@ -10,9 +10,10 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.node.Node;
+import org.elasticsearch.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
@@ -25,11 +26,11 @@ import org.slf4j.helpers.NOPLogger;
 @Slf4j
 public class JoinClusterClientFactory implements ESClientFactory {
 
-    private TransportClient client;
+    private NodeClient client;
 
     private String clusterName = "myCluster";
 
-    private String nodeName = null;
+    private String nodeName = JoinClusterClientFactory.class.getSimpleName();
 
     private boolean httpEnabled = false;
 
@@ -60,16 +61,11 @@ public class JoinClusterClientFactory implements ESClientFactory {
             settings.put("discovery.zen.ping.multicast.enabled", true);
             settings.put("discovery.zen.ping.unicast.enabled", false);
         }
-        if (nodeName != null) {
-            settings.put("node.name", nodeName);
-        } else {
-            logger.info("node name not set");
-        }
         if (networkHost != null) {
             settings.put("network.host", networkHost);
         }
         settings.put("transport.tcp.port", tcpPort);
-
+        settings.put(Node.NODE_NAME_SETTING.getKey(), nodeName);
         settings.put(additionalSettings);
         return settings.build();
     }
@@ -81,7 +77,9 @@ public class JoinClusterClientFactory implements ESClientFactory {
             }
             synchronized (JoinClusterClientFactory.this) {
                 if (client == null) {
-                    client = new PreBuiltTransportClient(getSettings(logger));
+                    Settings settings = getSettings(logger);
+                    client = new NodeClient(settings, new ThreadPool(settings));
+                    client.initialize(new HashMap<>(), () -> "test");
                 }
             }
             return client;

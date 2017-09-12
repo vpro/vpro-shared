@@ -1,7 +1,5 @@
 package nl.vpro.elasticsearch;
 
-import java.util.Collections;
-
 import org.elasticsearch.client.Client;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,12 +37,9 @@ public class JoinClusterClientFactoryTest {
 
     @Test
     public void join2() {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
+        TransportClientFactory factory = new TransportClientFactory();
         factory.setClusterName(clusterName);
-        factory.setTransportAddresses(Collections.singletonList(new UrlProvider("localhost", port)));
-        factory.setSniffCluster(true);
-        factory.setIgnoreClusterName(false);
-
+        factory.setTransportAddresses(new UrlProvider("localhost", port));
 
         Client client = factory.client("test");
 
@@ -54,11 +49,8 @@ public class JoinClusterClientFactoryTest {
 
     @Test
     public void join3() {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setTransportAddresses(Collections.singletonList(new UrlProvider("localhost", port)));
-        factory.setSniffCluster(false);
-        factory.setIgnoreClusterName(true);
-
+        TransportClientFactory factory = new TransportClientFactory();
+        factory.setTransportAddresses(new UrlProvider("localhost", port));
 
         Client client = factory.client("test");
     }
