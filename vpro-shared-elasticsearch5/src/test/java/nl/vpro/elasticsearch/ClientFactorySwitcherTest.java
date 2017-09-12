@@ -1,6 +1,5 @@
 package nl.vpro.elasticsearch;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,9 +19,9 @@ public class ClientFactorySwitcherTest {
     @Test
     public void test() {
         Map<String, ESClientFactory> map = new HashMap<>();
-        ESClientFactoryImpl impl = new ESClientFactoryImpl();
-        impl.setIgnoreClusterName(true);
-        impl.setTransportAddresses(Arrays.asList(UrlProvider.fromUrl("http://localhost:9205")));
+        TransportClientFactory impl = new TransportClientFactory();
+        //impl.setIgnoreClusterName(true);
+        impl.setTransportAddresses(UrlProvider.fromUrl("http://localhost:9205"));
         impl.setImplicitHttpToJavaPort(true);
         map.put("direct", impl);
 

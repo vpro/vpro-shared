@@ -1,6 +1,5 @@
 package nl.vpro.elasticsearch;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.elasticsearch.client.Client;
@@ -21,10 +20,10 @@ public class ElasticSearchIteratorTest {
     Client client;
     @Before
     public void setup() {
-        ESClientFactoryImpl factory = new ESClientFactoryImpl();
-        factory.setTransportAddresses(Collections.singletonList(new UrlProvider("localhost", 9302)));
-        factory.setSniffCluster(false);
-        factory.setIgnoreClusterName(true);
+        TransportClientFactory factory = new TransportClientFactory();
+        factory.setTransportAddresses(new UrlProvider("localhost", 9302));
+        //factory.setSniffCluster(false);
+        //factory.setIgnoreClusterName(true);
 
         client = factory.client("test");
     }
