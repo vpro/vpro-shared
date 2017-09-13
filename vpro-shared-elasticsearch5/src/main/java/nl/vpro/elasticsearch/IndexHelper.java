@@ -38,10 +38,19 @@ public class IndexHelper {
 
 
     public IndexHelper(Logger log, ESClientFactory client, String indexName, String settings) {
+        this(log, client, indexName, settings, null);
+    }
+
+
+    @lombok.Builder
+    private IndexHelper(Logger log, ESClientFactory client, String indexName, String settings, Map<String, String> mappings) {
         this.log = log;
         this.client = client;
         this.indexName = indexName;
         this.settings = settings;
+        if (mappings != null) {
+            this.mappings.putAll(mappings);
+        }
     }
 
     public IndexHelper mapping(String type, String mapping) {
