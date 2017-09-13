@@ -2,31 +2,34 @@ package nl.vpro.elasticsearch;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.node.InternalSettingsPreparer;
 import org.elasticsearch.node.Node;
-import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.transport.Netty4Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 
 /**
- * Simply join the cluster. That is perhaps the best implementation.
+ * Simply join the cluster. That is perhaps the best implementation. Though ES made it deprecated.
  * @author Michiel Meeuwissen
  * @since 0.23
  */
 @Slf4j
 public class JoinClusterClientFactory implements ESClientFactory {
 
-    private NodeClient client;
+    private Node node;
+
+    private Client client;
 
     private String clusterName = "myCluster";
 
@@ -40,10 +43,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private String networkHost = null;
 
-
     private Map<String, String> additionalSettings = new HashMap<>();
-
-
 
     private Settings getSettings(Logger logger) {
         if (logger == null) {
@@ -53,20 +53,23 @@ public class JoinClusterClientFactory implements ESClientFactory {
             .put("http.enabled", httpEnabled);
 
         if (StringUtils.isNotEmpty(unicastHosts)) {
-            settings.put("discovery.zen.ping.multicast.enabled", false);
-            settings.put("discovery.zen.ping.unicast.enabled", true);
             settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
         } else {
             logger.warn("No unicast hosts set. Will use multicast");
-            settings.put("discovery.zen.ping.multicast.enabled", true);
-            settings.put("discovery.zen.ping.unicast.enabled", false);
         }
         if (networkHost != null) {
             settings.put("network.host", networkHost);
         }
-        settings.put("transport.tcp.port", tcpPort);
-        settings.put(Node.NODE_NAME_SETTING.getKey(), nodeName);
-        settings.put(additionalSettings);
+        settings
+            .put("transport.tcp.port", tcpPort)
+            .put(Node.NODE_NAME_SETTING.getKey(), nodeName)
+            .put(additionalSettings)
+            .put("node.master", false)
+            .put("node.data", "false")
+            .put("transport.type", "netty4")
+            .put("http.type", "netty4")
+            .put("path.home", "/tmp/data");
+        ;
         return settings.build();
     }
 
@@ -78,8 +81,10 @@ public class JoinClusterClientFactory implements ESClientFactory {
             synchronized (JoinClusterClientFactory.this) {
                 if (client == null) {
                     Settings settings = getSettings(logger);
-                    client = new NodeClient(settings, new ThreadPool(settings));
-                    client.initialize(new HashMap<>(), () -> "test");
+                    Collection<Class<? extends Plugin>> plugins = Collections.singletonList(Netty4Plugin.class);
+                    node = new PluginConfigurableNode(settings, plugins).start();
+                    node.start();
+                    client = node.client();
                 }
             }
             return client;
@@ -87,9 +92,10 @@ public class JoinClusterClientFactory implements ESClientFactory {
         };
     }
 
-    private void reset() {
+    private void reset()  {
         shutdown();
         client = null;
+        node = null;
     }
 
     public String getClusterName() {
@@ -173,6 +179,13 @@ public class JoinClusterClientFactory implements ESClientFactory {
         if (client != null) {
             client.close();
         }
+        if (node != null){
+            try {
+                node.close();
+            } catch(IOException ioe) {
+                log.warn(ioe.getMessage());
+            }
+        }
     }
 
     @Override
@@ -180,5 +193,11 @@ public class JoinClusterClientFactory implements ESClientFactory {
         return "ES " + (nodeName == null ? "" : (nodeName + "@")) + clusterName + (StringUtils.isNotBlank(unicastHosts) ? (" (" + unicastHosts + ")") : "") + getSettings(null).getAsMap();
     }
 
+
+    private static class PluginConfigurableNode extends Node {
+        public PluginConfigurableNode(Settings settings, Collection<Class<? extends Plugin>> classpathPlugins) {
+            super(InternalSettingsPreparer.prepareEnvironment(settings, null), classpathPlugins);
+        }
+    }
 
 }

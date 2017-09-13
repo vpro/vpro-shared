@@ -17,10 +17,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.elasticsearch.client</groupId>
-      <artifactId>transport</artifactId>
-    </dependency>
-    <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-util</artifactId>
     </dependency>
@@ -50,15 +46,20 @@
       <artifactId>elasticsearch</artifactId>
       <version>${elasticsearch.version}</version>
     </dependency>
+   <!-- <dependency>
+      <groupId>org.elasticsearch.plugin</groupId>
+      <artifactId>transport-netty4-client</artifactId>
+      <version>${elasticsearch.version}</version>
+    </dependency>-->
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>transport</artifactId>
       <version>${elasticsearch.version}</version>
     </dependency>
-    <dependency>
+  <!--  <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>rest</artifactId>
       <version>${elasticsearch.version}</version>
-    </dependency>
+    </dependency>-->
   </dependencies>
 </project>
