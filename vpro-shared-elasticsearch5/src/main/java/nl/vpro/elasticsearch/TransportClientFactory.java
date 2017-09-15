@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -27,7 +28,6 @@ public class TransportClientFactory implements  ESClientFactory {
 
 
     private String clusterName;
-
 
     private boolean implicitHttpToJavaPort = false;
 
@@ -59,8 +59,14 @@ public class TransportClientFactory implements  ESClientFactory {
     }
 
     private Client constructClient(String logName) throws UnknownHostException {
-        Settings.Builder builder = Settings.builder();
+        Settings.Builder builder = Settings
+            .builder();
+
+        if (StringUtils.isNotBlank(clusterName)) {
+            builder.put("cluster.name", clusterName);
+        }
         TransportClient transportClient = new PreBuiltTransportClient(builder.build());
+
         for (UrlProvider urlProvider : transportAddresses) {
             int port = urlProvider.getPort();
             if (implicitHttpToJavaPort && port < 9300 && port >= 9200) {
