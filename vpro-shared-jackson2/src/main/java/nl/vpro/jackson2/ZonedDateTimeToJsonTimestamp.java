@@ -5,13 +5,13 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
 
 import static nl.vpro.jackson2.DateModule.ZONE;
 
@@ -39,7 +39,15 @@ public class ZonedDateTimeToJsonTimestamp {
         public static Deserializer INSTANCE = new Deserializer();
         @Override
         public ZonedDateTime deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            return Instant.ofEpochMilli(jp.getLongValue()).atZone(ZONE);
+            try {
+                return Instant.ofEpochMilli(jp.getLongValue()).atZone(ZONE);
+            } catch (JsonParseException jps) {
+                String s = jp.getValueAsString();
+                if (s == null) {
+                    return null;
+                }
+                return ZonedDateTime.parse(jp.getValueAsString());
+            }
         }
     }
 }
