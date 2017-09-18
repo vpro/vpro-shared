@@ -11,6 +11,7 @@ import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 
 /**
+ * Makes available {@link DateParamConverter}, {@link LocalDateParamConverter} and {@link InstantParamConverter}
  * @author Michiel Meeuwissen
  * @since 0.23
  */
