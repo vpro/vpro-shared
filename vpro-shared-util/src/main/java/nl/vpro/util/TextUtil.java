@@ -33,8 +33,6 @@ public class TextUtil {
 
     /**
      * Checks if given text input complies to POMS standard.
-     *
-     * @param input
      * @see #ILLEGAL_PATTERN for a rough check
      */
     public static boolean isValid(String input) {
@@ -47,7 +45,7 @@ public class TextUtil {
 
     public static String normalizeWhiteSpace(String input) {
         if (input == null) {
-            return input;
+            return null;
         }
         return input.trim().replaceAll("\\s+", " ");
     }
@@ -56,8 +54,6 @@ public class TextUtil {
     /**
      * Replaces all line separators with a single white space character. The line separator character (\u2028) is
      * forbidden in most modern browsers. These browsers won't render any text containing this character.
-     *
-     * @param input
      */
     public static String replaceLineBreaks(String input) {
         return input != null ? input.replace('\u2028', ' ') : null;
@@ -65,8 +61,6 @@ public class TextUtil {
 
     /**
      * Replaces all non breaking space characters (\u00A0) with a normal white space character.
-     *
-     * @param input
      */
     public static String replaceNonBreakingSpace(String input) {
         return input != null ? input.replace('\u00A0', ' ') : null;
@@ -74,8 +68,6 @@ public class TextUtil {
 
     /**
      * Replaces all non breaking space characters (\u00A0) with a normal white space character.
-     *
-     * @param input
      */
     public static String replaceHtmlEscapedNonBreakingSpace(String input) {
         return input != null ? input.replace("&nbsp;", " ") : null;
@@ -83,8 +75,6 @@ public class TextUtil {
 
     /**
      * Un-escapes all html escape characters. For example: Replaces "&amp;amp;" with "&amp;".
-     *
-     * @param input
      */
     public static String unescapeHtml(String input) {
         return input != null ? StringEscapeUtils.unescapeHtml4(input.replace("&nbsp;", " ")) : null;
@@ -92,8 +82,6 @@ public class TextUtil {
 
     /**
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
-     *
-     * @param input
      */
     public static String stripHtml(String input) {
         return input != null ? Jsoup.clean(input, Whitelist.none()) : null;
@@ -102,8 +90,6 @@ public class TextUtil {
     /**
      * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
      * might lead to problems for end users.
-     *
-     * @param input
      */
     public static String sanitize(String input) {
         return unescapeHtml(
@@ -192,8 +178,6 @@ public class TextUtil {
                 }
             }
             {
-
-
                 int end = lastIndexOfWhiteSpace(text);
                 if (end > 0 && end < text.length() - 1) {
                     text = text.substring(0, end);
