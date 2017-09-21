@@ -181,4 +181,11 @@ public class TextUtilTest {
         assertThat(TextUtil.truncate("Bla bla. Bloe bloe", 5)).isEqualTo("Bla");
 
     }
+
+
+    @Test
+    public void testTruncateShortWithEllipses() {
+        assertThat(TextUtil.truncate("Bla bla. Bloe bloe", 5, true)).isEqualTo("Bla...");
+
+    }
 }
