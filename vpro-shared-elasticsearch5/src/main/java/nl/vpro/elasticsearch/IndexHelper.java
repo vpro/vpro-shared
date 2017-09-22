@@ -37,7 +37,7 @@ public class IndexHelper {
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
 
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(Logger log, ESClientFactory client, String indexName, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
         this.log = log;
         this.client = client;
