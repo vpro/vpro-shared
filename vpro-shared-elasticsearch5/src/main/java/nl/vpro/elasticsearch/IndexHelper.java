@@ -19,6 +19,7 @@ import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
@@ -39,7 +40,7 @@ public class IndexHelper {
 
     @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(Logger log, ESClientFactory client, String indexName, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
-        this.log = log;
+        this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.client = client;
         this.indexName = indexName;
         this.settings = settings;
