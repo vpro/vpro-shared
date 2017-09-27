@@ -60,16 +60,25 @@ public class UrlProvider {
             this.port = 80;
         }
         this.path = uri.getPath();
-        if (this.path.startsWith("/")) {
+        if (this.path != null && this.path.startsWith("/")) {
             this.path = this.path.substring(1);
         }
         this.scheme = uri.getScheme();
+        if (scheme == null) {
+            switch(port) {
+                case 80:
+                    scheme = "http";
+                    break;
+                case 443:
+                    scheme = "https";
+            }
+        }
     }
 
     public String getUrl() {
         StringBuilder buffer = new StringBuilder(scheme + "://");
         buffer.append(host);
-        if (port > 0 && port != 80) {
+        if (port > 0 && (("http".equals(scheme) && port != 80) || ("https".equals(scheme) && port != 443))) {
             buffer.append(":").append(port);
         }
 
