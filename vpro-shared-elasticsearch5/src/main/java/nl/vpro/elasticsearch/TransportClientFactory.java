@@ -31,6 +31,8 @@ public class TransportClientFactory implements  ESClientFactory {
 
     private boolean implicitHttpToJavaPort = false;
 
+    private boolean ignoreClusterName = false;
+
     private Client client = null;
 
     Client buildClient() {
@@ -61,6 +63,9 @@ public class TransportClientFactory implements  ESClientFactory {
     private Client constructClient(String logName) throws UnknownHostException {
         Settings.Builder builder = Settings
             .builder();
+
+        builder.put("client.transport.ignore_cluster_name", ignoreClusterName);
+
 
         if (StringUtils.isNotBlank(clusterName)) {
             builder.put("cluster.name", clusterName);
@@ -93,11 +98,16 @@ public class TransportClientFactory implements  ESClientFactory {
         this.clusterName = clusterName;
     }
 
-
-
     public void setImplicitHttpToJavaPort(boolean implicitHttpToJavaPort) {
+        reset();
         this.implicitHttpToJavaPort = implicitHttpToJavaPort;
     }
+
+    public void setIgnoreClusterName(boolean ignoreClusterName) {
+        reset();
+        this.ignoreClusterName = ignoreClusterName;
+    }
+
 
     private void reset() {
         shutdown();
