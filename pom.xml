@@ -80,7 +80,7 @@
     <module>vpro-shared-ws</module>
     <module>vpro-shared-xml</module>
     <module>vpro-shared-guice</module>
-
+    <module>vpro-shared-couchdb-util</module>
   </modules>
 
   <scm>
