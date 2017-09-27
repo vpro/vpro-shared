@@ -6,8 +6,6 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.impl.NameConventions;
 import org.ektorp.support.CouchDbRepositorySupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Michiel Meeuwissen

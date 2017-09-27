@@ -65,11 +65,16 @@ public class SimpleCouchDbConnector {
     }
 
     private CloseableHttpResponse getHttpResponse(String query) throws IOException {
-        RequestConfig config = RequestConfig.custom()
-            .setSocketTimeout((int) socketTimeout.toMillis())
-            .setConnectTimeout((int) connectionTimeout.toMillis())
-            .build();
-        final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(config).build();
+        RequestConfig.Builder config = RequestConfig.custom();
+
+        if (socketTimeout != null) {
+            config.setSocketTimeout((int) socketTimeout.toMillis());
+        }
+        if (connectionTimeout != null) {
+            config.setConnectTimeout((int) connectionTimeout.toMillis());
+        }
+
+        final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(config.build()).build();
         HttpUriRequest uriRequest = new HttpGet("/" + path + query);
         HttpHost httpHost = new HttpHost(host, port);
         final CloseableHttpResponse httpResponse = client.execute(httpHost, uriRequest);
