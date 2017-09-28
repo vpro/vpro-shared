@@ -43,6 +43,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private String networkHost = null;
 
+    private String pathHome = "/tmp/";
+
     private Map<String, String> additionalSettings = new HashMap<>();
 
     private Settings getSettings(Logger logger) {
@@ -68,7 +70,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
             .put("node.data", "false")
             .put("transport.type", "netty4")
             .put("http.type", "netty4")
-            .put("path.home", "/tmp/data");
+            .put("path.home", pathHome);
         ;
         return settings.build();
     }
@@ -115,6 +117,14 @@ public class JoinClusterClientFactory implements ESClientFactory {
     public void setHttpEnabled(boolean httpEnabled) {
         reset();
         this.httpEnabled = httpEnabled;
+    }
+
+    public String getPathHome() {
+        return pathHome;
+    }
+
+    public void setPathHome(String pathHome) {
+        this.pathHome = pathHome;
     }
 
     public String getUnicastHosts() {
