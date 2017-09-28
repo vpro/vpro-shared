@@ -124,6 +124,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setPathHome(String pathHome) {
+        reset();
         this.pathHome = pathHome;
     }
 
