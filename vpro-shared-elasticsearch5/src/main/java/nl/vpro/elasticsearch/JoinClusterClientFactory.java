@@ -39,6 +39,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
 
     private String unicastHosts = null;
 
+    private int defaultPort = 9300;
+
     private String tcpPort = "9350-9400";
 
     private String networkHost = null;
@@ -52,7 +54,10 @@ public class JoinClusterClientFactory implements ESClientFactory {
             logger = NOPLogger.NOP_LOGGER;
         }
         Settings.Builder settings = Settings.builder()
-            .put("http.enabled", httpEnabled);
+            .put("http.enabled", httpEnabled)
+            .put("transport.profiles.default.port", defaultPort)
+            ;
+
 
         if (StringUtils.isNotEmpty(unicastHosts)) {
             settings.put("discovery.zen.ping.unicast.hosts", unicastHosts);
@@ -66,11 +71,13 @@ public class JoinClusterClientFactory implements ESClientFactory {
             .put("transport.tcp.port", tcpPort)
             .put(Node.NODE_NAME_SETTING.getKey(), nodeName)
             .put(additionalSettings)
-            .put("node.master", false)
-            .put("node.data", "false")
+            .put(Node.NODE_MASTER_SETTING.getKey(), false)
+            .put(Node.NODE_DATA_SETTING.getKey(), "false")
             .put("transport.type", "netty4")
             .put("http.type", "netty4")
-            .put("path.home", pathHome);
+            .put("path.home", pathHome)
+            .put("cluster.name", clusterName)
+        ;
         ;
         return settings.build();
     }
@@ -85,6 +92,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
                     Settings settings = getSettings(logger);
                     Collection<Class<? extends Plugin>> plugins = Collections.singletonList(Netty4Plugin.class);
                     node = new PluginConfigurableNode(settings, plugins).start();
+
                     node.start();
                     client = node.client();
                 }
@@ -136,8 +144,17 @@ public class JoinClusterClientFactory implements ESClientFactory {
      * The hosts to connect to via unicast. If empty, then multicast is used.
      */
     public void setUnicastHosts(String unicastHosts) {
-        reset();
         this.unicastHosts = unicastHosts;
+        reset();
+    }
+
+    public int getDefaultPort() {
+        return defaultPort;
+    }
+
+    public void setDefaultPort(int defaultPort) {
+        this.defaultPort = defaultPort;
+        reset();
     }
 
     public String getTcpPort() {
@@ -145,8 +162,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setTcpPort(String tcpPort) {
-        reset();
         this.tcpPort = tcpPort;
+        reset();
     }
 
     public String getNodeName() {
@@ -154,8 +171,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setNodeName(String nodeName) {
-        reset();
         this.nodeName = nodeName;
+        reset();
     }
 
     public String getNetworkHost() {
@@ -163,8 +180,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setNetworkHost(String networkName) {
-        reset();
         this.networkHost = networkName;
+        reset();
     }
 
     public Map<String, String> getAdditionalSettings() {
@@ -172,8 +189,8 @@ public class JoinClusterClientFactory implements ESClientFactory {
     }
 
     public void setAdditionalSettings(Map<String, String> additionalSettings) {
-        reset();
         this.additionalSettings = additionalSettings;
+        reset();
     }
 
     @Override
