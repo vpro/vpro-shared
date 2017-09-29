@@ -22,6 +22,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
         totalSize = Optional.empty();
     }
 
+    @lombok.Builder
     public BasicWrappedIterator(Long size, Long totalSize, Iterator<T> wrapped) {
         super(wrapped);
         this.size = size == null ? Optional.empty() : Optional.of(new AtomicLong(size));
