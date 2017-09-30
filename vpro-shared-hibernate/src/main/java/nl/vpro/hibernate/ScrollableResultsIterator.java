@@ -51,7 +51,14 @@ public class ScrollableResultsIterator<T> implements CloseableIterator<T> {
         if (hasNext == null) {
             hasNext = scrollableResults.next();
             if (hasNext) {
-                next = adapter.apply(scrollableResults);
+                while(true) {
+                    try {
+                        next = adapter.apply(scrollableResults);
+                        break;
+                    } catch (Exception e) {
+                        log.warn(e.getMessage(), e);
+                    }
+                }
             } else {
                 try {
                     close();
