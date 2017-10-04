@@ -39,6 +39,11 @@ public interface AbstractApiClientMXBean {
     int getMaxConnectionsPerRoute();
     void setMaxConnectionsPerRoute(int maxConnectionsPerRoute);
 
+    int getMaxConnectionsNoTimeout();
+    void setMaxConnectionsNoTimeout(int maxConnections);
+    int getMaxConnectionsPerRouteNoTimeout();
+    void setMaxConnectionsPerRouteNoTimeout(int maxConnectionsPerRoute);
+
 
     @Units("events/minute")
     double getRate();
