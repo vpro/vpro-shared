@@ -443,6 +443,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return clientHttpEngineNoTimeout;
     }
 
+
     @Override
     public int getMaxConnections() {
         return maxConnections;
@@ -465,6 +466,33 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
         if (this.maxConnectionsPerRoute != maxConnectionsPerRoute) {
             this.maxConnectionsPerRoute = maxConnectionsPerRoute;
+            invalidate();
+        }
+    }
+
+
+    @Override
+    public int getMaxConnectionsNoTimeout() {
+        return maxConnectionsNoTimeout;
+    }
+
+    @Override
+    public void setMaxConnectionsNoTimeout(int maxConnectionsNoTimeout) {
+        if (this.maxConnectionsNoTimeout != maxConnectionsNoTimeout) {
+            this.maxConnectionsNoTimeout = maxConnectionsNoTimeout;
+            invalidate();
+        }
+    }
+
+    @Override
+    public int getMaxConnectionsPerRouteNoTimeout() {
+        return maxConnectionsPerRouteNoTimeout;
+    }
+
+    @Override
+    public void setMaxConnectionsPerRouteNoTimeout(int maxConnectionsPerRouteNoTimeout) {
+        if (this.maxConnectionsPerRouteNoTimeout != maxConnectionsPerRouteNoTimeout) {
+            this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout;
             invalidate();
         }
     }
