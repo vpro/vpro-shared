@@ -110,6 +110,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private Integer maxConnections;
     private Integer maxConnectionsPerRoute;
+    private Integer maxConnectionsNoTimeout;
+    private Integer maxConnectionsPerRouteNoTimeout;
+
     Duration connectionInPoolTTL;
     protected final Map<String, Counter> counter = new HashMap<>();
     private Duration countWindow = Duration.ofHours(24);
@@ -140,6 +143,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Duration socketTimeout,
         Integer maxConnections,
         Integer maxConnectionsPerRoute,
+        Integer maxConnectionsNoTimeout,
+        Integer maxConnectionsPerRouteNoTimeout,
         Duration connectionInPoolTTL,
         Duration countWindow,
         Integer bucketCount,
@@ -157,6 +162,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.socketTimeout = socketTimeout;
         this.maxConnections = maxConnections;
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
+        this.maxConnectionsNoTimeout = maxConnectionsNoTimeout;
+        this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout;
         this.connectionInPoolTTL = connectionInPoolTTL;
         setBaseUrl(baseUrl);
         this.countWindow = countWindow == null ? this.countWindow : countWindow;
@@ -173,66 +180,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         registerBean();
     }
 
-    @Deprecated
-    protected AbstractApiClient(
-        String baseUrl,
-        Duration connectionRequestTimeout,
-        Duration connectTimeout,
-        Duration socketTimeout,
-        Integer maxConnections,
-        Integer maxConnectionsPerRoute,
-        Duration connectionInPoolTTL,
-        Duration countWindow,
-        Integer bucketCount,
-        Duration warnThreshold,
-        List<Locale> acceptableLanguages,
-        MediaType accept,
-        Boolean trustAll
-    ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, null, trustAll, null, null);
-
-    }
-
-    /**
-     * @deprecated Will be dropped soon
-     */
-    @Deprecated
-    protected AbstractApiClient(
-        String baseUrl,
-        Duration connectionRequestTimeout,
-        Duration connectTimeout,
-        Duration socketTimeout,
-        Integer maxConnections,
-        Integer maxConnectionsPerRoute,
-        Duration connectionInPoolTTL,
-        Duration countWindow,
-        Duration warnThreshold,
-        List<Locale> acceptableLanguages,
-        MediaType accept,
-        Boolean trustAll
-    ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, warnThreshold, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance(), null);
-    }
-
-    /**
-     * @deprecated Will be dropped soon
-     */
-    @Deprecated
-    protected AbstractApiClient(
-        String baseUrl,
-        Duration connectionRequestTimeout,
-        Duration connectTimeout,
-        Duration socketTimeout,
-        Integer maxConnections,
-        Integer maxConnectionsPerRoute,
-        Duration connectionInPoolTTL,
-        Duration countWindow,
-        List<Locale> acceptableLanguages,
-        MediaType accept,
-        Boolean trustAll
-    ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, countWindow, null, null, acceptableLanguages, accept, null, trustAll, Jackson2Mapper.getLenientInstance(), null);
-    }
 
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(baseUrl,
@@ -241,6 +188,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             maxConnections,
             maxConnectionsPerRoute,
+            3,
+            3,
             connectionInPoolTTL == null ? null : Duration.ofMillis(connectionInPoolTTL),
             null,
             null,
