@@ -19,7 +19,6 @@
   </bean>
   <bean id="esDirect" class="nl.vpro.elasticsearch.TransportClientFactory" autowire-candidate="false">
     <property name="clusterName" value="${elasticSearch.cluster}"/>
-    <property name="ignoreClusterName" value="true"/>
     <property name="implicitHttpToJavaPort" value="true"/>
     <property name="transportAddresses">
       <list>

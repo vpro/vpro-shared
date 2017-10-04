@@ -34,14 +34,14 @@ public class IndexHelper {
     private final Logger log;
     private String indexName;
     private Supplier<String> settings;
-    private ESClientFactory client;
+    private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
 
 
     @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(Logger log, ESClientFactory client, String indexName, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
-        this.client = client;
+        this.clientFactory = client;
         this.indexName = indexName;
         this.settings = settings;
         if (mappings != null) {
@@ -54,12 +54,15 @@ public class IndexHelper {
         return this;
     }
 
-    private Client client() {
-        return client.client(IndexHelper.class.getName() + "." + indexName);
+    public Client client() {
+        return clientFactory.client(IndexHelper.class.getName() + "." + indexName);
     }
 
     public  void createIndex() throws ExecutionException, InterruptedException, IOException {
 
+        if (indexName == null){
+            throw new IllegalStateException("No index name configured");
+        }
         try {
             CreateIndexRequestBuilder createIndexRequestBuilder = client().admin().indices()
                 .prepareCreate(indexName)
@@ -67,6 +70,7 @@ public class IndexHelper {
             for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
                 createIndexRequestBuilder.addMapping(e.getKey(), e.getValue().get(), XContentType.JSON);
             }
+            log.info("Creating index {} with mappings {}", indexName, mappings.keySet());
             CreateIndexResponse response = createIndexRequestBuilder.execute()
                 .actionGet();
             if (response.isAcknowledged()) {
@@ -84,7 +88,7 @@ public class IndexHelper {
         try {
             boolean exists = client().admin().indices().prepareExists(indexName).execute().actionGet().isExists();
             if (!exists) {
-                log.info("Index '{}' not existing in {}, now creating", indexName, client);
+                log.info("Index '{}' not existing in {}, now creating", indexName, clientFactory);
                 try {
                     createIndex();
                 } catch (Exception e) {
@@ -92,7 +96,7 @@ public class IndexHelper {
                     log.error(e.getMessage() + c);
                 }
             } else {
-                log.info("Found {} objects in '{}' of {}", count(), indexName, client);
+                log.info("Found {} objects in '{}' of {}", count(), indexName, clientFactory);
             }
         } catch( NoNodeAvailableException noNodeAvailableException) {
             log.error(noNodeAvailableException.getMessage());

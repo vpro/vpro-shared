@@ -64,7 +64,7 @@ public class TransportClientFactory implements  ESClientFactory {
         Settings.Builder builder = Settings
             .builder();
 
-        if (ignoreClusterName) {
+        if (ignoreClusterName || StringUtils.isBlank(clusterName)) {
             builder.put("client.transport.ignore_cluster_name", true);
         }
 
