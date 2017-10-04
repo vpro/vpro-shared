@@ -437,7 +437,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
             clientHttpEngineNoTimeout = ApacheHttpClient4EngineFactory.create(
-                getHttpClient(connectionRequestTimeout, connectTimeout, null, 3, 3, null)
+                getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null)
             );
         }
         return clientHttpEngineNoTimeout;
