@@ -162,8 +162,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.socketTimeout = socketTimeout;
         this.maxConnections = maxConnections;
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
-        this.maxConnectionsNoTimeout = maxConnectionsNoTimeout;
-        this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout;
+        this.maxConnectionsNoTimeout = maxConnectionsNoTimeout == null ? 3 : maxConnectionsNoTimeout;
+        this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout == null ? 3 : maxConnectionsPerRouteNoTimeout;
         this.connectionInPoolTTL = connectionInPoolTTL;
         setBaseUrl(baseUrl);
         this.countWindow = countWindow == null ? this.countWindow : countWindow;
@@ -181,6 +181,51 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
 
+    @Deprecated // "Will be dropped soon"
+    protected AbstractApiClient(
+        String baseUrl,
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
+        Duration connectionInPoolTTL,
+        Duration countWindow,
+        Integer bucketCount,
+        Duration warnThreshold,
+        List<Locale> acceptableLanguages,
+        MediaType accept,
+        MediaType contentType,
+        Boolean trustAll,
+        Jackson2Mapper objectMapper,
+        String mbeanName
+    ) {
+
+        this.connectionRequestTimeout = connectionRequestTimeout;
+        this.connectTimeout = connectTimeout;
+        this.socketTimeout = socketTimeout;
+        this.maxConnections = maxConnections;
+        this.maxConnectionsPerRoute = maxConnectionsPerRoute;
+        this.maxConnectionsNoTimeout = 3;
+        this.maxConnectionsPerRouteNoTimeout = 3;
+        this.connectionInPoolTTL = connectionInPoolTTL;
+        setBaseUrl(baseUrl);
+        this.countWindow = countWindow == null ? this.countWindow : countWindow;
+        this.bucketCount = bucketCount == null ? this.bucketCount : bucketCount;
+        this.warnThreshold = warnThreshold == null ? this.warnThreshold : warnThreshold;
+        this.acceptableLanguages = acceptableLanguages;
+        this.accept = accept;
+        this.contentType = contentType;
+        if (trustAll != null) {
+            setTrustAll(trustAll);
+        }
+        this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
+        this.mbeanName = mbeanName;
+        registerBean();
+    }
+
+
+    @Deprecated // "Will be dropped soon"
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(baseUrl,
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
