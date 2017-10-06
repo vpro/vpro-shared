@@ -1,22 +1,20 @@
 package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.logging.LoggerOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.vpro.logging.LoggerOutputStream;
-
 /**
  * Wrapper around ProcessorBuilder
  * It makes calling that somewhat simpler and also implements an interface, for easier mocking in test cases.
  * It supports a timeout, for implicit killing the process if it takes too long. It also can wrap stderr to log that as errors.
-  * @author Michiel Meeuwissen
+ *
+ * @author Michiel Meeuwissen
  * @since 1.6
  */
 @Slf4j
@@ -24,34 +22,50 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final String binary;
 
+    private final File workdir;
 
     private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
 
     public CommandExecutorImpl(String c) {
-        binary = c;
+        this(c, null);
     }
-	public CommandExecutorImpl(File f) {
-		if (!f.exists()) {
-			throw new RuntimeException("Executable " + f.getAbsolutePath() + " not found!");
-		}
-		if (!f.canExecute()) {
-			throw new RuntimeException("Executable " + f.getAbsolutePath() + " is not executable!");
-		}
-		binary = f.getAbsolutePath();
 
-	}
+    public CommandExecutorImpl(File f) {
+        this(f, null);
+    }
 
+    public CommandExecutorImpl(String binary, File workdir) {
+        if (workdir != null && !workdir.exists()) {
+            throw new RuntimeException("Executable " + workdir.getAbsolutePath() + " does not exist.");
+        }
+        this.binary = binary;
+        this.workdir = workdir;
+    }
+
+    public CommandExecutorImpl(File f, File workdir) {
+        if (!f.exists()) {
+            throw new RuntimeException("Executable " + f.getAbsolutePath() + " not found!");
+        }
+        if (!f.canExecute()) {
+            throw new RuntimeException("Executable " + f.getAbsolutePath() + " is not executable!");
+        }
+        if (workdir != null && !workdir.exists()) {
+            throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
+        }
+        binary = f.getAbsolutePath();
+        this.workdir = workdir;
+    }
 
     @Override
     public int execute(String... args) {
-        return execute(LoggerOutputStream.info(getLogger()), null,  args);
+        return execute(LoggerOutputStream.info(getLogger()), null, args);
     }
 
     @Override
     public int execute(final OutputStream out, OutputStream errors, String... args) {
-        return execute(null, out, errors,  args);
+        return execute(null, out, errors, args);
     }
 
     @Override
@@ -62,6 +76,9 @@ public class CommandExecutorImpl implements CommandExecutor {
         final List<String> command = new ArrayList<>();
         command.add(binary);
         ProcessBuilder pb = new ProcessBuilder(command);
+        if (workdir != null) {
+            pb.directory(workdir);
+        }
         Process p;
         try {
             Collections.addAll(command, args);
@@ -74,10 +91,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            Copier inputCopier  = in != null ? copyThread(in, p.getOutputStream()) : null;
+            Copier inputCopier = in != null ? copyThread(in, p.getOutputStream()) : null;
 
-            Copier copier       = out != null ? copyThread(p.getInputStream(), out) : null;
-            Copier errorCopier  = copyThread(p.getErrorStream(), errors);
+            Copier copier = out != null ? copyThread(p.getInputStream(), out) : null;
+            Copier errorCopier = copyThread(p.getErrorStream(), errors);
             if (inputCopier != null) {
                 inputCopier.waitFor();
                 p.getOutputStream().close();
@@ -119,14 +136,14 @@ public class CommandExecutorImpl implements CommandExecutor {
                     writer.flush();
                     writer.close();
                 } catch (IOException iae) {
-                    
+
                 }
-            },  args);
+            }, args);
             return result.lines();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
-            
+
         }
     }
 
@@ -137,7 +154,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     Logger getLogger() {
         String[] split = binary.split("[\\/\\.\\\\]+");
         StringBuilder category = new StringBuilder(CommandExecutorImpl.class.getName());
-        for (int i = split.length -1; i >=0; i-- ) {
+        for (int i = split.length - 1; i >= 0; i--) {
             if (split[i].length() > 0) {
                 category.append('.').append(split[i]);
             }
@@ -181,7 +198,6 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
 
-
     private static class ProcessTimeoutTask extends TimerTask {
         private final Process monitoredProcess;
         private final String command;
@@ -217,7 +233,6 @@ public class CommandExecutorImpl implements CommandExecutor {
     public String toString() {
         return binary;
     }
-
 
 
 }

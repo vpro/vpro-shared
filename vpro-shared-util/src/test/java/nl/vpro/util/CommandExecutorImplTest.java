@@ -1,9 +1,11 @@
 package nl.vpro.util;
 
-import java.io.ByteArrayOutputStream;
-
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,4 +35,16 @@ public class CommandExecutorImplTest {
         instance.lines("find",".").forEach(System.out::println);
     }
 
+    @Test
+    public void workdir() {
+        File workDir = new File("/tmp");
+        CommandExecutorImpl instance = new CommandExecutorImpl("pwd", workDir);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        instance.execute(out);
+        String actual = new String(out.toByteArray()).trim();
+        if (actual.startsWith("/private")) {
+            actual = StringUtils.substringAfter(actual, "/private");
+        }
+        assertEquals(workDir.getAbsolutePath(), actual);
+    }
 }
