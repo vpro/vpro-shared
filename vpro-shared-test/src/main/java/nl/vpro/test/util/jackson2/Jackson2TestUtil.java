@@ -122,7 +122,7 @@ public class Jackson2TestUtil {
     public static <T> T roundTripAndSimilarValue(T input, String expected) throws Exception {
         TestClass<T> embed = new TestClass<>(input);
         JavaType type = Jackson2Mapper.getInstance().getTypeFactory()
-            .constructParametricType(TestClass.class, TestClass.class, input.getClass());
+            .constructParametricType(TestClass.class, input.getClass());
 
         TestClass<T> result = roundTripAndSimilar(embed, "{\"value\": " + expected + "}", type);
 
