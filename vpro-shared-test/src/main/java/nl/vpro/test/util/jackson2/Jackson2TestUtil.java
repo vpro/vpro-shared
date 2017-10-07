@@ -86,6 +86,12 @@ public class Jackson2TestUtil {
         return result;
     }
 
+    public static <T> T roundTripAndSimilarAndEquals(ObjectMapper mapper, T input, String expected) throws Exception {
+        T result = roundTripAndSimilar(mapper, input, expected);
+        assertThat(result).isEqualTo(input);
+        return result;
+    }
+
     public static <T> T assertJsonEquals(String text, String expected, Class<T> typeReference) throws IOException {
         JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected, expected, text);
         return MAPPER.readValue(text, typeReference);
@@ -116,7 +122,7 @@ public class Jackson2TestUtil {
     public static <T> T roundTripAndSimilarValue(T input, String expected) throws Exception {
         TestClass<T> embed = new TestClass<>(input);
         JavaType type = Jackson2Mapper.getInstance().getTypeFactory()
-            .constructParametrizedType(TestClass.class, TestClass.class, input.getClass());
+            .constructParametricType(TestClass.class, TestClass.class, input.getClass());
 
         TestClass<T> result = roundTripAndSimilar(embed, "{\"value\": " + expected + "}", type);
 
