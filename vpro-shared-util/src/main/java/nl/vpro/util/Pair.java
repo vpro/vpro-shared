@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor(staticName = "of")
-@Builder
+@lombok.Builder
 public class Pair<F, S> {
     private F first;
     @Builder.Default
