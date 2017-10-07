@@ -225,7 +225,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
 
-    @Deprecated // "Will be dropped soon"
+    @Deprecated // Will be dropped soon
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(baseUrl,
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
@@ -248,6 +248,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         );
     }
 
+    @Deprecated
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout) {
         this(baseUrl, connectionTimeout, 0, 0, null);
     }
