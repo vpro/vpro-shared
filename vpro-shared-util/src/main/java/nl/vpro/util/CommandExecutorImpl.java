@@ -1,13 +1,16 @@
 package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.logging.LoggerOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import nl.vpro.logging.LoggerOutputStream;
 
 /**
  * Wrapper around ProcessorBuilder
@@ -106,7 +109,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             errorCopier.waitFor();
             int result = p.exitValue();
             if (result != 0) {
-                log.error("Error {} occurred while calling {}", result, command);
+                log.error("Error {} occurred while calling {}", result, command.stream().collect(Collectors.joining(" ")));
             }
             if (out != null) {
                 out.flush();
