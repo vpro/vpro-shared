@@ -50,7 +50,8 @@ public class BatchedReceiverTest {
                 .offset(10L)
 				.build();
 
-		assertThat(i).containsExactly(result.subList(10, result.size()).toArray(new String[result.size() -10]));
+		assertThat(i)
+			.containsExactly(result.subList(10, result.size()).toArray(new String[result.size() -10]));
 
 	}
 

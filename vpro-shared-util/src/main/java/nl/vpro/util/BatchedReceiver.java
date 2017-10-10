@@ -21,6 +21,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
 
 	final BiFunction<Long, Integer, Iterator<T>> batchGetter;
 
+	long subCount = 0;
 	long offset;
 	Iterator<T> subIterator;
 	Boolean hasNext;
@@ -42,16 +43,16 @@ public class BatchedReceiver<T> implements Iterator<T> {
 
         /**
          *
-         * @param batchGetter A function to get the next batch, the paramters are the current the necessary offset, and batch size
+         * @param batchGetter A function to get the next batch, the parameters are the current the necessary offset, and batch size
          */
-	    public Builder batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
+	    public Builder<T> batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
 	        return _batchGetter(batchGetter);
         }
 
         /**
          * @param batchGetter For 'resumption token' like functionality, the offset and max argument can be irrelevant.
          */
-        public Builder batchGetter(final Supplier<Iterator<T>> batchGetter) {
+        public Builder<T> batchGetter(final Supplier<Iterator<T>> batchGetter) {
             return _batchGetter((offset, max) -> batchGetter.get());
         }
 
@@ -78,6 +79,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
 		if (hasNext == null) {
 			if (subIterator == null) {
 				subIterator = batchGetter.apply(offset, batchSize);
+                subCount = 0;
                 if (subIterator == null) {
                     hasNext = false;
                     return;
@@ -85,10 +87,16 @@ public class BatchedReceiver<T> implements Iterator<T> {
 			}
 			if (subIterator.hasNext()) {
 				next = subIterator.next();
+                subCount++;
 				hasNext = true;
 			} else {
-				offset += batchSize;
-				subIterator = batchGetter.apply(offset, batchSize);
+				offset += subCount;
+				if (subCount == batchSize) {
+                    subIterator = batchGetter.apply(offset, batchSize);
+                } else {
+				    subIterator = null;
+                }
+                subCount = 0;
                 if (subIterator == null) {
                     hasNext = false;
                     return;
@@ -96,7 +104,8 @@ public class BatchedReceiver<T> implements Iterator<T> {
 				hasNext = subIterator.hasNext();
 				if (hasNext) {
 					next = subIterator.next();
-				}
+                    subCount++;
+                }
 			}
 		}
 	}
