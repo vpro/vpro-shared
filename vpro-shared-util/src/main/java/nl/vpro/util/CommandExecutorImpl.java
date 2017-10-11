@@ -138,7 +138,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 try {
                     writer.flush();
                     writer.close();
-                } catch (IOException iae) {
+                } catch (IOException ignored) {
 
                 }
             }, args);
