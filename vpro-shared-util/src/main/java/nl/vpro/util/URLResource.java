@@ -243,7 +243,7 @@ public class URLResource<T> {
             code = SC_OK;
         }
         lastTry = Instant.now();
-        log.info("Trying {} at {}", url, lastTry);
+        log.debug("Trying {} at {}", url, lastTry);
         switch (code) {
             case SC_NOT_MODIFIED:
                 log.debug("Not modified {}", url);
@@ -285,18 +285,25 @@ public class URLResource<T> {
                 if (newResult != null) {
                     if (result == null) {
                         log.info("Loaded {} -> {}", url, lastModified);
+                        changesCount++;
                     } else {
                         if (checkIfModified) {
-                            log.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod, lastModified);
+                            if (result.equals(newResult) && Objects.equals(prevMod, lastModified)) {
+                                log.info("Reloaded {} because it should have been modified.  But nothing changed. (lastmodified {})", url, lastModified);
+                            } else {
+                                log.info("Reloaded {}  as it is modified since {} -> {}", url, prevMod, lastModified);
+                                changesCount++;
+                            }
                         } else {
                             if (result.equals(newResult) && Objects.equals(prevMod, lastModified)) {
-                                log.debug("Reloaded after expiry, no changes");
+                                log.debug("Reloaded {} after expiry, no changes (lastmodified {})", url, lastModified);
                             } else {
                                 log.info("Reloaded {} as it was expired (lastmodified {}  -> {})", url, prevMod, lastModified);
+                                changesCount++;
+
                             }
                         }
                     }
-                    changesCount++;
                     result = newResult;
                     callBack();
                 }
