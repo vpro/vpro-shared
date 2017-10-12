@@ -28,7 +28,8 @@ public class URLResourceTest {
 
     @Test
     public void broadcasters() throws InterruptedException {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create("https://poms.omroep.nl/broadcasters/"));
+        URLResource<Properties> broadcasters =
+            URLResource.properties(URI.create("https://poms.omroep.nl/broadcasters/"));
 
         assertTrue(broadcasters.get().size() > 0);
         assertEquals(1, broadcasters.getChangesCount());
@@ -56,6 +57,10 @@ public class URLResourceTest {
         assertEquals(1, broadcasters.getNotModifiedCount());
         assertEquals(2, broadcasters.getNotCheckedCount());
 
+        System.out.println(broadcasters.get());
+        Thread.sleep(2000L);
+        broadcasters.setMinAge(Duration.ofSeconds(1));
+        broadcasters.setMaxAge(Duration.ofSeconds(1));
         System.out.println(broadcasters.get());
 
     }

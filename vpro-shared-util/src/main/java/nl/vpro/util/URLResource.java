@@ -210,10 +210,12 @@ public class URLResource<T> {
         }
         boolean httpUrl = connection instanceof HttpURLConnection;
         code = -1;
+        boolean checkIfModified = false;
         if (httpUrl && lastModified != null) {
             Instant alwaysRefreshIfAfter = lastTry.plus(maxAge);
             if (lastTry == null || Instant.now().isBefore(alwaysRefreshIfAfter)) {
                 log.debug("last tried at {}, check if modified", lastTry);
+                checkIfModified = true;
                 connection.setRequestProperty("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(lastModified.atOffset(ZoneOffset.UTC)));
             } else {
                 log.debug("last try at {} was pretty long ago (> {}), simply do a normal request", lastTry, maxAge);
@@ -284,7 +286,15 @@ public class URLResource<T> {
                     if (result == null) {
                         log.info("Loaded {} -> {}", url, lastModified);
                     } else {
-                        log.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod, lastModified);
+                        if (checkIfModified) {
+                            log.info("Reloaded {}  as it is modified since {}  -> {}", url, prevMod, lastModified);
+                        } else {
+                            if (result.equals(newResult) && Objects.equals(prevMod, lastModified)) {
+                                log.debug("Reloaded after expiry, no changes");
+                            } else {
+                                log.info("Reloaded {} as it was expired (lastmodified {}  -> {})", url, prevMod, lastModified);
+                            }
+                        }
                     }
                     changesCount++;
                     result = newResult;
