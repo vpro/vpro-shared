@@ -72,7 +72,7 @@ public class JoinClusterClientFactory implements ESClientFactory {
             .put(Node.NODE_NAME_SETTING.getKey(), nodeName)
             .put(additionalSettings)
             .put(Node.NODE_MASTER_SETTING.getKey(), false)
-            .put(Node.NODE_DATA_SETTING.getKey(), "false")
+            .put(Node.NODE_DATA_SETTING.getKey(), false)
             .put("transport.type", "netty4")
             .put("http.type", "netty4")
             .put("path.home", pathHome)
