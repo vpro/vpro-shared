@@ -41,10 +41,14 @@ public class BackwardsCompatibleJsonEnum {
             try {
                 return Enum.valueOf(enumClass, jp.getValueAsString());
             } catch(IllegalArgumentException iae) {
-                if (ctxt.getConfig().hasDeserializationFeatures(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL.getMask())) {
-                    return null;
-                } else {
-                    throw iae;
+                try {
+                    return Enum.valueOf(enumClass, jp.getValueAsString().toUpperCase());
+                } catch (IllegalArgumentException iaeu) {
+                    if (ctxt.getConfig().hasDeserializationFeatures(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL.getMask())) {
+                        return null;
+                    } else {
+                        throw iae;
+                    }
                 }
 
             }
