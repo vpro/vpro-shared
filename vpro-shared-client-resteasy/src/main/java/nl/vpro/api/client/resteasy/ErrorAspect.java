@@ -69,18 +69,25 @@ public class ErrorAspect<T> implements InvocationHandler {
                 }
                 throw throwable;
             }
+        } catch (javax.ws.rs.InternalServerErrorException e) {
+            mes = e.getClass().getName() + " " + e.getMessage();
+            t = e;
+            l = log;
+            error = true;
         } catch (WebApplicationException wea) {
             int status = wea.getResponse().getStatus();
             l = getLogger(status);
             mes = getMessage(wea);
             t = wea;
             error = status >= 500;
+
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = cause.getClass().getName() + " " + cause.getMessage();
             l = log;
             t = pe;
             error = true;
+
         } catch (Throwable e) {
             mes = e.getClass().getName() + " " + e.getMessage();
             t = e;
