@@ -39,9 +39,6 @@ public class Jackson2TestUtil {
      * <p>Marshalls input, checks whether it contains a string, and unmarshall it.</p>
      *
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
-     *
-     * @param input
-     * @param contains
      */
     public static  <T> T roundTrip(T input, String contains) throws Exception {
         StringWriter writer = new StringWriter();
@@ -59,9 +56,6 @@ public class Jackson2TestUtil {
      * <p>Marshalls input, checks whether it is similar to expected string, and unmarshall it.
      * </p>
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
-     *
-     * @param input
-     * @param expected
      */
     public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
         return roundTripAndSimilar(MAPPER, input, expected);
@@ -76,9 +70,6 @@ public class Jackson2TestUtil {
      * Marshalls input, checks whether it is similar to expected string, and unmarshall it. This unmarshalled result must be equal to the input.
      * <p>
      * Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.
-     *
-     * @param input
-     * @param expected
      */
     public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
         T result = roundTripAndSimilar(input, expected);
