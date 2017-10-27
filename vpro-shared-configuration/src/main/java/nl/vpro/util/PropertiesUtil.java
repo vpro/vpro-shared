@@ -1,11 +1,12 @@
 package nl.vpro.util;
 
+
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -25,9 +26,14 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     private Map<String, String> logMap = new HashMap<>();
 
 
+
     private String[] systemProperties;
 
     private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
+
+    @Getter
+    @Setter
+    private List<Runnable> afterProperties;
 
     @Override
     protected void processProperties(ConfigurableListableBeanFactory beanFactory,
@@ -41,7 +47,13 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
             PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
                 placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
             for (Map.Entry<String, String> logEntry : logMap.entrySet()) {
-                logger.info(String.format(helper.replacePlaceholders(logEntry.getValue(), props), getMap().get(logEntry.getKey())));
+                String log = String.format(helper.replacePlaceholders(logEntry.getValue(), props), getMap().get(logEntry.getKey()));
+                logger.info(log);
+            }
+        }
+        if (afterProperties != null) {
+            for (Runnable after : afterProperties) {
+                after.run();
             }
         }
     }
@@ -114,7 +126,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                     if(System.getProperty(property) == null || localOverride) {
                         System.setProperty(property, value);
                     } else {
-                        logger.warn("Can not override System property " + property + " because it allready exists");
+                        logger.warn("Can not override System property " + property + " because it already exists");
                     }
                 } else {
                     logger.error("Property " + property + " not found, please check the property configuration");
@@ -125,6 +137,6 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     @Override
     public String toString() {
-        return "PropertiesUtil " + propertiesMap.keySet();
+        return "PropertiesUtil " + (propertiesMap == null ? null : propertiesMap.keySet());
     }
 }
