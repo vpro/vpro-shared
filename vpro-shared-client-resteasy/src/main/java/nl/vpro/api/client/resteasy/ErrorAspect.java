@@ -69,18 +69,12 @@ public class ErrorAspect<T> implements InvocationHandler {
                 }
                 throw throwable;
             }
-        } catch (javax.ws.rs.InternalServerErrorException e) {
-            mes = e.getClass().getName() + " " + e.getMessage();
-            t = e;
-            l = log;
-            error = true;
         } catch (WebApplicationException wea) {
             int status = wea.getResponse().getStatus();
             l = getLogger(status);
             mes = getMessage(wea);
             t = wea;
             error = status >= 500;
-
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = cause.getClass().getName() + " " + cause.getMessage();
@@ -157,7 +151,7 @@ public class ErrorAspect<T> implements InvocationHandler {
                     String m = response.readEntity(String.class);
                     mes.append(response.getStatus()).append(':').append(m);
                 } catch (IllegalStateException is) {
-                    mes.append(response.getStatus()).append(':').append(is.getMessage());
+                    mes.append(response.getStatus()).append(':').append(we.getMessage());
                 }
             }
             for (String s : HEADERS) {
