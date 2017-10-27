@@ -87,7 +87,7 @@ public class JAXBTestUtil {
 
 
     /**
-     * !!!@Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
+
      *
      * One might disagree on this subject!
      *
@@ -98,8 +98,11 @@ public class JAXBTestUtil {
      *
      * MM: The difference was in the order of attributes and/or namespaces. Those are not relevant changes.
      *     SAX implementations are not required to preserve or guarantee any order in this. It is hence impossible to make a test using this that succeeds in any java version.
+     *     Furthermore roundTripAndSimilar will if not similar still do a test for equals to enforce a clearer message.
      *
+     * @Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static  <T> T roundTrip(T input, String contains) {
         String xml = marshal(input);
