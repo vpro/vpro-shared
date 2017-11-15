@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.LocaleUtils;
-
-import com.google.common.collect.Maps;
+import org.apache.commons.lang3.text.StrSubstitutor;
 
 /**
  * @author Michiel Meeuwissen
@@ -135,6 +134,11 @@ public class ReflectionUtils {
 
 
     public static Map<String, String> getProperties(String... configFiles) throws IOException {
+        return getProperties(new HashMap<>(), configFiles);
+    }
+
+
+    public static Map<String, String> getProperties(Map<String, String> initial, String... configFiles) throws IOException {
         Properties properties = new Properties();
         for (String configFile : configFiles) {
             if (configFile.startsWith("classpath:")) {
@@ -153,7 +157,18 @@ public class ReflectionUtils {
                 properties.load(new FileInputStream(file));
             }
         }
-        return Maps.fromProperties(properties);
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            initial.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+        }
+        substitute(initial);
+        return Collections.unmodifiableMap(initial);
+    }
+
+    public static void substitute(Map<String, String> map) {
+        StrSubstitutor subst = new StrSubstitutor(map);
+        for (Map.Entry<String, String> e : map.entrySet()) {
+            e.setValue(subst.replace(e.getValue()));
+        }
     }
 
     public static Map<String, String> filtered(Env e, Map<String, String> properties) {
