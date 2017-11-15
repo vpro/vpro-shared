@@ -467,7 +467,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
 
         HttpClient built  = client.build();
-
         return built;
     }
 
