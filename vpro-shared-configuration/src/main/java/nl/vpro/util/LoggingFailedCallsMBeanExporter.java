@@ -11,6 +11,8 @@ import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.SpringModelMBean;
 
 /**
+ * Exceptions from spring managed mbeans are silently swallowed. They are thrown to the clients (like visualvm), but they more often then not don't know how to gracefully show them
+ * (e.g. I think it is required that the exception is serializable then).
  * @author Michiel Meeuwissen
  * @since 1.75
  */
@@ -19,8 +21,6 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
 
     @Override
     protected ModelMBean createModelMBean() throws MBeanException {
-        // super method does:
-        // return (this.exposeManagedResourceClassLoader ? new SpringModelMBean() : new RequiredModelMBean());
         ModelMBean superModelMBean = super.createModelMBean();
 
         // but this.exposeManagedResourceClassLoader is not visible, so we switch on the type of the returned ModelMBean
@@ -50,7 +50,6 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
             };
         }
     }
-
 
 
 }
