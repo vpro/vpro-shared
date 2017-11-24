@@ -253,6 +253,29 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this(baseUrl, connectionTimeout, 0, 0, null);
     }
 
+    @Deprecated
+    protected  AbstractApiClient(String baseUrl, Duration connectionRequestTimeout, Duration connectTimeout, Duration socketTimeout, int maxConnections, int maxConnectionsPerRoute, Duration connectionInPoolTTL, Duration countWindow, Integer bucketCount, Duration warnThreshold, List<Locale> acceptableLanguages, MediaType accept, Boolean trustAll) {
+        this(baseUrl,
+            connectionRequestTimeout,
+            connectTimeout,
+            socketTimeout,
+            maxConnections,
+            maxConnectionsPerRoute,
+            3,
+            3,
+            connectionInPoolTTL,
+            countWindow,
+            bucketCount,
+            warnThreshold,
+            acceptableLanguages,
+            accept,
+            null,
+            trustAll,
+            Jackson2Mapper.getLenientInstance(),
+            null
+        );
+    }
+
     public synchronized void invalidate() {
         counter.values().forEach(Counter::shutdown);
         counter.clear();
