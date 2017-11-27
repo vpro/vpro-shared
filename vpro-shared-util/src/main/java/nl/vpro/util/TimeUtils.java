@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
@@ -11,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Michiel Meeuwissen
  * @since 0.45
  */
+@Slf4j
 public class TimeUtils {
 
     public static ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
@@ -82,6 +85,11 @@ public class TimeUtils {
         if (StringUtils.isBlank(d)) {
             return Optional.empty();
         }
+        if (d.toString().startsWith("${")) {// unresolved spring setting;
+            log.warn("Found {} as duration, returing empty", d);
+            return Optional.empty();
+        }
+
 
         try {
             return Optional.of(Duration.parse(d));
