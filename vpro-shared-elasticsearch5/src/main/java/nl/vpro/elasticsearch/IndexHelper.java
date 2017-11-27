@@ -5,11 +5,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
+import org.apache.commons.io.IOUtils;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -44,9 +47,34 @@ public class IndexHelper {
             this.mappings.put(type, mapping);
             return this;
         }
+
+        public Builder mappingResource(String type, String mapping) {
+            return mapping(type, () -> getResourceAsString(mapping));
+        }
         public Builder mappings(Map<String, Supplier<String>> mappings) {
             this.mappings.putAll(mappings);
             return this;
+        }
+
+        public Builder settingsResource(final String resource) {
+            return settings(() -> getResourceAsString(resource)
+            );
+        }
+    }
+
+    private static String getResourceAsString(String resource) {
+        try {
+            StringWriter e = new StringWriter();
+            InputStream inputStream = IndexHelper.class.getClassLoader().getResourceAsStream(resource);
+            if (inputStream == null) {
+                throw new IllegalStateException("Could not find " + resource);
+            } else {
+                IOUtils.copy(inputStream, e, "utf-8");
+                return e.toString();
+
+            }
+        } catch (IOException var3) {
+            throw new IllegalStateException(var3);
         }
     }
 
@@ -60,6 +88,16 @@ public class IndexHelper {
         if (mappings != null) {
             this.mappings.putAll(mappings);
         }
+    }
+
+
+    public static IndexHelper of(Logger log, ESClientFactory client, String indexName, String objectType) {
+        return IndexHelper.builder().log(log)
+            .client(client)
+            .indexName(indexName)
+            .settingsResource("es/setting.json")
+            .mappingResource(objectType, String.format("es/%s.json", objectType))
+            .build();
     }
 
     public IndexHelper mapping(String type, Supplier<String> mapping) {
