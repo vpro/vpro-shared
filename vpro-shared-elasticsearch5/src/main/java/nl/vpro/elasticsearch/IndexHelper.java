@@ -180,6 +180,12 @@ public class IndexHelper {
         return client().prepareSearch(getIndexName()).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits();
     }
 
+
+    public void setIndexName(String indexName) {
+        this.indexNameSupplier = () -> indexName;
+    }
+
+
     protected String getIndexName() {
         return indexNameSupplier.get();
     }
