@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class IndexHelper {
 
     private final Logger log;
-    private String indexName;
+    private Supplier<String> indexNameSupplier;
     private Supplier<String> settings;
     private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
@@ -60,6 +60,10 @@ public class IndexHelper {
             return settings(() -> getResourceAsString(resource)
             );
         }
+
+        public Builder indexName(final String indexName) {
+            return settings(() -> indexName);
+        }
     }
 
     private static String getResourceAsString(String resource) {
@@ -80,10 +84,10 @@ public class IndexHelper {
 
 
     @lombok.Builder(builderClassName = "Builder")
-    private IndexHelper(Logger log, ESClientFactory client, String indexName, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
+    private IndexHelper(Logger log, ESClientFactory client, Supplier<String> indexNameSupplier, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
-        this.indexName = indexName;
+        this.indexNameSupplier = indexNameSupplier;
         this.settings = settings;
         if (mappings != null) {
             this.mappings.putAll(mappings);
@@ -100,34 +104,43 @@ public class IndexHelper {
             .build();
     }
 
+    public static IndexHelper of(Logger log, ESClientFactory client, Supplier<String> indexName, String objectType) {
+        return IndexHelper.builder().log(log)
+            .client(client)
+            .indexNameSupplier(indexName)
+            .settingsResource("es/setting.json")
+            .mappingResource(objectType, String.format("es/%s.json", objectType))
+            .build();
+    }
+
     public IndexHelper mapping(String type, Supplier<String> mapping) {
         mappings.put(type, mapping);
         return this;
     }
 
     public Client client() {
-        return clientFactory.client(IndexHelper.class.getName() + "." + indexName);
+        return clientFactory.client(IndexHelper.class.getName() + "." + indexNameSupplier.get());
     }
 
     public  void createIndex() throws ExecutionException, InterruptedException, IOException {
 
-        if (indexName == null){
+        if (indexNameSupplier == null){
             throw new IllegalStateException("No index name configured");
         }
         try {
             CreateIndexRequestBuilder createIndexRequestBuilder = client().admin().indices()
-                .prepareCreate(indexName)
+                .prepareCreate(indexNameSupplier.get())
                 .setSettings(settings.get(), XContentType.JSON);
             for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
                 createIndexRequestBuilder.addMapping(e.getKey(), e.getValue().get(), XContentType.JSON);
             }
-            log.info("Creating index {} with mappings {}", indexName, mappings.keySet());
+            log.info("Creating index {} with mappings {}", indexNameSupplier, mappings.keySet());
             CreateIndexResponse response = createIndexRequestBuilder.execute()
                 .actionGet();
             if (response.isAcknowledged()) {
-                log.info("Created index {}", indexName);
+                log.info("Created index {}", getIndexName());
             } else {
-                log.warn("Could not create index {}", indexName);
+                log.warn("Could not create index {}", getIndexName());
             }
         } catch (ResourceAlreadyExistsException e) {
             log.info("Index exists");
@@ -137,9 +150,9 @@ public class IndexHelper {
 
     public void prepareIndex() {
         try {
-            boolean exists = client().admin().indices().prepareExists(indexName).execute().actionGet().isExists();
+            boolean exists = client().admin().indices().prepareExists(getIndexName()).execute().actionGet().isExists();
             if (!exists) {
-                log.info("Index '{}' not existing in {}, now creating", indexName, clientFactory);
+                log.info("Index '{}' not existing in {}, now creating", getIndexName(), clientFactory);
                 try {
                     createIndex();
                 } catch (Exception e) {
@@ -147,7 +160,7 @@ public class IndexHelper {
                     log.error(e.getMessage() + c);
                 }
             } else {
-                log.info("Found {} objects in '{}' of {}", count(), indexName, clientFactory);
+                log.info("Found {} objects in '{}' of {}", count(), getIndexName(), clientFactory);
             }
         } catch( NoNodeAvailableException noNodeAvailableException) {
             log.error(noNodeAvailableException.getMessage());
@@ -156,15 +169,19 @@ public class IndexHelper {
 
 
     public void deleteIndex() throws ExecutionException, InterruptedException, IOException {
-        client().admin().indices().prepareDelete(indexName).execute().actionGet();
+        client().admin().indices().prepareDelete(getIndexName()).execute().actionGet();
     }
 
     public RefreshResponse refresh() throws ExecutionException, InterruptedException {
-        return client().admin().indices().prepareRefresh(indexName).get();
+        return client().admin().indices().prepareRefresh(getIndexName()).get();
     }
 
     public long count() {
-        return client().prepareSearch(indexName).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits();
+        return client().prepareSearch(getIndexName()).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits();
+    }
+
+    protected String getIndexName() {
+        return indexNameSupplier.get();
     }
 
 
