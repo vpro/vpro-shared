@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
@@ -201,6 +202,13 @@ public class JoinClusterClientFactory implements ESClientFactory {
             throw new RuntimeException(e);
         }
     }
+
+    @PostConstruct
+    public void init() {
+        log.info("Created {}", this);
+
+    }
+
 
     @PreDestroy
     public void shutdown() {
