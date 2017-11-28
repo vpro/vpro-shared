@@ -54,10 +54,14 @@ public class JoinClusterClientFactory implements ESClientFactory {
         if (logger == null) {
             logger = NOPLogger.NOP_LOGGER;
         }
-        Settings.Builder settings = Settings.builder()
-            .put("http.enabled", httpEnabled)
-            .put("transport.profiles.default.port", defaultPort)
+        Settings.Builder settings = Settings.builder();
+
+        if (httpEnabled) {
+            settings
+                .put("http.enabled", httpEnabled)
+                .put("transport.profiles.default.port", defaultPort)
             ;
+        }
 
 
         if (StringUtils.isNotEmpty(unicastHosts)) {
