@@ -62,7 +62,7 @@ public class IndexHelper {
         }
 
         public Builder indexName(final String indexName) {
-            return settings(() -> indexName);
+            return indexNameSupplier(() -> indexName);
         }
     }
 
