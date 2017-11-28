@@ -3,20 +3,18 @@ package nl.vpro.elasticsearch;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.client.Client;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import nl.vpro.util.UrlProvider;
 
 
-@Ignore("requires running es")
 @Slf4j
-public class JoinClusterClientFactoryTest {
+public class JoinClusterClientFactoryITest {
 
     int port = 9300;
     //String clusterName = "elasticsearch_acceptatie";
     //String clusterName = "poms10aas";
-    String clusterName = "elasticsearch";
+    String clusterName = "jenkins";
 
     @Test
     public void joinUnicast() {
