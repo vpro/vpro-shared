@@ -187,7 +187,7 @@ public class IndexHelper {
     }
 
 
-    protected String getIndexName() {
+    public String getIndexName() {
         return indexNameSupplier.get();
     }
 
