@@ -7,6 +7,7 @@ import lombok.ToString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -73,7 +74,7 @@ public class IndexHelper {
             if (inputStream == null) {
                 throw new IllegalStateException("Could not find " + resource);
             } else {
-                IOUtils.copy(inputStream, e, "utf-8");
+                IOUtils.copy(inputStream, e, StandardCharsets.UTF_8);
                 return e.toString();
 
             }
