@@ -14,7 +14,7 @@ public class JoinClusterClientFactoryITest {
     int port = 9300;
     //String clusterName = "elasticsearch_acceptatie";
     //String clusterName = "poms10aas";
-    String clusterName = "jenkins";
+    String clusterName = System.getProperty("integ.cluster.name", "elasticsearch");
 
     @Test
     public void joinUnicast() {
