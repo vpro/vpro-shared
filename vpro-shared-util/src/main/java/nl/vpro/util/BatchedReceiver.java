@@ -40,10 +40,9 @@ public class BatchedReceiver<T> implements Iterator<T> {
 
 
 	public static class Builder<T>  {
-
         /**
          *
-         * @param batchGetter A function to get the next batch, the parameters are the current the necessary offset, and batch size
+         * @param batchGetter A function to get the next batch, the parameters are the current necessary offset, and batch size
          */
 	    public Builder<T> batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
 	        return _batchGetter(batchGetter);
