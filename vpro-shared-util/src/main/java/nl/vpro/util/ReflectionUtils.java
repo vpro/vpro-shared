@@ -2,19 +2,11 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.*;
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.LocaleUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 
 /**
  * @author Michiel Meeuwissen
@@ -43,22 +35,20 @@ public class ReflectionUtils {
         return configured(
             env,
             instance,
-            getConfigFilesInHome(configFiles)
+            ConfigUtils.getConfigFilesInHome(configFiles)
         );
     }
 
+    @Deprecated
     public static String[] getConfigFilesInHome(String... configFiles) {
-        return Stream.concat(
-            Arrays.stream(configFiles).map(c -> "classpath:/" + c),
-            Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
-        ).toArray(String[]::new);
+        return ConfigUtils.getConfigFilesInHome(configFiles);
     }
 
     public static <T> T configured(Env env, T instance, String... configFiles) {
         try {
-            Map<String, String> properties = getProperties(configFiles);
+            Map<String, String> properties = ConfigUtils.getProperties(configFiles);
             if (env == null) {
-                env = getEnv(properties);
+                env = ConfigUtils.getEnv(properties);
             }
             return configured(env, instance, properties);
         } catch (IOException ioe) {
@@ -68,7 +58,7 @@ public class ReflectionUtils {
 
 
     public static <T> T  configured(Env env, T instance, Map<String, String> properties, Collection<Function<String, String>> setterName) {
-        Map<String, String> filtered = filtered(env, null, properties);
+        Map<String, String> filtered = ConfigUtils.filtered(env, null, properties);
         log.debug("Configuring with {}", filtered);
         filtered.forEach((k, v) -> ReflectionUtils.setProperty(instance,
             setterName.stream().map(f -> f.apply(String.valueOf(k))).collect(Collectors.toList()), v));
@@ -81,7 +71,7 @@ public class ReflectionUtils {
 
 
     public static <T> T configured(T instance, Map<String, String> properties) {
-        return configured(getEnv(properties), instance, properties, Arrays.asList(SETTER, IDENTITY));
+        return configured(ConfigUtils.getEnv(properties), instance, properties, Arrays.asList(SETTER, IDENTITY));
     }
 
 
@@ -112,20 +102,20 @@ public class ReflectionUtils {
 
     public static <T> T configured(Env env, Class<T> clazz, String... configFiles) {
         try {
-            return configured(env, clazz, getProperties(configFiles));
+            return configured(env, clazz, ConfigUtils.getProperties(configFiles));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static <T> T configured(Class<T> clazz, Map<String, String> properties) {
-        return configured(getEnv(properties), clazz, properties);
+        return configured(ConfigUtils.getEnv(properties), clazz, properties);
     }
 
     public static <T> T configured(Class<T> clazz, String... configfiles) {
         try {
-            Map<String, String> properties = getProperties(configfiles);
-            return configured(getEnv(properties), clazz, properties);
+            Map<String, String> properties = ConfigUtils.getProperties(configfiles);
+            return configured(ConfigUtils.getEnv(properties), clazz, properties);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -133,42 +123,19 @@ public class ReflectionUtils {
     }
 
 
+    @Deprecated
     public static Map<String, String> getProperties(String... configFiles) throws IOException {
-        return getProperties(new HashMap<>(), configFiles);
+        return ConfigUtils.getProperties(new HashMap<>(), configFiles);
     }
 
-
+    @Deprecated
     public static Map<String, String> getProperties(Map<String, String> initial, String... configFiles) throws IOException {
-        Properties properties = new Properties();
-        for (String configFile : configFiles) {
-            if (configFile.startsWith("classpath:")) {
-                InputStream in = ReflectionUtils.class.getResourceAsStream(configFile.substring("classpath:".length()));
-                if (in != null) {
-                    log.info("Reading properties from classpath {}", configFile);
-                    properties.load(in);
-                    continue;
-                }
-            }
-            File file = new File(configFile);
-            if (!file.canRead()) {
-                log.info("The file {} cannot be read", file);
-            } else {
-                log.info("Reading properties from {}", file);
-                properties.load(new FileInputStream(file));
-            }
-        }
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            initial.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
-        }
-        substitute(initial);
-        return Collections.unmodifiableMap(initial);
+        return ConfigUtils.getProperties(initial, configFiles);
     }
 
+    @Deprecated
     public static void substitute(Map<String, String> map) {
-        StrSubstitutor subst = new StrSubstitutor(map);
-        for (Map.Entry<String, String> e : map.entrySet()) {
-            e.setValue(subst.replace(e.getValue()));
-        }
+        ConfigUtils.substitute(map);
     }
 
     public static Map<String, String> filtered(Env e, Map<String, String> properties) {
@@ -228,7 +195,7 @@ public class ReflectionUtils {
             if (setterNames.contains(m.getName()) && m.getParameterCount() == 1) {
                 try {
                     parameterClass = m.getParameters()[0];
-                    m.invoke(instance, convert(v, parameterClass));
+                    m.invoke(instance, ConfigUtils.convert(v, parameterClass));
                     log.debug("Set {}#{} to {} from config file", instance, m.getName(), v);
                     return true;
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -241,52 +208,6 @@ public class ReflectionUtils {
         }
         log.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
         return false;
-    }
-
-    private static <T> Object convert(String o, Parameter parameter) {
-        return convert(o, parameter.getParameterizedType());
-    }
-    private static <T> Object convert(String o, Type parameterType)  {
-        Class<?> parameterClass;
-        if (parameterType instanceof  Class) {
-            parameterClass = (Class) parameterType;
-        } else if (parameterType instanceof ParameterizedType) {
-            parameterClass = (Class) ((ParameterizedType) parameterType).getRawType();
-        } else if (parameterType instanceof WildcardType) {
-            parameterClass = (Class) ((WildcardType) parameterType).getUpperBounds()[0];
-        } else {
-            throw new UnsupportedOperationException("Cannot convert " + o + " to " + parameterType);
-        }
-        if (String.class.isAssignableFrom(parameterClass)) {
-            return o;
-        } else if (boolean.class.equals(parameterClass) || parameterClass.isAssignableFrom(Boolean.class)) {
-            return Boolean.valueOf(o);
-        } else if (int.class.equals(parameterClass) || parameterClass.isAssignableFrom(Integer.class)) {
-            return Integer.valueOf(o);
-        } else if (long.class.equals(parameterClass) || parameterClass.isAssignableFrom(Long.class)) {
-            return Long.valueOf(o);
-        } else if (float.class.equals(parameterClass) || parameterClass.isAssignableFrom(Float.class)) {
-            return Float.valueOf(o);
-        } else if (double.class.equals(parameterClass) || parameterClass.isAssignableFrom(Double.class)) {
-            return Double.valueOf(o);
-        } else if (Enum.class.isAssignableFrom(parameterClass)) {
-            try {
-                return Enum.valueOf((Class<? extends Enum>) parameterClass, o);
-            } catch (IllegalArgumentException iae) {
-                return Enum.valueOf((Class<? extends Enum>) parameterClass, o.toUpperCase());
-            }
-        } else if (parameterClass.isAssignableFrom(Locale.class)) {
-            return LocaleUtils.toLocale(o);
-        } else if (parameterClass.isAssignableFrom(Duration.class)) {
-            return TimeUtils.parseDuration(o).orElse(null);
-        } else if (parameterClass.isAssignableFrom(List.class)) {
-            ParameterizedType parameterizedType = (ParameterizedType) parameterType;
-            return Arrays.stream(o.split("\\s*,\\s*"))
-                .map(s -> convert(s, parameterizedType.getActualTypeArguments()[0]))
-                .collect(Collectors.toList());
-        } else {
-            throw new UnsupportedOperationException();
-        }
     }
 
 

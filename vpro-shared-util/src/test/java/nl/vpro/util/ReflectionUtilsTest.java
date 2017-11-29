@@ -71,66 +71,66 @@ public class ReflectionUtilsTest {
     }
     @Test
     public void testFilteredANull() {
-        assertThat(ReflectionUtils.filtered(null, properties).get("a")).isEqualTo("1");
-        assertThat(ReflectionUtils.filtered(null, properties).get("a.test")).isNull();
-        assertThat(ReflectionUtils.filtered(null, properties).get("a.prod")).isNull();
+        assertThat(ConfigUtils.filtered(null, properties).get("a")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(null, properties).get("a.test")).isNull();
+        assertThat(ConfigUtils.filtered(null, properties).get("a.prod")).isNull();
 
     }
 
     @Test
     public void testFilteredATest() {
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("a")).isEqualTo("2");
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("a.test")).isNull();
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("a.prod")).isNull();
+        assertThat(ConfigUtils.filtered(TEST, properties).get("a")).isEqualTo("2");
+        assertThat(ConfigUtils.filtered(TEST, properties).get("a.test")).isNull();
+        assertThat(ConfigUtils.filtered(TEST, properties).get("a.prod")).isNull();
     }
 
     @Test
     public void testFilteredAProd() {
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("a")).isEqualTo("3");
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("a.test")).isNull();
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("a.prod")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, properties).get("a")).isEqualTo("3");
+        assertThat(ConfigUtils.filtered(PROD, properties).get("a.test")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, properties).get("a.prod")).isNull();
     }
 
     @Test
     public void testFilteredBNull() {
-        assertThat(ReflectionUtils.filtered(null, properties).get("b")).isEqualTo("1");
-        assertThat(ReflectionUtils.filtered(null, properties).get("b.test")).isNull();
-        assertThat(ReflectionUtils.filtered(null, properties).get("b.prod")).isNull();
+        assertThat(ConfigUtils.filtered(null, properties).get("b")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(null, properties).get("b.test")).isNull();
+        assertThat(ConfigUtils.filtered(null, properties).get("b.prod")).isNull();
     }
 
     @Test
     public void testFilteredBTest() {
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("b")).isEqualTo("1");
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("b.test")).isNull();
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("b.prod")).isNull();
+        assertThat(ConfigUtils.filtered(TEST, properties).get("b")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(TEST, properties).get("b.test")).isNull();
+        assertThat(ConfigUtils.filtered(TEST, properties).get("b.prod")).isNull();
     }
 
     @Test
     public void testFilteredBProd() {
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("b")).isEqualTo("2");
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("b.test")).isNull();
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("b.prod")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, properties).get("b")).isEqualTo("2");
+        assertThat(ConfigUtils.filtered(PROD, properties).get("b.test")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, properties).get("b.prod")).isNull();
     }
 
     @Test
     public void testFilteredCNull() {
-        assertThat(ReflectionUtils.filtered(null, properties).get("c")).isEqualTo("1");
-        assertThat(ReflectionUtils.filtered(null, properties).get("c.test")).isNull();
-        assertThat(ReflectionUtils.filtered(null, properties).get("c.prod")).isNull();
+        assertThat(ConfigUtils.filtered(null, properties).get("c")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(null, properties).get("c.test")).isNull();
+        assertThat(ConfigUtils.filtered(null, properties).get("c.prod")).isNull();
     }
 
     @Test
     public void testFilteredCTest() {
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("c")).isEqualTo("1");
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("c.test")).isNull();
-        assertThat(ReflectionUtils.filtered(TEST, properties).get("c.prod")).isNull();
+        assertThat(ConfigUtils.filtered(TEST, properties).get("c")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(TEST, properties).get("c.test")).isNull();
+        assertThat(ConfigUtils.filtered(TEST, properties).get("c.prod")).isNull();
     }
 
     @Test
     public void testFilteredCProd() {
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("c")).isEqualTo("1");
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("c.test")).isNull();
-        assertThat(ReflectionUtils.filtered(PROD, properties).get("c.prod")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, properties).get("c")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(PROD, properties).get("c.test")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, properties).get("c.prod")).isNull();
     }
 
     @Test
