@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,6 +38,11 @@ public class ConfigUtils {
     }
 
     public static Map<String, String> getProperties(Map<String, String> initial, String... configFiles) throws IOException {
+        return getProperties(initial, (s) -> s, configFiles);
+    }
+    public static <K> Map<K, String> getProperties(Map<K, String> initial, Function<String, K> keyGenerator, String... configFiles) throws IOException {
+
+
         Properties properties = new Properties();
         for (String configFile : configFiles) {
             if (configFile.startsWith("classpath:")) {
@@ -48,7 +54,9 @@ public class ConfigUtils {
                 }
             }
             File file = new File(configFile);
-            if (!file.canRead()) {
+            if (! file.exists()) {
+                log.debug("The file {} does  not exists", file);
+            } else if (! file.canRead()) {
                 log.info("The file {} cannot be read", file);
             } else {
                 log.info("Reading properties from {}", file);
@@ -56,7 +64,7 @@ public class ConfigUtils {
             }
         }
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            initial.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+            initial.put(keyGenerator.apply(String.valueOf(entry.getKey())), String.valueOf(entry.getValue()));
         }
         substitute(initial);
         return Collections.unmodifiableMap(initial);
@@ -67,9 +75,11 @@ public class ConfigUtils {
 
     }
 
-    public static void substitute(Map<String, String> map) {
-        StrSubstitutor subst = new StrSubstitutor(map);
-        for (Map.Entry<String, String> e : map.entrySet()) {
+    public static <K> void substitute(Map<K, String> map) {
+        StrSubstitutor subst = new StrSubstitutor(map.entrySet().stream()
+                .collect(Collectors.toMap(Object::toString, Map.Entry::getValue)));
+
+        for (Map.Entry<K, String> e : map.entrySet()) {
             e.setValue(subst.replace(e.getValue()));
         }
     }
