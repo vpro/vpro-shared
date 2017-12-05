@@ -27,8 +27,16 @@ public class MBeans {
 
 
     public static String returnString(Supplier<String> description, Duration wait, Callable<String> job) {
+        Future<String> future = executorService.submit(() -> {
+            final String threadName = Thread.currentThread().getName();
+            try {
+                Thread.currentThread().setName(threadName + ":" + description.get());
+                return job.call();
+            } finally {
+                Thread.currentThread().setName(threadName);
+            }
 
-        Future<String> future = executorService.submit(job);
+        });
         try {
             return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException e) {
