@@ -1,5 +1,7 @@
 package nl.vpro.jmx;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -15,6 +17,7 @@ import nl.vpro.util.ThreadPools;
  * @author Michiel Meeuwissen
  * @since 1.75
  */
+@Slf4j
 public class MBeans {
 
 
@@ -23,7 +26,7 @@ public class MBeans {
 
 
 
-    static public String returnString(Supplier<String> description, Duration wait, Callable<String> job) {
+    public static String returnString(Supplier<String> description, Duration wait, Callable<String> job) {
 
         Future<String> future = executorService.submit(job);
         try {
@@ -34,6 +37,7 @@ public class MBeans {
             return description  + " still busy. Please check logs";
         }
     }
+
 
 
     public static class UpdatableString implements Supplier<String> {
