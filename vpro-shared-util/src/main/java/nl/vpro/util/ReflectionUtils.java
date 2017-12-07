@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -18,16 +19,17 @@ import org.apache.commons.lang3.LocaleUtils;
 @Slf4j
 public class ReflectionUtils {
 
-    public static Function<String, String> SETTER = k -> "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
-    public static Function<String, String> IDENTITY = k -> k;
+    public static final Function<String, String> SETTER = k -> "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    public static final Function<String, String> GETTER = k -> "get" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    public static final Function<String, String> IDENTITY = k -> k;
 
 
     /**
      * Sets a certain property value in an object using reflection
      */
 
-    public static void setProperty(Object instance, String key, Object value) {
-        setProperty(instance, Arrays.asList(SETTER.apply(key), IDENTITY.apply(key)), value);
+    public static Result setProperty(Object instance, String key, Object value) {
+        return setProperty(instance, key, Arrays.asList(SETTER.apply(key), IDENTITY.apply(key)), value);
     }
 
     /**
@@ -36,8 +38,56 @@ public class ReflectionUtils {
      */
     public static <T> T  configured(T instance, Map<String, String> properties, Collection<Function<String, String>> setterName) {
         log.debug("Configuring with {}", properties);
-        properties.forEach((k, v) -> setProperty(instance,
-            setterName.stream().map(f -> f.apply(String.valueOf(k))).collect(Collectors.toList()), v));
+        final Set<String> found = new HashSet<>();
+        final Set<String> notfound = new HashSet<>();
+        properties.forEach(
+            (k, v) -> {
+                List<String> setterNames = setterName.stream()
+                    .map(f -> f.apply(String.valueOf(k)))
+                    .collect(Collectors.toList());
+                if (setProperty(instance, k, setterNames, v) == Result.SET) {
+                    if (! found.add(k)) {
+                        log.warn("{} Set twice!", k);
+                    }
+                } else {
+                    notfound.add(k);
+                }
+            }
+        );
+        log.info("Set {}/{}. Not found {}", found.size(), properties.size(), notfound);
+        return instance;
+    }
+
+    /**
+     * Configure an instance using a map of properties.
+     *
+     * @param setterName How, given a property name the setter methods must be calculated.
+     */
+    public static <T> T configureIfNull(T instance, Map<String, String> properties, Collection<Function<String, String>> setterName, Collection<Function<String, String>> getterName) {
+        log.debug("Configuring with {}", properties);
+        final Set<String> found = new HashSet<>();
+        final Set<String> notfound = new HashSet<>();
+        properties.forEach(
+            (k, v) -> {
+                List<String> setterNames = setterName.stream()
+                    .map(f -> f.apply(String.valueOf(k)))
+                    .collect(Collectors.toList());
+                List<String> getterNames = getterName.stream()
+                    .map(f -> f.apply(String.valueOf(k)))
+                    .collect(Collectors.toList());
+                Result result = setProperty(instance, k, setterNames, getterNames, v, true);
+                if (result == Result.SET) {
+                    if (!found.add(k)) {
+                        log.warn("{} Set twice!", k);
+                    }
+                } else {
+                    if (result.isErrorneous()) {
+                        notfound.add(k);
+                    }
+                }
+            }
+        );
+        log.info("Set {}/{}. Not found {}", found.size(), properties.size(), notfound);
         return instance;
     }
 
@@ -49,6 +99,11 @@ public class ReflectionUtils {
     public static <T> T configured(T instance, Map<String, String> properties) {
         return configured(instance, properties, Arrays.asList(SETTER, IDENTITY));
     }
+
+    public static <T> T configureIfNull(T instance, Map<String, String> properties) {
+        return configureIfNull(instance, properties, Arrays.asList(SETTER, IDENTITY), Arrays.asList(SETTER, IDENTITY));
+    }
+
 
     /**
      * We can also create the instance itself (supporting the Builder pattern of lombok)
@@ -68,7 +123,7 @@ public class ReflectionUtils {
             }
             log.debug("No static builder method found");
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            log.debug("Canot build with builder because ", e);
+            log.debug("Cannot build with builder because ", e);
         }
         try {
             Constructor<T> constructor = clazz.getConstructor();
@@ -92,7 +147,7 @@ public class ReflectionUtils {
 
     @Deprecated
     public static void configured(Env env, Object instance, String... configFiles) {
-        ConfigUtils.getProperties();
+        ConfigUtils.configured(env, instance, configFiles);
     }
 
     @Deprecated
@@ -152,28 +207,76 @@ public class ReflectionUtils {
     }
 
 
+    private static Result  setProperty(Object instance, String fieldName, Collection<String> setterNames, Collection<String> getterNames, Object value, boolean onlyIfNull) {
+        String v = value == null ? null : String.valueOf(value);
 
-    private static boolean setProperty(Object instance, Collection<String> setterNames, Object value) {
+        Method setter = null;
         Method[] methods = instance.getClass().getMethods();
-        String v = (String) value;
-        Parameter parameterClass = null;
+        Type parameterClass = null;
+        if (onlyIfNull) {
+            for (Method m : methods) {
+                if (getterNames.contains(m.getName()) && m.getParameterCount() == 0) {
+                    try {
+                        Object existingValue = m.invoke(instance);
+                        if (existingValue != null) {
+                            return Result.IGNORED;
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+            if (fieldName != null) {
+                try {
+                    Field f = instance.getClass().getField(fieldName);
+                    f.setAccessible(true);
+                    Object existingValue = f.get(instance);
+                    if (existingValue != null) {
+                        return Result.IGNORED;
+                    }
+                } catch (NoSuchFieldException e) {
+                    log.debug(e.getMessage());
+                } catch (IllegalAccessException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
         for (Method m : methods) {
             if (setterNames.contains(m.getName()) && m.getParameterCount() == 1) {
                 try {
-                    parameterClass = m.getParameters()[0];
-                    m.invoke(instance, convert(v, parameterClass));
-                    log.debug("Set {}#{} to {} from config file", instance, m.getName(), v);
-                    return true;
+                    parameterClass = m.getParameters()[0].getParameterizedType();
+                    Object convertedValue = convert(v, parameterClass);
+                    m.invoke(instance, convertedValue);
+                    log.debug("Set {} to {}", m.getName(), v);
+                    return Result.SET;
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     log.error(e.getMessage(), e);
                 }
+            }
+        }
+        if (fieldName != null) {
+            try {
+                Field f = instance.getClass().getField(fieldName);
+                parameterClass = f.getType();
+                f.setAccessible(true);
+                f.set(instance, convert(v, f.getGenericType()));
+                log.debug("Set field {} to {}", f.getName(), v);
+                return Result.SET;
+            } catch (NoSuchFieldException e) {
+                log.debug(e.getMessage());
+            } catch (IllegalAccessException e) {
+                log.error(e.getMessage(), e);
             }
         }
         if (parameterClass != null) {
             log.warn("Unrecognized parameter type " + parameterClass);
         }
         log.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
-        return false;
+        return Result.NOTFOUND;
+    }
+
+    private static Result setProperty(Object instance, String fieldName, Collection<String> setterNames, Object value) {
+        return setProperty(instance, fieldName, setterNames, Collections.emptyList(), value, false);
     }
 
     static <T> Object convert(String o, Parameter parameter) {
@@ -220,6 +323,20 @@ public class ReflectionUtils {
                 .collect(Collectors.toList());
         } else {
             throw new UnsupportedOperationException();
+        }
+    }
+
+
+    @Getter
+    public enum Result {
+        SET(false),
+        NOTFOUND(true),
+        ERROR(true),
+        IGNORED(false);
+        final boolean errorneous;
+
+        Result(boolean errorneous) {
+            this.errorneous = errorneous;
         }
     }
 

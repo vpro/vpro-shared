@@ -57,6 +57,15 @@ public class ConfigUtilsTest {
         }
     }
 
+    public static class AWithOutSetters {
+        public String a = "A";
+        public Integer b;
+
+        public AWithOutSetters() {
+        }
+
+    }
+
 
     Map<String, String> properties;
 
@@ -143,6 +152,16 @@ public class ConfigUtilsTest {
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
     }
+
+
+    @Test
+    public void testConfiguredWithoutSetter() {
+        AWithOutSetters a = new AWithOutSetters();
+        ConfigUtils.configured(Env.PROD, a, properties);
+        assertThat(a.a).isEqualTo("3");
+        assertThat(a.b).isEqualTo(2);
+    }
+
 
     @Test
     public void testConfiguredWithFile() {
