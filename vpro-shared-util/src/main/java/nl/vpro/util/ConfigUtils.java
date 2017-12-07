@@ -191,7 +191,7 @@ public class ConfigUtils {
         return filtered(e, null, properties);
     }
 
-    static Map<String, String> filtered(final Env env, String prefix, Map<String, String> properties) {
+    public static Map<String, String> filtered(final Env env, String prefix, Map<String, String> properties) {
         log.debug("Filtering{} for {}", prefix == null ? "" : prefix + " ", env);
         Map<String, String> result = new HashMap<>();
         properties.forEach((key, value) -> {
