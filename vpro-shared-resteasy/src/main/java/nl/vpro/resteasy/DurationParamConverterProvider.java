@@ -1,11 +1,12 @@
 package nl.vpro.resteasy;
 
-import javax.ws.rs.ext.ParamConverter;
-import javax.ws.rs.ext.ParamConverterProvider;
-import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.time.Duration;
+
+import javax.ws.rs.ext.ParamConverter;
+import javax.ws.rs.ext.ParamConverterProvider;
+import javax.ws.rs.ext.Provider;
 
 /**
  * @author Michiel Meeuwissen
@@ -13,6 +14,7 @@ import java.time.Duration;
  */
 @Provider
 public class DurationParamConverterProvider implements ParamConverterProvider {
+    @SuppressWarnings("unchecked")
     @Override
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (Duration.class.isAssignableFrom(rawType)) {
