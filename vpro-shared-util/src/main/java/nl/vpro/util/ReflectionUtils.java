@@ -54,7 +54,7 @@ public class ReflectionUtils {
                 }
             }
         );
-        log.info("Set {}/{}. Not found {}", found.size(), properties.size(), notfound);
+        log.debug("Set {}/{}. Not found {}", found.size(), properties.size(), notfound);
         return instance;
     }
 
@@ -87,7 +87,7 @@ public class ReflectionUtils {
                 }
             }
         );
-        log.info("Set {}/{}. Not found {}", found.size(), properties.size(), notfound);
+        log.debug("Set {}/{}. Not found {}", found.size(), properties.size(), notfound);
         return instance;
     }
 
