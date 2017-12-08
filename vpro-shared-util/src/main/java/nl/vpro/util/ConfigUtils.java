@@ -69,43 +69,48 @@ public class ConfigUtils {
      * This allows for coalescing of equivalent keys.
      */
     public static <K> Map<K, String> getProperties(Map<K, String> initial, Function<String, K> keyGenerator, String... configFiles) {
-        Properties properties = new Properties();
+
+        Map<String, String> subst = new HashMap<>();
+        for (Map.Entry<K, String> entry : initial.entrySet()) {
+            subst.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+        }
+
         for (String configFile : configFiles) {
+            Properties properties = new Properties();
+            log.info("Reading {}", configFile);
             if (configFile.startsWith("classpath:")) {
                 InputStream in = ReflectionUtils.class.getResourceAsStream(configFile.substring("classpath:".length()));
                 if (in != null) {
                     log.info("Reading properties from classpath {}", configFile);
                     try {
                         properties.load(in);
-                        continue;
+                    } catch (IOException ioe) {
+                        log.error(ioe.getMessage());
+                    }
+                }
+            } else {
+                File file = new File(configFile);
+                if (! file.exists()) {
+                    log.debug("The file {} does  not exists", file);
+                } else if (! file.canRead()) {
+                    log.info("The file {} cannot be read", file);
+                } else {
+                    try {
+                        log.info("Reading properties from {}", file);
+                        properties.load(new FileInputStream(file));
                     } catch (IOException ioe) {
                         log.error(ioe.getMessage());
                     }
                 }
             }
-            File file = new File(configFile);
-            if (! file.exists()) {
-                log.debug("The file {} does  not exists", file);
-            } else if (! file.canRead()) {
-                log.info("The file {} cannot be read", file);
-            } else {
-                try {
-                    log.info("Reading properties from {}", file);
-                    properties.load(new FileInputStream(file));
-                } catch (IOException ioe) {
-                    log.error(ioe.getMessage());
-                }
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                initial.put(keyGenerator.apply(String.valueOf(entry.getKey())), String.valueOf(entry.getValue()));
+                subst.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
             }
         }
 
-        Map<String, String> subst = new HashMap<>();
-        for (Map.Entry<K, String> entry : initial.entrySet()) {
-            subst.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
-        }
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            initial.put(keyGenerator.apply(String.valueOf(entry.getKey())), String.valueOf(entry.getValue()));
-            subst.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
-        }
+
+
         substitute(initial, subst);
         return Collections.unmodifiableMap(initial);
     }
