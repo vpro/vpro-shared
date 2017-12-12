@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
@@ -87,6 +88,15 @@ public class TransportClientFactory implements  ESClientFactory {
         return transportClient;
     }
 
+    public void setElasticSearchHosts(String string ) {
+        reset();
+        this.transportAddresses = Arrays.stream(string.split("\\s*,\\s*"))
+            .map(s -> {
+                String[] split = s.split(":", 2);
+                return new UrlProvider(split[0], split.length < 2 ? 9300 : Integer.parseInt(split[1]));
+            }).collect(Collectors.toList());
+
+    }
 
 
     public void setTransportAddresses(UrlProvider... transportAddresses) {
