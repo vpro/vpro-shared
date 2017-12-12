@@ -17,17 +17,11 @@
     <property name="pathHome" value="${elasticSearch.pathHome}"/>
     <property name="nodeName" value="#{localhostInetAddress.hostName}/${elasticSearch.nodeNamePostfix}"/>
   </bean>
+
   <bean id="esDirect" class="nl.vpro.elasticsearch.TransportClientFactory" autowire-candidate="false">
     <property name="clusterName" value="${elasticSearch.cluster}"/>
     <property name="implicitHttpToJavaPort" value="true"/>
-    <property name="transportAddresses">
-      <list>
-        <bean class="nl.vpro.util.UrlProvider">
-          <constructor-arg name="host" value="${elasticSearch.host}"/>
-          <constructor-arg name="port" value="${elasticSearch.port}"/>
-        </bean>
-      </list>
-    </property>
+    <property name="elasticSearchHosts" value="${elasticSearch.unicastHosts}"/>
   </bean>
 
 </beans>
