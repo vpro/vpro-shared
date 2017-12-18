@@ -66,6 +66,19 @@ public class TextUtil {
         return input != null ? input.replace('\u00A0', ' ') : null;
     }
 
+    public static String replaceOdd(String input) {
+        if (input == null) {
+            return null;
+        }
+        input = input.replaceAll("[\b\u0007]+", " ");
+
+        return replaceLineBreaks(
+            replaceNonBreakingSpace(input)
+
+        );
+
+    }
+
     /**
      * Replaces all non breaking space characters (\u00A0) with a normal white space character.
      */
@@ -113,16 +126,16 @@ public class TextUtil {
     private static String _sanitize(String input) {
         return unescapeHtml(
             stripHtml(
-                replaceLineBreaks(
-                    replaceNonBreakingSpace(
-                        replaceHtmlEscapedNonBreakingSpace(
-                            unescapeHtml(input)
-                        )
+                replaceOdd(
+                    replaceHtmlEscapedNonBreakingSpace(
+                        unescapeHtml(input)
                     )
                 )
             )
         );
     }
+
+
 
     private static Set<Pattern> DUTCH_PARTICLES =
         new HashSet<>(
