@@ -72,6 +72,9 @@ public class JoinClusterClientFactory implements ESClientFactory {
         if (networkHost != null) {
             settings.put("network.host", networkHost);
         }
+        if (StringUtils.isBlank(tcpPort)) {
+            tcpPort = "9350-9400";
+        }
         settings
             .put("transport.tcp.port", tcpPort)
             .put(Node.NODE_NAME_SETTING.getKey(), nodeName)
