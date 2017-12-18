@@ -3,6 +3,7 @@ package nl.vpro.jmx;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -25,18 +26,52 @@ public class MBeans {
         ThreadPools.createThreadFactory("MBeans", true, Thread.NORM_PRIORITY));
 
 
+    static final Map<String, Future> locks = new ConcurrentHashMap<>();
 
     public static String returnString(Supplier<String> description, Duration wait, Callable<String> job) {
+        return returnString(null, description, wait, job);
+    }
+
+    public static boolean isRunning(final String key) {
+        return locks.containsKey(key);
+    }
+
+    public static String cancel(final String key){
+        Future future = locks.get(key);
+        if (future == null) {
+            return "Not running";
+        }
+
+        try {
+            future.cancel(true);
+        } finally {
+            locks.remove(key);
+        }
+        return "Cancelled";
+
+
+    }
+
+    public static String returnString(final String key, Supplier<String> description, Duration wait, Callable<String> job) {
+        if (key != null) {
+            if (isRunning(key)) {
+                return "Job " + key + "is still running, so could not be started again with " + description.get();
+            }
+        }
         Future<String> future = executorService.submit(() -> {
             final String threadName = Thread.currentThread().getName();
             try {
                 Thread.currentThread().setName(threadName + ":" + description.get());
                 return job.call();
             } finally {
+                locks.remove(key);
                 Thread.currentThread().setName(threadName);
             }
 
         });
+        if (key != null) {
+            locks.put(key, future);
+        }
         try {
             return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException e) {
