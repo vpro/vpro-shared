@@ -70,7 +70,7 @@ public class TextUtil {
         if (input == null) {
             return null;
         }
-        input = input.replaceAll("[\b\u0007]+", " ");
+        input = input.replaceAll("\\p{Cc}+", " ");
 
         return replaceLineBreaks(
             replaceNonBreakingSpace(input)
