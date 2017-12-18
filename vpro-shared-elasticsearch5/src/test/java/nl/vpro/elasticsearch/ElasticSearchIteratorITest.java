@@ -15,15 +15,15 @@ import nl.vpro.util.UrlProvider;
  * @since 0.47
  */
 @Ignore("Requires actualy es connection")
-public class ElasticSearchIteratorTest {
+public class ElasticSearchIteratorITest {
 
     Client client;
     @Before
     public void setup() {
         TransportClientFactory factory = new TransportClientFactory();
-        factory.setTransportAddresses(new UrlProvider("localhost", 9302));
+        factory.setTransportAddresses(new UrlProvider("localhost", 9300));
         //factory.setSniffCluster(false);
-        //factory.setIgnoreClusterName(true);
+        factory.setIgnoreClusterName(true);
 
         client = factory.client("test");
     }

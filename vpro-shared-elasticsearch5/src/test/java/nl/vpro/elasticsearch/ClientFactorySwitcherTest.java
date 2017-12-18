@@ -29,4 +29,9 @@ public class ClientFactorySwitcherTest {
         //System.out.println(switcher.client("test").prepareCount("apimedia").get().getCount());
     }
 
+    @Test
+    public void anothertest() {
+
+    }
+
 }

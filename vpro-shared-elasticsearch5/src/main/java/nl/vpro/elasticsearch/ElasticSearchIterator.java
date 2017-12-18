@@ -58,19 +58,21 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     }
 
     protected void findNext() {
-        if (response == null) {
-            // first call only.
-            if (builder == null) {
-                throw new IllegalStateException("prepareSearch not called");
-            }
-            response = builder.get();
-            hits = response.getHits().getHits();
-            if (hits.length == 0) {
-                hasNext = false;
-                needsNext = false;
-            }
-        }
         if (needsNext) {
+            if (response == null) {
+                // first call only.
+                if (builder == null) {
+                    throw new IllegalStateException("prepareSearch not called");
+                }
+                response = builder.get();
+                hits = response.getHits().getHits();
+                if (hits.length == 0) {
+                    hasNext = false;
+                    needsNext = false;
+                    return;
+                }
+            }
+
             i++;
             boolean newHasNext = i < hits.length;
             if (!newHasNext) {
@@ -82,11 +84,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                         .actionGet();
                     hits = response.getHits().getHits();
                     i = 0;
-                    if (hits.length == 0) {
-                        hasNext = false;
-                    } else {
-                        hasNext = true;
-                    }
+                    hasNext = hits.length > 0;
                 } else {
                     log.warn("No scroll id found, so not possible to scroll next batch");
                     hasNext = false;
@@ -115,7 +113,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Override
     public Optional<Long> getSize() {
         findNext();
-        return Optional.of(response.getHits().getTotalHits());
+        return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits());
     }
 
     @Override

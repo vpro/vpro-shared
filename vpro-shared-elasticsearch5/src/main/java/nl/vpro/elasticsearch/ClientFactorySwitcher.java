@@ -1,13 +1,15 @@
 package nl.vpro.elasticsearch;
 
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
+import javax.management.*;
 
 import org.elasticsearch.client.Client;
 
@@ -15,6 +17,7 @@ import org.elasticsearch.client.Client;
  * @author Michiel Meeuwissen
  * @since 0.48
  */
+@Slf4j
 public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwitcherMBean  {
 
     private final Map<String, ESClientFactory> map = new HashMap<>();
@@ -22,6 +25,9 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
     private String configured;
 
     private String name = ClientFactorySwitcher.class.getName();
+
+    @Setter
+    private boolean testAfterConstruct = false;
 
     public ClientFactorySwitcher(String configured, String name, Map<String, ESClientFactory> map) {
         this.name = name;
@@ -31,16 +37,29 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
 
     @PostConstruct
     public void init() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
-        /*MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName oname = new ObjectName("nl.vpro.elasticsearch:name=" + name);
-        mbs.registerMBean(this, oname);*/
+        mbs.registerMBean(this, oname);
+
+        if (testAfterConstruct) {
+            try {
+                log.info("Using {}", map.get(configured));
+                Client client = client("afterconstruct");
+                long count = client.prepareSearch().execute().get().getHits().getTotalHits();
+                client.close();
+                log.info("Found {} objects in {}", count, this);
+
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
     }
 
     @Override
     public Client client(String logName) {
         return map.get(configured).client(logName);
-
     }
+
 
     @Override
     public void setConfigured(String configured) {
