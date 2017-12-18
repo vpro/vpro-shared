@@ -199,4 +199,15 @@ public class TextUtilTest {
         assertThat(TextUtil.sanitize("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
         assertThat(TextUtil.sanitize("<iframe style=\"border: 0; width: 100%; height: 42px;\" src=\"https://bandcamp.com/EmbeddedPlayer/album=2972369232/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/\" seamless><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
     }
+
+    @Test
+    public void testSaniziteOddchars() {
+        assertThat(TextUtil.sanitize("a\bc")).isEqualTo("a c");
+        assertThat(TextUtil.sanitize("a\b\u0007c")).isEqualTo("a c");
+
+
+        // this was an actual occurence:
+        assertThat(TextUtil.sanitize("Zanger Van Boven is er duidelijk over: “Je kan deze cd zien als een retrospectief van toen tot nu.” \bZo staan er nieuwe nummers op het album die enkele weken voor de opnamesessies zijn geschreven, maar ook oude nummers die al meegaan sinds dat de band enkele jaren geleden haar eerste album uitbracht. In sommige nummers zijn de inspiratiebronnen van de band goed te herkennen. Zo doet de gitaar in ‘Voor Het Fatsoen’ denken aan \u0007‘Norwegian Wood’ (The Beatles) \ben verraadt het connecties met de Engelse beatmuziek uit de jaren 60. ‘Zo is het Maar Net’ heeft iets van ‘Another Brick In The Wall’ (Pink Floyd) en laat zien dat de band zich ook heeft laten vormen door de psychedelische rock uit de jaren 70. \u0007Zo is de cd niet alleen een kijkje in de keuken van de band zelf, maar is het ook een greep uit 60 jaar popmuziek."))
+            .isEqualTo("Zanger Van Boven is er duidelijk over: “Je kan deze cd zien als een retrospectief van toen tot nu.” Zo staan er nieuwe nummers op het album die enkele weken voor de opnamesessies zijn geschreven, maar ook oude nummers die al meegaan sinds dat de band enkele jaren geleden haar eerste album uitbracht. In sommige nummers zijn de inspiratiebronnen van de band goed te herkennen. Zo doet de gitaar in ‘Voor Het Fatsoen’ denken aan ‘Norwegian Wood’ (The Beatles) en verraadt het connecties met de Engelse beatmuziek uit de jaren 60. ‘Zo is het Maar Net’ heeft iets van ‘Another Brick In The Wall’ (Pink Floyd) en laat zien dat de band zich ook heeft laten vormen door de psychedelische rock uit de jaren 70. Zo is de cd niet alleen een kijkje in de keuken van de band zelf, maar is het ook een greep uit 60 jaar popmuziek.");
+    }
 }
