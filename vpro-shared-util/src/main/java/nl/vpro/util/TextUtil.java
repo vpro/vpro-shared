@@ -84,7 +84,12 @@ public class TextUtil {
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
      */
     public static String stripHtml(String input) {
-        return input != null ? Jsoup.clean(input, Whitelist.none()) : null;
+        if (input == null) {
+            return null;
+        }
+
+        return Jsoup.clean(input, Whitelist.none());
+
     }
 
     /**
@@ -92,6 +97,20 @@ public class TextUtil {
      * might lead to problems for end users.
      */
     public static String sanitize(String input) {
+        if (input == null) {
+            return null;
+        }
+        // recursive, because sometimes a sanitize operation results new html (see nl.vpro.util.TextUtilTest.testSanitizeIframe())
+        String sanitized = _sanitize(input);
+        while (!sanitized.equals(input)) {
+            input = sanitized;
+            sanitized = _sanitize(input);
+        }
+        return sanitized;
+
+    }
+
+    private static String _sanitize(String input) {
         return unescapeHtml(
             stripHtml(
                 replaceLineBreaks(
