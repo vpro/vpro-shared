@@ -35,8 +35,6 @@ public class ClientElasticSearchFactory implements ESClientFactory {
 
     @Override
     public RestClient client(String logName) {
-
-
         HttpHost[] hosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
             .map(HttpHost::create)
             .map(h -> h.getPort() >=9300 && implicitJavaToHttpPort ? new HttpHost(h.getHostName(), h.getPort() -100) : h)
@@ -48,7 +46,7 @@ public class ClientElasticSearchFactory implements ESClientFactory {
         helper = IndexHelper.builder()
             .client((e) -> client)
             .build();
-        if (clusterName != null && ! helper.getClusterName().equals(clusterName)) {
+        if (clusterName != null && ! clusterName.equals(helper.getClusterName())) {
             throw new IllegalStateException("Connected to wrong cluster");
         }
         return client;
