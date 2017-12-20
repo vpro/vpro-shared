@@ -2,25 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-
-  <bean id="localhostInetAddress"
-        class="java.net.InetAddress"
-        factory-method="getLocalHost"/>
-
-
-  <bean id="esJoinCluster" class="nl.vpro.elasticsearch.JoinClusterClientFactory" autowire-candidate="false">
+  <bean id="esClientFactory" class="nl.vpro.elasticsearchclient.ClientElasticSearchFactory" autowire-candidate="false">
     <property name="clusterName" value="${elasticSearch.cluster}"/>
     <property name="unicastHosts" value="${elasticSearch.unicastHosts}"/>
-    <property name="tcpPort" value="${elasticSearch.tcpPort}"/>
-    <property name="networkHost" value="${elasticSearch.networkHost}"/>
-    <property name="pathHome" value="${elasticSearch.pathHome}"/>
-    <property name="nodeName" value="#{localhostInetAddress.hostName}/${elasticSearch.nodeNamePostfix}"/>
-  </bean>
-
-  <bean id="esDirect" class="nl.vpro.elasticsearch.TransportClientFactory" autowire-candidate="false">
-    <property name="clusterName" value="${elasticSearch.cluster}"/>
-    <property name="implicitHttpToJavaPort" value="true"/>
-    <property name="elasticSearchHosts" value="${elasticSearch.unicastHosts}"/>
   </bean>
 
 </beans>

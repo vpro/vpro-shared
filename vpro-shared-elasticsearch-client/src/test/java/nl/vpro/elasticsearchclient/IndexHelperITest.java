@@ -1,4 +1,4 @@
-package nl.vpro.elasticsearch;
+package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
