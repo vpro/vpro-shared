@@ -156,7 +156,7 @@ public class IndexHelper {
         HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
 
         log.info("Creating index {} with mappings {}: {}", indexNameSupplier, mappings.keySet(), request.toString());
-        ObjectNode response = read(client().performRequest("PUT", indexNameSupplier.get(), Collections.emptyMap(), entity).getEntity());
+        ObjectNode response = read(client().performRequest("PUT", indexNameSupplier.get(), Collections.emptyMap(), entity));
 
 
         if (response.get("acknowledged").booleanValue()) {
@@ -222,7 +222,7 @@ public class IndexHelper {
 
         try {
             Response response = client().performRequest("GET", "_refresh");
-            JsonNode read = read(response.getEntity());
+            JsonNode read = read(response);
             return response != null;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -237,14 +237,17 @@ public class IndexHelper {
 
     public ObjectNode post(String path, ObjectNode request) {
         try {
-            return read(
-                client().performRequest("POST", path, Collections.emptyMap(), new NStringEntity(request.toString(), ContentType.APPLICATION_JSON))
-                    .getEntity()
-            );
+
+            return read(client().performRequest("POST", path, Collections.emptyMap(), entity(request)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return null;
+            throw new RuntimeException(e);
         }
+    }
+
+
+    HttpEntity entity(JsonNode node) {
+        return new NStringEntity(node.toString(), ContentType.APPLICATION_JSON);
     }
 
 
@@ -258,7 +261,7 @@ public class IndexHelper {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
-                future.complete(read(response.getEntity()));
+                future.complete(read(response));
             }
 
             @Override
@@ -297,7 +300,7 @@ public class IndexHelper {
     public Optional<JsonNode> get(String types, String id){
         try {
             Response response = client().performRequest("GET", indexNameSupplier.get() + "/" + types + "/" + encode(id));
-            return Optional.of(read(response.getEntity()));
+            return Optional.of(read(response));
         } catch (ResponseException re) {
             return Optional.empty();
         } catch (IOException e) {
@@ -308,8 +311,9 @@ public class IndexHelper {
     }
 
 
-    ObjectNode read(HttpEntity entity) {
+    ObjectNode read(Response response) {
         try {
+            HttpEntity entity = response.getEntity();
             return Jackson2Mapper.getLenientInstance().readerFor(ObjectNode.class).readValue(entity.getContent());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -348,7 +352,6 @@ public class IndexHelper {
         try {
             return read(
                 client().performRequest("POST", "_bulk", Collections.emptyMap(), bulkEntity(request))
-                    .getEntity()
             );
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -396,7 +399,7 @@ public class IndexHelper {
 
     public String getClusterName() {
         try {
-            ObjectNode node = read(client().performRequest("GET", "/", Collections.emptyMap()).getEntity());
+            ObjectNode node = read(client().performRequest("GET", "/", Collections.emptyMap()));
             return node.get("cluster_name").asText();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
