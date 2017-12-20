@@ -2,16 +2,19 @@ package nl.vpro.elasticsearch;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Function;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.search.SearchHit;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.CountedIterator;
 
 /**
@@ -23,31 +26,37 @@ import nl.vpro.util.CountedIterator;
 @Slf4j
 public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
-    final Function<SearchHit, T> adapt;
-    final Client client;
 
-    SearchRequestBuilder builder;
-    SearchResponse response;
-    SearchHit[] hits;
+    final Function<JsonNode, T> adapt;
+    final RestClient client;
+
+    ObjectNode request;
+    JsonNode response;
     private long count = -1;
+    private JsonNode hits;
+    private String scrollId;
 
     boolean hasNext;
     int i = -1;
     T next;
     boolean needsNext = true;
 
+    String[] indices;
 
-    public ElasticSearchIterator(Client client, Function<JSONNOde, T> adapt) {
+
+
+
+    public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this.adapt = adapt;
         this.client = client;
         needsNext = true;
     }
 
-    public SearchRequestBuilder prepareSearch(String... indices) {
-        builder = client.prepareSearch(indices);
-        builder.setScroll(TimeValue.timeValueSeconds(60));
-        builder.setSize(1000);
-        return builder;
+    public ObjectNode prepareSearch(String... indices) {
+        request = Jackson2Mapper.getInstance().createObjectNode();
+        request.with("query");
+        this.indices= indices;
+        return request;
     }
 
     @Override
@@ -61,12 +70,25 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         if (needsNext) {
             if (response == null) {
                 // first call only.
-                if (builder == null) {
+                if (request == null) {
                     throw new IllegalStateException("prepareSearch not called");
                 }
-                response = builder.get();
-                hits = response.getHits().getHits();
-                if (hits.length == 0) {
+                try {
+                    HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
+                    Map<String, String> params = new HashMap<>();
+                    params.put("scroll", "1m");
+                    Response res = client.performRequest("POST", indices[0] + "/_search", params, entity);
+
+                    response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
+                } catch (IOException ioe) {
+                    log.error(ioe.getMessage());
+
+                }
+                if (hits == null) {
+                    hits = response.get("hits");
+                }
+                scrollId = response.get("_scroll_id").asText();
+                if (hits.get("hits").size() == 0) {
                     hasNext = false;
                     needsNext = false;
                     return;
@@ -74,17 +96,23 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             }
 
             i++;
-            boolean newHasNext = i < hits.length;
+            boolean newHasNext = i < hits.get("hits").size();
             if (!newHasNext) {
-                if (response.getScrollId() != null) {
-                    response = client
-                        .prepareSearchScroll(response.getScrollId())
-                        .setScroll(new TimeValue(60000))
-                        .execute()
-                        .actionGet();
-                    hits = response.getHits().getHits();
+                if (scrollId != null) {
+                    ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
+                    scrollRequest.put("scroll", "1m");
+                    scrollRequest.put("scroll_id", scrollId);
+                    try {
+                        Response res = client.performRequest("POST", "/_search/scroll", Collections.emptyMap(), new NStringEntity(scrollRequest.toString(), ContentType.APPLICATION_JSON));
+                        response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
+                        log.debug("New scroll");
+                    } catch (IOException ioe) {
+                        log.error(ioe.getMessage());
+                    }
+
+                    hits = response.get("hits");
                     i = 0;
-                    hasNext = hits.length > 0;
+                    hasNext = hits.get("hits").size() > 0;
                 } else {
                     log.warn("No scroll id found, so not possible to scroll next batch");
                     hasNext = false;
@@ -93,7 +121,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                 hasNext = true;
             }
             if (hasNext) {
-                next = adapt.apply(hits[i]);
+                next = adapt.apply(hits.get("hits").get(i).get("_source"));
             }
             needsNext = false;
         }
@@ -113,7 +141,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Override
     public Optional<Long> getSize() {
         findNext();
-        return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits());
+        return Optional.of(hits.get("total").longValue());
     }
 
     @Override
