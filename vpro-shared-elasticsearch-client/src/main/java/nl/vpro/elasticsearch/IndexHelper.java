@@ -207,10 +207,22 @@ public class IndexHelper {
         }
     }
 
+    public void clearIndex() {
+        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client());
+        ObjectNode request = i.prepareSearch(getIndexName());
+        List<Pair<JsonNode, JsonNode>> bulk = new ArrayList<>();
+        while (i.hasNext()) {
+            JsonNode node = i.next();
+            bulk.add(deleteRequest(node.get("_type").asText(), node.get("_id").asText()));
+        }
+        bulk(bulk);
+    }
+
     public boolean refresh() {
 
         try {
             Response response = client().performRequest("GET", "_refresh");
+            JsonNode read = read(response.getEntity());
             return response != null;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -380,6 +392,16 @@ public class IndexHelper {
 
     public String getIndexName() {
         return indexNameSupplier.get();
+    }
+
+    public String getClusterName() {
+        try {
+            ObjectNode node = read(client().performRequest("GET", "/", Collections.emptyMap()).getEntity());
+            return node.get("cluster_name").asText();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
 
