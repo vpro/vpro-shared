@@ -52,6 +52,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         needsNext = true;
     }
 
+    public  static ElasticSearchIterator<JsonNode> of(RestClient client) {
+        return new ElasticSearchIterator<>(client, jn -> jn);
+    }
+
     public ObjectNode prepareSearch(String... indices) {
         request = Jackson2Mapper.getInstance().createObjectNode();
         request.with("query");
