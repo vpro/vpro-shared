@@ -125,7 +125,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                 hasNext = true;
             }
             if (hasNext) {
-                next = adapt.apply(hits.get("hits").get(i).get("_source"));
+                next = adapt.apply(hits.get("hits").get(i));
             }
             needsNext = false;
         }

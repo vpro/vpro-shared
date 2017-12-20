@@ -1,10 +1,11 @@
 package nl.vpro.util;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import lombok.Singular;
+import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * An iterator implementing offset and max, for another iterator.
@@ -12,9 +13,8 @@ import org.slf4j.LoggerFactory;
  * @author Michiel Meeuwissen
  * @since 3.1
  */
+@Slf4j
 public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
-
-    protected static final Logger LOG = LoggerFactory.getLogger(MaxOffsetIterator.class);
 
 
     private final Iterator<T> wrapped;
@@ -56,6 +56,24 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
         this.countNulls = countNulls;
     }
 
+    @lombok.Builder
+    private MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls, @Singular  List<Runnable> callbacks) {
+        this.wrapped = wrapped;
+        this.offset = offset == null ? 0L : offset.longValue();
+        this.offsetmax = max == null ? Long.MAX_VALUE : max.longValue() + this.offset;
+        this.countNulls = countNulls;
+        this.callback = () -> {
+            for (Runnable r : callbacks) {
+                try {
+                    r.run();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        };
+
+    }
+
     public MaxOffsetIterator<T> callBack(Runnable run) {
         callback = run;
         return this;
@@ -67,7 +85,7 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
                 try {
                     closeable.close();
                 } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
 
@@ -88,7 +106,7 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
                         try {
                             ((AutoCloseable) wrapped).close();
                         }catch(Exception e){
-                            LOG.error(e.getMessage(), e);
+                            log.error(e.getMessage(), e);
                         }
                     }
                 }
