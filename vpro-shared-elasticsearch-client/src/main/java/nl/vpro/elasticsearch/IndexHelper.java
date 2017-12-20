@@ -50,7 +50,17 @@ public class IndexHelper {
             return this;
         }
 
+
+
         public Builder mappingResource(String type, String mapping) {
+            return mapping(type, () -> getResourceAsString(mapping));
+        }
+
+        public Builder mappingResource(String mapping) {
+            String[] split = mapping.split("/");
+            String fileName = split[split.length - 1];
+            int dot = fileName.lastIndexOf(".");
+            String type = fileName.substring(0, dot);
             return mapping(type, () -> getResourceAsString(mapping));
         }
         public Builder mappings(Map<String, Supplier<String>> mappings) {
@@ -139,8 +149,9 @@ public class IndexHelper {
         }
         HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
 
-        log.info("Creating index {} with mappings {}", indexNameSupplier, mappings.keySet());
-        ObjectNode response = Jackson2Mapper.getLenientInstance().readerFor(ObjectNode.class).readValue(client().performRequest("POST", indexNameSupplier.get(), Collections.emptyMap(), entity).getEntity().getContent());
+        log.info("Creating index {} with mappings {}: {}", indexNameSupplier, mappings.keySet(), request.toString());
+        ObjectNode response = Jackson2Mapper.getLenientInstance().readerFor(ObjectNode.class).readValue(
+            client().performRequest("PUT", indexNameSupplier.get(), Collections.emptyMap(), entity).getEntity().getContent());
 
 
         if (response.get("acknowledged").booleanValue()) {
@@ -172,6 +183,16 @@ public class IndexHelper {
         }
     }
 
+    public boolean checkIndex() {
+        try {
+            Response response = client().performRequest("HEAD", getIndexName());
+            return response.getStatusLine().getStatusCode() != 404;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
 
     public void deleteIndex() throws ExecutionException, InterruptedException, IOException {
         client().performRequest("DELETE", getIndexName());
@@ -182,9 +203,29 @@ public class IndexHelper {
         return response != null;
     }
 
+    public ObjectNode search(ObjectNode request) {
+        return post(indexNameSupplier.get() + "/_search", request);
+    }
+
+
+    public ObjectNode post(String path, ObjectNode request) {
+        try {
+            return
+            Jackson2Mapper.getLenientInstance().readerFor(ObjectNode.class).readValue(
+                client().performRequest("POST", path, Collections.emptyMap(), new NStringEntity(request.toString(), ContentType.APPLICATION_JSON))
+                    .getEntity().getContent()
+            );
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
     public long count() {
-        return 0L;
-        //return client().prepareSearch(getIndexName()).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits();
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        request.put("size", 0);
+        ObjectNode response = search(request);
+        return response.get("hits").get("total").longValue();
     }
 
 
