@@ -404,7 +404,13 @@ public class IndexHelper {
     public String getClusterName() {
         try {
             ObjectNode node = read(client().performRequest("GET", "/", Collections.emptyMap()));
-            return node.get("cluster_name").asText();
+            log.info("Found {}", node);
+            if (node.has("cluster_name")) {
+                return node.get("cluster_name").asText();
+            } else {
+                log.warn("Could not found cluster_name in {} with {}", node, client());
+                return null;
+            }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
