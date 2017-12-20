@@ -8,23 +8,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.IOUtils;
-import org.elasticsearch.ResourceAlreadyExistsException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.transport.NoNodeAvailableException;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import nl.vpro.jackson2.Jackson2Mapper;
 
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
@@ -129,32 +129,34 @@ public class IndexHelper {
         if (indexNameSupplier == null){
             throw new IllegalStateException("No index name configured");
         }
-        try {
-            CreateIndexRequestBuilder createIndexRequestBuilder = client()..indices()
-                .prepareCreate(indexNameSupplier.get())
-                .setSettings(settings.get(), XContentType.JSON);
-            for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
-                createIndexRequestBuilder.addMapping(e.getKey(), e.getValue().get(), XContentType.JSON);
-            }
-            log.info("Creating index {} with mappings {}", indexNameSupplier, mappings.keySet());
-            client().performRequest("POST",  "/");
-            CreateIndexResponse response = createIndexRequestBuilder.execute()
-                .actionGet();
-            if (response.isAcknowledged()) {
-                log.info("Created index {}", getIndexName());
-            } else {
-                log.warn("Could not create index {}", getIndexName());
-            }
-        } catch (ResourceAlreadyExistsException e) {
-            log.info("Index exists");
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        request.set("settings", Jackson2Mapper.getInstance().readTree(settings.get()));
+        ObjectNode mappingNode = request.with("mappings");
+
+
+        for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
+            mappingNode.set(e.getKey(), Jackson2Mapper.getInstance().readTree(e.getValue().get()));
         }
+        HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
+
+        log.info("Creating index {} with mappings {}", indexNameSupplier, mappings.keySet());
+        ObjectNode response = Jackson2Mapper.getLenientInstance().readerFor(ObjectNode.class).readValue(client().performRequest("POST", indexNameSupplier.get(), Collections.emptyMap(), entity).getEntity().getContent());
+
+
+        if (response.get("acknowledged").booleanValue()) {
+            log.info("Created index {}", getIndexName());
+        } else {
+            log.warn("Could not create index {}", getIndexName());
+        }
+
     }
 
 
     public void prepareIndex() {
         try {
-            boolean exists = client().admin().indices().prepareExists(getIndexName()).execute().actionGet().isExists();
-            if (!exists) {
+
+            Response response = client().performRequest("HEAD",  getIndexName());
+            if (response.getStatusLine().getStatusCode() == 404) {
                 log.info("Index '{}' not existing in {}, now creating", getIndexName(), clientFactory);
                 try {
                     createIndex();
@@ -165,22 +167,24 @@ public class IndexHelper {
             } else {
                 log.info("Found {} objects in '{}' of {}", count(), getIndexName(), clientFactory);
             }
-        } catch( NoNodeAvailableException noNodeAvailableException) {
+        } catch( IOException noNodeAvailableException) {
             log.error(noNodeAvailableException.getMessage());
         }
     }
 
 
     public void deleteIndex() throws ExecutionException, InterruptedException, IOException {
-        client().admin().indices().prepareDelete(getIndexName()).execute().actionGet();
+        client().performRequest("DELETE", getIndexName());
     }
 
-    public RefreshResponse refresh() throws ExecutionException, InterruptedException {
-        return client().admin().indices().prepareRefresh(getIndexName()).get();
+    public boolean refresh() throws ExecutionException, InterruptedException, IOException {
+        Response response = client().performRequest("GET", "_refresh");
+        return response != null;
     }
 
     public long count() {
-        return client().prepareSearch(getIndexName()).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits();
+        return 0L;
+        //return client().prepareSearch(getIndexName()).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits();
     }
 
 
