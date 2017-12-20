@@ -1,4 +1,4 @@
-package nl.vpro.elasticsearch;
+package nl.vpro.elasticsearchclient;
 
 
 import org.elasticsearch.client.RestClient;

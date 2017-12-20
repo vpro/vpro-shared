@@ -1,4 +1,4 @@
-package nl.vpro.elasticsearch;
+package nl.vpro.elasticsearchclient;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -137,7 +137,11 @@ public class IndexHelper {
     }
 
     public RestClient client() {
-        return clientFactory.client(IndexHelper.class.getName() + "." + indexNameSupplier.get());
+        String name = IndexHelper.class.getName();
+        if (indexNameSupplier != null) {
+            name += "." + indexNameSupplier.get();
+        }
+        return clientFactory.client(name);
     }
 
     public  void createIndex() throws IOException {
