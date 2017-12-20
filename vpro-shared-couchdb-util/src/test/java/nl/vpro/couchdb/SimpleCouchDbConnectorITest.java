@@ -2,6 +2,7 @@ package nl.vpro.couchdb;
 
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -12,7 +13,8 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.73
  */
-public class SimpleCouchDbConnectorTest {
+@Ignore("docs.poms.omroep.nl does not exist any more")
+public class SimpleCouchDbConnectorITest {
 
     @Test
     public void get() throws Exception {
