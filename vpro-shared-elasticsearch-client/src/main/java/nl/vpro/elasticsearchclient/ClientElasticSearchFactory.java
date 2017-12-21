@@ -45,7 +45,11 @@ public class ClientElasticSearchFactory implements ESClientFactory {
             Logger l = LoggerFactory.getLogger(ln);
             HttpHost[] hosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
                 .map(HttpHost::create)
-                .map(h -> h.getPort() >= 9300 && implicitJavaToHttpPort ? new HttpHost(h.getHostName(), h.getPort() - 100) : h)
+                .map(h ->
+                    h.getPort() >= 9300 && implicitJavaToHttpPort
+                    ? new HttpHost(h.getHostName(), h.getPort() - 100)
+                    : h
+                )
                 .toArray(HttpHost[]::new);
 
             RestClientBuilder clientBuilder = RestClient.builder(hosts);
