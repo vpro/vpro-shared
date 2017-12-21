@@ -10,6 +10,10 @@
 
   <artifactId>vpro-shared-elasticsearch-client</artifactId>
 
+  <description>
+    Uses low level ES client, to avoid all lucene dependencies.
+  </description>
+
   <properties>
 
   </properties>
