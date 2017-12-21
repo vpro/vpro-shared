@@ -57,6 +57,11 @@ public class SimpleCouchDbConnector {
         return getInputStream("_all_docs?include_docs=true");
     }
 
+
+    public InputStream getChanges() throws IOException {
+        return getInputStream("_changes?include_docs=true");
+    }
+
     private InputStream getInputStream(String query) throws IOException {
         return getInputStream(getHttpResponse(query));
     }
