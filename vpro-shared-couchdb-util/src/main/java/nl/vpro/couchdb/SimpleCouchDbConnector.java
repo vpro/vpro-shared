@@ -62,9 +62,22 @@ public class SimpleCouchDbConnector {
         return getInputStream("_changes?include_docs=true");
     }
 
+    public CouchdbChangesIterator getChangesIterator() throws IOException {
+        return new CouchdbChangesIterator(getChanges());
+    }
+
+    public CouchdbViewIterator getAllIterator() throws IOException {
+        return new CouchdbViewIterator(getChanges());
+    }
+
+    public long getDocCount() throws IOException {
+        return CouchdbStreamIterator.mapper.readTree(getInputStream("")).get("doc_count").longValue();
+    }
+
     private InputStream getInputStream(String query) throws IOException {
         return getInputStream(getHttpResponse(query));
     }
+
 
 
     private InputStream getInputStream(CloseableHttpResponse httpResponse) throws IOException {

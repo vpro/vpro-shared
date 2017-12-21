@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class CouchdbStreamIterator implements Closeable, Iterator<JsonNode> {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    static final ObjectMapper mapper = new ObjectMapper();
 
     private final JsonParser parser;
 
