@@ -46,9 +46,11 @@ public class ClientElasticSearchFactory implements ESClientFactory {
         helper = IndexHelper.builder()
             .client((e) -> client)
             .build();
-        if (clusterName != null && ! clusterName.equals(helper.getClusterName())) {
-            throw new IllegalStateException("Connected to wrong cluster");
+        String foundClusterName = helper.getClusterName();
+        if (clusterName != null && ! clusterName.equals(foundClusterName)) {
+            throw new IllegalStateException("Connected to wrong cluster " + foundClusterName + " (!=" + clusterName + ")");
         }
+        log.info("Connected to {} with {} objects", foundClusterName, helper.count());
         return client;
     }
 }
