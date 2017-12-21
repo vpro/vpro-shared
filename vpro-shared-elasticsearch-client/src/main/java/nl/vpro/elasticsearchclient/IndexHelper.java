@@ -235,7 +235,8 @@ public class IndexHelper {
     }
 
     public ObjectNode search(ObjectNode request) {
-        return post(indexNameSupplier.get() + "/_search", request);
+        String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
+        return post((indexName == null ? "" : indexName) + "/_search", request);
     }
 
 
