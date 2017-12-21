@@ -105,7 +105,7 @@ public class IndexHelper {
     private IndexHelper(Logger log, ESClientFactory client, Supplier<String> indexNameSupplier, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
-        this.indexNameSupplier = indexNameSupplier;
+        this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
         if (mappings != null) {
             this.mappings.putAll(mappings);
@@ -146,7 +146,7 @@ public class IndexHelper {
 
     public  void createIndex() throws IOException {
 
-        if (indexNameSupplier == null){
+        if (getIndexName().isEmpty()){
             throw new IllegalStateException("No index name configured");
         }
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
@@ -277,17 +277,17 @@ public class IndexHelper {
     }
 
     public ObjectNode index(String type, String id, Object o) {
-        return post(indexNameSupplier.get() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return post(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
     }
 
     public Future<ObjectNode> indexAsync(String type, String id, Object o) {
-        return postAsync(indexNameSupplier.get() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
     }
 
 
     public ObjectNode delete(String type, String id) {
         try {
-            client().performRequest("DELETE", indexNameSupplier.get() + "/" + type + "/" + encode(id));
+            client().performRequest("DELETE", getIndexName() + "/" + type + "/" + encode(id));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -298,13 +298,13 @@ public class IndexHelper {
     public Future<ObjectNode> deleteAsync(String type, String id) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("DELETE", indexNameSupplier.get() + "/" + type + "/" + encode(id), listen(future));
+        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id), listen(future));
         return future;
     }
 
     public Optional<JsonNode> get(String types, String id){
         try {
-            Response response = client().performRequest("GET", indexNameSupplier.get() + "/" + types + "/" + encode(id));
+            Response response = client().performRequest("GET", getIndexName() + "/" + types + "/" + encode(id));
             return Optional.of(read(response));
         } catch (ResponseException re) {
             return Optional.empty();
@@ -356,7 +356,9 @@ public class IndexHelper {
     public ObjectNode bulk(List<Pair<JsonNode, JsonNode>> request) {
         try {
             return read(
-                client().performRequest("POST", "_bulk", Collections.emptyMap(), bulkEntity(request))
+                client().performRequest(
+                    "POST", "_bulk",
+                    Collections.emptyMap(), bulkEntity(request))
             );
         } catch (IOException e) {
             log.error(e.getMessage(), e);
