@@ -355,11 +355,12 @@ public class IndexHelper {
 
     public ObjectNode bulk(List<Pair<JsonNode, JsonNode>> request) {
         try {
-            return read(
+            ObjectNode result = read(
                 client().performRequest(
                     "POST", "_bulk",
                     Collections.emptyMap(), bulkEntity(request))
             );
+            return result;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
