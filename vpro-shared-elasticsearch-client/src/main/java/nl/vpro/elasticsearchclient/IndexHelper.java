@@ -213,7 +213,7 @@ public class IndexHelper {
 
     public void clearIndex() {
         ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client());
-        ObjectNode request = i.prepareSearch(getIndexName());
+        ObjectNode request = i.prepareSearch(Collections.singleton(getIndexName()), null);
         List<Pair<JsonNode, JsonNode>> bulk = new ArrayList<>();
         while (i.hasNext()) {
             JsonNode node = i.next();

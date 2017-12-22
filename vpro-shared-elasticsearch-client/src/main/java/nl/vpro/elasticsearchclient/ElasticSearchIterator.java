@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -41,7 +42,8 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     int i = -1;
     T next;
     boolean needsNext = true;
-    String[] indices;
+    Collection<String> indices;
+    Collection<String> types;
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this.adapt = adapt;
@@ -49,14 +51,15 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         needsNext = true;
     }
 
-    public  static ElasticSearchIterator<JsonNode> of(RestClient client) {
+    public static ElasticSearchIterator<JsonNode> of(RestClient client) {
         return new ElasticSearchIterator<>(client, jn -> jn);
     }
 
-    public ObjectNode prepareSearch(String... indices) {
+    public ObjectNode prepareSearch(Collection<String> indices, Collection<String> types) {
         request = Jackson2Mapper.getInstance().createObjectNode();
         request.with("query");
-        this.indices= indices;
+        this.indices = indices == null ? Collections.emptyList() : indices;
+        this.types = types == null ? Collections.emptyList() : types;
         return request;
     }
 
@@ -78,7 +81,19 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
                     Map<String, String> params = new HashMap<>();
                     params.put("scroll", "1m");
-                    Response res = client.performRequest("POST", indices[0] + "/_search", params, entity);
+                    StringBuilder builder = new StringBuilder();
+                    if (! indices.isEmpty()) {
+                        builder.append(indices.stream().collect(Collectors.joining(",")));
+                    }
+                    if (!types.isEmpty()) {
+                        if (builder.length() > 0) {
+                            builder.append("/");
+                        }
+                        builder.append(types.stream().collect(Collectors.joining(",")));
+                    }
+                    builder.append("/_search");
+
+                    Response res = client.performRequest("POST", builder.toString(), params, entity);
                     response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                 } catch (IOException ioe) {
                     //log.error(ioe.getMessage());
