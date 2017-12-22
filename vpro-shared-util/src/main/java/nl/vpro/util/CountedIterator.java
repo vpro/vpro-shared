@@ -30,8 +30,15 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
         return new BasicWrappedIterator<C>(size, wrapped);
     }
 
+
+    /**
+     * The size of of the collection this iterator is representing
+     */
     Optional<Long> getSize();
 
+    /**
+     * The current position.
+     */
     default Long getCount() {
         throw new UnsupportedOperationException();
     }

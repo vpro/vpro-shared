@@ -358,7 +358,8 @@ public class IndexHelper {
             ObjectNode result = read(
                 client().performRequest(
                     "POST", "_bulk",
-                    Collections.emptyMap(), bulkEntity(request))
+                    Collections.emptyMap(),
+                    bulkEntity(request))
             );
             return result;
         } catch (IOException e) {
