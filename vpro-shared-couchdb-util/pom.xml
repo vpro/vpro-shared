@@ -9,6 +9,11 @@
   </parent>
   <artifactId>vpro-shared-couchdb-util</artifactId>
 
+
+  <description>
+
+  </description>
+
   <dependencies>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
