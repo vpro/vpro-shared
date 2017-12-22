@@ -2,10 +2,7 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
@@ -15,7 +12,7 @@ import java.util.function.Function;
  * @since 1.17
  */
 @Slf4j
-public class TailAdder<T> implements Iterator<T> {
+public class TailAdder<T> implements CountedIterator<T> {
 
     private final boolean onlyIfEmpty;
 
@@ -144,5 +141,35 @@ public class TailAdder<T> implements Iterator<T> {
     @Override
     public void remove() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<Long> getSize() {
+        if (wrapped instanceof CountedIterator) {
+            Optional<Long> wrappedSize = ((CountedIterator) wrapped).getSize();
+            if (wrappedSize.isPresent()) {
+                long l = wrappedSize.get();
+                if (!onlyIfEmpty || l == 0L) {
+                    l++;
+                }
+                return Optional.of(l);
+            }
+
+        }
+        return Optional.empty();
+    }
+
+
+    @Override
+    public void close() throws Exception {
+        if (wrapped instanceof AutoCloseable) {
+            ((AutoCloseable) wrapped).close();
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        return wrapped + " + TAIL";
     }
 }
