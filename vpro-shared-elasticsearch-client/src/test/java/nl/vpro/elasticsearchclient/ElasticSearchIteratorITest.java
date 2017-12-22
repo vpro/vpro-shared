@@ -1,5 +1,6 @@
 package nl.vpro.elasticsearchclient;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.http.HttpHost;
@@ -32,7 +33,7 @@ public class ElasticSearchIteratorITest {
     @Test
     public void test() {
         ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, (jn) -> (Map<String, Object>) Jackson2Mapper.getLenientInstance().convertValue(jn, Map.class));
-        ObjectNode node = i.prepareSearch("media");
+        ObjectNode node = i.prepareSearch(Collections.singleton("media"), null);
         node.put("size", 100);
 
 
