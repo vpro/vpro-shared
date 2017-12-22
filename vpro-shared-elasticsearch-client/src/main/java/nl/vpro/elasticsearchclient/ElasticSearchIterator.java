@@ -82,10 +82,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     Map<String, String> params = new HashMap<>();
                     params.put("scroll", "1m");
                     Response res = client.performRequest("POST", indices[0] + "/_search", params, entity);
-
                     response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                 } catch (IOException ioe) {
-                    log.error(ioe.getMessage());
+                    //log.error(ioe.getMessage());
+                    throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
 
                 }
                 if (hits == null) {
@@ -112,6 +112,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                         log.debug("New scroll");
                     } catch (IOException ioe) {
                         log.error(ioe.getMessage());
+                        throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
                     }
 
                     hits = response.get("hits");
@@ -131,6 +132,9 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         }
 
     }
+
+
+
     @Override
     public T next() {
         findNext();
