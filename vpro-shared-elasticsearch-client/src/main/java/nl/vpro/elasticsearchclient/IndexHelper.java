@@ -302,9 +302,9 @@ public class IndexHelper {
         return future;
     }
 
-    public Optional<JsonNode> get(String types, String id){
+    public Optional<JsonNode> get(String type, String id){
         try {
-            Response response = client().performRequest("GET", getIndexName() + "/" + types + "/" + encode(id));
+            Response response = client().performRequest("GET", getIndexName() + "/" + type + "/" + encode(id));
             return Optional.of(read(response));
         } catch (ResponseException re) {
             return Optional.empty();
@@ -315,6 +315,9 @@ public class IndexHelper {
 
     }
 
+    public Optional<JsonNode> get(Collection<String> types, String id) {
+        return types.stream().map(t -> get(t, id)).filter(Optional::isPresent).map(Optional::get).findFirst();
+    }
 
     ObjectNode read(Response response) {
         try {
