@@ -40,11 +40,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     int i = -1;
     T next;
     boolean needsNext = true;
-
     String[] indices;
-
-
-
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this.adapt = adapt;
@@ -156,5 +152,6 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     public Long getCount() {
         return count;
     }
+
 
 }
