@@ -33,7 +33,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     ObjectNode request;
     JsonNode response;
     @Getter
-    private long count = -1;
+    private Long count = -1L;
     private JsonNode hits;
     private String scrollId;
 
@@ -97,6 +97,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             }
 
             i++;
+            count++;
             boolean newHasNext = i < hits.get("hits").size();
             if (!newHasNext) {
                 if (scrollId != null) {
