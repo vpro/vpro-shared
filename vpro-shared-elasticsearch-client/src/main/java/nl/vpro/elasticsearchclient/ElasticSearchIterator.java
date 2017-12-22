@@ -1,5 +1,6 @@
 package nl.vpro.elasticsearchclient;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -26,12 +27,12 @@ import nl.vpro.util.CountedIterator;
 @Slf4j
 public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
-
     final Function<JsonNode, T> adapt;
     final RestClient client;
 
     ObjectNode request;
     JsonNode response;
+    @Getter
     private long count = -1;
     private JsonNode hits;
     private String scrollId;
@@ -148,10 +149,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         return Optional.of(hits.get("total").longValue());
     }
 
-    @Override
-    public Long getCount() {
-        return count;
-    }
 
+    @Override
+    public String toString() {
+        return client + " " + request + " " + count;
+    }
 
 }
