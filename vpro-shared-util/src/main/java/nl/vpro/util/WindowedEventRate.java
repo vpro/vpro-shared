@@ -104,6 +104,12 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         return ((double) totalCount * TimeUnit.NANOSECONDS.convert(1, unit)) / relevantDuration.toNanos();
     }
 
+    public double getRate(Duration perInterval) {
+        long totalCount = getTotalCount();
+        Duration relevantDuration = getRelevantDuration();
+        return ((double) totalCount * perInterval.toNanos()) / relevantDuration.toNanos();
+    }
+
     public String toString() {
         return "" + getRate(TimeUnit.SECONDS) + " /s" + (isWarmingUp() ? " (warming up)" : "");
     }
