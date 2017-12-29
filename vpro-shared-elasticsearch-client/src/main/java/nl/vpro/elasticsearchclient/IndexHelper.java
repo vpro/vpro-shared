@@ -157,7 +157,7 @@ public class IndexHelper {
         for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
             mappingNode.set(e.getKey(), Jackson2Mapper.getInstance().readTree(e.getValue().get()));
         }
-        HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
+        HttpEntity entity = entity(request);
 
         log.info("Creating index {} with mappings {}: {}", indexNameSupplier, mappings.keySet(), request.toString());
         ObjectNode response = read(client().performRequest("PUT", indexNameSupplier.get(), Collections.emptyMap(), entity));
@@ -213,8 +213,8 @@ public class IndexHelper {
 
     public void clearIndex() {
         ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client());
-        ObjectNode request = i.prepareSearch(Collections.singleton(getIndexName()), null);
-        List<Pair<JsonNode, JsonNode>> bulk = new ArrayList<>();
+        i.prepareSearch(Collections.singleton(getIndexName()), null);
+        List<Pair<ObjectNode, ObjectNode>> bulk = new ArrayList<>();
         while (i.hasNext()) {
             JsonNode node = i.next();
             bulk.add(deleteRequest(node.get("_type").asText(), node.get("_id").asText()));
@@ -252,13 +252,13 @@ public class IndexHelper {
 
 
     HttpEntity entity(JsonNode node) {
-        return new NStringEntity(node.toString(), ContentType.APPLICATION_JSON);
+        return new NStringEntity(saveToString(node), ContentType.APPLICATION_JSON);
     }
 
 
     public Future<ObjectNode> postAsync(String path, ObjectNode request) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
-        client().performRequestAsync("POST", path, Collections.emptyMap(), new NStringEntity(request.toString(), ContentType.APPLICATION_JSON), listen(future));
+        client().performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future));
         return future;
     }
 
@@ -338,16 +338,18 @@ public class IndexHelper {
         }
     }
 
-    public Pair<JsonNode, JsonNode> indexRequest(String type, String id, Object o) {
+    public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("index");
         index.put("_type", type);
         index.put("_id", id);
         index.put("_index", getIndexName());
-        return Pair.of(actionLine, Jackson2Mapper.getPublisherInstance().valueToTree(o));
+
+        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(o);
+        return Pair.of(actionLine, jsonNode);
     }
 
-    public Pair<JsonNode, JsonNode> deleteRequest(String type, String id) {
+    public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");
         index.put("_type", type);
@@ -356,7 +358,7 @@ public class IndexHelper {
         return Pair.of(actionLine, null);
     }
 
-    public ObjectNode bulk(List<Pair<JsonNode, JsonNode>> request) {
+    public ObjectNode bulk(List<Pair<ObjectNode, ObjectNode>> request) {
         try {
             ObjectNode result = read(
                 client().performRequest(
@@ -372,24 +374,31 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> bulkAsync(List<Pair<JsonNode, JsonNode>> request) {
+    public Future<ObjectNode> bulkAsync(List<Pair<ObjectNode, ObjectNode>> request) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future));
         return future;
     }
 
-    protected HttpEntity bulkEntity(List<Pair<JsonNode, JsonNode>> request) {
+    protected HttpEntity bulkEntity(List<Pair<ObjectNode, ObjectNode>> request) {
         StringBuilder builder = new StringBuilder();
-        for (Pair<JsonNode, JsonNode> n : request) {
+        for (Pair<ObjectNode, ObjectNode> n : request) {
             builder.append(n.getFirst());
             builder.append("\n");
             if (n.getSecond() != null) {
-                builder.append(n.getSecond());
+                builder.append(saveToString(n.getSecond()));
                 builder.append("\n");
             }
         }
         return new NStringEntity(builder.toString(), ContentType.APPLICATION_JSON);
+    }
+
+    protected String saveToString(JsonNode jsonNode) {
+        String value = jsonNode.toString();
+        String replaced = value.replaceAll("\\p{Cc}", "");
+        return replaced;
+
     }
 
     public long count() {
