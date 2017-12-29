@@ -57,10 +57,16 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
         if (value.getNano() == 0 && OMIT_MILLIS_IF_ZERO.get()) {
             return formatterNoMillis.format(value);
         } else {
-            return formatter.format(
-                // round to millis
-                value.plusNanos(500_000).truncatedTo(ChronoUnit.MILLIS)
-            );
+            return formatWithMillis(value);
         }
+    }
+
+    static String formatWithMillis(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        return formatter.format(
+            // round to millis
+            instant.plusNanos(500_000).truncatedTo(ChronoUnit.MILLIS));
     }
 }
