@@ -10,7 +10,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.IOUtils;
@@ -123,25 +122,26 @@ public class IndexHelper {
         return clientFactory.client(IndexHelper.class.getName() + "." + indexNameSupplier.get());
     }
 
-    public  void createIndex() throws ExecutionException, InterruptedException, IOException {
+    public  void createIndex() {
 
         if (indexNameSupplier == null){
             throw new IllegalStateException("No index name configured");
         }
         try {
+            String indexName = indexNameSupplier.get();
             CreateIndexRequestBuilder createIndexRequestBuilder = client().admin().indices()
-                .prepareCreate(indexNameSupplier.get())
+                .prepareCreate(indexName)
                 .setSettings(settings.get(), XContentType.JSON);
             for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
                 createIndexRequestBuilder.addMapping(e.getKey(), e.getValue().get(), XContentType.JSON);
             }
-            log.info("Creating index {} with mappings {}", indexNameSupplier, mappings.keySet());
+            log.debug("Creating index {} with mappings {}", indexName, mappings.keySet());
             CreateIndexResponse response = createIndexRequestBuilder.execute()
                 .actionGet();
             if (response.isAcknowledged()) {
-                log.info("Created index {}", getIndexName());
+                log.info("Created index {} with mappings {}", indexName, mappings.keySet());
             } else {
-                log.warn("Could not create index {}", getIndexName());
+                log.warn("Could not create index {}", indexName);
             }
         } catch (ResourceAlreadyExistsException e) {
             log.info("Index exists");
@@ -169,11 +169,11 @@ public class IndexHelper {
     }
 
 
-    public void deleteIndex() throws ExecutionException, InterruptedException, IOException {
+    public void deleteIndex() {
         client().admin().indices().prepareDelete(getIndexName()).execute().actionGet();
     }
 
-    public RefreshResponse refresh() throws ExecutionException, InterruptedException {
+    public RefreshResponse refresh() {
         return client().admin().indices().prepareRefresh(getIndexName()).get();
     }
 
