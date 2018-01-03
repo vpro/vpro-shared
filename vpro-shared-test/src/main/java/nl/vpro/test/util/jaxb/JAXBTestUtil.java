@@ -97,7 +97,7 @@ public class JAXBTestUtil {
      * would still like the be informed om this change.
      *
      * MM: The difference was in the order of attributes and/or namespaces. Those are not relevant changes.
-     *     SAX implementations are not required to preserve or guarantee any order in this. It is hence impossible to make a test using this that succeeds in any java version.
+     *     SAX implementations are not required to preserve or guarantee any order in this. It is hence impossible to make a test using this that succeeds in every java version.
      *     Furthermore roundTripAndSimilar will if not similar still do a test for equals to enforce a clearer message.
      *
      * @Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
