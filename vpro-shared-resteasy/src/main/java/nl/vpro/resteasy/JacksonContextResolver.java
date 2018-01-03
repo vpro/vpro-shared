@@ -21,7 +21,7 @@ public class JacksonContextResolver extends JacksonJaxbJsonProvider implements C
 
     private final ObjectMapper mapper;
 
-    public JacksonContextResolver() throws Exception {
+    public JacksonContextResolver() {
         this(Jackson2Mapper.LENIENT);
     }
     public JacksonContextResolver(ObjectMapper mapper) {
