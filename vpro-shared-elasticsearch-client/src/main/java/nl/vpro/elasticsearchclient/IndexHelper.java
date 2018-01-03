@@ -26,6 +26,7 @@ import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -325,10 +326,12 @@ public class IndexHelper {
         return types.stream().map(t -> get(t, id)).filter(Optional::isPresent).map(Optional::get).findFirst();
     }
 
-    ObjectNode read(Response response) {
+    public ObjectNode read(Response response) {
         try {
             HttpEntity entity = response.getEntity();
-            return Jackson2Mapper.getLenientInstance().readerFor(ObjectNode.class).readValue(entity.getContent());
+            return Jackson2Mapper.getLenientInstance()
+                .readerFor(ObjectNode.class)
+                .readValue(entity.getContent());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -355,6 +358,14 @@ public class IndexHelper {
         return Pair.of(actionLine, jsonNode);
     }
 
+    public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o, String routing) {
+        Pair<ObjectNode, ObjectNode> request = indexRequest(type, id, o);
+        request.getFirst().put("_routing", routing);
+        request.getFirst().put("_parent", routing);
+        return request;
+    }
+
+
     public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");
@@ -363,6 +374,52 @@ public class IndexHelper {
         index.put("_index", getIndexName());
         return Pair.of(actionLine, null);
     }
+
+    public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id, String routing) {
+        Pair<ObjectNode, ObjectNode> request = deleteRequest(type, id);
+        request.getFirst().put("_routing", routing);
+        return request;
+    }
+
+
+    protected static void sort(ObjectNode request, String field, String dir){
+        ArrayNode sort = request.withArray("sort");
+        ObjectNode sortNode  = sort.addObject();
+        sortNode.put(field, dir);
+    }
+
+    public static void asc(ObjectNode request, String field) {
+        sort(request, field, "ASC");
+    }
+
+    public static void desc(ObjectNode request, String field) {
+        sort(request, field, "ASC");
+    }
+    public static ObjectNode must(ObjectNode query) {
+        ObjectNode bool = query.with("bool");
+        ArrayNode must = bool.withArray("must");
+        ObjectNode clause = must.addObject();
+        return clause;
+    }
+
+
+    public static ObjectNode mustTerm(ObjectNode query, String field, String value) {
+        ObjectNode clause = must(query);
+        ObjectNode term = clause.with("term");
+        term.put(field, value);
+        return clause;
+    }
+
+
+
+
+    public static ObjectNode should(ObjectNode query) {
+        ObjectNode bool = query.with("bool");
+        ArrayNode must = bool.withArray("should");
+        ObjectNode clause = must.addObject();
+        return clause;
+    }
+
 
     public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
         try {
