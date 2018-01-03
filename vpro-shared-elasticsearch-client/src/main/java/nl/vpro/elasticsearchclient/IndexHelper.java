@@ -262,16 +262,22 @@ public class IndexHelper {
         return future;
     }
 
-    protected ResponseListener listen(final CompletableFuture<ObjectNode> future) {
+    protected ResponseListener listen(final CompletableFuture<ObjectNode> future, ResponseListener... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 future.complete(read(response));
+                for (ResponseListener rl : listeners) {
+                    rl.onSuccess(response);
+                }
             }
 
             @Override
             public void onFailure(Exception exception) {
                 future.completeExceptionally(exception);
+                for (ResponseListener rl : listeners) {
+                    rl.onFailure(exception);
+                }
             }
         };
     }
@@ -358,7 +364,7 @@ public class IndexHelper {
         return Pair.of(actionLine, null);
     }
 
-    public ObjectNode bulk(List<Pair<ObjectNode, ObjectNode>> request) {
+    public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
         try {
             ObjectNode result = read(
                 client().performRequest(
@@ -374,14 +380,14 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> bulkAsync(List<Pair<ObjectNode, ObjectNode>> request) {
+    public Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, ResponseListener... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future));
+        client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future, listeners));
         return future;
     }
 
-    protected HttpEntity bulkEntity(List<Pair<ObjectNode, ObjectNode>> request) {
+    protected HttpEntity bulkEntity(Collection<Pair<ObjectNode, ObjectNode>> request) {
         StringBuilder builder = new StringBuilder();
         for (Pair<ObjectNode, ObjectNode> n : request) {
             builder.append(n.getFirst());

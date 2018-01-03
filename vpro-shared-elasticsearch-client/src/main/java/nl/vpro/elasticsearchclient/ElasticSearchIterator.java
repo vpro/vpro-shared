@@ -63,6 +63,11 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         return request;
     }
 
+
+    public ObjectNode prepareSearch(String indices, String... types) {
+        return prepareSearch(Collections.singletonList(indices), Arrays.asList(types));
+    }
+
     @Override
     public boolean hasNext() {
         findNext();
