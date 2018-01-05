@@ -42,4 +42,11 @@ public class QueryBuilder {
         ObjectNode clause = must.addObject();
         return clause;
     }
+
+    public static ObjectNode shouldTerm(ObjectNode query, String field, String value) {
+        ObjectNode clause = should(query);
+        ObjectNode term = clause.with("term");
+        term.put(field, value);
+        return clause;
+    }
 }
