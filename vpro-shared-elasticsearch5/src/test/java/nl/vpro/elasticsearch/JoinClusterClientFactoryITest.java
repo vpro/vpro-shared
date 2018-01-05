@@ -10,6 +10,7 @@ import org.junit.Test;
 
 
 @Slf4j
+@Ignore
 public class JoinClusterClientFactoryITest {
 
 
