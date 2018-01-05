@@ -401,8 +401,8 @@ public class IndexHelper {
 
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o, String routing) {
         Pair<ObjectNode, ObjectNode> request = indexRequest(type, id, o);
-        request.getFirst().put("_routing", routing);
-        request.getFirst().put("_parent", routing);
+        request.getFirst().with("index").put("_routing", routing);
+        request.getFirst().with("index").put("_parent", routing);
         return request;
     }
 
@@ -418,7 +418,7 @@ public class IndexHelper {
 
     public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id, String routing) {
         Pair<ObjectNode, ObjectNode> request = deleteRequest(type, id);
-        request.getFirst().put("_routing", routing);
+        request.getFirst().with("delete").put("_routing", routing);
         return request;
     }
 
@@ -439,7 +439,8 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
+    @SafeVarargs
+    public final Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future, listeners));
