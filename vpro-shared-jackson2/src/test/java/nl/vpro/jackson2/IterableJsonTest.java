@@ -5,6 +5,7 @@ import net.sf.json.test.JSONAssert;
 import java.io.StringWriter;
 import java.util.*;
 
+import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -83,11 +84,12 @@ public class IterableJsonTest {
 
         }
 
-        public StringIterable(List<String> v) {
+        public StringIterable(@Nonnull List<String> v) {
             values = v;
         }
 
         @Override
+        @Nonnull
         public Iterator<String> iterator() {
             return values.iterator();
 
@@ -163,6 +165,7 @@ public class IterableJsonTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     static <T> T roundTripAndSimilar(T input, String expected) throws Exception {
         StringWriter writer = new StringWriter();
         Jackson2Mapper.getInstance().writeValue(writer, input);
