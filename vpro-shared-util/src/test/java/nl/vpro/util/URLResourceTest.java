@@ -66,7 +66,7 @@ public class URLResourceTest {
     }
 
     @Test
-    public void broadcastersRedirect() throws InterruptedException {
+    public void broadcastersRedirect() {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://poms.omroep.nl/broadcasters/"));
 
         assertTrue(broadcasters.get().size() > 0);
