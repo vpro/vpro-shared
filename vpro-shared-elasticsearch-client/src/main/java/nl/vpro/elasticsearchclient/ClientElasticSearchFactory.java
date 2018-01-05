@@ -46,9 +46,12 @@ public class ClientElasticSearchFactory implements ESClientFactory {
             HttpHost[] hosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
                 .map(HttpHost::create)
                 .map(h ->
-                    h.getPort() >= 9300 && implicitJavaToHttpPort
-                    ? new HttpHost(h.getHostName(), h.getPort() - 100)
-                    : h
+                    h.getPort() >= 9300 && implicitJavaToHttpPort ?
+                        new HttpHost(h.getHostName(), h.getPort() - 100)
+                        : h
+                )
+                .map(h ->
+                    h.getPort() == -1 ? new HttpHost(h.getHostName(), 9200) : h
                 )
                 .toArray(HttpHost[]::new);
 
@@ -61,7 +64,7 @@ public class ClientElasticSearchFactory implements ESClientFactory {
                 .build();
             String foundClusterName = helper.getClusterName();
             if (clusterName != null && !clusterName.equals(foundClusterName)) {
-                throw new IllegalStateException("Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')");
+                throw new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')");
             }
             l.info("Connected to {} with {} objects", foundClusterName, helper.count());
             return client;
