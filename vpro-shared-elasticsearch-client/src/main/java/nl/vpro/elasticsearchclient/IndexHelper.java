@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -236,9 +237,15 @@ public class IndexHelper {
         }
     }
 
-    public ObjectNode search(ObjectNode request) {
+    public ObjectNode search(ObjectNode request, String... types) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        return post((indexName == null ? "" : indexName) + "/_search", request);
+        StringBuilder path =  new StringBuilder((indexName == null ? "" : indexName));
+        String typeString = Arrays.stream(types).collect(Collectors.joining(","));
+        if (typeString.length() > 0) {
+            path.append("/").append(typeString);
+        }
+        path.append("_search");
+        return post(path.toString(), request);
     }
 
     public Future<ObjectNode> searchAsync(ObjectNode request, ResponseListener... listeners) {
@@ -461,18 +468,10 @@ public class IndexHelper {
     }
 
 
-
-    public long count() {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-        request.put("size", 0);
-        ObjectNode response = search(request);
-        return response.get("hits").get("total").longValue();
-    }
-
     public long count(String... types) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
-        ObjectNode response = search(request);
+        ObjectNode response = search(request, types);
         return response.get("hits").get("total").longValue();
     }
 
