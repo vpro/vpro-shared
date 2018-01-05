@@ -244,11 +244,12 @@ public class IndexHelper {
         if (typeString.length() > 0) {
             path.append("/").append(typeString);
         }
-        path.append("_search");
+        path.append("/_search");
         return post(path.toString(), request);
     }
 
-    public Future<ObjectNode> searchAsync(ObjectNode request, ResponseListener... listeners) {
+    @SafeVarargs
+    public final Future<ObjectNode> searchAsync(ObjectNode request, Consumer<ObjectNode>... listeners) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
         return postAsync((indexName == null ? "" : indexName) + "/_search", request, listeners);
     }
@@ -270,28 +271,27 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> postAsync(String path, ObjectNode request, ResponseListener... listeners) {
+    @SafeVarargs
+    public final Future<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         client().performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
         return future;
     }
 
-    protected ResponseListener listen(final CompletableFuture<ObjectNode> future, ResponseListener... listeners) {
+    protected ResponseListener listen(final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
-                future.complete(read(response));
-                for (ResponseListener rl : listeners) {
-                    rl.onSuccess(response);
+                ObjectNode result = read(response);
+                future.complete(result);
+                for (Consumer<ObjectNode> rl : listeners) {
+                    rl.accept(result);
                 }
             }
 
             @Override
             public void onFailure(Exception exception) {
                 future.completeExceptionally(exception);
-                for (ResponseListener rl : listeners) {
-                    rl.onFailure(exception);
-                }
             }
         };
     }
@@ -440,7 +440,7 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, ResponseListener... listeners) {
+    public Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future, listeners));
@@ -476,22 +476,12 @@ public class IndexHelper {
     }
 
 
-    public void countAsync(Consumer<Long> consumer) {
+    public void countAsync(final Consumer<Long> consumer) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
-        searchAsync(request, new ResponseListener() {
-            @Override
-            public void onSuccess(Response response) {
-                long count = read(response).get("hits").get("total").longValue();
-                consumer.accept(count);
-
-            }
-
-            @Override
-            public void onFailure(Exception exception) {
-                log.error(exception.getMessage(), exception);
-
-            }
+        searchAsync(request, (entity) ->  {
+            long count = entity.get("hits").get("total").longValue();
+            consumer.accept(count);
         });
     }
 
