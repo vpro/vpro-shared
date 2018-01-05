@@ -27,7 +27,6 @@ import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -503,8 +502,7 @@ public class IndexHelper {
             } else {
                 log.warn("Could not found cluster_name in {} with {}", node, client());
                 return null;
-            }
-        } catch (IOException e) {
+            } } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
         }
