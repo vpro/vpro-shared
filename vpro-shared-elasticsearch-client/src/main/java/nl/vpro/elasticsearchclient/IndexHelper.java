@@ -290,11 +290,35 @@ public class IndexHelper {
     }
 
     public ObjectNode index(String type, String id, Object o) {
-        return post(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, null), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+    }
+
+
+    public ObjectNode index(String type, String id, Object o, String parent) {
+        return post(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+    }
+
+    public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
+        return post(indexPath(indexRequest.getFirst().get("type").textValue(), indexRequest.getFirst().get("id").textValue(), indexRequest.getFirst().get("parent").textValue()), indexRequest.getSecond());
     }
 
     public Future<ObjectNode> indexAsync(String type, String id, Object o) {
         return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+    }
+
+
+    public Future<ObjectNode> indexAsync(String type, String id, Object o, String parent) {
+
+        return postAsync(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+    }
+
+
+    protected String indexPath(String type, String id, String parent) {
+        String path = getIndexName() + "/" + type + "/" + encode(id);
+        if (parent != null) {
+            path += "?parent=" + parent;
+        }
+        return path;
     }
 
 
@@ -305,6 +329,11 @@ public class IndexHelper {
             log.error(e.getMessage(), e);
         }
         return null;
+    }
+
+
+    public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest) {
+        return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue());
     }
 
 
@@ -431,7 +460,16 @@ public class IndexHelper {
 
     }
 
+
+
     public long count() {
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        request.put("size", 0);
+        ObjectNode response = search(request);
+        return response.get("hits").get("total").longValue();
+    }
+
+    public long count(String... types) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         ObjectNode response = search(request);
