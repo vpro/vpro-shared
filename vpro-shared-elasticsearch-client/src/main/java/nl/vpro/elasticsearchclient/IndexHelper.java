@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.IOUtils;
@@ -25,8 +26,8 @@ import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -240,6 +241,11 @@ public class IndexHelper {
         return post((indexName == null ? "" : indexName) + "/_search", request);
     }
 
+    public Future<ObjectNode> searchAsync(ObjectNode request, ResponseListener... listeners) {
+        String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
+        return postAsync((indexName == null ? "" : indexName) + "/_search", request, listeners);
+    }
+
 
     public ObjectNode post(String path, ObjectNode request) {
         try {
@@ -257,9 +263,9 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> postAsync(String path, ObjectNode request) {
+    public Future<ObjectNode> postAsync(String path, ObjectNode request, ResponseListener... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
-        client().performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future));
+        client().performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
         return future;
     }
 
@@ -382,45 +388,6 @@ public class IndexHelper {
     }
 
 
-    protected static void sort(ObjectNode request, String field, String dir){
-        ArrayNode sort = request.withArray("sort");
-        ObjectNode sortNode  = sort.addObject();
-        sortNode.put(field, dir);
-    }
-
-    public static void asc(ObjectNode request, String field) {
-        sort(request, field, "ASC");
-    }
-
-    public static void desc(ObjectNode request, String field) {
-        sort(request, field, "ASC");
-    }
-    public static ObjectNode must(ObjectNode query) {
-        ObjectNode bool = query.with("bool");
-        ArrayNode must = bool.withArray("must");
-        ObjectNode clause = must.addObject();
-        return clause;
-    }
-
-
-    public static ObjectNode mustTerm(ObjectNode query, String field, String value) {
-        ObjectNode clause = must(query);
-        ObjectNode term = clause.with("term");
-        term.put(field, value);
-        return clause;
-    }
-
-
-
-
-    public static ObjectNode should(ObjectNode query) {
-        ObjectNode bool = query.with("bool");
-        ArrayNode must = bool.withArray("should");
-        ObjectNode clause = must.addObject();
-        return clause;
-    }
-
-
     public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
         try {
             ObjectNode result = read(
@@ -471,6 +438,25 @@ public class IndexHelper {
         return response.get("hits").get("total").longValue();
     }
 
+
+    public void countAsync(Consumer<Long> consumer) {
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        request.put("size", 0);
+        searchAsync(request, new ResponseListener() {
+            @Override
+            public void onSuccess(Response response) {
+                long count = read(response).get("hits").get("total").longValue();
+                consumer.accept(count);
+
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                log.error(exception.getMessage(), exception);
+
+            }
+        });
+    }
 
     public void setIndexName(String indexName) {
         this.indexNameSupplier = () -> indexName;
