@@ -355,12 +355,18 @@ public class IndexHelper {
             Response response = client().performRequest("GET", getIndexName() + "/" + type + "/" + encode(id));
             return Optional.of(read(response));
         } catch (ResponseException re) {
+            log.error(re.getMessage(), re);
             return Optional.empty();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
 
+    }
+
+
+    public Optional<JsonNode> getSource(String type, String id) {
+        return get(type, id).map(jn -> jn.get("_source"));
     }
 
     public Optional<JsonNode> get(Collection<String> types, String id) {
