@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -11,8 +12,8 @@ import com.google.common.collect.PeekingIterator;
  */
 public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements  CountedIterator<T> {
 
-    protected MergedSortedIterator(Long size, Long totalSize, Iterator<T> iterator) {
-        super(size, totalSize, iterator);
+    protected MergedSortedIterator(Supplier<Long> size, Supplier<Long> totalSize, Iterator<T> iterator) {
+        super(size, totalSize, null, null, iterator);
     }
 
     /**
@@ -24,21 +25,24 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
     }
 
     /**
-     * This doesn't use queue, so it is also useable with Hibernate.
+     * This doesn't use a queue, so it is also useable with Hibernate.
      */
     public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
         return mergeInSameThread(comparator, Arrays.asList(iterators));
     }
 
     public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
-        return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), Iterators.mergeSorted(iterators, comparator));
+        return new MergedSortedIterator<T>(
+            () -> getSize(iterators),
+            () -> getTotalSize(iterators),
+            Iterators.mergeSorted(iterators, comparator));
     }
 
     /**
-     * This doesn't use queue, so it is also useable with Hibernate.
+     * This doesn't usea  queue, so it is also useable with Hibernate.
      */
     public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
-        return new MergedSortedIterator<T>(getSize(iterators), getTotalSize(iterators), new SameThreadMergingIterator<T>(comparator, iterators));
+        return new MergedSortedIterator<T>(() -> getSize(iterators), () -> getTotalSize(iterators), new SameThreadMergingIterator<T>(comparator, iterators));
     }
 
     protected static <T> Long getSize(Iterable<CountedIterator<T>> iterators) {
