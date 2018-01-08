@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 /**
  * @author Michiel Meeuwissen
@@ -11,28 +12,36 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
-    private final Optional<AtomicLong> size;
-    private final Optional<AtomicLong> totalSize;
+    private final Supplier<Long> size;
+    private final Supplier<Long> totalSize;
 
     private long count;
 
     public BasicWrappedIterator(Iterator<T> wrapped) {
         super(wrapped);
-        size = Optional.empty();
-        totalSize = Optional.empty();
+        size = null;
+        totalSize = null;
     }
 
     @lombok.Builder
-    public BasicWrappedIterator(Long size, Long totalSize, Iterator<T> wrapped) {
+    protected BasicWrappedIterator(
+        Supplier<Long> sizeSupplier,
+        Supplier<Long> totalSizeSupplier,
+        Long size,
+        Long totalSize,
+        Iterator<T> wrapped) {
         super(wrapped);
-        this.size = size == null ? Optional.empty() : Optional.of(new AtomicLong(size));
-        this.totalSize = totalSize == null ? Optional.empty() : Optional.of(new AtomicLong(totalSize));
+        this.size = sizeSupplier != null ? sizeSupplier : () -> size;
+        this.totalSize = totalSizeSupplier != null ? totalSizeSupplier :  () -> totalSize;
+    }
+
+
+    public BasicWrappedIterator(Long size, Long totalSize, Iterator<T> wrapped) {
+        this(null, null, size, totalSize, wrapped);
     }
 
     public BasicWrappedIterator(AtomicLong size, AtomicLong totalSize, Iterator<T> wrapped) {
-        super(wrapped);
-        this.size = Optional.ofNullable(size);
-        this.totalSize = Optional.ofNullable(totalSize);
+        this(size::get, totalSize::get, null, null, wrapped);
     }
 
     public BasicWrappedIterator(Long totalSize, Iterator<T> wrapped) {
@@ -45,14 +54,14 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     public BasicWrappedIterator(Collection<T> wrapped) {
         super(wrapped.iterator());
-        this.size = Optional.of(new AtomicLong(wrapped.size()));
-        this.totalSize = Optional.of(new AtomicLong(wrapped.size()));
+        this.size = () -> (long) wrapped.size();
+        this.totalSize = () -> (long) wrapped.size();
     }
 
     @Override
     public Optional<Long> getSize() {
-        if (size.isPresent()) {
-            return size.map(AtomicLong::longValue);
+        if (size != null) {
+            return Optional.ofNullable(size.get());
         } else {
             return super.getSize();
         }
@@ -60,8 +69,8 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     @Override
     public Optional<Long> getTotalSize() {
-        if (totalSize.isPresent()) {
-            return totalSize.map(AtomicLong::longValue);
+        if (totalSize != null) {
+            return Optional.ofNullable(totalSize.get());
         } else {
             return super.getTotalSize();
         }
