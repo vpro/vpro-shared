@@ -49,6 +49,23 @@
           <artifactId>buildnumber-maven-plugin</artifactId>
           <version>1.4</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20</version>
+          <configuration>
+            <systemPropertyVariables>
+              <projectArtifactId>${project.artifactId}</projectArtifactId>
+            </systemPropertyVariables>
+            <includes>
+              <include>**/*Test.java</include>
+              <include>**/*Spec.java</include>
+            </includes>
+            <excludes>
+              <exclude>**/*ITest.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
