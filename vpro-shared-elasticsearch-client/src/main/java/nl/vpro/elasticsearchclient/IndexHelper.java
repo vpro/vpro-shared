@@ -277,7 +277,8 @@ public class IndexHelper {
         return future;
     }
 
-    protected ResponseListener listen(final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
+    @SafeVarargs
+    protected final ResponseListener listen(final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
@@ -308,13 +309,14 @@ public class IndexHelper {
         return post(indexPath(indexRequest.getFirst().get("type").textValue(), indexRequest.getFirst().get("id").textValue(), indexRequest.getFirst().get("parent").textValue()), indexRequest.getSecond());
     }
 
-    public Future<ObjectNode> indexAsync(String type, String id, Object o) {
-        return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+    @SafeVarargs
+    public final Future<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
+        return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o), listeners);
     }
 
 
-    public Future<ObjectNode> indexAsync(String type, String id, Object o, String parent) {
-
+    @SafeVarargs
+    public final Future<ObjectNode> indexAsync(String type, String id, Object o, String parent, Consumer<ObjectNode>... listeners) {
         return postAsync(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
     }
 
@@ -338,15 +340,15 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest) {
-        return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue());
+    public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
+        return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue(), listeners);
     }
 
 
-    public Future<ObjectNode> deleteAsync(String type, String id) {
+    public Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id), listen(future));
+        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id), listen(future, listeners));
         return future;
     }
 
