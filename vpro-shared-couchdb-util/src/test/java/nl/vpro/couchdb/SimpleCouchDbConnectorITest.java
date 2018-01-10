@@ -1,19 +1,22 @@
 package nl.vpro.couchdb;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
-import org.junit.Ignore;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.73
  */
-@Ignore("docs.poms.omroep.nl does not exist any more")
+@Slf4j
 public class SimpleCouchDbConnectorITest {
 
     @Test
@@ -24,7 +27,10 @@ public class SimpleCouchDbConnectorITest {
             .path("media")
             .build();
 
-        Map mo = Jackson2Mapper.getLenientInstance().readValue(connector.get("POW_03603111"), Map.class);
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        IOUtils.copy(connector.get("POW_03603111"), result);
+        log.info("{}", new String(result.toByteArray()));
+        Map mo = Jackson2Mapper.getLenientInstance().readValue(result.toByteArray(), Map.class);
         assertThat(mo.get("mid")).isEqualTo("POW_03603111");
     }
 
