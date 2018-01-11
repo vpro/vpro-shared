@@ -33,6 +33,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
 
+import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
+
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
  * @author Michiel Meeuwissen
@@ -292,17 +294,18 @@ public class IndexHelper {
             @Override
             public void onFailure(Exception exception) {
                 future.completeExceptionally(exception);
+                log.error(exception.getMessage(), exception);
             }
         };
     }
 
     public ObjectNode index(String type, String id, Object o) {
-        return post(indexPath(type, id, null), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, null), getPublisherInstance().valueToTree(o));
     }
 
 
     public ObjectNode index(String type, String id, Object o, String parent) {
-        return post(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, parent), getPublisherInstance().valueToTree(o));
     }
 
     public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
@@ -311,13 +314,13 @@ public class IndexHelper {
 
     @SafeVarargs
     public final Future<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
-        return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o), listeners);
+        return postAsync(getIndexName() + "/" + type + "/" + encode(id), getPublisherInstance().valueToTree(o), listeners);
     }
 
 
     @SafeVarargs
     public final Future<ObjectNode> indexAsync(String type, String id, Object o, String parent, Consumer<ObjectNode>... listeners) {
-        return postAsync(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return postAsync(indexPath(type, id, parent), getPublisherInstance().valueToTree(o));
     }
 
 
@@ -345,7 +348,8 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
+    @SafeVarargs
+    public final Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id), listen(future, listeners));
@@ -403,7 +407,7 @@ public class IndexHelper {
         index.put("_id", id);
         index.put("_index", getIndexName());
 
-        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(o);
+        ObjectNode jsonNode = getPublisherInstance().valueToTree(o);
         return Pair.of(actionLine, jsonNode);
     }
 
