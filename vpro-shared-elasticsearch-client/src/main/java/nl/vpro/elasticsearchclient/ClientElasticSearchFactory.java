@@ -47,6 +47,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
     public Future<RestClient> clientAsync(String logName, Consumer<RestClient> callback) {
         RestClient present = clients.get(logName);
         if (present != null) {
+            callback.accept(present);
             return Futures.immediateFuture(present);
         }
 
