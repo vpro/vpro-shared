@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.io.IOUtils;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -54,7 +53,7 @@ public class IndexHelper {
         return client.client(IndexHelper.class.getName() + "." + indexName);
     }
 
-    public  void createIndex() throws ExecutionException, InterruptedException, IOException {
+    public  void createIndex() throws IOException {
         CreateIndexResponse response = client().admin().indices().prepareCreate(indexName).setSettings(read(settings)).execute().actionGet();
         if (response.isAcknowledged()) {
             log.info("Created index {}", indexName);
@@ -64,7 +63,7 @@ public class IndexHelper {
         putMappings();
     }
 
-    public void putMappings() throws ExecutionException, InterruptedException, IOException {
+    public void putMappings() throws IOException {
         for (Map.Entry<String, String> e : mappings.entrySet()) {
             PutMappingResponse a = client().admin().indices().preparePutMapping(indexName).setType(e.getKey()).setSource(read(e.getValue())).execute().actionGet();
             if (a.isAcknowledged()) {
@@ -102,11 +101,11 @@ public class IndexHelper {
     }
 
 
-    public void deleteIndex() throws ExecutionException, InterruptedException, IOException {
+    public void deleteIndex() {
         client().admin().indices().prepareDelete(indexName).execute().actionGet();
     }
 
-    public RefreshResponse refresh() throws ExecutionException, InterruptedException {
+    public RefreshResponse refresh() {
         return client().admin().indices().prepareRefresh(indexName).get();
     }
 

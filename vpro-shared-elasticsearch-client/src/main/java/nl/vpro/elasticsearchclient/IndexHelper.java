@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,9 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.util.concurrent.Futures;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
+
+import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
@@ -104,7 +108,13 @@ public class IndexHelper {
 
 
     @lombok.Builder(builderClassName = "Builder")
-    private IndexHelper(Logger log, ESClientFactory client, Supplier<String> indexNameSupplier, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
+    private IndexHelper(
+        Logger log,
+        ESClientFactory client,
+        Supplier<String> indexNameSupplier,
+        Supplier<String> settings,
+        Map<String,
+            Supplier<String>> mappings) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
@@ -139,11 +149,27 @@ public class IndexHelper {
     }
 
     public RestClient client() {
+        try {
+            return clientAsync((c) -> {}).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns client after that checks on it are performed.
+     */
+    public Future<RestClient> clientAsync(Consumer<RestClient> callback) {
         String name = IndexHelper.class.getName();
         if (indexNameSupplier != null) {
             name += "." + indexNameSupplier.get();
         }
-        return clientFactory.client(name);
+        if (clientFactory instanceof AsyncESClientFactory) {
+            return ((AsyncESClientFactory) clientFactory).clientAsync(name, callback);
+        } else {
+            return Futures.immediateFuture(clientFactory.client(name));
+        }
+
     }
 
     public  void createIndex() throws IOException {
@@ -273,7 +299,10 @@ public class IndexHelper {
     @SafeVarargs
     public final Future<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
-        client().performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
+        clientAsync((client) -> {
+            client.performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
+            }
+        );
         return future;
     }
 
@@ -291,18 +320,20 @@ public class IndexHelper {
 
             @Override
             public void onFailure(Exception exception) {
+                log.error(exception.getMessage(), exception);
                 future.completeExceptionally(exception);
+
             }
         };
     }
 
     public ObjectNode index(String type, String id, Object o) {
-        return post(indexPath(type, id, null), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, null), getPublisherInstance().valueToTree(o));
     }
 
 
     public ObjectNode index(String type, String id, Object o, String parent) {
-        return post(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, parent), getPublisherInstance().valueToTree(o));
     }
 
     public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
@@ -354,10 +385,15 @@ public class IndexHelper {
 
     public Optional<JsonNode> get(String type, String id){
         try {
-            Response response = client().performRequest("GET", getIndexName() + "/" + type + "/" + encode(id));
+            Response response = client()
+                .performRequest("GET", getIndexName() + "/" + type + "/" + encode(id));
             return Optional.of(read(response));
         } catch (ResponseException re) {
-            log.error(re.getMessage(), re);
+            if (re.getResponse().getStatusLine().getStatusCode() >= 500) {
+                log.error(re.getMessage(), re);
+            } else {
+                log.debug(re.getMessage());
+            }
             return Optional.empty();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -403,7 +439,7 @@ public class IndexHelper {
         index.put("_id", id);
         index.put("_index", getIndexName());
 
-        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(o);
+        ObjectNode jsonNode = getPublisherInstance().valueToTree(o);
         return Pair.of(actionLine, jsonNode);
     }
 
@@ -504,17 +540,40 @@ public class IndexHelper {
 
     public String getClusterName() {
         try {
-            ObjectNode node = read(client().performRequest("GET", "/", Collections.emptyMap()));
-            log.info("Found {}", node);
-            if (node.has("cluster_name")) {
-                return node.get("cluster_name").asText();
-            } else {
-                log.warn("Could not found cluster_name in {} with {}", node, client());
-                return null;
-            } } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return null;
+            return getClusterNameAsync((s) -> {
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+
+    public Future<String> getClusterNameAsync(Consumer<String> callBack) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        client().performRequestAsync("GET", "/", Collections.emptyMap(), new ResponseListener() {
+            @Override
+            public void onSuccess(Response response) {
+                ObjectNode node = read(response);
+                log.info("Found {}", node);
+                String clusterName;
+                if (node.has("cluster_name")) {
+                    clusterName = node.get("cluster_name").asText();
+                } else {
+                    log.warn("Could not found cluster_name in {} with {}", node, client());
+                    clusterName = null;
+                }
+                callBack.accept(clusterName);
+                future.complete(clusterName);
+
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                future.completeExceptionally(exception);
+            }
+
+        });
+        return  future;
     }
 
 

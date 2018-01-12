@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +17,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.util.concurrent.Futures;
 
 
 /**
@@ -22,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 @Data
 @Slf4j
-public class ClientElasticSearchFactory implements ESClientFactory {
+public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     private String clusterName;
 
@@ -40,34 +44,46 @@ public class ClientElasticSearchFactory implements ESClientFactory {
     }
 
     @Override
-    public RestClient client(String logName) {
-        return clients.computeIfAbsent(logName, (ln) -> {
-            Logger l = LoggerFactory.getLogger(ln);
-            HttpHost[] hosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
-                .map(HttpHost::create)
-                .map(h ->
+    public Future<RestClient> clientAsync(String logName, Consumer<RestClient> callback) {
+        RestClient present = clients.get(logName);
+        if (present != null) {
+            return Futures.immediateFuture(present);
+        }
+
+        Logger l = LoggerFactory.getLogger(logName);
+        HttpHost[] hosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
+            .map(HttpHost::create)
+            .map(h ->
                     h.getPort() >= 9300 && implicitJavaToHttpPort ?
                         new HttpHost(h.getHostName(), h.getPort() - 100)
                         : h
-                )
-                .map(h ->
+            )
+            .map(h ->
                     h.getPort() == -1 ? new HttpHost(h.getHostName(), 9200) : h
-                )
-                .toArray(HttpHost[]::new);
+            )
+            .toArray(HttpHost[]::new);
 
-            RestClientBuilder clientBuilder = RestClient.builder(hosts);
-            RestClient client = clientBuilder.build();
+        final RestClientBuilder clientBuilder = RestClient.builder(hosts);
+        final RestClient client = clientBuilder.build();
 
-            helper = IndexHelper.builder()
-                .client((e) -> client)
-                .log(l)
-                .build();
-            String foundClusterName = helper.getClusterName();
+        CompletableFuture<RestClient> future = new CompletableFuture<>();
+        helper = IndexHelper.builder()
+            .client((e) -> client)
+            .log(l)
+            .build();
+        helper.getClusterNameAsync((foundClusterName) -> {
             if (clusterName != null && !clusterName.equals(foundClusterName)) {
                 throw new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')");
             }
-            l.info("Connected to {} with {} objects", foundClusterName, helper.count());
-            return client;
+            future.complete(client);
+            callback.accept(client);
+            clients.put(logName, client);
+            if (l.isInfoEnabled()) {
+                l.info("Connected to cluster '{}'", foundClusterName);
+                helper.countAsync((count) ->
+                    l.info("Cluster '{}' has  {} objects", foundClusterName, count));
+            }
         });
+        return future;
     }
 }
