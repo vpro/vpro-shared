@@ -167,7 +167,9 @@ public class IndexHelper {
         if (clientFactory instanceof AsyncESClientFactory) {
             return ((AsyncESClientFactory) clientFactory).clientAsync(name, callback);
         } else {
-            return Futures.immediateFuture(clientFactory.client(name));
+            RestClient client = clientFactory.client(name);
+            callback.accept(client);
+            return Futures.immediateFuture(client);
         }
 
     }
@@ -300,6 +302,7 @@ public class IndexHelper {
     public final Future<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
+            log.debug("posting");
             client.performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
             }
         );
