@@ -12,6 +12,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.Response;
+import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -128,14 +129,17 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                         Response res = client.performRequest("POST", "/_search/scroll", Collections.emptyMap(), new NStringEntity(scrollRequest.toString(), ContentType.APPLICATION_JSON));
                         response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                         log.debug("New scroll");
+                        hits = response.get("hits");
+                        i = 0;
+                        hasNext = hits.get("hits").size() > 0;
+                    } catch(ResponseException re) {
+                        log.warn(re.getMessage());
+                        hits = null;
+                        hasNext = false;
                     } catch (IOException ioe) {
                         log.error(ioe.getMessage());
                         throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
                     }
-
-                    hits = response.get("hits");
-                    i = 0;
-                    hasNext = hits.get("hits").size() > 0;
                 } else {
                     log.warn("No scroll id found, so not possible to scroll next batch");
                     hasNext = false;
