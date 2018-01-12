@@ -1,0 +1,463 @@
+{
+    "offset": 0,
+    "rows": [
+        {
+            "doc": {
+                "_id": "10Jeugd0845",
+                "_rev": "3-f33044ec68521c29a6d2404d8e33a6fe",
+                "avType": "VIDEO",
+                "broadcasters": [
+                    "NOS",
+                    "NPO Zapp"
+                ],
+                "creationDate": 1360975969493,
+                "credits": [],
+                "descendantOf": [
+                    {
+                        "midRef": "POMS_S_NOS_059931",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:4420502"
+                    }
+                ],
+                "descriptions": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal (ochtenduitzending)"
+                    }
+                ],
+                "email": [
+                    "jeugdjournaal@nos.nl"
+                ],
+                "embeddable": true,
+                "genres": [
+                    "Jeugd",
+                    "Kinderen 6-12",
+                    "Nieuws/actualiteiten"
+                ],
+                "images": [
+                    {
+                        "creationDate": 1360975971950,
+                        "description": "NOS Jeugdjournaal (ochtenduitzending)",
+                        "highlighted": false,
+                        "imageUri": "urn:vpro:image:133680",
+                        "lastModified": 1360975971996,
+                        "owner": "NEBO",
+                        "title": "NOS Jeugdjournaal (ochtenduitzending)",
+                        "type": "PICTURE",
+                        "urn": "urn:vpro:media:image:20814340",
+                        "workflow": "PUBLISHED"
+                    }
+                ],
+                "isOrdered": true,
+                "lastModified": 1363066032183,
+                "locations": [],
+                "memberOf": [
+                    {
+                        "added": 1360975973357,
+                        "highlighted": false,
+                        "index": 2,
+                        "midRef": "POMS_S_NOS_059931",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:4420502"
+                    }
+                ],
+                "mid": "10Jeugd0845",
+                "scheduleEvents": [],
+                "sortDate": 1292571900000,
+                "titles": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal (ochtenduitzending)"
+                    },
+                    {
+                        "owner": "NEBO",
+                        "type": "LEXICO",
+                        "value": "Jeugdjournaal (ochtenduitzending)"
+                    }
+                ],
+                "type": "SEASON",
+                "urn": "urn:vpro:media:group:20814338",
+                "websites": [
+                    {
+                        "value": "http://www.jeugdjournaal.nl"
+                    },
+                    {
+                        "value": "http://www.jeugdjournaal.nl"
+                    }
+                ],
+                "workflow": "PUBLISHED"
+            },
+            "id": "10Jeugd0845",
+            "key": "10Jeugd0845",
+            "value": {
+                "rev": "3-f33044ec68521c29a6d2404d8e33a6fe"
+            }
+        },
+        {
+            "doc": {
+                "_id": "10Jeugd0845gebaren",
+                "_rev": "3-00f0b5ae1016d289112d5971f04f1163",
+                "avType": "VIDEO",
+                "broadcasters": [
+                    "NOS",
+                    "NPO Zapp"
+                ],
+                "creationDate": 1360975311163,
+                "credits": [],
+                "descendantOf": [
+                    {
+                        "midRef": "POMS_S_NOS_122683",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:4420505"
+                    }
+                ],
+                "descriptions": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal met gebarentolk (ochtenduitzending)"
+                    }
+                ],
+                "email": [
+                    "jeugdjournaal@nos.nl"
+                ],
+                "embeddable": true,
+                "genres": [
+                    "Kinderen 6-12",
+                    "Nieuws/actualiteiten"
+                ],
+                "images": [
+                    {
+                        "creationDate": 1360975313603,
+                        "description": "NOS Jeugdjournaal met gebarentolk (ochtenduitzending)",
+                        "highlighted": false,
+                        "imageUri": "urn:vpro:image:133680",
+                        "lastModified": 1360975313646,
+                        "owner": "NEBO",
+                        "title": "NOS Jeugdjournaal met gebarentolk (ochtenduitzending)",
+                        "type": "PICTURE",
+                        "urn": "urn:vpro:media:image:20809887",
+                        "workflow": "PUBLISHED"
+                    }
+                ],
+                "isOrdered": true,
+                "lastModified": 1363066047076,
+                "locations": [],
+                "memberOf": [
+                    {
+                        "added": 1360975315009,
+                        "highlighted": false,
+                        "index": 2,
+                        "midRef": "POMS_S_NOS_122683",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:4420505"
+                    }
+                ],
+                "mid": "10Jeugd0845gebaren",
+                "scheduleEvents": [],
+                "sortDate": 1292571900000,
+                "titles": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal met gebarentolk (ochtenduitzending)"
+                    },
+                    {
+                        "owner": "NEBO",
+                        "type": "LEXICO",
+                        "value": "NOS Jeugdjournaal met gebarentolk (ochtenduitzending)"
+                    }
+                ],
+                "type": "SEASON",
+                "urn": "urn:vpro:media:group:20809885",
+                "websites": [
+                    {
+                        "value": "http://www.jeugdjournaal.nl"
+                    },
+                    {
+                        "value": "http://www.jeugdjournaal.nl"
+                    }
+                ],
+                "workflow": "PUBLISHED"
+            },
+            "id": "10Jeugd0845gebaren",
+            "key": "10Jeugd0845gebaren",
+            "value": {
+                "rev": "3-00f0b5ae1016d289112d5971f04f1163"
+            }
+        },
+        {
+            "doc": {
+                "_id": "10Jeugd1130",
+                "_rev": "3-e2176d20c33351b076a4463dba5bd929",
+                "avType": "VIDEO",
+                "broadcasters": [
+                    "NOS",
+                    "NPO Zapp"
+                ],
+                "creationDate": 1360962268432,
+                "credits": [],
+                "descendantOf": [
+                    {
+                        "midRef": "POMS_S_NOS_104206",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:3731082"
+                    }
+                ],
+                "descriptions": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "H\u00e9t dagelijks nieuwsprogramma voor kinderen van 9 tot en met 12 jaar."
+                    }
+                ],
+                "email": [
+                    "jeugdjournaal@rtv.nos.nl"
+                ],
+                "embeddable": true,
+                "genres": [
+                    "Jeugd",
+                    "Kinderen 6-12"
+                ],
+                "images": [
+                    {
+                        "creationDate": 1360962270873,
+                        "description": "NOS Jeugdjournaal met gebarentolk",
+                        "highlighted": false,
+                        "imageUri": "urn:vpro:image:133681",
+                        "lastModified": 1360962270919,
+                        "owner": "NEBO",
+                        "title": "NOS Jeugdjournaal met gebarentolk",
+                        "type": "PICTURE",
+                        "urn": "urn:vpro:media:image:20719989",
+                        "workflow": "PUBLISHED"
+                    }
+                ],
+                "isOrdered": true,
+                "lastModified": 1363068651802,
+                "locations": [],
+                "memberOf": [
+                    {
+                        "added": 1360962272323,
+                        "highlighted": false,
+                        "index": 6,
+                        "midRef": "POMS_S_NOS_104206",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:3731082"
+                    }
+                ],
+                "mid": "10Jeugd1130",
+                "scheduleEvents": [],
+                "sortDate": 1283506200000,
+                "titles": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal met gebarentolk"
+                    },
+                    {
+                        "owner": "NEBO",
+                        "type": "LEXICO",
+                        "value": "Jeugdjournaal met gebarentolk"
+                    }
+                ],
+                "type": "SEASON",
+                "urn": "urn:vpro:media:group:20719987",
+                "websites": [
+                    {
+                        "value": "http://www.jeugdjournaal.nl/index.html"
+                    },
+                    {
+                        "value": "http://www.jeugdjournaal.nl/index.html"
+                    }
+                ],
+                "workflow": "PUBLISHED"
+            },
+            "id": "10Jeugd1130",
+            "key": "10Jeugd1130",
+            "value": {
+                "rev": "3-e2176d20c33351b076a4463dba5bd929"
+            }
+        },
+        {
+            "doc": {
+                "_id": "10Jeugd1710",
+                "_rev": "3-6d9b8d16c2a1aecf2948c0e29abff877",
+                "avType": "VIDEO",
+                "broadcasters": [
+                    "NOS",
+                    "NPO Zapp"
+                ],
+                "creationDate": 1360962273893,
+                "credits": [],
+                "descendantOf": [
+                    {
+                        "midRef": "POMS_S_NOS_104532",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:19260966"
+                    }
+                ],
+                "descriptions": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "Het belangrijkste nieuws voor kinderen in vier minuten. Dat zie je in de middaguitzending van het NOS Jeugdjournaal. Met iedere dag een nieuwe stelling van de Jeugdjournaal-website."
+                    }
+                ],
+                "embeddable": true,
+                "genres": [
+                    "Jeugd",
+                    "Kinderen 6-12"
+                ],
+                "images": [
+                    {
+                        "creationDate": 1360962276362,
+                        "description": "NOS Jeugdjournaal - middag",
+                        "highlighted": false,
+                        "imageUri": "urn:vpro:image:133681",
+                        "lastModified": 1360962276404,
+                        "owner": "NEBO",
+                        "title": "NOS Jeugdjournaal - middag",
+                        "type": "PICTURE",
+                        "urn": "urn:vpro:media:image:20720016",
+                        "workflow": "PUBLISHED"
+                    }
+                ],
+                "isOrdered": true,
+                "lastModified": 1363069916259,
+                "locations": [],
+                "memberOf": [
+                    {
+                        "added": 1360962277927,
+                        "highlighted": false,
+                        "index": 5,
+                        "midRef": "POMS_S_NOS_104532",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:19260966"
+                    }
+                ],
+                "mid": "10Jeugd1710",
+                "scheduleEvents": [],
+                "sortDate": 1275664320000,
+                "titles": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal - middag"
+                    },
+                    {
+                        "owner": "NEBO",
+                        "type": "LEXICO",
+                        "value": "NOS Jeugdjournaal - middag"
+                    }
+                ],
+                "type": "SEASON",
+                "urn": "urn:vpro:media:group:20720014",
+                "workflow": "PUBLISHED"
+            },
+            "id": "10Jeugd1710",
+            "key": "10Jeugd1710",
+            "value": {
+                "rev": "3-6d9b8d16c2a1aecf2948c0e29abff877"
+            }
+        },
+        {
+            "doc": {
+                "_id": "10Jeugd1845",
+                "_rev": "3-573f347b2273a912572865f75966085a",
+                "avType": "VIDEO",
+                "broadcasters": [
+                    "NOS",
+                    "NPO Zapp"
+                ],
+                "creationDate": 1360960551748,
+                "credits": [],
+                "descendantOf": [
+                    {
+                        "midRef": "POMS_S_NOS_059930",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:3730962"
+                    }
+                ],
+                "descriptions": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "H\u00e9t dagelijks nieuwsprogramma voor kinderen van 9 tot en met 12 jaar."
+                    },
+                    {
+                        "owner": "NEBO",
+                        "type": "EPISODE",
+                        "value": "H\u00e9t dagelijks nieuwsprogramma voor kinderen van 9 tot en met 12 jaar."
+                    }
+                ],
+                "embeddable": true,
+                "genres": [
+                    "Jeugd",
+                    "Kinderen 6-12"
+                ],
+                "images": [
+                    {
+                        "creationDate": 1360960554209,
+                        "description": "NOS Jeugdjournaal - avond",
+                        "highlighted": false,
+                        "imageUri": "urn:vpro:image:133680",
+                        "lastModified": 1360960554252,
+                        "owner": "NEBO",
+                        "title": "NOS Jeugdjournaal - avond",
+                        "type": "PICTURE",
+                        "urn": "urn:vpro:media:image:20709177",
+                        "workflow": "PUBLISHED"
+                    }
+                ],
+                "isOrdered": true,
+                "lastModified": 1363049931250,
+                "locations": [],
+                "memberOf": [
+                    {
+                        "added": 1360960555665,
+                        "highlighted": false,
+                        "index": 9,
+                        "midRef": "POMS_S_NOS_059930",
+                        "type": "SERIES",
+                        "urnRef": "urn:vpro:media:group:3730962"
+                    }
+                ],
+                "mid": "10Jeugd1845",
+                "scheduleEvents": [],
+                "sortDate": 1293817500000,
+                "titles": [
+                    {
+                        "owner": "NEBO",
+                        "type": "MAIN",
+                        "value": "NOS Jeugdjournaal - avond"
+                    },
+                    {
+                        "owner": "NEBO",
+                        "type": "LEXICO",
+                        "value": "Jeugdjournaal - avond"
+                    }
+                ],
+                "type": "SEASON",
+                "urn": "urn:vpro:media:group:20709174",
+                "websites": [
+                    {
+                        "value": "http://www.nos.nl/jeugdjournaal/index.html"
+                    },
+                    {
+                        "value": "http://www.nos.nl/jeugdjournaal/index.html"
+                    }
+                ],
+                "workflow": "PUBLISHED"
+            },
+            "id": "10Jeugd1845",
+            "key": "10Jeugd1845",
+            "value": {
+                "rev": "3-573f347b2273a912572865f75966085a"
+            }
+        }
+    ],
+    "total_rows": 117428
+}

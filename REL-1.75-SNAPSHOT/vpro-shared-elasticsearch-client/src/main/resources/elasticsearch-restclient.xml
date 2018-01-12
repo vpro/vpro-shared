@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <bean id="esRestClientFactory" class="nl.vpro.elasticsearchclient.ClientElasticSearchFactory" autowire-candidate="true">
+    <property name="clusterName" value="${elasticSearch.cluster}"/>
+    <property name="unicastHosts" value="${elasticSearch.unicastHosts}"/>
+    <property name="implicitJavaToHttpPort" value="true" />
+  </bean>
+
+</beans>

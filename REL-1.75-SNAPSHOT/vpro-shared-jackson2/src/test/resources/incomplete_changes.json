@@ -1,0 +1,31 @@
+{
+  "size": 14,
+  "changes": [
+    {
+      "sequence": 724,
+      "revision": 2,
+      "mid": "POMS_NCRV_1138990",
+      "deleted": true
+    },
+    "Een string",
+    null,
+    {
+      "sequence": 3660,
+      "revision": 2,
+      "mid": "POMS_AVRO_1138559",
+      "deleted": true
+    },
+    "some error",
+    {
+      "sequence": 3661,
+      "revision": 2,
+      "mid": "POMS_AVRO_1138560",
+      "deleted": true
+    },
+    {
+      "sequence": 4000,
+      "revision": 1,
+      "mid": "POMS_VPRO_1139774",
+      "deleted": false,
+      "media": {
+        "objectType": "program",
