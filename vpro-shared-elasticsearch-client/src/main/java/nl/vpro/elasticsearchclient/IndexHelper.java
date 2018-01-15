@@ -250,7 +250,9 @@ public class IndexHelper {
             JsonNode node = i.next();
             bulk.add(deleteRequest(node.get("_type").asText(), node.get("_id").asText()));
         }
-        bulk(bulk);
+        if (bulk.size() > 0) {
+            bulk(bulk);
+        }
     }
 
     public boolean refresh() {
@@ -482,12 +484,14 @@ public class IndexHelper {
 
 
     public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
+
         try {
             ObjectNode result = read(
                 client().performRequest(
                     "POST", "_bulk",
                     Collections.emptyMap(),
-                    bulkEntity(request))
+                    bulkEntity(request)
+                )
             );
             return result;
         } catch (IOException e) {
@@ -501,7 +505,10 @@ public class IndexHelper {
     public final Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future, listeners));
+        client().performRequestAsync("POST", "_bulk",
+            Collections.emptyMap(),
+            bulkEntity(request),
+            listen(future, listeners));
         return future;
     }
 
@@ -538,8 +545,14 @@ public class IndexHelper {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         searchAsync(request, (entity) ->  {
-            long count = entity.get("hits").get("total").longValue();
-            consumer.accept(count);
+            JsonNode hits = entity.get("hits");
+            if (hits != null) {
+                long count = hits.get("total").longValue();
+                consumer.accept(count);
+            } else {
+                log.warn("{}", entity);
+                consumer.accept(null);
+            }
         });
     }
 
