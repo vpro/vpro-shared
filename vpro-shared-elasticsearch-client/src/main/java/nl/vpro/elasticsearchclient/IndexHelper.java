@@ -29,6 +29,7 @@ import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.util.concurrent.Futures;
 
@@ -323,8 +324,17 @@ public class IndexHelper {
 
             @Override
             public void onFailure(Exception exception) {
-                log.error(exception.getMessage(), exception);
-                future.completeExceptionally(exception);
+                if (exception instanceof ResponseException) {
+                    ResponseException re = (ResponseException) exception;
+                    Response response = re.getResponse();
+                    ObjectNode result = read(response);
+                    for (Consumer<ObjectNode> rl : listeners) {
+                        rl.accept(result);
+                    }
+                } else {
+                    log.error(exception.getMessage(), exception);
+                    future.completeExceptionally(exception);
+                }
 
             }
         };
@@ -579,5 +589,84 @@ public class IndexHelper {
         return  future;
     }
 
+
+    public Consumer<ObjectNode> indexLogger(Logger logger) {
+        return jsonNode -> {
+            String index = jsonNode.get("_index").textValue();
+            String type = jsonNode.get("_type").textValue();
+            String id = jsonNode.get("_id").textValue();
+            int version = jsonNode.get("_version").intValue();
+            logger.info("{}/{}/{}/{} version: {}", clientFactory, index, type, encode(id), version);
+            logger.debug("{}", jsonNode);
+        };
+    }
+
+
+
+    public Consumer<ObjectNode> deleteLogger(Logger logger) {
+        return jsonNode -> {
+            boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
+            String index = jsonNode.get("_index").textValue();
+            String type = jsonNode.get("_type").textValue();
+            String id = jsonNode.get("_id").textValue();
+            int version = jsonNode.get("_version").intValue();
+            if (found) {
+                logger.info("{}/{}/{}/{} version: {}", clientFactory, index, type, encode(id), version);
+            } else {
+                logger.info("{}/{}/{}/{} (not found)", clientFactory, index, type, encode(id));
+            }
+            logger.debug("{} {}", clientFactory, jsonNode);
+        };
+    }
+
+
+    public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog) {
+        Consumer<ObjectNode> indexLogger = indexLogger(indexLog);
+        Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog);
+
+        return jsonNode -> {
+            ArrayNode items = jsonNode.withArray("items");
+            for (JsonNode n : items) {
+                ObjectNode on = (ObjectNode) n;
+                if (on.has("delete")) {
+                    deleteLogger.accept(on.with("delete"));
+                    continue;
+                }
+                if (n.has("index")) {
+                    indexLogger.accept(on.with("index"));
+                    continue;
+                }
+                log.warn("Unrecognized bulk response {}", n);
+
+            }
+        };
+    }
+
+    public Consumer<ObjectNode> bulkLogger(Logger logger) {
+        return jsonNode -> {
+            ArrayNode items = jsonNode.withArray("items");
+            int deletes = 0;
+            int indexes = 0;
+            String index = null;
+            String type = null;
+            for (JsonNode n : items) {
+                ObjectNode on = (ObjectNode) n;
+                index = n.get("_index").textValue();
+                type = n.get("_type").textValue();
+                if (on.has("delete")) {
+                    deletes++;
+                    continue;
+                }
+                if (n.has("index")) {
+                    indexes++;
+                    continue;
+                }
+                log.warn("Unrecognized bulk response {}", n);
+
+            }
+
+            logger.info("{} {}/{} indices: {}, revokes: {}", clientFactory, index, type, indexes, deletes);
+        };
+    }
 
 }
