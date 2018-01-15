@@ -646,27 +646,33 @@ public class IndexHelper {
     public Consumer<ObjectNode> bulkLogger(Logger logger) {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
-            int deletes = 0;
-            int indexes = 0;
             String index = null;
             String type = null;
+            List<String> deleted = new ArrayList<>();
+            List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
-                index = n.get("_index").textValue();
-                type = n.get("_type").textValue();
                 if (on.has("delete")) {
-                    deletes++;
+                    ObjectNode delete = on.with("delete");
+                    index = delete.get("_index").textValue();
+                    type = delete.get("_type").textValue();
+                    String id = delete.get("_id").textValue();
+                    deleted.add(id);
                     continue;
                 }
                 if (n.has("index")) {
-                    indexes++;
+                    ObjectNode indexResponse = on.with("index");
+                    index = indexResponse.get("_index").textValue();
+                    type = indexResponse.get("_type").textValue();
+                    String id = indexResponse.get("_id").textValue();
+                    indexed.add(id);
                     continue;
                 }
                 log.warn("Unrecognized bulk response {}", n);
 
             }
 
-            logger.info("{} {}/{} indices: {}, revokes: {}", clientFactory, index, type, indexes, deletes);
+            logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
         };
     }
 
