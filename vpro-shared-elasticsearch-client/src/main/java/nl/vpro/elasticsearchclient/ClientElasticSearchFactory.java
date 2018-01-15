@@ -32,8 +32,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     private String unicastHosts;
 
-    private IndexHelper helper;
-
     private boolean implicitJavaToHttpPort = true;
 
     Map<String, RestClient> clients = new HashMap<>();
@@ -52,23 +50,13 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
         }
 
         Logger l = LoggerFactory.getLogger(logName);
-        HttpHost[] hosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
-            .map(HttpHost::create)
-            .map(h ->
-                    h.getPort() >= 9300 && implicitJavaToHttpPort ?
-                        new HttpHost(h.getHostName(), h.getPort() - 100)
-                        : h
-            )
-            .map(h ->
-                    h.getPort() == -1 ? new HttpHost(h.getHostName(), 9200) : h
-            )
-            .toArray(HttpHost[]::new);
+        HttpHost[] hosts = getHosts();
 
         final RestClientBuilder clientBuilder = RestClient.builder(hosts);
         final RestClient client = clientBuilder.build();
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
-        helper = IndexHelper.builder()
+        IndexHelper helper = IndexHelper.builder()
             .client((e) -> client)
             .log(l)
             .build();
@@ -87,4 +75,31 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
         });
         return future;
     }
+
+    protected HttpHost[] getHosts() {
+        return Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
+            .map(HttpHost::create)
+            .map(h ->
+                h.getPort() >= 9300 && implicitJavaToHttpPort ?
+                    new HttpHost(h.getHostName(), h.getPort() - 100)
+                    : h
+            )
+            .map(h ->
+                h.getPort() == -1 ? new HttpHost(h.getHostName(), 9200) : h
+            )
+            .toArray(HttpHost[]::new);
+    }
+
+    @Override
+    public String toString() {
+        HttpHost[] hosts = getHosts();
+        if (hosts.length > 0) {
+            return hosts[0].toString();
+        } else {
+            return unicastHosts;
+        }
+
+    }
+
+
 }
