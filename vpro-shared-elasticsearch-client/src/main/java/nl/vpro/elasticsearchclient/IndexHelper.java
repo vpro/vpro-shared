@@ -302,7 +302,7 @@ public class IndexHelper {
 
 
     @SafeVarargs
-    public final Future<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
             log.debug("posting");
@@ -358,7 +358,7 @@ public class IndexHelper {
     }
 
     @SafeVarargs
-    public final Future<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
         return postAsync(getIndexName() + "/" + type + "/" + encode(id), getPublisherInstance().valueToTree(o), listeners);
     }
 
@@ -410,7 +410,7 @@ public class IndexHelper {
 
 
     @SafeVarargs
-    public final Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id),
@@ -522,9 +522,11 @@ public class IndexHelper {
 
 
     @SafeVarargs
-    public final Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
-
+        if (request.size() == 0) {
+            return CompletableFuture.completedFuture(null);
+        }
         client().performRequestAsync("POST", "_bulk",
             Collections.emptyMap(),
             bulkEntity(request),
