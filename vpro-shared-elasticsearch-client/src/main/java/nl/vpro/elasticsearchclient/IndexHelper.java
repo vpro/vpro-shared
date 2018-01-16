@@ -300,18 +300,20 @@ public class IndexHelper {
 
 
     @SafeVarargs
-    public final Future<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
             log.debug("posting");
-            client.performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
+            client.performRequestAsync("POST", path, Collections.emptyMap(),
+                entity(request),
+                listen(request.toString(), future, listeners));
             }
         );
         return future;
     }
 
     @SafeVarargs
-    protected final ResponseListener listen(final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
+    protected final ResponseListener listen(final String requestDescription, final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
@@ -332,7 +334,7 @@ public class IndexHelper {
                         rl.accept(result);
                     }
                 } else {
-                    log.error(exception.getMessage(), exception);
+                    log.error("{}: {}", requestDescription, exception.getMessage(), exception);
                     future.completeExceptionally(exception);
                 }
 
@@ -354,7 +356,7 @@ public class IndexHelper {
     }
 
     @SafeVarargs
-    public final Future<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
         return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o), listeners);
     }
 
@@ -383,6 +385,22 @@ public class IndexHelper {
         return null;
     }
 
+    public ObjectNode delete(String[] types, String id) {
+        Collection<Pair<ObjectNode, ObjectNode>> bulkRequest = new ArrayList<>();
+        for (String type : types) {
+            bulkRequest.add(deleteRequest(type, id));
+        }
+        ObjectNode bulkResponse = bulk(bulkRequest);
+        ObjectNode delete = null;
+        for (JsonNode jsonNode : bulkResponse.withArray("items")) {
+            delete = (ObjectNode) jsonNode.with("delete");
+            if (delete.get("found").booleanValue()) {
+                break;
+            }
+        }
+        return delete;
+    }
+
 
     public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
         return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue(), listeners);
@@ -392,7 +410,9 @@ public class IndexHelper {
     public Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id), listen(future, listeners));
+        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id),
+            listen("delete " + type + "/" + id, future, listeners)
+        );
         return future;
     }
 
@@ -497,9 +517,11 @@ public class IndexHelper {
 
 
     @SafeVarargs
-    public final Future<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
-
+        if (request.size() == 0) {
+            return CompletableFuture.completedFuture(null);
+        }
         client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future, listeners));
         return future;
     }
