@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>vpro-shared-parent</artifactId>
-    <version>1.75.4</version>
+    <version>1.75.5-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-services</artifactId>
   <description>This module contains service classes to be shared to be shared among other modules</description>
