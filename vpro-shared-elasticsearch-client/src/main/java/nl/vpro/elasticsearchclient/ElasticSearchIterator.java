@@ -58,7 +58,6 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
     public ObjectNode prepareSearch(Collection<String> indices, Collection<String> types) {
         request = Jackson2Mapper.getInstance().createObjectNode();
-        request.with("query");
         this.indices = indices == null ? Collections.emptyList() : indices;
         this.types = types == null ? Collections.emptyList() : types;
         return request;

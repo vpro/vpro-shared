@@ -69,8 +69,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
             clients.put(logName, client);
             if (l.isInfoEnabled()) {
                 l.info("Connected to cluster '{}'", foundClusterName);
-                helper.countAsync((count) ->
-                    l.info("Cluster '{}' has  {} objects", foundClusterName, count));
             }
         });
         return future;
