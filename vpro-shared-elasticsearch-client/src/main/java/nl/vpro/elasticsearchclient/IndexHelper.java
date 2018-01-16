@@ -387,6 +387,22 @@ public class IndexHelper {
         return null;
     }
 
+    public ObjectNode delete(String[] types, String id) {
+        Collection<Pair<ObjectNode, ObjectNode>> bulkRequest = new ArrayList<>();
+        for (String type : types) {
+            bulkRequest.add(deleteRequest(type, id));
+        }
+        ObjectNode bulkResponse = bulk(bulkRequest);
+        ObjectNode delete = null;
+        for (JsonNode jsonNode : bulkResponse.withArray("items")) {
+            delete = (ObjectNode) jsonNode.with("delete");
+            if (delete.get("found").booleanValue()) {
+                break;
+            }
+        }
+        return delete;
+    }
+
 
     public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
         return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue(), listeners);
