@@ -306,14 +306,16 @@ public class IndexHelper {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
             log.debug("posting");
-            client.performRequestAsync("POST", path, Collections.emptyMap(), entity(request), listen(future, listeners));
+            client.performRequestAsync("POST", path, Collections.emptyMap(),
+                entity(request),
+                listen(request.toString(), future, listeners));
             }
         );
         return future;
     }
 
     @SafeVarargs
-    protected final ResponseListener listen(final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
+    protected final ResponseListener listen(final String requestDescription, final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
@@ -334,7 +336,7 @@ public class IndexHelper {
                         rl.accept(result);
                     }
                 } else {
-                    log.error(exception.getMessage(), exception);
+                    log.error("{}: {}", requestDescription, exception.getMessage(), exception);
                     future.completeExceptionally(exception);
                 }
 
@@ -395,7 +397,9 @@ public class IndexHelper {
     public final Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id), listen(future, listeners));
+        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id),
+            listen("delete " + type + "/" + id, future, listeners)
+        );
         return future;
     }
 
@@ -508,7 +512,7 @@ public class IndexHelper {
         client().performRequestAsync("POST", "_bulk",
             Collections.emptyMap(),
             bulkEntity(request),
-            listen(future, listeners));
+            listen("" + request.size() + " bulk operations", future, listeners));
         return future;
     }
 
