@@ -688,7 +688,7 @@ public class IndexHelper {
                     indexLogger.accept(on.with("index"));
                     continue;
                 }
-                log.warn("Unrecognized bulk response {}", n);
+                log.warn("{}Unrecognized bulk response {}", logPrefix, n);
 
             }
         };
