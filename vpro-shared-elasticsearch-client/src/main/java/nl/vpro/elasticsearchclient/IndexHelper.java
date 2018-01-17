@@ -28,6 +28,7 @@ import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -613,19 +614,27 @@ public class IndexHelper {
 
 
     public Consumer<ObjectNode> indexLogger(Logger logger) {
+        return indexLogger(logger, () -> "");
+    }
+
+    public Consumer<ObjectNode> indexLogger(Logger logger, Supplier<String> prefix) {
         return jsonNode -> {
             String index = jsonNode.get("_index").textValue();
             String type = jsonNode.get("_type").textValue();
             String id = jsonNode.get("_id").textValue();
             int version = jsonNode.get("_version").intValue();
-            logger.info("{}/{}/{}/{} version: {}", clientFactory, index, type, encode(id), version);
-            logger.debug("{}", jsonNode);
+            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
+            logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
 
 
-
     public Consumer<ObjectNode> deleteLogger(Logger logger) {
+        return deleteLogger(logger, () -> "");
+    }
+
+
+    public Consumer<ObjectNode> deleteLogger(Logger logger, Supplier<String> prefix) {
         return jsonNode -> {
             boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
             String index = jsonNode.get("_index").textValue();
@@ -633,23 +642,30 @@ public class IndexHelper {
             String id = jsonNode.get("_id").textValue();
             int version = jsonNode.get("_version").intValue();
             if (found) {
-                logger.info("{}/{}/{}/{} version: {}", clientFactory, index, type, encode(id), version);
+                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             } else {
-                logger.info("{}/{}/{}/{} (not found)", clientFactory, index, type, encode(id));
+                logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory, index, type, encode(id));
             }
-            logger.debug("{} {}", clientFactory, jsonNode);
+            logger.debug("{}{} {}", prefix.get(), clientFactory, jsonNode);
         };
     }
 
 
     public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog) {
-        Consumer<ObjectNode> indexLogger = indexLogger(indexLog);
-        Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog);
+        @SuppressWarnings("MismatchedQueryAndUpdateOfStringBuilder")
+        StringBuilder logPrefix = new StringBuilder();
+        Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
+        Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
 
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
+            int i = 0;
+            int total = items.size();
             for (JsonNode n : items) {
+                logPrefix.setLength(0);
+                logPrefix.append(++i).append('/').append(total).append(' ');
                 ObjectNode on = (ObjectNode) n;
+
                 if (on.has("delete")) {
                     deleteLogger.accept(on.with("delete"));
                     continue;
@@ -658,7 +674,7 @@ public class IndexHelper {
                     indexLogger.accept(on.with("index"));
                     continue;
                 }
-                log.warn("Unrecognized bulk response {}", n);
+                log.warn("{}Unrecognized bulk response {}", logPrefix, n);
 
             }
         };
