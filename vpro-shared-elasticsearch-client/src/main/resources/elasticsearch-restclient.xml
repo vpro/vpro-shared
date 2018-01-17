@@ -6,6 +6,9 @@
     <property name="clusterName" value="${elasticSearch.cluster}"/>
     <property name="unicastHosts" value="${elasticSearch.unicastHosts}"/>
     <property name="implicitJavaToHttpPort" value="true" />
+    <property name="socketTimeoutDuration" value="${elasticSearch.socketTimeout}"/>
+    <property name="connectionTimeoutDuration" value="${elasticSearch.connectTimeout}"/>
+    <property name="maxRetryTimeoutDuration" value="${elasticSearch.maxRetryTimeout}"/>
   </bean>
 
 </beans>

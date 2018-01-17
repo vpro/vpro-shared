@@ -3,6 +3,7 @@ package nl.vpro.elasticsearchclient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,13 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.Futures;
 
+import nl.vpro.util.TimeUtils;
+
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.75
  */
-@Data
 @Slf4j
+@Data
 public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     private String clusterName;
@@ -33,6 +36,10 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
     private String unicastHosts;
 
     private boolean implicitJavaToHttpPort = true;
+
+    private Duration socketTimeout = Duration.ofSeconds(60);
+    private Duration connectionTimeout = Duration.ofSeconds(5);
+    private Duration maxRetryTimeout = Duration.ofSeconds(60);
 
     Map<String, RestClient> clients = new HashMap<>();
 
@@ -53,7 +60,12 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
         HttpHost[] hosts = getHosts();
 
         final RestClientBuilder clientBuilder = RestClient.builder(hosts);
-        final RestClient client = clientBuilder.build();
+        final RestClient client = clientBuilder
+            .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
+                .setConnectTimeout((int) connectionTimeout.toMillis())
+                .setSocketTimeout((int) socketTimeout.toMillis()))
+            .setMaxRetryTimeoutMillis((int) maxRetryTimeout.toMillis())
+            .build();
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
         IndexHelper helper = IndexHelper.builder()
@@ -99,5 +111,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     }
 
+    public void setSocketTimeoutDuration(String socketTimeout) {
+        this.socketTimeout = TimeUtils.parseDuration(socketTimeout).orElse(this.socketTimeout);
+    }
 
+    public void setConnectionTimeoutDuration(String connectionTimeout) {
+        this.connectionTimeout = TimeUtils.parseDuration(connectionTimeout).orElse(this.connectionTimeout);
+    }
+
+    public void setMaxRetryTimeoutDuration(String maxRetryTimeout) {
+        this.maxRetryTimeout = TimeUtils.parseDuration(maxRetryTimeout).orElse(this.maxRetryTimeout);
+    }
 }
