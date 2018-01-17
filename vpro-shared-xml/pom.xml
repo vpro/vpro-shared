@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>1.75.5</version>
+    <version>1.75.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-xml</artifactId>
