@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -601,28 +598,28 @@ public class IndexHelper {
     public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
         CompletableFuture<String> future = new CompletableFuture<>();
         final RestClient client = client();
-        client.performRequestAsync("GET", "/", Collections.emptyMap(), new ResponseListener() {
+        client.performRequestAsync("GET", "/_cat/health", Collections.emptyMap(), new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
-                ObjectNode node = read(response);
-                log.info("Found {}", node);
-                String clusterName;
-                if (node.has("cluster_name")) {
-                    clusterName = node.get("cluster_name").asText(null);
-                } else {
-                    log.warn("Could not found cluster_name in {} with {}", node, client());
-                    clusterName = null;
-                }
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
                 try {
-                    for (Consumer<String> callBack : callBacks) {
-                        callBack.accept(clusterName);
+                    IOUtils.copy(response.getEntity().getContent(), out);
+                    String[] content = out.toString("UTF-8").split("\\s+");
+                    log.info("Found {}", Arrays.asList(content));
+                    String clusterName = content[2];
+                    try {
+                        for (Consumer<String> callBack : callBacks) {
+                            callBack.accept(clusterName);
+                        }
+                    } catch (Exception e) {
+                        future.completeExceptionally(e);
+                        return;
                     }
-                } catch (Exception e) {
+                    future.complete(clusterName);
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
                     future.completeExceptionally(e);
-                    return;
                 }
-                future.complete(clusterName);
-
             }
 
             @Override
