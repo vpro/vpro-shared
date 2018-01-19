@@ -613,8 +613,13 @@ public class IndexHelper {
                     log.warn("Could not found cluster_name in {} with {}", node, client());
                     clusterName = null;
                 }
-                for (Consumer<String> callBack : callBacks) {
-                    callBack.accept(clusterName);
+                try {
+                    for (Consumer<String> callBack : callBacks) {
+                        callBack.accept(clusterName);
+                    }
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                    return;
                 }
                 future.complete(clusterName);
 
