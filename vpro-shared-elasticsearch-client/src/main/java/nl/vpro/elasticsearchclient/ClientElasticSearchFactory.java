@@ -70,7 +70,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
             .client(new SimpleESClientFactory(client, this::toString))
             .log(l)
             .build();
-        CompletableFuture<String> clusterNameGetter = helper.getClusterNameAsync().whenComplete((foundClusterName, exception) -> {
+        helper.getClusterNameAsync().whenComplete((foundClusterName, exception) -> {
             if (exception != null) {
                 future.completeExceptionally(exception);
             }
