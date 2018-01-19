@@ -608,7 +608,7 @@ public class IndexHelper {
                 log.info("Found {}", node);
                 String clusterName;
                 if (node.has("cluster_name")) {
-                    clusterName = node.get("cluster_name").asText();
+                    clusterName = node.get("cluster_name").asText(null);
                 } else {
                     log.warn("Could not found cluster_name in {} with {}", node, client());
                     clusterName = null;
