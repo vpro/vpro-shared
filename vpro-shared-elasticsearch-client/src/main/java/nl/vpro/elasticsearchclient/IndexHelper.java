@@ -251,7 +251,9 @@ public class IndexHelper {
             JsonNode node = i.next();
             bulk.add(deleteRequest(node.get("_type").asText(), node.get("_id").asText()));
         }
-        bulk(bulk);
+        if (bulk.size() > 0) {
+            bulk(bulk);
+        }
     }
 
     public boolean refresh() {
@@ -358,13 +360,13 @@ public class IndexHelper {
 
     @SafeVarargs
     public final CompletableFuture<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
-        return postAsync(getIndexName() + "/" + type + "/" + encode(id), Jackson2Mapper.getPublisherInstance().valueToTree(o), listeners);
+        return postAsync(getIndexName() + "/" + type + "/" + encode(id), getPublisherInstance().valueToTree(o), listeners);
     }
 
 
     @SafeVarargs
     public final Future<ObjectNode> indexAsync(String type, String id, Object o, String parent, Consumer<ObjectNode>... listeners) {
-        return postAsync(indexPath(type, id, parent), Jackson2Mapper.getPublisherInstance().valueToTree(o));
+        return postAsync(indexPath(type, id, parent), getPublisherInstance().valueToTree(o));
     }
 
 
@@ -408,7 +410,8 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
+    @SafeVarargs
+    public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id),
@@ -502,12 +505,14 @@ public class IndexHelper {
 
 
     public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
+
         try {
             ObjectNode result = read(
                 client().performRequest(
                     "POST", "_bulk",
                     Collections.emptyMap(),
-                    bulkEntity(request))
+                    bulkEntity(request)
+                )
             );
             return result;
         } catch (IOException e) {
@@ -523,7 +528,10 @@ public class IndexHelper {
         if (request.size() == 0) {
             return CompletableFuture.completedFuture(null);
         }
-        client().performRequestAsync("POST", "_bulk", Collections.emptyMap(), bulkEntity(request), listen(future, listeners));
+        client().performRequestAsync("POST", "_bulk",
+            Collections.emptyMap(),
+            bulkEntity(request),
+            listen("" + request.size() + " bulk operations", future, listeners));
         return future;
     }
 
@@ -560,8 +568,14 @@ public class IndexHelper {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         searchAsync(request, (entity) ->  {
-            long count = entity.get("hits").get("total").longValue();
-            consumer.accept(count);
+            JsonNode hits = entity.get("hits");
+            if (hits != null) {
+                long count = hits.get("total").longValue();
+                consumer.accept(count);
+            } else {
+                log.warn("{}", entity);
+                consumer.accept(null);
+            }
         });
     }
 
@@ -692,27 +706,33 @@ public class IndexHelper {
     public Consumer<ObjectNode> bulkLogger(Logger logger) {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
-            int deletes = 0;
-            int indexes = 0;
             String index = null;
             String type = null;
+            List<String> deleted = new ArrayList<>();
+            List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
-                index = n.get("_index").textValue();
-                type = n.get("_type").textValue();
                 if (on.has("delete")) {
-                    deletes++;
+                    ObjectNode delete = on.with("delete");
+                    index = delete.get("_index").textValue();
+                    type = delete.get("_type").textValue();
+                    String id = delete.get("_id").textValue();
+                    deleted.add(id);
                     continue;
                 }
                 if (n.has("index")) {
-                    indexes++;
+                    ObjectNode indexResponse = on.with("index");
+                    index = indexResponse.get("_index").textValue();
+                    type = indexResponse.get("_type").textValue();
+                    String id = indexResponse.get("_id").textValue();
+                    indexed.add(id);
                     continue;
                 }
                 log.warn("Unrecognized bulk response {}", n);
 
             }
 
-            logger.info("{} {}/{} indices: {}, revokes: {}", clientFactory, index, type, indexes, deletes);
+            logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
         };
     }
 
