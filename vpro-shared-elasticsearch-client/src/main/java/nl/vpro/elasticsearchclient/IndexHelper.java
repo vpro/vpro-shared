@@ -576,17 +576,18 @@ public class IndexHelper {
 
     public String getClusterName() {
         try {
-            return getClusterNameAsync((s) -> {
-            }).get();
+            return getClusterNameAsync().get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    public Future<String> getClusterNameAsync(Consumer<String> callBack) {
+    @SafeVarargs
+    public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
         CompletableFuture<String> future = new CompletableFuture<>();
-        client().performRequestAsync("GET", "/", Collections.emptyMap(), new ResponseListener() {
+        final RestClient client = client();
+        client.performRequestAsync("GET", "/", Collections.emptyMap(), new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 ObjectNode node = read(response);
@@ -598,13 +599,21 @@ public class IndexHelper {
                     log.warn("Could not found cluster_name in {} with {}", node, client());
                     clusterName = null;
                 }
-                callBack.accept(clusterName);
+                try {
+                    for (Consumer<String> callBack : callBacks) {
+                        callBack.accept(clusterName);
+                    }
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
+                    return;
+                }
                 future.complete(clusterName);
 
             }
 
             @Override
             public void onFailure(Exception exception) {
+                log.error("Error getting clustername from {}: {}", clientFactory, exception.getMessage(), exception);
                 future.completeExceptionally(exception);
             }
 
