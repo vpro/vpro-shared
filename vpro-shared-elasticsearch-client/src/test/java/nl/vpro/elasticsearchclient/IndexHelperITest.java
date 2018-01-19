@@ -2,9 +2,6 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.Before;
@@ -47,7 +44,7 @@ public class IndexHelperITest {
     }
 
     @Test
-    public void createIndex() throws InterruptedException, ExecutionException, IOException {
+    public void createIndex() {
         helper.prepareIndex();
         helper.refresh();
         assertThat(helper.count()).isEqualTo(0);
@@ -55,4 +52,11 @@ public class IndexHelperITest {
         helper.refresh();
         assertThat(helper.checkIndex()).isFalse();
     }
+
+    @Test
+    public void getClusterNamee() {
+        log.info("clustername: {}", helper.getClusterName());
+    }
+
+
 }
