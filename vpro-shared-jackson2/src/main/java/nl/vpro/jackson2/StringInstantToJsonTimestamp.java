@@ -37,16 +37,18 @@ public class StringInstantToJsonTimestamp {
     private static Parser PARSER = new Parser(TimeZone.getTimeZone("Europe/Amsterdam"));
 
 
-    public static class Serializer extends JsonSerializer<String> {
+    public static class Serializer extends JsonSerializer<Object> {
         public static StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
 
         @Override
-        public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
             if (value == null) {
                 jgen.writeNull();
-            } else {
+            } else if (value instanceof Instant) { // if no JaxbAnnotationIntrospector
+                jgen.writeNumber(((Instant) value).toEpochMilli());
+            } else if (value instanceof CharSequence) {
                 try {
-                    jgen.writeNumber(parseDateTime(value).toEpochMilli());
+                    jgen.writeNumber(parseDateTime(String.valueOf(value)).toEpochMilli());
                 } catch (IllegalArgumentException iae) {
                     log.warn("Could not parse {}. Writing null to json", value);
                     jgen.writeNull();
