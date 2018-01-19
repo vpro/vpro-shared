@@ -130,6 +130,8 @@
 
     <hibernate.version>5.2.11.Final</hibernate.version>
     <hibernate.search.version>5.8.0.Final</hibernate.search.version>
+
+    <validation.api.version>2.0.1.Final</validation.api.version>
     <!--
 
     <hibernate.version>5.1.0.Final</hibernate.version>
@@ -395,6 +397,11 @@
         <artifactId>javax.servlet-api</artifactId>
         <version>3.1.0</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation.api.version}</version>
       </dependency>
       <dependency>
         <groupId>org.xmlunit</groupId>
