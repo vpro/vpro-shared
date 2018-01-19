@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +17,6 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.util.concurrent.Futures;
 
 import nl.vpro.util.TimeUtils;
 
@@ -49,11 +47,11 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
     }
 
     @Override
-    public Future<RestClient> clientAsync(String logName, Consumer<RestClient> callback) {
+    public CompletableFuture<RestClient> clientAsync(String logName, Consumer<RestClient> callback) {
         RestClient present = clients.get(logName);
         if (present != null) {
             callback.accept(present);
-            return Futures.immediateFuture(present);
+            return CompletableFuture.completedFuture(present);
         }
 
         Logger l = LoggerFactory.getLogger(logName);
@@ -69,12 +67,16 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
         IndexHelper helper = IndexHelper.builder()
-            .client((e) -> client)
+            .client(new SimpleESClientFactory(client, this::toString))
             .log(l)
             .build();
-        helper.getClusterNameAsync((foundClusterName) -> {
+        CompletableFuture<String> clusterNameGetter = helper.getClusterNameAsync().whenComplete((foundClusterName, exception) -> {
+            if (exception != null) {
+                future.completeExceptionally(exception);
+            }
             if (clusterName != null && !clusterName.equals(foundClusterName)) {
-                throw new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')");
+                future.completeExceptionally(new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
+                return;
             }
             future.complete(client);
             callback.accept(client);
@@ -84,6 +86,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
             }
         });
         return future;
+
     }
 
     protected HttpHost[] getHosts() {
