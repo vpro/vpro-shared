@@ -37,10 +37,12 @@ public class SerializeTestUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T roundTrip(T input) throws IOException {
         return (T) deserialize(serialize(input), input.getClass());
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T roundTripAndEquals(T input) throws IOException {
         T newT = (T) deserialize(serialize(input), input.getClass());
         assertThat(newT).isEqualTo(input);
