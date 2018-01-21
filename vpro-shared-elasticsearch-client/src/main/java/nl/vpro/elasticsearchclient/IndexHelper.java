@@ -685,16 +685,18 @@ public class IndexHelper {
                 logPrefix.setLength(0);
                 logPrefix.append(++i).append('/').append(total).append(' ');
                 ObjectNode on = (ObjectNode) n;
-
+                boolean recognized = false;
                 if (on.has("delete")) {
                     deleteLogger.accept(on.with("delete"));
-                    continue;
+                    recognized = true;
                 }
                 if (n.has("index")) {
                     indexLogger.accept(on.with("index"));
-                    continue;
+                    recognized = true;
                 }
-                log.warn("{}Unrecognized bulk response {}", logPrefix, n);
+                if (! recognized) {
+                    log.warn("{}Unrecognized bulk response {}", logPrefix, n);
+                }
 
             }
         };
