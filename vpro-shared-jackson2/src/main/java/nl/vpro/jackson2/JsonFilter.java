@@ -38,6 +38,7 @@ public class JsonFilter implements Callable<Void> {
     }
 
 
+    @SuppressWarnings("unchecked")
     private <T> T handleReplacements(Deque<String> stack, T value) {
         String fieldName = stack.poll();
         for (Replacement replacement : replacements) {
