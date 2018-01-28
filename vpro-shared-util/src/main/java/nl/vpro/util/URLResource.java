@@ -34,7 +34,9 @@ public class URLResource<T> {
     }
 
     @SafeVarargs
-    public static URLResource<Map<String, String>> map(URI url, Consumer<Map<String, String>>... callbacks) {
+    public static URLResource<Map<String, String>> map(
+        URI url,
+        Consumer<Map<String, String>>... callbacks) {
         return new URLResource<>(url, MAP, new HashMap<>(), callbacks);
     }
 
