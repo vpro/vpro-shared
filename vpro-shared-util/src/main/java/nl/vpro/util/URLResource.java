@@ -199,7 +199,7 @@ public class URLResource<T> {
         }
     }
 
-    void callBack() {
+    public void callBack() {
         for (Consumer<T> callback : callbacks) {
             callback.accept(result);
         }
