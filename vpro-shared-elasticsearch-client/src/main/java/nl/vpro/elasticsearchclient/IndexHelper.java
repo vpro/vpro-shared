@@ -265,6 +265,9 @@ public class IndexHelper {
         }
     }
 
+    public ObjectNode search(ObjectNode request, Enum<?>... types) {
+        return search(request, Arrays.toString(Arrays.stream(types).map(Enum::name).toArray(String[]::new)));
+    }
     public ObjectNode search(ObjectNode request, String... types) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
         StringBuilder path =  new StringBuilder((indexName == null ? "" : indexName));
@@ -417,6 +420,9 @@ public class IndexHelper {
         return future;
     }
 
+    public Optional<JsonNode> get(Enum<?> type, String id) {
+        return get(type.name(), id);
+    }
     public Optional<JsonNode> get(String type, String id){
         try {
             Response response = client()
@@ -438,6 +444,10 @@ public class IndexHelper {
 
 
     public Optional<JsonNode> getSource(String type, String id) {
+        return get(type, id).map(jn -> jn.get("_source"));
+    }
+
+    public Optional<JsonNode> getSource(Enum<?> type, String id) {
         return get(type, id).map(jn -> jn.get("_source"));
     }
 
@@ -552,8 +562,18 @@ public class IndexHelper {
 
     }
 
+    public long count() {
+        return count(new String[]{});
+    }
 
     public long count(String... types) {
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        request.put("size", 0);
+        ObjectNode response = search(request, types);
+        return response.get("hits").get("total").longValue();
+    }
+
+    public long count(Enum<?>... types) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         ObjectNode response = search(request, types);
