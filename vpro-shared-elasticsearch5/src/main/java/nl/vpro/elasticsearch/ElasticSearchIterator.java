@@ -37,6 +37,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     boolean needsNext = true;
 
 
+    public static ElasticSearchIterator<SearchHit> searchHits(Client client) {
+        return new ElasticSearchIterator<>(client, sh -> sh);
+    }
+
     public ElasticSearchIterator(Client client, Function<SearchHit, T> adapt) {
         this.adapt = adapt;
         this.client = client;
