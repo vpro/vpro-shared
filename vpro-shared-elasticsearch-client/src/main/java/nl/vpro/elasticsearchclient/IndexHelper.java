@@ -265,6 +265,10 @@ public class IndexHelper {
         }
     }
 
+
+    public ObjectNode search(ObjectNode request) {
+        return search(request, new String[] {});
+    }
     public ObjectNode search(ObjectNode request, Enum<?>... types) {
         return search(request, Arrays.toString(Arrays.stream(types).map(Enum::name).toArray(String[]::new)));
     }
@@ -504,6 +508,9 @@ public class IndexHelper {
         return Pair.of(actionLine, null);
     }
 
+    public Pair<ObjectNode, ObjectNode> deleteRequest(Enum<?> type, String id, String routing) {
+        return deleteRequest(type.name(), id, routing);
+    }
     public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id, String routing) {
         Pair<ObjectNode, ObjectNode> request = deleteRequest(type, id);
         request.getFirst().with("delete").put("_routing", routing);

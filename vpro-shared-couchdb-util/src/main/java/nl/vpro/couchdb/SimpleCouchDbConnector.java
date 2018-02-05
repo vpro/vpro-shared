@@ -58,12 +58,20 @@ public class SimpleCouchDbConnector {
     }
 
 
+    public InputStream getChanges(String since) throws IOException {
+        return getInputStream("_changes?include_docs=true&since=" + since);
+    }
+
     public InputStream getChanges() throws IOException {
         return getInputStream("_changes?include_docs=true");
     }
 
     public CouchdbChangesIterator getChangesIterator() throws IOException {
         return new CouchdbChangesIterator(getChanges());
+    }
+
+    public CouchdbChangesIterator getChangesIterator(String since) throws IOException {
+        return new CouchdbChangesIterator(getChanges(since));
     }
 
     public CouchdbViewIterator getAllIterator() throws IOException {
