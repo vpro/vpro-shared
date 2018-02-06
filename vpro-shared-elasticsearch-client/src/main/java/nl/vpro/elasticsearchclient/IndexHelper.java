@@ -270,7 +270,7 @@ public class IndexHelper {
         return search(request, new String[] {});
     }
     public ObjectNode search(ObjectNode request, Enum<?>... types) {
-        return search(request, Arrays.toString(Arrays.stream(types).map(Enum::name).toArray(String[]::new)));
+        return search(request, Arrays.stream(types).map(Enum::name).toArray(String[]::new));
     }
     public ObjectNode search(ObjectNode request, String... types) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
