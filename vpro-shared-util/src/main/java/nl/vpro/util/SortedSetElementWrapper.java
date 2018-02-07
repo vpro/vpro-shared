@@ -53,13 +53,7 @@ public abstract class SortedSetElementWrapper<T, S> extends AbstractSet<S> imple
 
     @Override
     public Comparator<? super S> comparator() {
-        return new Comparator<S>() {
-            @Override
-            public int compare(S o1, S o2) {
-                return wrapped.comparator().compare(find(o1), find(o2));
-
-            }
-        };
+        return (Comparator<S>) (o1, o2) -> wrapped.comparator().compare(find(o1), find(o2));
 
     }
 
