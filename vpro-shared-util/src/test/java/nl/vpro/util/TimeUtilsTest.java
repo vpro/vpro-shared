@@ -1,9 +1,8 @@
 package nl.vpro.util;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import lombok.extern.slf4j.Slf4j;
+
+import java.time.*;
 import java.time.format.DateTimeParseException;
 
 import org.junit.Test;
@@ -16,30 +15,31 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 0.45
  */
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@Slf4j
 public class TimeUtilsTest {
 
 
     @Test
-    public void parseZoned() throws Exception {
+    public void parseZoned() {
 
         assertThat(TimeUtils.parseZoned("2000-01-01").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(0, 0), TimeUtils.ZONE_ID));
 
     }
 
     @Test
-    public void parseZonedYear() throws Exception {
+    public void parseZonedYear() {
         assertThat(TimeUtils.parseZoned("2000").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(0, 0), TimeUtils.ZONE_ID));
 
     }
 
     @Test
-    public void parseMillis() throws Exception {
+    public void parseMillis() {
         assertThat(TimeUtils.parseZoned("1474643244279").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2016, 9, 23), LocalTime.of(17, 7, 24, 279000000), TimeUtils.ZONE_ID));
 
     }
 
     @Test
-    public void parse() throws Exception {
+    public void parse() {
 
         assertThat(TimeUtils.parse("2000-07-11T14:00:33.556+02:00").get())
             .isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 7, 11), LocalTime.of(14, 0, 33, 556000000), TimeUtils.ZONE_ID).toInstant());
@@ -47,7 +47,16 @@ public class TimeUtilsTest {
     }
 
     @Test
-    public void parseDuration() throws Exception {
+    public void parse2() {
+        LocalDateTime example = LocalDateTime.of(2018, 2, 13, 9, 0);
+        log.info("{}", example);
+        assertThat(TimeUtils.parse("2018-02-13T09:00").get())
+            .isEqualTo(example.atZone(TimeUtils.ZONE_ID).toInstant());
+
+    }
+
+    @Test
+    public void parseDuration() {
         assertThat(TimeUtils.parseDuration("PT5M").get()).isEqualTo(Duration.ofMinutes(5));
         assertThat(TimeUtils.parseDuration("T5M").get()).isEqualTo(Duration.ofMinutes(5));
         assertThat(TimeUtils.parseDuration("5M").get()).isEqualTo(Duration.ofMinutes(5));
