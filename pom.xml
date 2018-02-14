@@ -75,13 +75,16 @@
     <module>vpro-shared-camel</module>
     <module>vpro-shared-client-resteasy</module>
     <module>vpro-shared-configuration</module>
-    <module>vpro-shared-domain</module>
+    <!--
+        <module>vpro-shared-domain</module>
+        <module>vpro-shared-integration</module>
+    -->
     <module>vpro-shared-ektorp</module>
     <module>vpro-shared-elasticsearch</module>
     <module>vpro-shared-elasticsearch5</module>
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-hibernate</module>
-    <module>vpro-shared-integration</module>
+
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-logging</module>
     <module>vpro-shared-newrelic</module>
@@ -167,16 +170,19 @@
         <artifactId>vpro-shared-configuration</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <!--
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-domain</artifactId>
         <version>${project.version}</version>
-      </dependency>
+        </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-integration</artifactId>
         <version>${project.version}</version>
-      </dependency>
+        </dependency>
+      -->
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson2</artifactId>
