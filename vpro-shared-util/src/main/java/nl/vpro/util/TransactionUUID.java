@@ -24,7 +24,7 @@ public class TransactionUUID {
         }
     }
 
-    static ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
+    protected static ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
 
     public static UUID get() {
         UUID uuid = threadLocal.get();
@@ -38,12 +38,12 @@ public class TransactionUUID {
         return uuid;
     }
 
-    private static void consume(String uuid){
+    protected static void consume(String uuid){
         for (TransactionUUIDConsumer consumer : consumers) {
             consumer.accept(uuid);
         }
     }
-    private static void consume() {
+    protected static void consume() {
         UUID uuid = get();
         if (uuid != null) {
             consume(uuid.toString());
