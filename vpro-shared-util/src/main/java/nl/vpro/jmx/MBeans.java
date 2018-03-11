@@ -22,7 +22,7 @@ import nl.vpro.util.ThreadPools;
 public class MBeans {
 
 
-    static final ExecutorService executorService = Executors.newCachedThreadPool(
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool(
         ThreadPools.createThreadFactory("MBeans", true, Thread.NORM_PRIORITY));
 
 
@@ -58,7 +58,7 @@ public class MBeans {
                 return "Job " + key + "is still running, so could not be started again with " + description.get();
             }
         }
-        Future<String> future = executorService.submit(() -> {
+        Future<String> future = EXECUTOR_SERVICE.submit(() -> {
             final String threadName = Thread.currentThread().getName();
             try {
                 Thread.currentThread().setName(threadName + ":" + description.get());
