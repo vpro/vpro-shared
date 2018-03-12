@@ -41,7 +41,7 @@ public class SimpleCouchDbConnector {
         String host, int port, String path, Duration socketTimeout, Duration connectionTimeout) {
         this.host = host;
 
-        this.port = port;
+        this.port = port <= 0 ? 80 : port;
         this.path = StringUtils.isNotBlank(path) && ! path.endsWith("/") ? path + "/" : path;
         this.socketTimeout = socketTimeout;
         this.connectionTimeout = connectionTimeout;
@@ -49,7 +49,7 @@ public class SimpleCouchDbConnector {
 
 
     public InputStream get(String id) throws IOException {
-        return getInputStream("/" + id);
+        return getInputStream(id);
     }
 
 
@@ -112,8 +112,9 @@ public class SimpleCouchDbConnector {
         final CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(config.build()).build();
 
         HttpUriRequest uriRequest = new HttpGet("/" + path + query);
-        log.info("Opening {}", uriRequest);
+
         HttpHost httpHost = new HttpHost(host, port);
+        log.debug("Opening {}{}", httpHost, uriRequest);
         final CloseableHttpResponse httpResponse = client.execute(httpHost, uriRequest);
         return httpResponse;
     }
