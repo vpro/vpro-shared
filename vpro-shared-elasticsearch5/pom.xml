@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>1.75.8-SNAPSHOT</version>
+    <version>1.75.8</version>
   </parent>
 
   <artifactId>vpro-shared-elasticsearch5</artifactId>
