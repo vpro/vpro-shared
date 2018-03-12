@@ -270,7 +270,7 @@ public class IndexHelper {
         return search(request, new String[] {});
     }
     public ObjectNode search(ObjectNode request, Enum<?>... types) {
-        return search(request, Arrays.toString(Arrays.stream(types).map(Enum::name).toArray(String[]::new)));
+        return search(request, Arrays.stream(types).map(Enum::name).toArray(String[]::new));
     }
     public ObjectNode search(ObjectNode request, String... types) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
@@ -424,6 +424,9 @@ public class IndexHelper {
         return future;
     }
 
+    public Optional<JsonNode> get(Enum<?> type, String id) {
+        return get(type.name(), id);
+    }
     public Optional<JsonNode> get(String type, String id){
         try {
             Response response = client()
@@ -445,6 +448,10 @@ public class IndexHelper {
 
 
     public Optional<JsonNode> getSource(String type, String id) {
+        return get(type, id).map(jn -> jn.get("_source"));
+    }
+
+    public Optional<JsonNode> getSource(Enum<?> type, String id) {
         return get(type, id).map(jn -> jn.get("_source"));
     }
 
@@ -562,8 +569,18 @@ public class IndexHelper {
 
     }
 
+    public long count() {
+        return count(new String[]{});
+    }
 
     public long count(String... types) {
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        request.put("size", 0);
+        ObjectNode response = search(request, types);
+        return response.get("hits").get("total").longValue();
+    }
+
+    public long count(Enum<?>... types) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         ObjectNode response = search(request, types);
@@ -606,7 +623,7 @@ public class IndexHelper {
 
     @SafeVarargs
     public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
-        CompletableFuture<String> future = new CompletableFuture<>();
+        final CompletableFuture<String> future = new CompletableFuture<>();
         final RestClient client = client();
         client.performRequestAsync("GET", "/_cat/health", Collections.emptyMap(), new ResponseListener() {
             @Override
@@ -652,7 +669,7 @@ public class IndexHelper {
             String index = jsonNode.get("_index").textValue();
             String type = jsonNode.get("_type").textValue();
             String id = jsonNode.get("_id").textValue();
-            int version = jsonNode.get("_version").intValue();
+            Integer version = jsonNode.hasNonNull("_version") ? jsonNode.get("_version").intValue() : null;
             logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
@@ -695,16 +712,18 @@ public class IndexHelper {
                 logPrefix.setLength(0);
                 logPrefix.append(++i).append('/').append(total).append(' ');
                 ObjectNode on = (ObjectNode) n;
-
+                boolean recognized = false;
                 if (on.has("delete")) {
                     deleteLogger.accept(on.with("delete"));
-                    continue;
+                    recognized = true;
                 }
                 if (n.has("index")) {
                     indexLogger.accept(on.with("index"));
-                    continue;
+                    recognized = true;
                 }
-                log.warn("{}Unrecognized bulk response {}", logPrefix, n);
+                if (! recognized) {
+                    log.warn("{}Unrecognized bulk response {}", logPrefix, n);
+                }
 
             }
         };
