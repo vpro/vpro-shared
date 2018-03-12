@@ -114,7 +114,7 @@ public class SimpleCouchDbConnector {
         HttpUriRequest uriRequest = new HttpGet("/" + path + query);
 
         HttpHost httpHost = new HttpHost(host, port);
-        log.info("Opening {}{}", httpHost, uriRequest);
+        log.debug("Opening {}{}", httpHost, uriRequest);
         final CloseableHttpResponse httpResponse = client.execute(httpHost, uriRequest);
         return httpResponse;
     }
