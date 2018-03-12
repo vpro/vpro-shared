@@ -623,7 +623,7 @@ public class IndexHelper {
 
     @SafeVarargs
     public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
-        CompletableFuture<String> future = new CompletableFuture<>();
+        final CompletableFuture<String> future = new CompletableFuture<>();
         final RestClient client = client();
         client.performRequestAsync("GET", "/_cat/health", Collections.emptyMap(), new ResponseListener() {
             @Override
@@ -669,7 +669,7 @@ public class IndexHelper {
             String index = jsonNode.get("_index").textValue();
             String type = jsonNode.get("_type").textValue();
             String id = jsonNode.get("_id").textValue();
-            int version = jsonNode.get("_version").intValue();
+            Integer version = jsonNode.hasNonNull("_version") ? jsonNode.get("_version").intValue() : null;
             logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
