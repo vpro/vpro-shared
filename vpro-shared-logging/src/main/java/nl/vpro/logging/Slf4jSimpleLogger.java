@@ -5,7 +5,7 @@ import org.slf4j.event.Level;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.76
  */
 public class Slf4jSimpleLogger implements SimpleLogger {
 
