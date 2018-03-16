@@ -50,24 +50,26 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
     }
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls) {
-        this.wrapped = wrapped;
-        this.offset = offset == null ? 0L : offset.longValue();
-        this.offsetmax = max == null ? Long.MAX_VALUE : max.longValue() + this.offset;
-        this.countNulls = countNulls;
+        this(wrapped, max, offset, countNulls, null);
     }
 
     @lombok.Builder
     private MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls, @Singular  List<Runnable> callbacks) {
+          if (wrapped == null) {
+            throw new IllegalArgumentException("Cannot wrap null");
+        }
         this.wrapped = wrapped;
         this.offset = offset == null ? 0L : offset.longValue();
         this.offsetmax = max == null ? Long.MAX_VALUE : max.longValue() + this.offset;
         this.countNulls = countNulls;
         this.callback = () -> {
-            for (Runnable r : callbacks) {
-                try {
-                    r.run();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+            if (callbacks != null) {
+                for (Runnable r : callbacks) {
+                    try {
+                        r.run();
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
                 }
             }
         };

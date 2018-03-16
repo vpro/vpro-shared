@@ -24,7 +24,7 @@ public class MDCFilter implements Filter {
     boolean clear = false;
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         if (filterConfig.getInitParameter("clear") != null) {
             clear = Boolean.valueOf(filterConfig.getInitParameter("clear"));
         }
