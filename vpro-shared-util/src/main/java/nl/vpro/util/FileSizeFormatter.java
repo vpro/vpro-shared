@@ -30,7 +30,10 @@ public class FileSizeFormatter {
     private boolean mebi = true;
 
 
-    public String format(long length) {
+    public String format(Long length) {
+        if (length == null) {
+            return "? B";
+        }
         if (mebi) {
             return formatMebi(length);
         } else {
