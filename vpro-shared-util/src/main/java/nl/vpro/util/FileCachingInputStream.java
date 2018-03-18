@@ -48,6 +48,10 @@ public class FileCachingInputStream extends InputStream {
         public Builder tempDir(String uri) {
             return path(Paths.get(URI.create(uri)));
         }
+
+        public Builder noProgressLogging() {
+            return progressLogging(false);
+        }
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -61,7 +65,8 @@ public class FileCachingInputStream extends InputStream {
         Logger logger,
         List<OpenOption> openOptions,
         Integer initialBuffer,
-        Boolean startImmediately
+        Boolean startImmediately,
+        Boolean progressLogging
     ) throws IOException {
 
         super();
@@ -121,11 +126,22 @@ public class FileCachingInputStream extends InputStream {
         }
         final BiConsumer<FileCachingInputStream, Copier> bc;
         if (batchConsumer == null) {
-            bc = (t, c) ->
-                log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+            if (progressLogging == null || progressLogging) {
+                bc = (t, c) ->
+                    log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+            } else {
+                bc = (t, c) -> {};
+            }
 
         } else {
-            bc = batchConsumer;
+            if (progressLogging != null && progressLogging) {
+                bc = (t, c) -> {
+                    log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                    batchConsumer.accept(t, c);
+                };
+            } else {
+                bc = batchConsumer;
+            }
         }
         // The copier is responsible for copying the remaining of the stream to the file
         // in a separate thread
