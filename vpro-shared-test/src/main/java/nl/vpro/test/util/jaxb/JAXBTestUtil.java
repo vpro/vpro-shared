@@ -267,7 +267,7 @@ public class JAXBTestUtil {
             try {
                 rounded = roundTripAndSimilar(actual, expected);
             } catch (Exception e) {
-                Fail.fail(e.getMessage());
+                Fail.fail(e.getMessage(), e);
             }
             return myself;
         }

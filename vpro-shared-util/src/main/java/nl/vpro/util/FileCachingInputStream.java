@@ -34,6 +34,7 @@ public class FileCachingInputStream extends InputStream {
     private final byte[] buffer;
     private final int bufferLength;
 
+
     private final Path tempFile;
     private final InputStream file;
     private int count = 0;
@@ -54,6 +55,9 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    /**
+     * @param path Directory for temporary files
+     */
     @lombok.Builder(builderClassName = "Builder")
     private FileCachingInputStream(
         InputStream input,
