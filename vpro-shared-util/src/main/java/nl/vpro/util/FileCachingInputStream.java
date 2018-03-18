@@ -1,8 +1,7 @@
 package nl.vpro.util;
 
-import lombok.Builder;
-
 import java.io.*;
+import java.net.URI;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,10 @@ import org.slf4j.LoggerFactory;
 /**
  * <p>When wrapping this around your inputstream, it will be read as fast a possible, but you can
  * consume from it slower. </p>
- * 
+ *
  * <p>It will first buffer to an internal byte array (if the initial buffer size > 0, defaults to 2048). If that is too small it will buffer the result to a temporary file.
  * </p>
- * <p>Use this if you want to consume an inputstream as fast as possible, while handing it at a 
+ * <p>Use this if you want to consume an inputstream as fast as possible, while handing it at a
  *  slower pace. The cost is the creation of the temporary file.</p>
  *
  * @author Michiel Meeuwissen
@@ -41,7 +40,17 @@ public class FileCachingInputStream extends InputStream {
 
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
 
-    @Builder
+    public static class Builder {
+
+        public Builder tempDir(URI uri) {
+            return path(Paths.get(uri));
+        }
+        public Builder tempDir(String uri) {
+            return path(Paths.get(URI.create(uri)));
+        }
+    }
+
+    @lombok.Builder(builderClassName = "Builder")
     private FileCachingInputStream(
         InputStream input,
         Path path,
@@ -140,7 +149,7 @@ public class FileCachingInputStream extends InputStream {
             openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
         }
         this.file = new BufferedInputStream(
-            Files.newInputStream(tempFile, openOptions.stream().toArray(OpenOption[]::new)));
+            Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
     }
 
     @Override
