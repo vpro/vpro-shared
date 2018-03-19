@@ -11,8 +11,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 
 /**
  * The provided implementations by swagger don't work or give in log:
@@ -37,7 +35,7 @@ public class SwaggerListingResource extends BaseApiListingResource {
         @Context Application app,
         @Context ServletConfig sc,
         @Context HttpHeaders headers,
-        @Context UriInfo uriInfo) throws JsonProcessingException {
+        @Context UriInfo uriInfo) {
         return getListingJsonResponse(app, context, sc, headers, uriInfo);
     }
 }
