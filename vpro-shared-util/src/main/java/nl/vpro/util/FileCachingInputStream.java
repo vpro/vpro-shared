@@ -154,7 +154,9 @@ public class FileCachingInputStream extends InputStream {
             .output(out)
             .callback(c -> {
                 IOUtils.closeQuietly(out);
-                log.info("Created {} ({} bytes written)", tempFile, c.getCount());
+                if (progressLogging == null || progressLogging) {
+                    log.info("Created {} ({} bytes written)", tempFile, c.getCount());
+                }
             })
             .batch(batchSize)
             .batchConsumer(c -> bc.accept(this, c))
