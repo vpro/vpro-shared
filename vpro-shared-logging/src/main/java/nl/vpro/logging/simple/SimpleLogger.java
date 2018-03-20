@@ -1,4 +1,4 @@
-package nl.vpro.logging;
+package nl.vpro.logging.simple;
 
 import java.util.function.BiConsumer;
 
@@ -8,11 +8,9 @@ import org.slf4j.helpers.MessageFormatter;
 
 
 /**
- * A very simplified Logger. This can be used as messaging system. It was made to use in conjuction with @{link ChainedSimpleLogger} to be able to programmatticly 'tee' logging.
+ * A very simplified Logger. This can be used as messaging system. It was made to use in conjuction with @{link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.
  *
  * The goal was to log to slf4j but also send corresponding messages to users via websockets.
- *
- *
  * @author Michiel Meeuwissen
  * @since 1.76
  */

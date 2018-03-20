@@ -1,4 +1,4 @@
-package nl.vpro.logging;
+package nl.vpro.logging.simple;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,6 +10,11 @@ import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
 /**
+ * A {@link SimpleLogger} that adds every log event to a {@link Queue} of {@link Event}'s (or possibly extensions thereof)
+ *
+ * It is abstract because you need to implement how to instantiate a new {@link Event} extension for the queue via {@link #createEvent(Level, String, Throwable)}
+ * If you have no need for that, you can instantiate via {@link #of(Queue)}.
+ *
  * @author Michiel Meeuwissen
  * @since 1.76
  */
@@ -17,10 +22,13 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
 
     private final Queue<E> queue;
 
-    public QueueSimpleLogger(Queue<E> queue) {
+    protected QueueSimpleLogger(Queue<E> queue) {
         this.queue = queue;
     }
 
+    /**
+     * Creates a straighforward instance for a {@link Queue<Event>}
+     */
     public static QueueSimpleLogger<Event> of(Queue<Event> q) {
         return new QueueSimpleLogger<Event>(q) {
             @Override
@@ -42,7 +50,9 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     protected abstract E createEvent(Level level, String message, Throwable t);
 
 
-
+    /**
+     * A representation of a log event
+     */
     @Getter
     @lombok.AllArgsConstructor(access = AccessLevel.PROTECTED)
     @lombok.Builder
