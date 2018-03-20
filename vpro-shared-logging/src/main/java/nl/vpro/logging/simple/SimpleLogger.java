@@ -11,10 +11,11 @@ import org.slf4j.helpers.MessageFormatter;
  * A very simplified Logger. This can be used as messaging system. It was made to use in conjuction with @{link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.
  *
  * The goal was to log to slf4j but also send corresponding messages to users via websockets.
+ *
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public interface  SimpleLogger extends  BiConsumer<Level, String> {
+public interface  SimpleLogger extends BiConsumer<Level, String> {
 
 
      default void info(String format, Object... arg) {

@@ -4,7 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
 /**
- * Wraps a {@link Logger}
+ * Wraps an SLF4J {@link Logger}
+
  * @author Michiel Meeuwissen
  * @since 1.76
  */
