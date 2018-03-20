@@ -1,4 +1,4 @@
-package nl.vpro.logging;
+package nl.vpro.logging.simple;
 
 import java.util.ArrayList;
 import java.util.Collections;

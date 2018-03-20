@@ -1,9 +1,10 @@
-package nl.vpro.logging;
+package nl.vpro.logging.simple;
 
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
 /**
+ * Wraps a {@link Logger}
  * @author Michiel Meeuwissen
  * @since 1.76
  */

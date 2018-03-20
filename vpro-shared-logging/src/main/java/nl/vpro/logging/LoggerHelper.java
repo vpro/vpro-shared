@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.ext.LoggerWrapper;
 
 /**
- * A logger wrapper that add an time stamp to every trace message.
+ * An SFL4j-logger wrapper that add an timestamp to every trace message.
  */
 
 public final class LoggerHelper extends LoggerWrapper {
