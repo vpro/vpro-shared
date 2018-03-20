@@ -27,7 +27,7 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     }
 
     /**
-     * Creates a straighforward instance for a {@link Queue<Event>}
+     * Creates a straight forward instance for a {@link Queue<Event>}
      */
     public static QueueSimpleLogger<Event> of(Queue<Event> q) {
         return new QueueSimpleLogger<Event>(q) {
