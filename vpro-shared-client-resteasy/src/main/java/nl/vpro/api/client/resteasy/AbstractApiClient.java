@@ -633,6 +633,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         invalidate();
     }
 
+    @SuppressWarnings("unchecked")
     protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService, Class<?> errorClass) {
         T proxy;
         if (restEasyService == null) {
@@ -640,7 +641,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         } else {
             S resteasy = buildResteasy(engine, restEasyService);
             proxy = (T) Proxy.newProxyInstance(
-                AbstractApiClient.class.getClassLoader(),
+                restEasyService.getClassLoader(),
                 new Class[]{restEasyService, service},
                 new LeaveDefaultsProxyHandler(resteasy));
         }
@@ -692,6 +693,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
         return getTarget(engine)
             .proxyBuilder(service)
+            .classloader(service.getClassLoader())
             .defaultConsumes(MediaType.APPLICATION_XML)
             .defaultProduces(MediaType.APPLICATION_XML)
             .build();
