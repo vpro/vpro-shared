@@ -59,7 +59,9 @@ public class MBeans {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
-                locks.remove(key);
+                if (key != null) {
+                    locks.remove(key);
+                }
                 Thread.currentThread().setName(threadName);
             }
 
