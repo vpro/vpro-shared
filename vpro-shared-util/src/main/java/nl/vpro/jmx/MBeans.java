@@ -11,8 +11,6 @@ import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 
-import nl.vpro.util.ThreadPools;
-
 /**
  * Utilities to start jmx tasks in the background.
  * @author Michiel Meeuwissen
@@ -20,11 +18,6 @@ import nl.vpro.util.ThreadPools;
  */
 @Slf4j
 public class MBeans {
-
-
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool(
-        ThreadPools.createThreadFactory("MBeans", true, Thread.NORM_PRIORITY));
-
 
     static final Map<String, Future> locks = new ConcurrentHashMap<>();
 
@@ -58,11 +51,13 @@ public class MBeans {
                 return "Job " + key + "is still running, so could not be started again with " + description.get();
             }
         }
-        Future<String> future = EXECUTOR_SERVICE.submit(() -> {
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
             final String threadName = Thread.currentThread().getName();
             try {
                 Thread.currentThread().setName(threadName + ":" + description.get());
                 return job.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             } finally {
                 locks.remove(key);
                 Thread.currentThread().setName(threadName);
