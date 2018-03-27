@@ -50,4 +50,7 @@ public interface AbstractApiClientMXBean {
 
     String getInitializationInstant();
 
+
+    void invalidate();
+
 }
