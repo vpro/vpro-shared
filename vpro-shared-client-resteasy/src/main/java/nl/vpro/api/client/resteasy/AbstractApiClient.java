@@ -284,6 +284,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         );
     }
 
+    @Override
     public synchronized void invalidate() {
         counter.values().forEach(Counter::shutdown);
         counter.clear();

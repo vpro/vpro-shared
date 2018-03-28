@@ -50,25 +50,27 @@ class CountAspect<T> implements InvocationHandler {
             Object o = method.invoke(proxied, args);
             return o;
         } finally {
-            local.responseEnd();
-            Duration totalDuration = local.getTotalDuration();
-            counts.computeIfAbsent(local.key,
-                (m) -> Counter.builder()
-                    .name(getObjectName(m))
-                    .countWindow(countWindow)
-                    .bucketCount(bucketCount)
-                    .build()
-            )
-                .eventAndDuration(totalDuration, local.getRequestDuration());
+            if (local.needsCount()) {
+                local.responseEnd();
+                Duration totalDuration = local.getTotalDuration();
+                counts.computeIfAbsent(local.key,
+                    (m) -> Counter.builder()
+                        .name(getObjectName(m))
+                        .countWindow(countWindow)
+                        .bucketCount(bucketCount)
+                        .build()
+                )
+                    .eventAndDuration(totalDuration, local.getRequestDuration());
 
-            if (totalDuration.compareTo(warnThreshold) > 0) {
-                String durationReport = (((float) totalDuration.toMillis()) / local.getRequestDuration().toMillis() > 1.5f) ?
-                    String.format("%s/%s", roundToMillis(local.getRequestDuration()), roundToMillis(totalDuration)) :
-                    roundToMillis(totalDuration).toString();
-                log.warn("Took {}: {} {}",
-                    durationReport,
-                    local.key,
-                    local.requestUri);
+                if (totalDuration.compareTo(warnThreshold) > 0) {
+                    String durationReport = (((float) totalDuration.toMillis()) / local.getRequestDuration().toMillis() > 1.5f) ?
+                        String.format("%s/%s", roundToMillis(local.getRequestDuration()), roundToMillis(totalDuration)) :
+                        roundToMillis(totalDuration).toString();
+                    log.warn("Took {}: {} {}",
+                        durationReport,
+                        local.key,
+                        local.requestUri);
+                }
             }
 
             currentThreadLocal.remove();
@@ -121,6 +123,13 @@ class CountAspect<T> implements InvocationHandler {
             this.key = method.getName();
         }
 
+
+        public boolean needsCount() {
+            if (method.getName().equals("toString")) {
+                return false;
+            }
+            return true;
+        }
 
         public Duration getRequestDuration() {
             return Duration.ofNanos(requestEnd - start);
