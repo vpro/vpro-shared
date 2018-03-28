@@ -34,15 +34,15 @@ public interface AbstractApiClientMXBean {
     String getWarnThresholdString();
     void setWarnThresholdString(String s);
 
-    int getMaxConnections();
-    void setMaxConnections(int maxConnections);
-    int getMaxConnectionsPerRoute();
-    void setMaxConnectionsPerRoute(int maxConnectionsPerRoute);
+    Integer getMaxConnections();
+    void setMaxConnections(Integer maxConnections);
+    Integer getMaxConnectionsPerRoute();
+    void setMaxConnectionsPerRoute(Integer maxConnectionsPerRoute);
 
-    int getMaxConnectionsNoTimeout();
-    void setMaxConnectionsNoTimeout(int maxConnections);
-    int getMaxConnectionsPerRouteNoTimeout();
-    void setMaxConnectionsPerRouteNoTimeout(int maxConnectionsPerRoute);
+    Integer getMaxConnectionsNoTimeout();
+    void setMaxConnectionsNoTimeout(Integer maxConnections);
+    Integer getMaxConnectionsPerRouteNoTimeout();
+    void setMaxConnectionsPerRouteNoTimeout(Integer maxConnectionsPerRoute);
 
 
     @Units("events/minute")

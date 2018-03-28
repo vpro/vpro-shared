@@ -136,6 +136,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     @Getter
     private Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
 
+
+    protected ClassLoader classLoader;
+
     protected AbstractApiClient(
         String baseUrl,
         Duration connectionRequestTimeout,
@@ -154,7 +157,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         MediaType contentType,
         Boolean trustAll,
         Jackson2Mapper objectMapper,
-        String mbeanName
+        String mbeanName,
+        ClassLoader classLoader
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -177,6 +181,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
         this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
         this.mbeanName = mbeanName;
+        this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
+        log.info("Using class loader {}", this.classLoader);
         registerBean();
     }
 
@@ -244,6 +250,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             null,
             false,
             Jackson2Mapper.getLenientInstance(),
+            null,
             null
         );
     }
@@ -272,6 +279,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             null,
             trustAll,
             Jackson2Mapper.getLenientInstance(),
+            null,
             null
         );
     }
@@ -513,26 +521,26 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     @Override
-    public int getMaxConnections() {
+    public Integer getMaxConnections() {
         return maxConnections;
     }
 
     @Override
-    public void setMaxConnections(int maxConnections) {
-        if (this.maxConnections != maxConnections) {
+    public void setMaxConnections(Integer maxConnections) {
+        if (! Objects.equals(this.maxConnections, maxConnections)) {
             this.maxConnections = maxConnections;
             invalidate();
         }
     }
 
     @Override
-    public int getMaxConnectionsPerRoute() {
+    public Integer getMaxConnectionsPerRoute() {
         return maxConnectionsPerRoute;
     }
 
     @Override
-    public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute) {
-        if (this.maxConnectionsPerRoute != maxConnectionsPerRoute) {
+    public void setMaxConnectionsPerRoute(Integer maxConnectionsPerRoute) {
+        if (! Objects.equals(this.maxConnectionsPerRoute, maxConnectionsPerRoute)) {
             this.maxConnectionsPerRoute = maxConnectionsPerRoute;
             invalidate();
         }
@@ -540,26 +548,26 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     @Override
-    public int getMaxConnectionsNoTimeout() {
+    public Integer getMaxConnectionsNoTimeout() {
         return maxConnectionsNoTimeout;
     }
 
     @Override
-    public void setMaxConnectionsNoTimeout(int maxConnectionsNoTimeout) {
-        if (this.maxConnectionsNoTimeout != maxConnectionsNoTimeout) {
+    public void setMaxConnectionsNoTimeout(Integer maxConnectionsNoTimeout) {
+        if (! Objects.equals(this.maxConnectionsNoTimeout, maxConnectionsNoTimeout)) {
             this.maxConnectionsNoTimeout = maxConnectionsNoTimeout;
             invalidate();
         }
     }
 
     @Override
-    public int getMaxConnectionsPerRouteNoTimeout() {
+    public Integer getMaxConnectionsPerRouteNoTimeout() {
         return maxConnectionsPerRouteNoTimeout;
     }
 
     @Override
-    public void setMaxConnectionsPerRouteNoTimeout(int maxConnectionsPerRouteNoTimeout) {
-        if (this.maxConnectionsPerRouteNoTimeout != maxConnectionsPerRouteNoTimeout) {
+    public void setMaxConnectionsPerRouteNoTimeout(Integer maxConnectionsPerRouteNoTimeout) {
+        if (! Objects.equals(this.maxConnectionsPerRouteNoTimeout, maxConnectionsPerRouteNoTimeout)) {
             this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout;
             invalidate();
         }
@@ -693,7 +701,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
         return getTarget(engine)
             .proxyBuilder(service)
-            .classloader(service.getClassLoader())
+            .classloader(classLoader)
             .defaultConsumes(MediaType.APPLICATION_XML)
             .defaultProduces(MediaType.APPLICATION_XML)
             .build();
