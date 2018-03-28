@@ -50,8 +50,8 @@ class CountAspect<T> implements InvocationHandler {
             Object o = method.invoke(proxied, args);
             return o;
         } finally {
+            local.responseEnd();
             if (local.needsCount()) {
-                local.responseEnd();
                 Duration totalDuration = local.getTotalDuration();
                 counts.computeIfAbsent(local.key,
                     (m) -> Counter.builder()
