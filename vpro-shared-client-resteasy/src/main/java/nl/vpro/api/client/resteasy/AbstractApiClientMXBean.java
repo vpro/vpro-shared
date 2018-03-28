@@ -50,4 +50,6 @@ public interface AbstractApiClientMXBean {
 
     String getInitializationInstant();
 
+    String test(String arg);
+
 }

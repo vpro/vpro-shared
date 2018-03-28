@@ -335,6 +335,20 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         }
     }
 
+    @Override
+    public final String test(String arg) {
+        StringBuilder builder = new StringBuilder();
+        appendTestResult(builder, arg);
+        return builder.toString();
+
+    }
+
+    protected void appendTestResult(StringBuilder builder, String arg) {
+        builder.append(this).append("\n");
+        builder.append("initialized at: ").append(getInitializationInstant());
+        builder.append("\n");
+    }
+
     public MediaType getAccept() {
         return accept;
     }
