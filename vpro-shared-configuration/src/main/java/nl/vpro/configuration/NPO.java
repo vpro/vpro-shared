@@ -4,8 +4,6 @@ import java.io.File;
 
 import javax.servlet.ServletContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -13,7 +11,6 @@ import org.springframework.web.context.ServletContextAware;
  */
 public class NPO implements ServletContextAware {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NPO.class);
 
     private ServletContext sx;
 

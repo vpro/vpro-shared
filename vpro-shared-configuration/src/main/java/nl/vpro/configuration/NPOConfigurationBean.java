@@ -1,5 +1,7 @@
 package nl.vpro.configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,18 +14,22 @@ import java.util.Properties;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.configuration2.AbstractConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.ServletContextAware;
 
 /**
+ * At NPO a bit odd way to set up applications is used. This makes it aware of that.
+ *
+ * It can be configured with just config file name, and it will then resolve it automaticly in in the config directory of the
+ * application server /e/as/<server>/conf
+ *
+ * This simplifies configuration and elimates the need for several settings.
+ *
  * @author Michiel Meeuwissen
  */
+@Slf4j
 public class NPOConfigurationBean extends AbstractConfiguration implements ServletContextAware, Resource {
-
-    private static final Logger LOG = LoggerFactory.getLogger(NPOConfigurationBean.class);
 
     private final String name;
     private final Properties properties = new Properties();
@@ -39,7 +45,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         if (file == null) {
             File configDir = new NPO(sx).getConfigDirectory();
             file = new File(configDir, name);
-            LOG.debug("Found configuration file {}", file);
+            log.debug("Found configuration file {}", file);
         }
         return file;
     }
@@ -51,12 +57,12 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         if (file.exists()) {
             try {
                 properties.load(new FileInputStream(file));
-                LOG.info("Loaded from " + file + " " + properties.keySet());
+                log.info("Loaded from " + file + " " + properties.keySet());
             } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         } else {
-            LOG.info("File " + file+ " not found");
+            log.info("File " + file+ " not found");
         }
     }
 
@@ -130,19 +136,19 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
     @Override
-    public URI getURI() throws IOException {
+    public URI getURI() {
         return getFile().toURI();
     }
 
 
 
     @Override
-    public long lastModified() throws IOException {
+    public long lastModified() {
         return getFile().lastModified();
     }
 
     @Override
-    public Resource createRelative(String relativePath) throws IOException {
+    public Resource createRelative(String relativePath) {
         return new FileSystemResource(new File(getFile(), relativePath));
     }
 
@@ -163,7 +169,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
 
 
 	@Override
-	public long contentLength() throws IOException {
+	public long contentLength() {
 		File file = this.getFile();
 		if (file == null) {
 			return 0;
