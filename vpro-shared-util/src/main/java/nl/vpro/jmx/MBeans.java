@@ -48,7 +48,7 @@ public class MBeans {
     public static String returnString(final String key, Supplier<String> description, Duration wait, Callable<String> job) {
         if (key != null) {
             if (isRunning(key)) {
-                return "Job " + key + "is still running, so could not be started again with " + description.get();
+                return "Job " + key + " is still running, so could not be started again with " + description.get();
             }
         }
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
