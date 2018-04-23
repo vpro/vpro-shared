@@ -115,8 +115,8 @@
     <spring.version>4.3.11.RELEASE</spring.version>
     <spring-security.version>4.2.3.RELEASE</spring-security.version>
 
-    <jackson2.version>2.9.4</jackson2.version>    <!-- equals to poms-parent -->
-    <jackson2.scala.version>2.9.4</jackson2.scala.version>
+    <jackson2.version>2.9.5</jackson2.version>    <!-- equals to poms-parent -->
+    <jackson2.scala.version>2.9.5</jackson2.scala.version>
     <junit.version>4.12</junit.version>
     <mockito.version>2.10.0</mockito.version>
     <mycila.version>2.9.ga</mycila.version>
