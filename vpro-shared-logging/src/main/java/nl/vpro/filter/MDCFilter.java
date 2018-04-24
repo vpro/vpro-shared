@@ -19,7 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * @author Michiel Meeuwissen
  * @since 0.30
  */
-public class MDCFilter implements Filter {
+public class  MDCFilter implements Filter {
 
     boolean clear = false;
 
