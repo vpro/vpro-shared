@@ -14,8 +14,6 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewQuery;
 import org.ektorp.impl.NameConventions;
 import org.ektorp.support.View;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nl.vpro.util.ThreadPools;
 
