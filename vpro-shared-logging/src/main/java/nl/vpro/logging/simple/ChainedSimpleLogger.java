@@ -1,9 +1,6 @@
 package nl.vpro.logging.simple;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
@@ -36,6 +33,16 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     @Nonnull
     public Iterator<SimpleLogger> iterator() {
         return list.iterator();
+    }
 
+    public static SimpleLogger of(SimpleLogger... loggers) {
+        SimpleLogger[] withoutNulls = Arrays.stream(loggers).filter(Objects::nonNull).toArray(SimpleLogger[]::new);
+        if (withoutNulls.length == 0) {
+            return new NOPLogger();
+        } else if (withoutNulls.length == 1) {
+            return withoutNulls[0];
+        } else {
+            return new ChainedSimpleLogger(withoutNulls);
+        }
     }
 }
