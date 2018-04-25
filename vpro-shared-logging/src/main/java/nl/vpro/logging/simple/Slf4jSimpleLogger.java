@@ -17,6 +17,10 @@ public class Slf4jSimpleLogger implements SimpleLogger {
         this.logger = logger;
     }
 
+    public static SimpleLogger of(Logger logger) {
+        return new Slf4jSimpleLogger(logger);
+    }
+
     @Override
     public void accept(Level level, String message, Throwable t) {
           switch (level) {
