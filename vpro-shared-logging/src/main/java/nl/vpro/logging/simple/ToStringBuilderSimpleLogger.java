@@ -24,9 +24,13 @@ public class ToStringBuilderSimpleLogger implements SimpleLogger {
 
     @Override
     public void accept(Level level, String message, Throwable t) {
-        stringBuilder.append(level.name()).append(" ").append(message).append('\n');
+        if (stringBuilder.length() > 0) {
+            stringBuilder.append('\n');
+        }
+        stringBuilder.append(level.name()).append(" ").append(message);
         if (t != null) {
-            stringBuilder.append(ExceptionUtils.getStackTrace(t)).append('\n');
+            stringBuilder.append('\n');
+            stringBuilder.append(ExceptionUtils.getStackTrace(t));
         }
     }
 }
