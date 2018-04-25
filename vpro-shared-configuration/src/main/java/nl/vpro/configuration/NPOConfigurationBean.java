@@ -40,6 +40,9 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
 
+    /**
+     * The implicetely determined configuration file
+     */
     @Override
     public File getFile() {
         if (file == null) {
@@ -62,7 +65,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
                 log.error(e.getMessage(), e);
             }
         } else {
-            log.info("File " + file+ " not found");
+            log.info("File " + file + " not found");
         }
     }
 
