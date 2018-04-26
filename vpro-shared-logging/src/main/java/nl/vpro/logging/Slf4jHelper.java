@@ -45,6 +45,7 @@ public class Slf4jHelper {
      * are null, behaviour depends on the SLF4J-backing implementation.
      */
 
+    @SuppressWarnings("Duplicates")
     public static void log(Logger logger, Level level, String format, Object[] argArray) {
         if (logger != null && level != null) {
             switch (level) {
@@ -74,6 +75,7 @@ public class Slf4jHelper {
      * implementation.
      */
 
+    @SuppressWarnings("Duplicates")
     public static void log(Logger logger, Level level, String txt, Throwable throwable) {
         if (logger != null && level != null) {
             switch (level) {
