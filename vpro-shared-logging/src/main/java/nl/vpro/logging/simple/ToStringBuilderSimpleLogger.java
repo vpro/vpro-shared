@@ -7,12 +7,14 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.event.Level;
 
 /**
+ * Simply logs everything to a StringBuilder. It also works as a tail (to avoid excessive memory useage if lots is logged)
+ * If more than {@link #getMaxLength()} lines are logged, the string will be prefixed by {@link #TRUNK} and the earliest lines are removed.
  * @author Michiel Meeuwissen
  * @since 1.77
  */
 public class ToStringBuilderSimpleLogger implements SimpleLogger {
 
-    private static final String TRUNC = "...\n";
+    private static final String TRUNK = "...\n";
 
     @Getter
     final StringBuilder stringBuilder;
@@ -49,17 +51,17 @@ public class ToStringBuilderSimpleLogger implements SimpleLogger {
             count += StringUtils.countMatches(stackTrace, '\n');
             stringBuilder.append(stackTrace);
         }
-        trucatedIfNecessary();
+        truncateIfNecessary();
     }
 
-    private void trucatedIfNecessary() {
+    private void truncateIfNecessary() {
         while (count >= maxLength) {
             if (! truncated) {
-                stringBuilder.insert(0, TRUNC);
+                stringBuilder.insert(0, TRUNK);
                 truncated = true;
             }
-            int index = stringBuilder.indexOf("\n", TRUNC.length());
-            stringBuilder.delete(TRUNC.length(),  index + 1);
+            int index = stringBuilder.indexOf("\n", TRUNK.length());
+            stringBuilder.delete(TRUNK.length(),  index + 1);
             count--;
         }
     }
