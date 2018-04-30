@@ -22,9 +22,12 @@ public interface  SimpleLogger extends BiConsumer<Level, String> {
         log(Level.INFO, format, arg);
     }
 
-
     default void error(String format, Object... arg) {
         log(Level.ERROR, format, arg);
+    }
+
+    default void debug(String format, Object... arg) {
+        log(Level.DEBUG, format, arg);
     }
 
     default void log(Level level, String format, Object... arg) {
@@ -38,6 +41,10 @@ public interface  SimpleLogger extends BiConsumer<Level, String> {
                 accept(level, message, (Throwable) t);
             }
         }
+    }
+
+    default void debugOrInfo(boolean level, String format, Object... arg) {
+        log(level ? Level.INFO : Level.DEBUG, format, arg);
     }
 
 
