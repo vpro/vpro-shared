@@ -55,13 +55,11 @@ public class ToFileSimpleLogger implements SimpleLogger {
         try(FileWriter writer = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(writer);
             PrintWriter out = new PrintWriter(bw))  {
-            writer.write(Instant.now() + "\t" + level.name() + "\t" + message);
+            out.println(Instant.now() + "\t" + level.name() + "\t" + message);
             if (t != null) {
-                writer.append('\n');
                 String stackTrace = ExceptionUtils.getStackTrace(t);
-                writer.append(stackTrace);
+                out.println(stackTrace);
             }
-            writer.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
