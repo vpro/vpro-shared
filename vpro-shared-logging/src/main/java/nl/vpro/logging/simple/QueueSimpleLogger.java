@@ -50,6 +50,13 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     protected abstract E createEvent(Level level, String message, Throwable t);
 
 
+
+    @Override
+    public String toString() {
+        return "queue:" + queue;
+    }
+
+
     /**
      * A representation of a log event
      */

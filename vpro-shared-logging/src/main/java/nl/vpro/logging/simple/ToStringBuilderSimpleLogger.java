@@ -60,6 +60,12 @@ public class ToStringBuilderSimpleLogger implements SimpleLogger {
         truncateIfNecessary();
     }
 
+    @Override
+    public String toString() {
+        return "string buffer with " + count + " lines";
+    }
+
+
     private void truncateIfNecessary() {
         while (count >= maxLength) {
             if (! truncated) {

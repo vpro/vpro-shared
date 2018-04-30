@@ -27,4 +27,10 @@ public class Slf4jSimpleLogger implements SimpleLogger {
     public void accept(Level level, String message, Throwable t) {
         Slf4jHelper.log(logger, level, message, t);
     }
+
+
+    @Override
+    public String toString() {
+        return "slf4j:" + logger.getName();
+    }
 }
