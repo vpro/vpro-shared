@@ -15,7 +15,7 @@ import org.slf4j.event.Level;
  * @since 1.77
  */
 @Slf4j
-public class ToFileSimpleLogger implements SimpleLogger {
+public class FileSimpleLogger implements SimpleLogger {
 
     @Getter
     final File file;
@@ -36,14 +36,14 @@ public class ToFileSimpleLogger implements SimpleLogger {
     }
 
     @lombok.Builder(builderClassName = "Builder")
-    private ToFileSimpleLogger(
+    private FileSimpleLogger(
         File file,
         Level level) {
         this.file = file;
         this.level = level == null ? Level.INFO : level;
     }
 
-    public ToFileSimpleLogger() {
+    public FileSimpleLogger() {
         this(null, null);
     }
 

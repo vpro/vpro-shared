@@ -12,7 +12,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class ToStringBuilderSimpleLogger implements SimpleLogger {
+public class StringBuilderSimpleLogger implements SimpleLogger {
 
     private static final String TRUNK = "...\n";
 
@@ -27,7 +27,7 @@ public class ToStringBuilderSimpleLogger implements SimpleLogger {
     private Level level = Level.INFO;
 
     @lombok.Builder
-    private ToStringBuilderSimpleLogger(
+    private StringBuilderSimpleLogger(
         StringBuilder stringBuilder,
         Level level,
         Long maxLength) {
@@ -36,7 +36,7 @@ public class ToStringBuilderSimpleLogger implements SimpleLogger {
         this.level = level == null ? Level.INFO : level;
     }
 
-    public ToStringBuilderSimpleLogger() {
+    public StringBuilderSimpleLogger() {
         this(null, null, null);
     }
 

@@ -12,7 +12,7 @@ public class ToStringBuilderSimpleLoggerTest {
 
     @Test
     public void test() {
-        ToStringBuilderSimpleLogger logger = new ToStringBuilderSimpleLogger();
+        StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
         logger.info("x:{}", "y", new Exception());
         assertThat(logger.getStringBuilder().toString()).startsWith("INFO x:y\n" +
             "java.lang.Exception");
@@ -21,7 +21,7 @@ public class ToStringBuilderSimpleLoggerTest {
 
      @Test
     public void testTruncate() {
-        ToStringBuilderSimpleLogger logger = ToStringBuilderSimpleLogger
+        StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
             .builder()
             .maxLength(4L)
             .build();
