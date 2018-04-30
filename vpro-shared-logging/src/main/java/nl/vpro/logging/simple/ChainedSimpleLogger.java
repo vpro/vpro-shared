@@ -45,4 +45,9 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
             return new ChainedSimpleLogger(withoutNulls);
         }
     }
+
+    @Override
+    public String toString() {
+        return "chained " + list;
+    }
 }

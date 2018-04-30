@@ -11,4 +11,9 @@ public class NOPLogger implements SimpleLogger {
     public void accept(Level level, String message, Throwable t) {
 
     }
+
+    @Override
+    public String toString() {
+        return "NOP";
+    }
 }
