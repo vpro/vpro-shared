@@ -24,21 +24,27 @@ public class ToStringBuilderSimpleLogger implements SimpleLogger {
     private long count = 0;
     private boolean truncated = false;
 
+    private Level level = Level.INFO;
+
     @lombok.Builder
     private ToStringBuilderSimpleLogger(
         StringBuilder stringBuilder,
+        Level level,
         Long maxLength) {
         this.stringBuilder = stringBuilder == null ? new StringBuilder() : stringBuilder;
         this.maxLength = maxLength == null ? 10000L : maxLength;
+        this.level = level == null ? Level.INFO : level;
     }
 
     public ToStringBuilderSimpleLogger() {
-        this(null, null);
+        this(null, null, null);
     }
 
     @Override
     public void accept(Level level, String message, Throwable t) {
-
+        if (level.toInt() < this.level.toInt()) {
+            return;
+        }
         if (stringBuilder.length() > 0) {
             stringBuilder.append('\n');
             count++;

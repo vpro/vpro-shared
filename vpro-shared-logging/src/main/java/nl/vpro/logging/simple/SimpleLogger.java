@@ -18,17 +18,23 @@ import org.slf4j.helpers.MessageFormatter;
 public interface  SimpleLogger extends BiConsumer<Level, String> {
 
 
+
+    default void debug(String format, Object... arg) {
+        log(Level.DEBUG, format, arg);
+    }
+
     default void info(String format, Object... arg) {
         log(Level.INFO, format, arg);
+    }
+
+    default void warn(String format, Object... arg) {
+        log(Level.WARN, format, arg);
     }
 
     default void error(String format, Object... arg) {
         log(Level.ERROR, format, arg);
     }
 
-    default void debug(String format, Object... arg) {
-        log(Level.DEBUG, format, arg);
-    }
 
     default void log(Level level, String format, Object... arg) {
         FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
@@ -39,20 +45,20 @@ public interface  SimpleLogger extends BiConsumer<Level, String> {
             Object t = arg[arg.length - 1];
             if (t instanceof Throwable) {
                 accept(level, message, (Throwable) t);
+            } else {
+                accept(level, message);
             }
         }
     }
 
-    default void debugOrInfo(boolean level, String format, Object... arg) {
-        log(level ? Level.INFO : Level.DEBUG, format, arg);
+    default void debugOrInfo(boolean info, String format, Object... arg) {
+        log(info ? Level.INFO : Level.DEBUG, format, arg);
     }
-
 
     @Override
     default void accept(Level level, String message) {
         accept(level, message, null);
     }
-
     void accept(Level level, String message, Throwable t);
 
 
