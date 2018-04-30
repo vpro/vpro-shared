@@ -12,7 +12,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger> {
+public class ChainedSimpleLogger implements SimpleLogger<ChainedSimpleLogger>, Iterable<SimpleLogger> {
 
     private final List<SimpleLogger> list = new ArrayList<>();
 

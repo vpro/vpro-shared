@@ -6,10 +6,13 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
+
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.SimpleLogger;
 
 /**
  * Utilities to start jmx tasks in the background.
@@ -80,7 +83,7 @@ public class MBeans {
 
 
 
-    public static class UpdatableString implements Supplier<String> {
+    public static class UpdatableString implements Supplier<String>, SimpleLogger<UpdatableString> {
         private String string;
         private Logger logger;
 
@@ -93,34 +96,16 @@ public class MBeans {
         public String get() {
             return string;
         }
-        private void set(String s, Object... args) {
-            this.string = String.format(s, args);
-        }
 
-        private void log(Consumer<String> log, String s, Object... args) {
+        @Override
+        public void accept(Level level, String s, Throwable t) {
             if (logger != null) {
                 String prev = this.string;
-                set(s, args);
+                this.string = s;
                 if (Objects.equals(prev, this.string)) {
-                    log.accept(this.string);
+                    Slf4jHelper.log(logger, level, this.string);
                 }
             }
-        }
-
-        public String debug(String s, Object... args) {
-            log((string) -> logger.debug(string), s, args);
-            return this.string;
-        }
-
-
-        public String info(String s, Object... args) {
-            log((string) -> logger.info(string), s, args);
-            return this.string;
-        }
-
-        public String error(String s, Object... args) {
-            log((string) -> logger.error(string), s, args);
-            return this.string;
         }
 
         @Override

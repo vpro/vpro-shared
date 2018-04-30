@@ -18,7 +18,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> implements SimpleLogger {
+public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> implements SimpleLogger<QueueSimpleLogger<E>> {
 
     private final Queue<E> queue;
 
