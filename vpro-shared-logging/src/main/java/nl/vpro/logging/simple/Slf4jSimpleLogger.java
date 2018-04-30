@@ -11,7 +11,7 @@ import nl.vpro.logging.Slf4jHelper;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public class Slf4jSimpleLogger implements SimpleLogger {
+public class Slf4jSimpleLogger implements SimpleLogger<Slf4jSimpleLogger> {
 
     private final Logger logger;
 

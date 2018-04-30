@@ -15,7 +15,7 @@ import org.slf4j.event.Level;
  * @since 1.77
  */
 @Slf4j
-public class FileSimpleLogger implements SimpleLogger {
+public class FileSimpleLogger implements SimpleLogger<FileSimpleLogger> {
 
     @Getter
     final File file;

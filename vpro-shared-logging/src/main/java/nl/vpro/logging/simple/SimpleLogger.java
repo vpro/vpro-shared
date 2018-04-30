@@ -15,28 +15,29 @@ import org.slf4j.helpers.MessageFormatter;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public interface  SimpleLogger extends BiConsumer<Level, String> {
+public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level, String> {
 
 
 
-    default void debug(String format, Object... arg) {
-        log(Level.DEBUG, format, arg);
+    default S  debug(String format, Object... arg) {
+        return log(Level.DEBUG, format, arg);
     }
 
-    default void info(String format, Object... arg) {
-        log(Level.INFO, format, arg);
+    default S  info(String format, Object... arg) {
+        return log(Level.INFO, format, arg);
     }
 
-    default void warn(String format, Object... arg) {
-        log(Level.WARN, format, arg);
+    default S  warn(String format, Object... arg) {
+        return log(Level.WARN, format, arg);
+
     }
 
-    default void error(String format, Object... arg) {
-        log(Level.ERROR, format, arg);
+    default S  error(String format, Object... arg) {
+        return log(Level.ERROR, format, arg);
     }
 
 
-    default void log(Level level, String format, Object... arg) {
+    default S  log(Level level, String format, Object... arg) {
         FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
         String message = ft.getMessage();
         if (ft.getArgArray().length == arg.length) {
@@ -49,10 +50,11 @@ public interface  SimpleLogger extends BiConsumer<Level, String> {
                 accept(level, message);
             }
         }
+        return (S) this;
     }
 
-    default void debugOrInfo(boolean info, String format, Object... arg) {
-        log(info ? Level.INFO : Level.DEBUG, format, arg);
+    default S debugOrInfo(boolean info, String format, Object... arg) {
+        return log(info ? Level.INFO : Level.DEBUG, format, arg);
     }
 
     @Override

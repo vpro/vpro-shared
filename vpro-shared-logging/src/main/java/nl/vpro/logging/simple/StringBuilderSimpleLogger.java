@@ -12,7 +12,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class StringBuilderSimpleLogger implements SimpleLogger {
+public class StringBuilderSimpleLogger implements SimpleLogger<StringBuilderSimpleLogger> {
 
     private static final String TRUNK = "...\n";
 
