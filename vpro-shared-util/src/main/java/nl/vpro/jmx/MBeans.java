@@ -99,9 +99,9 @@ public class MBeans {
 
         @Override
         public void accept(Level level, String s, Throwable t) {
+            String prev = this.string;
+            this.string = s;
             if (logger != null) {
-                String prev = this.string;
-                this.string = s;
                 if (Objects.equals(prev, this.string)) {
                     Slf4jHelper.log(logger, level, this.string);
                 }

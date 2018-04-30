@@ -50,6 +50,9 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
                 accept(level, message);
             }
         }
+        return self();
+    }
+    default S self() {
         return (S) this;
     }
 
