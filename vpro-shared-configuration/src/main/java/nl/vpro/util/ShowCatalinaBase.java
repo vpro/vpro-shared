@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -13,7 +15,7 @@ public class ShowCatalinaBase implements Runnable {
     public void run() {
         String catalinaBase = System.getProperty("catalina.base");
         if (StringUtils.isNotEmpty(catalinaBase)) {
-            System.out.println("CATALINA BASE: '" + catalinaBase + "'");
+            System.out.println("CATALINA BASE: '" + catalinaBase + File.separator + "'");
         }
 
     }
