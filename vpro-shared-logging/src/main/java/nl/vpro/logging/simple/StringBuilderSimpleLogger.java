@@ -2,6 +2,8 @@ package nl.vpro.logging.simple;
 
 import lombok.Getter;
 
+import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.event.Level;
@@ -26,18 +28,22 @@ public class StringBuilderSimpleLogger implements SimpleLogger<StringBuilderSimp
 
     private Level level = Level.INFO;
 
+    final private Function<Level, String> prefix;
+
     @lombok.Builder
     private StringBuilderSimpleLogger(
         StringBuilder stringBuilder,
         Level level,
-        Long maxLength) {
+        Long maxLength,
+        Function<Level, String> prefix) {
         this.stringBuilder = stringBuilder == null ? new StringBuilder() : stringBuilder;
         this.maxLength = maxLength == null ? 10000L : maxLength;
         this.level = level == null ? Level.INFO : level;
+        this.prefix = prefix == null ? Enum::name : prefix;
     }
 
     public StringBuilderSimpleLogger() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
 
     @Override
@@ -49,7 +55,12 @@ public class StringBuilderSimpleLogger implements SimpleLogger<StringBuilderSimp
             stringBuilder.append('\n');
             count++;
         }
-        stringBuilder.append(level.name()).append(" ").append(message);
+        String p = prefix.apply(level);
+        stringBuilder.append(p);
+        if (p.length() > 0) {
+            stringBuilder.append(" ");
+        }
+        stringBuilder.append(message);
         if (t != null) {
             stringBuilder.append('\n');
             count++;
@@ -64,6 +75,7 @@ public class StringBuilderSimpleLogger implements SimpleLogger<StringBuilderSimp
     public String toString() {
         return "string buffer with " + count + " lines";
     }
+
 
 
     private void truncateIfNecessary() {
