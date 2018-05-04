@@ -15,7 +15,7 @@ public class ShowCatalinaBase implements Runnable {
     public void run() {
         String catalinaBase = System.getProperty("catalina.base");
         if (StringUtils.isNotEmpty(catalinaBase)) {
-            System.out.println("CATALINA BASE: '" + catalinaBase + File.separator + "'");
+            System.out.println("CATALINA BASE:\n'" + catalinaBase + File.separator + "'");
         }
 
     }
