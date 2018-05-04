@@ -13,15 +13,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * <a href="http://www.adobe.com/devnet/flashplayer/articles/fplayer10_security_changes_02.html#head32"
  * >http://www.adobe.com/devnet/flashplayer/articles/ fplayer10_security_changes_02.html#head32</a> describes a change
  * in the flash player that ignores any flash content that is served with a Content-Disposition header with the value
  * 'attachment'. This filter will remove that header for these specific attachments.
- * 
- * 
+ *
+ *
  * @author Auke van Leeuwen
  * @author Peter Maas
  */
