@@ -46,7 +46,7 @@ public class Slf4jHelper {
      */
 
     @SuppressWarnings("Duplicates")
-    public static void log(Logger logger, Level level, String format, Object[] argArray) {
+    public static void log(Logger logger, Level level, String format, Object... argArray) {
         if (logger != null && level != null) {
             switch (level) {
             case TRACE:
