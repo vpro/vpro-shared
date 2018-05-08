@@ -21,6 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class  MDCFilter implements Filter {
 
+    public static final String USER_NAME = "userName";
+    public static final String REQUEST = "request";
+    public static final String REMOTE_ADDR= "remoteAddr";
+
     boolean clear = false;
 
     @Override
@@ -38,17 +42,17 @@ public class  MDCFilter implements Filter {
         HttpServletResponse response  = (HttpServletResponse) res;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
-            MDC.put("userName", auth.getName());
+            MDC.put(USER_NAME, auth.getName());
         }
         String query = request.getQueryString();
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        MDC.put("request", request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
+        MDC.put(REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
 
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (ipAddress == null) {
             ipAddress = request.getRemoteAddr();
         }
-        MDC.put("remoteAddr", ipAddress);
+        MDC.put(REMOTE_ADDR, ipAddress);
         try {
             chain.doFilter(req, res);
         } finally {
@@ -59,9 +63,9 @@ public class  MDCFilter implements Filter {
             if (clear) {
                 MDC.clear();
             } else {
-                MDC.remove("userName");
-                MDC.remove("request");
-                MDC.remove("remoteAddr");
+                MDC.remove(USER_NAME);
+                MDC.remove(REQUEST);
+                MDC.remove(REMOTE_ADDR);
             }
         }
     }
