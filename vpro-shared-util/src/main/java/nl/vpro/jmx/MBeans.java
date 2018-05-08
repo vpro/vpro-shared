@@ -75,9 +75,9 @@ public class MBeans {
         try {
             return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException e) {
-            return e.getMessage();
+            return description + " " + e.getMessage();
         } catch (TimeoutException e) {
-            return description  + " still busy. Please check logs";
+            return description  + "\n...\nstill busy. Please check logs";
         }
     }
 
