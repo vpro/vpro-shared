@@ -45,13 +45,13 @@ public class WindowedEventRateTest {
         assertThat(ranges.get(buckets.length - 3).getValue().longValue()).isEqualTo(0); // longer ago
 
         assertThat(ranges.get(buckets.length - 2).getKey()
-            .lowerEndpoint()).isEqualByComparingTo(rate.getStart()); // This bucket was the first one
+            .lowerEndpoint()).isEqualTo(rate.getStart()); // This bucket was the first one
 
         for (int i = 0; i < ranges.size() - 1; i++) {
             assertThat(ranges.get(i).getKey().lowerEndpoint())
-                .isLessThanOrEqualTo(ranges.get(i + 1).getKey().lowerEndpoint());
+                .isBeforeOrEqualTo(ranges.get(i + 1).getKey().lowerEndpoint());
             assertThat(ranges.get(i).getKey().upperEndpoint())
-                .isEqualByComparingTo(ranges.get(i + 1).getKey().lowerEndpoint());
+                .isEqualTo(ranges.get(i + 1).getKey().lowerEndpoint());
         }
 
     }
