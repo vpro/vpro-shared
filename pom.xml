@@ -119,6 +119,7 @@
     <jackson2.scala.version>2.9.5</jackson2.scala.version>
     <junit.version>4.12</junit.version>
     <mockito.version>2.18.3</mockito.version>
+    <assertj.version>3.9.1</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
     <resteasy.version>3.5.1.Final</resteasy.version>
     <slf4j.version>1.7.25</slf4j.version>
@@ -128,6 +129,7 @@
     <guava.version>25.0-jre</guava.version>
     <javassist.version>3.22.0-CR1</javassist.version>
     <wss4j.version>2.1.4</wss4j.version>
+
     <httpcomponents.version>4.5.3</httpcomponents.version>
     <httpcomponentscore.version>4.4.7</httpcomponentscore.version>
 
@@ -365,7 +367,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.3.0</version>
+        <version>${assertj.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
