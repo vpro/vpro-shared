@@ -10,7 +10,7 @@ import net.sf.json.test.JSONAssert;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 import com.fasterxml.jackson.databind.JavaType;
