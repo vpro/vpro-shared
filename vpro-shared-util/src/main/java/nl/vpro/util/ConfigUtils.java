@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 /**
  * @author Michiel Meeuwissen
  * @since 1.75
@@ -179,7 +179,7 @@ public class ConfigUtils {
 
     static <K> void substitute(Map<K, String> map, Map<String, String> substMap) {
 
-        StrSubstitutor subst = new StrSubstitutor(substMap);
+        StringSubstitutor subst = new StringSubstitutor(substMap);
 
         for (Map.Entry<K, String> e : map.entrySet()) {
             String v = e.getValue();
