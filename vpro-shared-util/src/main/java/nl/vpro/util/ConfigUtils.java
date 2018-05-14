@@ -11,8 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
-
+import org.apache.commons.text.StrSubstitutor;
 /**
  * @author Michiel Meeuwissen
  * @since 1.75
