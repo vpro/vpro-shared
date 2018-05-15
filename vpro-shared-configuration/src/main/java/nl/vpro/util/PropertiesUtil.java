@@ -3,6 +3,7 @@ package nl.vpro.util;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,17 +16,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.PropertyPlaceholderHelper;
 
 /**
- * An extension of {@link PropertyPlaceholderConfigurer} that only exposes the map of properties (for use in e.g. JSP).
+ * An extension of {@link PropertyPlaceholderConfigurer} that can do:
+ * - exposes the map of properties (for use in e.g. JSP).
+ * - expose some properties as system properties
+ * - log some things
+ * -
  *
  * @author Michiel Meeuwissen
  */
+@Slf4j
 public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     private Map<String, String> propertiesMap;
 
     private Map<String, String> logMap = new HashMap<>();
-
-
 
     private String[] systemProperties;
 
@@ -33,14 +37,33 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     @Getter
     @Setter
+    private boolean registerAsSingletonString;
+
+    @Getter
+    @Setter
     private List<Runnable> afterProperties;
 
     @Override
-    protected void processProperties(ConfigurableListableBeanFactory beanFactory,
-                                     Properties props) throws BeansException {
+    protected void processProperties(
+        ConfigurableListableBeanFactory beanFactory,
+        Properties props) throws BeansException {
         super.processProperties(beanFactory, props);
         initMap(props);
         initSystemProperties();
+        if (isRegisterAsSingletonString()) {
+            int count = 0;
+            for (Map.Entry<String, String> e : propertiesMap.entrySet()) {
+                if (!beanFactory.containsBean(e.getKey())) {
+                    count++;
+                    beanFactory.registerSingleton(e.getKey(), e.getValue());
+                } else {
+                    log.info("Could not register {} as a singleton string (it is already {})", e.getKey(), beanFactory.getBean(e.getKey()));
+                }
+            }
+            if (count > 0) {
+                log.info("Registered {} singleton strings", count);
+            }
+        }
         if (logMap.isEmpty()) {
             logger.debug(String.valueOf(getMap()));
         } else {
@@ -56,6 +79,9 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 after.run();
             }
         }
+
+
+
     }
 
     public Map<String, String> getMap() {
