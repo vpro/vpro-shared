@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -37,7 +38,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     @Getter
     @Setter
-    private boolean registerAsSingletonString;
+    private Pattern registerAsSingletonStringRegexp = Pattern.compile("^$");
 
     @Getter
     @Setter
@@ -50,20 +51,21 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         super.processProperties(beanFactory, props);
         initMap(props);
         initSystemProperties();
-        if (isRegisterAsSingletonString()) {
-            int count = 0;
-            for (Map.Entry<String, String> e : propertiesMap.entrySet()) {
+        Set<String> registered = new HashSet<>();
+        for (Map.Entry<String, String> e : propertiesMap.entrySet()) {
+            if (registerAsSingletonStringRegexp.matcher(e.getKey()).matches()) {
                 if (!beanFactory.containsBean(e.getKey())) {
-                    count++;
+                    registered.add(e.getKey());
                     beanFactory.registerSingleton(e.getKey(), e.getValue());
                 } else {
-                    log.info("Could not register {} as a singleton string (it is already {})", e.getKey(), beanFactory.getBean(e.getKey()));
+                    log.info("Could not register {} as a singleton string (it is already {})", e.getKey(), beanFactory.getBeanDefinition(e.getKey()));
                 }
             }
-            if (count > 0) {
-                log.info("Registered {} singleton strings", count);
-            }
         }
+        if (registered.size() > 0) {
+            log.info("Registered {} singleton strings: {} ", registered.size(), registered);
+        }
+
         if (logMap.isEmpty()) {
             logger.debug(String.valueOf(getMap()));
         } else {
