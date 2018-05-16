@@ -1,8 +1,10 @@
-package nl.vpro.spring;
+package nl.vpro.spring.converters;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
 
 /**
@@ -10,7 +12,8 @@ import org.springframework.core.convert.converter.Converter;
  * @author Michiel Meeuwissen
  * @since 1.78
  */
-public class StringToIntegerListConverter implements Converter<String, List<Integer>> {
+//@Component
+public class StringToIntegerListConverter implements ConditionalConverter, Converter<String, List<Integer>> {
 
     public static final StringToIntegerListConverter INSTANCE = new StringToIntegerListConverter();
 
@@ -41,6 +44,12 @@ public class StringToIntegerListConverter implements Converter<String, List<Inte
             }
         }
         return result;
+
+    }
+
+    @Override
+    public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+        return false;
 
     }
 }
