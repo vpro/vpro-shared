@@ -9,7 +9,6 @@ import javax.ws.rs.ext.ParamConverter;
  * @author Michiel Meeuwissen
  * @since 0.25
  */
-
 public class LocalDateParamConverter implements ParamConverter<LocalDate> {
 
     static LocalDateParamConverter INSTANCE = new LocalDateParamConverter();
