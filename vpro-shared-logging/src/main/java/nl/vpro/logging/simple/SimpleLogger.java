@@ -52,6 +52,7 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
         }
         return self();
     }
+    @SuppressWarnings("unchecked")
     default S self() {
         return (S) this;
     }
