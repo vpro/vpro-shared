@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -20,7 +21,6 @@ import nl.vpro.logging.LoggerOutputStream;
  * @author Michiel Meeuwissen
  * @since 1.6
  */
-@Slf4j
 public class CommandExecutorImpl implements CommandExecutor {
 
     private final String binary;
@@ -30,13 +30,15 @@ public class CommandExecutorImpl implements CommandExecutor {
     private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     public CommandExecutorImpl(String c) {
         this(c, null);
     }
 
     public CommandExecutorImpl(File f) {
-        this(f, null);
+        this(f, (File) null);
     }
 
     public CommandExecutorImpl(String binary, File workdir) {
@@ -59,6 +61,33 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         binary = f.getAbsolutePath();
         this.workdir = workdir;
+    }
+
+    @lombok.Builder
+    private CommandExecutorImpl(
+        File workdir,
+        @Singular
+        List<File> executables,
+        Logger logger) {
+         if (workdir != null && !workdir.exists()) {
+            throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
+        }
+        File f = null;
+        for (File executable : executables) {
+            if (executable.exists() && executable.canExecute()) {
+                f = executable;
+                break;
+            }
+        }
+        if (f == null) {
+            throw new RuntimeException("None of " + executables + "can be executed");
+        }
+        binary = f.getAbsolutePath();
+        this.workdir = workdir;
+        if (logger != null) {
+            this.logger = logger;
+        }
+
     }
 
     @Override
@@ -85,7 +114,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         Process p;
         try {
             Collections.addAll(command, args);
-            log.info(toString(command));
+            logger.info(toString(command));
             p = pb.start();
 
             final ProcessTimeoutHandle handle;
@@ -109,7 +138,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             errorCopier.waitFor();
             int result = p.exitValue();
             if (result != 0) {
-                log.error("Error {} occurred while calling {}", result, command.stream().collect(Collectors.joining(" ")));
+                logger.error("Error {} occurred while calling {}", result, command.stream().collect(Collectors.joining(" ")));
             }
             if (out != null) {
                 out.flush();
@@ -122,7 +151,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
@@ -144,7 +173,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             }, args);
             return result.lines();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
 
         }
@@ -201,6 +230,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
 
+    @Slf4j
     private static class ProcessTimeoutTask extends TimerTask {
         private final Process monitoredProcess;
         private final String command;
