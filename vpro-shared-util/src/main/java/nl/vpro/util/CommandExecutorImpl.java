@@ -5,11 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.ext.LoggerWrapper;
 
 import nl.vpro.logging.LoggerOutputStream;
 
@@ -63,12 +66,13 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.workdir = workdir;
     }
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private CommandExecutorImpl(
         File workdir,
         @Singular
         List<File> executables,
-        Logger logger) {
+        Logger logger,
+        Function<String, String> wrapLogInfo) {
          if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
@@ -87,9 +91,20 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (logger != null) {
             this.logger = logger;
         }
+        if (wrapLogInfo != null) {
+            this.logger = new LoggerWrapper(this.logger, this.logger.getName()) {
+                @Override
+                public void info(String message) {
+                    super.info(wrapLogInfo.apply(message));
+                }
+            };
+        }
 
     }
 
+    public static class Builder {
+
+    }
     @Override
     public int execute(String... args) {
         return execute(LoggerOutputStream.info(getLogger()), null, args);
@@ -123,10 +138,14 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            Copier inputCopier = in != null ? copyThread(in, p.getOutputStream()) : null;
+            Copier inputCopier = in != null ? copyThread(in, p.getOutputStream(), (e) -> {}) : null;
 
-            Copier copier = out != null ? copyThread(p.getInputStream(), out) : null;
-            Copier errorCopier = copyThread(p.getErrorStream(), errors);
+            Copier copier = out != null ? copyThread(p.getInputStream(), out, (e) -> {
+                Process process = p.destroyForcibly();
+                logger.info("Killed {}", process);
+            }) : null;
+
+            Copier errorCopier = copyThread(p.getErrorStream(), errors, (e) -> {});
             if (inputCopier != null) {
                 inputCopier.waitFor();
                 p.getOutputStream().close();
@@ -151,7 +170,11 @@ public class CommandExecutorImpl implements CommandExecutor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            if (e.getCause() == null || ! e.getCause().getMessage().equalsIgnoreCase("broken pipe")) {
+                logger.error(e.getMessage(), e);
+            } else {
+                logger.info(e.getMessage());
+            }
             throw new RuntimeException(e);
         }
     }
@@ -195,8 +218,12 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
 
-    public static Copier copyThread(InputStream in, OutputStream out) {
-        Copier copier = new Copier(in, out);
+    public static Copier copyThread(InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
+        Copier copier = Copier.builder()
+        .input(in)
+        .output(out)
+        .errorHandler((c, t) -> errorHandler.accept(t))
+        .build();
         ThreadPools.copyExecutor.execute(copier);
         return copier;
     }
