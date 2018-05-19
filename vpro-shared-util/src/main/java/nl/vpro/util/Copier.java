@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
@@ -25,12 +26,13 @@ public class Copier implements Runnable {
     private final OutputStream out;
     private final long batch;
     private final Consumer<Copier> callback;
+    private final BiConsumer<Copier, Throwable> errorHandler;
     private final Consumer<Copier> batchConsumer;
     private Future<?> future;
 
 
     public Copier(InputStream i, OutputStream o, long batch) {
-        this(i, o, batch, null, null, 0);
+        this(i, o, batch, null, null, null,  0);
     }
 
     @Builder
@@ -40,6 +42,7 @@ public class Copier implements Runnable {
         long batch,
         Consumer<Copier> batchConsumer,
         Consumer<Copier> callback,
+        BiConsumer<Copier, Throwable> errorHandler,
         int offset
         ) {
         in = input;
@@ -47,6 +50,7 @@ public class Copier implements Runnable {
         this.batch = batch == 0 ? 8192: batch;
         this.callback = callback;
         this.batchConsumer = batchConsumer;
+        this.errorHandler = errorHandler;
         this.count = offset;
     }
 
@@ -72,6 +76,9 @@ public class Copier implements Runnable {
             }
         } catch (Throwable t) {
             log.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
+            if (errorHandler != null) {
+                errorHandler.accept(this, t);
+            }
         }
         synchronized (this) {
             ready = true;
