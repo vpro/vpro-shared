@@ -42,13 +42,16 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
         String message = ft.getMessage();
         if (ft.getArgArray().length == arg.length) {
             accept(level, message);
-        } else if (arg.length > 1){
+        } else if (arg.length >= 1){
             Object t = arg[arg.length - 1];
             if (t instanceof Throwable) {
                 accept(level, message, (Throwable) t);
             } else {
                 accept(level, message);
             }
+        } else {
+            accept(Level.ERROR, "Format has " + ft.getArgArray().length + " args but " + arg.length + " were given");
+            accept(level, message);
         }
         return self();
     }
