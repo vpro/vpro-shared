@@ -23,7 +23,7 @@ public class IterableJson {
         public void serialize(Iterable value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
             if (value == null) {
-                jgen.writeNull();;
+                jgen.writeNull();
             } else {
                 Iterator<?> i = value.iterator();
                 Object v;
@@ -63,6 +63,7 @@ public class IterableJson {
             isSimple = memberClass.isPrimitive() || simpleTypes.contains(memberClass);
         }
 
+        @SuppressWarnings("unchecked")
         public Deserializer(Function<List<T>, Iterable<T>> supplier) {
             this.creator = supplier;
             try {
