@@ -3,7 +3,6 @@ package nl.vpro.util;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.lang.reflect.*;
 import java.time.Duration;
 import java.util.*;
@@ -107,11 +106,12 @@ public class ReflectionUtils {
 
     /**
      * We can also create the instance itself (supporting the Builder pattern of lombok)
-     * @param clazz
-     * @param properties
-     * @param <T>
-     * @return
+     * @param clazz Class which can have a static 'builder' method, or a no args constructor
+     * @param properties Properties which are used to configure the created instant
+     * @param <T> type of object to create
+     * @return a new, configured instance of T
      */
+    @SuppressWarnings("unchecked")
     public static <T> T configured(Class<T> clazz, Map<String, String> properties) {
         try {
             Method builderMethod = clazz.getDeclaredMethod("builder");
@@ -156,12 +156,12 @@ public class ReflectionUtils {
     }
 
     @Deprecated
-    public static Map<String, String> getProperties(String... configFiles) throws IOException {
+    public static Map<String, String> getProperties(String... configFiles) {
         return ConfigUtils.getProperties(configFiles);
     }
 
     @Deprecated
-    public static Map<String, String> getProperties(Map<String, String> initial, String... configFiles) throws IOException {
+    public static Map<String, String> getProperties(Map<String, String> initial, String... configFiles) {
         return ConfigUtils.getProperties(initial, configFiles);
     }
 
@@ -283,6 +283,7 @@ public class ReflectionUtils {
         return convert(o, parameter.getParameterizedType());
     }
 
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     private static <T> Object convert(String o, Type parameterType) {
         Class<?> parameterClass;
         if (parameterType instanceof Class) {
