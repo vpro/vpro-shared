@@ -4,6 +4,7 @@ import java.util.concurrent.*;
 
 /**
  * Utilities related to ThreadPools
+ * Perhaps this can be deprecated in favour of {@link  ForkJoinPool#commonPool()}?
  * @author Michiel Meeuwissen
  * @since 1.5
  */

@@ -3,7 +3,7 @@ package nl.vpro.util;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -28,7 +28,7 @@ public interface CommandExecutor {
      * @return the exit code
      */
     int execute(String... args);
-    
+
     /**
      * Executes the command
      *
@@ -40,7 +40,7 @@ public interface CommandExecutor {
     int execute(OutputStream out, OutputStream error, String... args);
 
     /**
-     * Executes the command with given arguments. Stderr will be logged via slf4j 
+     * Executes the command with given arguments. Stderr will be logged via slf4j
      * @param out Stdout will be written to this.
      * @return the exit code
      */
@@ -65,12 +65,12 @@ public interface CommandExecutor {
 
 
    /**
-    * Executes the command in the background. 
+    * Executes the command in the background.
     * @param callback will be called when ready.
     * @return A future producing the result code.
     */
-    default Future<Integer> submit(InputStream in, OutputStream out, OutputStream error, Consumer<Integer> callback, String... args) {
-        return ThreadPools.copyExecutor.submit(() -> {
+    default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, Consumer<Integer> callback, String... args) {
+        return CompletableFuture.supplyAsync(() -> {
             Integer result = null;
             try {
                 result = execute(in, out, error, args);
@@ -83,12 +83,20 @@ public interface CommandExecutor {
         });
     }
 
-    default Future<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
+    default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
         return submit(in, out, error, null, args);
     }
 
-    default Future<Integer> submit(Consumer<Integer> callback, String... args) {
-        return ThreadPools.copyExecutor.submit(() -> {
+    default CompletableFuture<Integer> submit(OutputStream out, OutputStream error, String... args) {
+        return submit(null, out, error, args);
+    }
+
+     default CompletableFuture<Integer> submit(OutputStream out, String... args) {
+        return submit(out, LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+    }
+
+    default CompletableFuture<Integer> submit(Consumer<Integer> callback, String... args) {
+        return CompletableFuture.supplyAsync(() -> {
             Integer result = null;
             try {
                 result = execute(args);
@@ -101,15 +109,15 @@ public interface CommandExecutor {
         });
     }
 
-    default Future<Integer> submit(String... args) {
-        return submit(null, args);
+    default CompletableFuture<Integer> submit(String... args) {
+        return submit((OutputStream) null, args);
     }
 
 
     /**
      * Executes the command streamingly. Stdout is converted to a stream of string (one for each line).
      * E.g.
-     * <code>*      
+     * <code>*
      *      CommandExecutorImpl env = new CommandExecutorImpl("/usr/bin/env");
      *      long running = env.lines("ps", "u").filter(s -> s.contains("amara_poms_publisher")).count();
      * </code>
