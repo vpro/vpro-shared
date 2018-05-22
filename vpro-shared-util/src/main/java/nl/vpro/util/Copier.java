@@ -75,7 +75,9 @@ public class Copier implements Runnable {
                 }
             }
         } catch (Throwable t) {
-            log.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
+            if (! CommandExecutor.isBrokenPipe(t)) {
+                log.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
+            }
             if (errorHandler != null) {
                 errorHandler.accept(this, t);
             }
