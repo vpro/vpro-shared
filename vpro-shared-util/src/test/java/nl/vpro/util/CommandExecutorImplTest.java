@@ -1,11 +1,11 @@
 package nl.vpro.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 
@@ -31,8 +31,12 @@ public class CommandExecutorImplTest {
     }
     @Test
     public void lines() {
-        CommandExecutorImpl instance = new CommandExecutorImpl("/usr/bin/env");
-        instance.lines("find",".").forEach(System.out::println);
+        CommandExecutor find =
+            CommandExecutorImpl.builder()
+                .executablesPaths("/usr/bin/env")
+                .commonArg("find")
+                .build();
+        find.lines(".").forEach(System.out::println);
     }
 
     @Test
