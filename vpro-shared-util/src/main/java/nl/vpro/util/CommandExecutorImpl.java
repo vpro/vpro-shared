@@ -28,6 +28,8 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final String binary;
 
+    private final List<String> commonArgs;
+
     private final File workdir;
 
     private long processTimeout = -1L;
@@ -50,6 +52,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         this.binary = binary;
         this.workdir = workdir;
+        this.commonArgs = null;
     }
 
     public CommandExecutorImpl(File f, File workdir) {
@@ -64,6 +67,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         binary = f.getAbsolutePath();
         this.workdir = workdir;
+        this.commonArgs = null;
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -72,7 +76,10 @@ public class CommandExecutorImpl implements CommandExecutor {
         @Singular
         List<File> executables,
         Logger logger,
-        Function<String, String> wrapLogInfo) {
+        Function<String, String> wrapLogInfo,
+        @Singular
+        List<String> commonArgs
+        ) {
          if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
@@ -99,10 +106,18 @@ public class CommandExecutorImpl implements CommandExecutor {
                 }
             };
         }
+        this.commonArgs = commonArgs;
 
     }
 
     public static class Builder {
+
+        public Builder executablesPaths(String... executables) {
+            for (String executable : executables) {
+                executable(new File(executable));
+            }
+            return this;
+        }
 
     }
     @Override
@@ -128,6 +143,9 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         Process p;
         try {
+            if (commonArgs != null) {
+                command.addAll(commonArgs);
+            }
             Collections.addAll(command, args);
             logger.info(toString(command));
             p = pb.start();
@@ -178,6 +196,8 @@ public class CommandExecutorImpl implements CommandExecutor {
             throw new RuntimeException(e);
         }
     }
+
+
 
     @Override
     public Stream<String> lines(InputStream in, OutputStream errors, String... args) {
