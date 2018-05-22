@@ -12,9 +12,11 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ext.LoggerWrapper;
 
 import nl.vpro.logging.LoggerOutputStream;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.SimpleLoggerWrapper;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
 
 /**
  * Wrapper around ProcessorBuilder
@@ -35,7 +37,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private SimpleLogger<?> logger = new Slf4jSimpleLogger(LoggerFactory.getLogger(this.getClass()));
 
 
     public CommandExecutorImpl(String c) {
@@ -43,7 +45,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     public CommandExecutorImpl(File f) {
-        this(f, (File) null);
+        this(f, null);
     }
 
     public CommandExecutorImpl(String binary, File workdir) {
@@ -96,13 +98,14 @@ public class CommandExecutorImpl implements CommandExecutor {
         binary = f.getAbsolutePath();
         this.workdir = workdir;
         if (logger != null) {
-            this.logger = logger;
+            this.logger = new Slf4jSimpleLogger(logger);
         }
         if (wrapLogInfo != null) {
-            this.logger = new LoggerWrapper(this.logger, this.logger.getName()) {
+            this.logger = new SimpleLoggerWrapper(this.logger) {
                 @Override
-                public void info(String message) {
-                    super.info(wrapLogInfo.apply(message));
+                protected String wrapMessage(String message) {
+                    return wrapLogInfo.apply(message);
+
                 }
             };
         }
@@ -188,12 +191,15 @@ public class CommandExecutorImpl implements CommandExecutor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            if (e.getCause() == null || ! e.getCause().getMessage().equalsIgnoreCase("broken pipe")) {
-                logger.error(e.getMessage(), e);
+            if (CommandExecutor.isBrokenPipe(e)) {
+                logger.debug(e.getMessage());
+                throw new BrokenPipe(e);
             } else {
-                logger.info(e.getMessage());
+                logger.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+
             }
-            throw new RuntimeException(e);
+
         }
     }
 
@@ -227,7 +233,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     Logger getLogger() {
-        String[] split = binary.split("[\\/\\.\\\\]+");
+        String[] split = binary.split("[/.\\\\]+");
         StringBuilder category = new StringBuilder(CommandExecutorImpl.class.getName());
         for (int i = split.length - 1; i >= 0; i--) {
             if (split[i].length() > 0) {

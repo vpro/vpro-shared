@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -128,4 +129,14 @@ public interface CommandExecutor {
         return lines(null, LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
     }
 
+    static boolean isBrokenPipe(Throwable ioe) {
+         return ioe.getCause() != null && ioe.getCause().getMessage().equalsIgnoreCase("broken pipe");
+    }
+
+    class BrokenPipe extends RuntimeException {
+
+        public BrokenPipe(IOException e) {
+            super(e);
+        }
+    }
 }

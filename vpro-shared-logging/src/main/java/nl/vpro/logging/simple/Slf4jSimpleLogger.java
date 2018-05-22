@@ -1,6 +1,7 @@
 package nl.vpro.logging.simple;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -18,6 +19,12 @@ public class Slf4jSimpleLogger implements SimpleLogger<Slf4jSimpleLogger> {
     public Slf4jSimpleLogger(Logger logger) {
         this.logger = logger;
     }
+
+
+    public Slf4jSimpleLogger(Class clazz) {
+        this(LoggerFactory.getLogger(clazz));
+    }
+
 
     public static SimpleLogger of(Logger logger) {
         return new Slf4jSimpleLogger(logger);
