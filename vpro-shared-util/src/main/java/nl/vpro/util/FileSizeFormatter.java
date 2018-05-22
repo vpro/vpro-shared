@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.text.DecimalFormat;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-@lombok.Builder
+@lombok.Builder(builderClassName = "Builder")
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class FileSizeFormatter {
@@ -24,13 +26,23 @@ public class FileSizeFormatter {
     private static final long G = 1000 * M;
 
     @lombok.Builder.Default
-    private DecimalFormat format = new DecimalFormat("#.##");
+    private DecimalFormat format = new DecimalFormat("#");
 
     @lombok.Builder.Default
     private boolean mebi = true;
 
+    public static FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
+        .pattern("#.#")
+        .mebi(true)
+        .build();
 
-    public String format(Long length) {
+
+    public static FileSizeFormatter SI = FileSizeFormatter.builder()
+        .pattern("#.#")
+        .mebi(false)
+        .build();
+
+    public String format(Float length) {
         if (length == null) {
             return "? B";
         }
@@ -41,7 +53,32 @@ public class FileSizeFormatter {
         }
     }
 
-    private String formatMebi(long length) {
+      public String format(Long length) {
+        if (length == null) {
+            return "? B";
+        }
+        if (mebi) {
+            return formatMebi(length);
+        } else {
+            return formatSI(length);
+        }
+    }
+
+    public String formatSpeed(Long length, Duration duration) {
+        if (length == null) {
+            return format(length) + " /s";
+        }
+        Float perSecond = 1000f * length / duration.toMillis();
+        return format(perSecond) + "/s";
+    }
+
+
+
+    public String formatSpeed(Long length, Instant start) {
+        return formatSpeed(length, Duration.between(start, Instant.now()));
+    }
+
+    private String formatMebi(float length) {
         if (length > GiB) {
             return format.format(length / GiB) + " GiB";
         }
@@ -55,7 +92,7 @@ public class FileSizeFormatter {
     }
 
 
-     private String formatSI(long length) {
+     private String formatSI(float length) {
         if (length > G) {
             return format.format(length / G) + " GB";
         }
@@ -66,6 +103,13 @@ public class FileSizeFormatter {
             return format.format(length / K) + " KB";
         }
         return format.format(length) + " B";
+    }
+
+
+    public static class Builder {
+        public Builder pattern(String pattern) {
+            return format(new DecimalFormat(pattern));
+        }
     }
 
 }
