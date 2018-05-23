@@ -37,7 +37,7 @@ public class FileCachingInputStream extends InputStream {
 
     private final Path tempFile;
     private final InputStream file;
-    private int count = 0;
+    private long count = 0;
 
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
 
@@ -153,7 +153,14 @@ public class FileCachingInputStream extends InputStream {
                     bc = batchConsumer;
                 }
             }
-            // The copier is responsible for copying the remaining of the stream to the file
+
+            if (openOptions == null) {
+                openOptions = new ArrayList<>();
+                openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
+            }
+            this.file = new BufferedInputStream(
+                Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
+             // The copier is responsible for copying the remaining of the stream to the file
             // in a separate thread
             copier = Copier.builder()
                 .input(input).offset(bufferLength)
@@ -162,6 +169,7 @@ public class FileCachingInputStream extends InputStream {
                     IOUtils.closeQuietly(out);
                     if (progressLogging == null || progressLogging) {
                         log.info("Created {} ({} bytes written)", tempFile, c.getCount());
+
                     }
                 })
                 .batch(batchSize)
@@ -172,12 +180,6 @@ public class FileCachingInputStream extends InputStream {
                 copier.execute();
             }
 
-            if (openOptions == null) {
-                openOptions = new ArrayList<>();
-                openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
-            }
-            this.file = new BufferedInputStream(
-                Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -215,6 +217,9 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public void close() throws IOException {
+        if (file != null) {
+            file.close();
+        }
         if (copier != null) {
             // if somewhy close when copier is not ready yet, it can be interrupted, because we will not be using it any more.
             if (copier.interrupt()) {
@@ -222,7 +227,6 @@ public class FileCachingInputStream extends InputStream {
             }
         }
         if (file != null) {
-            file.close();
             if (tempFile != null) {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
@@ -240,16 +244,16 @@ public class FileCachingInputStream extends InputStream {
 
     private int readFromBuffer() {
         if (count < bufferLength) {
-            return buffer[count++];
+            return buffer[(int) count++];
         } else {
             return EOF;
         }
     }
 
     private int readFromBuffer(byte b[]) throws IOException {
-        int toCopy = Math.min(b.length, bufferLength - count);
+        int toCopy = Math.min(b.length, bufferLength - (int) count);
         if (toCopy > 0) {
-            System.arraycopy(buffer, count, b, 0, toCopy);
+            System.arraycopy(buffer, (int) count, b, 0, toCopy);
             count += toCopy;
             return toCopy;
         } else {
@@ -292,10 +296,12 @@ public class FileCachingInputStream extends InputStream {
         if (copier.isReady() && count == copier.getCount()) {
             return EOF;
         }
-        int totalResult = Math.max(file.read(b, 0, b.length), 0);
+        int totalResult = 0;
+        synchronized (copier) {
+            totalResult += Math.max(file.read(b, 0, b.length), 0);
 
-        if (totalResult == 0) {
-            synchronized (copier) {
+            if (totalResult == 0) {
+
                 while (!copier.isReady() && totalResult == 0) {
                     log.debug("Copier not yet ready");
                     try {
@@ -304,11 +310,13 @@ public class FileCachingInputStream extends InputStream {
                         log.error(e.getMessage(), e);
                     }
                     int subResult = Math.max(file.read(b, totalResult, b.length - totalResult), 0);
-                    totalResult += subResult;
+                      totalResult += subResult;
                 }
+
             }
+            count += totalResult;
         }
-        count += totalResult;
+
         //log.debug("returning {} bytes", totalResult);
         return totalResult;
     }
