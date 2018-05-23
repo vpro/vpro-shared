@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,6 +41,8 @@ public class CommandExecutorImpl implements CommandExecutor {
     private SimpleLogger<?> logger = new Slf4jSimpleLogger(LoggerFactory.getLogger(this.getClass()));
 
     private boolean useFileCache = false;
+
+    private int batchSize = 8192;
 
 
     public CommandExecutorImpl(String c) {
@@ -264,13 +267,14 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
 
-    public static Copier copyThread(InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
+    Copier copyThread(InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
         Copier copier = Copier.builder()
-        .input(in)
-        .output(out)
-        .errorHandler((c, t) -> errorHandler.accept(t))
-        .build();
-        ThreadPools.copyExecutor.execute(copier);
+            .input(in)
+            .output(out)
+            .errorHandler((c, t) -> errorHandler.accept(t))
+            .batch(batchSize)
+            .build();
+        ForkJoinPool.commonPool().execute(copier);
         return copier;
     }
 
