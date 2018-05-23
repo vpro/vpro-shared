@@ -86,7 +86,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         Function<String, String> wrapLogInfo,
         @Singular
         List<String> commonArgs,
-        boolean useFileCache
+        boolean useFileCache,
+        int batchSize
         ) {
          if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
@@ -111,6 +112,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         this.commonArgs = commonArgs;
         this.useFileCache = useFileCache;
+        this.batchSize = batchSize;
 
     }
 
@@ -132,16 +134,30 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
 
     }
+
+    /**
+     * Eecutes the command with given arguments. Output is logged only.
+     * @return  The exit code
+     */
     @Override
     public int execute(String... args) {
         return execute(LoggerOutputStream.info(getLogger()), null, args);
     }
 
+    /**
+     * Executes the command with given arguments, and catch the output and error streams in the given output streams.
+     * @return  The exit code
+     */
     @Override
     public int execute(final OutputStream out, OutputStream errors, String... args) {
         return execute(null, out, errors, args);
     }
 
+
+    /**
+     * Executes the command with given arguments, catch the output and error streams in the given output streams, and provide standard input with the given input stream
+     * @return  The exit code
+     */
     @Override
     public int execute(InputStream in, final OutputStream out, OutputStream errors, String... args) {
         if (errors == null) {
@@ -228,6 +244,12 @@ public class CommandExecutorImpl implements CommandExecutor {
 
 
 
+
+    /**
+     * Executes the command with given arguments,  and provide standard input with the given input stream.
+     * The output is returned as {@link Stream} of {@link String}'s (one for each line)
+     * @return  The exit code
+     */
     @Override
     public Stream<String> lines(InputStream in, OutputStream errors, String... args) {
         try {
@@ -279,7 +301,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
 
-    public static String toString(Iterable<String> args) {
+    static String toString(Iterable<String> args) {
         StringBuilder builder = new StringBuilder();
         for (String a : args) {
             if (builder.length() > 0) builder.append(' ');
