@@ -20,6 +20,16 @@ public class FileSizeFormatterTest {
 
     }
 
+
+    @Test
+    public void testDefault() {
+        FileSizeFormatter formatter = FileSizeFormatter.DEFAULT;
+        assertThat(formatter.format(1000L)).isEqualTo("1000 B");
+        assertThat(formatter.format(221400200L)).isEqualTo("211.1 MiB");
+
+    }
+
+
      @Test
     public void si() {
         FileSizeFormatter formatter = FileSizeFormatter.builder()
