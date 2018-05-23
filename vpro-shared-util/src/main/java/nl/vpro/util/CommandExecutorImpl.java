@@ -135,6 +135,9 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             return this;
         }
+        public Builder executablesPath(String executable) {
+            return executablesPaths(executable);
+        }
 
     }
 
