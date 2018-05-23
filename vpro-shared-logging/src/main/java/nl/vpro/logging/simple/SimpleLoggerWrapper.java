@@ -3,6 +3,9 @@ package nl.vpro.logging.simple;
 import org.slf4j.event.Level;
 
 /**
+ * It is hard to wrap every call to e.g. an {@link org.slf4j.Logger}. For a {@link SimpleLogger} it is easy though.
+ * Override {@link SimpleLoggerWrapper#wrapMessage(String)} and wrap an existing logger, and every log entry can be post processed.
+ *
  * @author Michiel Meeuwissen
  * @since 1.78
  */
