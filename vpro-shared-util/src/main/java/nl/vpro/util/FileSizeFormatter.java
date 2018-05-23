@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Locale;
 
 /**
  * @author Michiel Meeuwissen
@@ -24,6 +26,8 @@ public class FileSizeFormatter {
     private static final long K = 1000;
     private static final long M = 1000 * K;
     private static final long G = 1000 * M;
+
+    public static final DecimalFormatSymbols DECIMAL = DecimalFormatSymbols.getInstance(Locale.US);
 
     @lombok.Builder.Default
     private DecimalFormat format = new DecimalFormat("#");
@@ -108,7 +112,9 @@ public class FileSizeFormatter {
 
     public static class Builder {
         public Builder pattern(String pattern) {
-            return format(new DecimalFormat(pattern));
+            DecimalFormat decimalFormat = new DecimalFormat(pattern);
+            decimalFormat.setDecimalFormatSymbols(DECIMAL);
+            return format(decimalFormat);
         }
     }
 
