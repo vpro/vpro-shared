@@ -68,6 +68,10 @@ public class Slf4jHelper {
         }
     }
 
+    public static void debugOrInfo(Logger logger, boolean info, String format, Object... argArray) {
+        log(logger, info ? Level.INFO : Level.DEBUG, format, argArray);
+    }
+
     /**
      * Log at the specified level, with a Throwable on top. If the "logger" is null,
      * nothing is logged. If the "level" is null, nothing is logged. If the "format" or
