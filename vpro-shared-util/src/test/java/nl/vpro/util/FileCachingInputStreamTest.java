@@ -97,6 +97,7 @@ public class FileCachingInputStreamTest {
             out.write(buffer, 0, r);
         }
 
+
     }
 
 
@@ -319,6 +320,25 @@ public class FileCachingInputStreamTest {
         try (
             InputStream inputStream = new BufferedInputStream(new FileInputStream(new File("/tmp/pageupdates.json")));
             OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
+        ) {
+            IOUtils.copyLarge(inputStream, out);
+            System.out.println("Duration " + Duration.between(now, Instant.now()));
+        }
+
+
+    }
+
+
+    @Test
+    @Ignore
+    public void testLarge() throws IOException {
+        Instant now = Instant.now();
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .input(new FileInputStream(new File("/tmp/test.mp4")))
+                .build()
+            ;
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.mp4")))
         ) {
             IOUtils.copyLarge(inputStream, out);
             System.out.println("Duration " + Duration.between(now, Instant.now()));
