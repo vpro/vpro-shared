@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * <p>It will first buffer to an internal byte array (if the initial buffer size > 0, defaults to 2048). If that is too small it will buffer the result to a temporary file.
  * </p>
  * <p>Use this if you want to consume an inputstream as fast as possible, while handing it at a
- *  slower pace. The cost is the creation of the temporary file.</p>
+ * slower pace. The cost is the creation of the temporary file.</p>
  *
  * @author Michiel Meeuwissen
  * @since 0.50
@@ -46,6 +46,7 @@ public class FileCachingInputStream extends InputStream {
         public Builder tempDir(URI uri) {
             return path(Paths.get(uri));
         }
+
         public Builder tempDir(String uri) {
             return path(Paths.get(URI.create(uri)));
         }
@@ -71,107 +72,116 @@ public class FileCachingInputStream extends InputStream {
         Integer initialBuffer,
         Boolean startImmediately,
         Boolean progressLogging
-    ) throws IOException {
+    ) {
 
         super();
-        if(logger != null) {
+        if (logger != null) {
             this.log = logger;
         }
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
-        if (initialBuffer > 0) {
-            // first use an initial buffer of memory only
-            byte[] buf = new byte[initialBuffer];
+        try {
+            if (initialBuffer > 0) {
+                // first use an initial buffer of memory only
+                byte[] buf = new byte[initialBuffer];
 
-            int bufferOffset = 0;
-            int numRead;
-            do {
-                numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
-                if (numRead > 0) {
-                    bufferOffset += numRead;
+                int bufferOffset = 0;
+                int numRead;
+                do {
+                    numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
+                    if (numRead > 0) {
+                        bufferOffset += numRead;
+                    }
+                } while (numRead != -1 && bufferOffset < buf.length);
+
+                bufferLength = bufferOffset;
+
+                if (bufferLength < initialBuffer) {
+                    // the buffer was not completely filled.
+                    // there will be no need for a file at all.
+                    buffer = buf;
+                    System.arraycopy(buf, 0, buffer, 0, bufferLength);
+
+                    // don't use file later on
+                    copier = null;
+                    tempFile = null;
+                    file = null;
+                    return;
+                } else {
+                    buffer = buf;
                 }
-            } while (numRead != -1 && bufferOffset < buf.length);
-
-            bufferLength = bufferOffset;
-
-            if (bufferLength < initialBuffer) {
-                // the buffer was not completely filled.
-                // there will be no need for a file at all.
-                buffer = buf;
-                System.arraycopy(buf, 0, buffer, 0, bufferLength);
-
-                // don't use file later on
-                copier = null;
-                tempFile = null;
-                file = null;
-                return;
             } else {
-                buffer = buf;
+                bufferLength = 0;
+                buffer = null;
             }
-        } else {
-            bufferLength = 0;
-            buffer = null;
-        }
-        // if arriving here, a temp file will be needed
-        tempFile = Files.createTempFile(
-            path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
-            filePrefix == null ? "file-caching-inputstream" : filePrefix,
-            null);
+            // if arriving here, a temp file will be needed
 
-        log.debug("Using {}", tempFile);
-        if (outputBuffer == null) {
-            outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
-        }
-        OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
-        if (buffer != null) {
-            // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
-            out.write(buffer);
-        }
-        final BiConsumer<FileCachingInputStream, Copier> bc;
-        if (batchConsumer == null) {
-            if (progressLogging == null || progressLogging) {
-                bc = (t, c) ->
-                    log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
-            } else {
-                bc = (t, c) -> {};
+            tempFile = Files.createTempFile(
+                path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
+                filePrefix == null ? "file-caching-inputstream" : filePrefix,
+                null);
+
+
+            log.debug("Using {}", tempFile);
+            if (outputBuffer == null) {
+                outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
+            }
+            OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
+            if (buffer != null) {
+                // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
+                out.write(buffer);
             }
 
-        } else {
-            if (progressLogging != null && progressLogging) {
-                bc = (t, c) -> {
-                    log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
-                    batchConsumer.accept(t, c);
-                };
-            } else {
-                bc = batchConsumer;
-            }
-        }
-        // The copier is responsible for copying the remaining of the stream to the file
-        // in a separate thread
-        copier = Copier.builder()
-            .input(input).offset(bufferLength)
-            .output(out)
-            .callback(c -> {
-                IOUtils.closeQuietly(out);
+            final BiConsumer<FileCachingInputStream, Copier> bc;
+            if (batchConsumer == null) {
                 if (progressLogging == null || progressLogging) {
-                    log.info("Created {} ({} bytes written)", tempFile, c.getCount());
+                    bc = (t, c) ->
+                        log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                } else {
+                    bc = (t, c) -> {
+                    };
                 }
-            })
-            .batch(batchSize)
-            .batchConsumer(c -> bc.accept(this, c))
-            .build();
-        if (startImmediately == null || startImmediately) {
-            // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
-            copier.execute();
-        }
 
-        if (openOptions == null) {
-            openOptions = new ArrayList<>();
-            openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
+            } else {
+                if (progressLogging != null && progressLogging) {
+                    bc = (t, c) -> {
+                        log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                        batchConsumer.accept(t, c);
+                    };
+                } else {
+                    bc = batchConsumer;
+                }
+            }
+            // The copier is responsible for copying the remaining of the stream to the file
+            // in a separate thread
+            copier = Copier.builder()
+                .input(input).offset(bufferLength)
+                .output(out)
+                .callback(c -> {
+                    IOUtils.closeQuietly(out);
+                    if (progressLogging == null || progressLogging) {
+                        log.info("Created {} ({} bytes written)", tempFile, c.getCount());
+                    }
+                })
+                .batch(batchSize)
+                .batchConsumer(c -> bc.accept(this, c))
+                .build();
+            if (startImmediately == null || startImmediately) {
+                // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
+                copier.execute();
+            }
+
+            if (openOptions == null) {
+                openOptions = new ArrayList<>();
+                openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
+            }
+            this.file = new BufferedInputStream(
+                Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
-        this.file = new BufferedInputStream(
-            Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
     }
 
     @Override
@@ -183,9 +193,9 @@ public class FileCachingInputStream extends InputStream {
             } else {
                 return readFromFile();
             }
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             close();
-            throw  ioe;
+            throw ioe;
         }
     }
 
@@ -197,7 +207,7 @@ public class FileCachingInputStream extends InputStream {
             } else {
                 return readFromFile(b);
             }
-        } catch (IOException ioe){
+        } catch (IOException ioe) {
             close();
             throw ioe;
         }

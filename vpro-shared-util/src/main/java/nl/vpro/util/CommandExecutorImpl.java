@@ -39,6 +39,8 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private SimpleLogger<?> logger = new Slf4jSimpleLogger(LoggerFactory.getLogger(this.getClass()));
 
+    private boolean useFileCache = false;
+
 
     public CommandExecutorImpl(String c) {
         this(c, null);
@@ -80,22 +82,17 @@ public class CommandExecutorImpl implements CommandExecutor {
         Logger logger,
         Function<String, String> wrapLogInfo,
         @Singular
-        List<String> commonArgs
+        List<String> commonArgs,
+        boolean useFileCache
         ) {
          if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
-        File f = null;
-        for (File executable : executables) {
-            if (executable.exists() && executable.canExecute()) {
-                f = executable;
-                break;
-            }
-        }
-        if (f == null) {
+        Optional<File> f = getExecutable(executables);
+        if (! f.isPresent()) {
             throw new RuntimeException("None of " + executables + "can be executed");
         }
-        binary = f.getAbsolutePath();
+        binary = f.get().getAbsolutePath();
         this.workdir = workdir;
         if (logger != null) {
             this.logger = new Slf4jSimpleLogger(logger);
@@ -110,7 +107,16 @@ public class CommandExecutorImpl implements CommandExecutor {
             };
         }
         this.commonArgs = commonArgs;
+        this.useFileCache = useFileCache;
 
+    }
+
+    public static Optional<File> getExecutable(Collection<File> proposals) {
+        return proposals.stream().filter((e) -> e.exists() && e.canExecute()).findFirst();
+    }
+
+    public static Optional<File> getExecutable(String... proposals) {
+        return Arrays.stream(proposals).map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
     }
 
     public static class Builder {
@@ -138,6 +144,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (errors == null) {
             errors = LoggerOutputStream.error(getLogger(), true);
         }
+
         final List<String> command = new ArrayList<>();
         command.add(binary);
         ProcessBuilder pb = new ProcessBuilder(command);
@@ -159,12 +166,25 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            Copier inputCopier = in != null ? copyThread(in, p.getOutputStream(), (e) -> {}) : null;
+            final Copier inputCopier = in != null ? copyThread(in, p.getOutputStream(), (e) -> {}) : null;
 
-            Copier copier = out != null ? copyThread(p.getInputStream(), out, (e) -> {
-                Process process = p.destroyForcibly();
-                logger.info("Killed {}", process);
-            }) : null;
+            final Copier copier;
+            if (out != null) {
+                InputStream commandOutput = p.getInputStream();
+                  if (useFileCache) {
+                      commandOutput = FileCachingInputStream
+                          .builder()
+                          .input(commandOutput)
+                          .noProgressLogging()
+                          .build();
+                  }
+                copier = copyThread(commandOutput, out, (e) -> {
+                    Process process = p.destroyForcibly();
+                    logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
+                });
+            } else {
+                copier = null;
+            }
 
             Copier errorCopier = copyThread(p.getErrorStream(), errors, (e) -> {});
             if (inputCopier != null) {
