@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Future;
@@ -18,7 +20,7 @@ import org.apache.commons.io.IOUtils;
 */
 @Slf4j
 @ToString
-public class Copier implements Runnable {
+public class Copier implements Runnable, Closeable {
 
     private boolean ready;
     private long count;
@@ -124,7 +126,13 @@ public class Copier implements Runnable {
         return this;
     }
 
-    public boolean interrupt() {
+    @Override
+    public void close() throws IOException {
+        in.close();
+    }
+
+    public boolean interrupt() throws IOException {
+        close();
         return future != null && future.cancel(true);
     }
 
