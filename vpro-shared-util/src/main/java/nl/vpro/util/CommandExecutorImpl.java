@@ -44,6 +44,8 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private int batchSize = 8192;
 
+    private Function<String, String> wrapLogInfo = (s) -> s;
+
 
     public CommandExecutorImpl(String c) {
         this(c, null);
@@ -109,6 +111,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
                 }
             };
+            this.wrapLogInfo = wrapLogInfo;
         }
         this.commonArgs = commonArgs;
         this.useFileCache = useFileCache;
@@ -363,7 +366,9 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     @Override
     public String toString() {
-        return binary;
+        return binary + (commonArgs == null ? "" : commonArgs.stream()
+            .map(s -> this.wrapLogInfo.apply(s))
+            .collect(Collectors.joining(" ")));
     }
 
 
