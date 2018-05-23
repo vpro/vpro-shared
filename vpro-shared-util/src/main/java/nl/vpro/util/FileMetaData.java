@@ -14,7 +14,7 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @lombok.Builder(builderClassName = "Builder")
-public class FileDescriptor {
+public class FileMetaData {
 
     private final Long size;
     private final Instant lastModified;
