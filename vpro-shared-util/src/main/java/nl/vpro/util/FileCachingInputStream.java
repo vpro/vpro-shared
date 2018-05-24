@@ -54,6 +54,7 @@ public class FileCachingInputStream extends InputStream {
         public Builder noProgressLogging() {
             return progressLogging(false);
         }
+
     }
 
     /**

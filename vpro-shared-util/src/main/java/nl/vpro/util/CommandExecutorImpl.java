@@ -38,7 +38,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
-    private SimpleLogger<?> logger = new Slf4jSimpleLogger(LoggerFactory.getLogger(this.getClass()));
+    private SimpleLogger<?> logger = new Slf4jSimpleLogger(this.getClass());
 
     private boolean useFileCache = false;
 
