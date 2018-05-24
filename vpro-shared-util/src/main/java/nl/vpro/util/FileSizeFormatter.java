@@ -36,13 +36,13 @@ public class FileSizeFormatter {
     private boolean mebi = true;
 
     public static FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
-        .pattern("#.#")
+        .pattern("#.0")
         .mebi(true)
         .build();
 
 
     public static FileSizeFormatter SI = FileSizeFormatter.builder()
-        .pattern("#.#")
+        .pattern("#.0")
         .mebi(false)
         .build();
 
@@ -85,7 +85,7 @@ public class FileSizeFormatter {
     }
 
 
-     private String formatSI(float length) {
+    private String formatSI(float length) {
         if (length > G) {
             return format.format(length / G) + " GB";
         }
@@ -100,9 +100,23 @@ public class FileSizeFormatter {
 
 
     public static class Builder {
+        private DecimalFormatSymbols symbols = DECIMAL;
+
+        public Builder decimalFormatSymbols(DecimalFormatSymbols decimalFormatSymbols) {
+            this.symbols = decimalFormatSymbols == null ? DECIMAL : decimalFormatSymbols;
+            if (format != null) {
+                format.setDecimalFormatSymbols(decimalFormatSymbols);
+            }
+            return this;
+        }
+
+        public Builder decimalFormatSymbols(Locale locale) {
+            return decimalFormatSymbols(new DecimalFormatSymbols(locale));
+        }
+
         public Builder pattern(String pattern) {
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
-            decimalFormat.setDecimalFormatSymbols(DECIMAL);
+            decimalFormat.setDecimalFormatSymbols(symbols);
             return format(decimalFormat);
         }
     }
