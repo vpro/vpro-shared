@@ -46,39 +46,28 @@ public class FileSizeFormatter {
         .mebi(false)
         .build();
 
-    public String format(Float length) {
+    public String format(Number length) {
         if (length == null) {
             return "? B";
         }
         if (mebi) {
-            return formatMebi(length);
+            return formatMebi(length.floatValue());
         } else {
-            return formatSI(length);
+            return formatSI(length.floatValue());
         }
     }
 
-      public String format(Long length) {
-        if (length == null) {
-            return "? B";
-        }
-        if (mebi) {
-            return formatMebi(length);
-        } else {
-            return formatSI(length);
-        }
-    }
-
-    public String formatSpeed(Long length, Duration duration) {
+    public String formatSpeed(Number length, Duration duration) {
         if (length == null) {
             return format(length) + " /s";
         }
-        Float perSecond = 1000f * length / duration.toMillis();
+        Float perSecond = 1000f * length.floatValue() / duration.toMillis();
         return format(perSecond) + "/s";
     }
 
 
 
-    public String formatSpeed(Long length, Instant start) {
+    public String formatSpeed(Number length, Instant start) {
         return formatSpeed(length, Duration.between(start, Instant.now()));
     }
 
