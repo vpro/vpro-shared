@@ -4,7 +4,6 @@
  */
 package nl.vpro.api.client.resteasy;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -31,7 +30,7 @@ public class AcceptLanguageRequestFilter implements ClientRequestFilter {
     }
 
     @Override
-    public void filter(ClientRequestContext requestContext) throws IOException {
+    public void filter(ClientRequestContext requestContext) {
         if (locale != null) {
             List<String> localesAsString = locale.stream().map(Locale::toString).collect(Collectors.toList());
             requestContext.getHeaders()

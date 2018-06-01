@@ -12,7 +12,17 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
+
 /**
+ * At VPRO we use an convention for configuring web-application using property-files.
+ * This boils down to a fall back mechanism:
+ * <ol>
+ *     <li>Look in {@code {user.home}/conf/<application name>.properties}</li>
+ *     <li>Look in {@code <classpath>/<applicationname>.properties}</li>
+ * </ol>
+ * This class provides utilities to arrange that.
+ * I.e. it provides the means to calculate the actual values of the properties, and also using {@link ReflectionUtils} means to configure actual beans.
+ *
  * @author Michiel Meeuwissen
  * @since 1.75
  */
@@ -23,7 +33,7 @@ public class ConfigUtils {
     /**
      * Given a list of config file names, returns an array of resources representing it.
      * For every entry this return a 'classpath' url and a file in user.home/conf
-     * @return An array twice the size
+     * @return An array twice the size of the input arguments
      */
     public static String[] getConfigFilesInHome(String... configFiles) {
         return Stream.concat(
