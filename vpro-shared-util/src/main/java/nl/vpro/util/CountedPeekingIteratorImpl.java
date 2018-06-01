@@ -5,6 +5,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
+ *
  * @author Michiel Meeuwissen
  * @since 5.1
  */
