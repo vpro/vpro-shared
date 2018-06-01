@@ -18,6 +18,7 @@ import static nl.vpro.util.TimeUtils.roundToMillis;
 
 /**
  * Wraps all calls to register some statistics.
+ *
  * @author Michiel Meeuwissen
  * @since 1.57
  */
@@ -88,6 +89,7 @@ class CountAspect<T> implements InvocationHandler {
     }
 
 
+    @SuppressWarnings("unchecked")
     static <T> T proxyCounter(
         Map<String, Counter> counter,
         Duration countWindow,
@@ -99,7 +101,7 @@ class CountAspect<T> implements InvocationHandler {
         ) {
         return (T) Proxy.newProxyInstance(CountAspect.class.getClassLoader(),
             new Class[]{restInterface},
-            new CountAspect<T>(service, counter, countWindow, bucketCount, name, log, warnThreshold));
+            new CountAspect<>(service, counter, countWindow, bucketCount, name, log, warnThreshold));
     }
 
     private Local start(Method method) {

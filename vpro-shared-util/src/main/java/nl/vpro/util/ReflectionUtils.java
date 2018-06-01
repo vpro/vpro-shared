@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.LocaleUtils;
 
+import static nl.vpro.util.ReflectionUtils.ResultAction.IGNORED;
+import static nl.vpro.util.ReflectionUtils.ResultAction.NOTFOUND;
+import static nl.vpro.util.ReflectionUtils.ResultAction.SET;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.40
@@ -25,6 +29,7 @@ public class ReflectionUtils {
 
     /**
      * Sets a certain property value in an object using reflection
+     * @return A {@link Result} object describing what happened
      */
 
     public static Result setProperty(Object instance, String key, Object value) {
@@ -44,7 +49,7 @@ public class ReflectionUtils {
                 List<String> setterNames = setterName.stream()
                     .map(f -> f.apply(String.valueOf(k)))
                     .collect(Collectors.toList());
-                if (setProperty(instance, k, setterNames, v) == Result.SET) {
+                if (setProperty(instance, k, setterNames, v).getAction() == SET) {
                     if (! found.add(k)) {
                         log.warn("{} Set twice!", k);
                     }
@@ -74,8 +79,8 @@ public class ReflectionUtils {
                 List<String> getterNames = getterName.stream()
                     .map(f -> f.apply(String.valueOf(k)))
                     .collect(Collectors.toList());
-                Result result = setProperty(instance, k, setterNames, getterNames, v, true);
-                if (result == Result.SET) {
+                ResultAction result = setProperty(instance, k, setterNames, getterNames, v, true).getAction();
+                if (result == SET) {
                     if (!found.add(k)) {
                         log.warn("{} Set twice!", k);
                     }
@@ -219,7 +224,7 @@ public class ReflectionUtils {
                     try {
                         Object existingValue = m.invoke(instance);
                         if (existingValue != null) {
-                            return Result.IGNORED;
+                            return new Result(fieldName, IGNORED);
                         }
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         log.error(e.getMessage(), e);
@@ -232,7 +237,7 @@ public class ReflectionUtils {
                     f.setAccessible(true);
                     Object existingValue = f.get(instance);
                     if (existingValue != null) {
-                        return Result.IGNORED;
+                        return new Result(fieldName, IGNORED);
                     }
                 } catch (NoSuchFieldException e) {
                     log.debug(e.getMessage());
@@ -248,7 +253,7 @@ public class ReflectionUtils {
                     Object convertedValue = convert(v, parameterClass);
                     m.invoke(instance, convertedValue);
                     log.debug("Set {} to {}", m.getName(), v);
-                    return Result.SET;
+                    return new Result(fieldName, SET);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -261,7 +266,7 @@ public class ReflectionUtils {
                 f.setAccessible(true);
                 f.set(instance, convert(v, f.getGenericType()));
                 log.debug("Set field {} to {}", f.getName(), v);
-                return Result.SET;
+                return  new Result(fieldName, SET);
             } catch (NoSuchFieldException e) {
                 log.debug(e.getMessage());
             } catch (IllegalAccessException e) {
@@ -272,7 +277,7 @@ public class ReflectionUtils {
             log.warn("Unrecognized parameter type " + parameterClass);
         }
         log.debug("Unrecognized property {} on {}", setterNames, instance.getClass());
-        return Result.NOTFOUND;
+        return new Result(fieldName, NOTFOUND);
     }
 
     private static Result setProperty(Object instance, String fieldName, Collection<String> setterNames, Object value) {
@@ -329,14 +334,25 @@ public class ReflectionUtils {
 
 
     @Getter
-    public enum Result {
+    public static class Result {
+        final String property;
+        final ResultAction action;
+
+        public Result(String property, ResultAction action) {
+            this.property = property;
+            this.action = action;
+        }
+    }
+
+    @Getter
+    public enum ResultAction {
         SET(false),
         NOTFOUND(true),
         ERROR(true),
         IGNORED(false);
         final boolean errorneous;
 
-        Result(boolean errorneous) {
+        ResultAction(boolean errorneous) {
             this.errorneous = errorneous;
         }
     }

@@ -1,5 +1,7 @@
 package nl.vpro.api.client.resteasy;
 
+import lombok.Getter;
+
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
@@ -20,13 +22,14 @@ import nl.vpro.jackson2.Jackson2Mapper;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Wraps all calls to log client errors, and to register some statistics.
+ * Wraps all calls to log client errors.
  *
  * @author Michiel Meeuwissen
+ * @param <T> The class of the proxied object
  * @since 4.2
  */
 
-public class ErrorAspect<T> implements InvocationHandler {
+public class ErrorAspect<T, E> implements InvocationHandler {
 
     private final Logger log;
 
@@ -34,9 +37,13 @@ public class ErrorAspect<T> implements InvocationHandler {
 
     private final Supplier<String> string;
 
-    private final Class<?> errorClass;
+    private final Class<E> errorClass;
 
-    ErrorAspect(T proxied, Logger log, Supplier<String> string, Class<?> errorClass) {
+    /**
+     *
+     * @param errorClass The class which an error is tried to be unmarshalled to.
+     */
+    ErrorAspect(T proxied, Logger log, Supplier<String> string, Class<E> errorClass) {
         this.proxied = proxied;
         this.log = log;
         this.string = string;
@@ -47,13 +54,12 @@ public class ErrorAspect<T> implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Throwable t;
-        String mes;
+        Message mes;
         Logger l;
         boolean error;
         try {
             try {
-                Object object = method.invoke(proxied, args);
-                return object;
+                return method.invoke(proxied, args);
             } catch (InvocationTargetException itc) {
                 Throwable throwable = itc;
                 while(true) {
@@ -77,13 +83,13 @@ public class ErrorAspect<T> implements InvocationHandler {
             error = status >= 500;
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
-            mes = cause.getClass().getName() + " " + cause.getMessage();
+            mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
             l = log;
             t = pe;
             error = true;
 
         } catch (Throwable e) {
-            mes = e.getClass().getName() + " " + e.getMessage();
+            mes = new Message(null, e.getClass().getName() + " " + e.getMessage());
             t = e;
             l = log;
             error = true;
@@ -123,8 +129,9 @@ public class ErrorAspect<T> implements InvocationHandler {
         "X-ProxyInstancename",
         "Content-Type" // problem may be related to json vs xml?
     };
-    protected String getMessage(WebApplicationException we) {
+    protected Message getMessage(WebApplicationException we) {
         StringBuilder mes = new StringBuilder();
+        E error = null;
         try {
             Response response = we.getResponse();
             try {
@@ -135,8 +142,9 @@ public class ErrorAspect<T> implements InvocationHandler {
 
             if (errorClass != null) {
                 try {
-                    Object error = response.readEntity(errorClass);
+                    error = response.readEntity(errorClass);
                     mes.append(error.toString());
+
                 } catch (Exception e) {
                     // ignore and marshal to string
                 }
@@ -171,8 +179,9 @@ public class ErrorAspect<T> implements InvocationHandler {
             mes.append(we.getMessage());
         }
 
-        return mes.toString();
+        return new Message(error, mes.toString());
     }
+
 
     protected String valueToString(Object o) {
         if (o instanceof String) {
@@ -180,7 +189,7 @@ public class ErrorAspect<T> implements InvocationHandler {
         } else {
             try {
                 return Jackson2Mapper.getInstance().writeValueAsString(o);
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException ignored) {
 
             }
             return o.toString();
@@ -188,8 +197,15 @@ public class ErrorAspect<T> implements InvocationHandler {
     }
 
 
-    public static <T> T proxyErrors(Logger logger, Supplier<String> info, Class<T> restInterface, T service, Class<?> errorClass) {
-        return (T) Proxy.newProxyInstance(restInterface.getClassLoader(), new Class[]{restInterface}, new ErrorAspect<T>(service, logger, info, errorClass));
+    @SuppressWarnings("unchecked")
+    public static <T, E> T proxyErrors(
+        Logger logger,
+        Supplier<String> info,
+        Class<T> restInterface,
+        T service,
+        Class<E> errorClass) {
+        return (T) Proxy.newProxyInstance(restInterface.getClassLoader(), new Class[]{restInterface},
+            new ErrorAspect<>(service, logger, info, errorClass));
     }
 
 
@@ -197,5 +213,21 @@ public class ErrorAspect<T> implements InvocationHandler {
         return proxyErrors(logger, info, restInterface, service, null);
     }
 
+
+
+    @Getter
+    public class Message {
+        final E error;
+        final String message;
+
+        public Message(E error, String message) {
+            this.error = error;
+            this.message = message;
+        }
+        @Override
+        public String toString() {
+            return message;
+        }
+    }
 }
 

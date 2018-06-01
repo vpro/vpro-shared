@@ -429,7 +429,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     /**
-     * Checks wether supplier has null, if so produces it while locking, so it happens only on
+     * Checks wether supplier has null, if so produces it while locking, so it happens only once
      */
     protected <T> T produceIfNull(Supplier<T> supplier, Supplier<T> producer) {
         T t = supplier.get();
@@ -512,8 +512,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             }
         }
 
-        HttpClient built  = client.build();
-        return built;
+        return client.build();
     }
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
@@ -657,7 +656,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T, S> T build(ClientHttpEngine engine, Class<T> service, Class<S> restEasyService, Class<?> errorClass) {
+    protected <T, S, E> T build(
+        ClientHttpEngine engine,
+        Class<T> service,
+        Class<S> restEasyService,
+        Class<E> errorClass) {
         T proxy;
         if (restEasyService == null) {
             proxy = buildResteasy(engine, service);
@@ -676,18 +679,33 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return proxyErrors(service, proxyCounter(service, proxy));
     }
 
-    protected <T> T proxyErrorsAndCount(Class<T> service, T proxy, Class<?> errorClass) {
+    protected <T, E> T proxyErrorsAndCount(Class<T> service, T proxy, Class<E> errorClass) {
         return proxyErrors(service, proxyCounter(service, proxy), errorClass);
     }
 
     protected <T> T proxyErrors(Class<T> service, T proxy) {
-        return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy);
+        return proxyErrors(service, proxy, null);
     }
 
-    protected <T> T proxyErrors(Class<T> service, T proxy, Class<?> errorClass) {
+    /**
+     *
+     * @param service The service interface
+     * @param proxy The current proxy object for the service interface
+     * @param errorClass The class representing an error
+     * @param <T> The type of the service interface
+     * @return  A new proxy, with the functionality of {@link ErrorAspect} added.
+     */
+    protected <T, E> T proxyErrors(Class<T> service, T proxy, Class<E> errorClass) {
         return ErrorAspect.proxyErrors(log, AbstractApiClient.this::getInfo, service, proxy, errorClass);
     }
 
+      /**
+     *
+     * @param service The service interface
+     * @param proxy The current proxy object for the service interface
+     * @param <T> The type of the service interface
+     * @return  A new proxy, with the functionality of {@link CountAspect} added.
+     */
     protected <T> T proxyCounter(Class<T> service, T proxy) {
         return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log, warnThreshold);
     }
@@ -701,7 +719,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return build(engine, service, restEasyInterface, null);
     }
 
-    protected <T, S> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<S> restEasyInterface, Class<?> errorClass) {
+    protected <T, S> T buildWithErrorClass(
+        ClientHttpEngine engine,
+        Class<T> service,
+        Class<S> restEasyInterface,
+        Class<?> errorClass) {
         return build(engine, service, restEasyInterface, errorClass);
     }
 

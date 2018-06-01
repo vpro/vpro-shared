@@ -1,7 +1,5 @@
 package nl.vpro.api.client.resteasy;
 
-import java.io.IOException;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.ws.rs.client.ClientRequestContext;
@@ -27,7 +25,7 @@ class CountFilter implements ClientResponseFilter  {
     }
 
     @Override
-    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
+    public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) {
         CountAspect.Local local = CountAspect.currentThreadLocal.get();
 
         if (local != null) {
