@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import com.google.common.collect.Range;
 
 /**
- * Maintains values duration a certain time window. This window is divided up in a certain number of 'buckets', of which the oldest bucket expires every time after <window duration>/<number of buckets> and is discarded.
+ * Maintains values duration a certain time window. This window is divided up in a certain number of 'buckets', of which the oldest bucket expires every time after {@code <window duration>/<number of buckets>} and is discarded.
  *
  * The idea is that the values in the buckets can be used to calculate averages which are based on sufficiently long times, though sufficiently sensitive for changes. So you actually look at a window in time that slides gradually forward.
  *
