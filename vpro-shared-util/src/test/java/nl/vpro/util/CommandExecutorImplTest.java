@@ -5,7 +5,8 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.slf4j.Logger;
+
+import nl.vpro.logging.simple.SimpleLogger;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,7 +27,7 @@ public class CommandExecutorImplTest {
 
     @Test
     public void logger() {
-        Logger logger = new CommandExecutorImpl("/usr/bin/env").getLogger();
+        SimpleLogger<?> logger = new CommandExecutorImpl("/usr/bin/env").getLogger();
         assertEquals(CommandExecutorImpl.class.getName() + ".env.bin.usr", logger.getName());
     }
     @Test

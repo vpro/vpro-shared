@@ -31,10 +31,11 @@ public class Copier implements Runnable, Closeable {
     private final BiConsumer<Copier, Throwable> errorHandler;
     private final Consumer<Copier> batchConsumer;
     private Future<?> future;
+    private final String name;
 
 
     public Copier(InputStream i, OutputStream o, long batch) {
-        this(i, o, batch, null, null, null,  0);
+        this(i, o, batch, null, null, null,  0, null);
     }
 
     @Builder
@@ -45,7 +46,8 @@ public class Copier implements Runnable, Closeable {
         Consumer<Copier> batchConsumer,
         Consumer<Copier> callback,
         BiConsumer<Copier, Throwable> errorHandler,
-        int offset
+        int offset,
+        String name
         ) {
         in = input;
         out = output;
@@ -54,6 +56,7 @@ public class Copier implements Runnable, Closeable {
         this.batchConsumer = batchConsumer;
         this.errorHandler = errorHandler;
         this.count = offset;
+        this.name = name;
     }
 
     public Copier(InputStream i, OutputStream o) {
@@ -78,7 +81,7 @@ public class Copier implements Runnable, Closeable {
             }
         } catch (Throwable t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
-                log.error("Connector " + toString() + ": " + t.getClass() + " " + t.getMessage());
+                log.error("{}Connector " + toString() + ": " + t.getClass() + " " + t.getMessage(), logPrefix());
             }
             if (errorHandler != null) {
                 errorHandler.accept(this, t);
@@ -89,7 +92,7 @@ public class Copier implements Runnable, Closeable {
             if (callback != null) {
                 callback.accept(this);
             }
-            log.debug("notifying listeners");
+            log.debug("{}notifying listeners", logPrefix());
             notifyAll();
         }
     }
@@ -113,7 +116,7 @@ public class Copier implements Runnable, Closeable {
 
     public Copier execute() {
         if (future != null) {
-            throw new IllegalStateException("Already running");
+            throw new IllegalStateException(logPrefix() + "Already running");
         }
         future = ThreadPools.copyExecutor.submit(this);
         return this;
@@ -134,6 +137,10 @@ public class Copier implements Runnable, Closeable {
     public boolean interrupt() throws IOException {
         close();
         return future != null && future.cancel(true);
+    }
+
+    protected String logPrefix() {
+        return name == null ? "" : name + ": ";
     }
 
 }

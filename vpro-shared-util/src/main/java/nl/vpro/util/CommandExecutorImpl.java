@@ -3,16 +3,17 @@ package nl.vpro.util;
 import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.SimpleLogger;
@@ -38,7 +39,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
-    private SimpleLogger<?> logger = new Slf4jSimpleLogger(this.getClass());
+    private SimpleLogger<?> logger;
 
     private boolean useFileCache = false;
 
@@ -62,6 +63,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.binary = binary;
         this.workdir = workdir;
         this.commonArgs = null;
+        this.logger = getDefaultLogger(binary);
     }
 
     public CommandExecutorImpl(File f, File workdir) {
@@ -77,6 +79,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         binary = f.getAbsolutePath();
         this.workdir = workdir;
         this.commonArgs = null;
+        this.logger = getDefaultLogger(binary);
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -102,6 +105,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.workdir = workdir;
         if (logger != null) {
             this.logger = new Slf4jSimpleLogger(logger);
+        } else {
+            this.logger = getDefaultLogger(binary);
         }
         if (wrapLogInfo != null) {
             this.logger = new SimpleLoggerWrapper(this.logger) {
@@ -150,15 +155,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         return execute(LoggerOutputStream.info(getLogger()), null, args);
     }
 
-    /**
-     * Executes the command with given arguments, and catch the output and error streams in the given output streams.
-     * @return  The exit code
-     */
-    @Override
-    public int execute(final OutputStream out, OutputStream errors, String... args) {
-        return execute(null, out, errors, args);
-    }
-
 
     /**
      * Executes the command with given arguments, catch the output and error streams in the given output streams, and provide standard input with the given input stream
@@ -166,6 +162,7 @@ public class CommandExecutorImpl implements CommandExecutor {
      */
     @Override
     public int execute(InputStream in, final OutputStream out, OutputStream errors, String... args) {
+
         if (errors == null) {
             errors = LoggerOutputStream.error(getLogger(), true);
         }
@@ -191,7 +188,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            final Copier inputCopier = in != null ? copyThread(in, p.getOutputStream(), (e) -> {}) : null;
+            final Copier inputCopier = in != null ? copyThread("input copier", in, p.getOutputStream(), (e) -> {}) : null;
 
             final Copier copier;
             if (out != null) {
@@ -203,7 +200,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                           .noProgressLogging()
                           .build();
                   }
-                copier = copyThread(commandOutput, out, (e) -> {
+                copier = copyThread("command output", commandOutput, out, (e) -> {
                     Process process = p.destroyForcibly();
                     logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
                 });
@@ -211,7 +208,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 copier = null;
             }
 
-            Copier errorCopier = copyThread(p.getErrorStream(), errors, (e) -> {});
+            Copier errorCopier = copyThread("error copier", p.getErrorStream(), errors, (e) -> {});
             if (inputCopier != null) {
                 inputCopier.waitFor();
                 p.getOutputStream().close();
@@ -250,40 +247,16 @@ public class CommandExecutorImpl implements CommandExecutor {
 
 
 
-
-    /**
-     * Executes the command with given arguments,  and provide standard input with the given input stream.
-     * The output is returned as {@link Stream} of {@link String}'s (one for each line)
-     * @return  The exit code
-     */
-    @Override
-    public Stream<String> lines(InputStream in, OutputStream errors, String... args) {
-        try {
-            PipedInputStream reader = new PipedInputStream();
-            PipedOutputStream writer = new PipedOutputStream(reader);
-
-            BufferedReader result = new BufferedReader(new InputStreamReader(reader));
-            submit(in, writer, errors, (i) -> {
-                try {
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ignored) {
-
-                }
-            }, args);
-            return result.lines();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new RuntimeException(e);
-
-        }
-    }
-
     public void setProcessTimeout(long processTimeout) {
         this.processTimeout = processTimeout;
     }
 
-    Logger getLogger() {
+    @Override
+    public SimpleLogger<?> getLogger() {
+        return logger;
+    }
+
+    private static SimpleLogger<?> getDefaultLogger(String binary) {
         String[] split = binary.split("[/.\\\\]+");
         StringBuilder category = new StringBuilder(CommandExecutorImpl.class.getName());
         for (int i = split.length - 1; i >= 0; i--) {
@@ -291,12 +264,12 @@ public class CommandExecutorImpl implements CommandExecutor {
                 category.append('.').append(split[i]);
             }
         }
-        return LoggerFactory.getLogger(category.toString());
+        return Slf4jSimpleLogger.of(category.toString());
     }
 
-
-    Copier copyThread(InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
+    Copier copyThread(String name, InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
         Copier copier = Copier.builder()
+            .name(name)
             .input(in)
             .output(out)
             .errorHandler((c, t) -> errorHandler.accept(t))

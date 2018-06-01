@@ -8,9 +8,11 @@ import org.slf4j.helpers.MessageFormatter;
 
 
 /**
- * A very simplified Logger. This can be used as messaging system. It was made to use in conjuction with @{link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.
+ * A very simplified Logger. This can e.g. be used as messaging system. It was made to use in conjuction with @{link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.
  *
  * The goal was to log to slf4j but also send corresponding messages to users via websockets.
+ *
+ * Generally this can be used when a Logger instance wants to be an argument, because simple loggers can be implemented easily, normally with a just a few lines, and actuall loggers can be wrapped easily too.
  *
  * @author Michiel Meeuwissen
  * @since 1.76
@@ -18,6 +20,9 @@ import org.slf4j.helpers.MessageFormatter;
 public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level, String> {
 
 
+    default String getName() {
+        return getClass().getSimpleName();
+    }
 
     default S  debug(String format, Object... arg) {
         return log(Level.DEBUG, format, arg);
@@ -69,6 +74,7 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
         accept(level, message, null);
     }
     void accept(Level level, String message, Throwable t);
+
 
 
 }

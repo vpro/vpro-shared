@@ -6,6 +6,8 @@ import java.io.OutputStream;
 
 import org.slf4j.Logger;
 
+import nl.vpro.logging.simple.SimpleLogger;
+
 /**
  * Wraps a {@link Logger} in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
  * @author Michiel Meeuwissen
@@ -15,6 +17,15 @@ public abstract class LoggerOutputStream extends OutputStream {
 
     public static LoggerOutputStream info(java.util.logging.Logger log) {
         return info(log, false);
+    }
+
+    public static LoggerOutputStream info(final java.util.logging.Logger log, boolean skipEmptyLines) {
+        return new LoggerOutputStream(skipEmptyLines) {
+            @Override
+            void log(String line) {
+                log.info(line);
+            }
+        };
     }
 
     public static LoggerOutputStream info(Logger log) {
@@ -30,7 +41,12 @@ public abstract class LoggerOutputStream extends OutputStream {
         };
     }
 
-    public static LoggerOutputStream info(final java.util.logging.Logger log, boolean skipEmptyLines) {
+
+    public static LoggerOutputStream info(SimpleLogger log) {
+        return info(log, false);
+    }
+
+    public static LoggerOutputStream info(final SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
             void log(String line) {
@@ -39,16 +55,12 @@ public abstract class LoggerOutputStream extends OutputStream {
         };
     }
 
-    public static LoggerOutputStream error(Logger log) {
+
+    public static LoggerOutputStream error(SimpleLogger<?> log) {
         return error(log, false);
     }
 
-    public static LoggerOutputStream error(java.util.logging.Logger log) {
-        return error(log, false);
-    }
-
-
-    public static LoggerOutputStream error(final Logger log, boolean skipEmptyLines) {
+    public static LoggerOutputStream error(SimpleLogger<?> log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
             void log(String line) {
@@ -57,11 +69,30 @@ public abstract class LoggerOutputStream extends OutputStream {
         };
     }
 
+
+    public static LoggerOutputStream error(java.util.logging.Logger log) {
+        return error(log, false);
+    }
+
     public static LoggerOutputStream error(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
             void log(String line) {
                 log.severe(line);
+            }
+        };
+    }
+
+
+    public static LoggerOutputStream error(Logger log) {
+        return error(log, false);
+    }
+
+    public static LoggerOutputStream error(final Logger log, boolean skipEmptyLines) {
+        return new LoggerOutputStream(skipEmptyLines) {
+            @Override
+            void log(String line) {
+                log.error(line);
             }
         };
     }

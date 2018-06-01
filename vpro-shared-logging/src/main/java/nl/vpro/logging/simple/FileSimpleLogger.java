@@ -47,6 +47,8 @@ public class FileSimpleLogger implements SimpleLogger<FileSimpleLogger> {
         this(null, null);
     }
 
+
+
     @Override
     public void accept(Level level, String message, Throwable t) {
         if (level.toInt() < this.level.toInt()) {

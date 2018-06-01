@@ -29,6 +29,15 @@ public class Slf4jSimpleLogger implements SimpleLogger<Slf4jSimpleLogger> {
     public static SimpleLogger of(Logger logger) {
         return new Slf4jSimpleLogger(logger);
     }
+    public static SimpleLogger of(String category) {
+        return of(LoggerFactory.getLogger(category));
+    }
+
+    @Override
+    public String getName() {
+        return logger.getName();
+
+    }
 
     @Override
     public void accept(Level level, String message, Throwable t) {
