@@ -21,6 +21,11 @@ public class Log4jSimpleLogger implements SimpleLogger<Log4jSimpleLogger> {
         log.log(toLevel(level), message, t);
     }
 
+    @Override
+    public boolean isEnabled(Level level) {
+        return log.isEnabledFor(toLevel(level));
+    }
+
     public static org.apache.log4j.Level toLevel(Level level) {
         switch(level) {
             case TRACE:

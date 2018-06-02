@@ -20,17 +20,20 @@ public class Slf4jSimpleLogger implements SimpleLogger<Slf4jSimpleLogger> {
         this.logger = logger;
     }
 
-
     public Slf4jSimpleLogger(Class clazz) {
         this(LoggerFactory.getLogger(clazz));
     }
-
 
     public static SimpleLogger of(Logger logger) {
         return new Slf4jSimpleLogger(logger);
     }
     public static SimpleLogger of(String category) {
         return of(LoggerFactory.getLogger(category));
+    }
+
+    @Override
+    public boolean isEnabled(Level level) {
+        return Slf4jHelper.isEnabled(logger, level);
     }
 
     @Override

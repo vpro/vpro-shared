@@ -23,40 +23,45 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
     default String getName() {
         return getClass().getSimpleName();
     }
+    default S trace(String format, Object... arg) {
+        return log(Level.TRACE, format, arg);
+    }
 
-    default S  debug(String format, Object... arg) {
+    default S debug(String format, Object... arg) {
         return log(Level.DEBUG, format, arg);
     }
 
-    default S  info(String format, Object... arg) {
+    default S info(String format, Object... arg) {
         return log(Level.INFO, format, arg);
     }
 
-    default S  warn(String format, Object... arg) {
+    default S warn(String format, Object... arg) {
         return log(Level.WARN, format, arg);
 
     }
 
-    default S  error(String format, Object... arg) {
+    default S error(String format, Object... arg) {
         return log(Level.ERROR, format, arg);
     }
 
 
-    default S  log(Level level, String format, Object... arg) {
-        FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
-        String message = ft.getMessage();
-        if (ft.getArgArray().length == arg.length) {
-            accept(level, message);
-        } else if (arg.length >= 1){
-            Object t = arg[arg.length - 1];
-            if (t instanceof Throwable) {
-                accept(level, message, (Throwable) t);
+    default S log(Level level, String format, Object... arg) {
+        if (isEnabled(level)) {
+            FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
+            String message = ft.getMessage();
+            if (ft.getArgArray().length == arg.length) {
+                accept(level, message);
+            } else if (arg.length >= 1){
+                Object t = arg[arg.length - 1];
+                if (t instanceof Throwable) {
+                    accept(level, message, (Throwable) t);
+                } else {
+                    accept(level, message);
+                }
             } else {
+                accept(Level.ERROR, "Format has " + ft.getArgArray().length + " args but " + arg.length + " were given");
                 accept(level, message);
             }
-        } else {
-            accept(Level.ERROR, "Format has " + ft.getArgArray().length + " args but " + arg.length + " were given");
-            accept(level, message);
         }
         return self();
     }
@@ -67,6 +72,10 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
 
     default S debugOrInfo(boolean info, String format, Object... arg) {
         return log(info ? Level.INFO : Level.DEBUG, format, arg);
+    }
+
+    default boolean isEnabled(Level level) {
+        return true;
     }
 
     @Override

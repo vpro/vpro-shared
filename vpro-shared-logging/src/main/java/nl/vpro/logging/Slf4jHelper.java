@@ -1,5 +1,7 @@
 package nl.vpro.logging;
 
+import javax.annotation.Nonnull;
+
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
@@ -101,4 +103,22 @@ public class Slf4jHelper {
             }
         }
     }
+
+    public static boolean isEnabled(@Nonnull Logger logger,  @Nonnull  Level level) {
+        switch (level) {
+            case TRACE:
+                return logger.isTraceEnabled();
+            case DEBUG:
+                return logger.isDebugEnabled();
+            case INFO:
+                return logger.isInfoEnabled();
+            case WARN:
+                return logger.isWarnEnabled();
+            case ERROR:
+                return logger.isErrorEnabled();
+            default:
+                return true;
+        }
+    }
+
 }

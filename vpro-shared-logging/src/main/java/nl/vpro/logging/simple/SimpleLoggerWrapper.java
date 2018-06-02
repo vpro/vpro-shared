@@ -22,5 +22,14 @@ public abstract class SimpleLoggerWrapper implements SimpleLogger<SimpleLoggerWr
         wrapped.accept(level, wrapMessage(message), t);
     }
 
+    @Override
+    public boolean isEnabled(Level level) {
+        return wrapped.isEnabled(level);
+    }
+    @Override
+    public String getName() {
+        return wrapped.getName();
+    }
+
     protected abstract  String wrapMessage(String message);
 }

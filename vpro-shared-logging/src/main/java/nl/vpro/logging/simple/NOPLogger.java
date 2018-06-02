@@ -13,6 +13,12 @@ public class NOPLogger implements SimpleLogger<NOPLogger> {
     }
 
     @Override
+    public boolean isEnabled(Level level) {
+        return false;
+    }
+
+
+    @Override
     public String toString() {
         return "NOP";
     }
