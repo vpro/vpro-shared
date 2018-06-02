@@ -25,8 +25,15 @@ public class ChainedSimpleLogger implements SimpleLogger<ChainedSimpleLogger>, I
     @Override
     public void accept(Level level, String message, Throwable t) {
         for (SimpleLogger logger : list) {
-            logger.accept(level, message, t);;
+            if (logger.isEnabled(level)) {
+                logger.accept(level, message, t);;
+            }
         }
+    }
+
+    @Override
+    public boolean isEnabled(Level level){
+        return list.stream().map(l -> l.isEnabled(level)).filter(b -> b).findFirst().orElse(false);
     }
 
     @Override

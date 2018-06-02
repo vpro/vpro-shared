@@ -21,6 +21,12 @@ public class JULSimpleLogger implements SimpleLogger<JULSimpleLogger> {
         log.log(toLevel(level), message, t);
     }
 
+
+    @Override
+    public boolean isEnabled(Level level) {
+        return log.getLevel().intValue() <= toLevel(level).intValue();
+    }
+
     public static java.util.logging.Level toLevel(Level level) {
         switch(level) {
             case TRACE:
