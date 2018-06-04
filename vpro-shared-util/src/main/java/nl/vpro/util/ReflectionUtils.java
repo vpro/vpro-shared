@@ -20,7 +20,7 @@ import static nl.vpro.util.ReflectionUtils.ResultAction.SET;
  * This provides some basic reflection code to call setters and getters on java beans. There are of course other libraries available
  * for these kind of things, but it it not hard,  and this allows for customizing details of it.
  *
- * Most importantly we add a number of {@link #configured(Object, Map)}
+ * Most importantly we add a number of {@link #configured(Object, Map)} methods so this class together with {@link ConfigUtils} provides a complete configuration mechanism.
  *
  *
  * @author Michiel Meeuwissen

@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 
 /**
+ * Wraps an iterator, to add zero or more elements at the start of it.
  * @author Michiel Meeuwissen
  * @since 1.72
  */
