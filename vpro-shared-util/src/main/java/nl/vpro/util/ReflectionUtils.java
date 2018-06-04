@@ -16,6 +16,13 @@ import static nl.vpro.util.ReflectionUtils.ResultAction.NOTFOUND;
 import static nl.vpro.util.ReflectionUtils.ResultAction.SET;
 
 /**
+ *
+ * This provides some basic reflection code to call setters and getters on java beans. There are of course other libraries available
+ * for these kind of things, but it it not hard,  and this allows for customizing details of it.
+ *
+ * Most importantly we add a number of {@link #configured(Object, Map)}
+ *
+ *
  * @author Michiel Meeuwissen
  * @since 0.40
  */
@@ -143,28 +150,42 @@ public class ReflectionUtils {
     }
 
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configured(Env env, Class<T> clazz, String... configFiles) {
         return ConfigUtils.configured(env, clazz, configFiles);
-
     }
 
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static void configured(Env env, Object instance, String... configFiles) {
         ConfigUtils.configured(env, instance, configFiles);
     }
 
+     /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configured(Class<T> clazz, String... configfiles) {
         return ConfigUtils.configured(clazz, configfiles);
     }
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static Map<String, String> getProperties(String... configFiles) {
         return ConfigUtils.getProperties(configFiles);
     }
 
+     /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static Map<String, String> getProperties(Map<String, String> initial, String... configFiles) {
         return ConfigUtils.getProperties(initial, configFiles);
@@ -175,11 +196,17 @@ public class ReflectionUtils {
         ConfigUtils.substitute(map, map);
     }
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static Map<String, String> filtered(Env e, Map<String, String> properties) {
         return ConfigUtils.filtered(e, properties);
     }
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static Map<String, String> filtered(Env e, String prefix,  Map<String, String> properties) {
         return ConfigUtils.filtered(e, prefix, properties);
@@ -187,25 +214,41 @@ public class ReflectionUtils {
     }
 
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configured(T instance, String... configFiles) {
         return ConfigUtils.configured(instance, configFiles);
     }
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configuredInHome(T instance, String... configFiles) {
         return ConfigUtils.configured(instance, ConfigUtils.getConfigFilesInHome(configFiles));
     }
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configuredInHome(Env env, T instance, String... configFiles) {
         return ConfigUtils.configuredInHome(env, instance, configFiles);
     }
+
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configured(Env env, Class<T> clazz, Map<String, String> config) {
         return ConfigUtils.configured(env, clazz, config);
     }
 
+    /**
+     * @deprecated Use {@link ConfigUtils}
+     */
     @Deprecated
     public static <T> T configured(Env env, T instance, Map<String, String> config) {
         return ConfigUtils.configured(env, instance, config);

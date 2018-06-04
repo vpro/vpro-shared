@@ -20,8 +20,15 @@ import org.apache.commons.text.StringSubstitutor;
  *     <li>Look in {@code {user.home}/conf/<application name>.properties}</li>
  *     <li>Look in {@code <classpath>/<applicationname>.properties}</li>
  * </ol>
- * This class provides utilities to arrange that.
- * I.e. it provides the means to calculate the actual values of the properties, and also using {@link ReflectionUtils} means to configure actual beans.
+ * This class provides utilities to arrange that. Also it is aware of {@link Env} (explicitely or via an 'env' property)  so that there is a consistent system for
+ * varying properties across different OTAP deployments.
+
+ *
+ * I.e. it provides the means to calculate the actual values of the properties dependent on the available properties and environment.
+ *
+ * There are also methods combining this with {@link ReflectionUtils} to configure actual beans.
+ *
+ *
  *
  * @author Michiel Meeuwissen
  * @since 1.75
