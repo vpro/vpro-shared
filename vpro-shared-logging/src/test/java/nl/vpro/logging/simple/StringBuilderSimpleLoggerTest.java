@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class ToStringBuilderSimpleLoggerTest {
+public class StringBuilderSimpleLoggerTest {
 
     @Test
     public void test() {
@@ -19,7 +19,7 @@ public class ToStringBuilderSimpleLoggerTest {
     }
 
 
-     @Test
+    @Test
     public void testTruncate() {
         StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
             .builder()
@@ -42,5 +42,15 @@ public class ToStringBuilderSimpleLoggerTest {
              "INFO e\n" +
              "INFO f");
 
+    }
+
+    @Test
+    public void testFormat() {
+        StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
+            .builder()
+            .maxLength(4L)
+            .build();
+        logger.info("{} + {} = 30", "10", 20);
+        assertThat(logger.getStringBuilder().toString()).isEqualTo("INFO 10 + 20 = 30");
     }
 }
