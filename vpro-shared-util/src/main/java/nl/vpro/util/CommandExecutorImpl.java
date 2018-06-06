@@ -39,13 +39,13 @@ public class CommandExecutorImpl implements CommandExecutor {
     private long processTimeout = -1L;
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
 
-    private SimpleLogger<?> logger;
+    private SimpleLogger logger;
 
     private boolean useFileCache = false;
 
     private int batchSize = 8192;
 
-    private Function<String, String> wrapLogInfo = (s) -> s;
+    private Function<CharSequence, String> wrapLogInfo = CharSequence::toString;
 
 
     public CommandExecutorImpl(String c) {
@@ -88,7 +88,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         @Singular
         List<File> executables,
         Logger logger,
-        Function<String, String> wrapLogInfo,
+        Function<CharSequence, String> wrapLogInfo,
         @Singular
         List<String> commonArgs,
         boolean useFileCache,
@@ -111,7 +111,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (wrapLogInfo != null) {
             this.logger = new SimpleLoggerWrapper(this.logger) {
                 @Override
-                protected String wrapMessage(String message) {
+                protected String wrapMessage(CharSequence message) {
                     return wrapLogInfo.apply(message);
 
                 }
@@ -252,11 +252,11 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     @Override
-    public SimpleLogger<?> getLogger() {
+    public SimpleLogger getLogger() {
         return logger;
     }
 
-    private static SimpleLogger<?> getDefaultLogger(String binary) {
+    private static SimpleLogger getDefaultLogger(String binary) {
         String[] split = binary.split("[/.\\\\]+");
         StringBuilder category = new StringBuilder(CommandExecutorImpl.class.getName());
         for (int i = split.length - 1; i >= 0; i--) {

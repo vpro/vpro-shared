@@ -83,8 +83,8 @@ public class MBeans {
 
 
 
-    public static class UpdatableString implements Supplier<String>, SimpleLogger<UpdatableString> {
-        private String string;
+    public static class UpdatableString implements Supplier<String>, SimpleLogger {
+        private CharSequence string;
         private Logger logger;
 
         public UpdatableString(Logger logger, String string, Object... args) {
@@ -94,23 +94,23 @@ public class MBeans {
 
         @Override
         public String get() {
-            return string;
+            return toString();
         }
 
         @Override
-        public void accept(Level level, String s, Throwable t) {
-            String prev = this.string;
+        public void accept(Level level, CharSequence s, Throwable t) {
+            CharSequence prev = this.string;
             this.string = s;
             if (logger != null) {
                 if (Objects.equals(prev, this.string)) {
-                    Slf4jHelper.log(logger, level, this.string);
+                    Slf4jHelper.log(logger, level, this.string.toString());
                 }
             }
         }
 
         @Override
         public String toString() {
-            return string;
+            return string.toString();
         }
     }
 }

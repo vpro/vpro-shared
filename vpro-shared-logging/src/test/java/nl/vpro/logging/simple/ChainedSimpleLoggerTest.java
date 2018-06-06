@@ -27,7 +27,7 @@ public class ChainedSimpleLoggerTest {
             }
 
     @Slf4j
-    static class SLogger implements SimpleLogger<SLogger> {
+    static class SLogger implements SimpleLogger {
         private final Level level;
 
         SLogger(Level level) {
@@ -40,8 +40,8 @@ public class ChainedSimpleLoggerTest {
         }
 
         @Override
-        public void accept(Level level, String message, Throwable t) {
-            Slf4jHelper.log(log, level, message, t);
+        public void accept(Level level, CharSequence message, Throwable t) {
+            Slf4jHelper.log(log, level, message.toString(), t);
         }
     }
 }

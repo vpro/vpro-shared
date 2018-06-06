@@ -163,7 +163,7 @@ public interface CommandExecutor {
          return ioe.getCause() != null && ioe.getCause().getMessage().equalsIgnoreCase("broken pipe");
     }
 
-    SimpleLogger<?> getLogger();
+    SimpleLogger getLogger();
 
 
     class BrokenPipe extends RuntimeException {
