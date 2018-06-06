@@ -27,7 +27,7 @@ public class CommandExecutorImplTest {
 
     @Test
     public void logger() {
-        SimpleLogger<?> logger = new CommandExecutorImpl("/usr/bin/env").getLogger();
+        SimpleLogger logger = new CommandExecutorImpl("/usr/bin/env").getLogger();
         assertEquals(CommandExecutorImpl.class.getName() + ".env.bin.usr", logger.getName());
     }
     @Test
