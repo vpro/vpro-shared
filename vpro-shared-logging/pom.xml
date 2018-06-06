@@ -41,6 +41,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.google.flogger</groupId>
+      <artifactId>flogger</artifactId>
+      <version>0.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
