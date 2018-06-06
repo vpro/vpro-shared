@@ -166,6 +166,7 @@ public class FileCachingInputStream extends InputStream {
             copier = Copier.builder()
                 .input(input).offset(bufferLength)
                 .output(out)
+                .name(tempFile.toString())
                 .callback(c -> {
                     IOUtils.closeQuietly(out);
                     if (progressLogging == null || progressLogging) {
@@ -268,7 +269,7 @@ public class FileCachingInputStream extends InputStream {
         while (result == EOF) {
             synchronized (copier) {
                 while (!copier.isReady() && result == EOF) {
-                    log.debug("Copier not yet ready");
+                    log.debug("Copier {} not yet ready", copier.logPrefix());
                     // copier is still busy, wait a second, and try again.
                     try {
                         copier.wait(1000);
@@ -304,7 +305,7 @@ public class FileCachingInputStream extends InputStream {
             if (totalResult == 0) {
 
                 while (!copier.isReady() && totalResult == 0) {
-                    log.debug("Copier not yet ready");
+                    log.debug("Copier {} not yet ready", copier.logPrefix());
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
