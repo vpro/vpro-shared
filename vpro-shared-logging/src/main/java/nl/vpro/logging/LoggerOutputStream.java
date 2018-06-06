@@ -56,11 +56,11 @@ public abstract class LoggerOutputStream extends OutputStream {
     }
 
 
-    public static LoggerOutputStream error(SimpleLogger<?> log) {
+    public static LoggerOutputStream error(SimpleLogger log) {
         return error(log, false);
     }
 
-    public static LoggerOutputStream error(SimpleLogger<?> log, boolean skipEmptyLines) {
+    public static LoggerOutputStream error(SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
             void log(String line) {

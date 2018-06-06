@@ -17,61 +17,83 @@ import org.slf4j.helpers.MessageFormatter;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level, String> {
+public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
 
 
     default String getName() {
         return getClass().getSimpleName();
     }
-    default S trace(String format, Object... arg) {
-        return log(Level.TRACE, format, arg);
-    }
-
-    default S debug(String format, Object... arg) {
-        return log(Level.DEBUG, format, arg);
-    }
-
-    default S info(String format, Object... arg) {
-        return log(Level.INFO, format, arg);
-    }
-
-    default S warn(String format, Object... arg) {
-        return log(Level.WARN, format, arg);
-
-    }
-
-    default S error(String format, Object... arg) {
-        return log(Level.ERROR, format, arg);
+    default void trace(String format, Object... arg) {
+        log(Level.TRACE, format, arg);
     }
 
 
-    default S log(Level level, String format, Object... arg) {
+    default void debug(String format, Object... arg) {
+        log(Level.DEBUG, format, arg);
+    }
+
+    default void info(String format, Object... arg) {
+        log(Level.INFO, format, arg);
+    }
+
+    default void warn(String format, Object... arg) {
+        log(Level.WARN, format, arg);
+
+    }
+
+    default void error(String format, Object... arg) {
+        log(Level.ERROR, format, arg);
+    }
+
+     default void trace(CharSequence message) {
+        log(Level.TRACE, message);
+    }
+
+
+    default void debug(CharSequence message) {
+        log(Level.DEBUG, message);
+    }
+
+    default void info(CharSequence message) {
+        log(Level.INFO, message);
+    }
+
+    default void warn(CharSequence message) {
+        log(Level.WARN, message);
+
+    }
+
+    default void error(CharSequence message) {
+        log(Level.ERROR, message);
+    }
+
+    default void log(Level level, CharSequence message) {
+        accept(level, message);
+    }
+
+
+    default void log(Level level, String format, Object... arg) {
         if (isEnabled(level)) {
             FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
             String message = ft.getMessage();
             if (ft.getArgArray().length == arg.length) {
-                accept(level, message);
+                accept(level, message, null);
             } else if (arg.length >= 1){
                 Object t = arg[arg.length - 1];
                 if (t instanceof Throwable) {
                     accept(level, message, (Throwable) t);
                 } else {
-                    accept(level, message);
+                    accept(level, message, null);
                 }
             } else {
-                accept(Level.ERROR, "Format has " + ft.getArgArray().length + " args but " + arg.length + " were given");
-                accept(level, message);
+                accept(Level.ERROR, "Format has " + ft.getArgArray().length + " args but " + arg.length + " were given", null);
+                accept(level, message, null);
             }
         }
-        return self();
-    }
-    @SuppressWarnings("unchecked")
-    default S self() {
-        return (S) this;
     }
 
-    default S debugOrInfo(boolean info, String format, Object... arg) {
-        return log(info ? Level.INFO : Level.DEBUG, format, arg);
+    default void debugOrInfo(boolean info, String format, Object... arg) {
+        log(info ? Level.INFO : Level.DEBUG, format, arg);
     }
 
     default boolean isEnabled(Level level) {
@@ -79,10 +101,10 @@ public interface  SimpleLogger<S extends SimpleLogger> extends BiConsumer<Level,
     }
 
     @Override
-    default void accept(Level level, String message) {
+    default void accept(Level level, CharSequence message) {
         accept(level, message, null);
     }
-    void accept(Level level, String message, Throwable t);
+    void accept(Level level, CharSequence message, Throwable t);
 
 
 

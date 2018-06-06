@@ -12,13 +12,13 @@ import org.slf4j.event.Level;
 /**
  * A {@link SimpleLogger} that adds every log event to a {@link Queue} of {@link Event}'s (or possibly extensions thereof)
  *
- * It is abstract because you need to implement how to instantiate a new {@link Event} extension for the queue via {@link #createEvent(Level, String, Throwable)}
+ * It is abstract because you need to implement how to instantiate a new {@link Event} extension for the queue via {@link #createEvent(Level, CharSequence, Throwable)}
  * If you have no need for that, you can instantiate via {@link #of(Queue)}.
  *
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> implements SimpleLogger<QueueSimpleLogger<E>> {
+public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> implements SimpleLogger {
 
     private final Queue<E> queue;
 
@@ -32,7 +32,7 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     public static QueueSimpleLogger<Event> of(Queue<Event> q) {
         return new QueueSimpleLogger<Event>(q) {
             @Override
-            protected Event createEvent(Level level, String message, Throwable t) {
+            protected Event createEvent(Level level, CharSequence message, Throwable t) {
                 return  Event.builder()
                     .level(level)
                     .message(message)
@@ -43,12 +43,21 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     }
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
+    public void accept(Level level, CharSequence message, Throwable t) {
         queue.add(createEvent(level, message, t));
     }
 
-    protected abstract E createEvent(Level level, String message, Throwable t);
+    @Override
+    public void accept(Level level, CharSequence message) {
+        queue.add(createEvent(level, message));
+    }
 
+
+    protected abstract E createEvent(Level level, CharSequence message, Throwable t);
+
+    protected E createEvent(Level level, CharSequence message) {
+        return createEvent(level, message.toString(), null);
+    }
 
 
     @Override
@@ -65,7 +74,7 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     @lombok.Builder
     public static class Event {
         private final Level level;
-        private final String message;
+        private final CharSequence message;
         private final Throwable throwable;
         private final Map<String, String> mdc = MDC.getCopyOfContextMap();
     }

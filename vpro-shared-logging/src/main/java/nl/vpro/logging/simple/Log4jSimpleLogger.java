@@ -9,7 +9,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.79
  */
-public class Log4jSimpleLogger implements SimpleLogger<Log4jSimpleLogger> {
+public class Log4jSimpleLogger implements SimpleLogger {
     private final Logger log;
 
     public Log4jSimpleLogger(Logger log) {
@@ -17,7 +17,7 @@ public class Log4jSimpleLogger implements SimpleLogger<Log4jSimpleLogger> {
     }
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
+    public void accept(Level level, CharSequence message, Throwable t) {
         log.log(toLevel(level), message, t);
     }
 

@@ -8,7 +8,7 @@ import com.google.common.flogger.FluentLogger;
  * @author Michiel Meeuwissen
  * @since 1.79
  */
-public class FloggerSimpleLogger implements SimpleLogger<FloggerSimpleLogger> {
+public class FloggerSimpleLogger implements SimpleLogger{
     private final FluentLogger logger;
 
     public FloggerSimpleLogger(FluentLogger logger) {
@@ -16,8 +16,8 @@ public class FloggerSimpleLogger implements SimpleLogger<FloggerSimpleLogger> {
     }
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
-        logger.at(JULSimpleLogger.toLevel(level)).withCause(t).log(message);
+    public void accept(Level level, CharSequence message, Throwable t) {
+        logger.at(JULSimpleLogger.toLevel(level)).withCause(t).log(message.toString());
     }
 
 }
