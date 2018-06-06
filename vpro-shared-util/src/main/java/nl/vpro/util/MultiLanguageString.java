@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class MultiLanguageString {
 
-    public static final Locale DEFAULT = new Locale("NL");
+    public static final Locale DEFAULT = new Locale("nl");
 
     private final Map<Locale, String> strings = new HashMap<>();
 
@@ -22,6 +22,11 @@ public class MultiLanguageString {
         return s;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+
     public String get(Locale locale) {
         return strings.get(locale);
     }
@@ -29,5 +34,41 @@ public class MultiLanguageString {
     @Override
     public String toString() {
         return strings.get(DEFAULT);
+    }
+
+    public static class Builder {
+        MultiLanguageString created = new MultiLanguageString();
+
+        public Builder nl(String text) {
+            created.strings.put(new Locale("nl"), text);
+            return this;
+        }
+        public Builder en(String text) {
+            created.strings.put(Locale.ENGLISH, text);
+            return this;
+        }
+
+        public Builder.In in(Locale locale) {
+            return new In(locale);
+        }
+
+        public Builder.In in(String locale) {
+            return new In(new Locale(locale));
+        }
+        public MultiLanguageString build() {
+            return created;
+        }
+        public class In {
+            private final Locale locale;
+
+            public In(Locale locale) {
+                this.locale = locale;
+            }
+
+            public Builder is(String string) {
+                Builder.this.created.strings.put(locale, string);
+                return Builder.this;
+            }
+        }
     }
 }
