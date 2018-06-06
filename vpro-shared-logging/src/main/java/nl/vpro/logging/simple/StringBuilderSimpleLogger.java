@@ -14,7 +14,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class StringBuilderSimpleLogger implements SimpleLogger<StringBuilderSimpleLogger> {
+public class StringBuilderSimpleLogger implements SimpleLogger {
 
     private static final String TRUNK = "...\n";
 
@@ -47,7 +47,7 @@ public class StringBuilderSimpleLogger implements SimpleLogger<StringBuilderSimp
     }
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
+    public void accept(Level level, CharSequence message, Throwable t) {
         if (level.toInt() < this.level.toInt()) {
             return;
         }

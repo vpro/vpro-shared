@@ -12,7 +12,7 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public class ChainedSimpleLogger implements SimpleLogger<ChainedSimpleLogger>, Iterable<SimpleLogger> {
+public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger> {
 
     private final List<SimpleLogger> list = new ArrayList<>();
 
@@ -23,13 +23,22 @@ public class ChainedSimpleLogger implements SimpleLogger<ChainedSimpleLogger>, I
 
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
+    public void accept(Level level, CharSequence message, Throwable t) {
         for (SimpleLogger logger : list) {
             if (logger.isEnabled(level)) {
                 logger.accept(level, message, t);;
             }
         }
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void accept(Level level, CharSequence message) {
+        for (SimpleLogger logger : list) {
+            if (logger.isEnabled(level)) {
+                logger.accept(level, message);;
+            }
+        } }
 
     @Override
     public boolean isEnabled(Level level){

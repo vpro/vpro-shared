@@ -6,9 +6,9 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class NOPLogger implements SimpleLogger<NOPLogger> {
+public class NOPLogger implements SimpleLogger {
     @Override
-    public void accept(Level level, String message, Throwable t) {
+    public void accept(Level level, CharSequence message, Throwable t) {
 
     }
 

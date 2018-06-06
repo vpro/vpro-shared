@@ -15,7 +15,7 @@ import org.slf4j.event.Level;
  * @since 1.77
  */
 @Slf4j
-public class FileSimpleLogger implements SimpleLogger<FileSimpleLogger> {
+public class FileSimpleLogger implements SimpleLogger {
 
     @Getter
     final File file;
@@ -50,7 +50,7 @@ public class FileSimpleLogger implements SimpleLogger<FileSimpleLogger> {
 
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
+    public void accept(Level level, CharSequence message, Throwable t) {
         if (level.toInt() < this.level.toInt()) {
             return;
         }

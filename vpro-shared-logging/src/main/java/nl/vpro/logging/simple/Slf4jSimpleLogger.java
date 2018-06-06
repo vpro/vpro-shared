@@ -12,7 +12,7 @@ import nl.vpro.logging.Slf4jHelper;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public class Slf4jSimpleLogger implements SimpleLogger<Slf4jSimpleLogger> {
+public class Slf4jSimpleLogger implements SimpleLogger {
 
     private final Logger logger;
 
@@ -43,8 +43,8 @@ public class Slf4jSimpleLogger implements SimpleLogger<Slf4jSimpleLogger> {
     }
 
     @Override
-    public void accept(Level level, String message, Throwable t) {
-        Slf4jHelper.log(logger, level, message, t);
+    public void accept(Level level, CharSequence message, Throwable t) {
+        Slf4jHelper.log(logger, level, message.toString(), t);
     }
 
 
