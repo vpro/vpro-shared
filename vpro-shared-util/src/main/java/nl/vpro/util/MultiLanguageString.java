@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -33,11 +35,13 @@ public class MultiLanguageString implements CharSequence {
     private Object[] args;
 
 
+    public static Builder.In in(Locale locale) {
+        Builder builder = new Builder();
+        return builder.defaultLocale(locale).in(locale);
+    }
 
-    public static MultiLanguageString of(String string) {
-        MultiLanguageString s = new MultiLanguageString();
-        s.strings.put(DEFAULT, string);
-        return s;
+    public static Builder of(Locale locale, String text) {
+        return in(locale).is(text);
     }
 
     public static Builder en(String text) {
@@ -101,8 +105,13 @@ public class MultiLanguageString implements CharSequence {
     }
 
     @Override
+    @Nonnull
     public String toString() {
-        return get(defaultLocale);
+        String s = get(defaultLocale);
+        if (s == null) {
+            return "";
+        }
+        return s;
     }
 
     public static class Builder {

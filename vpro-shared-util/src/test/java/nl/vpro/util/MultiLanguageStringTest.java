@@ -26,9 +26,16 @@ public class MultiLanguageStringTest {
         assertThat(string.get(new Locale("en"))).isEqualTo("Hello");
         assertThat(string.get(new Locale("eo"))).isEqualTo("Saluton");
         assertThat(string.get(new Locale("en", "US"))).isEqualTo("Hello");
-
-
     }
+
+    @Test
+    public void in() {
+        MultiLanguageString string = MultiLanguageString
+            .of(Locale.CHINESE, "asdfad")
+            .build();
+        assertThat(string.toString()).isEqualTo("asdfad");
+    }
+
      @Test
     public void testWithSlfjArgs() {
         MultiLanguageString string = MultiLanguageString.builder()
