@@ -21,7 +21,7 @@ import org.springframework.util.PropertyPlaceholderHelper;
  * - exposes the map of properties (for use in e.g. JSP).
  * - expose some properties as system properties
  * - log some things
- * -
+ * -Using {@link #setRegisterAsSingletonStringRegexp(Pattern)} you can also register specified properties as beans (this is usefull when using {@link javax.inject.Named} in stead of {@link org.springframework.beans.factory.annotation.Value}
  *
  * @author Michiel Meeuwissen
  */
