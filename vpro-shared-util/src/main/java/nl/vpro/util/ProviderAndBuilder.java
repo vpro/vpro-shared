@@ -23,7 +23,7 @@ import javax.inject.Provider;
 public class ProviderAndBuilder {
 
 
-    public static <T, S> S fill(Provider<T> provider, S builder) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+    public static <T, S> S fill(Provider<T> provider, S builder) throws InvocationTargetException, IllegalAccessException, ClassNotFoundException {
         Class<?> providerClass = provider.getClass();
         Class<?> builderClass = builder.getClass();
         for (Field providerField : providerClass.getDeclaredFields()) {
@@ -91,7 +91,7 @@ public class ProviderAndBuilder {
     public static <T, S> S fillAndCatch(Provider<T> provider, S builder) {
         try {
             return fill(provider, builder);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+        } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
