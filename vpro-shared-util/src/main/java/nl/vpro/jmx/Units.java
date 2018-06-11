@@ -26,6 +26,7 @@ import static java.lang.annotation.ElementType.*;
  * }
  *}
  *</pre>
+ * See also {@link Description}
  * @author Michiel Meeuwissen
  * @since 1.57
  */
