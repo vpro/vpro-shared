@@ -56,6 +56,12 @@ public final class XTrustProvider extends java.security.Provider {
         });
     }
 
+    public static void trustAll(boolean trustAll) {
+        if (trustAll) {
+            install();
+        }
+    }
+
     public static void install() {
         if (Security.getProvider(NAME) == null) {
             Security.insertProviderAt(new XTrustProvider(), 2);
