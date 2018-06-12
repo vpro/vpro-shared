@@ -28,6 +28,10 @@ public class MBeans {
         return returnString(null, description, wait, job);
     }
 
+    public static String returnString(Supplier<String> description, Callable<String> job) {
+        return returnString(description, Duration.ofSeconds(5), job);
+    }
+
     public static boolean isRunning(final String key) {
         return locks.containsKey(key);
     }
