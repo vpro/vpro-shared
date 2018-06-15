@@ -1,5 +1,6 @@
 package nl.vpro.hibernate;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Function;
@@ -18,12 +19,22 @@ import nl.vpro.util.CloseableIterator;
 @Slf4j
 public class CriteriaIterator<T> extends ScrollableResultsIterator<T> {
 
+    @Getter
+    private final Criteria criteria;
 
     public CriteriaIterator(Criteria criteria, Function<ScrollableResults, T> adapter) {
         super(criteria
             .setReadOnly(true)
             .setCacheable(false)
             .scroll(ScrollMode.FORWARD_ONLY), adapter);
+        this.criteria = criteria;
+    }
+
+
+    @Override
+    public String toString() {
+        return criteria + "->" + super.toString();
+
     }
 
 }
