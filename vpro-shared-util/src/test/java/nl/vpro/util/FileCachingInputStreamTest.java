@@ -271,6 +271,21 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
+    public void createPath() {
+        new File("/tmp/bestaatniet").delete();
+        FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(1)
+            .tempDir("/tmp/bestaatniet")
+            .input(new ByteArrayInputStream(hello))
+            .initialBuffer(hello.length)
+            .build();
+
+        assertThat(new File("/tmp/bestaatniet")).exists();
+
+    }
+
+    @Test
     @Ignore
     public void performance() throws IOException {
         Instant now = Instant.now();
@@ -343,7 +358,6 @@ public class FileCachingInputStreamTest {
             IOUtils.copyLarge(inputStream, out);
             System.out.println("Duration " + Duration.between(now, Instant.now()));
         }
-
 
     }
 

@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
@@ -41,6 +43,7 @@ public class FileCachingInputStream extends InputStream {
 
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
 
+    @Slf4j
     public static class Builder {
 
         public Builder tempDir(URI uri) {
@@ -48,7 +51,12 @@ public class FileCachingInputStream extends InputStream {
         }
 
         public Builder tempDir(String uri) {
-            return path(Paths.get(URI.create(uri)));
+            try {
+                return path(Paths.get(URI.create(uri)));
+            } catch (IllegalArgumentException iae) {
+                log.debug("{}:{} Supposing it a file name", uri, iae.getMessage());
+                return path(Paths.get(uri));
+            }
         }
 
         public Builder noProgressLogging() {
@@ -117,6 +125,12 @@ public class FileCachingInputStream extends InputStream {
                 buffer = null;
             }
             // if arriving here, a temp file will be needed
+            if (path != null) {
+                if (! Files.isDirectory(path)) {
+                    Files.createDirectories(path);
+                    log.info("Created {}", path);
+                }
+            }
 
             tempFile = Files.createTempFile(
                 path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
