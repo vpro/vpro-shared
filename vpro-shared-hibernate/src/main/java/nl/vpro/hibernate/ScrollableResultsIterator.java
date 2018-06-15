@@ -74,4 +74,10 @@ public class ScrollableResultsIterator<T> implements CloseableIterator<T> {
     public void close()  {
         this.scrollableResults.close();
     }
+
+    @Override
+    public String toString() {
+        return "Iterator[" + this.scrollableResults + "]";
+
+    }
 }
