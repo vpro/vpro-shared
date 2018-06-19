@@ -20,6 +20,7 @@ import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xmlunit.XMLUnitException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
@@ -194,12 +195,15 @@ public class JAXBTestUtil {
         for (Consumer<DiffBuilder> b : build) {
             b.accept(builder);
         }
-
-        Diff diff = builder.build();
-        if (diff.hasDifferences()) {
-            throw new ComparisonFailure(diff.toString(), expected, input);
-        } else {
-            assertThat(diff.hasDifferences()).isFalse();
+        try {
+            Diff diff = builder.build();
+            if (diff.hasDifferences()) {
+                throw new ComparisonFailure(diff.toString(), expected, input);
+            } else {
+                assertThat(diff.hasDifferences()).isFalse();
+            }
+        } catch (XMLUnitException xue) {
+            throw new ComparisonFailure(xue.getMessage(), expected, input);
         }
     }
 
