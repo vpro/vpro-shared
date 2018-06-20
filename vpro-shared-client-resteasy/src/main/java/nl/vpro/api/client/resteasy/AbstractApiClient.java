@@ -192,6 +192,31 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
 
+    @Deprecated
+    protected AbstractApiClient(
+        String baseUrl,
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
+        Integer maxConnectionsNoTimeout,
+        Integer maxConnectionsPerRouteNoTimeout,
+        Duration connectionInPoolTTL,
+        Duration countWindow,
+        Integer bucketCount,
+        Duration warnThreshold,
+        List<Locale> acceptableLanguages,
+        MediaType accept,
+        MediaType contentType,
+        Boolean trustAll,
+        Jackson2Mapper objectMapper,
+        String mbeanName,
+        ClassLoader classLoader
+        ) {
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout,
+            connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, contentType, trustAll, objectMapper, mbeanName, classLoader, null);
+    }
     @Deprecated // "Will be dropped soon"
     protected AbstractApiClient(
         String baseUrl,
