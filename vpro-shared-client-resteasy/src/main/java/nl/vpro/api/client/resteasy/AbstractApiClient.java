@@ -45,6 +45,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.VersionInfo;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -139,6 +140,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     protected ClassLoader classLoader;
 
+    private final String userAgent;
+
     protected AbstractApiClient(
         String baseUrl,
         Duration connectionRequestTimeout,
@@ -158,7 +161,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Boolean trustAll,
         Jackson2Mapper objectMapper,
         String mbeanName,
-        ClassLoader classLoader
+        ClassLoader classLoader,
+        String userAgent
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -182,6 +186,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
         this.mbeanName = mbeanName;
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
+        this.userAgent = userAgent == null ? VersionInfo.getUserAgent(getClass().getSimpleName(), getClass().getPackage().getName(), this.getClass()) : userAgent;
         log.info("Using class loader {}", this.classLoader);
         registerBean();
     }
@@ -206,7 +211,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Jackson2Mapper objectMapper,
         String mbeanName
     ) {
-
+        this.userAgent = null;
         this.connectionRequestTimeout = connectionRequestTimeout;
         this.connectTimeout = connectTimeout;
         this.socketTimeout = socketTimeout;
@@ -233,7 +238,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Deprecated // Will be dropped soon
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
-        this(baseUrl,
+        this(
+            baseUrl,
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
             Duration.ofMillis(connectionTimeout == null ? -1 : connectionTimeout),
@@ -251,6 +257,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             false,
             Jackson2Mapper.getLenientInstance(),
             null,
+            null,
             null
         );
     }
@@ -262,7 +269,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Deprecated
     protected  AbstractApiClient(String baseUrl, Duration connectionRequestTimeout, Duration connectTimeout, Duration socketTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Duration connectionInPoolTTL, Duration countWindow, Integer bucketCount, Duration warnThreshold, List<Locale> acceptableLanguages, MediaType accept, Boolean trustAll) {
-        this(baseUrl,
+        this(
+            baseUrl,
             connectionRequestTimeout,
             connectTimeout,
             socketTimeout,
@@ -279,6 +287,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             null,
             trustAll,
             Jackson2Mapper.getLenientInstance(),
+            null,
             null,
             null
         );
@@ -489,6 +498,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             .setConnectionRequestTimeout(connectionRequestTimeout == null ? 0 : (int) connectionRequestTimeout.toMillis())
             .setConnectTimeout(connectTimeout == null ? 0 : (int) connectTimeout.toMillis())
             .setSocketTimeout(socketTimeout == null ? 0 : (int) socketTimeout.toMillis())
+
             .build();
 
         List<Header> defaultHeaders = new ArrayList<>();
@@ -497,6 +507,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         HttpClientBuilder client = HttpClients.custom()
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
+            .setUserAgent(userAgent)
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
 
         if (connectionManager != null){
