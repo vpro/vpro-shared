@@ -187,7 +187,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.mbeanName = mbeanName;
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
         this.userAgent = userAgent == null ? VersionInfo.getUserAgent(getClass().getSimpleName(), getClass().getPackage().getName(), this.getClass()) : userAgent;
-        log.info("Using class loader {}", this.classLoader);
+        log.info("Using class loader {}, user agent {}", this.classLoader, this.userAgent);
         registerBean();
     }
 
