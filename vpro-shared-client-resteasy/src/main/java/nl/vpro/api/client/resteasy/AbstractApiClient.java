@@ -5,9 +5,9 @@
 package nl.vpro.api.client.resteasy;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -46,7 +46,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.VersionInfo;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -187,7 +186,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
         this.mbeanName = mbeanName;
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
-        this.userAgent = userAgent == null ? VersionInfo.getUserAgent(getClass().getSimpleName(), getClass().getPackage().getName(), this.getClass()) : userAgent;
+        this.userAgent = userAgent == null ? getUserAgent(getClass().getSimpleName(), getVersion("vpro.shared.version", this.classLoader)) : userAgent;
         log.info("Using class loader {}, user agent {}", this.classLoader, this.userAgent);
         registerBean();
     }
@@ -319,12 +318,18 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         );
     }
 
-    protected static String getVersion(String prop, ClassLoader loader) throws IOException {
+    @SneakyThrows
+    protected static String getVersion(String prop, ClassLoader loader) {
         Properties properties = new Properties();
 
         properties.load(loader.getResource("/maven.properties").openStream());
         return properties.getProperty(prop);
     }
+    public static String getUserAgent(final String name, final String version) {
+        final String javaVersion = System.getProperty("java.version");
+        return String.format("%s/%s (Java/%s)", name, version, javaVersion);
+    }
+
 
     @Override
     public synchronized void invalidate() {
