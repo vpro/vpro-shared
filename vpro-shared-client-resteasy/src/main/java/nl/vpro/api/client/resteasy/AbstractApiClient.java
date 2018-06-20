@@ -7,6 +7,7 @@ package nl.vpro.api.client.resteasy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -316,6 +317,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             null,
             null
         );
+    }
+
+    protected static String getVersion(String prop, ClassLoader loader) throws IOException {
+        Properties properties = new Properties();
+
+        properties.load(loader.getResource("/maven.properties").openStream());
+        return properties.getProperty(prop);
     }
 
     @Override
