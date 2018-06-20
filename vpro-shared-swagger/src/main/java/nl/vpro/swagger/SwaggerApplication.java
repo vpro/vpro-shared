@@ -23,6 +23,8 @@ import javax.ws.rs.core.Application;
 
 import com.google.common.collect.ImmutableMap;
 
+import nl.vpro.util.XTrustProvider;
+
 
 /**
  * Static helper to expose a dummy JAX-RS Application. Swagger needs such an application to expose the API docs for
@@ -35,6 +37,7 @@ import com.google.common.collect.ImmutableMap;
 public class SwaggerApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
     static {
+        XTrustProvider.install();
         // swagger sucks a lot.
         //https://github.com/swagger-api/swagger-core/issues/1444
         setExternalTypes(ImmutableMap.<Class, PrimitiveType>builder()
