@@ -4,8 +4,6 @@ import lombok.Getter;
 
 import java.util.function.Function;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.event.Level;
 
 /**
@@ -14,21 +12,11 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class StringBuilderSimpleLogger implements SimpleLogger {
-
-    private static final String TRUNK = "...\n";
+public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger{
 
     @Getter
     final StringBuilder stringBuilder;
 
-    @Getter
-    final long maxLength;
-    private long count = 0;
-    private boolean truncated = false;
-
-    private Level level = Level.INFO;
-
-    final private Function<Level, String> prefix;
 
     @lombok.Builder
     private StringBuilderSimpleLogger(
@@ -36,49 +24,34 @@ public class StringBuilderSimpleLogger implements SimpleLogger {
         Level level,
         Long maxLength,
         Function<Level, String> prefix) {
+        super(level, maxLength, prefix);
         this.stringBuilder = stringBuilder == null ? new StringBuilder() : stringBuilder;
-        this.maxLength = maxLength == null ? 10000L : maxLength;
-        this.level = level == null ? Level.INFO : level;
-        this.prefix = prefix == null ? Enum::name : prefix;
     }
 
     public StringBuilderSimpleLogger() {
         this(null, null, null, null);
     }
 
+
     @Override
-    public void accept(Level level, CharSequence message, Throwable t) {
-        if (level.toInt() < this.level.toInt()) {
-            return;
-        }
-        if (stringBuilder.length() > 0) {
-            stringBuilder.append('\n');
-            count++;
-        }
-        String p = prefix.apply(level);
-        stringBuilder.append(p);
-        if (p.length() > 0) {
-            stringBuilder.append(" ");
-        }
-        stringBuilder.append(message);
-        if (t != null) {
-            stringBuilder.append('\n');
-            count++;
-            String stackTrace = ExceptionUtils.getStackTrace(t);
-            count += StringUtils.countMatches(stackTrace, '\n');
-            stringBuilder.append(stackTrace);
-        }
-        truncateIfNecessary();
+    int getLength() {
+        return stringBuilder.length();
+
     }
 
     @Override
-    public String toString() {
-        return "string buffer with " + count + " lines";
+    void append(CharSequence m) {
+        stringBuilder.append(m);
+    }
+
+    @Override
+    void append(char c) {
+        stringBuilder.append(c);
     }
 
 
-
-    private void truncateIfNecessary() {
+    @Override
+    void truncateIfNecessary() {
         while (count >= maxLength) {
             if (! truncated) {
                 stringBuilder.insert(0, TRUNK);
