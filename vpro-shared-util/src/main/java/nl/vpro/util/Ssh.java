@@ -26,7 +26,7 @@ public class Ssh {
     private final File   remote_host_private_key_file;// = " key_for_upload_omroep_nl";
 
     private final CommandExecutor ssh = new CommandExecutorImpl("/usr/bin/ssh");
-    private final CommandExecutor scp = new CommandExecutorImpl("/usr/bin/scp");
+    private final CommandExecutor scp = CommandExecutorImpl.builder().executablesPaths("/local/bin/scp", "/usr/bin/scp").build();
 
     public Ssh(String remoteHostName, String remoteHostUser, String privateKeyFile) {
         if (remoteHostName == null) throw new IllegalArgumentException();
