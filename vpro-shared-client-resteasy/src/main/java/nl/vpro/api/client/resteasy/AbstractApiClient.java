@@ -319,10 +319,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     @SneakyThrows
-    protected static String getVersion(String prop, ClassLoader loader) {
+    protected String getVersion(String prop, ClassLoader loader) {
         Properties properties = new Properties();
-
-        properties.load(loader.getResource("/maven.properties").openStream());
+        try {
+            properties.load(loader.getResource("/maven.properties").openStream());
+        } catch (Exception e) {
+            log.warn(e.getMessage());
+        }
         return properties.getProperty(prop);
     }
     public static String getUserAgent(final String name, final String version) {
