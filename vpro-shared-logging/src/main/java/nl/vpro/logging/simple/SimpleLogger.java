@@ -8,11 +8,11 @@ import org.slf4j.helpers.MessageFormatter;
 
 
 /**
- * A very simplified Logger. This can e.g. be used as messaging system. It was made to use in conjuction with @{link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.
+ *<p>A very simplified Logger. This can e.g. be used as messaging system. It was made to use in conjuction with {@link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.</p>
  *
- * The goal was to log to slf4j but also send corresponding messages to users via websockets.
+ * <p>The goal was to log to slf4j but also send corresponding messages to users via websockets.</p>
  *
- * Generally this can be used when a Logger instance wants to be an argument, because simple loggers can be implemented easily, normally with a just a few lines, and actuall loggers can be wrapped easily too.
+ *<p>Generally this can be used when a Logger instance wants to be an argument, because simple loggers can be implemented easily, normally with a just a few lines, and actual loggers can be wrapped easily too.</p>
  *
  * @author Michiel Meeuwissen
  * @since 1.76
