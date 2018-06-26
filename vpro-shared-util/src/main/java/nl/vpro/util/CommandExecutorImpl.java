@@ -132,9 +132,17 @@ public class CommandExecutorImpl implements CommandExecutor {
         return Arrays.stream(proposals).map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
     }
 
+      public static Optional<File> getExecutableFromStrings(Collection<String> proposals) {
+        return proposals.stream().map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
+    }
+
     public static class Builder {
 
         public Builder executablesPaths(String... executables) {
+            return executablesPaths(Arrays.asList(executables));
+        }
+
+        public Builder executablesPaths(Iterable<String> executables) {
             for (String executable : executables) {
                 executable(new File(executable));
             }
