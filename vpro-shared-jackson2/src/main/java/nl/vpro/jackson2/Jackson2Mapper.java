@@ -92,11 +92,15 @@ public class Jackson2Mapper extends ObjectMapper {
 
 
         try {
-            registerModule(new SerializeAvroModule());
-        } catch (NoClassDefFoundError ncdfe) {
+            Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
+            registerModule((Module) avro.newInstance());
+        } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
             }
+            loggedAboutAvro = true;
+        } catch (IllegalAccessException | InstantiationException e) {
+            log.error(e.getMessage(), e);
             loggedAboutAvro = true;
         }
     }

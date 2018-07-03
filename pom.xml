@@ -86,6 +86,8 @@
     <module>vpro-shared-hibernate</module>
 
     <module>vpro-shared-jackson2</module>
+    <module>vpro-shared-avro</module>
+
     <module>vpro-shared-logging</module>
     <module>vpro-shared-newrelic</module>
     <module>vpro-shared-persistence</module>
