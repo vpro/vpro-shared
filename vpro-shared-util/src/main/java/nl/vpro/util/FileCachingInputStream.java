@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,7 +181,11 @@ public class FileCachingInputStream extends InputStream {
                 .output(out)
                 .name(tempFile.toString())
                 .callback(c -> {
-                    IOUtils.closeQuietly(out);
+                    try {
+                        out.close();
+                    } catch (IOException ignore) {
+
+                    }
                     if (progressLogging == null || progressLogging) {
                         log.info("Created {} ({} bytes written)", tempFile, c.getCount());
 
