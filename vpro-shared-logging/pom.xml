@@ -18,10 +18,12 @@
     <dependency>
       <groupId>uk.org.lidalia</groupId>
       <artifactId>lidalia-slf4j-ext</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-ext</artifactId>
+      <scope>provided</scope>
     </dependency>
    <!-- <dependency>
       <groupId>org.slf4j</groupId>
