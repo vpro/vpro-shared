@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * An iterator implementing offset and max, for another iterator.
  *
@@ -54,8 +57,13 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
     }
 
     @lombok.Builder
-    private MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls, @Singular  List<Runnable> callbacks) {
-          if (wrapped == null) {
+    private MaxOffsetIterator(
+        @Nonnull Iterator<T> wrapped,
+        @Nullable Number max,
+        @Nullable Number offset, boolean countNulls,
+        @Nullable @Singular  List<Runnable> callbacks) {
+        //noinspection ConstantConditions
+        if (wrapped == null) {
             throw new IllegalArgumentException("Cannot wrap null");
         }
         this.wrapped = wrapped;
