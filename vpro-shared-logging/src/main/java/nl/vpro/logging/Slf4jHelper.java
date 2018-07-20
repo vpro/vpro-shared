@@ -4,6 +4,8 @@ import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MessageFormatter;
 
 /**
  *  https://stackoverflow.com/questions/2621701/setting-log-level-of-message-at-runtime-in-slf4j
@@ -119,6 +121,22 @@ public class Slf4jHelper {
             default:
                 return true;
         }
+    }
+
+
+    public static String returnAndWarn(@Nonnull  Logger logger, @Nonnull String format, Object... arg) {
+        FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
+        String message = ft.getMessage();
+        logger.warn(message);
+        return message;
+    }
+
+
+    public static String returnAndInfo(@Nonnull  Logger logger, @Nonnull String format, Object... arg) {
+        FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
+        String message = ft.getMessage();
+        logger.info(message);
+        return message;
     }
 
 }
