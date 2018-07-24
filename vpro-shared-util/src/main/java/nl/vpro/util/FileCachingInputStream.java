@@ -39,6 +39,7 @@ public class FileCachingInputStream extends InputStream {
 
 
     private final Path tempFile;
+    private final boolean deleteTempFile;
     private final InputStream file;
     private long count = 0;
 
@@ -95,7 +96,8 @@ public class FileCachingInputStream extends InputStream {
         Integer initialBuffer,
         Boolean startImmediately,
         Boolean progressLogging,
-        Path tempPath
+        Path tempPath,
+        Boolean deleteTempFile
     ) {
 
         super();
@@ -105,6 +107,8 @@ public class FileCachingInputStream extends InputStream {
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
+        this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
+
         try {
             if (initialBuffer > 0) {
                 // first use an initial buffer of memory only
@@ -156,6 +160,7 @@ public class FileCachingInputStream extends InputStream {
                 path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
                 filePrefix == null ? "file-caching-inputstream" : filePrefix,
                 null) : tempPath;
+
 
 
             log.debug("Using {}", tempFile);
@@ -269,7 +274,7 @@ public class FileCachingInputStream extends InputStream {
             }
         }
         if (file != null) {
-            if (tempFile != null) {
+            if (tempFile != null && deleteTempFile) {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
                 } else {
