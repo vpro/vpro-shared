@@ -33,9 +33,11 @@ public class Copier implements Runnable, Closeable {
     private Future<?> future;
     private final String name;
 
+    private final Object notify;
+
 
     public Copier(InputStream i, OutputStream o, long batch) {
-        this(i, o, batch, null, null, null,  0, null);
+        this(i, o, batch, null, null, null,  0, null, null);
     }
 
     @Builder
@@ -47,7 +49,8 @@ public class Copier implements Runnable, Closeable {
         Consumer<Copier> callback,
         BiConsumer<Copier, Throwable> errorHandler,
         int offset,
-        String name
+        String name,
+        Object notify
         ) {
         in = input;
         out = output;
@@ -57,6 +60,7 @@ public class Copier implements Runnable, Closeable {
         this.errorHandler = errorHandler;
         this.count = offset;
         this.name = name;
+        this.notify = notify;
     }
 
     public Copier(InputStream i, OutputStream o) {
@@ -68,11 +72,22 @@ public class Copier implements Runnable, Closeable {
         try {
             if (batchConsumer == null || batch < 1) {
                 count += IOUtils.copyLarge(in, out);
+                if (notify != null) {
+                    synchronized (notify) {
+                        notify.notifyAll();
+                    }
+                }
             } else {
                 batchConsumer.accept(this);
                 while (true) {
                     long result = IOUtils.copyLarge(in, out, 0, batch);
                     count += result;
+                    if (notify != null) {
+                        synchronized (notify) {
+                            notify.notifyAll();
+                        }
+                    }
+
                     if (result < batch) {
                         break;
                     }

@@ -270,6 +270,51 @@ public class FileCachingInputStreamTest {
         }
     }
 
+
+    @Test
+    public void testWaitForBytes() throws IOException, InterruptedException {
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(1)
+                .input(new ByteArrayInputStream(hello))
+                .initialBuffer(4)
+                .build();) {
+
+            long count = inputStream.waitForBytesRead(10);
+            log.info("Found {}", count);
+            assertThat(count).isGreaterThanOrEqualTo(1);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IOUtils.copy(inputStream, out);
+
+            assertThat(inputStream.getCount()).isEqualTo(hello.length);
+            assertThat(out.toByteArray()).containsExactly(hello);
+        }
+    }
+
+      @Test
+    public void testWaitForBytesOnZeroBytes() throws IOException, InterruptedException {
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(1)
+                .input(new ByteArrayInputStream(new byte[0]))
+                .initialBuffer(4)
+                .build();) {
+
+            long count = inputStream.waitForBytesRead(10);
+            log.info("Found {}", count);
+            assertThat(count).isEqualTo(0);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IOUtils.copy(inputStream, out);
+
+            assertThat(inputStream.getCount()).isEqualTo(0);
+            assertThat(out.toByteArray()).hasSize(0);
+        }
+    }
+
     @Test
     public void createPath() {
         new File("/tmp/bestaatniet").delete();
