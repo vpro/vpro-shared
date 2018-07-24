@@ -63,6 +63,15 @@ public class FileCachingInputStream extends InputStream {
             }
         }
 
+        public Builder tempFile(Path path) {
+            return tempPath(path);
+        }
+
+
+        public Builder tempFile(File file) {
+            return tempPath(file.toPath());
+        }
+
         public Builder noProgressLogging() {
             return progressLogging(false);
         }
@@ -86,7 +95,7 @@ public class FileCachingInputStream extends InputStream {
         Integer initialBuffer,
         Boolean startImmediately,
         Boolean progressLogging,
-        Path tempFile
+        Path tempPath
     ) {
 
         super();
@@ -121,8 +130,8 @@ public class FileCachingInputStream extends InputStream {
                     // don't use file later on
                     copier = null;
                     this.tempFile = null;
-                    if (tempFile != null) {
-                        try (FileOutputStream out = new FileOutputStream(tempFile.toFile())) {
+                    if (tempPath != null) {
+                        try (FileOutputStream out = new FileOutputStream(tempPath.toFile())) {
                             IOUtils.copy(new ByteArrayInputStream(buffer), out);
                         }
                     }
@@ -143,10 +152,10 @@ public class FileCachingInputStream extends InputStream {
                 }
             }
 
-            this.tempFile = tempFile == null ? Files.createTempFile(
+            this.tempFile = tempPath== null ? Files.createTempFile(
                 path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
                 filePrefix == null ? "file-caching-inputstream" : filePrefix,
-                null) : tempFile;
+                null) : tempPath;
 
 
             log.debug("Using {}", tempFile);
@@ -295,7 +304,9 @@ public class FileCachingInputStream extends InputStream {
         if (count < bufferLength) {
             int result = buffer[(int) count++];
             bytesRead += result;
-            notifyAll();
+            synchronized (this) {
+                notifyAll();
+            }
             return result;
         } else {
             return EOF;

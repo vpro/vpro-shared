@@ -11,11 +11,17 @@ import org.apache.commons.lang.StringUtils;
  * @since 1.74
  */
 public class ShowCatalinaBase implements Runnable {
+
+    private static boolean shown = false;
+
     @Override
     public void run() {
-        String catalinaBase = System.getProperty("catalina.base");
-        if (StringUtils.isNotEmpty(catalinaBase)) {
-            System.out.println("CATALINA BASE:\n'" + catalinaBase + File.separator + "'");
+        if (! shown) {
+            String catalinaBase = System.getProperty("catalina.base");
+            if (StringUtils.isNotEmpty(catalinaBase)) {
+                System.out.println("CATALINA BASE:\n'" + catalinaBase + File.separator + "'");
+            }
+            shown = true;
         }
 
     }
