@@ -54,11 +54,15 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         Set<String> registered = new HashSet<>();
         for (Map.Entry<String, String> e : propertiesMap.entrySet()) {
             if (registerAsSingletonStringRegexp.matcher(e.getKey()).matches()) {
-                if (!beanFactory.containsBean(e.getKey())) {
-                    registered.add(e.getKey());
-                    beanFactory.registerSingleton(e.getKey(), e.getValue());
-                } else {
-                    log.info("Could not register {} as a singleton string (it is already {})", e.getKey(), beanFactory.getBeanDefinition(e.getKey()));
+                try {
+                    if (!beanFactory.containsBeanDefinition(e.getKey())) {
+                        registered.add(e.getKey());
+                        beanFactory.registerSingleton(e.getKey(), e.getValue());
+                    } else {
+                        log.info("Could not register {} as a singleton string (it is already {})", e.getKey(), beanFactory.getBeanDefinition(e.getKey()));
+                    }
+                } catch (Exception ex) {
+                    log.error(ex.getMessage());
                 }
             }
         }
