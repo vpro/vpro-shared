@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,9 @@ public class FileCachingInputStream extends InputStream {
     private final InputStream file;
     private long count = 0;
 
+    @Getter
+    private long bytesRead = 0;
+
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
 
     @Slf4j
@@ -65,6 +70,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     /**
+     * @param batchSize Batch size
      * @param path Directory for temporary files
      */
     @lombok.Builder(builderClassName = "Builder")
@@ -79,7 +85,8 @@ public class FileCachingInputStream extends InputStream {
         List<OpenOption> openOptions,
         Integer initialBuffer,
         Boolean startImmediately,
-        Boolean progressLogging
+        Boolean progressLogging,
+        Path tempFile
     ) {
 
         super();
@@ -113,7 +120,12 @@ public class FileCachingInputStream extends InputStream {
 
                     // don't use file later on
                     copier = null;
-                    tempFile = null;
+                    this.tempFile = null;
+                    if (tempFile != null) {
+                        try (FileOutputStream out = new FileOutputStream(tempFile.toFile())) {
+                            IOUtils.copy(new ByteArrayInputStream(buffer), out);
+                        }
+                    }
                     file = null;
                     return;
                 } else {
@@ -131,10 +143,10 @@ public class FileCachingInputStream extends InputStream {
                 }
             }
 
-            tempFile = Files.createTempFile(
+            this.tempFile = tempFile == null ? Files.createTempFile(
                 path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
                 filePrefix == null ? "file-caching-inputstream" : filePrefix,
-                null);
+                null) : tempFile;
 
 
             log.debug("Using {}", tempFile);
@@ -177,9 +189,11 @@ public class FileCachingInputStream extends InputStream {
              // The copier is responsible for copying the remaining of the stream to the file
             // in a separate thread
             copier = Copier.builder()
-                .input(input).offset(bufferLength)
+                .input(input)
+                .offset(bufferLength)
                 .output(out)
                 .name(tempFile.toString())
+                .notify(this)
                 .callback(c -> {
                     try {
                         out.close();
@@ -257,19 +271,38 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
+        if (copier != null) {
+            copier.executeIfNotRunning();
+            while (copier.getCount() < atLeast && ! copier.isReady()) {
+                wait();
+            }
+            return copier.getCount();
+        } else {
+            return bufferLength;
+        }
+    }
+
+    public long getCount() {
+        return copier == null ? bufferLength : copier.getCount();
+    }
+
     public Path getTempFile() {
         return tempFile;
     }
 
     private int readFromBuffer() {
         if (count < bufferLength) {
-            return buffer[(int) count++];
+            int result = buffer[(int) count++];
+            bytesRead += result;
+            notifyAll();
+            return result;
         } else {
             return EOF;
         }
     }
 
-    private int readFromBuffer(byte b[]) throws IOException {
+    private int readFromBuffer(byte b[]) {
         int toCopy = Math.min(b.length, bufferLength - (int) count);
         if (toCopy > 0) {
             System.arraycopy(buffer, (int) count, b, 0, toCopy);
