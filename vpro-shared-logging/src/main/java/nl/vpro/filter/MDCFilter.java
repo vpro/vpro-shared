@@ -57,7 +57,6 @@ public class  MDCFilter implements Filter {
             chain.doFilter(req, res);
         } finally {
             // access logging...
-            String contentType = res.getContentType();
             Logger logger = LoggerFactory.getLogger(MDCFilter.class.getName() + path.replace('/', '.'));
             logger.debug("{} {}", response.getStatus(), response.getContentType());
             if (clear) {
