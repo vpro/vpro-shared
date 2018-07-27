@@ -16,16 +16,20 @@ public abstract class EnumAdapter<T extends Enum<T>> extends XmlAdapter<String, 
     }
 
 
+    protected T valueOf(String v) {
+         return Enum.valueOf(enumClass, v.trim());
+    }
+
     @Override
     public T unmarshal(String v) throws Exception {
         if (v == null) {
             return null;
         }
         try {
-            return Enum.valueOf(enumClass, v.trim());
+            return valueOf(v.trim());
         } catch (IllegalArgumentException iae) {
             try {
-                return Enum.valueOf(enumClass, v.trim().toUpperCase());
+                return valueOf(v.trim().toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new JAXBException(e);
             }
@@ -34,7 +38,7 @@ public abstract class EnumAdapter<T extends Enum<T>> extends XmlAdapter<String, 
     }
 
     @Override
-    public String marshal(T v) throws Exception {
+    public String marshal(T v) {
         if (v == null) {
             return null;
         }
