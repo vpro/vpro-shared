@@ -4,6 +4,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
+ * This is a nice idea. The sad thing however, is that when using this, the generated XSD will not any more be an enum.
+ *
  * @author Michiel Meeuwissen
  * @since 1.63
  */
