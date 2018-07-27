@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class  MDCFilter implements Filter {
 
     public static final String USER_NAME = "userName";
+    public static final String ONBEHALFOF= "onBehalfOf";
     public static final String REQUEST = "request";
     public static final String REMOTE_ADDR= "remoteAddr";
 
