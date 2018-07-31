@@ -20,18 +20,23 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
 
     long size = 0L;
 
+    boolean autoFlush = false;
+
     @lombok.Builder
     private OutputStreamSimpleLogger(
         OutputStream output,
         Level level,
         Long maxLength,
-        Function<Level, String> prefix) {
+        Function<Level, String> prefix,
+        boolean autoFlush
+    ) {
         super(level, maxLength, prefix);
         this.outputStream = output == null ? new ByteArrayOutputStream() : output;
+        this.autoFlush = autoFlush;
     }
 
      public OutputStreamSimpleLogger() {
-        this(null, null, null, null);
+        this(null, null, null, null, false);
     }
 
 
@@ -49,6 +54,16 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
         size += s.length;
         outputStream.write(s);
     }
+
+    @Override
+    @SneakyThrows
+    public void accept(Level level, CharSequence message, Throwable t) {
+        super.accept(level, message, t);
+        if (autoFlush) {
+            outputStream.flush();
+        }
+    }
+
 
     @Override
     @SneakyThrows
