@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -43,6 +45,7 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Use <code>XTrustProvider.install()</code> and you don't have any dealings with untrusted certificates any more....
  */
+@Slf4j
 public final class XTrustProvider extends java.security.Provider {
 
     private final static String NAME = "XTrustJSSE";
@@ -68,6 +71,7 @@ public final class XTrustProvider extends java.security.Provider {
         if (Security.getProvider(NAME) == null) {
             Security.insertProviderAt(new XTrustProvider(), 2);
             Security.setProperty("ssl.TrustManagerFactory.algorithm", TrustManagerFactoryImpl.getAlgorithm());
+            log.info("Trusting all certificates");
         }
     }
 
