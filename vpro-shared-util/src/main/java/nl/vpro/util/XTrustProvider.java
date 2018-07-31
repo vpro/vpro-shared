@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.net.ssl.ManagerFactoryParameters;
 import javax.net.ssl.TrustManager;
@@ -68,6 +70,26 @@ public final class XTrustProvider extends java.security.Provider {
             Security.setProperty("ssl.TrustManagerFactory.algorithm", TrustManagerFactoryImpl.getAlgorithm());
         }
     }
+
+    public static class Installer implements Consumer<Map<String, String>> {
+
+
+        final String prop;
+
+        public Installer(String prop) {
+            this.prop = prop;
+        }
+
+
+        @Override
+        public void accept(Map<String, String> map) {
+
+            if (Boolean.parseBoolean(map.get(prop))) {
+                install();
+            }
+        }
+    }
+
 
     public final static class TrustManagerFactoryImpl extends TrustManagerFactorySpi {
         public TrustManagerFactoryImpl() {

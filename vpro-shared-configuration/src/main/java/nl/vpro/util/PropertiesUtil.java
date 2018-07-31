@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.BeansException;
@@ -42,7 +43,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     @Getter
     @Setter
-    private List<Runnable> afterProperties;
+    private List<Consumer<Map<String, String>>> afterProperties;
 
     @Override
     protected void processProperties(
@@ -81,8 +82,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
             }
         }
         if (afterProperties != null) {
-            for (Runnable after : afterProperties) {
-                after.run();
+            for (Consumer<Map<String, String>> after : afterProperties) {
+                after.accept(propertiesMap);
             }
         }
 

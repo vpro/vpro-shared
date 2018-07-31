@@ -1,6 +1,8 @@
 package nl.vpro.util;
 
 import java.io.File;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -10,13 +12,15 @@ import org.apache.commons.lang.StringUtils;
  * @author Michiel Meeuwissen
  * @since 1.74
  */
-public class ShowCatalinaBase implements Runnable {
+public class ShowCatalinaBase implements Consumer<Map<String, String>> {
 
     private static boolean shown = false;
 
+
+
     @Override
-    public void run() {
-        if (! shown) {
+    public void accept(Map<String, String> stringStringMap) {
+         if (! shown) {
             String catalinaBase = System.getProperty("catalina.base");
             if (StringUtils.isNotEmpty(catalinaBase)) {
                 System.out.println("CATALINA BASE:\n'" + catalinaBase + File.separator + "'");
