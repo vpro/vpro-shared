@@ -56,14 +56,13 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
     }
 
     @Override
-    @SneakyThrows
-    public void accept(Level level, CharSequence message, Throwable t) {
-        super.accept(level, message, t);
+    protected boolean needsNewLine() {
         if (autoFlush) {
-            outputStream.flush();
+            return false;
+        } else {
+            return super.needsNewLine();
         }
     }
-
 
     @Override
     @SneakyThrows
@@ -73,6 +72,11 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
     }
 
     @Override
+    @SneakyThrows
     void truncateIfNecessary() {
+        if (autoFlush) {
+            outputStream.write('\n');
+            outputStream.flush();
+        }
     }
 }
