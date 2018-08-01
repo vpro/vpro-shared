@@ -1,18 +1,16 @@
 package nl.vpro.jmx;
 
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.SimpleLogger;
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.event.Level;
-
-import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.SimpleLogger;
 
 /**
  * Utilities to start jmx tasks in the background.
@@ -56,7 +54,9 @@ public class MBeans {
         }
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
             final String threadName = Thread.currentThread().getName();
+            final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             try {
+                Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
                 Thread.currentThread().setName(threadName + ":" + description.get());
                 return job.call();
             } catch (Exception e) {
@@ -65,6 +65,7 @@ public class MBeans {
                 if (key != null) {
                     locks.remove(key);
                 }
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
                 Thread.currentThread().setName(threadName);
             }
 
