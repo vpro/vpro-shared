@@ -49,8 +49,8 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
         }
         if (needsNewLine()) {
             append('\n');
+            count++;
         }
-        count++;
 
         String p = prefix.apply(level);
         append(p);

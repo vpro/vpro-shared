@@ -77,6 +77,7 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
         if (autoFlush) {
             outputStream.write('\n');
             outputStream.flush();
+            count++;
         }
     }
 }
