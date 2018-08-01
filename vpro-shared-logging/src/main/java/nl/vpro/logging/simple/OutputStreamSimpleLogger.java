@@ -11,7 +11,7 @@ import org.slf4j.event.Level;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.79
  */
 public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger {
 
