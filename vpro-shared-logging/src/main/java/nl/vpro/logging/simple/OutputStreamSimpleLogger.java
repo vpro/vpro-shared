@@ -11,7 +11,7 @@ import org.slf4j.event.Level;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 1.79
  */
 public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger {
 
@@ -20,18 +20,23 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
 
     long size = 0L;
 
+    boolean autoFlush = false;
+
     @lombok.Builder
     private OutputStreamSimpleLogger(
         OutputStream output,
         Level level,
         Long maxLength,
-        Function<Level, String> prefix) {
+        Function<Level, String> prefix,
+        boolean autoFlush
+    ) {
         super(level, maxLength, prefix);
         this.outputStream = output == null ? new ByteArrayOutputStream() : output;
+        this.autoFlush = autoFlush;
     }
 
      public OutputStreamSimpleLogger() {
-        this(null, null, null, null);
+        this(null, null, null, null, false);
     }
 
 
@@ -51,6 +56,15 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
     }
 
     @Override
+    protected boolean needsNewLine() {
+        if (autoFlush) {
+            return false;
+        } else {
+            return super.needsNewLine();
+        }
+    }
+
+    @Override
     @SneakyThrows
     void append(char c) {
         size++;
@@ -58,6 +72,11 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
     }
 
     @Override
+    @SneakyThrows
     void truncateIfNecessary() {
+        if (autoFlush) {
+            outputStream.write('\n');
+            outputStream.flush();
+        }
     }
 }

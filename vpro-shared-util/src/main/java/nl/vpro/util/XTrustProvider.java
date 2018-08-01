@@ -1,7 +1,11 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.security.*;
 import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.net.ssl.ManagerFactoryParameters;
 import javax.net.ssl.TrustManager;
@@ -41,6 +45,7 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Use <code>XTrustProvider.install()</code> and you don't have any dealings with untrusted certificates any more....
  */
+@Slf4j
 public final class XTrustProvider extends java.security.Provider {
 
     private final static String NAME = "XTrustJSSE";
@@ -66,8 +71,29 @@ public final class XTrustProvider extends java.security.Provider {
         if (Security.getProvider(NAME) == null) {
             Security.insertProviderAt(new XTrustProvider(), 2);
             Security.setProperty("ssl.TrustManagerFactory.algorithm", TrustManagerFactoryImpl.getAlgorithm());
+            log.info("Trusting all certificates");
         }
     }
+
+    public static class Installer implements Consumer<Map<String, String>> {
+
+
+        final String prop;
+
+        public Installer(String prop) {
+            this.prop = prop;
+        }
+
+
+        @Override
+        public void accept(Map<String, String> map) {
+
+            if (Boolean.parseBoolean(map.get(prop))) {
+                install();
+            }
+        }
+    }
+
 
     public final static class TrustManagerFactoryImpl extends TrustManagerFactorySpi {
         public TrustManagerFactoryImpl() {

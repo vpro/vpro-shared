@@ -47,10 +47,11 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
         if (level.toInt() < this.level.toInt()) {
             return;
         }
-        if (getLength() > 0) {
+        if (needsNewLine()) {
             append('\n');
-            count++;
         }
+        count++;
+
         String p = prefix.apply(level);
         append(p);
         if (p.length() > 0) {
@@ -65,6 +66,10 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
             append(stackTrace);
         }
         truncateIfNecessary();
+    }
+
+    protected boolean needsNewLine() {
+        return getLength() > 0;
     }
 
     abstract  int getLength();
