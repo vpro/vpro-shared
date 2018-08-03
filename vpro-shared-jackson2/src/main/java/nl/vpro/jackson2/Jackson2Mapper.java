@@ -94,7 +94,7 @@ public class Jackson2Mapper extends ObjectMapper {
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
             registerModule((Module) avro.newInstance());
-        } catch (ClassNotFoundException ncdfe) {
+        } catch (ClassNotFoundException | NoClassDefFoundError ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
             }
