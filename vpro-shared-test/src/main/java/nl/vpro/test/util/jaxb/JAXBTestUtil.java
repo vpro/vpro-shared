@@ -153,8 +153,16 @@ public class JAXBTestUtil {
                 "input: " + xml + "\n" +
                 "expected: " + expected, spe);
         }
-
     }
+    public static <T> T roundTripAndSimilar(T input, InputStream expected) throws IOException, SAXException {
+
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(expected, writer);
+        return roundTripAndSimilar(input, writer.toString());
+    }
+
+
+
 
     public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
         T result = roundTripAndSimilar(input, expected);
