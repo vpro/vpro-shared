@@ -285,6 +285,11 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
     public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
         if (copier != null) {
             copier.executeIfNotRunning();

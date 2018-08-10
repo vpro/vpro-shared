@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -80,7 +79,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             l = getLogger(status);
             mes = getMessage(wea);
             t = wea;
-            error = status >= 500;
+            error = status >= 400 && status != 404;
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
