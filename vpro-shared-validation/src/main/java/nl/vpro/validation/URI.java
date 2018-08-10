@@ -4,11 +4,12 @@
  */
 package nl.vpro.validation;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import javax.validation.Constraint;
+import javax.validation.Payload;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -19,6 +20,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface URI {
     String message() default "{nl.vpro.constraints.URI}";
+
+    boolean mustHaveScheme() default false;
+
+    int  minHostParts() default 0;
+
+    String[] schemes() default {};
 
     Class<?>[] groups() default {};
 
