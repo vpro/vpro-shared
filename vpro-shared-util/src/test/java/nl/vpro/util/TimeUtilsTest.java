@@ -55,6 +55,14 @@ public class TimeUtilsTest {
 
     }
 
+
+    @Test
+    public void parseWithMillis() {
+        Instant instant = TimeUtils.parse("2015-03-22T03:43:05.660Z").orElse(null);
+        assertThat(instant.toEpochMilli()).isEqualTo(1426995785660L);
+
+    }
+
     @Test
     public void parseDuration() {
         assertThat(TimeUtils.parseDuration("PT5M").get()).isEqualTo(Duration.ofMinutes(5));
