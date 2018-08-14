@@ -79,7 +79,17 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             l = getLogger(status);
             mes = getMessage(wea);
             t = wea;
-            error = status >= 400 && status != 404;
+            if (status == 404) {
+                Object entity = wea.getResponse().getEntity();
+                if (entity != null && entity.getClass().getName().equals("nl.vpro.domain.api.Error")) {
+                    error = false;
+                } else {
+                    error = true;
+                }
+            } else {
+                error = status >= 400;
+            }
+
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
