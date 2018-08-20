@@ -89,7 +89,9 @@
     <module>vpro-shared-avro</module>
 
     <module>vpro-shared-logging</module>
+    <!--
     <module>vpro-shared-newrelic</module>
+    -->
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-resteasy</module>
     <module>vpro-shared-rs</module>
