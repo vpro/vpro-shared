@@ -22,3 +22,8 @@ SNAPSHOT builds can be found at https://oss.sonatype.org/content/repositories/sn
 
 Release builds will be provided via maven central.
 
+## TODO
+
+- Some of these modules are old, contain very little usefull or are very specific for VPRO. We should remove them.
+- A bit more of documentation here and there would be welcome. Though we provide this mainly to be able to provide _other_ artifact too, which themselves depend on this
+
