@@ -15,3 +15,10 @@ places in VPRO artifacts.
 - vpro-shared-logging: Utilities related to logging. Mostly related to SLF4j. Also contains a more simple framework 'SimpleLogger', which is easy to implement on the fly
 - vpro-shared-eleasticsearch5: Related to elasticsearch
 
+
+## Builds
+
+SNAPSHOT builds can be found at https://oss.sonatype.org/content/repositories/snapshots/nl/vpro/shared/
+
+Release builds will be provided via maven central.
+
