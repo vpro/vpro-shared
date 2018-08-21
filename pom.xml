@@ -8,6 +8,51 @@
 
   <name>vpro-shared-parent</name>
 
+
+  <licenses>
+    <license>
+      <name>GPLv3</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+    </license>
+  </licenses>
+
+
+  <developers>
+    <developer>
+      <id>mihxil</id>
+      <name>Michiel Meeuwissen</name>
+      <email>michiel.meeuwissen+github@gmail.com</email>
+      <url>http://www.meeuw.org</url>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>Europe/Amsterdam</timezone>
+    </developer>
+    <developer>
+      <id>rico</id>
+      <name>Rico Jansen</name>
+      <timezone>Europe/Amsterdam</timezone>
+    </developer>
+    <developer>
+      <id>rico</id>
+      <name>Eric Kuijt</name>
+      <timezone>Europe/Amsterdam</timezone>
+    </developer>
+  </developers>
+
+  <ciManagement>
+    <system>Travis CI</system>
+    <url>https://travis-ci.org/vpro/vpro-shared</url>
+  </ciManagement>
+  <scm>
+    <connection>scm:git:git://git@github.com/vpro/vpro-shared.git</connection>
+    <developerConnection>scm:git:git@github.com:vpro/vpro-shared.git</developerConnection>
+    <url>https://github.com/vpro/vpro-shared</url>
+    <tag>HEAD</tag>
+  </scm>
+
+
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -108,11 +153,6 @@
     <module>vpro-shared-couchdb-util</module>
   </modules>
 
-  <scm>
-    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/trunk</connection>
-    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/trunk</developerConnection>
-    <url>https://subversion.vpro.nl/viewvc/nl/vpro/vpro-shared/trunk</url>
-  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -634,29 +674,34 @@
     </dependency>
   </dependencies>
 
+
+
   <distributionManagement>
-    <repository>
-      <id>nexus</id>
-      <name>Nexus releases</name>
-      <url>http://nexus.vpro.nl/content/repositories/releases</url>
-    </repository>
     <snapshotRepository>
-      <id>nexus</id>
-      <name>Nexus snapshots</name>
-      <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
+      <id>vpro-ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>vpro-ossrh-release</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
 
 
   <profiles>
     <profile>
-      <id>topspin-bintray</id>
+      <id>vpro-nexus</id>
       <distributionManagement>
         <repository>
-          <id>bintray-npo-topspin-vpro-releases</id>
-          <name>npo-topspin-vpro-releases</name>
-          <url>https://api.bintray.com/maven/npo-topspin/vpro-releases/vpro-shared/;publish=1</url>
+          <id>nexus</id>
+          <name>Nexus releases</name>
+          <url>http://nexus.vpro.nl/content/repositories/releases</url>
         </repository>
+        <snapshotRepository>
+          <id>nexus</id>
+          <name>Nexus snapshots</name>
+          <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
+        </snapshotRepository>
       </distributionManagement>
     </profile>
     <profile>
