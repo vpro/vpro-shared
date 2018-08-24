@@ -484,14 +484,19 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected <T> T produceIfNull(Supplier<T> supplier, Supplier<T> producer) {
         T t = supplier.get();
         if (t == null) {
+            log.debug("Not found");
             synchronized (this) {
                 T found = supplier.get();
                 if (found == null) {
+                    log.debug("Still not found,  now producing");
                     t = producer.get();
                 } else {
+                    log.debug("Found after all");
                     t = found;
                 }
             }
+        } else {
+            log.debug("Using previously produced instance");
         }
         return t;
 
