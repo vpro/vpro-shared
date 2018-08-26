@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -105,18 +106,24 @@ public class FileCachingInputStreamTest {
     public void testReadFileGetsInterrupted() throws IOException {
         Thread thisThread = Thread.currentThread();
         try {
+            final AtomicLong interrupted = new AtomicLong(0);
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
                 .batchConsumer((f, c) -> {
                     if (c.getCount() > 300) {
-                        log.info("Interrupting");
-                        thisThread.interrupt();
+                        long i = interrupted.getAndIncrement();
+                        if (! thisThread.isInterrupted())  {
+                            log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
+                            thisThread.interrupt();
+                        } else {
+                            log.trace("{} Interrupted already {} {}", c.getCount(), thisThread, i);
+                        }
                     }
                 })
                 .input(new ByteArrayInputStream(in))
                 .initialBuffer(4)
-                .startImmediately(true)
+                .startImmediately(false)
                 .build();
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -129,7 +136,7 @@ public class FileCachingInputStreamTest {
         } catch (ClosedByInterruptException ie) {
             throw ie;
         } finally {
-            Thread.interrupted();
+            log.info("Interrupted: {}", Thread.interrupted());
         }
     }
 
