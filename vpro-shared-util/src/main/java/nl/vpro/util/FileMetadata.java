@@ -8,6 +8,7 @@ import java.time.Instant;
 
 /**
  * An abstract representation of a File, it can e.g. also be a file on a different server.
+ *
  * @author Michiel Meeuwissen
  * @since 1.78
  */

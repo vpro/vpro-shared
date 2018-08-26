@@ -15,9 +15,12 @@ import java.util.function.Consumer;
 import org.apache.commons.io.IOUtils;
 
 /**
-* @author Michiel Meeuwissen
-* @since 3.1
-*/
+ * Can be used to copy an {@link InputStream} to an {@link OutputStream} in a stand alone thread.
+ * Used by {@link FileCachingInputStream}.
+ *
+ * @author Michiel Meeuwissen
+ * @since 3.1
+ */
 @Slf4j
 @ToString
 public class Copier implements Runnable, Closeable {
