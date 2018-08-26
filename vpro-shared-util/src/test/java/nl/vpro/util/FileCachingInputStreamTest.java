@@ -33,7 +33,7 @@ public class FileCachingInputStreamTest {
 
     @Before
     public void before() {
-        Thread.interrupted();
+        log.info("Interrupted {}", Thread.interrupted());
     }
 
     @Test
@@ -160,6 +160,7 @@ public class FileCachingInputStreamTest {
             .batchSize(3)
             .input(new ByteArrayInputStream(in))
             .initialBuffer(4)
+            .noProgressLogging()
             .startImmediately(false)
             .build();
 
@@ -182,6 +183,7 @@ public class FileCachingInputStreamTest {
             .batchSize(3)
             .input(new ByteArrayInputStream(in))
             .initialBuffer(1024)
+            .noProgressLogging()
             .build();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -202,6 +204,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(in))
                 .initialBuffer(4)
+                .noProgressLogging()
                 .startImmediately(true)
                 .build()) {
 
@@ -222,6 +225,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(in))
                 .initialBuffer(4)
                 .startImmediately(false)
+                .noProgressLogging()
                 .build();) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
