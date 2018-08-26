@@ -11,6 +11,16 @@ import java.time.Instant;
 import java.util.Locale;
 
 /**
+ * Formatting file sizes it not always very trivial. This can help.
+ *
+ * E.g. {@code
+ * FileSizeFormatter.DEFAULT.format(12345)
+ * }
+ *
+ * For customizing a builder is available (Use {@link #builder()})
+ *
+ * Find more examples in {@link FileSizeFormatterTest}.
+ *
  * @author Michiel Meeuwissen
  * @since 1.76
  */
