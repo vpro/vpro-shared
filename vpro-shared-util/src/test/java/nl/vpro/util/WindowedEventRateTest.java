@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import static org.assertj.core.data.Percentage.withPercentage;
  * @author Michiel Meeuwissen
  * @since 0.38
  */
+@Slf4j
 public class WindowedEventRateTest {
 
 
@@ -65,19 +68,21 @@ public class WindowedEventRateTest {
         long start = System.currentTimeMillis();
 
         for (int i = 0; i < 1000; i++) {
-            System.out.println("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() + ")");
+            if (i % 100 == 0) {
+                log.info("{} duration: {}", i,  (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() + ")");
+            }
             rate.newEvent();
 
         }
 
         Thread.sleep(4800L);
 
-        System.out.println("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() +")");
+        log.info("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() +")");
 
         Thread.sleep(201L);
 
         assertThat(rate.isWarmingUp()).isFalse();
-        System.out.println(rate.getRanges());
+        log.info("ranges: {}", rate.getRanges());
     }
 
 
@@ -101,7 +106,7 @@ public class WindowedEventRateTest {
         assertThat(rate.getRelevantDuration().toMillis()).isCloseTo(1000, withPercentage(20));
 
         double rateDuringWarmup = rate.getRate(TimeUnit.SECONDS);
-        System.out.println(rateDuringWarmup + " ~ 100 /s");
+        log.info(rateDuringWarmup + " ~ 100 /s");
 
         for (int i = 0; i < 10; i++) {
             rate.newEvents(10);
@@ -113,7 +118,7 @@ public class WindowedEventRateTest {
         assertThat(relevantDuration).isGreaterThan(1500 - rate.getBucketDuration().toMillis());
 
         double rateAfterWarmup = rate.getRate(TimeUnit.SECONDS);
-        System.out.println(rateAfterWarmup + " ~ 100 /s");
+        log.info(rateAfterWarmup + " ~ 100 /s");
         assertThat(rateAfterWarmup).isCloseTo(100.0, withPercentage(20));
 
         assertThat(rateDuringWarmup).isCloseTo(100.0, withPercentage(20));
