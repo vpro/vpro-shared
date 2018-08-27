@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
@@ -13,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Michiel Meeuwissen
  */
+@Slf4j
 public class CommandExecutorImplTest {
 
     @Test
@@ -37,7 +40,9 @@ public class CommandExecutorImplTest {
                 .executablesPaths("/usr/bin/env")
                 .commonArg("find")
                 .build();
-        find.lines(".").forEach(System.out::println);
+        find.lines(".")
+            .limit(20)
+            .forEach(log::info);
     }
 
     @Test
