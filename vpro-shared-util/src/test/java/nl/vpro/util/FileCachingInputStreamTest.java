@@ -22,13 +22,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Slf4j
 public class FileCachingInputStreamTest {
-    byte[] hello = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
-    byte[] in;
+    private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
+    private static byte[] MANY_BYTES;
     {
         int ncopies = 100;
-        in = new byte[hello.length * ncopies];
+        MANY_BYTES = new byte[HELLO.length * ncopies];
         for (int i = 0; i < ncopies; i++) {
-            System.arraycopy(hello, 0, in, i * hello.length, hello.length);
+            System.arraycopy(HELLO, 0, MANY_BYTES, i * HELLO.length, HELLO.length);
         }
     }
 
@@ -49,7 +49,7 @@ public class FileCachingInputStreamTest {
             out.write(r);
         }
 
-        assertThat(out.toByteArray()).containsExactly(in);
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
 
@@ -66,7 +66,7 @@ public class FileCachingInputStreamTest {
             out.write(buffer, 0, r);
         }
 
-        assertThat(out.toByteArray()).containsExactly(in);
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
 
@@ -85,7 +85,7 @@ public class FileCachingInputStreamTest {
 
                 }
             })
-            .input(new ByteArrayInputStream(in))
+            .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .startImmediately(true)
             .build();
@@ -102,42 +102,48 @@ public class FileCachingInputStreamTest {
     }
 
 
-    @Test(expected = ClosedByInterruptException.class)
+    @Test
     public void testReadFileGetsInterrupted() throws IOException {
-        Thread thisThread = Thread.currentThread();
-        try {
-            final AtomicLong interrupted = new AtomicLong(0);
-            FileCachingInputStream inputStream = FileCachingInputStream.builder()
-                .outputBuffer(2)
-                .batchSize(3)
-                .batchConsumer((f, c) -> {
-                    if (c.getCount() > 300) {
-                        long i = interrupted.getAndIncrement();
-                        if (! thisThread.isInterrupted())  {
-                            log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
-                            thisThread.interrupt();
-                        } else {
-                            log.trace("{} Interrupted already {} {}", c.getCount(), thisThread, i);
-                        }
+        final Thread thisThread = Thread.currentThread();
+
+        final AtomicLong interrupted = new AtomicLong(0);
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .batchConsumer((f, c) -> {
+                if (c.getCount() > 300) {
+                    long i = interrupted.getAndIncrement();
+                    if (! thisThread.isInterrupted())  {
+                        log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
+                        thisThread.interrupt();
+                        // According to javadoc this will either cause an exception or set the interrupted status.
+
+                    } else {
+                        log.trace("{} Interrupted already {} {}", c.getCount(), thisThread, i);
                     }
-                })
-                .input(new ByteArrayInputStream(in))
-                .initialBuffer(4)
-                .startImmediately(false)
-                .build();
+                }
+            })
+            .input(new ByteArrayInputStream(MANY_BYTES))
+            .initialBuffer(4)
+            .startImmediately(false)
+            .build();
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            int r;
-            byte[] buffer = new byte[10];
+        int r;
+        byte[] buffer = new byte[10];
+        boolean isInterrupted = false;
+        try {
             while ((r = inputStream.read(buffer)) != -1) {
                 out.write(buffer, 0, r);
             }
-        } catch (ClosedByInterruptException ie) {
-            throw ie;
+        } catch (ClosedByInterruptException | InterruptedIOException ie) {
+            isInterrupted = true;
         } finally {
-            log.info("Interrupted: {}", Thread.interrupted());
+            isInterrupted |= thisThread.isInterrupted();
+            log.info("Interrupted: {}", thisThread.isInterrupted());
         }
+        assertThat(isInterrupted).isTrue();
     }
 
     protected FileCachingInputStream slowReader() throws IOException {
@@ -154,7 +160,7 @@ public class FileCachingInputStreamTest {
                 }
                 //log.info("count:" + c.getCount());
             })
-            .input(new ByteArrayInputStream(in))
+            .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .startImmediately(true)
             .build();
@@ -165,7 +171,7 @@ public class FileCachingInputStreamTest {
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
-            .input(new ByteArrayInputStream(in))
+            .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .noProgressLogging()
             .startImmediately(false)
@@ -178,7 +184,7 @@ public class FileCachingInputStreamTest {
             out.write(r);
         }
 
-        assertThat(out.toByteArray()).containsExactly(in);
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
 
@@ -188,7 +194,7 @@ public class FileCachingInputStreamTest {
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
-            .input(new ByteArrayInputStream(in))
+            .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(1024)
             .noProgressLogging()
             .build();
@@ -200,7 +206,7 @@ public class FileCachingInputStreamTest {
             out.write(r);
         }
 
-        assertThat(out.toByteArray()).containsExactly(in);
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
     @Test
@@ -209,7 +215,7 @@ public class FileCachingInputStreamTest {
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
-                .input(new ByteArrayInputStream(in))
+                .input(new ByteArrayInputStream(MANY_BYTES))
                 .initialBuffer(4)
                 .noProgressLogging()
                 .startImmediately(true)
@@ -219,7 +225,7 @@ public class FileCachingInputStreamTest {
 
             IOUtils.copy(inputStream, out);
 
-            assertThat(out.toByteArray()).containsExactly(in);
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
     }
 
@@ -229,7 +235,7 @@ public class FileCachingInputStreamTest {
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
-                .input(new ByteArrayInputStream(in))
+                .input(new ByteArrayInputStream(MANY_BYTES))
                 .initialBuffer(4)
                 .startImmediately(false)
                 .noProgressLogging()
@@ -239,7 +245,7 @@ public class FileCachingInputStreamTest {
 
             IOUtils.copy(inputStream, out);
 
-            assertThat(out.toByteArray()).containsExactly(in);
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
     }
 
@@ -249,7 +255,7 @@ public class FileCachingInputStreamTest {
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
-                .input(new ByteArrayInputStream(hello))
+                .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(2048)
                 .build();) {
 
@@ -258,7 +264,7 @@ public class FileCachingInputStreamTest {
 
             IOUtils.copy(inputStream, out);
 
-            assertThat(out.toByteArray()).containsExactly(hello);
+            assertThat(out.toByteArray()).containsExactly(HELLO);
         }
     }
 
@@ -268,8 +274,8 @@ public class FileCachingInputStreamTest {
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(1)
-                .input(new ByteArrayInputStream(hello))
-                .initialBuffer(hello.length)
+                .input(new ByteArrayInputStream(HELLO))
+                .initialBuffer(HELLO.length)
                 .build();) {
 
 
@@ -277,7 +283,7 @@ public class FileCachingInputStreamTest {
 
             IOUtils.copy(inputStream, out);
 
-            assertThat(out.toByteArray()).containsExactly(hello);
+            assertThat(out.toByteArray()).containsExactly(HELLO);
         }
     }
 
@@ -288,7 +294,7 @@ public class FileCachingInputStreamTest {
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(1)
-                .input(new ByteArrayInputStream(hello))
+                .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(4)
                 .build();) {
 
@@ -299,12 +305,12 @@ public class FileCachingInputStreamTest {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             IOUtils.copy(inputStream, out);
 
-            assertThat(inputStream.getCount()).isEqualTo(hello.length);
-            assertThat(out.toByteArray()).containsExactly(hello);
+            assertThat(inputStream.getCount()).isEqualTo(HELLO.length);
+            assertThat(out.toByteArray()).containsExactly(HELLO);
         }
     }
 
-      @Test
+    @Test
     public void testWaitForBytesOnZeroBytes() throws IOException, InterruptedException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
@@ -333,8 +339,8 @@ public class FileCachingInputStreamTest {
             .outputBuffer(2)
             .batchSize(1)
             .tempDir("/tmp/bestaatniet")
-            .input(new ByteArrayInputStream(hello))
-            .initialBuffer(hello.length)
+            .input(new ByteArrayInputStream(HELLO))
+            .initialBuffer(HELLO.length)
             .build();
 
         assertThat(new File("/tmp/bestaatniet")).exists();

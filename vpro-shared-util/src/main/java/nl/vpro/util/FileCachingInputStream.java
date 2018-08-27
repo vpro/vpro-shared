@@ -263,7 +263,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (file != null) {
             file.close();
         }
@@ -380,7 +380,7 @@ public class FileCachingInputStream extends InputStream {
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
-                        log.error(e.getMessage(), e);
+                        log.warn(e.getMessage(), e);
                     }
                     int subResult = Math.max(file.read(b, totalResult, b.length - totalResult), 0);
                       totalResult += subResult;
