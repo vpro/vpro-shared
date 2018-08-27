@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 public class CommandExecutorImplTest {
 
     @Rule
-    public Timeout timeout = new Timeout(10, TimeUnit.MINUTES);
+    public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
 
 
     @Test
