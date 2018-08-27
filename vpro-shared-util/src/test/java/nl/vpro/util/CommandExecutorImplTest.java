@@ -56,5 +56,6 @@ public class CommandExecutorImplTest {
             actual = StringUtils.substringAfter(actual, "/private");
         }
         assertEquals(workDir.getAbsolutePath(), actual);
+        log.info("Found workdir {}", actual);
     }
 }
