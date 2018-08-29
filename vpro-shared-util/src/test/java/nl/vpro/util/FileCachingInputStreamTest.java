@@ -137,7 +137,7 @@ public class FileCachingInputStreamTest {
             while ((r = inputStream.read(buffer)) != -1) {
                 out.write(buffer, 0, r);
             }
-        } catch (ClosedByInterruptException | InterruptedIOException ie) {
+        } catch (ClosedByInterruptException | InterruptedIOException  ie) {
             isInterrupted = true;
         } finally {
             isInterrupted |= thisThread.isInterrupted();

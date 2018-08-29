@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -84,6 +85,7 @@ public class FileCachingInputStream extends InputStream {
      * @param path Directory for temporary files
      */
     @lombok.Builder(builderClassName = "Builder")
+    @SneakyThrows(IOException.class)
     private FileCachingInputStream(
         InputStream input,
         Path path,
@@ -229,7 +231,7 @@ public class FileCachingInputStream extends InputStream {
 
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -381,6 +383,7 @@ public class FileCachingInputStream extends InputStream {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.warn(e.getMessage(), e);
+                        throw new InterruptedIOException(e.getMessage());
                     }
                     int subResult = Math.max(file.read(b, totalResult, b.length - totalResult), 0);
                       totalResult += subResult;
