@@ -1,7 +1,7 @@
 couchdb
 =======
 
-Lightweight straight forward streaming couchdb client implementation in java.
+Lightweight straight forward streaming couchdb client implementation in java, with little dependencies.
 
 Access to a couchdb view is implemented as an Iterator. Just feed it an input stream and than you can iterate the view 
 as Jackson JsonNode's:
@@ -13,6 +13,8 @@ as Jackson JsonNode's:
     ....
  }
 ```
+This can be used on huge views, and won't consume much memory.
+
 This example is from a test case. Normally you would open the stream using HTTP. To help constructing the URL for that, 
 a 'CouchdbOptions' object is present too (which is copied from org.jcouchdb.db.Options, but with removed dependencies), 
 and also a 'CouchdView' class.
