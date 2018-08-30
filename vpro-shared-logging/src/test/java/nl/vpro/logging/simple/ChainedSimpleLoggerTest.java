@@ -20,7 +20,8 @@ public class ChainedSimpleLoggerTest {
     public void isEnabled() {
         ChainedSimpleLogger logger = new ChainedSimpleLogger(
             new SLogger(Level.DEBUG),
-            new SLogger(Level.WARN));
+            new SLogger(Level.WARN)
+        );
 
         assertThat(logger.isEnabled(Level.TRACE)).isFalse();
         assertThat(logger.isEnabled(Level.DEBUG)).isTrue();

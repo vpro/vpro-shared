@@ -12,13 +12,13 @@ import org.slf4j.event.Level;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger{
+public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger implements StringSupplierSimpleLogger {
 
     @Getter
     final StringBuilder stringBuilder;
 
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private StringBuilderSimpleLogger(
         StringBuilder stringBuilder,
         Level level,
@@ -31,7 +31,6 @@ public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger
     public StringBuilderSimpleLogger() {
         this(null, null, null, null);
     }
-
 
     @Override
     int getLength() {
@@ -62,4 +61,30 @@ public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger
             count--;
         }
     }
+
+
+
+
+    @Override
+    public String get() {
+        return stringBuilder.toString();
+
+    }
+
+    @Override
+    public StringSupplierSimpleLogger chain(SimpleLogger... logger) {
+        SimpleLogger[] array = new SimpleLogger[logger.length + 1];
+        array[0] = this;
+        System.arraycopy(logger, 0, array, 1, logger.length);
+        return new StringSupplierChainedSimpleLogger(array);
+    }
+
+    public static class Builder {
+
+        public StringSupplierSimpleLogger chain(SimpleLogger... logger) {
+            return build().chain(logger);
+        }
+
+    }
+
 }

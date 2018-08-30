@@ -106,6 +106,19 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
     void accept(Level level, CharSequence message, Throwable t);
 
+    /**
+     * Returns a new {@link SimpleLogger} that logs to both the current logger and the loggers given as argument.
+     * @param logger
+     * @return
+     */
+    default SimpleLogger chain(SimpleLogger... logger) {
+        SimpleLogger[] array = new SimpleLogger[logger.length + 1];
+        array[0] = this;
+        System.arraycopy(logger, 0, array, 1, logger.length);
+        return new ChainedSimpleLogger(array);
+
+    }
+
 
 
 }

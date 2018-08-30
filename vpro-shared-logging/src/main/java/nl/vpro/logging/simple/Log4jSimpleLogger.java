@@ -16,6 +16,10 @@ public class Log4jSimpleLogger implements SimpleLogger {
         this.log = log;
     }
 
+    public static Log4jSimpleLogger of(Logger log) {
+        return new Log4jSimpleLogger(log);
+    }
+
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
         log.log(toLevel(level), message, t);
