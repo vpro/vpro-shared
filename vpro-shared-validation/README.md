@@ -1,3 +1,3 @@
 # Some javax.validation validators
 
-See [source code](src/main/java/nl/vpro/validations)
+See [source code](src/main/java/nl/vpro/validation)
