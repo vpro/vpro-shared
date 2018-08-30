@@ -5,10 +5,10 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>1.80-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-newrelic</artifactId>
-   <dependencies>
+  <dependencies>
     <dependency>
       <groupId>ext.newrelic</groupId>
       <artifactId>newrelic-plugin</artifactId>
@@ -20,6 +20,10 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
   </dependencies>
 </project>

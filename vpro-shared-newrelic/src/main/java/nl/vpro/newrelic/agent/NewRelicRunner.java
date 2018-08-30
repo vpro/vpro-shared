@@ -4,14 +4,14 @@
  */
 package nl.vpro.newrelic.agent;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.annotation.PreDestroy;
 
 import com.newrelic.metrics.publish.Runner;
 
@@ -21,8 +21,8 @@ import nl.vpro.util.ThreadPools;
  * @author Roelof Jan Koekoek
  * @since 0.22.0
  */
+@Slf4j
 public class NewRelicRunner implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(NewRelicRunner.class);
 
     private static final ExecutorService EXECUTOR =
         Executors.newSingleThreadExecutor(ThreadPools.createThreadFactory("NewRelicAgentRunner", true, Thread.MIN_PRIORITY));
@@ -34,16 +34,21 @@ public class NewRelicRunner implements Runnable {
         EXECUTOR.execute(this);
     }
 
+    @PreDestroy
+    public void shutdown() {
+        EXECUTOR.shutdownNow();
+    }
+
     @Override
     public void run() {
         try {
-            LOG.info("Starting an embedded NewRelic Agent");
+            log.info("Starting an embedded NewRelic Agent");
 
             Runner runner = new Runner();
             runner.add(new NewRelicAgentFactory(this));
             runner.setupAndRun(); // Never returns
         } catch(Exception e) {
-            LOG.error("Could not start the NewRelic Agent", e);
+            log.error("Could not start the NewRelic Agent", e);
         }
     }
 
