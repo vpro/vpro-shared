@@ -16,6 +16,9 @@ import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+import nl.vpro.logging.simple.StringSupplierSimpleLogger;
 
 /**
  * Utilities to start jmx tasks in the background.
@@ -115,6 +118,20 @@ public class MBeans {
         return returnString(description, Duration.ofSeconds(5), job);
     }
 
+
+    public static UpdatableString singleLine(Logger log, String message, Object... args) {
+        return new UpdatableString(log, message, args);
+    }
+
+
+    public static StringSupplierSimpleLogger multiLine(Logger log, String message, Object... args) {
+
+        StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
+            .prefix((l) -> "")
+            .chain(Slf4jSimpleLogger.of(log));
+        string.info(message, args);
+        return string;
+    }
 
     /**
      * A String supplier of one line. This can be used as argument for {@link #returnString(String, Supplier, Duration, Callable)}
