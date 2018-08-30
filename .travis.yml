@@ -5,7 +5,7 @@ env:
   - secure: XatlKXcu1Opzwod0VY0+p81e14qiev8KyU12QKmoIq44P6dWcEAMdMdRF2oAnvfCnfpqDZJ+YGfzqdDJALs2H5aHTIsMLlQc5yHFrWeOoYoCFjplrSwT4Q7wIkTjG8wXwB7CRSqRaoz7gKazUes6jKOGi1uqzeVYy6G6EFVj+oAzAIwJ593XCaR1RWAUERijMUNSWlHzia6zrmpeZjUPTt8H4vUuzPLMwZPR2wJUxe122H7I4bTTNBi/yJ63XbI4xLpH6ayx/FxV/j5hhXZneTpvLhty4g2ypLGs1G8EPmZ3Wt82c4ifz+y1Jy+guoog5s/UDe9xlve1tQq8D9cIsPy7EZsLD+dOHg64QKQkSU/G7MOH74isuKo+IwjTSrCOQ+B/mc81huq+YbIUHaHeic6hTFODGzvXixSobHFROoN3xTpJc0I5651Vh+5x57CzKlYFCoxwF63F79MXcqRs3iQJP3vWiQC+MxYUGfhPhlG9x5XpEE/skgzZC1b8wKDLqs3Zh1CgiAarXT+ogUdhwFsi4+tvNjUV7EC/o9E8VTKXcMPpZ68KUkV3G87RXtHRm91udDCIERXSfdjtlSnIqwlPovZ62fAldUHluS0Wn+1rH+/16qZwMQ17XKBn+kV0D0/VNHmzzX0yigpE3JRRKvbGkTfwRkmnal/V5kq4JE0=
 jdk:
 - oraclejdk8
-sudo: false
+sudo: true
 script: mvn clean test install
 after_success:
 - mvn -Pdeploy deploy --settings travis-settings.xml -DskipTests=true -Dgpg.skip=true  -B
