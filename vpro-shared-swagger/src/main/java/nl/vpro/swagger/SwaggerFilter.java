@@ -34,7 +34,7 @@ public class SwaggerFilter implements Filter {
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
 
     }
 
@@ -127,7 +127,7 @@ public class SwaggerFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        executor.shutdownNow();
 
     }
 
