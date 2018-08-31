@@ -44,7 +44,7 @@ public class Slf4jSimpleLogger implements SimpleLogger {
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
-        Slf4jHelper.log(logger, level, message.toString(), t);
+        Slf4jHelper.log(logger, level, message == null ? null : message.toString(), t);
     }
 
 

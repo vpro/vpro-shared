@@ -1,24 +1,21 @@
 package nl.vpro.jmx;
 
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+import nl.vpro.logging.simple.StringSupplierSimpleLogger;
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.event.Level;
-
-import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
-import nl.vpro.logging.simple.StringBuilderSimpleLogger;
-import nl.vpro.logging.simple.StringSupplierSimpleLogger;
 
 /**
  * Utilities to start jmx tasks in the background.
@@ -54,16 +51,16 @@ public class MBeans {
     /**
      *
      * @param key A key on which the job can be 'locked'.
-     * @param description A supplier that before the job starts should describe the job.
+     * @param description A supplier that before the job starts should describe the job. One can be created using e.g. {@link #multiLine(Logger, String, Object...)} or {@link #singleLine(Logger, String, Object...)}
      * @param wait How long to wait before returing with a message that the job is not yet finished, but still running.
      * @param job A job returning a String when ready. This string will be returned.
      * @return
      */
     public static String returnString(
         @Nullable final String key,
-        @Nonnull final Supplier<String> description,
+        @Nonnull final StringSupplierSimpleLogger description,
         @Nonnull final  Duration wait,
-        @Nonnull final  Callable<String> job) {
+        @Nonnull final Consumer<StringSupplierSimpleLogger> job) {
         if (key != null) {
             if (isRunning(key)) {
                 return "Job " + key + " is still running, so could not be started again with " + description.get();
@@ -75,9 +72,9 @@ public class MBeans {
             try {
                 Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
                 Thread.currentThread().setName(threadName + ":" + description.get());
-                return job.call();
+                job.accept(description);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                description.error(e.getClass().getName() + " " + e.getMessage(), e);
             } finally {
                 if (key != null) {
                     locks.remove(key);
@@ -85,6 +82,7 @@ public class MBeans {
                 Thread.currentThread().setContextClassLoader(contextClassLoader);
                 Thread.currentThread().setName(threadName);
             }
+            return description.get();
 
         });
         if (key != null) {
@@ -93,33 +91,57 @@ public class MBeans {
         try {
             return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException e) {
-            return description + " " + e.getMessage();
+            log.info(e.getMessage());
         } catch (TimeoutException e) {
             return description.get() + "\n...\nstill busy. Please check logs";
         }
+        return description.get();
     }
 
+    @Deprecated
+    public static String returnString(
+        @Nullable final String key,
+        @Nonnull final StringSupplierSimpleLogger description,
+        @Nonnull final  Duration wait,
+        @Nonnull final Callable<String> job) {
+        return returnString(key, description, wait, l -> {
+            try {
+                String s = job.call();
+                l.info(s);
+            } catch (Exception e) {
+                description.error(e.getClass().getName() + " " + e.getMessage(), e);
+            }
+        }
+        );
+      }
 
     /**
-     * Defaulting version of {@link #returnString(String, Supplier, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
-        @Nonnull Supplier<String> description,
+        @Nonnull StringSupplierSimpleLogger description,
         @Nonnull Duration wait,
         @Nonnull Callable<String> job) {
         return returnString(null, description, wait, job);
     }
 
-    /**
-     * Defaulting version of {@link #returnString(Supplier, Duration, Callable)} waiting for 5 seconds before time out.*/
-    public static String returnString(
+
+      public static String returnString(
         @Nonnull Supplier<String> description,
+        @Nonnull Duration wait,
+        @Nonnull Callable<String> job) {
+        return returnString(null, singleLine(log, description.get()), wait, job);
+    }
+    /**
+     * Defaulting version of {@link #returnString(StringSupplierSimpleLogger, Duration, Callable)} waiting for 5 seconds before time out.*/
+    public static String returnString(
+        @Nonnull StringSupplierSimpleLogger description,
         @Nonnull Callable<String> job) {
         return returnString(description, Duration.ofSeconds(5), job);
     }
 
 
-    public static UpdatableString singleLine(Logger log, String message, Object... args) {
+    public static StringSupplierSimpleLogger singleLine(Logger log, String message, Object... args) {
         return new UpdatableString(log, message, args);
     }
 
@@ -127,16 +149,16 @@ public class MBeans {
     public static StringSupplierSimpleLogger multiLine(Logger log, String message, Object... args) {
 
         StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
-            .prefix((l) -> "")
+            .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
             .chain(Slf4jSimpleLogger.of(log));
         string.info(message, args);
         return string;
     }
 
     /**
-     * A String supplier of one line. This can be used as argument for {@link #returnString(String, Supplier, Duration, Callable)}
+     * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)}
      */
-    public static class UpdatableString implements Supplier<String>, SimpleLogger {
+    public static class UpdatableString implements StringSupplierSimpleLogger {
         private CharSequence string;
         private Logger logger;
 
