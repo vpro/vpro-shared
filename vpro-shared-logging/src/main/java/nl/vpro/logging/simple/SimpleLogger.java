@@ -19,6 +19,21 @@ import org.slf4j.helpers.MessageFormatter;
  */
 public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
 
+    ThreadLocal<SimpleLogger> THREAD_LOCAL = ThreadLocal.withInitial(NOPLogger::new);
+
+    static RemoveFromThreadLocal withLogger(SimpleLogger logger) {
+        THREAD_LOCAL.set(logger);
+        return RemoveFromThreadLocal.INSTANCE;
+    }
+
+    class RemoveFromThreadLocal implements  AutoCloseable {
+        static final RemoveFromThreadLocal INSTANCE = new RemoveFromThreadLocal();
+
+        @Override
+        public void close()  {
+            THREAD_LOCAL.remove();
+        }
+    }
 
     default String getName() {
         return getClass().getSimpleName();
