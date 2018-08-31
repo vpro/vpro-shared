@@ -22,16 +22,26 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     ThreadLocal<SimpleLogger> THREAD_LOCAL = ThreadLocal.withInitial(NOPLogger::new);
 
     static RemoveFromThreadLocal withLogger(SimpleLogger logger) {
+        SimpleLogger before = THREAD_LOCAL.get();
         THREAD_LOCAL.set(logger);
-        return RemoveFromThreadLocal.INSTANCE;
+        return new RemoveFromThreadLocal(before);
     }
 
     class RemoveFromThreadLocal implements  AutoCloseable {
-        static final RemoveFromThreadLocal INSTANCE = new RemoveFromThreadLocal();
+
+        private final SimpleLogger before;
+
+        public RemoveFromThreadLocal(SimpleLogger before) {
+            this.before = before;
+        }
 
         @Override
         public void close()  {
-            THREAD_LOCAL.remove();
+            if (before == null) {
+                THREAD_LOCAL.remove();
+            } else {
+                THREAD_LOCAL.set(before);
+            }
         }
     }
 
