@@ -101,6 +101,17 @@ public class MBeans {
         return description.get();
     }
 
+
+    /**
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     */
+    public static String returnString(
+        @Nonnull StringSupplierSimpleLogger description,
+        @Nonnull Duration wait,
+        @Nonnull Consumer<StringSupplierSimpleLogger> logger) {
+        return returnString(null, description, wait, logger);
+    }
+
     @Deprecated
     public static String returnString(
         @Nullable final String key,

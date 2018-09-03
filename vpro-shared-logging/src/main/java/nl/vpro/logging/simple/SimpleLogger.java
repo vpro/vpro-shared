@@ -2,9 +2,11 @@ package nl.vpro.logging.simple;
 
 import java.util.function.BiConsumer;
 
+import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
+import com.google.common.flogger.FluentLogger;
 
 
 /**
@@ -27,6 +29,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new RemoveFromThreadLocal(before);
     }
 
+
     class RemoveFromThreadLocal implements  AutoCloseable {
 
         private final SimpleLogger before;
@@ -44,6 +47,35 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             }
         }
     }
+
+    static SimpleLogger slfj4(Logger log) {
+        return new Slf4jSimpleLogger(log);
+    }
+
+    static SimpleLogger jul(java.util.logging.Logger log) {
+        return new JULSimpleLogger(log);
+    }
+
+
+    static SimpleLogger log4j(org.apache.log4j.Logger  log) {
+        return new Log4jSimpleLogger(log);
+    }
+
+    static SimpleLogger flogger(FluentLogger  log) {
+        return new FloggerSimpleLogger(log);
+    }
+
+    static SimpleLogger of(Object o) {
+        switch(o.getClass().getName()) {
+            case "org.slf4j.Logger":
+                return slfj4((Logger) o);
+            case "com.google.common.flogger.FluentLogger":
+                return flogger((FluentLogger) o);
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
 
     default String getName() {
         return getClass().getSimpleName();
