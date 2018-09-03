@@ -61,19 +61,8 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new Log4jSimpleLogger(log);
     }
 
-    static SimpleLogger flogger(FluentLogger  log) {
+    static SimpleLogger flogger(FluentLogger log) {
         return new FloggerSimpleLogger(log);
-    }
-
-    static SimpleLogger of(Object o) {
-        switch(o.getClass().getName()) {
-            case "org.slf4j.Logger":
-                return slfj4((Logger) o);
-            case "com.google.common.flogger.FluentLogger":
-                return flogger((FluentLogger) o);
-            default:
-                throw new IllegalArgumentException();
-        }
     }
 
 
