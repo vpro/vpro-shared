@@ -8,6 +8,8 @@ import java.util.function.Function;
 
 
 /**
+ * Adapts an existing iterator, to add elements at the end, perhaps based on the last element.
+ *
  * @author Michiel Meeuwissen
  * @since 1.17
  */

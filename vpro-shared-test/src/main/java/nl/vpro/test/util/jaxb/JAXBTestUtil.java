@@ -8,6 +8,7 @@ import junit.framework.ComparisonFailure;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import javax.xml.bind.*;
@@ -157,7 +158,7 @@ public class JAXBTestUtil {
     public static <T> T roundTripAndSimilar(T input, InputStream expected) throws IOException, SAXException {
 
         StringWriter writer = new StringWriter();
-        IOUtils.copy(expected, writer);
+        IOUtils.copy(expected, writer, Charset.forName("UTF-8"));
         return roundTripAndSimilar(input, writer.toString());
     }
 

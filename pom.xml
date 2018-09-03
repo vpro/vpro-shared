@@ -176,8 +176,8 @@
     <httpcomponents.version>4.5.3</httpcomponents.version>
     <httpcomponentscore.version>4.4.7</httpcomponentscore.version>
 
-    <hibernate.version>5.2.11.Final</hibernate.version>
-    <hibernate.search.version>5.8.0.Final</hibernate.search.version>
+    <hibernate.version>5.3.6.Final</hibernate.version>
+    <hibernate.search.version>5.10.3.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
     <!--
