@@ -1,21 +1,24 @@
 package nl.vpro.jmx;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
-import nl.vpro.logging.simple.StringBuilderSimpleLogger;
-import nl.vpro.logging.simple.StringSupplierSimpleLogger;
-import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
+
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+import nl.vpro.logging.simple.StringSupplierSimpleLogger;
 
 /**
  * Utilities to start jmx tasks in the background.
@@ -53,14 +56,14 @@ public class MBeans {
      * @param key A key on which the job can be 'locked'.
      * @param description A supplier that before the job starts should describe the job. One can be created using e.g. {@link #multiLine(Logger, String, Object...)} or {@link #singleLine(Logger, String, Object...)}
      * @param wait How long to wait before returing with a message that the job is not yet finished, but still running.
-     * @param job A job returning a String when ready. This string will be returned.
+     * @param logger A job returning a String when ready. This string will be returned.
      * @return
      */
     public static String returnString(
         @Nullable final String key,
         @Nonnull final StringSupplierSimpleLogger description,
         @Nonnull final  Duration wait,
-        @Nonnull final Consumer<StringSupplierSimpleLogger> job) {
+        @Nonnull final Consumer<StringSupplierSimpleLogger> logger) {
         if (key != null) {
             if (isRunning(key)) {
                 return "Job " + key + " is still running, so could not be started again with " + description.get();
@@ -72,7 +75,7 @@ public class MBeans {
             try {
                 Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
                 Thread.currentThread().setName(threadName + ":" + description.get());
-                job.accept(description);
+                logger.accept(description);
             } catch (Exception e) {
                 description.error(e.getClass().getName() + " " + e.getMessage(), e);
             } finally {

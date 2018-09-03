@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 
 /**
+ * An iterator that
  * @author Michiel Meeuwissen
  * @since 3.1
  */
