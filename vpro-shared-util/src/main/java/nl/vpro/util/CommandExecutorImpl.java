@@ -228,7 +228,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             errorCopier.waitFor();
             int result = p.exitValue();
             if (result != 0) {
-                logger.error("Error {} occurred while calling {}", result, command.stream().collect(Collectors.joining(" ")));
+                logger.error("Error {} occurred while calling {}", result, String.join(" ", command));
             }
             if (out != null) {
                 out.flush();
