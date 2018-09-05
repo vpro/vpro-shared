@@ -135,6 +135,7 @@ public class MBeans {
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
      */
+    @Deprecated
     public static String returnString(
         @Nonnull StringSupplierSimpleLogger description,
         @Nonnull Duration wait,
