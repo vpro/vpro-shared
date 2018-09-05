@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Getter;
+
 import java.io.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -170,6 +172,16 @@ public interface CommandExecutor {
 
         public BrokenPipe(IOException e) {
             super(e);
+        }
+    }
+
+
+    @Getter
+    class ExitCodeException extends RuntimeException {
+        final int exitCode;
+        public ExitCodeException(String message, int exitCode) {
+            super(message);
+            this.exitCode = exitCode;
         }
     }
 }
