@@ -80,11 +80,15 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             mes = getMessage(wea);
             t = wea;
             if (status == 404) {
-                Object entity = wea.getResponse().getEntity();
-                if (entity != null && entity.getClass().getName().equals("nl.vpro.domain.api.Error")) {
+                try {
+                    Object entity = wea.getResponse().getEntity();
+                    if (entity != null && entity.getClass().getName().equals("nl.vpro.domain.api.Error")) {
+                        error = false;
+                    } else {
+                        error = true;
+                    }
+                } catch (IllegalStateException iae) {
                     error = false;
-                } else {
-                    error = true;
                 }
             } else {
                 error = status >= 400;
