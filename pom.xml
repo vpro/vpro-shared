@@ -107,9 +107,10 @@
   </modules>
 
   <scm>
-    <connection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/branches/REL-1.79-SNAPSHOT</connection>
-    <developerConnection>scm:svn:https://subversion.vpro.nl/repo/nl/vpro/vpro-shared/branches/REL-1.79-SNAPSHOT</developerConnection>
-    <url>https://subversion.vpro.nl/viewvc/nl/vpro/vpro-shared/branches/REL-1.79-SNAPSHOT</url>
+    <connection>scm:git:git://git@github.com/vpro/vpro-shared.git</connection>
+    <developerConnection>scm:git:git@github.com:vpro/vpro-shared.git</developerConnection>
+    <url>https://github.com/vpro/vpro-shared</url>
+    <tag>REL-1.79-SNAPSHOT</tag>
   </scm>
 
   <properties>
