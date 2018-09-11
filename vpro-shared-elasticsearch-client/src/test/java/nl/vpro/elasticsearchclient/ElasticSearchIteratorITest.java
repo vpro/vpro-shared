@@ -3,6 +3,7 @@ package nl.vpro.elasticsearchclient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -44,9 +45,11 @@ public class ElasticSearchIteratorITest {
         QueryBuilder.mustTerm(query, "broadcasters", "VPRO");
 
         i.forEachRemaining((u) -> {
-            log.info("{}/{}: {} (eta: {})", i.getCount(), i.getTotalSize().orElse(null), u,
-                i.getETA().map(eta -> eta.atZone(ZoneId.of("Europe/Amsterdam")).toLocalDateTime()).orElse(null)
-            );
+            if (i.getCount() % 1000 == 0) {
+                log.info("{}/{}: {} (eta: {})", i.getCount(), i.getTotalSize().orElse(null), u,
+                    i.getETA().map(eta -> eta.atZone(ZoneId.of("Europe/Amsterdam")).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS)).orElse(null)
+                );
+            }
         });
 
      }

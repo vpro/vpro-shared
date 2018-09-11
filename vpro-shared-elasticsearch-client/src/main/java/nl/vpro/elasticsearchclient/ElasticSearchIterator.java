@@ -229,7 +229,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     public Optional<Instant> getETA() {
         if (getCount() != null && getCount() != 0 && getTotalSize().isPresent()) {
             Duration duration = Duration.between(start, Instant.now());
-            Duration estimatedTotalDuration = Duration.ofMillis(duration.toMillis() * getTotalSize().get() / getCount());
+            Duration estimatedTotalDuration = Duration.ofNanos(duration.toNanos() * getTotalSize().get() / getCount());
             return Optional.of(start.plus(estimatedTotalDuration));
         } else {
             return Optional.empty();
