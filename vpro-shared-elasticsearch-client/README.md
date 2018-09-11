@@ -3,9 +3,22 @@
 Depends only on elastic search restclient. No lucene dependencies.
 
 ## IndexerHelper
-Helps creating indexing
+Helps creating and mainting indexer
 ```java
+  client = RestClient.builder(
+            new HttpHost("localhost", 9200, "http"))
+            .build();
 
+        helper = IndexHelper.builder()
+            .log(log)
+            .client((e) -> client)
+            .settingsResource("setting.json")
+            .mappingResource("test.json")
+            .indexName("test-" + System.currentTimeMillis())
+            .build();
+        
+        helper.createIndexIfNotExists();
+        
 
 ```
 ## ElasticSearchIterator

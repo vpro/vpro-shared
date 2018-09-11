@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
 
+import static nl.vpro.elasticsearchclient.Constants.*;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 
 /**
@@ -198,9 +199,11 @@ public class IndexHelper {
     }
 
 
-    public void prepareIndex() {
+    /**
+     * Checks whether index exists, and if not, created it.
+     */
+    public void createIndexIfNotExists() {
         try {
-
             Response response = client().performRequest(new Request("HEAD",  getIndexName()));
             if (response.getStatusLine().getStatusCode() == 404) {
                 log.info("Index '{}' not existing in {}, now creating", getIndexName(), clientFactory);
@@ -243,12 +246,13 @@ public class IndexHelper {
         List<Pair<ObjectNode, ObjectNode>> bulk = new ArrayList<>();
         while (i.hasNext()) {
             JsonNode node = i.next();
-            bulk.add(deleteRequest(node.get("_type").asText(), node.get("_id").asText()));
+            bulk.add(deleteRequest(node.get(TYPE).asText(), node.get(Constants.ID).asText()));
         }
         if (bulk.size() > 0) {
             bulk(bulk);
         }
     }
+
 
     public boolean refresh() {
 
@@ -482,9 +486,9 @@ public class IndexHelper {
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("index");
-        index.put("_type", type);
-        index.put("_id", id);
-        index.put("_index", getIndexName());
+        index.put(TYPE, type);
+        index.put(ID, id);
+        index.put(INDEX, getIndexName());
 
         ObjectNode jsonNode = getPublisherInstance().valueToTree(o);
         return Pair.of(actionLine, jsonNode);
@@ -501,9 +505,9 @@ public class IndexHelper {
     public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");
-        index.put("_type", type);
-        index.put("_id", id);
-        index.put("_index", getIndexName());
+        index.put(TYPE, type);
+        index.put(ID, id);
+        index.put(INDEX, getIndexName());
         return Pair.of(actionLine, null);
     }
 
@@ -592,7 +596,7 @@ public class IndexHelper {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         searchAsync(request, (entity) ->  {
-            JsonNode hits = entity.get("hits");
+            JsonNode hits = entity.get(HITS);
             if (hits != null) {
                 long count = hits.get("total").longValue();
                 consumer.accept(count);
@@ -666,9 +670,9 @@ public class IndexHelper {
 
     public Consumer<ObjectNode> indexLogger(Logger logger, Supplier<String> prefix) {
         return jsonNode -> {
-            String index = jsonNode.get("_index").textValue();
-            String type = jsonNode.get("_type").textValue();
-            String id = jsonNode.get("_id").textValue();
+            String index = jsonNode.get(INDEX).textValue();
+            String type = jsonNode.get(TYPE).textValue();
+            String id = jsonNode.get(ID).textValue();
             Integer version = jsonNode.hasNonNull("_version") ? jsonNode.get("_version").intValue() : null;
             logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
@@ -684,9 +688,9 @@ public class IndexHelper {
     public Consumer<ObjectNode> deleteLogger(Logger logger, Supplier<String> prefix) {
         return jsonNode -> {
             boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
-            String index = jsonNode.get("_index").textValue();
-            String type = jsonNode.get("_type").textValue();
-            String id = jsonNode.get("_id").textValue();
+            String index = jsonNode.get(INDEX).textValue();
+            String type = jsonNode.get(TYPE).textValue();
+            String id = jsonNode.get(ID).textValue();
             int version = jsonNode.get("_version").intValue();
             if (found) {
                 logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
@@ -740,17 +744,17 @@ public class IndexHelper {
                 ObjectNode on = (ObjectNode) n;
                 if (on.has("delete")) {
                     ObjectNode delete = on.with("delete");
-                    index = delete.get("_index").textValue();
-                    type = delete.get("_type").textValue();
-                    String id = delete.get("_id").textValue();
+                    index = delete.get(INDEX).textValue();
+                    type = delete.get(TYPE).textValue();
+                    String id = delete.get(ID).textValue();
                     deleted.add(id);
                     continue;
                 }
                 if (n.has("index")) {
                     ObjectNode indexResponse = on.with("index");
-                    index = indexResponse.get("_index").textValue();
-                    type = indexResponse.get("_type").textValue();
-                    String id = indexResponse.get("_id").textValue();
+                    index = indexResponse.get(INDEX).textValue();
+                    type = indexResponse.get(TYPE).textValue();
+                    String id = indexResponse.get(ID).textValue();
                     indexed.add(id);
                     continue;
                 }

@@ -45,7 +45,7 @@ public class IndexHelperITest {
 
     @Test
     public void createIndex() {
-        helper.prepareIndex();
+        helper.createIndexIfNotExists();
         helper.refresh();
         assertThat(helper.count()).isEqualTo(0);
         helper.deleteIndex();
@@ -54,7 +54,7 @@ public class IndexHelperITest {
     }
 
     @Test
-    public void getClusterNamee() {
+    public void getClusterName() {
         log.info("clustername: {}", helper.getClusterName());
     }
 
