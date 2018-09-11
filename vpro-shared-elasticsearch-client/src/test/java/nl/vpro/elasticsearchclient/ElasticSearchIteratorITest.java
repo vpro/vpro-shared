@@ -2,8 +2,7 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collections;
-import java.util.Map;
+import java.time.ZoneId;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -13,8 +12,6 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.jackson2.Jackson2Mapper;
 
 /**
  * @author Michiel Meeuwissen
@@ -36,19 +33,22 @@ public class ElasticSearchIteratorITest {
 
     @Test
     public void test() {
-        ElasticSearchIterator<Map<String, Object>> i = ElasticSearchIterator
-            .<Map<String, Object>>builder()
+        ElasticSearchIterator<String> i = ElasticSearchIterator
+            .<String>builder()
             .client(client)
-            .adapt(jsonNode -> (Map<String, Object>) Jackson2Mapper.getLenientInstance().convertValue(jsonNode, Map.class))
+            .adapt(jsonNode -> jsonNode.get(Constants.ID).textValue())
             .build();
-        ObjectNode node = i.prepareSearch(Collections.singleton("media"), null);
-        node.put("size", 100);
+        ObjectNode search = i.prepareSearch("pageupdates-publish");
+        QueryBuilder.asc(search, "lastPublished");
+        ObjectNode query = search.with(Constants.QUERY);
+        QueryBuilder.mustTerm(query, "broadcasters", "VPRO");
 
+        i.forEachRemaining((u) -> {
+            log.info("{}/{}: {} (eta: {})", i.getCount(), i.getTotalSize().orElse(null), u,
+                i.getETA().map(eta -> eta.atZone(ZoneId.of("Europe/Amsterdam")).toLocalDateTime()).orElse(null)
+            );
+        });
 
-        while(i.hasNext()) {
-            String mid = String.valueOf(i.next().get("mid"));
-            System.out.println("" + i.getCount() + "/" + i.getTotalSize().orElse(null) + " " + mid);
-        }
      }
 
 

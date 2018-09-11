@@ -22,4 +22,7 @@ public class Constants {
 
     public static final String SCROLL = "scroll";
 
+    public static final String QUERY = "query";
+
+
 }

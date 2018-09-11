@@ -49,4 +49,5 @@ public class QueryBuilder {
         term.put(field, value);
         return clause;
     }
+
 }

@@ -69,8 +69,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     private Duration scrollContext = Duration.ofMinutes(1);
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this.adapt = adapt;
-        this.client = client;
+        this(client, adapt, Duration.ofMinutes(1));
     }
 
 
@@ -83,16 +82,22 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     ) {
         this.adapt = adapt;
         this.client = client;
-        this.scrollContext = scrollContext;
+        this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
     }
 
 
     public static ElasticSearchIterator<JsonNode> of(RestClient client) {
-        return new ElasticSearchIterator<>(client, jn -> jn);
+        return ElasticSearchIterator.<JsonNode>builder()
+            .client(client)
+            .adapt(jn -> jn)
+            .build();
     }
 
     public static ElasticSearchIterator<JsonNode> sources(RestClient client) {
-        return new ElasticSearchIterator<>(client, jn -> jn.get(SOURCE));
+        return ElasticSearchIterator.<JsonNode>builder()
+            .client(client)
+            .adapt(jn -> jn.get(SOURCE))
+            .build();
     }
 
     public ObjectNode prepareSearch(Collection<String> indices, Collection<String> types) {
