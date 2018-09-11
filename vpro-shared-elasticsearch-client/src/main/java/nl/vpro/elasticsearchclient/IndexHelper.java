@@ -13,23 +13,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseException;
-import org.elasticsearch.client.ResponseListener;
-import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.util.concurrent.Futures;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
@@ -168,7 +163,7 @@ public class IndexHelper {
         } else {
             RestClient client = clientFactory.client(name);
             callback.accept(client);
-            return Futures.immediateFuture(client);
+            return CompletableFuture.completedFuture(client);
         }
 
     }
@@ -189,7 +184,9 @@ public class IndexHelper {
         HttpEntity entity = entity(request);
 
         log.info("Creating index {} with mappings {}: {}", indexNameSupplier, mappings.keySet(), request.toString());
-        ObjectNode response = read(client().performRequest("PUT", indexNameSupplier.get(), Collections.emptyMap(), entity));
+        Request req = new Request("PUT", indexNameSupplier.get());
+        req.setEntity(entity);
+        ObjectNode response = read(client().performRequest(req));
 
 
         if (response.get("acknowledged").booleanValue()) {
@@ -204,7 +201,7 @@ public class IndexHelper {
     public void prepareIndex() {
         try {
 
-            Response response = client().performRequest("HEAD",  getIndexName());
+            Response response = client().performRequest(new Request("HEAD",  getIndexName()));
             if (response.getStatusLine().getStatusCode() == 404) {
                 log.info("Index '{}' not existing in {}, now creating", getIndexName(), clientFactory);
                 try {
@@ -223,7 +220,7 @@ public class IndexHelper {
 
     public boolean checkIndex() {
         try {
-            Response response = client().performRequest("HEAD", getIndexName());
+            Response response = client().performRequest(new Request("HEAD", getIndexName()));
             return response.getStatusLine().getStatusCode() != 404;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -234,7 +231,7 @@ public class IndexHelper {
 
     public void deleteIndex()  {
         try {
-            client().performRequest("DELETE", getIndexName());
+            client().performRequest(new Request("DELETE", getIndexName()));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -256,7 +253,7 @@ public class IndexHelper {
     public boolean refresh() {
 
         try {
-            Response response = client().performRequest("GET", "_refresh");
+            Response response = client().performRequest(new Request("GET", "_refresh"));
             JsonNode read = read(response);
             return response != null;
         } catch (IOException e) {
@@ -275,7 +272,7 @@ public class IndexHelper {
     public ObjectNode search(ObjectNode request, String... types) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
         StringBuilder path =  new StringBuilder((indexName == null ? "" : indexName));
-        String typeString = Arrays.stream(types).collect(Collectors.joining(","));
+        String typeString = String.join(",", types);
         if (typeString.length() > 0) {
             path.append("/").append(typeString);
         }
@@ -293,7 +290,9 @@ public class IndexHelper {
     public ObjectNode post(String path, ObjectNode request) {
         try {
 
-            return read(client().performRequest("POST", path, Collections.emptyMap(), entity(request)));
+            Request req = new Request("POST", path);
+            req.setEntity(entity(request));
+            return read(client().performRequest(req));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -311,9 +310,9 @@ public class IndexHelper {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
             log.debug("posting");
-            client.performRequestAsync("POST", path, Collections.emptyMap(),
-                entity(request),
-                listen(request.toString(), future, listeners));
+            Request req = new Request("POST", path);
+            req.setEntity(entity(request));
+            client.performRequestAsync(req, listen(request.toString(), future, listeners));
             }
         );
         return future;
@@ -385,7 +384,7 @@ public class IndexHelper {
 
     public ObjectNode delete(String type, String id) {
         try {
-            client().performRequest("DELETE", getIndexName() + "/" + type + "/" + encode(id));
+            client().performRequest(new Request("DELETE", getIndexName() + "/" + type + "/" + encode(id)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -418,7 +417,7 @@ public class IndexHelper {
     public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync("DELETE", getIndexName() + "/" + type + "/" + encode(id),
+        client().performRequestAsync(new Request("DELETE", getIndexName() + "/" + type + "/" + encode(id)),
             listen("delete " + type + "/" + id, future, listeners)
         );
         return future;
@@ -430,7 +429,7 @@ public class IndexHelper {
     public Optional<JsonNode> get(String type, String id){
         try {
             Response response = client()
-                .performRequest("GET", getIndexName() + "/" + type + "/" + encode(id));
+                .performRequest(new Request("GET", getIndexName() + "/" + type + "/" + encode(id)));
             return Optional.of(read(response));
         } catch (ResponseException re) {
             if (re.getResponse().getStatusLine().getStatusCode() >= 500) {
@@ -521,12 +520,11 @@ public class IndexHelper {
     public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
 
         try {
+            Request req = new Request("POST", "_bulk");
+            req.setEntity(bulkEntity(request));
+
             ObjectNode result = read(
-                client().performRequest(
-                    "POST", "_bulk",
-                    Collections.emptyMap(),
-                    bulkEntity(request)
-                )
+                client().performRequest(req)
             );
             return result;
         } catch (IOException e) {
@@ -542,9 +540,11 @@ public class IndexHelper {
         if (request.size() == 0) {
             return CompletableFuture.completedFuture(null);
         }
-        client().performRequestAsync("POST", "_bulk",
-            Collections.emptyMap(),
-            bulkEntity(request),
+
+        Request req = new Request("POST", "_bulk");
+        req.setEntity(bulkEntity(request));
+
+        client().performRequestAsync(req,
             listen("" + request.size() + " bulk operations", future, listeners));
         return future;
     }
@@ -625,7 +625,7 @@ public class IndexHelper {
     public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
         final CompletableFuture<String> future = new CompletableFuture<>();
         final RestClient client = client();
-        client.performRequestAsync("GET", "/_cat/health", Collections.emptyMap(), new ResponseListener() {
+        client.performRequestAsync(new Request("GET", "/_cat/health"), new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();

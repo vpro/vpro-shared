@@ -12,6 +12,7 @@ import java.util.function.Function;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
@@ -65,8 +66,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Getter
     private Instant start;
 
-    @lombok.Builder.Default
-    private Duration scrollContext = Duration.ofMinutes(1);
+    private Duration scrollContext;
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this(client, adapt, Duration.ofMinutes(1));
@@ -128,8 +128,6 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                 }
                 try {
                     HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
-                    Map<String, String> params = new HashMap<>();
-                    params.put(SCROLL, scrollContext.toMinutes() + "m");
                     StringBuilder builder = new StringBuilder();
                     if (! indices.isEmpty()) {
                         builder.append(String.join(",", indices));
@@ -142,7 +140,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     }
                     builder.append("/_search");
                     start = Instant.now();
-                    Response res = client.performRequest("POST", builder.toString(), params, entity);
+                    Request post = new Request("POST", builder.toString());
+                    post.setEntity(entity);
+                    post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                    Response res = client.performRequest(post);
                     response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                 } catch (IOException ioe) {
                     //log.error(ioe.getMessage());
@@ -169,7 +170,9 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
                     scrollRequest.put(SCROLL_ID, scrollId);
                     try {
-                        Response res = client.performRequest("POST", "/_search/scroll", Collections.emptyMap(), new NStringEntity(scrollRequest.toString(), ContentType.APPLICATION_JSON));
+                        Request post = new Request("POST", "/_search/scroll");
+                        post.setEntity(new NStringEntity(scrollRequest.toString(), ContentType.APPLICATION_JSON));
+                        Response res = client.performRequest(post);
                         response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                         log.debug("New scroll");
                         hits = response.get(HITS);

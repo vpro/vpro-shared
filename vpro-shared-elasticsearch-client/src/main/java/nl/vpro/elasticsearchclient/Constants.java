@@ -6,6 +6,9 @@ package nl.vpro.elasticsearchclient;
  */
 public class Constants {
 
+    public static class Fields {
+
+    }
     public static final String TYPE  = "_type";
 
     public static final String ID = "_id";
