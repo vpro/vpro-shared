@@ -1,23 +1,19 @@
 package nl.vpro.api.client.resteasy;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
+import nl.vpro.jackson2.Jackson2Mapper;
+import org.jboss.resteasy.util.HttpResponseCodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.jboss.resteasy.util.HttpResponseCodes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import nl.vpro.jackson2.Jackson2Mapper;
 
 import static java.util.stream.Collectors.joining;
 
@@ -80,9 +76,6 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             l = getLogger(status);
             mes = getMessage(wea);
             t = wea;
-<<<<<<< HEAD
-            error = status >= 500;
-=======
             if (status == 404) {
                 try {
                     Object entity = wea.getResponse().getEntity();
@@ -98,7 +91,6 @@ public class ErrorAspect<T, E> implements InvocationHandler {
                 error = status >= 400;
             }
 
->>>>>>> b7e0a89f... PAGEPUB-16, PAGEPUB-17
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
