@@ -25,42 +25,74 @@ import nl.vpro.util.CountedIterator;
 import static nl.vpro.elasticsearchclient.Constants.*;
 
 /**
- * A wrapper around the Elastic Search scroll interface.
-
+ * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
+ * {@code
+ *        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client);
+ *        JsonNode search = i.prepareSearch("pageupdates-publish");
+ *        // fill your request here
+ *        i.forEachRemaining((node) -> {
+ *             String url = node.get("url").textValue();
+ *             if (i.getCount() % 1000 == 0) {
+ *                 log.info("{}: {}", i.getCount(), url);
+ *
+ *             }
+ *         });
+ *
+ * }*
  * @author Michiel Meeuwissen
  * @since 0.47
  */
 @Slf4j
 public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
-    final Function<JsonNode, T> adapt;
-    final RestClient client;
+    private final Function<JsonNode, T> adapt;
+    private final RestClient client;
 
-    ObjectNode request;
-    JsonNode response;
+    private ObjectNode request;
+    private JsonNode response;
     @Getter
     private Long count = -1L;
     private JsonNode hits;
     private String scrollId;
 
-    boolean hasNext;
-    int i = -1;
-    T next;
-    boolean needsNext;
-    Collection<String> indices;
-    Collection<String> types;
+    private boolean hasNext;
+    private int i = -1;
+    private T next;
+    private boolean needsNext = true;
+    private Collection<String> indices;
+    private Collection<String> types;
 
     @Getter
-    Instant start;
+    private Instant start;
+
+    @lombok.Builder.Default
+    private Duration scrollContext = Duration.ofMinutes(1);
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this.adapt = adapt;
         this.client = client;
-        needsNext = true;
     }
+
+
+    @lombok.Builder(builderClassName = "Builder")
+    private ElasticSearchIterator(
+        RestClient client,
+        Function<JsonNode, T> adapt,
+        Duration scrollContext
+
+    ) {
+        this.adapt = adapt;
+        this.client = client;
+        this.scrollContext = scrollContext;
+    }
+
 
     public static ElasticSearchIterator<JsonNode> of(RestClient client) {
         return new ElasticSearchIterator<>(client, jn -> jn);
+    }
+
+    public static ElasticSearchIterator<JsonNode> sources(RestClient client) {
+        return new ElasticSearchIterator<>(client, jn -> jn.get(SOURCE));
     }
 
     public ObjectNode prepareSearch(Collection<String> indices, Collection<String> types) {
@@ -92,7 +124,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                 try {
                     HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
                     Map<String, String> params = new HashMap<>();
-                    params.put(SCROLL, "1m");
+                    params.put(SCROLL, scrollContext.toMinutes() + "m");
                     StringBuilder builder = new StringBuilder();
                     if (! indices.isEmpty()) {
                         builder.append(String.join(",", indices));
@@ -116,6 +148,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     hits = response.get(HITS);
                 }
                 scrollId = response.get(_SCROLL_ID).asText();
+                log.debug("Scroll id {}", scrollId);
                 if (hits.get(HITS).size() == 0) {
                     hasNext = false;
                     needsNext = false;
@@ -128,7 +161,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             if (!newHasNext) {
                 if (scrollId != null) {
                     ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
-                    scrollRequest.put(SCROLL, "1m");
+                    scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
                     scrollRequest.put(SCROLL_ID, scrollId);
                     try {
                         Response res = client.performRequest("POST", "/_search/scroll", Collections.emptyMap(), new NStringEntity(scrollRequest.toString(), ContentType.APPLICATION_JSON));

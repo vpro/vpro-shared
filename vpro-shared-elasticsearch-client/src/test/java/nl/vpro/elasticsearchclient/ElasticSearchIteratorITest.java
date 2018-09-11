@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -30,14 +29,18 @@ public class ElasticSearchIteratorITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9208, "http"))
+            new HttpHost("localhost", 9212, "http"))
             .build();
     }
 
 
     @Test
     public void test() {
-        ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, (jn) -> (Map<String, Object>) Jackson2Mapper.getLenientInstance().convertValue(jn, Map.class));
+        ElasticSearchIterator<Map<String, Object>> i = ElasticSearchIterator
+            .<Map<String, Object>>builder()
+            .client(client)
+            .adapt(jsonNode -> (Map<String, Object>) Jackson2Mapper.getLenientInstance().convertValue(jsonNode, Map.class))
+            .build();
         ObjectNode node = i.prepareSearch(Collections.singleton("media"), null);
         node.put("size", 100);
 
@@ -50,22 +53,15 @@ public class ElasticSearchIteratorITest {
 
 
     @Test
-    // NOT used as this doesn't work on ES 1....
-    public void correctPageIds() {
-        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client);
-        i.prepareSearch("apipages");
-        long index = 0;
-        while(i.hasNext()) {
-            JsonNode node = i.next();
-            String id = node.get("_id").textValue();
-            String url = node.get("_source").get("url").textValue();
-            if (! Objects.equals(id, url)) {
-                log.info("{}, {}", id, url);
-            }
-            if (index++ % 1000 == 0) {
-                log.info("{}: {}", index, url);
+    public void testSources() {
+        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client);
+        JsonNode search = i.prepareSearch("pageupdates-publish");
+        i.forEachRemaining((node) -> {
+            String url = node.get("url").textValue();
+            if (i.getCount() % 1000 == 0) {
+                log.info("{}: {}", i.getCount(), url);
 
             }
-        }
+        });
     }
 }
