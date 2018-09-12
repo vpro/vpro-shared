@@ -758,7 +758,7 @@ public class IndexHelper {
                     indexed.add(id);
                     continue;
                 }
-                log.warn("Unrecognized bulk response {}", n);
+                logger.warn("Unrecognized bulk response {}", n);
 
             }
 
