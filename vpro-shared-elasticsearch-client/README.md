@@ -1,6 +1,8 @@
 # Elasticsearch utils
 
-Depends only on elastic search restclient. No lucene dependencies.
+Depends only on [elastic search restclient](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html). No lucene dependencies.
+
+It constains several simple utilities. These are some important ones
 
 ## IndexerHelper
 Helps creating and maintaining indexes.
