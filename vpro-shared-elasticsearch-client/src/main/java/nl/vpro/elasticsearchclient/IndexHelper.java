@@ -21,7 +21,6 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -47,6 +46,8 @@ public class IndexHelper {
     private Supplier<String> settings;
     private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
+
+    private File writeJsonDir = null;
 
 
     public static class Builder {
@@ -108,8 +109,9 @@ public class IndexHelper {
         ESClientFactory client,
         Supplier<String> indexNameSupplier,
         Supplier<String> settings,
-        Map<String,
-            Supplier<String>> mappings) {
+        Map<String, Supplier<String>> mappings,
+        File writeJsonDir
+        ) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
@@ -527,6 +529,7 @@ public class IndexHelper {
             Request req = new Request("POST", "_bulk");
             req.setEntity(bulkEntity(request));
 
+            writeJson(request);
             ObjectNode result = read(
                 client().performRequest(req)
             );
@@ -547,6 +550,7 @@ public class IndexHelper {
 
         Request req = new Request("POST", "_bulk");
         req.setEntity(bulkEntity(request));
+        writeJson(request);
 
         client().performRequestAsync(req,
             listen("" + request.size() + " bulk operations", future, listeners));
@@ -764,6 +768,27 @@ public class IndexHelper {
 
             logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
         };
+    }
+
+    protected void writeJson(Collection<Pair<ObjectNode, ObjectNode>> requests) {
+        for (Pair<ObjectNode, ObjectNode> request: requests) {
+            ObjectNode actionLine = request.getFirst();
+            if (actionLine.has("index")) {
+                writeJson(actionLine.get("index").get(ID).textValue(), request.getSecond());
+            }
+        }
+    }
+
+    protected void writeJson(String id, JsonNode jsonNode) {
+        if (writeJsonDir != null) {
+            File file = new File(writeJsonDir, id + ".json");
+            try {
+                Jackson2Mapper.getPrettyInstance().writeValue(new FileOutputStream(file), jsonNode);
+                log.info("Wrote {}", file);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
     }
 
 }
