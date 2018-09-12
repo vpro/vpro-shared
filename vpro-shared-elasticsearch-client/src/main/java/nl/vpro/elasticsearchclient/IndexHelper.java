@@ -119,6 +119,7 @@ public class IndexHelper {
         if (mappings != null) {
             this.mappings.putAll(mappings);
         }
+        this.writeJsonDir = writeJsonDir;
     }
 
 
@@ -768,6 +769,19 @@ public class IndexHelper {
 
             logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
         };
+    }
+
+    public void setWriteJsonDir(File file) {
+        if (file != null) {
+            if (! file.exists()) {
+                if (file.mkdirs()) {
+                    log.info("Created {}", file);
+                } else {
+                    log.info("Could not create {}", file);
+                }
+            }
+        }
+        this.writeJsonDir = file;
     }
 
     protected void writeJson(Collection<Pair<ObjectNode, ObjectNode>> requests) {
