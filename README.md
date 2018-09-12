@@ -23,7 +23,7 @@ places in VPRO artifacts.
 
 SNAPSHOT builds can be found at https://oss.sonatype.org/content/repositories/snapshots/nl/vpro/shared/
 
-Release builds will be provided via [maven central](https://search.maven.org/search?q=g:nl.vpro).
+Release builds will be provided via [maven central](https://search.maven.org/search?q=g:nl.vpro.shared).
 
 ## TODO
 
