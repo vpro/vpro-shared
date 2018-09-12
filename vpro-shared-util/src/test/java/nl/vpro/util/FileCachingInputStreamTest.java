@@ -144,6 +144,7 @@ public class FileCachingInputStreamTest {
             log.info("Interrupted: {}", thisThread.isInterrupted());
         }
         assertThat(isInterrupted).isTrue();
+        inputStream.close();
     }
 
     protected FileCachingInputStream slowReader() throws IOException {
@@ -318,7 +319,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(1)
                 .input(new ByteArrayInputStream(new byte[0]))
                 .initialBuffer(4)
-                .build();) {
+                .build()) {
 
             long count = inputStream.waitForBytesRead(10);
             log.info("Found {}", count);

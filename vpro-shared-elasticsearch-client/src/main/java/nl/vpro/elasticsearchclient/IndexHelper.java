@@ -781,7 +781,7 @@ public class IndexHelper {
 
     protected void writeJson(String id, JsonNode jsonNode) {
         if (writeJsonDir != null) {
-            File file = new File(writeJsonDir, id + ".json");
+            File file = new File(writeJsonDir, id.replaceAll(File.separator, "_") + ".json");
             try {
                 Jackson2Mapper.getPrettyInstance().writeValue(new FileOutputStream(file), jsonNode);
                 log.info("Wrote {}", file);

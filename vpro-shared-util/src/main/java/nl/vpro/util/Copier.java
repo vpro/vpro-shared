@@ -150,11 +150,20 @@ public class Copier implements Runnable, Closeable {
     @Override
     public void close() throws IOException {
         in.close();
+
     }
 
     public boolean interrupt() throws IOException {
         close();
-        return future != null && future.cancel(true);
+        boolean result = true;
+        if (future != null) {
+
+            result = future.isCancelled() || future.isDone() || future.cancel(true);
+            if (! result) {
+                log.warn("Couldn't cancel {}", future);
+            }
+        }
+        return result;
     }
 
     protected String logPrefix() {
