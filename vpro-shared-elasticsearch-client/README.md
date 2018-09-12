@@ -3,13 +3,13 @@
 Depends only on elastic search restclient. No lucene dependencies.
 
 ## IndexerHelper
-Helps creating and mainting indexer
+Helps creating and maintaining indexes.
 ```java
   client = RestClient.builder(
             new HttpHost("localhost", 9200, "http"))
             .build();
 
-        helper = IndexHelper.builder()
+  helper = IndexHelper.builder()
             .log(log)
             .client((e) -> client)
             .settingsResource("setting.json")
@@ -17,10 +17,14 @@ Helps creating and mainting indexer
             .indexName("test-" + System.currentTimeMillis())
             .build();
         
-        helper.createIndexIfNotExists();
+  helper.createIndexIfNotExists();
+  
+  ..
+  helper.deleteIndex()
         
-
 ```
+We use this in test classes, but also in some repository implementations to bootstrap databases if they happen to not exist yet.
+
 ## ElasticSearchIterator
 Wraps the scroll interface in an `java.util.Iterator`.
 ```java
@@ -37,7 +41,9 @@ Wraps the scroll interface in an `java.util.Iterator`.
 ```
 The idea is to create it with a client, then 'prepare the search' (you may use e.g. utilities from `nl.vpro.elasticsearchclient.QueryBuilder` to do that).
 
-You can also use an adapter:
+You can also use an adapter, to have an iterator of other object types. It is e.g. possible to use an ObjectMapper and have an iterator of your domain objects.
+
+Here is a more full example, which shows how to 'prepare' the search, and how you could use an adapter.
 ```java
  ElasticSearchIterator<String> i = ElasticSearchIterator
             .<String>builder()
