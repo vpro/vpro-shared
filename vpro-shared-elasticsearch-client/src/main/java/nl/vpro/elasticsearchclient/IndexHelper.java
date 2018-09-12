@@ -747,7 +747,7 @@ public class IndexHelper {
                     index = delete.get(INDEX).textValue();
                     type = delete.get(TYPE).textValue();
                     String id = delete.get(ID).textValue();
-                    deleted.add(id);
+                    deleted.add(type+ ":" + id);
                     continue;
                 }
                 if (n.has("index")) {
@@ -755,7 +755,7 @@ public class IndexHelper {
                     index = indexResponse.get(INDEX).textValue();
                     type = indexResponse.get(TYPE).textValue();
                     String id = indexResponse.get(ID).textValue();
-                    indexed.add(id);
+                    indexed.add(type + ":" + id);
                     continue;
                 }
                 logger.warn("Unrecognized bulk response {}", n);
