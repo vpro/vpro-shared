@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/vpro/vpro-shared.svg?)](https://travis-ci.org/vpro/vpro-shared)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/nl.vpro/vpro-shared/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/nl.vpro/vpro-shared)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/nl.vpro.shared/vpro-shared/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/nl.vpro.shared/vpro-shared)
 
 # VPRO Shared modules
 
