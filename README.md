@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/vpro/vpro-shared.svg?)](https://travis-ci.org/vpro/vpro-shared)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/nl.vpro.shared/vpro-shared/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/nl.vpro.shared/vpro-shared)
+[![Maven Central](https://img.shields.io/maven-central/v/nl.vpro.shared/vpro-shared-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22nl.vpro.shared%22%20AND%20a:%vpro-shared-parent%22)
+
 
 # VPRO Shared modules
 
