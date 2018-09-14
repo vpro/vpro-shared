@@ -7,6 +7,8 @@
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
+  <description>Description These are various shared utility modules which are used on several places in VPRO artifacts.</description>
+  <url>https://github.com/vpro/vpro-shared</url>
 
 
   <licenses>
@@ -73,11 +75,10 @@
           <version>3.0.1</version>
           <configuration>
             <!-- javadoc met java 8 is anders een absolute ramp, zeker met de oude zooi in dit project -->
-            <additionalparam>-Xdoclint:none</additionalparam>
+            <doclint>none</doclint>
             <failOnError>false</failOnError>
           </configuration>
         </plugin>
-
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
