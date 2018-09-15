@@ -11,7 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,10 +33,13 @@ public class FileCachingInputStreamTest {
             System.arraycopy(HELLO, 0, MANY_BYTES, i * HELLO.length, HELLO.length);
         }
     }
+    @Rule
+    public TestName name = new TestName();
+
 
     @Before
     public void before() {
-        log.info("Interrupted {}", Thread.interrupted());
+        log.info("-----{}. Interrupted {}", name.getMethodName(), Thread.interrupted());
     }
 
     @Test
@@ -107,44 +112,46 @@ public class FileCachingInputStreamTest {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
-        FileCachingInputStream inputStream = FileCachingInputStream.builder()
-            .outputBuffer(2)
-            .batchSize(3)
-            .batchConsumer((f, c) -> {
-                if (c.getCount() > 300) {
-                    long i = interrupted.getAndIncrement();
-                    if (! thisThread.isInterrupted())  {
-                        log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
-                        thisThread.interrupt();
-                        // According to javadoc this will either cause an exception or set the interrupted status.
-
-                    } else {
-                        log.trace("{} Interrupted already {} {}", c.getCount(), thisThread, i);
-                    }
-                }
-            })
-            .input(new ByteArrayInputStream(MANY_BYTES))
-            .initialBuffer(4)
-            .startImmediately(false)
-            .build();
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        int r;
-        byte[] buffer = new byte[10];
         boolean isInterrupted = false;
-        try {
+
+        try(
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .batchConsumer((f, c) -> {
+                    if (c.getCount() > 300) {
+                        long i = interrupted.getAndIncrement();
+                        if (! thisThread.isInterrupted())  {
+                            log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
+                            thisThread.interrupt();
+                            // According to javadoc this will either cause an exception or set the interrupted status.
+
+                        } else {
+                            log.info("{} Interrupted already {} {}", c.getCount(), thisThread, i);
+                        }
+                    }
+                })
+                .input(new ByteArrayInputStream(MANY_BYTES))
+                .initialBuffer(4)
+                .startImmediately(false)
+                .build();
+        ) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            int r;
+            byte[] buffer = new byte[10];
             while ((r = inputStream.read(buffer)) != -1) {
                 out.write(buffer, 0, r);
             }
         } catch (ClosedByInterruptException | InterruptedIOException  ie) {
             isInterrupted = true;
+            log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
         } finally {
             isInterrupted |= thisThread.isInterrupted();
-            log.info("Interrupted: {}", thisThread.isInterrupted());
+            log.info("Finally: interrupted: {}: times: {} ", thisThread.isInterrupted(), interrupted.get());
+
         }
-        assertThat(isInterrupted).isTrue();
-        inputStream.close();
+        assertThat(isInterrupted).withFailMessage("Thread did not get interrupted").isTrue();
     }
 
     protected FileCachingInputStream slowReader() throws IOException {

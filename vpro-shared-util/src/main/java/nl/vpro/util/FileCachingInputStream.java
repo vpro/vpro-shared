@@ -222,7 +222,9 @@ public class FileCachingInputStream extends InputStream {
                     }
                 })
                 .batch(batchSize)
-                .batchConsumer(c -> bc.accept(this, c))
+                .batchConsumer(c -> {
+                    bc.accept(this, c);
+                })
                 .build();
             if (startImmediately == null || startImmediately) {
                 // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
@@ -348,6 +350,7 @@ public class FileCachingInputStream extends InputStream {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.error(e.getMessage(), e);
+                        this.close();
                     }
                     result = file.read();
                 }
@@ -382,7 +385,7 @@ public class FileCachingInputStream extends InputStream {
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
-                        log.warn(e.getMessage(), e);
+                        log.warn("Interrupted {}", e.getMessage());
                         throw new InterruptedIOException(e.getMessage());
                     }
                     int subResult = Math.max(file.read(b, totalResult, b.length - totalResult), 0);
