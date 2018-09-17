@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
+@SuppressWarnings({"Duplicates", "deprecation"})
 @Slf4j
 public class MBeansTest {
 
