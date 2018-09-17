@@ -30,6 +30,8 @@ public class MBeans {
 
     private static final Map<String, Future> locks = new ConcurrentHashMap<>();
 
+    public static final Duration DEFAULT_DURATION =  Duration.ofSeconds(5);
+
 
     public static boolean isRunning(final String key) {
         return locks.containsKey(key);
@@ -112,6 +114,15 @@ public class MBeans {
         return returnString(null, description, wait, logger);
     }
 
+    /**
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     */
+    public static String returnString(
+        @Nonnull StringSupplierSimpleLogger description,
+        @Nonnull Consumer<StringSupplierSimpleLogger> logger) {
+        return returnString(null, description, DEFAULT_DURATION, logger);
+    }
+
 
 
 
@@ -155,7 +166,7 @@ public class MBeans {
     public static String returnString(
         @Nonnull StringSupplierSimpleLogger description,
         @Nonnull Callable<String> job) {
-        return returnString(description, Duration.ofSeconds(5), job);
+        return returnString(description, DEFAULT_DURATION, job);
     }
 
 
@@ -173,6 +184,12 @@ public class MBeans {
         return string;
     }
 
+     public static StringSupplierSimpleLogger multiLine(Logger log) {
+        StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
+            .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
+            .chain(Slf4jSimpleLogger.of(log));
+        return string;
+    }
     /**
      * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)}
      */
