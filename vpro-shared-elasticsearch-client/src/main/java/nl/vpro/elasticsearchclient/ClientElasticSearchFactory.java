@@ -91,6 +91,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     protected HttpHost[] getHosts() {
         return Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
+            .filter(s -> ! s.isEmpty())
             .map(HttpHost::create)
             .map(h ->
                 h.getPort() >= 9300 && implicitJavaToHttpPort ?
@@ -105,10 +106,16 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     @Override
     public String toString() {
-        HttpHost[] hosts = getHosts();
-        if (hosts.length > 0) {
-            return hosts[0].toString();
-        } else {
+        try {
+            HttpHost[] hosts = getHosts();
+            if (hosts.length > 0) {
+                return hosts[0].toString();
+
+            } else {
+                return unicastHosts;
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return unicastHosts;
         }
 
