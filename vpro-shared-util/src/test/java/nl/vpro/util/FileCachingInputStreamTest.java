@@ -218,7 +218,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void test() throws IOException {
+    public void testSimple() throws IOException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
