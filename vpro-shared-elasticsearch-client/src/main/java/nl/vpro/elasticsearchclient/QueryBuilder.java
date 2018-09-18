@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearchclient;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -48,6 +50,18 @@ public class QueryBuilder {
         ObjectNode term = clause.with("term");
         term.put(field, value);
         return clause;
+    }
+
+    public static ObjectNode range(ObjectNode query, String field, Instant start, Instant stop) {
+        ObjectNode range = query.with("range");
+        ObjectNode fieldObject = range.with(field);
+        if (start != null) {
+            fieldObject.put("gte", start.toEpochMilli());
+        }
+        if (stop != null) {
+            fieldObject.put("lt", stop.toEpochMilli());
+        }
+        return range;
     }
 
 }
