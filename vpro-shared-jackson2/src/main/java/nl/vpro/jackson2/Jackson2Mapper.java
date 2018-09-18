@@ -4,10 +4,12 @@
  */
 package nl.vpro.jackson2;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -63,6 +65,10 @@ public class Jackson2Mapper extends ObjectMapper {
         return PUBLISHER;
     }
 
+    @SneakyThrows({JsonProcessingException.class})
+    public static <T> T lenientTreeToValue(JsonNode jsonNode, Class<T> clazz) {
+        return getLenientInstance().treeToValue(jsonNode, clazz);
+    }
 
     private Jackson2Mapper() {
 
