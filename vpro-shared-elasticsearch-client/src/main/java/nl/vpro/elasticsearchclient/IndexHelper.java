@@ -455,21 +455,7 @@ public class IndexHelper {
     }
 
     public Optional<JsonNode> get(Collection<String> type, String id) {
-        ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
-        ArrayNode array = body.withArray("docs");
-        for (String t : type) {
-            ObjectNode doc = array.addObject();
-            doc.put(Constants.ID, id);
-            doc.put(Constants.TYPE, t);
-        }
-        ObjectNode post = post(getIndexName() + "/_mget", body);
-
-        ArrayNode result = post.withArray("docs");
-        if (result.size() > 0) {
-            return Optional.of(result.get(0).get(Constants.SOURCE));
-        } else {
-            return Optional.empty();
-        }
+        return get(type, id, (jn) -> jn.get(Constants.SOURCE));
     }
 
 
