@@ -42,4 +42,10 @@ public class IndexHelper2ITest {
         log.info("{}", helper.get(Arrays.asList("program", "group"), "RBX_KRO_2439590"));
     }
 
+
+    @Test
+    public void mget404() {
+        log.info("{}", helper.get(Arrays.asList("program", "group"), "BESTAATNIET"));
+    }
+
 }

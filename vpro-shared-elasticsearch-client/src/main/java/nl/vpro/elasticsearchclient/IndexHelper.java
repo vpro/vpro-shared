@@ -470,11 +470,12 @@ public class IndexHelper {
         ObjectNode post = post(getIndexName() + "/_mget", body);
 
         ArrayNode result = post.withArray("docs");
-        if (result.size() > 0) {
-            return Optional.of(adapter.apply(result.get(0)));
-        } else {
-            return Optional.empty();
+        for (JsonNode n : result) {
+            if (n.get("found").booleanValue()) {
+                return Optional.of(adapter.apply(n));
+            }
         }
+        return Optional.empty();
     }
 
     public Optional<JsonNode> getWithEnums(Collection<Enum<?>> type, String id) {
