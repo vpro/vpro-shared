@@ -453,7 +453,7 @@ public class IndexHelper {
         }
     }
 
-    public Optional<ObjectNode> get(Collection<String> type, String id) {
+    public Optional<JsonNode> get(Collection<String> type, String id) {
         ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
         ArrayNode array = body.withArray("docs");
         for (String t : type) {
@@ -465,13 +465,13 @@ public class IndexHelper {
 
         ArrayNode result = post.withArray("docs");
         if (result.size() > 0) {
-            return Optional.of((ObjectNode) result.get(0).get(Constants.SOURCE));
+            return Optional.of(result.get(0).get(Constants.SOURCE));
         } else {
             return Optional.empty();
         }
     }
 
-    public Optional<ObjectNode> getWithEnums(Collection<Enum<?>> type, String id) {
+    public Optional<JsonNode> getWithEnums(Collection<Enum<?>> type, String id) {
         return get(type.stream().map(Enum::name).collect(Collectors.toList()), id);
     }
 
