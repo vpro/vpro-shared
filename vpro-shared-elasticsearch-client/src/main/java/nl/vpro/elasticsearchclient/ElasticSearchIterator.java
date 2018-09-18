@@ -1,6 +1,7 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -12,10 +13,7 @@ import java.util.function.Function;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseException;
-import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -68,8 +66,12 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
     private Duration scrollContext;
 
+    @Getter
+    @Setter
+    private boolean jsonRequests = true;
+
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, Duration.ofMinutes(1));
+        this(client, adapt, Duration.ofMinutes(1), true);
     }
 
 
@@ -77,12 +79,14 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     private ElasticSearchIterator(
         RestClient client,
         Function<JsonNode, T> adapt,
-        Duration scrollContext
+        Duration scrollContext,
+        Boolean jsonRequests
 
     ) {
         this.adapt = adapt;
         this.client = client;
         this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
+        this.jsonRequests = jsonRequests == null || jsonRequests;
     }
 
 
@@ -166,12 +170,21 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             boolean newHasNext = i < hits.get(HITS).size();
             if (!newHasNext) {
                 if (scrollId != null) {
-                    ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
-                    scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
-                    scrollRequest.put(SCROLL_ID, scrollId);
                     try {
-                        Request post = new Request("POST", "/_search/scroll");
-                        post.setEntity(new NStringEntity(scrollRequest.toString(), ContentType.APPLICATION_JSON));
+                        Request post;
+                        if (jsonRequests) {
+                            ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
+                            scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
+                            scrollRequest.put(SCROLL_ID, scrollId);
+
+                            post = new Request("POST", "/_search/scroll");
+                            post.setJsonEntity(scrollRequest.toString());
+
+                        } else {
+                            post = new Request("POST", "/_search/scroll");
+                            post.addParameter("scroll", scrollContext.toMinutes() + "m");
+                            post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
+                        }
                         Response res = client.performRequest(post);
                         response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                         log.debug("New scroll");

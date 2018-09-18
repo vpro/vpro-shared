@@ -27,7 +27,7 @@ public class ElasticSearchIteratorITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9212, "http"))
+            new HttpHost("localhost", 9210, "http"))
             .build();
     }
 
@@ -58,11 +58,32 @@ public class ElasticSearchIteratorITest {
     @Test
     public void testSources() {
         ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client);
+        i.setJsonRequests(false);
         JsonNode search = i.prepareSearch("pageupdates-publish");
         i.forEachRemaining((node) -> {
             String url = node.get("url").textValue();
             if (i.getCount() % 1000 == 0) {
                 log.info("{}: {}", i.getCount(), url);
+
+            }
+        });
+    }
+
+     @Test
+    public void test15() {
+        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
+            .sources(client);
+        i.setJsonRequests(false);
+        i.prepareSearch("apimedia", "program", "group", "segment");
+        i.forEachRemaining((node) -> {
+            String string;
+            if (node.has("mid")) {
+                string = node.get("mid").textValue();
+            } else {
+                string = node.toString();
+            }
+            if (i.getCount() % 1000 == 0) {
+                log.info("{}: {}", i.getCount(), string);
 
             }
         });
