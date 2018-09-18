@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -21,6 +22,7 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -449,9 +451,29 @@ public class IndexHelper {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
     }
 
+    public Optional<ObjectNode> get(Collection<String> type, String id) {
+        ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
+        ArrayNode array = body.withArray("docs");
+        for (String t : type) {
+            ObjectNode doc = array.addObject();
+            doc.put(Constants.ID, id);
+            doc.put(Constants.TYPE, t);
+        }
+        ObjectNode post = post(getIndexName() + "/_mget", body);
+
+        ArrayNode result = post.withArray("docs");
+        if (result.size() > 0) {
+            return Optional.of((ObjectNode) result.get(0).get(Constants.SOURCE));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<ObjectNode> getWithEnums(Collection<Enum<?>> type, String id) {
+        return get(type.stream().map(Enum::name).collect(Collectors.toList()), id);
+    }
 
     public Optional<JsonNode> getSource(String type, String id) {
         return get(type, id).map(jn -> jn.get("_source"));
@@ -459,10 +481,6 @@ public class IndexHelper {
 
     public Optional<JsonNode> getSource(Enum<?> type, String id) {
         return get(type, id).map(jn -> jn.get("_source"));
-    }
-
-    public Optional<JsonNode> get(Collection<String> types, String id) {
-        return types.stream().map(t -> get(t, id)).filter(Optional::isPresent).map(Optional::get).findFirst();
     }
 
     public ObjectNode read(Response response) {
