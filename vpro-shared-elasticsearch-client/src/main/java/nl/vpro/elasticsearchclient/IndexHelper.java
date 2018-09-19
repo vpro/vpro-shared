@@ -455,7 +455,7 @@ public class IndexHelper {
     }
 
     public Optional<JsonNode> get(Collection<String> type, String id) {
-        return get(type, id, (jn) -> jn.get(Constants.SOURCE));
+        return get(type, id, (jn) -> jn);
     }
 
 
@@ -483,11 +483,11 @@ public class IndexHelper {
     }
 
     public Optional<JsonNode> getSource(String type, String id) {
-        return get(type, id).map(jn -> jn.get("_source"));
+        return get(type, id).map(jn -> jn.get(Constants.SOURCE));
     }
 
     public Optional<JsonNode> getSource(Enum<?> type, String id) {
-        return get(type, id).map(jn -> jn.get("_source"));
+        return get(type, id).map(jn -> jn.get(Constants.SOURCE));
     }
 
     public ObjectNode read(Response response) {
