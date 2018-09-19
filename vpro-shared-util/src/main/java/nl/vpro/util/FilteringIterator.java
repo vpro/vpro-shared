@@ -204,6 +204,11 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         }
     }
 
+    @Override
+    public String toString() {
+        return "filter " + wrapped.toString() + " [" + filter + "]";
+    }
+
 
     public static class KeepAlive {
         private final long count;

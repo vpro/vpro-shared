@@ -16,4 +16,9 @@ public class CouchdbChangesIterator extends CouchdbStreamIterator {
     public CouchdbChangesIterator(InputStream stream) throws IOException {
         super(stream, 3, "results");
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + " changes";
+    }
 }
