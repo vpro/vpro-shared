@@ -37,7 +37,7 @@ public class ElasticSearchIteratorITest {
         ElasticSearchIterator<String> i = ElasticSearchIterator
             .<String>builder()
             .client(client)
-            .adapt(jsonNode -> jsonNode.get(Constants.ID).textValue())
+            .adapt(jsonNode -> jsonNode.get(Constants.Fields.ID).textValue())
             .build();
         ObjectNode search = i.prepareSearch("pageupdates-publish");
         QueryBuilder.asc(search, "lastPublished");

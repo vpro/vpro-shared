@@ -252,7 +252,7 @@ public class IndexHelper {
         List<Pair<ObjectNode, ObjectNode>> bulk = new ArrayList<>();
         while (i.hasNext()) {
             JsonNode node = i.next();
-            bulk.add(deleteRequest(node.get(TYPE).asText(), node.get(Constants.ID).asText()));
+            bulk.add(deleteRequest(node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText()));
         }
         if (bulk.size() > 0) {
             bulk(bulk);
@@ -464,8 +464,8 @@ public class IndexHelper {
         ArrayNode array = body.withArray("docs");
         for (String t : type) {
             ObjectNode doc = array.addObject();
-            doc.put(Constants.ID, id);
-            doc.put(Constants.TYPE, t);
+            doc.put(Fields.ID, id);
+            doc.put(Fields.TYPE, t);
         }
         ObjectNode post = post(getIndexName() + "/_mget", body);
 
@@ -483,11 +483,11 @@ public class IndexHelper {
     }
 
     public Optional<JsonNode> getSource(String type, String id) {
-        return get(type, id).map(jn -> jn.get(Constants.SOURCE));
+        return get(type, id).map(jn -> jn.get(Fields.SOURCE));
     }
 
     public Optional<JsonNode> getSource(Enum<?> type, String id) {
-        return get(type, id).map(jn -> jn.get(Constants.SOURCE));
+        return get(type, id).map(jn -> jn.get(Fields.SOURCE));
     }
 
     public ObjectNode read(Response response) {
@@ -514,9 +514,9 @@ public class IndexHelper {
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("index");
-        index.put(TYPE, type);
-        index.put(ID, id);
-        index.put(INDEX, getIndexName());
+        index.put(Fields.TYPE, type);
+        index.put(Fields.ID, id);
+        index.put(Fields.INDEX, getIndexName());
 
         ObjectNode jsonNode = getPublisherInstance().valueToTree(o);
         return Pair.of(actionLine, jsonNode);
@@ -524,8 +524,8 @@ public class IndexHelper {
 
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o, String routing) {
         Pair<ObjectNode, ObjectNode> request = indexRequest(type, id, o);
-        request.getFirst().with("index").put("_routing", routing);
-        request.getFirst().with("index").put("_parent", routing);
+        request.getFirst().with("index").put(Fields.ROUTING, routing);
+        request.getFirst().with("index").put(Fields.PARENT, routing);
         return request;
     }
 
@@ -533,9 +533,9 @@ public class IndexHelper {
     public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");
-        index.put(TYPE, type);
-        index.put(ID, id);
-        index.put(INDEX, getIndexName());
+        index.put(Fields.TYPE, type);
+        index.put(Fields.ID, id);
+        index.put(Fields.INDEX, getIndexName());
         return Pair.of(actionLine, null);
     }
 
@@ -544,7 +544,7 @@ public class IndexHelper {
     }
     public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id, String routing) {
         Pair<ObjectNode, ObjectNode> request = deleteRequest(type, id);
-        request.getFirst().with("delete").put("_routing", routing);
+        request.getFirst().with("delete").put(Fields.ROUTING, routing);
         return request;
     }
 
@@ -700,9 +700,9 @@ public class IndexHelper {
 
     public Consumer<ObjectNode> indexLogger(Logger logger, Supplier<String> prefix) {
         return jsonNode -> {
-            String index = jsonNode.get(INDEX).textValue();
-            String type = jsonNode.get(TYPE).textValue();
-            String id = jsonNode.get(ID).textValue();
+            String index = jsonNode.get(Fields.INDEX).textValue();
+            String type = jsonNode.get(Fields.TYPE).textValue();
+            String id = jsonNode.get(Fields.ID).textValue();
             Integer version = jsonNode.hasNonNull("_version") ? jsonNode.get("_version").intValue() : null;
             logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
@@ -718,9 +718,9 @@ public class IndexHelper {
     public Consumer<ObjectNode> deleteLogger(Logger logger, Supplier<String> prefix) {
         return jsonNode -> {
             boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
-            String index = jsonNode.get(INDEX).textValue();
-            String type = jsonNode.get(TYPE).textValue();
-            String id = jsonNode.get(ID).textValue();
+            String index = jsonNode.get(Fields.INDEX).textValue();
+            String type = jsonNode.get(Fields.TYPE).textValue();
+            String id = jsonNode.get(Fields.ID).textValue();
             int version = jsonNode.get("_version").intValue();
             if (found) {
                 logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
@@ -774,17 +774,17 @@ public class IndexHelper {
                 ObjectNode on = (ObjectNode) n;
                 if (on.has("delete")) {
                     ObjectNode delete = on.with("delete");
-                    index = delete.get(INDEX).textValue();
-                    type = delete.get(TYPE).textValue();
-                    String id = delete.get(ID).textValue();
+                    index = delete.get(Fields.INDEX).textValue();
+                    type = delete.get(Fields.TYPE).textValue();
+                    String id = delete.get(Fields.ID).textValue();
                     deleted.add(type+ ":" + id);
                     continue;
                 }
                 if (n.has("index")) {
                     ObjectNode indexResponse = on.with("index");
-                    index = indexResponse.get(INDEX).textValue();
-                    type = indexResponse.get(TYPE).textValue();
-                    String id = indexResponse.get(ID).textValue();
+                    index = indexResponse.get(Fields.INDEX).textValue();
+                    type = indexResponse.get(Fields.TYPE).textValue();
+                    String id = indexResponse.get(Fields.ID).textValue();
                     indexed.add(type + ":" + id);
                     continue;
                 }
@@ -813,7 +813,7 @@ public class IndexHelper {
         for (Pair<ObjectNode, ObjectNode> request: requests) {
             ObjectNode actionLine = request.getFirst();
             if (actionLine.has("index")) {
-                writeJson(actionLine.get("index").get(ID).textValue(), request.getSecond());
+                writeJson(actionLine.get("index").get(Fields.ID).textValue(), request.getSecond());
             }
         }
     }

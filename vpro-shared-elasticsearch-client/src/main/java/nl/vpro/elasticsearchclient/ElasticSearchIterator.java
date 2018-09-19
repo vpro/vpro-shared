@@ -100,7 +100,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     public static ElasticSearchIterator<JsonNode> sources(RestClient client) {
         return ElasticSearchIterator.<JsonNode>builder()
             .client(client)
-            .adapt(jn -> jn.get(SOURCE))
+            .adapt(jn -> jn.get(Fields.SOURCE))
             .build();
     }
 
