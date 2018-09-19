@@ -131,7 +131,7 @@ public class TailAdder<T> implements CountedIterator<T> {
                     } catch (NoSuchElementException nse) {
                         // ignore
                     } catch (Exception e) {
-                        log.warn(e.getMessage());
+                        log.warn(e.getClass().getName() + ": " + e.getMessage());
 
                     }
 
