@@ -35,14 +35,14 @@ public class HttpConnectionUtils {
                     return null;
                 }
             } else {
-                log.warn("Response code {} from {}", connection.getResponseCode(), u);
+                log.warn("For determining byte sise. Response code {} from {}", connection.getResponseCode(), u);
                 return null;
             }
         } catch (MalformedURLException mf) {
             log.debug(mf.getMessage());
             return null;
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.warn("For determining byte size of {}: {}", u, e.getMessage(), e);
             return null;
         }
     }
