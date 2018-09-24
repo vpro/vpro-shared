@@ -15,6 +15,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.io.Resource;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.ParseException;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
 
 /**
@@ -74,11 +77,21 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         if (logMap.isEmpty()) {
             logger.debug(String.valueOf(getMap()));
         } else {
+            ExpressionParser parser = new SpelExpressionParser();
+
             PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
                 placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
             for (Map.Entry<String, String> logEntry : logMap.entrySet()) {
-                String log = String.format(helper.replacePlaceholders(logEntry.getValue(), props), getMap().get(logEntry.getKey()));
-                logger.info(log);
+                String log = String.format(
+                    helper.replacePlaceholders(logEntry.getValue(), props), getMap().get(logEntry.getKey())
+                );
+                try {
+                    logger.info(parser.parseExpression(log));
+                } catch (ParseException spe) {
+                    logger.warn("For " + log + ":" + spe.getMessage());
+                    logger.info(log);
+
+                }
             }
         }
         if (afterProperties != null) {
