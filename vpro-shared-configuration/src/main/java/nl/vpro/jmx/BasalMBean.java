@@ -24,7 +24,7 @@ import nl.vpro.util.CommandExecutorImpl;
 @Slf4j
 public class BasalMBean {
 
-    @ManagedOperation(description = "Delete a file. E.g. a log-file (sometime they linger for years!). Useful if you don't have shell access")
+    @ManagedOperation(description = "Delete a file. E.g. a log-file (sometimes they linger for years!). Useful if you don't have shell access")
     @ManagedOperationParameters({
         @ManagedOperationParameter(name = "file", description = "Path to file or directory to remove"),
         @ManagedOperationParameter(name = "confirm", description = "For deleting a directory, type here 'DIRECTORY'"),
