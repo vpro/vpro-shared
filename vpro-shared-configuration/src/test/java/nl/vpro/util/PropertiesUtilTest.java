@@ -23,7 +23,7 @@ public class PropertiesUtilTest {
 
 
     @Test
-    public void testGetMap() throws Exception {
+    public void testGetMap() {
         PropertiesUtil properties = applicationContext.getBean(PropertiesUtil.class);
 
         assertThat(properties.getMap().get("b")).isEqualTo("B");
@@ -32,7 +32,7 @@ public class PropertiesUtilTest {
     }
 
     @Test
-    public void testSetExposeAsSystemProperty() throws Exception {
+    public void testSetExposeAsSystemProperty() {
 
 
         assertThat(System.getProperty("b")).isEqualTo("B");
