@@ -156,16 +156,16 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>5.0.6.RELEASE</spring.version>
-    <spring-security.version>5.0.5.RELEASE</spring-security.version>
+    <spring.version>5.1.0.RELEASE</spring.version>
+    <spring-security.version>5.1.0.RELEASE</spring-security.version>
 
-    <jackson2.version>2.9.6</jackson2.version>    <!-- equals to poms-parent -->
-    <jackson2.scala.version>2.9.5</jackson2.scala.version>
+    <jackson2.version>2.9.7</jackson2.version>    <!-- equals to poms-parent -->
+    <jackson2.scala.version>2.9.7</jackson2.scala.version>
     <junit.version>4.12</junit.version>
     <mockito.version>2.18.3</mockito.version>
     <assertj.version>3.9.1</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
-    <resteasy.version>3.5.1.Final</resteasy.version>
+    <resteasy.version>3.6.1.Final</resteasy.version>
     <slf4j.version>1.7.25</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.9.0</log4j2.version>
