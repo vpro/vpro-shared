@@ -68,12 +68,12 @@ public class ConfigurationServlet extends HttpServlet {
         return (Context)context.lookup("java:comp/env");
     }
 
-    public static Map<String, Object> getProperties(ServletContext context, HttpServletRequest request) throws IOException {
+    public static Map<String, Object> getProperties(ServletContext context, HttpServletRequest request) {
         return ((Function<HttpServletRequest, Map<String, Object>>)context.getAttribute(ATTRIBUTE_NAME)).apply(request);
     }
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         ServletConfig config = getServletConfig();
         String name = config.getInitParameter("name");
         if(name == null || name.length() == 0) {
