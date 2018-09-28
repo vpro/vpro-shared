@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * @author Michiel Meeuwissen
- * @since 2.1
+ * @since 2.2
  */
 public class IterableCharSequenceBridge extends IterableToStringBridge<CharSequence> {
 
