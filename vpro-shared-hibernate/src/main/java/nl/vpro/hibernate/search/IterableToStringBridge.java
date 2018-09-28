@@ -1,7 +1,5 @@
 package nl.vpro.hibernate.search;
 
-import java.util.Objects;
-
 import org.apache.lucene.document.Document;
 import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
@@ -10,7 +8,7 @@ import org.hibernate.search.bridge.LuceneOptions;
  * @author Michiel Meeuwissen
  * @since 1.10
  */
-public class IterableToStringBridge<T> implements FieldBridge {
+public abstract class IterableToStringBridge<T> implements FieldBridge {
 
     @Override
     public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
@@ -22,7 +20,5 @@ public class IterableToStringBridge<T> implements FieldBridge {
             }
         }
     }
-    protected String toString(T object) {
-        return Objects.toString(object, null);
-    }
+    protected abstract String toString(T object);
 }
