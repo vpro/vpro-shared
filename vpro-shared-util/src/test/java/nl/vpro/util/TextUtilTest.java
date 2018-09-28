@@ -194,7 +194,8 @@ public class TextUtilTest {
 
     @Test
     public void testSanitizeIframe() {
-        assertThat(Jsoup.clean("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>", Whitelist.none())).isEqualTo("&lt;a href=&quot;http://fistsoftime.bandcamp.com/album/i-will-survive&quot;&gt;I Will Survive by Fists Of Time&lt;/a&gt;");
+        assertThat(Jsoup.clean("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>", Whitelist.none()))
+            .isEqualTo("&lt;a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\"&gt;I Will Survive by Fists Of Time&lt;/a&gt;");
 
         assertThat(TextUtil.sanitize("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
         assertThat(TextUtil.sanitize("<iframe style=\"border: 0; width: 100%; height: 42px;\" src=\"https://bandcamp.com/EmbeddedPlayer/album=2972369232/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/\" seamless><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
