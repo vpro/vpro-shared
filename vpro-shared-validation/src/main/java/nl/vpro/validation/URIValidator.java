@@ -4,6 +4,9 @@
  */
 package nl.vpro.validation;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
@@ -12,6 +15,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 
+@Slf4j
 public class URIValidator implements ConstraintValidator<URI, String> {
 
     URI annotation;
@@ -30,16 +34,54 @@ public class URIValidator implements ConstraintValidator<URI, String> {
         try {
             java.net.URI uri = new java.net.URI(value);
             if (annotation.mustHaveScheme()) {
-                return StringUtils.isNotEmpty(uri.getScheme());
+                if (StringUtils.isEmpty(uri.getScheme())) {
+                    log.debug("Scheme empty");
+                    return false;
+                }
             }
             if (annotation.schemes().length > 0) {
-                return Arrays.asList(annotation.schemes()).contains(uri.getScheme());
+                if (!Arrays.asList(annotation.schemes()).contains(uri.getScheme())) {
+                    log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
+                    return false;
+                }
             }
             if (annotation.minHostParts() > 0) {
-                return uri.getHost() != null && uri.getHost().split("\\.").length >= annotation.minHostParts();
+                if (uri.getHost() == null || uri.getHost().split("\\.").length < annotation.minHostParts()) {
+                    log.debug("Too few host parts");
+                    return false;
+                }
             }
         } catch(URISyntaxException e) {
-            return false;
+            log.debug("{}:{}",  value, e.getMessage());
+            if (this.annotation.lenient()) {
+                try {
+                    java.net.URL url = new java.net.URL(value);
+                    if (annotation.mustHaveScheme()) {
+                        if (StringUtils.isEmpty(url.getProtocol())) {
+                            log.debug("Scheme empty");
+                            return false;
+                        }
+                    }
+                    if (annotation.schemes().length > 0) {
+                        if (! Arrays.asList(annotation.schemes()).contains(url.getProtocol())) {
+                            log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
+                            return false;
+                        }
+                    }
+                    if (annotation.minHostParts() > 0) {
+                        if (url.getHost() == null || url.getHost().split("\\.").length < annotation.minHostParts()) {
+                            log.debug("Too few host parts");
+                            return false;
+                        }
+                    }
+                    return true;
+                } catch (MalformedURLException e1) {
+                    log.debug("{}:{}",  value, e.getMessage());
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
 
         return true;
