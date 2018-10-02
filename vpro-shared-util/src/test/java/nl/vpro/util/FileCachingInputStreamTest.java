@@ -112,8 +112,8 @@ public class FileCachingInputStreamTest {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
+        final AtomicLong closed = new AtomicLong(0);
         boolean isInterrupted = false;
-
         try(
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -121,6 +121,9 @@ public class FileCachingInputStreamTest {
                 .batchConsumer((f, c) -> {
                     if (c.getCount() > 300) {
                         long i = interrupted.getAndIncrement();
+                        if (closed.get() > 0) {
+                            throw new RuntimeException("Called while closed!");
+                        }
                         if (! thisThread.isInterrupted())  {
                             log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
                             thisThread.interrupt();
@@ -148,6 +151,7 @@ public class FileCachingInputStreamTest {
             log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
         } finally {
             isInterrupted |= thisThread.isInterrupted();
+            closed.getAndIncrement();
             log.info("Finally: interrupted: {}: times: {} ", thisThread.isInterrupted(), interrupted.get());
 
         }
