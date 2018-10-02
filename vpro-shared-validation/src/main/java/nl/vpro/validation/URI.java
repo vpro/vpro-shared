@@ -30,4 +30,9 @@ public @interface URI {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    /**
+     * If the check is lenient, than also 'new URL' will be tried.
+     */
+    boolean lenient() default false;
 }
