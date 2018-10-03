@@ -5,10 +5,9 @@
 package nl.vpro.newrelic.agent;
 
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 import com.newrelic.metrics.publish.Agent;
 
@@ -16,8 +15,8 @@ import com.newrelic.metrics.publish.Agent;
  * @author Roelof Jan Koekoek
  * @since 0.22.0
  */
+@Slf4j
 public class NewRelicAgent extends Agent {
-    private static final Logger LOG = LoggerFactory.getLogger(NewRelicAgent.class);
 
     private final String env;
 

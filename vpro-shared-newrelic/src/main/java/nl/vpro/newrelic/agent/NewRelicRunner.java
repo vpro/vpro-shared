@@ -4,6 +4,8 @@
  */
 package nl.vpro.newrelic.agent;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -27,6 +29,8 @@ public class NewRelicRunner implements Runnable {
     private static final ExecutorService EXECUTOR =
         Executors.newSingleThreadExecutor(ThreadPools.createThreadFactory("NewRelicAgentRunner", true, Thread.MIN_PRIORITY));
 
+    @Getter
+    @Setter
     private List<NewRelicReporter> reporters;
 
     @PostConstruct
@@ -52,11 +56,4 @@ public class NewRelicRunner implements Runnable {
         }
     }
 
-    List<NewRelicReporter> getReporters() {
-        return reporters;
-    }
-
-    public void setReporters(List<NewRelicReporter> reporters) {
-        this.reporters = reporters;
-    }
 }
