@@ -30,6 +30,7 @@ public abstract class Windowed<T> {
     protected long  currentBucketTime = start.toEpochMilli();
     protected int   currentBucket = 0;
 
+
     /**
      * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
      * @param bucketDuration The duration of one bucket (or <code>null</code> if window specified).

@@ -1,12 +1,12 @@
 package nl.vpro.util;
 
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * Keeps track of an event rate in a current window of a given duration
@@ -19,17 +19,26 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 public class WindowedEventRate extends Windowed<AtomicLong> {
 
+    private final Consumer<WindowedEventRate> reporter;
+
     /**
      * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
      * @param bucketDuration The duration of one bucket (or <code>null</code> if window specified).
      * @param bucketCount    The number of buckets the total window time is to be divided in.
      */
-    @Builder
-    public WindowedEventRate(
+    @lombok.Builder
+    private WindowedEventRate(
         Duration window,
         Duration bucketDuration,
-        Integer bucketCount) {
+        Integer bucketCount,
+        Consumer<WindowedEventRate> reporter
+        ) {
         super(window, bucketDuration, bucketCount);
+        this.reporter = reporter;
+        if (reporter != null) {
+            ThreadPools.backgroundExecutor.scheduleAtFixedRate(
+                () -> reporter.accept(WindowedEventRate.this), 0, bucketDuration.toMillis(), TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
@@ -51,7 +60,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
     public WindowedEventRate(int unit, TimeUnit timeUnit, int bucketCount) {
         this(Duration.ofMillis(
             TimeUnit.MILLISECONDS.convert(unit, timeUnit) * bucketCount),
-            null, bucketCount);
+            null, bucketCount, null);
     }
     public WindowedEventRate(int unit, TimeUnit timeUnit) {
         this(unit, timeUnit, 100);

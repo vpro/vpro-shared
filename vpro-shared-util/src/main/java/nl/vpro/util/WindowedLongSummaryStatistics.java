@@ -3,7 +3,6 @@ package nl.vpro.util;
 import lombok.Builder;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.LongSummaryStatistics;
 
@@ -39,7 +38,6 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
     }
 
     public LongSummaryStatistics getCombined() {
-        Instant now = Instant.now();
         LongSummaryStatistics result = new LongSummaryStatistics();
         LongSummaryStatistics[] b = getBuckets();
         int j = 0;
