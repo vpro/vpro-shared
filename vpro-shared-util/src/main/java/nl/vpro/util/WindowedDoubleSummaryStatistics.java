@@ -31,16 +31,14 @@ public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStati
         return new DoubleSummaryStatistics();
     }
 
-    public void accept(Double... value) {
+    public void accept(double... value) {
         DoubleSummaryStatistics currentBucket = currentBucket();
-        Arrays.stream(value)
-            .forEach(currentBucket::accept);
+        Arrays.stream(value).forEach(currentBucket);
     }
 
     public DoubleSummaryStatistics getCombined() {
         DoubleSummaryStatistics result = new DoubleSummaryStatistics();
         DoubleSummaryStatistics[] b = getBuckets();
-        int j = 0;
         for (int i = b.length -1 ; i >= 0; i--) {
             result.combine(b[i]);
 

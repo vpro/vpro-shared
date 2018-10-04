@@ -31,16 +31,14 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
         return new LongSummaryStatistics();
     }
 
-    public void accept(Long... value) {
+    public void accept(long... value) {
         LongSummaryStatistics currentBucket = currentBucket();
-        Arrays.stream(value)
-            .forEach(currentBucket::accept);
+        Arrays.stream(value).forEach(currentBucket);
     }
 
     public LongSummaryStatistics getCombined() {
         LongSummaryStatistics result = new LongSummaryStatistics();
         LongSummaryStatistics[] b = getBuckets();
-        int j = 0;
         for (int i = b.length -1 ; i >= 0; i--) {
             result.combine(b[i]);
 
