@@ -4,16 +4,23 @@
  */
 package nl.vpro.newrelic.agent;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Roelof Jan Koekoek
  * @since 0.24.0
  */
 public class SimpleMetric implements Metric {
 
+    @Getter
     private final String name;
 
+    @Getter
     private final String unit;
 
+    @Getter
+    @Setter
     private float value;
 
     public SimpleMetric(String name, String unit) {
@@ -22,21 +29,7 @@ public class SimpleMetric implements Metric {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getUnit() {
-        return unit;
-    }
-
-    @Override
-    public float getValue() {
-        return value;
-    }
-
-    public void setValue(float value) {
-        this.value = value;
+    public String toString() {
+        return name + " = " + value + " " + unit;
     }
 }
