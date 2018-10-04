@@ -42,5 +42,10 @@ public class RateCounter {
         return ratio;
     }
 
+    @Override
+    public String toString() {
+        return getRatio(TimeUnit.SECONDS) + " /s";
+    }
+
 
 }
