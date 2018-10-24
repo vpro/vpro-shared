@@ -64,7 +64,7 @@ public class MBeans {
     public static String returnString(
         @Nullable final String key,
         @Nonnull final StringSupplierSimpleLogger description,
-        @Nonnull final  Duration wait,
+        @Nonnull final Duration wait,
         @Nonnull final Consumer<StringSupplierSimpleLogger> logger) {
         if (key != null) {
             if (isRunning(key)) {
