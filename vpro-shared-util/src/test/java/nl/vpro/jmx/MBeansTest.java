@@ -3,7 +3,6 @@ package nl.vpro.jmx;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.util.concurrent.Callable;
 
 import org.junit.Test;
 
@@ -31,17 +30,14 @@ public class MBeansTest {
         assertThat(MBeans.returnString(
             string,
             Duration.ofMillis(100),
-            new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    string.info("starting");
-                    Thread.sleep(50);
-                    string.info("first thing");
-                    Thread.sleep(200);
-                    string.info("second thing thing");
-                    return "ready";
+            () -> {
+                string.info("starting");
+                Thread.sleep(50);
+                string.info("first thing");
+                Thread.sleep(200);
+                string.info("second thing thing");
+                return "ready";
 
-                }
             }
         )).isEqualTo("first thing\n" +
             "...\n" +
@@ -59,17 +55,14 @@ public class MBeansTest {
         assertThat(MBeans.returnString(
             string,
             Duration.ofMillis(100),
-            new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    string.info("starting");
-                    Thread.sleep(50);
-                    string.info("first thing");
-                    Thread.sleep(200);
-                    string.info("second thing thing");
-                    return "ready";
+            () -> {
+                string.info("starting");
+                Thread.sleep(50);
+                string.info("first thing");
+                Thread.sleep(200);
+                string.info("second thing thing");
+                return "ready";
 
-                }
             }
         )).isEqualTo("starting\n" +
             "first thing\n" +

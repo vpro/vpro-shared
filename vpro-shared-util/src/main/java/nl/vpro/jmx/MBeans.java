@@ -59,7 +59,7 @@ public class MBeans {
      * @param description A supplier that before the job starts should describe the job. One can be created using e.g. {@link #multiLine(Logger, String, Object...)} or {@link #singleLine(Logger, String, Object...)}
      * @param wait How long to wait before returing with a message that the job is not yet finished, but still running.
      * @param logger A job returning a String when ready. This string will be returned.
-     * @return
+     * @return The string to be used as a return value for a JMX operation
      */
     public static String returnString(
         @Nullable final String key,
@@ -105,7 +105,7 @@ public class MBeans {
 
 
     /**
-     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
         @Nonnull StringSupplierSimpleLogger description,
@@ -115,7 +115,7 @@ public class MBeans {
     }
 
     /**
-     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
         @Nonnull StringSupplierSimpleLogger description,
@@ -155,7 +155,8 @@ public class MBeans {
     }
 
 
-      public static String returnString(
+    @Deprecated
+    public static String returnString(
         @Nonnull Supplier<String> description,
         @Nonnull Duration wait,
         @Nonnull Callable<String> job) {
@@ -163,6 +164,7 @@ public class MBeans {
     }
     /**
      * Defaulting version of {@link #returnString(StringSupplierSimpleLogger, Duration, Callable)} waiting for 5 seconds before time out.*/
+    @Deprecated
     public static String returnString(
         @Nonnull StringSupplierSimpleLogger description,
         @Nonnull Callable<String> job) {
@@ -170,28 +172,43 @@ public class MBeans {
     }
 
 
+    /**
+     * @param log Logger instance to log too
+     * @param message Initial value of the string
+     * @param args The arguments of the initial value
+     * @return a {@link StringBuilderSimpleLogger} representing a single line string (actually a {@link UpdatableString}
+     */
     public static StringSupplierSimpleLogger singleLine(Logger log, String message, Object... args) {
         return new UpdatableString(log, message, args);
     }
 
 
+    /**
+     * @param log Logger instance to log too
+     * @param message First line of the string (logged as info)
+     * @param args The arguments of the first line
+     * @return a {@link StringBuilderSimpleLogger} representing multiple lines actually a {@link StringBuilderSimpleLogger}
+     */
     public static StringSupplierSimpleLogger multiLine(Logger log, String message, Object... args) {
 
         StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
             .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
             .chain(Slf4jSimpleLogger.of(log));
-        string.info(message, args);
+        if (message != null) {
+            string.info(message, args);
+        }
         return string;
     }
 
-     public static StringSupplierSimpleLogger multiLine(Logger log) {
-        StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
-            .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
-            .chain(Slf4jSimpleLogger.of(log));
-        return string;
+    /**
+     * @param log Logger instance to log too
+     * @return a {@link StringBuilderSimpleLogger} representing multiple lines actually a {@link StringBuilderSimpleLogger}
+     */
+    public static StringSupplierSimpleLogger multiLine(Logger log) {
+        return multiLine(log, null);
     }
     /**
-     * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)}
+     * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}
      */
     public static class UpdatableString implements StringSupplierSimpleLogger {
         private CharSequence string;
