@@ -10,8 +10,9 @@
   <artifactId>vpro-shared-newrelic</artifactId>
   <dependencies>
     <dependency>
-      <groupId>ext.newrelic</groupId>
-      <artifactId>newrelic-plugin</artifactId>
+      <groupId>com.newrelic.plugin</groupId>
+      <artifactId>newrelic</artifactId>
+      <version>2.0</version>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
