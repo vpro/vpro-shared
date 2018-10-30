@@ -123,6 +123,11 @@ public class MBeans {
         return returnString(null, description, DEFAULT_DURATION, logger);
     }
 
+    public static String returnMultilineString(
+        @Nonnull Logger log,
+        @Nonnull Consumer<StringSupplierSimpleLogger> logger) {
+        return returnString(multiLine(log), logger);
+    }
 
 
 
