@@ -16,7 +16,7 @@ public class Strings {
     public static Stream<String> strings(String... strings) {
         return Arrays
             .stream(strings)
-            .map(s -> s.split("\\s*[,\\n]+\\s*"))
+            .map(s -> s.split("\\s*[,\\n]\\s*"))
             .flatMap(Arrays::stream)
             .map(Strings::fromFile)
             .flatMap(s -> s)
