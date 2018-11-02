@@ -65,11 +65,11 @@ public class XmlUtils {
     }
 
     /**
-     * @deprecated No explicit default time zone, makes parsing unreliable.
+     * Parses with zone {@link #DEFAULT_ZONE}
      */
-    @Deprecated
+
     public static Instant toInstant(XMLGregorianCalendar in) {
-        return toInstant(null, in);
+        return toInstant(DEFAULT_ZONE, in);
     }
 
     @Deprecated
