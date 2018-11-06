@@ -30,7 +30,7 @@ public class TransactionUUID {
 
     public static UUID get() {
         Holder uuid = threadLocal.get();
-        return uuid.isValid() ? uuid.uuid : null;
+        return uuid != null && uuid.isValid() ? uuid.uuid : null;
     }
 
     public static Optional<Holder> getHolder() {
