@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -24,16 +26,19 @@ public class TransactionUUID {
         }
     }
 
-    protected static ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
+    protected static final ThreadLocal<Holder> threadLocal = ThreadLocal.withInitial(() -> null);
 
     public static UUID get() {
-        UUID uuid = threadLocal.get();
+        Holder uuid = threadLocal.get();
+        return uuid.isValid() ? uuid.uuid : null;
+    }
 
-        return uuid;
+    public static Optional<Holder> getHolder() {
+        return Optional.ofNullable(threadLocal.get());
     }
 
     public static UUID set(UUID uuid) {
-        threadLocal.set(uuid);
+        threadLocal.set(new Holder(uuid));
         consume(uuid.toString());
         return uuid;
     }
@@ -63,5 +68,17 @@ public class TransactionUUID {
      * @since 1.8
      */
     public interface TransactionUUIDConsumer extends Consumer<String> {
+    }
+
+    @Getter
+    @Setter
+    public static class Holder {
+        final UUID uuid;
+        private boolean valid = true;
+
+
+        public Holder(UUID uuid) {
+            this.uuid = uuid;
+        }
     }
 }
