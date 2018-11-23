@@ -30,8 +30,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
+import nl.vpro.util.Version;
 
-import static nl.vpro.elasticsearchclient.Constants.*;
+import static nl.vpro.elasticsearchclient.Constants.Fields;
+import static nl.vpro.elasticsearchclient.Constants.HITS;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 
 /**
@@ -272,6 +274,21 @@ public class IndexHelper {
         }
     }
 
+    public String getVersionNumber() {
+
+        try {
+            Response response = client().performRequest(new Request("GET", ""));
+            JsonNode read = read(response);
+            return read.get("version").get("number").asText();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+    public Version<Integer> getVersion() {
+        return Version.parseIntegers(getVersionNumber());
+    }
+
 
     public ObjectNode search(ObjectNode request) {
         return search(request, new String[] {});
@@ -308,6 +325,8 @@ public class IndexHelper {
             throw new RuntimeException(e);
         }
     }
+
+
 
 
     HttpEntity entity(JsonNode node) {
