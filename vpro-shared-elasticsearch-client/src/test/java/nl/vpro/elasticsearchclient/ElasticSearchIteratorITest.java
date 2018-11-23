@@ -27,7 +27,7 @@ public class ElasticSearchIteratorITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9210, "http"))
+            new HttpHost("localhost", 9209, "http"))
             .build();
     }
 
@@ -71,21 +71,41 @@ public class ElasticSearchIteratorITest {
 
      @Test
     public void test15() {
+
+        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
+             .sources(client);) {
+            i.setJsonRequests(false);
+            ObjectNode search = i.prepareSearch("apimedia", "program", "group", "segment");
+
+            i.forEachRemaining((node) -> {
+                String string;
+                if (node.has("mid")) {
+                    string = node.get("mid").textValue();
+                } else {
+                    string = node.toString();
+                }
+                if (i.getCount() % 1000 == 0) {
+                    log.info("{}: {}", i.getCount(), string);
+
+                }
+            });
+        }
+    }
+
+    @Test
+    public void testmemberref() {
+
         ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
             .sources(client);
         i.setJsonRequests(false);
-        i.prepareSearch("apimedia", "program", "group", "segment");
-        i.forEachRemaining((node) -> {
-            String string;
-            if (node.has("mid")) {
-                string = node.get("mid").textValue();
-            } else {
-                string = node.toString();
-            }
-            if (i.getCount() % 1000 == 0) {
-                log.info("{}: {}", i.getCount(), string);
 
-            }
+        ObjectNode search = i.prepareSearch("apimedia-publish", "groupMemberRef", "episodeRef");
+        ObjectNode query = search.with("query");
+        QueryBuilder.mustTerm(query, "midRef", "18Jnl1100");
+
+
+        i.forEachRemaining((node) -> {
+            log.info("{}: {}", i.getCount(), node);
         });
     }
 

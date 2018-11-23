@@ -70,6 +70,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Setter
     private boolean jsonRequests = true;
 
+
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this(client, adapt, Duration.ofMinutes(1), true);
     }
@@ -147,6 +148,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     Request post = new Request("POST", builder.toString());
                     post.setEntity(entity);
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                    //post.addParameter("search_type", "scan");
                     Response res = client.performRequest(post);
                     response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                 } catch (IOException ioe) {
@@ -182,11 +184,14 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
                         } else {
                             post = new Request("POST", "/_search/scroll");
-                            post.addParameter("scroll", scrollContext.toMinutes() + "m");
+                            post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                             post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                         }
                         Response res = client.performRequest(post);
-                        response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
+                        response = Jackson2Mapper.getLenientInstance()
+                            .readerFor(JsonNode.class)
+                            .readTree(res.getEntity().getContent()
+                            );
                         log.debug("New scroll");
                         hits = response.get(HITS);
                         i = 0;
@@ -246,6 +251,27 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             return Optional.of(start.plus(estimatedTotalDuration));
         } else {
             return Optional.empty();
+        }
+    }
+
+
+    @Override
+    public void close()  {
+
+        if (scrollId != null) {
+            try {
+                Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
+                Response res = client.performRequest(delete);
+                log.info("Deleted {}", res);
+            } catch (ResponseException re) {
+                if (re.getResponse().getStatusLine().getStatusCode() == 404) {
+                    log.debug("Not found to delete");
+                } else {
+                    log.warn(re.getMessage());
+                }
+            } catch (Exception e) {
+                log.warn(e.getMessage());
+            }
         }
     }
 
