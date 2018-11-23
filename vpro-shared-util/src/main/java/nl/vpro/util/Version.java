@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Michiel Meeuwissen
  * @since 2.2
  */
+@SuppressWarnings("unchecked")
 public class Version<T extends Comparable<T>> implements Comparable<Version<T>> {
     final T[] parts;
 
