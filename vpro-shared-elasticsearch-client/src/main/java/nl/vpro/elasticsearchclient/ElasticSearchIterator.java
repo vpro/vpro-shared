@@ -341,5 +341,8 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         public Builder<T> autoEsVersion() {
             return _autoEsVersion(true);
         }
+        public Builder<T> elasticsearch(int i) {
+            return esVersion(Version.of(i));
+        }
     }
 }

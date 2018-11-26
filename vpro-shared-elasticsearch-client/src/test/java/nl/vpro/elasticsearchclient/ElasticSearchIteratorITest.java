@@ -12,11 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -135,7 +132,7 @@ public class ElasticSearchIteratorITest {
     public void testAll() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
             .sourcesBuilder(client)
-            .autoEsVersion()
+            .jsonRequests(false)
             .build()
             ;) {
             i.setJsonRequests(false);
@@ -157,9 +154,8 @@ public class ElasticSearchIteratorITest {
 
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
             .sourcesBuilder(client)
-            .esVersion(Version.of(5))
+            .jsonRequests(false)
             .build()) {
-            i.setJsonRequests(false);
 
             ObjectNode search = i.prepareSearch("apimedia-publish", "groupMemberRef", "episodeRef");
             ObjectNode query = search.with("query");
