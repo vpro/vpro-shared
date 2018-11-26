@@ -1,15 +1,14 @@
 package nl.vpro.util.rs.error;
 
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Date: 2-5-12
- * Time: 14:12
- *
  * @author Ernst Bunders
  */
 @XmlRootElement
@@ -23,20 +22,15 @@ public enum DataError {
     ILLEGALSTATE(5, "The data contains a field value that should not be there");
 
     @XmlAttribute(name = "code")
+    @Getter
     private int errorCode;
     @XmlAttribute(name = "description")
+    @Getter
     private String description;
 
-    private DataError(int errorCode, String description) {
+    DataError(int errorCode, String description) {
         this.errorCode = errorCode;
         this.description = description;
     }
 
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }
