@@ -123,14 +123,18 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
 
     public static ElasticSearchIterator<JsonNode> of(RestClient client) {
+        return ElasticSearchIterator.builderOf(client).build();
+    }
+
+
+    public static ElasticSearchIterator.Builder<JsonNode> builderOf(RestClient client) {
         return ElasticSearchIterator.<JsonNode>builder()
             .client(client)
-            .adapt(jn -> jn)
-            .build();
+            .adapt(jn -> jn);
     }
 
     public static ElasticSearchIterator<JsonNode> sources(RestClient client) {
-        return ElasticSearchIterator.<JsonNode>sourcesBuilder(client)
+        return ElasticSearchIterator.sourcesBuilder(client)
             .build();
     }
 
