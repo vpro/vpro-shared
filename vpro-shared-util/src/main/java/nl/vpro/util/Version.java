@@ -23,6 +23,14 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
         return new Version<>(integers);
     }
 
+    public static Version<Integer> of(int... parts) {
+        Integer[] integers = new Integer[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            integers[i] = parts[i];
+        }
+        return new Version<>(integers);
+    }
+
     public boolean isAfter(T... parts) {
         return isAfter(new Version<T>(parts));
     }
