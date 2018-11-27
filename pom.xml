@@ -192,6 +192,7 @@
     -->
     <swagger.version>1.5.20</swagger.version>
     <lombok.version>1.18.4</lombok.version>
+    <vpro.shared.version>${project.version}</vpro.shared.version>
   </properties>
 
   <dependencyManagement>
@@ -209,12 +210,12 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-camel</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-configuration</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <!--
       <dependency>
@@ -232,57 +233,57 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson2</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-resteasy</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-services</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-transfer</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-util</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-web</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-ws</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shred.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-xml</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-logging</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-couchdb-util</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -588,7 +589,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-test</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
