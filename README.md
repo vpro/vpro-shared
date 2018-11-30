@@ -17,6 +17,8 @@ places in VPRO artifacts.
 - [vpro-shared-eleasticsearch5](vpro-shared-elasticsearch5): Related to elasticsearch5
 - [vpro-shared-eleasticsearch-client](vpro-shared-elasticsearch-client): Related to elasticsearch
 - [vpro-shared-couchdb-util](vpro-shared-couchdb-util): Lightweight and streaming couchdb clients
+- [vpro-shared-swagger](vpro-shared-swagger): War overlay containing swagger frontend
+
 - ..
 
 
@@ -25,6 +27,11 @@ places in VPRO artifacts.
 SNAPSHOT builds can be found at https://oss.sonatype.org/content/repositories/snapshots/nl/vpro/shared/
 
 Release builds will be provided via [maven central](https://search.maven.org/search?q=g:nl.vpro.shared).
+
+## Checkout
+
+Check this out with git clone --recurse-submodules. It is essential for a correct build of vpro-shared-swagger.war
+
 
 ## TODO
 
