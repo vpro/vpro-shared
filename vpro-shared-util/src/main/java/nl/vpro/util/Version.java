@@ -14,21 +14,17 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
         this.parts = parts;
     }
 
-    public static Version<Integer> parseIntegers(String string) {
-        String[] split = string.split("\\.");
-        Integer[] integers = new Integer[split.length];
-        for (int i = 0; i < split.length; i++) {
-            integers[i] = Integer.parseInt(split[i].trim());
-        }
-        return new Version<>(integers);
+    public static IntegerVersion parseIntegers(String string) {
+        return new IntegerVersion(string);
     }
 
-    public static Version<Integer> of(int... parts) {
+
+    public static IntegerVersion of(int... parts) {
         Integer[] integers = new Integer[parts.length];
         for (int i = 0; i < parts.length; i++) {
             integers[i] = parts[i];
         }
-        return new Version<>(integers);
+        return new IntegerVersion(integers);
     }
 
     public boolean isAfter(T... parts) {
