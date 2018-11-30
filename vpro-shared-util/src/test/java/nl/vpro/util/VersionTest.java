@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 2.2
  */
 public class VersionTest {
 
@@ -21,6 +21,13 @@ public class VersionTest {
         assertThat(parseIntegers("2.2.3").isAfter(1, 2, 5, 4)).isTrue();
         assertThat(parseIntegers("2.2.3").isNotBefore(2, 2, 3)).isTrue();
         assertThat(parseIntegers("2.2.3").isNotBefore(2, 2, 4)).isFalse();
+
+    }
+    @Test
+    public void floatValue() {
+
+        assertThat(parseIntegers("2.2.3").toFloat()).isEqualTo(2.002003f);
+
 
 
 
