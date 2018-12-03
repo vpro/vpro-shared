@@ -8,13 +8,18 @@ import junit.framework.ComparisonFailure;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.AbstractObjectAssert;
@@ -142,6 +147,30 @@ public class JAXBTestUtil {
         String xml = null;
         try {
             xml = marshal(input);
+            similar(xml, expected);
+            Class<? extends T> clazz = (Class<? extends T>) input.getClass();
+            T result = unmarshal(xml, clazz);
+            /// make sure unmarshalling worked too, by marshalling the result again.
+            String xmlAfter = marshal(result);
+            similar(xmlAfter, xml);
+            return result;
+        } catch (SAXParseException spe) {
+            throw new RuntimeException(
+                "input: " + xml + "\n" +
+                "expected: " + expected, spe);
+        }
+    }
+
+    public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, String expected) throws IOException, SAXException {
+        String xml = null;
+        try {
+            xml = marshal(input);
+            SchemaFactory schemaFactory = SchemaFactory
+                .newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = schemaFactory.newSchema(xsd);
+            Validator validator = schema.newValidator();
+            validator.validate( new StreamSource(new StringReader(xml)));
+
             similar(xml, expected);
             Class<? extends T> clazz = (Class<? extends T>) input.getClass();
             T result = unmarshal(xml, clazz);
