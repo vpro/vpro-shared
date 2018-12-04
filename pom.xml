@@ -165,7 +165,7 @@
     <mockito.version>2.23.4</mockito.version>
     <assertj.version>3.11.1</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
-    <resteasy.version>4.0.0.Beta5</resteasy.version>
+    <resteasy.version>3.6.2.Final</resteasy.version>
     <slf4j.version>1.7.25</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.11.1</log4j2.version>
@@ -177,8 +177,8 @@
     <httpcomponents.version>4.5.6</httpcomponents.version>
     <httpcomponentscore.version>4.4.10</httpcomponentscore.version>
 
-    <hibernate.version>5.3.6.Final</hibernate.version>
-    <hibernate.search.version>5.10.3.Final</hibernate.search.version>
+    <hibernate.version>5.3.7.Final</hibernate.version>
+    <hibernate.search.version>5.10.5.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
     <!--
@@ -190,7 +190,7 @@
     <!--
     <swagger.version>2.0.0-rc2</swagger.version>
     -->
-    <swagger.version>1.5.20</swagger.version>
+    <swagger.version>1.5.21</swagger.version>
     <lombok.version>1.18.4</lombok.version>
     <vpro.shared.version>${project.version}</vpro.shared.version>
   </properties>
@@ -483,7 +483,7 @@
       <dependency>
         <groupId>uk.org.lidalia</groupId>
         <artifactId>lidalia-slf4j-ext</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.0-jdk6</version>
       </dependency>
       <dependency>
         <groupId>ext.newrelic</groupId>
