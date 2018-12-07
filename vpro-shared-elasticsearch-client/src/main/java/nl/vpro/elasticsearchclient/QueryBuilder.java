@@ -17,11 +17,16 @@ public class QueryBuilder {
     }
 
     public static void asc(ObjectNode request, String field) {
-        sort(request, field, "ASC");
+        sort(request, field, "asc");
     }
 
     public static void desc(ObjectNode request, String field) {
-        sort(request, field, "ASC");
+        sort(request, field, "desc");
+    }
+
+    public static void docOrder(ObjectNode request) {
+        ArrayNode sort = request.withArray("sort");
+        sort.add("_doc");
     }
 
     public static ObjectNode must(ObjectNode query) {
