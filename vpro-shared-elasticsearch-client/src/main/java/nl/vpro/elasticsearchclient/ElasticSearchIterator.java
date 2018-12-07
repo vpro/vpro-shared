@@ -17,7 +17,6 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -148,8 +147,6 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         request = Jackson2Mapper.getInstance().createObjectNode();
         this.indices = indices == null ? Collections.emptyList() : indices;
         this.types = types == null ? Collections.emptyList() : types;
-        ArrayNode sort = request.withArray("sort");
-        sort.add("_doc");
         return request;
     }
 
@@ -173,6 +170,12 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     throw new IllegalStateException("prepareSearch not called");
                 }
                 try {
+                    ArrayNode sort = request.withArray("sort");
+                    if (sort.isEmpty(null)) {
+                        log.debug("No explicit sort given, sorting on _doc!");
+                        QueryBuilder.docOrder(request);
+                    }
+
                     HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
                     StringBuilder builder = new StringBuilder();
                     if (! indices.isEmpty()) {
