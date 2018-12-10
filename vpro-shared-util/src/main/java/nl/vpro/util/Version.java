@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -15,7 +17,8 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     public static IntegerVersion parseIntegers(String string) {
-        return new IntegerVersion(string);
+        String[] parts = string.split("-", 2);
+        return new IntegerVersion(parts[0]);
     }
 
 
@@ -64,8 +67,24 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
             }
             i++;
         }
-
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Version<?> version = (Version<?>) o;
+
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        return Arrays.equals(parts, version.parts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(parts);
+    }
+
     @Override
     public String toString() {
         return StringUtils.join(parts, ".");
