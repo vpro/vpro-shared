@@ -368,8 +368,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @Override
     public synchronized void setConnectTimeout(String connectTimeout) {
-        this.connectTimeout = TimeUtils.parseDuration(connectTimeout).orElse(null);
-        invalidate();
+        Duration parsed = TimeUtils.parseDuration(connectTimeout).orElse(null);
+        if (! Objects.equals(parsed, this.connectTimeout)) {
+            this.connectTimeout = parsed;
+            invalidate();
+        }
     }
 
     @Override
@@ -405,8 +408,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setAccept(MediaType mediaType) {
-        this.accept = mediaType;
-        this.invalidate();
+        if (this.accept != mediaType) {
+            this.accept = mediaType;
+            this.invalidate();
+        }
     }
 
 
@@ -415,22 +420,28 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setContentType(MediaType mediaType) {
-        this.contentType = mediaType;
-        this.invalidate();
+        if (this.contentType != mediaType) {
+            this.contentType = mediaType;
+            this.invalidate();
+        }
     }
 
     public void setTrustAll(boolean b) {
-        this.trustAll = b;
-        if (trustAll) {
-            XTrustProvider.install();
+        if (this.trustAll != b) {
+            this.trustAll = b;
+            if (trustAll) {
+                XTrustProvider.install();
+            }
+            invalidate();
         }
-        invalidate();
     }
 
 
     public void setObjectMapper(Jackson2Mapper objectMapper) {
-        this.objectMapper = objectMapper;
-        invalidate();
+        if (! Objects.equals(this.objectMapper, objectMapper)) {
+            this.objectMapper = objectMapper;
+            invalidate();
+        }
     }
 
     private void registerBean() {
@@ -649,9 +660,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
-        this.connectionInPoolTTL = connectionInPoolTTL;
-        clientHttpEngine = null;
-        invalidate();
+        if (! Objects.equals(this.connectionInPoolTTL, connectionInPoolTTL)) {
+            this.connectionInPoolTTL = connectionInPoolTTL;
+            clientHttpEngine = null;
+            invalidate();
+        }
     }
 
     @Override
@@ -699,8 +712,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setWarnThreshold(Duration warnThreshold) {
-        this.warnThreshold = warnThreshold;
-        invalidate();
+        if (! Objects.equals(warnThreshold, this.warnThreshold)) {
+            this.warnThreshold = warnThreshold;
+            invalidate();
+        }
     }
 
     public List<Locale> getAcceptableLanguages() {
@@ -708,8 +723,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     public void setAcceptableLanguages(List<Locale> acceptableLanguages) {
-        this.acceptableLanguages = acceptableLanguages;
-        invalidate();
+        if (! Objects.equals(acceptableLanguages, this.acceptableLanguages)) {
+            this.acceptableLanguages = acceptableLanguages;
+            invalidate();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -901,8 +918,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
     public void setBrowserCache(BrowserCache browserCache) {
-        this.resteasyBrowserCache = browserCache;
-        invalidate();
+        if (! Objects.equals(browserCache, this.resteasyBrowserCache)) {
+            this.resteasyBrowserCache = browserCache;
+            invalidate();
+        }
     }
 
 
