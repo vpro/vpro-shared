@@ -198,7 +198,9 @@ public class FileCachingInputStream extends InputStream {
 
             if (openOptions == null) {
                 openOptions = new ArrayList<>();
-                openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
+                if (deleteTempFile == null || deleteTempFile) {
+                    openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
+                }
             }
             this.file = new BufferedInputStream(
                 Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
