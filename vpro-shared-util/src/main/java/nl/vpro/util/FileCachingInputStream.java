@@ -110,6 +110,9 @@ public class FileCachingInputStream extends InputStream {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
+        if (! this.deleteTempFile && initialBuffer <= 0) {
+            log.warn("Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.");
+        }
 
         try {
             if (initialBuffer > 0) {
