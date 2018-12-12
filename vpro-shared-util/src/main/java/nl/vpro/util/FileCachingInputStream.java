@@ -14,6 +14,9 @@ import java.util.function.BiConsumer;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+
+import nl.vpro.logging.Slf4jHelper;
 
 /**
  * <p>When wrapping this around your inputstream, it will be read as fast a possible, but you can
@@ -106,13 +109,16 @@ public class FileCachingInputStream extends InputStream {
         if (logger != null) {
             this.log = logger;
         }
+        this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
+        if (! this.deleteTempFile) {
+            Slf4jHelper.log(log, initialBuffer == null ? Level.WARN : Level.DEBUG,
+                "Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.", initialBuffer == null ? DEFAULT_FILE_BUFFER_SIZE : initialBuffer);
+        }
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
-        this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
-        if (! this.deleteTempFile && initialBuffer <= 0) {
-            log.warn("Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.");
-        }
+
+
 
         try {
             if (initialBuffer > 0) {
