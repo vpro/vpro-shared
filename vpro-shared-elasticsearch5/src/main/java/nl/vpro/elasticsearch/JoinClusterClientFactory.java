@@ -26,6 +26,7 @@ import org.slf4j.helpers.NOPLogger;
  * @since 0.23
  */
 @Slf4j
+@Deprecated
 public class JoinClusterClientFactory implements ESClientFactory {
 
     private Node node;

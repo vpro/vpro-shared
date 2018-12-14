@@ -4,11 +4,18 @@
  */
 package nl.vpro.util;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.net.URI;
 
 /**
  * @author rico
  */
+@Getter
+@Setter
+@EqualsAndHashCode
 public class UrlProvider {
 
     private String scheme = "http";
@@ -30,26 +37,6 @@ public class UrlProvider {
     public UrlProvider(String host, int port) {
         this.host = host;
         this.port = port;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    @Deprecated
-    public String getUri() {
-        return path;
-    }
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public void setUrl(String url) {

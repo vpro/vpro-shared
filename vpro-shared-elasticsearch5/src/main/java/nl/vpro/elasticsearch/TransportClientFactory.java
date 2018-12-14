@@ -1,5 +1,6 @@
 package nl.vpro.elasticsearch;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
@@ -25,13 +26,17 @@ import nl.vpro.util.UrlProvider;
 @Slf4j
 public class TransportClientFactory implements  ESClientFactory {
 
+    @Getter
     private List<UrlProvider> transportAddresses = Collections.emptyList();
 
 
+    @Getter
     private String clusterName;
 
+    @Getter
     private boolean implicitHttpToJavaPort = false;
 
+    @Getter
     private boolean ignoreClusterName = false;
 
     private Client client = null;
@@ -89,30 +94,46 @@ public class TransportClientFactory implements  ESClientFactory {
     }
 
     public void setElasticSearchHosts(String string ) {
-        reset();
+
         this.transportAddresses = Arrays.stream(string.split("\\s*,\\s*"))
             .map(s -> {
                 String[] split = s.split(":", 2);
-                return new UrlProvider(split[0], split.length < 2 ? 9300 : Integer.parseInt(split[1]));
+                return new UrlProvider(split[0], split.length < 2 ? -1: Integer.parseInt(split[1]));
             }).collect(Collectors.toList());
+        int port = -1;
+        for (UrlProvider u : this.transportAddresses) {
+            if (u.getPort() > -1) {
+                port = u.getPort();
+            }
+        }
+        if (port == -1) {
+            port = 9300;
+        }
+        for (UrlProvider u : this.transportAddresses) {
+            if (u.getPort() == -1) {
+                u.setPort(port);
+            }
+        }
+        reset();
 
     }
 
 
     public void setTransportAddresses(UrlProvider... transportAddresses) {
-        reset();
         this.transportAddresses = Arrays.asList(transportAddresses);
+        reset();
     }
 
 
     public void setClusterName(String clusterName) {
-        reset();
         this.clusterName = clusterName;
+        reset();
     }
 
     public void setImplicitHttpToJavaPort(boolean implicitHttpToJavaPort) {
-        reset();
+
         this.implicitHttpToJavaPort = implicitHttpToJavaPort;
+        reset();
     }
 
     public void setIgnoreClusterName(boolean ignoreClusterName) {
