@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -82,7 +83,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             if (status == 404) {
                 try {
                     Object entity = wea.getResponse().getEntity();
-                    if (entity != null && entity.getClass().getName().equals("nl.vpro.domain.api.Error")) {
+                    if (entity != null && isRecognizedErrorClass(entity.getClass())) {
                         error = false;
                     } else {
                         error = true;
@@ -118,7 +119,10 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             l.info("For {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
-                args == null ? "(no args)" : Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
+                args == null ? "(no args)" :
+                    Arrays.stream(args)
+                        .map(ErrorAspect.this::valueToString)
+                        .collect(joining("\n")),
                 mes);
         }
         if (t instanceof RuntimeException) {
@@ -135,6 +139,10 @@ public class ErrorAspect<T, E> implements InvocationHandler {
 
     Logger getLogger(int status) {
         return LoggerFactory.getLogger(log.getName() + "." + (status / 100) + "." + String.format("%02d", (status % 100)));
+    }
+
+    protected static boolean isRecognizedErrorClass(Class<?> clazz) {
+        return clazz.getPackage().getName().startsWith("nl.vpro") && clazz.getSimpleName().equals("Error");
     }
 
     protected static final String[] HEADERS = new String[] {
@@ -156,7 +164,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             if (errorClass != null) {
                 try {
                     error = response.readEntity(errorClass);
-                    mes.append(error.toString());
+                    mes.append(getMessage(error));
 
                 } catch (Exception e) {
                     // ignore and marshal to string
@@ -195,6 +203,15 @@ public class ErrorAspect<T, E> implements InvocationHandler {
         return new Message(error, mes.toString());
     }
 
+    protected String getMessage(Object o) {
+        try {
+            Method getMessage = o.getClass().getMethod("getMessage");
+            return Objects.toString(getMessage.invoke(o));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            return o.toString();
+        }
+    }
+
 
     protected String valueToString(Object o) {
         if (o instanceof String) {
@@ -205,7 +222,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             } catch (JsonProcessingException ignored) {
 
             }
-            return o.toString();
+            return Objects.toString(o);
         }
     }
 
