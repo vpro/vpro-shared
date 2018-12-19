@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
 
-import java.io.Closeable;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
