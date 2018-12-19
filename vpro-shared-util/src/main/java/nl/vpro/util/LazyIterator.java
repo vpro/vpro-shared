@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 
+import java.io.Closeable;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
@@ -9,7 +10,7 @@ import java.util.function.Supplier;
  * of hasNext() or next().
  * @author Michiel Meeuwissen
  */
-public class LazyIterator<T> implements Iterator<T> {
+public class LazyIterator<T> implements CloseableIterator<T> {
 
 	private final Supplier<Iterator<T>> supplier;
 	private Iterator<T> iterator;
@@ -38,5 +39,13 @@ public class LazyIterator<T> implements Iterator<T> {
 			iterator = supplier.get();
 		}
 		return iterator;
+	}
+
+	@Override
+	public void close() throws Exception {
+		if (iterator != null && iterator instanceof AutoCloseable) {
+			((AutoCloseable) iterator).close();
+		}
+
 	}
 }
