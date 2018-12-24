@@ -29,7 +29,6 @@ public class TransportClientFactory implements  ESClientFactory {
     @Getter
     private List<UrlProvider> transportAddresses = Collections.emptyList();
 
-
     @Getter
     private String clusterName;
 
@@ -50,14 +49,15 @@ public class TransportClientFactory implements  ESClientFactory {
         if (client == null) {
             synchronized (this) {
                 if (client == null) {
-                    log.info("Constructing client on behalf of {}", logName);
                     try {
                         client = constructClient(logName);
+                        log.info("Constructed client {} ({} {}) (on behalf of {}", client, transportAddresses, clusterName, logName);
+
                     } catch (UnknownHostException e) {
                         throw new RuntimeException(e);
                     }
                 } else {
-                    log.info("Construction client on behalf of {} not needed (already happend in other thread)", logName);
+                    log.debug("Construction client on behalf of {} not needed (already happend in other thread)", logName);
                 }
             }
         }
@@ -88,30 +88,34 @@ public class TransportClientFactory implements  ESClientFactory {
             }
             transportClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(urlProvider.getHost()), port));
         }
-        log.info("Build es client {} {} ({})", logName, transportAddresses, clusterName);
+        log.debug("Build es client {} {} ({})", logName, transportAddresses, clusterName);
 
         return transportClient;
     }
 
     public void setElasticSearchHosts(String string ) {
 
-        this.transportAddresses = Arrays.stream(string.split("\\s*,\\s*"))
+        int index = string.lastIndexOf(":");
+        final String hosts;
+        final int defaultPort;
+        if (index > 0) {
+            hosts = string.substring(0, index);
+            defaultPort = Integer.parseInt(string.substring(index + 1, string.length()));
+        } else {
+            hosts = string;
+            defaultPort = 9300;
+        }
+
+
+        this.transportAddresses = Arrays.stream(hosts.split("\\s*,\\s*"))
             .map(s -> {
                 String[] split = s.split(":", 2);
                 return new UrlProvider(split[0], split.length < 2 ? -1: Integer.parseInt(split[1]));
             }).collect(Collectors.toList());
-        int port = -1;
-        for (UrlProvider u : this.transportAddresses) {
-            if (u.getPort() > -1) {
-                port = u.getPort();
-            }
-        }
-        if (port == -1) {
-            port = 9300;
-        }
+
         for (UrlProvider u : this.transportAddresses) {
             if (u.getPort() == -1) {
-                u.setPort(port);
+                u.setPort(defaultPort);
             }
         }
         reset();
