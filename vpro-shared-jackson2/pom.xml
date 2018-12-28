@@ -60,5 +60,10 @@
       <artifactId>natty</artifactId>
       <version>0.13</version>
     </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>
