@@ -77,6 +77,7 @@
             <!-- javadoc met java 8 is anders een absolute ramp, zeker met de oude zooi in dit project -->
             <doclint>none</doclint>
             <failOnError>false</failOnError>
+            <notimestamp>true</notimestamp>
           </configuration>
         </plugin>
         <plugin>
@@ -160,7 +161,11 @@
     <spring-security.version>5.1.2.RELEASE</spring-security.version>
 
     <jackson2.version>2.9.8</jackson2.version>    <!-- equals to poms-parent -->
+<<<<<<< HEAD
     <jackson2.scala.version>2.9.7</jackson2.scala.version>
+=======
+    <jackson2.scala.version>2.9.8</jackson2.scala.version>
+>>>>>>> origin/master
     <junit.version>4.12</junit.version>
     <mockito.version>2.23.4</mockito.version>
     <assertj.version>3.11.1</assertj.version>
