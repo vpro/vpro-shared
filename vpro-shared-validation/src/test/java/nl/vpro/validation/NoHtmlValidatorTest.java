@@ -18,22 +18,22 @@ public class NoHtmlValidatorTest {
     private NoHtmlValidator validator = new NoHtmlValidator();
 
     @Test
-    public void testIsValid() throws Exception {
+    public void testIsValid() {
         assertTrue(validator.isValid("some text", null));
     }
 
     @Test
-    public void testIsValidShouldFailOnTags() throws Exception {
+    public void testIsValidShouldFailOnTags() {
         assertFalse(validator.isValid("some <text>", null));
     }
 
     @Test
-    public void testIsValidShouldFailOnEntityNames() throws Exception {
+    public void testIsValidShouldFailOnEntityNames() {
         assertFalse(validator.isValid("some &amp; text", null));
     }
 
     @Test
-    public void testIsValidShouldFailOnEntityNumbers() throws Exception {
+    public void testIsValidShouldFailOnEntityNumbers() {
         assertFalse(validator.isValid("some&#20;text", null));
     }
 }

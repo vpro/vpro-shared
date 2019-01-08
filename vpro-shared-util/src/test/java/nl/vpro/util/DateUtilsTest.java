@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DateUtilsTest {
 
     @Test
-    public void testLowest() throws Exception {
+    public void testLowest() {
         assertThat(DateUtils.lowest(null,null)).isNull();
         assertThat(DateUtils.lowest(new Date(0),null)).isEqualTo(new Date(0));
         assertThat(DateUtils.lowest(new Date(0),new Date(1))).isEqualTo(new Date(0));
@@ -26,7 +26,7 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void testHighest() throws Exception {
+    public void testHighest() {
         assertThat(DateUtils.highest(null,null)).isNull();
         assertThat(DateUtils.highest(new Date(0),null)).isEqualTo(new Date(0));
         assertThat(DateUtils.highest(new Date(0),new Date(1))).isEqualTo(new Date(1));

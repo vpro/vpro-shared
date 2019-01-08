@@ -104,7 +104,7 @@ public final class XTrustProvider extends java.security.Provider {
         }
 
         @Override
-        protected void engineInit(KeyStore keystore) throws KeyStoreException {
+        protected void engineInit(KeyStore keystore) {
         }
 
         @Override

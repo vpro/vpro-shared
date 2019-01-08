@@ -49,7 +49,7 @@ public class ProviderAndBuilderTest {
     }
 
     @Test
-    public void build() throws Exception {
+    public void build() {
         AProvider a = new AProvider();
         a.setA(Optional.of("X"));
         a.setB(8);
@@ -65,7 +65,7 @@ public class ProviderAndBuilderTest {
 
 
     @Test
-    public void buildNull() throws Exception {
+    public void buildNull() {
         AProvider a = new AProvider();
         a.setA(Optional.empty());
         a.setB(null);
@@ -78,7 +78,7 @@ public class ProviderAndBuilderTest {
     }
 
     @Test
-    public void buildDuration() throws Exception {
+    public void buildDuration() {
         AProvider a = new AProvider();
         a.setDuration(TimeUtils.parseDuration("5s").orElse(null));
         a.setB(null);

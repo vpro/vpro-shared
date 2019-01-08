@@ -20,7 +20,7 @@ public class SecondsToDateAdapter extends XmlAdapter<String, Date> {
     private final static Pattern PATTERN = Pattern.compile("(\\d+)(?:\\.(\\d{1,3})(?:\\d*))?");
 
     @Override
-    public Date unmarshal(String seconds) throws Exception {
+    public Date unmarshal(String seconds) {
         Matcher matcher = PATTERN.matcher(seconds);
         if(matcher.find()) {
             long result = Long.valueOf(matcher.group(1)) * 1000;
@@ -37,7 +37,7 @@ public class SecondsToDateAdapter extends XmlAdapter<String, Date> {
     }
 
     @Override
-    public String marshal(Date v) throws Exception {
+    public String marshal(Date v) {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

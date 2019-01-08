@@ -25,7 +25,7 @@ public class ConditionalBasicAuthentication  implements ClientRequestFilter {
         this.authHeader = BasicAuthHelper.createHeader(username, password);
     }
 
-    public void filter(ClientRequestContext requestContext) throws IOException {
+    public void filter(ClientRequestContext requestContext) {
           List<Object> existing = requestContext.getHeaders().get(HttpHeaders.AUTHORIZATION);
         if (existing == null || existing.isEmpty()) {
             requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, this.authHeader);

@@ -69,7 +69,7 @@ public class ErrorMessageToXMLTest extends CamelTestSupport {
                 from("direct:error")
                     .process(new Processor() {
                         @Override
-                        public void process(Exchange exchange) throws Exception {
+                        public void process(Exchange exchange) {
                             throw new RuntimeException("Error message");
                         }
                     })

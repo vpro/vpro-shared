@@ -158,7 +158,7 @@ public class FileCachingInputStreamTest {
         assertThat(isInterrupted).withFailMessage("Thread did not get interrupted").isTrue();
     }
 
-    protected FileCachingInputStream slowReader() throws IOException {
+    protected FileCachingInputStream slowReader() {
         return
         FileCachingInputStream.builder()
             .outputBuffer(2)

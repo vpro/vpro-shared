@@ -68,7 +68,7 @@ public class SwfAttachmentFilter implements Filter {
   }
 
   /** {@inheritDoc} */
-  public void init(FilterConfig config) throws ServletException {
+  public void init(FilterConfig config) {
     String mimetypeParameter = StringUtils.defaultString(config.getInitParameter(PARAM_MIMETYPE), DEFAULT_MIMETYPES);
     String extensionParameter = StringUtils.defaultString(config.getInitParameter(PARAM_EXTENSION), DEFAULT_EXTENSIONS);
     mimetypes = mimetypeParameter.split(PARAM_SPLIT_REGEX);

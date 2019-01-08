@@ -27,7 +27,7 @@ public class PlainTextUsernameTokenValidator extends UsernameTokenValidator {
     AuthenticationManager manager;
 
     @Override
-    protected void verifyPlaintextPassword(UsernameToken usernameToken, RequestData data) throws WSSecurityException {
+    protected void verifyPlaintextPassword(UsernameToken usernameToken, RequestData data) {
         final String name = usernameToken.getName();
         final String password = usernameToken.getPassword();
 

@@ -30,7 +30,7 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
     }
 
     @PostConstruct
-    public void init() throws MalformedObjectNameException, NotCompliantMBeanException, InstanceAlreadyExistsException, MBeanRegistrationException {
+    public void init() {
         /*MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         ObjectName oname = new ObjectName("nl.vpro.elasticsearch:name=" + name);
         mbs.registerMBean(this, oname);*/

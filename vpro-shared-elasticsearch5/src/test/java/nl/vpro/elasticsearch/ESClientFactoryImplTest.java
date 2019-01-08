@@ -28,7 +28,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testGetClusterName() throws Exception {
+    public void testGetClusterName() {
         TransportClientFactory factory = new TransportClientFactory();
         factory.setClusterName("vpro");
 
@@ -37,7 +37,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetSniffCluster() throws Exception {
+    public void testSetSniffCluster() {
         TransportClientFactory factory = new TransportClientFactory();
         //factory.setSniffCluster(false);
 
@@ -46,7 +46,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetIgnoreClusterName() throws Exception {
+    public void testSetIgnoreClusterName() {
         TransportClientFactory factory = new TransportClientFactory();
         //factory.setIgnoreClusterName(true);
 
@@ -55,7 +55,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetPingTimeoutInSeconds() throws Exception {
+    public void testSetPingTimeoutInSeconds() {
         TransportClientFactory factory = new TransportClientFactory();
         //factory.setPingTimeoutInSeconds(10);
 
@@ -64,7 +64,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetPingIntervalInSeconds() throws Exception {
+    public void testSetPingIntervalInSeconds() {
         TransportClientFactory factory = new TransportClientFactory();
         //factory.setPingIntervalInSeconds(100);
 

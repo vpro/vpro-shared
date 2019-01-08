@@ -11,7 +11,7 @@ public class JAXBTestUtilTest {
 
 
     @Test
-    public void testMarshal() throws Exception {
+    public void testMarshal() {
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
             "<a xmlns=\"urn:test:1234\">\n" +
             "    <value>aa</value>\n" +
@@ -25,7 +25,7 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testMarshalWithNoRootElement () throws Exception {
+    public void testMarshalWithNoRootElement () {
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
             "<local:b xmlns=\"urn:test:1234\" xmlns:local=\"uri:local\">\n" +
             "    <value>bb</value>\n" +

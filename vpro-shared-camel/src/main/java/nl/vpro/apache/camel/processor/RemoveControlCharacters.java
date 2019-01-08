@@ -11,7 +11,7 @@ import org.apache.camel.Processor;
 public class RemoveControlCharacters implements Processor {
 
     @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) {
         String body = exchange.getIn().getBody(String.class);
         String replaced = body.replaceAll("\\p{Cc}", "");
         exchange.getIn().setBody(replaced);

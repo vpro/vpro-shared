@@ -76,7 +76,7 @@ public class PropertyConfigurationFactoryBean implements InitializingBean, Facto
 
 
     @Override
-    public Object getObject() throws Exception {
+    public Object getObject() {
         return configuration;
     }
 

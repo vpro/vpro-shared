@@ -25,21 +25,21 @@ public class XmlUtilsTest {
 
 
     @Test
-    public void toInstant() throws Exception {
+    public void toInstant() {
         Instant instance = XmlUtils.toInstant(ZoneId.of("Europe/London"), XmlUtils.FACTORY.newXMLGregorianCalendar("2017-06-26T14:23:00+02:00"));
         assertThat(instance).isEqualTo(LocalDateTime.of(2017, 6, 26, 14, 23).atZone(ZoneId.of("Europe/Amsterdam")).toInstant());
         log.info("{}", instance);
     }
 
     @Test
-    public void toInstantImplicitZone() throws Exception {
+    public void toInstantImplicitZone() {
         Instant instance = XmlUtils.toInstant(ZoneId.of("Europe/Amsterdam"), XmlUtils.FACTORY.newXMLGregorianCalendar("2017-06-26T14:23:00"));
         assertThat(instance).isEqualTo(LocalDateTime.of(2017, 6, 26, 14, 23).atZone(ZoneId.of("Europe/Amsterdam")).toInstant());
         log.info("{}", instance);
     }
 
     @Test
-    public void toXml() throws Exception {
+    public void toXml() {
 
         assertThat(XmlUtils.toXml(ZoneId.of("Europe/Amsterdam"), LocalDateTime.of(2017, 6, 26, 14, 23).atZone(ZoneId.of("Europe/Amsterdam")).toInstant()).toXMLFormat())
             .isEqualTo("2017-06-26T14:23:00.000+02:00");

@@ -29,20 +29,20 @@ public class AcceptLanguageRequestFilterTest {
     }
 
     @Test
-    public void filterWithoutExisting() throws Exception {
+    public void filterWithoutExisting() {
         instance.filter(context);
         assertThat(headers.getFirst("Accept-Language")).isEqualTo("en, nl_NL");
     }
 
     @Test
-    public void filterWithemptyExisting() throws Exception {
+    public void filterWithemptyExisting() {
         headers.put("Accept-Language", new ArrayList<>());
         instance.filter(context);
         assertThat(headers.getFirst("Accept-Language")).isEqualTo("en, nl_NL");
     }
 
     @Test
-    public void filterWithExisting() throws Exception {
+    public void filterWithExisting() {
         headers.putSingle("Accept-Language", "de, nl");
         instance.filter(context);
         assertThat(headers.getFirst("Accept-Language")).isEqualTo("en, nl_NL");

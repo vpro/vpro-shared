@@ -32,14 +32,14 @@ public class AcceptRequestFilterTest {
 
 
     @Test
-    public void filterWithoutExisting() throws Exception {
+    public void filterWithoutExisting() {
         instance.filter(context);
         assertThat(headers.getFirst("Accept")).isEqualTo("application/json");
 
     }
 
     @Test
-    public void filterWithemptyExisting() throws Exception {
+    public void filterWithemptyExisting() {
         headers.put("Accept", new ArrayList<>());
         instance.filter(context);
         assertThat(headers.getFirst("Accept")).isEqualTo("application/json");
@@ -47,7 +47,7 @@ public class AcceptRequestFilterTest {
     }
 
     @Test
-    public void filterWithExisting() throws Exception {
+    public void filterWithExisting() {
         headers.putSingle("Accept", "application/xml, application/json;charset=UTF-8");
         instance.filter(context);
         assertThat(headers.getFirst("Accept")).isEqualTo("application/json;charset=UTF-8, application/xml;q=0.5");

@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class UrlProviderTest {
     @Test
-    public void test() throws Exception {
+    public void test() {
         UrlProvider provider = new UrlProvider("a", 80);
         assertEquals("a", provider.getHost());
         assertEquals(80, provider.getPort());
@@ -27,7 +27,7 @@ public class UrlProviderTest {
     }
 
     @Test
-    public void testUrl() throws Exception {
+    public void testUrl() {
         UrlProvider provider = UrlProvider.fromUrl("http://a:81/b");
         assertEquals("http://a:81/b", provider.getUrl());
 

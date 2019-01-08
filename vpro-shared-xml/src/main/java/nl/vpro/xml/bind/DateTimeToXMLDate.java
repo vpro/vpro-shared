@@ -20,7 +20,7 @@ public class DateTimeToXMLDate extends XmlAdapter<String, Date> {
     }
 
     @Override
-    public String marshal(Date date) throws Exception {
+    public String marshal(Date date) {
         return DF.get().format(date);
     }
 }

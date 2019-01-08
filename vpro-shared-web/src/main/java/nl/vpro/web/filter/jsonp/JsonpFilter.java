@@ -26,7 +26,7 @@ public class JsonpFilter implements Filter {
     private String callback;
 
     @Override
-    public void init(FilterConfig config) throws ServletException {
+    public void init(FilterConfig config) {
         String callback = config.getInitParameter("callback");
         if(callback != null && !callback.equals("")) {
             this.callback = callback;

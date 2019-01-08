@@ -43,7 +43,7 @@ public class DateToDurationTest {
     }
 
     @Test
-    public void jaxb() throws Exception {
+    public void jaxb() {
         JAXB.marshal(new TestObject(), System.out);
     }
 

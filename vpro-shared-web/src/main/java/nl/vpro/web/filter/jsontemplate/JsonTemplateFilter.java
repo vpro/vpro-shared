@@ -29,7 +29,7 @@ public class JsonTemplateFilter implements Filter {
     private String property;
 
     @Override
-    public void init(FilterConfig config) throws ServletException {
+    public void init(FilterConfig config) {
         String template = config.getInitParameter(PROPERTY);
         if(template != null && !template.equals("")) {
             this.property = template;

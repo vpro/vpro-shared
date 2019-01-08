@@ -16,14 +16,14 @@ public class LocalDateXmlAdapterTest {
     private LocalDateXmlAdapter instance = new LocalDateXmlAdapter();
 
     @Test
-    public void testUnmarshalLocalDate() throws Exception {
+    public void testUnmarshalLocalDate() {
         assertThat(instance.unmarshal("2015-12-09")).isEqualTo(LocalDate.of(2015, 12, 9));
         assertThat(instance.unmarshal("2015")).isEqualTo(Year.of(2015));
 
     }
 
     @Test
-    public void testMarshal() throws Exception {
+    public void testMarshal() {
 
     }
 }

@@ -21,7 +21,7 @@ public class LoggerHelperTest {
     private static final Logger log = LoggerFactory.getLogger(LoggerHelperTest.class);
 
     @Test
-    public void trace() throws Exception {
+    public void trace() {
         final StringWriter writer = new StringWriter();
 
         org.apache.log4j.Logger rootLogger = LogManager.getRootLogger();

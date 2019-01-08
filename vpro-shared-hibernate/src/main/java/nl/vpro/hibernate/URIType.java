@@ -40,7 +40,7 @@ public class URIType extends AbstractSingleColumnStandardBasicType<URI> implemen
     }
 
     @Override
-    public URI stringToObject(String xml) throws Exception {
+    public URI stringToObject(String xml) {
         return URITypeDescriptor.INSTANCE.fromString(xml);
     }
 }

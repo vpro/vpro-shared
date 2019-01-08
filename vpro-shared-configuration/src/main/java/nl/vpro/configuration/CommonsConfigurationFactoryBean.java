@@ -28,7 +28,7 @@ public class CommonsConfigurationFactoryBean implements InitializingBean, Factor
     /**
      * {@inheritDoc}
      */
-    public Object getObject() throws Exception {
+    public Object getObject() {
         return (configuration != null) ? configuration : null;
     }
 
@@ -65,7 +65,7 @@ public class CommonsConfigurationFactoryBean implements InitializingBean, Factor
     /**
      * {@inheritDoc}
      */
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         if (configurations == null || configurations.length == 0) {
             throw new IllegalArgumentException("at least one configuration");
         }

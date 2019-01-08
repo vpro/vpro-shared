@@ -12,7 +12,7 @@ import nl.vpro.jackson2.JsonFilter;
 public class SwaggerFilterTest {
 
     @Test
-    public void testFilter() throws IOException, ExecutionException, InterruptedException {
+    public void testFilter() throws IOException {
         String input = "{apiVersion: \"3.0\",\n" +
             "swaggerVersion: \"1.2\",\n" +
             "basePath: \"${api.basePath}\"}";

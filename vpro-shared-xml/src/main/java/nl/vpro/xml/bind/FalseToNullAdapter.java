@@ -9,12 +9,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class FalseToNullAdapter extends XmlAdapter<Boolean, Boolean> {
 
     @Override
-    public Boolean unmarshal(Boolean bool) throws Exception {
+    public Boolean unmarshal(Boolean bool) {
         return bool == null ? false : bool;
     }
 
     @Override
-    public Boolean marshal(Boolean  bool) throws Exception {
+    public Boolean marshal(Boolean  bool) {
         return bool == null || !bool ? null : true;
     }
 }

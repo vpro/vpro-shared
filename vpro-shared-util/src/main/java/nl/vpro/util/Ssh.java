@@ -47,7 +47,7 @@ public class Ssh {
     }
 
 
-    public void exec(String... command) throws Exception {
+    public void exec(String... command) {
         final List<String> args = new ArrayList<>(
             Arrays.asList(
                 "-i",
@@ -59,7 +59,7 @@ public class Ssh {
     }
 
 
-    public void upload(File localFrom, String remotePath) throws Exception {
+    public void upload(File localFrom, String remotePath) {
         int result = scp.execute(STDOUT, STDERR,
             "-i",
             remote_host_private_key_file.getAbsolutePath(), localFrom.getAbsolutePath(), remote_host_user + "@" + remote_host_name + ":" + remotePath);
@@ -68,7 +68,7 @@ public class Ssh {
             throw new RuntimeException("Not succeeded upload from " + localFrom + " to  " + remote_host_name + ":" + remotePath);
     }
 
-    public void download(String remotePath, File localTo) throws Exception {
+    public void download(String remotePath, File localTo) {
         int result =
             scp.execute(
                 STDOUT,

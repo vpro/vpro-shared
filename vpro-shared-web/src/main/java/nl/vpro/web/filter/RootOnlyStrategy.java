@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class RootOnlyStrategy implements ExclusionStrategy {
 
-	public boolean exclude(HttpServletRequest request) throws ServletException {
+	public boolean exclude(HttpServletRequest request) {
 		String requestURI = request.getRequestURI();
 		return !requestURI.equals("/");
 	}

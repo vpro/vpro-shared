@@ -15,6 +15,6 @@ public class ESClientTest {
 
 
     @Test
-    public void test() throws UnknownHostException {
+    public void test() {
     }
 }

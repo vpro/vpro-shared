@@ -31,7 +31,7 @@ public class JsonFilter implements Callable<Void> {
     final OutputStream out;
     final List<Replacement> replacements;
 
-    public JsonFilter(InputStream in, OutputStream out, List<Replacement> replacements) throws IOException {
+    public JsonFilter(InputStream in, OutputStream out, List<Replacement> replacements) {
         this.in = in;
         this.out = out;
         this.replacements = replacements;

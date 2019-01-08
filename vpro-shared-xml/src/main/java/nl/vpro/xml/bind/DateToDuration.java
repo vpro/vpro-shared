@@ -38,7 +38,7 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
     }
 
     @Override
-    public Date unmarshal(Duration duration) throws Exception {
+    public Date unmarshal(Duration duration) {
         Date date = new Date(0);
         duration.addTo(date);
         return date;

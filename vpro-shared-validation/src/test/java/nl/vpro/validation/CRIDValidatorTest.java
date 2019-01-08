@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class CRIDValidatorTest {
     @Test
-    public void testIsValid() throws Exception {
+    public void testIsValid() {
         CRIDValidator validator = new CRIDValidator();
         assertFalse(validator.isValid("http://bla/bla", null));
         assertFalse(validator.isValid("crid://test", null));

@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public class ESClientFactoryImplTest {
 
     @Test
-    public void testSetTransportAddresses() throws Exception {
+    public void testSetTransportAddresses() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setTransportAddresses(Arrays.asList(new UrlProvider("a", 100), new UrlProvider("b", 101)));
         TransportClient client = (TransportClient) factory.buildClient();
@@ -25,7 +25,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testGetClusterName() throws Exception {
+    public void testGetClusterName() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setClusterName("vpro");
 
@@ -34,7 +34,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetSniffCluster() throws Exception {
+    public void testSetSniffCluster() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setSniffCluster(false);
 
@@ -43,7 +43,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetIgnoreClusterName() throws Exception {
+    public void testSetIgnoreClusterName() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setIgnoreClusterName(true);
 
@@ -52,7 +52,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetPingTimeoutInSeconds() throws Exception {
+    public void testSetPingTimeoutInSeconds() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setPingTimeoutInSeconds(10);
 
@@ -61,7 +61,7 @@ public class ESClientFactoryImplTest {
     }
 
     @Test
-    public void testSetPingIntervalInSeconds() throws Exception {
+    public void testSetPingIntervalInSeconds() {
         ESClientFactoryImpl factory = new ESClientFactoryImpl();
         factory.setPingIntervalInSeconds(100);
 

@@ -22,7 +22,7 @@ public class ServerCallbackHandler implements CallbackHandler {
     AuthenticationManager manager;
 
     @Override
-    public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+    public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
         for(Callback callback : callbacks) {
             WSPasswordCallback wsp = (WSPasswordCallback)callback;
             switch(wsp.getUsage()) {
