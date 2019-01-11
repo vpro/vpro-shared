@@ -42,9 +42,22 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
 
+    /**
+     * All properties for which the key matches this regexp will be registered as a singleton String spring bean
+     */
     @Getter
     @Setter
     private Pattern registerAsSingletonStringRegexp = Pattern.compile("^$");
+
+
+    /**
+     * All properties for which the key matches this regexp will be registered as a singleton String bean, and the most basic
+     * type interference using the value will be attempted. E.g. 'true' will be registered as a {@link Boolean}.
+     */
+    @Getter
+    @Setter
+    private Pattern registerAsSingletonObjectRegexp = Pattern.compile("^$");
+
 
     @Getter
     @Setter
@@ -57,12 +70,13 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         super.processProperties(beanFactory, props);
         initMap(props);
         initSystemProperties();
-        Set<String> registered = new HashSet<>();
+        Set<String> registeredAsString = new HashSet<>();
+        Set<String> registeredAsObject = new HashSet<>();
         for (Map.Entry<String, String> e : propertiesMap.entrySet()) {
             if (registerAsSingletonStringRegexp.matcher(e.getKey()).matches()) {
                 try {
                     if (!beanFactory.containsBeanDefinition(e.getKey())) {
-                        registered.add(e.getKey());
+                        registeredAsString.add(e.getKey());
                         String v = e.getValue();
                         beanFactory.registerSingleton(e.getKey(), v);
                     } else {
@@ -72,9 +86,25 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                     log.error(ex.getMessage());
                 }
             }
+            if (registerAsSingletonObjectRegexp.matcher(e.getKey()).matches()) {
+                try {
+                    if (!beanFactory.containsBeanDefinition(e.getKey())) {
+                        registeredAsObject.add(e.getKey());
+                        String v = e.getValue();
+                        beanFactory.registerSingleton(e.getKey(), toObject(v));
+                    } else {
+                        log.info("Could not register {} as a singleton object (it is already {})", e.getKey(), beanFactory.getBeanDefinition(e.getKey()));
+                    }
+                } catch (Exception ex) {
+                    log.error(ex.getMessage());
+                }
+            }
         }
-        if (registered.size() > 0) {
-            log.info("Registered {} singleton strings: {} ", registered.size(), registered);
+        if (registeredAsString.size() > 0) {
+            log.info("Registered {} singleton strings: {} ", registeredAsString.size(), registeredAsString);
+        }
+        if (registeredAsObject.size() > 0) {
+            log.info("Registered {} singleton objects: {} ", registeredAsObject.size(), registeredAsObject);
         }
 
         if (logMap.isEmpty()) {
@@ -106,9 +136,29 @@ TODO
                 after.accept(propertiesMap);
             }
         }
+    }
 
-
-
+    protected Object toObject(String v) {
+        if ("true".equals(v) || "false".equals(v)) {
+            return Boolean.valueOf(v);
+        }
+        try {
+            return Integer.parseInt(v);
+        } catch (NumberFormatException ignored) {
+        }
+        try {
+            return Long.parseLong(v);
+        } catch (NumberFormatException ignore) {
+        }
+        try {
+            return Float.parseFloat(v);
+        } catch (NumberFormatException ignored) {
+        }
+        try {
+            return Double.parseDouble(v);
+        } catch (NumberFormatException ignored) {
+        }
+        return v;
     }
 
     public Map<String, String> getMap() {
