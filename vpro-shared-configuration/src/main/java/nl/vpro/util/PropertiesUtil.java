@@ -109,7 +109,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         }
 
         if (logMap.isEmpty()) {
-            logger.debug(String.valueOf(getMap()));
+            log.debug("{}", getMap());
         } else {
             StandardBeanExpressionResolver resolver = new StandardBeanExpressionResolver();
 
@@ -128,8 +128,7 @@ TODO
                     logger.warn("For " + value + ":" + spe.getMessage());
 
                 }*/
-                String log = String.format(value, getMap().get(logEntry.getKey()));
-                logger.info(log);
+                log.info(String.format(value, getMap().get(logEntry.getKey())));
             }
         }
         if (afterProperties != null) {
@@ -225,7 +224,9 @@ TODO
         for(Object key : p.keySet()) {
             String keyStr = key.toString();
             String value = p.getProperty(keyStr);
-            if (value == null && p.containsKey(keyStr)) value = "";
+            if (value == null && p.containsKey(keyStr)) {
+                value = "";
+            }
             String v = helper.replacePlaceholders(value, p);
             propertiesMap.put(keyStr, v);
         }
@@ -239,10 +240,10 @@ TODO
                     if(System.getProperty(property) == null || localOverride) {
                         System.setProperty(property, value);
                     } else {
-                        logger.warn("Can not override System property " + property + " because it already exists");
+                        log.warn("Can not override System property " + property + " because it already exists");
                     }
                 } else {
-                    logger.error("Property " + property + " not found, please check the property configuration");
+                    log.error("Property " + property + " not found, please check the property configuration");
                 }
             }
         }
