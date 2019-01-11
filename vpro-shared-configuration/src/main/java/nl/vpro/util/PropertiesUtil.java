@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Provider;
 
@@ -104,7 +105,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
             log.info("Registered {} singleton strings: {} ", registeredAsString.size(), registeredAsString);
         }
         if (registeredAsObject.size() > 0) {
-            log.info("Registered {} singleton objects: {} ", registeredAsObject.size(), registeredAsObject);
+            log.info("Registered {} singleton objects: {} ", registeredAsObject.size(), registeredAsObject.stream().map(v -> v.getClass().getSimpleName() + ":" + v).collect(Collectors.toList()));
         }
 
         if (logMap.isEmpty()) {
