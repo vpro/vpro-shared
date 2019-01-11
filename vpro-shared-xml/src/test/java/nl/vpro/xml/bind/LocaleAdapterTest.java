@@ -14,7 +14,7 @@ public class LocaleAdapterTest {
 
 
     @Test
-    public void adapt() throws Exception {
+    public void adapt() {
         LocaleAdapter adapter = new LocaleAdapter();
         assertThat(adapter.marshal(new Locale("nl", "NL"))).isEqualTo("nl-NL");
         assertThat(adapter.marshal(new Locale("nl", "NL", "slang"))).isEqualTo("nl-NL-slang");
@@ -24,7 +24,7 @@ public class LocaleAdapterTest {
 
 
     @Test
-    public void unadapt() throws Exception {
+    public void unadapt() {
         LocaleAdapter adapter = new LocaleAdapter();
         assertThat(adapter.unmarshal("nl")).isEqualTo(new Locale("nl"));
         assertThat(adapter.unmarshal("nl-NL")).isEqualTo(new Locale("nl", "NL"));

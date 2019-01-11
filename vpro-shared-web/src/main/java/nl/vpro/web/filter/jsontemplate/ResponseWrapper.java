@@ -37,7 +37,7 @@ class ResponseWrapper extends HttpServletResponseWrapper {
     }
 
     @Override
-    public PrintWriter getWriter() throws IOException {
+    public PrintWriter getWriter() {
         return new PrintWriter(getOutputStream(), true);
     }
 

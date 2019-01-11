@@ -131,7 +131,7 @@ public class SplashPageFilter implements Filter {
         return WebUtils.getCookie(request, cookieName) == null;
     }
 
-    private boolean notExcludedByStrategy(HttpServletRequest request) throws ServletException {
+    private boolean notExcludedByStrategy(HttpServletRequest request) {
         return !exclusionStrategy.exclude(request);
     }
 }
