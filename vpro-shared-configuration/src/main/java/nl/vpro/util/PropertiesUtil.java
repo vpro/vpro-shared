@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import javax.inject.Provider;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -61,7 +63,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 try {
                     if (!beanFactory.containsBeanDefinition(e.getKey())) {
                         registered.add(e.getKey());
-                        beanFactory.registerSingleton(e.getKey(), e.getValue());
+                        String v = e.getValue();
+                        beanFactory.registerSingleton(e.getKey(), v);
                     } else {
                         log.info("Could not register {} as a singleton string (it is already {})", e.getKey(), beanFactory.getBeanDefinition(e.getKey()));
                     }
@@ -109,7 +112,18 @@ TODO
     }
 
     public Map<String, String> getMap() {
+        if (propertiesMap == null) {
+            log.warn("Properties map not yet initialized");
+            return new HashMap<>();
+        }
         return Collections.unmodifiableMap(propertiesMap);
+    }
+
+    /**
+     * @since 2.4
+     */
+    public Provider<Map<String, String>> provideMap() {
+        return this::getMap;
     }
 
     public void setExposeAsSystemProperty(String properties) {
