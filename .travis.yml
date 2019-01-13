@@ -9,5 +9,5 @@ jdk:
 sudo: true
 script: mvn -T 1C clean test install
 after_success:
-- mvn -T 1C -Pdeploy deploy --settings travis-settings.xml -DskipTests=true -Dgpg.skip=true  -B
-- .travis-update-javadoc.sh
+- mvn -T 1C -Pdeploy deploy --settings .travis-settings.xml -DskipTests=true -Dgpg.skip=true  -B
+- ./.travis-update-javadoc.sh
