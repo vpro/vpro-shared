@@ -7,7 +7,6 @@ env:
 jdk:
 - oraclejdk8
 sudo: true
-script: mvn -T 1C clean test install
+script: mvn -T 1C -Pdeploy clean test deploy --settings .travis-settings.xml -Dgpg.skip=true
 after_success:
-- mvn -T 1C -Pdeploy deploy --settings .travis-settings.xml -DskipTests=true -Dgpg.skip=true  -B
-- ./.travis-update-javadoc.sh
+#- ./.travis-update-javadoc.sh
