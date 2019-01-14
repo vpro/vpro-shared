@@ -1,5 +1,9 @@
 package nl.vpro.jackson2;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +18,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 public class JsonArrayIteratorTest {
 
     @Test
@@ -30,7 +35,7 @@ public class JsonArrayIteratorTest {
             Change change = it.next(); // 10
             Optional<Long> size = it.getSize();
             if (size.isPresent()) {
-                System.out.println(it.getCount() + "/" + size.get() + " :" + change);
+                log.info(it.getCount() + "/" + size.get() + " :" + change);
             }
             if (!change.isDeleted()) {
                 assertThat(change.getMedia()).isNotNull();
@@ -100,46 +105,20 @@ public class JsonArrayIteratorTest {
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
+    @Getter
+    @Setter
     private static class Change {
 
         private String mid;
-        private Boolean deleted;
+        private boolean deleted;
         private Object media;
 
         public Change() {
 
         }
-        public Change(String mid, Boolean deleted) {
+        public Change(String mid, boolean deleted) {
             this.mid = mid;
             this.deleted = deleted;
-        }
-
-        String getMid() {
-            return mid;
-        }
-
-        public void setMid(String mid) {
-            this.mid = mid;
-        }
-
-        Boolean isDeleted() {
-            return deleted;
-        }
-
-        public void setDeleted(Boolean deleted) {
-            this.deleted = deleted;
-        }
-
-        public Boolean getDeleted() {
-            return deleted;
-        }
-
-        Object getMedia() {
-            return media;
-        }
-
-        public void setMedia(Object media) {
-            this.media = media;
         }
 
         @Override
