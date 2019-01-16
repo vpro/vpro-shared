@@ -4,8 +4,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import com.google.common.collect.PeekingIterator;
+
 /**
- * An iterator that is also aware of the current position {@link #getCount()}, and optionally of the total size {@link #getSize()}, and also optionally of a 'total' size (in case this iterator presents some sub-collection {@link #getTotalSize()}.
+ * An iterator that is also aware of the current position {@link #getCount()}, and optionally of the size of the object that is iterated {@link #getSize()}, and also optionally of a 'total' size (in case this iterator presents some sub-collection) {@link #getTotalSize()}.
  *
  * @author Michiel Meeuwissen
  * @since 0.31
@@ -71,7 +73,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     }
 
     /**
-     * If you need a guava {@link com.google.common.collect.PeekingIterator}, this will make you one.
+     * If you need a guava {@link PeekingIterator}, this will make you one. It remains also a {@link CountedIterator}
      */
     default CountedPeekingIterator<T> peeking() {
         return new CountedPeekingIteratorImpl<>(this);
