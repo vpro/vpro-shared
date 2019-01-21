@@ -3,7 +3,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>2.4.2-SNAPSHOT</version>
+  <version>2.4.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -65,30 +65,6 @@
           <branchName>REL-${project.version}</branchName>
           <tagNameFormat>REL-@{project.version}</tagNameFormat>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
-        <inherited>false</inherited> <!-- only execute these in the parent -->
-        <executions>
-          <execution>
-            <id>git submodule update</id>
-            <phase>initialize</phase>
-            <configuration>
-              <executable>git</executable>
-                <arguments>
-                  <argument>submodule</argument>
-                  <argument>update</argument>
-                  <argument>--init</argument>
-                  <argument>--recursive</argument>
-                </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-        </execution>
-        </executions>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -166,7 +142,6 @@
     <module>vpro-shared-resteasy</module>
     <module>vpro-shared-rs</module>
     <module>vpro-shared-services</module>
-    <module>vpro-shared-swagger</module>
     <module>vpro-shared-test</module>
     <module>vpro-shared-transfer</module>
     <module>vpro-shared-util</module>
