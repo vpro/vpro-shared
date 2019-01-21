@@ -205,11 +205,23 @@ public class FileCachingInputStream extends InputStream {
                 }
             }
 
+            final boolean deleteOnClose;
             if (openOptions == null) {
                 openOptions = new ArrayList<>();
                 if (deleteTempFile == null || deleteTempFile) {
                     openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
+                    deleteOnClose = true;
+                } else {
+                    deleteOnClose = false;
                 }
+            } else {
+                deleteOnClose = false;
+            }
+            final boolean effectiveProgressLogging;
+            if (progressLogging == null) {
+                effectiveProgressLogging = ! deleteOnClose;
+            } else {
+                effectiveProgressLogging = progressLogging;
             }
             this.file = new BufferedInputStream(
                 Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
@@ -227,10 +239,7 @@ public class FileCachingInputStream extends InputStream {
                     } catch (IOException ignore) {
 
                     }
-                    if (progressLogging == null || progressLogging) {
-                        log.info("Created {} ({} bytes written)", tempFile, c.getCount());
-
-                    }
+                    Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
                 })
                 .batch(batchSize)
                 .batchConsumer(c -> {
