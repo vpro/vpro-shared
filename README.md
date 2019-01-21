@@ -37,4 +37,6 @@ Check this out with git clone --recurse-submodules. It is essential for a correc
 
 - Some of these modules are old, contain very little usefull or are very specific for VPRO. We should remove them.
 - A bit more of documentation here and there would be welcome. Though we provide this mainly to be able to provide _other_ artifact too, which themselves depend on this
+- Some, or perhaps even most or all, of the submodules should be migrated to git repositories of their own. They don't change often. This will make the builds faster and leaner.
+
 
