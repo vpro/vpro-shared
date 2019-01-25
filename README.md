@@ -30,7 +30,7 @@ Release builds will be provided via [maven central](https://search.maven.org/sea
 
 ## Checkout
 
-Check this out with git clone --recurse-submodules. It is essential for a correct build of vpro-shared-swagger.war
+The maven build will ensure that this is checked out with git clone --recurse-submodules. It is essential for a correct build of vpro-shared-swagger.war
 
 
 ## TODO
