@@ -162,7 +162,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         Jackson2Mapper objectMapper,
         String mbeanName,
         ClassLoader classLoader,
-        String userAgent
+        String userAgent,
+        Boolean registerMBean
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -188,10 +189,45 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
         this.userAgent = userAgent == null ? getUserAgent(getClass().getSimpleName(), getVersion("vpro.shared.version", this.classLoader)) : userAgent;
         log.info("Using class loader {}, user agent {}", this.classLoader, this.userAgent);
-        registerBean();
+        if (registerMBean == null || registerMBean) {
+            registerBean();
+        }
     }
 
+    /**
+     * @deprecated Remove in 2.6
+     */
+    @Deprecated
+    protected AbstractApiClient(
+        String baseUrl,
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
+        Integer maxConnectionsNoTimeout,
+        Integer maxConnectionsPerRouteNoTimeout,
+        Duration connectionInPoolTTL,
+        Duration countWindow,
+        Integer bucketCount,
+        Duration warnThreshold,
+        List<Locale> acceptableLanguages,
+        MediaType accept,
+        MediaType contentType,
+        Boolean trustAll,
+        Jackson2Mapper objectMapper,
+        String mbeanName,
+        ClassLoader classLoader,
+        String userAgent
+     ) {
+         this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout,
+             connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, contentType, trustAll, objectMapper, mbeanName, classLoader, userAgent, null);
+     }
 
+
+    /**
+     * @deprecated Remove in 2.6
+     */
     @Deprecated
     protected AbstractApiClient(
         String baseUrl,
@@ -215,8 +251,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         ClassLoader classLoader
         ) {
         this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout,
-            connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, contentType, trustAll, objectMapper, mbeanName, classLoader, null);
+            connectionInPoolTTL, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, contentType, trustAll, objectMapper, mbeanName, classLoader, null, null);
     }
+
+    /**
+     * @deprecated Remove in 2.6
+     */
     @Deprecated // "Will be dropped soon"
     protected AbstractApiClient(
         String baseUrl,
@@ -261,6 +301,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
 
+
+    /**
+     * @deprecated Remove in 2.6
+     */
     @Deprecated // Will be dropped soon
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Integer connectionInPoolTTL) {
         this(
@@ -287,11 +331,19 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         );
     }
 
+
+    /**
+     * @deprecated Remove in 2.6
+     */
     @Deprecated
     protected AbstractApiClient(String baseUrl, Integer connectionTimeout) {
         this(baseUrl, connectionTimeout, 0, 0, null);
     }
 
+
+    /**
+     * @deprecated Remove in 2.6
+     */
     @Deprecated
     protected  AbstractApiClient(String baseUrl, Duration connectionRequestTimeout, Duration connectTimeout, Duration socketTimeout, Integer maxConnections, Integer maxConnectionsPerRoute, Duration connectionInPoolTTL, Duration countWindow, Integer bucketCount, Duration warnThreshold, List<Locale> acceptableLanguages, MediaType accept, Boolean trustAll) {
         this(
