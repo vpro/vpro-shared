@@ -66,6 +66,33 @@
           <tagNameFormat>REL-@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
+      <plugin>
+        <!--
+         
+        https://stackoverflow.com/questions/6938142/how-to-get-maven-release-to-clone-git-submodules -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <inherited>false</inherited>
+        <executions>
+          <execution>
+            <id>git submodule update</id>
+            <phase>initialize</phase>
+            <configuration>
+              <executable>git</executable>
+              <arguments>
+                <argument>submodule</argument>
+                <argument>update</argument>
+                <argument>--init</argument>
+                <argument>--recursive</argument>
+              </arguments>
+            </configuration>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
