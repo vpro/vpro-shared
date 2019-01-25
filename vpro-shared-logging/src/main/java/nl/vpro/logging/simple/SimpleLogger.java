@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
-import com.google.common.flogger.FluentLogger;
 
 
 /**
@@ -60,11 +59,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     static SimpleLogger log4j(org.apache.log4j.Logger  log) {
         return new Log4jSimpleLogger(log);
     }
-
-    static SimpleLogger flogger(FluentLogger log) {
-        return new FloggerSimpleLogger(log);
-    }
-
 
     default String getName() {
         return getClass().getSimpleName();
