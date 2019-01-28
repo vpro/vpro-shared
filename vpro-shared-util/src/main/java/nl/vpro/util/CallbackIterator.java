@@ -4,7 +4,9 @@ import java.util.Iterator;
 import java.util.Optional;
 
 /**
- * An iterator that can call a callback function it iteration finished.
+ * An iterator that can call a callback function when its iteration is finished.
+ *
+ * It simply wraps another iterator, which is one iteration ahead on call of 'hasNext'.
  * @author Michiel Meeuwissen
  */
 public class CallbackIterator<T> implements CountedIterator<T> {
@@ -13,6 +15,7 @@ public class CallbackIterator<T> implements CountedIterator<T> {
     private Runnable callback;
     private Boolean hasNext;
 
+    @lombok.Builder
     public CallbackIterator(Iterator<T> wrapped, Runnable callback) {
         this.wrapped = wrapped;
         this.callback = callback;
