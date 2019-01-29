@@ -114,7 +114,6 @@ public class TimeUtils {
         return Optional.ofNullable(i == null ? null : Duration.ofMillis(i));
     }
 
-
     public static Optional<Duration> durationOf(Date i) {
         return Optional.ofNullable(i == null ? null : Duration.ofMillis(i.getTime()));
     }
@@ -122,6 +121,14 @@ public class TimeUtils {
     public static Duration durationOf(javax.xml.datatype.Duration d) {
         return d == null ? null : Duration.parse(d.toString());
     }
+
+    public static Optional<Integer> toSeconds(Duration d) {
+        return Optional.ofNullable(d == null ? null : (int) (d.toMillis() / 1000));
+    }
+    public static Optional<Long> toMillis(Duration d) {
+        return Optional.ofNullable(d == null ? null : d.toMillis());
+    }
+
 
     public static Date asDate(Duration duration) {
         return duration == null ? null : new Date(duration.toMillis());
