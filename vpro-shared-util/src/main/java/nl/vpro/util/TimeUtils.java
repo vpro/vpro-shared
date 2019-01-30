@@ -122,9 +122,14 @@ public class TimeUtils {
         return d == null ? null : Duration.parse(d.toString());
     }
 
-    public static Optional<Integer> toSeconds(Duration d) {
+    public static Optional<Integer> toSecondsInteger(Duration d) {
         return Optional.ofNullable(d == null ? null : (int) (d.toMillis() / 1000));
     }
+
+    public static Optional<Float> toSeconds(Duration d) {
+        return Optional.ofNullable(d == null ? null : d.toMillis() / 1000f);
+    }
+
     public static Optional<Long> toMillis(Duration d) {
         return Optional.ofNullable(d == null ? null : d.toMillis());
     }
