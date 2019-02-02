@@ -10,3 +10,5 @@ sudo: true
 script: mvn -T 1C -Pdeploy clean test deploy --settings .travis-settings.xml -Dgpg.skip=true
 after_success:
  - ./.travis-update-javadoc.sh
+ - bash <(curl -s https://codecov.io/bash)
+
