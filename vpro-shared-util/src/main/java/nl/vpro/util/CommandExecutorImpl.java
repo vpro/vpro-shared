@@ -201,13 +201,13 @@ public class CommandExecutorImpl implements CommandExecutor {
             final Copier copier;
             if (out != null) {
                 InputStream commandOutput = p.getInputStream();
-                  if (useFileCache) {
-                      commandOutput = FileCachingInputStream
-                          .builder()
-                          .input(commandOutput)
-                          .noProgressLogging()
-                          .build();
-                  }
+                if (useFileCache) {
+                    commandOutput = FileCachingInputStream
+                        .builder()
+                        .input(commandOutput)
+                        .noProgressLogging()
+                        .build();
+                }
                 copier = copyThread("command output", commandOutput, out, (e) -> {
                     Process process = p.destroyForcibly();
                     logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
@@ -280,6 +280,14 @@ public class CommandExecutorImpl implements CommandExecutor {
             .name(name)
             .input(in)
             .output(out)
+            .callback((c) -> {
+                try {
+                    in.close();
+                    out.close();
+                } catch (IOException ioe) {
+                    logger.warn(ioe.getMessage());
+                }
+            })
             .errorHandler((c, t) -> errorHandler.accept(t))
             .batch(batchSize)
             .build();
