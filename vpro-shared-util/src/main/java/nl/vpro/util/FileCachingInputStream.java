@@ -167,7 +167,7 @@ public class FileCachingInputStream extends InputStream {
                 }
             }
 
-            this.tempFile = tempPath== null ? Files.createTempFile(
+            this.tempFile = tempPath == null ? Files.createTempFile(
                 path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
                 filePrefix == null ? "file-caching-inputstream" : filePrefix,
                 null) : tempPath;
@@ -224,6 +224,9 @@ public class FileCachingInputStream extends InputStream {
                 .callback(c -> {
                     try {
                         out.close();
+                        if (deleteTempFile) {
+                            Files.deleteIfExists(tempFile);
+                        }
                     } catch (IOException ignore) {
 
                     }
