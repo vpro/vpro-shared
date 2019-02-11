@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
+import nl.vpro.util.BindingUtils;
 import nl.vpro.util.DateUtils;
 
 /**
@@ -34,7 +35,7 @@ import nl.vpro.util.DateUtils;
 @Slf4j
 public class StringInstantToJsonTimestamp {
 
-    private static Parser PARSER = new Parser(TimeZone.getTimeZone("Europe/Amsterdam"));
+    private static Parser PARSER = new Parser(TimeZone.getTimeZone(BindingUtils.DEFAULT_ZONE));
 
 
     public static class Serializer extends JsonSerializer<Object> {

@@ -16,14 +16,15 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import nl.vpro.util.BindingUtils;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.36
  */
 @Slf4j
-public class XmlUtils {
+public class XmlUtils extends BindingUtils  {
 
-    public static ZoneId DEFAULT_ZONE = ZoneId.of("Europe/Amsterdam");
     static final DatatypeFactory FACTORY;
     static {
         try {
