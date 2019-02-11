@@ -68,7 +68,7 @@
       </plugin>
       <plugin>
         <!--
-         
+
         https://stackoverflow.com/questions/6938142/how-to-get-maven-release-to-clone-git-submodules -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -106,7 +106,7 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.5.2</version>
+                  <version>3.3.9</version>
                 </requireMavenVersion>
               </rules>
             </configuration>
