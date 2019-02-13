@@ -4,6 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +16,9 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.StringBuilderSimpleLogger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -46,10 +52,38 @@ public class CommandExecutorImplTest {
             CommandExecutorImpl.builder()
                 .executablesPaths("/usr/bin/env")
                 .commonArg("find")
+                .optional(true)
                 .build();
         find.lines(".")
             .limit(20)
             .forEach(log::info);
+    }
+
+
+    @Test
+    public void optional() throws IOException {
+        File tmpFile = File.createTempFile("env", "test");
+        tmpFile.deleteOnExit();
+        StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
+        CommandExecutor find =
+            CommandExecutorImpl.builder()
+                .executablesPaths(tmpFile.getAbsolutePath())
+                .commonArg("find")
+                .simpleLogger(logger)
+                .optional(true)
+                .build();
+        find.lines(".")
+            .limit(20)
+            .forEach(log::info);
+        assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR java.lang.IllegalStateException: No binary found");
+
+        logger.getStringBuilder().setLength(0);
+        Files.copy(Paths.get(new File("/usr/bin/env").toURI()), Paths.get(tmpFile.toURI()), StandardCopyOption.REPLACE_EXISTING);
+
+        find.lines(".")
+            .limit(20)
+            .forEach(log::info);
+        assertThat(logger.getStringBuilder().toString()).doesNotContain("ERROR java.lang.IllegalStateException");
     }
 
     @Test

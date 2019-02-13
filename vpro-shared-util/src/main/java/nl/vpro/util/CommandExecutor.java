@@ -140,7 +140,7 @@ public interface CommandExecutor {
             PipedOutputStream writer = new PipedOutputStream(reader);
 
             BufferedReader result = new BufferedReader(new InputStreamReader(reader));
-            submit(in, writer, errors, (i) -> {
+            CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
                 try {
                     writer.flush();
                     writer.close();
@@ -148,6 +148,11 @@ public interface CommandExecutor {
 
                 }
             }, args);
+            submit.whenComplete((i, t) -> {
+                if (t != null) {
+                    getLogger().error(t.getMessage());
+                }
+            });
             return result.lines();
         } catch (IOException e) {
             getLogger().error(e.getMessage(), e);

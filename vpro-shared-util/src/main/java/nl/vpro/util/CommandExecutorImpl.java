@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ import nl.vpro.logging.simple.Slf4jSimpleLogger;
  */
 public class CommandExecutorImpl implements CommandExecutor {
 
-    private final String binary;
+    private final Supplier<String> binary;
 
     private final List<String> commonArgs;
 
@@ -60,7 +61,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Executable " + workdir.getAbsolutePath() + " does not exist.");
         }
-        this.binary = binary;
+        this.binary = () -> binary;
         this.workdir = workdir;
         this.commonArgs = null;
         this.logger = getDefaultLogger(binary);
@@ -76,10 +77,10 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
-        binary = f.getAbsolutePath();
+        binary = f::getAbsolutePath;
         this.workdir = workdir;
         this.commonArgs = null;
-        this.logger = getDefaultLogger(binary);
+        this.logger = getDefaultLogger(binary.get());
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -88,25 +89,38 @@ public class CommandExecutorImpl implements CommandExecutor {
         @Singular
         List<File> executables,
         Logger logger,
+        SimpleLogger simpleLogger,
         Function<CharSequence, String> wrapLogInfo,
         @Singular
         List<String> commonArgs,
         boolean useFileCache,
-        int batchSize
+        int batchSize,
+        boolean optional
         ) {
          if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
+        if (logger != null) {
+            this.logger = new Slf4jSimpleLogger(logger);
+        } else {
+            this.logger = getDefaultLogger("");
+        }
         Optional<File> f = getExecutable(executables);
         if (! f.isPresent()) {
-            throw new RuntimeException("None of " + executables + " can be executed");
+            if (! optional) {
+                throw new RuntimeException("None of " + executables + " can be executed");
+            } else {
+                this.logger.debug("None of {} can be executed", executables);
+                binary = () -> getExecutable(executables).map(File::getAbsolutePath).orElse(null);
+            }
+        } else {
+            binary = () -> f.get().getAbsolutePath();
         }
-        binary = f.get().getAbsolutePath();
         this.workdir = workdir;
         if (logger != null) {
             this.logger = new Slf4jSimpleLogger(logger);
         } else {
-            this.logger = getDefaultLogger(binary);
+            this.logger = getDefaultLogger(binary.get());
         }
         if (wrapLogInfo != null) {
             this.logger = new SimpleLoggerWrapper(this.logger) {
@@ -117,6 +131,11 @@ public class CommandExecutorImpl implements CommandExecutor {
                 }
             };
             this.wrapLogInfo = wrapLogInfo;
+
+        }
+        if (simpleLogger != null) {
+            this.logger = this.logger.chain(simpleLogger);
+
         }
         this.commonArgs = commonArgs;
         this.useFileCache = useFileCache;
@@ -176,7 +195,11 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
 
         final List<String> command = new ArrayList<>();
-        command.add(binary);
+        String b = binary.get();
+        if (b == null) {
+            throw new IllegalStateException("No binary found");
+        }
+        command.add(binary.get());
         ProcessBuilder pb = new ProcessBuilder(command);
         if (workdir != null) {
             pb.directory(workdir);
@@ -265,7 +288,12 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     private static SimpleLogger getDefaultLogger(String binary) {
-        String[] split = binary.split("[/.\\\\]+");
+        String[] split;
+        if (binary == null) {
+            split = new String[0];
+        } else {
+            split = binary.split("[/.\\\\]+");
+        }
         StringBuilder category = new StringBuilder(CommandExecutorImpl.class.getName());
         for (int i = split.length - 1; i >= 0; i--) {
             if (split[i].length() > 0) {
