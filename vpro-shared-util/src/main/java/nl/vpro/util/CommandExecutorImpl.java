@@ -99,7 +99,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         Optional<File> f = getExecutable(executables);
         if (! f.isPresent()) {
-            throw new RuntimeException("None of " + executables + "can be executed");
+            throw new RuntimeException("None of " + executables + " can be executed");
         }
         binary = f.get().getAbsolutePath();
         this.workdir = workdir;
