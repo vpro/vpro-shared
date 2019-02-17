@@ -1,5 +1,7 @@
 package nl.vpro.swagger;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
@@ -17,9 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.ws.rs.core.MediaType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import nl.vpro.jackson2.JsonFilter;
 
 /**
@@ -27,11 +26,10 @@ import nl.vpro.jackson2.JsonFilter;
  * @author Michiel Meeuwissen
  * @since 0.21
  */
+@Slf4j
 public class SwaggerFilter implements Filter {
 
-    private static Logger LOG = LoggerFactory.getLogger(SwaggerFilter.class);
-
-    private static ExecutorService executor = Executors.newCachedThreadPool();
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -55,10 +53,10 @@ public class SwaggerFilter implements Filter {
                         }
                     }
                 } catch (Exception e) {
-                    LOG.warn(e.getMessage());
+                    log.warn(e.getMessage());
                 }
                 if (!json) {
-                    LOG.debug("Not json");
+                    log.debug("Not json");
                     chain.doFilter(request, response);
                     return;
                 }
@@ -127,7 +125,7 @@ public class SwaggerFilter implements Filter {
 
     @Override
     public void destroy() {
-        executor.shutdownNow();
+        EXECUTOR_SERVICE.shutdownNow();
 
     }
 
@@ -148,7 +146,7 @@ public class SwaggerFilter implements Filter {
 
         JsonFilter filter = new JsonFilter(in, from, replacements);
 
-        future[0] = executor.submit(filter);
+        future[0] = EXECUTOR_SERVICE.submit(filter);
         return out;
     }
 
