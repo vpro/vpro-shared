@@ -1,0 +1,36 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    version="2.0"
+    >
+    <jsp:directive.tag
+            description="This includes the head links for the swagger index" />
+
+    <jsp:scriptlet>request.setAttribute("swaggerbase", request.getContextPath() + "/webjars/swagger-ui/2.2.6/");</jsp:scriptlet>
+
+
+  <link href='${swaggerbase}css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='${swaggerbase}css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='${swaggerbase}css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='${swaggerbase}css/reset.css' media='print' rel='stylesheet' type='text/css'/>
+  <link href='${swaggerbase}css/print.css' media='print' rel='stylesheet' type='text/css'/>
+
+  <link href='css/override.css' rel='stylesheet' type='text/css'/>
+
+  <script src='${swaggerbase}lib/object-assign-pollyfill.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/jquery-1.8.0.min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/jquery.slideto.min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/jquery.wiggle.min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/jquery.ba-bbq.min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/handlebars-4.0.5.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/lodash.min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/backbone-min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}swagger-ui.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/highlight.9.1.0.pack.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/highlight.9.1.0.pack_extended.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/jsoneditor.min.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/marked.js' type='text/javascript'><jsp:text></jsp:text></script>
+  <script src='${swaggerbase}lib/swagger-oauth.js' type='text/javascript'><jsp:text></jsp:text></script>
+
+
+
+</jsp:root>

@@ -1,0 +1,55 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    version="2.0"
+    >
+    <jsp:directive.tag
+            description="This includes the javascript for the swagger index" />
+
+
+  <script type="text/javascript"><![CDATA[
+    $(function () {
+
+      var url = "../../api/swagger.json";
+      hljs.configure({
+        highlightSizeThreshold: 5000
+      });
+
+      // Pre load translate...
+      if(window.SwaggerTranslator) {
+        window.SwaggerTranslator.translate();
+      }
+      window.swaggerUi = new SwaggerUi({
+          url: url,
+          dom_id: "swagger-ui-container",
+          //supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+          supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+          onComplete: function(swaggerApi, swaggerUi){
+
+              if(window.SwaggerTranslator) {
+                  window.SwaggerTranslator.translate();
+              }
+          },
+          onFailure: function(data) {
+              log("Unable to Load SwaggerUI");
+          },
+          docExpansion: "none",
+          jsonEditor: false,
+          defaultModelRendering: 'schema',
+          showRequestHeaders: true,
+          apisSorter: 'alpha',
+          operationsSorter: 'alpha',
+          validatorUrl: null
+      });
+
+      window.swaggerUi.load();
+
+      function log() {
+        if ('console' in window) {
+          console.log.apply(console, arguments);
+        }
+      }
+  });]]>
+  </script>
+
+
+</jsp:root>
