@@ -61,7 +61,7 @@ public class CommandExecutorImplTest {
 
 
     @Test
-    public void optional() throws IOException {
+    public void optional() throws IOException, InterruptedException {
         File tmpFile = File.createTempFile("env", "test");
         tmpFile.deleteOnExit();
         StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
@@ -74,7 +74,10 @@ public class CommandExecutorImplTest {
                 .build();
         find.lines(".")
             .limit(20)
-            .forEach(log::info);
+            .forEach(log::info)
+            ;
+        // wait for whenComplete
+        Thread.sleep(100);
         assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR java.lang.IllegalStateException: No binary found");
 
         logger.getStringBuilder().setLength(0);
