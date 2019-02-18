@@ -1,7 +1,11 @@
 package nl.vpro.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,6 +71,18 @@ public class SkipAtStartInputStreamTest {
         assertThat(SkipAtStartInputStream.skipUnicodeByteOrderMarks(new ByteArrayInputStream(withbe))).hasSameContentAs(new ByteArrayInputStream(new byte[]{'c', 'd'}));
         assertThat(SkipAtStartInputStream.skipUnicodeByteOrderMarks(new ByteArrayInputStream(withle))).hasSameContentAs(new ByteArrayInputStream(new byte[]{'c', 'd'}));
         assertThat(SkipAtStartInputStream.skipUnicodeByteOrderMarks(new ByteArrayInputStream(withunrecognized))).hasSameContentAs(new ByteArrayInputStream(withunrecognized));
+
+    }
+
+    @Test
+    public void testLarge() throws IOException {
+        String name = "/" + SkipAtStartInputStream.class.getName().replaceAll("\\.", "/") + ".class";
+        InputStream resourceAsStream = SkipAtStartInputStream.class.getResourceAsStream(name);
+        int count = IOUtils.copy(resourceAsStream, new NullOutputStream());
+        SkipAtStartInputStream wrapped = new SkipAtStartInputStream(resourceAsStream = SkipAtStartInputStream.class.getResourceAsStream(name));
+        int count2 = IOUtils.copy(wrapped, new NullOutputStream());
+        assertThat(count2).isEqualTo(count);
+
 
     }
 }
