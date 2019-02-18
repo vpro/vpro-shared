@@ -4,7 +4,9 @@
     >
     <jsp:directive.tag
             description="This includes the javascript for the swagger index" />
-    <jsp:directive.attribute name="json"   type="java.lang.String" description="swagger json to load" required="false" />
+    <jsp:directive.attribute name="json"
+                             rtexprvalue="true"
+                             type="java.lang.String" description="swagger json to load" required="false" />
 
 
   <jsp:scriptlet>

@@ -16,7 +16,7 @@
     <name>javascript</name>
     <path>/META-INF/tags/swagger/javascript.tagx</path>
   </tag-file>
-   <tag-file>
+  <tag-file>
     <name>logo</name>
     <path>/META-INF/tags/swagger/logo.tagx</path>
   </tag-file>

@@ -1,0 +1,1 @@
+<jsp:scriptlet>request.setAttribute("swaggerbase", request.getContextPath() + "/webjars/swagger-ui/2.2.10-1/");</jsp:scriptlet>
