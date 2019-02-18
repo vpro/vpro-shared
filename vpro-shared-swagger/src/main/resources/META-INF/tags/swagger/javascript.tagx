@@ -4,6 +4,7 @@
     >
     <jsp:directive.tag
             description="This includes the javascript for the swagger index" />
+    <jsp:directive.attribute name="json"   type="java.lang.String" required="false" />
 
 
   <script type="text/javascript"><![CDATA[
