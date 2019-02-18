@@ -152,6 +152,7 @@ public interface CommandExecutor {
                 if (t != null) {
                     getLogger().error(t.getMessage());
                 }
+                getLogger().debug("Ready with {}", i);
             });
             return result.lines();
         } catch (IOException e) {
