@@ -8,10 +8,9 @@
   <uri>https://www.vpro.nl/shared/tags/swagger</uri>
 
   <tag-file>
-    <name>head</name>
+    <name>head-links</name>
     <path>/META-INF/tags/swagger/head-links.tagx</path>
   </tag-file>
-
    <tag-file>
     <name>javascript</name>
     <path>/META-INF/tags/swagger/javascript.tagx</path>
@@ -19,6 +18,10 @@
   <tag-file>
     <name>logo</name>
     <path>/META-INF/tags/swagger/logo.tagx</path>
+  </tag-file>
+   <tag-file>
+    <name>swaggerbase</name>
+    <path>/META-INF/tags/swagger/swaggerbase.tagx</path>
   </tag-file>
 
 </taglib>

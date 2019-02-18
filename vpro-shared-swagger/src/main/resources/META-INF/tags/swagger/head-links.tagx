@@ -1,14 +1,12 @@
 <jsp:root
     xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:swagger="https://www.vpro.nl/shared/tags/swagger"
     version="2.0"
     >
   <jsp:directive.tag
             description="This includes the head links for the swagger index" />
-  <jsp:directive.variable name-given="swaggerbase" />
 
-  <jsp:scriptlet>request.setAttribute("swaggerbase", request.getContextPath() + "/webjars/swagger-ui/2.2.10-1/");</jsp:scriptlet>
-
-
+  <swagger:swaggerbase />
 
   <link href='${swaggerbase}css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
   <link href='${swaggerbase}css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
