@@ -50,7 +50,7 @@
     <connection>scm:git:git://git@github.com/vpro/vpro-shared.git</connection>
     <developerConnection>scm:git:git@github.com:vpro/vpro-shared.git</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>HEAD</tag>
+    <tag>REL-2.5-SNAPSHOT</tag>
   </scm>
 
 
