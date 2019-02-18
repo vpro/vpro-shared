@@ -4,13 +4,20 @@
     >
     <jsp:directive.tag
             description="This includes the javascript for the swagger index" />
-    <jsp:directive.attribute name="json"   type="java.lang.String" required="false" />
+    <jsp:directive.attribute name="json"   type="java.lang.String" description="swagger json to load" required="false" />
 
 
+  <jsp:scriptlet>
+     String url = (String) request.getAttribute("json");
+     if (url == null) {
+       url = "../../api/swagger.json";
+     }
+    request.setAttribute("swaggerjson", url);
+  </jsp:scriptlet>
   <script type="text/javascript"><![CDATA[
     $(function () {
 
-      var url = "../../api/swagger.json";
+      var url = '${swaggerjson}';
       hljs.configure({
         highlightSizeThreshold: 5000
       });
