@@ -1,0 +1,10 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    version="2.0"
+    >
+    <jsp:directive.include file="swaggerbase.jspx" />
+    <a id="logo" href="http://swagger.io">
+        <img class="logo__img" alt="swagger" height="30" width="30" src="${swaggerbase}images/logo_small.png" />
+    </a>
+
+</jsp:root>
