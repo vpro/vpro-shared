@@ -5,7 +5,7 @@
     <jsp:directive.tag
             description="This includes the head links for the swagger index" />
 
-    <jsp:scriptlet>request.setAttribute("swaggerbase", request.getContextPath() + "/webjars/swagger-ui/2.2.6/");</jsp:scriptlet>
+    <jsp:scriptlet>request.setAttribute("swaggerbase", request.getContextPath() + "/webjars/swagger-ui/2.2.10-1/");</jsp:scriptlet>
 
 
   <link href='${swaggerbase}css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
