@@ -94,4 +94,73 @@ public class SkipAtStartInputStream extends InputStream {
 
 
     }
+
+    @Override
+    public int read(byte b[]) throws IOException {
+        if (skip.isEmpty()) {
+            return wrapped.read(b, 0, b.length);
+        } else {
+            return super.read(b);
+        }
+    }
+
+    @Override
+    public int read(byte b[], int off, int len) throws IOException {
+        if (skip.isEmpty()) {
+            return wrapped.read(b, off, len);
+        } else {
+            return super.read(b, off, len);
+        }
+    }
+    @Override
+    public long skip(long n) throws IOException {
+          if (skip.isEmpty()) {
+            return wrapped.skip(n);
+        } else {
+            return super.skip(n);
+        }
+    }
+
+    @Override
+    public int available() throws IOException {
+         if (skip.isEmpty()) {
+            return wrapped.available();
+        } else {
+            return super.available();
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        wrapped.close();
+    }
+
+    @Override
+    public synchronized void mark(int readlimit) {
+        if (skip.isEmpty()) {
+            wrapped.mark(readlimit);
+        } else {
+            super.mark(readlimit);
+        }
+
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        if (skip.isEmpty()) {
+            wrapped.reset();
+        } else {
+            super.reset();
+        }
+    }
+
+    @Override
+    public boolean markSupported() {
+         if (skip.isEmpty()) {
+            return wrapped.markSupported();
+        } else {
+             return super.markSupported();
+        }
+    }
+
 }
