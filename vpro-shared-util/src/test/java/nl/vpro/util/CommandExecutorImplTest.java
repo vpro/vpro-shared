@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -31,6 +32,10 @@ public class CommandExecutorImplTest {
     public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
 
 
+    @After
+    public void check() {
+        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
+    }
     @Test
     public void execute() {
         CommandExecutorImpl instance = new CommandExecutorImpl("/usr/bin/env");

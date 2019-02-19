@@ -1,6 +1,5 @@
 package nl.vpro.util;
 
-import lombok.Builder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,8 +26,9 @@ public class Copier implements Runnable, Closeable {
 
     private boolean ready;
     private long count;
-    private final InputStream in;
-    private final OutputStream out;
+
+    private final InputStream input;
+    private final OutputStream output;
     private final long batch;
     private final Consumer<Copier> callback;
     private final BiConsumer<Copier, Throwable> errorHandler;
@@ -43,7 +43,19 @@ public class Copier implements Runnable, Closeable {
         this(i, o, batch, null, null, null,  0, null, null);
     }
 
-    @Builder
+    /**
+     *
+     * @param input The input stream to copy from (will be close if ready)
+     * @param output The output stream to copy to (will not be implicetely closed)
+     * @param batch
+     * @param batchConsumer
+     * @param callback
+     * @param errorHandler
+     * @param offset
+     * @param name
+     * @param notify
+     */
+    @lombok.Builder
     private Copier(
         InputStream input,
         OutputStream output,
@@ -55,8 +67,8 @@ public class Copier implements Runnable, Closeable {
         String name,
         Object notify
         ) {
-        in = input;
-        out = output;
+        this.input = input;
+        this.output = output;
         this.batch = batch == 0 ? 8192: batch;
         this.callback = callback;
         this.batchConsumer = batchConsumer;
@@ -74,7 +86,7 @@ public class Copier implements Runnable, Closeable {
     public void run() {
         try {
             if (batchConsumer == null || batch < 1) {
-                count += IOUtils.copyLarge(in, out);
+                count += IOUtils.copyLarge(input, output);
                 if (notify != null) {
                     synchronized (notify) {
                         notify.notifyAll();
@@ -83,7 +95,7 @@ public class Copier implements Runnable, Closeable {
             } else {
                 batchConsumer.accept(this);
                 while (true) {
-                    long result = IOUtils.copyLarge(in, out, 0, batch);
+                    long result = IOUtils.copyLarge(input, output, 0, batch);
                     count += result;
                     if (notify != null) {
                         synchronized (notify) {
@@ -149,7 +161,7 @@ public class Copier implements Runnable, Closeable {
 
     @Override
     public void close() throws IOException {
-        in.close();
+        input.close();
         if (future != null) {
             future.cancel(false);
             future = null;

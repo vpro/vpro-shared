@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -231,7 +230,8 @@ public class CommandExecutorImpl implements CommandExecutor {
                         .noProgressLogging()
                         .build();
                 }
-                copier = copyThread("command output", commandOutput, out, (e) -> {
+                copier = copyThread("command output", commandOutput, out,
+                    (e) -> {
                     Process process = p.destroyForcibly();
                     logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
                 });
@@ -311,6 +311,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             .callback((c) -> {
                 try {
                     in.close();
+                } catch (IOException ioe) {
+                    logger.warn(ioe.getMessage());
+                }
+                try {
                     out.close();
                 } catch (IOException ioe) {
                     logger.warn(ioe.getMessage());
@@ -319,7 +323,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             .errorHandler((c, t) -> errorHandler.accept(t))
             .batch(batchSize)
             .build();
-        ForkJoinPool.commonPool().execute(copier);
+        copier.execute();
         return copier;
     }
 

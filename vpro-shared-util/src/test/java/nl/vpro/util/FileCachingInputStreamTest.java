@@ -45,63 +45,73 @@ public class FileCachingInputStreamTest {
     @Test
     public void testRead() throws IOException {
 
-        FileCachingInputStream inputStream =  slowReader();
+        try(FileCachingInputStream inputStream =  slowReader()) {
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        int r;
-        while ((r = inputStream.read()) != -1) {
-            out.write(r);
+            int r;
+            while ((r = inputStream.read()) != -1) {
+                out.write(r);
+            }
+
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
-
-        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
+        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
     }
 
 
     @Test
     public void testReadBuffer() throws IOException {
 
-        FileCachingInputStream inputStream = slowReader();
+        try(FileCachingInputStream inputStream = slowReader()) {
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        int r;
-        byte[] buffer = new byte[10];
-        while ((r = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, r);
+            int r;
+            byte[] buffer = new byte[10];
+            while ((r = inputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, r);
+            }
+
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
+        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
 
-        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
 
     @Test(expected = IOException.class)
     public void testReadFileGetsBroken() throws IOException {
-        FileCachingInputStream inputStream = FileCachingInputStream.builder()
-            .outputBuffer(2)
-            .batchSize(3)
-            .batchConsumer((f, c) -> {
-                if (c.getCount() > 300) {
-                    try {
-                        f.close();
-                    } catch (IOException e) {
-                        log.error(e.getMessage(), e);
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream
+                .builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .batchConsumer((f, c) -> {
+                    if (c.getCount() > 300) {
+                        try {
+                            f.close();
+                        } catch (IOException e) {
+                            log.error(e.getMessage(), e);
+                        }
+
                     }
+                })
+                .input(new ByteArrayInputStream(MANY_BYTES))
+                .initialBuffer(4)
+                .startImmediately(true)
+                .build()) {
 
-                }
-            })
-            .input(new ByteArrayInputStream(MANY_BYTES))
-            .initialBuffer(4)
-            .startImmediately(true)
-            .build();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        int r;
-        byte[] buffer = new byte[10];
-        while ((r = inputStream.read(buffer)) != -1) {
-            out.write(buffer, 0, r);
+            int r;
+            byte[] buffer = new byte[10];
+            while ((r = inputStream.read(buffer)) != -1) {
+                out.write(buffer, 0, r);
+            }
         }
+        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
+
 
 
     }
@@ -153,6 +163,8 @@ public class FileCachingInputStreamTest {
             isInterrupted |= thisThread.isInterrupted();
             closed.getAndIncrement();
             log.info("Finally: interrupted: {}: times: {} ", thisThread.isInterrupted(), interrupted.get());
+
+
 
         }
         assertThat(isInterrupted).withFailMessage("Thread did not get interrupted").isTrue();

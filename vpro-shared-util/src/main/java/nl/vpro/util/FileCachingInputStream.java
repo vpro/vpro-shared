@@ -46,6 +46,7 @@ public class FileCachingInputStream extends InputStream {
     private final boolean deleteTempFile;
     private final InputStream tempFileInputStream;
     private long count = 0;
+    static int openStreams = 0;
 
     @Getter
     private long bytesRead = 0;
@@ -179,6 +180,7 @@ public class FileCachingInputStream extends InputStream {
 
 
             final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
+            openStreams++;
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
                 tempFileOutputStream.write(buffer);
@@ -224,6 +226,7 @@ public class FileCachingInputStream extends InputStream {
                 effectiveProgressLogging = progressLogging;
             }
             this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
+            openStreams++;
              // The copier is responsible for copying the remaining of the stream to the file
             // in a separate thread
             copier = Copier.builder()
@@ -235,7 +238,9 @@ public class FileCachingInputStream extends InputStream {
                 .callback(c -> {
                     try {
                         tempFileOutputStream.close();
+                        openStreams--;
                         //this.tempFileInputStream.close();
+                        //openStreams--;
                         if (deleteTempFile) {
                             Files.deleteIfExists(tempFile);
                         }
@@ -293,6 +298,7 @@ public class FileCachingInputStream extends InputStream {
     public synchronized void close() throws IOException {
         if (this.tempFileInputStream != null) {
             this.tempFileInputStream.close();
+            openStreams--;
         }
         if (copier != null) {
             // if somewhy close when copier is not ready yet, it can be interrupted, because we will not be using it any more.
@@ -314,7 +320,7 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public String toString() {
-        return super.toString();
+        return super.toString() + " for " + tempFile;
     }
 
     public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
@@ -336,6 +342,7 @@ public class FileCachingInputStream extends InputStream {
     public Path getTempFile() {
         return tempFile;
     }
+
 
     private int readFromBuffer() {
         if (count < bufferLength) {
