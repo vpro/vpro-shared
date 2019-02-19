@@ -44,7 +44,7 @@ public class FileCachingInputStream extends InputStream {
 
     private final Path tempFile;
     private final boolean deleteTempFile;
-    private final InputStream file;
+    private final InputStream tempFileInputStream;
     private long count = 0;
 
     @Getter
@@ -90,19 +90,19 @@ public class FileCachingInputStream extends InputStream {
     @lombok.Builder(builderClassName = "Builder")
     @SneakyThrows(IOException.class)
     private FileCachingInputStream(
-        InputStream input,
-        Path path,
-        String filePrefix,
-        long batchSize,
-        BiConsumer<FileCachingInputStream, Copier> batchConsumer,
+        final InputStream input,
+        final Path path,
+        final String filePrefix,
+        final long batchSize,
+        final BiConsumer<FileCachingInputStream, Copier> batchConsumer,
         Integer outputBuffer,
-        Logger logger,
+        final Logger logger,
         List<OpenOption> openOptions,
         Integer initialBuffer,
-        Boolean startImmediately,
-        Boolean progressLogging,
-        Path tempPath,
-        Boolean deleteTempFile
+        final Boolean startImmediately,
+        final Boolean progressLogging,
+        final Path tempPath,
+        final Boolean deleteTempFile
     ) {
 
         super();
@@ -150,7 +150,7 @@ public class FileCachingInputStream extends InputStream {
                             IOUtils.copy(new ByteArrayInputStream(buffer), out);
                         }
                     }
-                    file = null;
+                    tempFileInputStream = null;
                     return;
                 } else {
                     buffer = buf;
@@ -172,16 +172,16 @@ public class FileCachingInputStream extends InputStream {
                 filePrefix == null ? "file-caching-inputstream" : filePrefix,
                 null) : tempPath;
 
-
-
             log.debug("Using {}", tempFile);
             if (outputBuffer == null) {
                 outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
             }
-            OutputStream out = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
+
+
+            final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
-                out.write(buffer);
+                tempFileOutputStream.write(buffer);
             }
 
             final BiConsumer<FileCachingInputStream, Copier> bc;
@@ -223,19 +223,19 @@ public class FileCachingInputStream extends InputStream {
             } else {
                 effectiveProgressLogging = progressLogging;
             }
-            this.file = new BufferedInputStream(
-                Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
+            this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
              // The copier is responsible for copying the remaining of the stream to the file
             // in a separate thread
             copier = Copier.builder()
                 .input(input)
                 .offset(bufferLength)
-                .output(out)
+                .output(tempFileOutputStream)
                 .name(tempFile.toString())
                 .notify(this)
                 .callback(c -> {
                     try {
-                        out.close();
+                        tempFileOutputStream.close();
+                        //this.tempFileInputStream.close();
                         if (deleteTempFile) {
                             Files.deleteIfExists(tempFile);
                         }
@@ -263,7 +263,7 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public int read() throws IOException {
         try {
-            if (file == null) {
+            if (tempFileInputStream == null) {
                 // the stream was small, we are reading from the memory buffer
                 return readFromBuffer();
             } else {
@@ -278,7 +278,7 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public int read(byte b[]) throws IOException {
         try {
-            if (file == null) {
+            if (tempFileInputStream == null) {
                 return readFromBuffer(b);
             } else {
                 return readFromFile(b);
@@ -291,8 +291,8 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public synchronized void close() throws IOException {
-        if (file != null) {
-            file.close();
+        if (this.tempFileInputStream != null) {
+            this.tempFileInputStream.close();
         }
         if (copier != null) {
             // if somewhy close when copier is not ready yet, it can be interrupted, because we will not be using it any more.
@@ -300,7 +300,7 @@ public class FileCachingInputStream extends InputStream {
                 log.info("Interrupted {}", copier);
             }
         }
-        if (file != null) {
+        if (tempFileInputStream != null) {
             if (tempFile != null && deleteTempFile) {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
@@ -363,7 +363,7 @@ public class FileCachingInputStream extends InputStream {
 
     private int readFromFile() throws IOException {
         copier.executeIfNotRunning();
-        int result = file.read();
+        int result = tempFileInputStream.read();
         while (result == EOF) {
             synchronized (copier) {
                 while (!copier.isReady() && result == EOF) {
@@ -375,7 +375,7 @@ public class FileCachingInputStream extends InputStream {
                         log.error(e.getMessage(), e);
                         this.close();
                     }
-                    result = file.read();
+                    result = tempFileInputStream.read();
                 }
                 if (copier.isReady() && result == EOF) {
                     // the copier did not return any new results
@@ -399,7 +399,7 @@ public class FileCachingInputStream extends InputStream {
         }
         int totalResult = 0;
         synchronized (copier) {
-            totalResult += Math.max(file.read(b, 0, b.length), 0);
+            totalResult += Math.max(tempFileInputStream.read(b, 0, b.length), 0);
 
             if (totalResult == 0) {
 
@@ -411,7 +411,7 @@ public class FileCachingInputStream extends InputStream {
                         log.warn("Interrupted {}", e.getMessage());
                         throw new InterruptedIOException(e.getMessage());
                     }
-                    int subResult = Math.max(file.read(b, totalResult, b.length - totalResult), 0);
+                    int subResult = Math.max(tempFileInputStream.read(b, totalResult, b.length - totalResult), 0);
                       totalResult += subResult;
                 }
 
