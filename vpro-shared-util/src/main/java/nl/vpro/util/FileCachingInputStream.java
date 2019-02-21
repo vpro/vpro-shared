@@ -212,7 +212,7 @@ public class FileCachingInputStream extends InputStream {
             final boolean deleteOnClose;
             if (openOptions == null) {
                 openOptions = new ArrayList<>();
-                if (deleteTempFile == null || deleteTempFile) {
+                if (this.deleteTempFile) {
                     openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
                     deleteOnClose = true;
                 } else {
@@ -246,7 +246,7 @@ public class FileCachingInputStream extends InputStream {
                     } catch (IOException ignore) {
 
                     }
-                    if (deleteTempFile) {
+                    if (this.deleteTempFile) {
                         try {
                             Files.deleteIfExists(tempFile);
                         } catch (IOException ignore) {
@@ -313,7 +313,7 @@ public class FileCachingInputStream extends InputStream {
             }
         }
         if (tempFileInputStream != null) {
-            if (tempFile != null && deleteTempFile) {
+            if (tempFile != null && this.deleteTempFile) {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
                 } else {
