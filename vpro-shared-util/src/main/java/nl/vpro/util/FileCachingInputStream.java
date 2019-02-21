@@ -18,6 +18,8 @@ import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
 
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+
 /**
  * <p>When wrapping this around your inputstream, it will be read as fast a possible, but you can
  * consume from it slower. </p>
@@ -147,7 +149,7 @@ public class FileCachingInputStream extends InputStream {
                     copier = null;
                     this.tempFile = null;
                     if (tempPath != null) {
-                        try (FileOutputStream out = new FileOutputStream(tempPath.toFile())) {
+                        try (OutputStream out = Files.newOutputStream(tempPath)) {
                             IOUtils.copy(new ByteArrayInputStream(buffer), out);
                         }
                     }
@@ -179,7 +181,7 @@ public class FileCachingInputStream extends InputStream {
             }
 
 
-            final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
+            final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile, CREATE_NEW), outputBuffer);
             openStreams++;
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
@@ -241,11 +243,11 @@ public class FileCachingInputStream extends InputStream {
                         openStreams--;
                         //this.tempFileInputStream.close();
                         //openStreams--;
-                        if (deleteTempFile) {
-                            Files.deleteIfExists(tempFile);
-                        }
                     } catch (IOException ignore) {
 
+                    }
+                    if (deleteTempFile) {
+                        Files.deleteIfExists(tempFile);
                     }
                     Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
                 })
