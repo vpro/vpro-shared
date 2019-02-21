@@ -247,7 +247,11 @@ public class FileCachingInputStream extends InputStream {
 
                     }
                     if (deleteTempFile) {
-                        Files.deleteIfExists(tempFile);
+                        try {
+                            Files.deleteIfExists(tempFile);
+                        } catch (IOException ignore) {
+
+                        }
                     }
                     Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
                 })
