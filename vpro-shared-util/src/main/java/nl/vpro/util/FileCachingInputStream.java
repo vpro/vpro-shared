@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -256,9 +258,7 @@ public class FileCachingInputStream extends InputStream {
                     Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
                 })
                 .batch(batchSize)
-                .batchConsumer(c -> {
-                    bc.accept(this, c);
-                })
+                .batchConsumer(c -> bc.accept(this, c))
                 .build();
             if (startImmediately == null || startImmediately) {
                 // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
@@ -287,7 +287,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte b[]) throws IOException {
+    public int read(@Nonnull  byte[] b) throws IOException {
         try {
             if (tempFileInputStream == null) {
                 return readFromBuffer(b);
@@ -363,7 +363,7 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
-    private int readFromBuffer(byte b[]) {
+    private int readFromBuffer(byte[] b) {
         int toCopy = Math.min(b.length, bufferLength - (int) count);
         if (toCopy > 0) {
             System.arraycopy(buffer, (int) count, b, 0, toCopy);
@@ -405,7 +405,7 @@ public class FileCachingInputStream extends InputStream {
         return result;
     }
 
-    private int readFromFile(byte b[]) throws IOException {
+    private int readFromFile(byte[] b) throws IOException {
         copier.executeIfNotRunning();
         if (copier.isReady() && count == copier.getCount()) {
             return EOF;
