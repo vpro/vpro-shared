@@ -169,17 +169,22 @@ public class Copier implements Runnable, Closeable {
         }
     }
 
+    /**
+     *
+     * @return True if any interruption happened. False if the future was canceled or done already, or if cancellng failed.
+     * @throws IOException
+     */
 
     public boolean interrupt() throws IOException {
         try {
             if (future != null) {
                 if (future.isCancelled()) {
                     log.debug("Future is cancelled already");
-                    return true;
+                    return false;
                 }
                 if (future.isDone()) {
                     log.debug("Future is done already");
-                    return true;
+                    return false;
                 }
                 future.cancel(true);
                 boolean result = future.cancel(true);

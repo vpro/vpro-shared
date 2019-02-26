@@ -20,8 +20,6 @@ import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-
 /**
  * <p>When wrapping this around your inputstream, it will be read as fast a possible, but you can
  * consume from it slower. </p>
@@ -183,7 +181,7 @@ public class FileCachingInputStream extends InputStream {
             }
 
 
-            final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile, CREATE_NEW), outputBuffer);
+            final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
             openStreams++;
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
@@ -307,7 +305,7 @@ public class FileCachingInputStream extends InputStream {
             openStreams--;
         }
         if (copier != null) {
-            // if somewhy close when copier is not ready yet, it can be interrupted, because we will not be using it any more.
+            // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
             if (copier.interrupt()) {
                 log.info("Interrupted {}", copier);
             }
