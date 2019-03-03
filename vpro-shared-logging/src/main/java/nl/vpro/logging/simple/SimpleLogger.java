@@ -160,5 +160,16 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
 
+    default SimpleLogger chain(Logger... logger) {
+        SimpleLogger[] array = new SimpleLogger[logger.length + 1];
+        array[0] = this;
+        for (int i = 1; i <= logger.length; i++) {
+            array[i] = SimpleLogger.slfj4(logger[i]);
+        }
+        return new ChainedSimpleLogger(array);
+
+    }
+
+
 
 }
