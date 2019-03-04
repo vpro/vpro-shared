@@ -1,6 +1,5 @@
 package nl.vpro.util;
 
-import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -85,12 +84,10 @@ public class CommandExecutorImpl implements CommandExecutor {
     @lombok.Builder(builderClassName = "Builder")
     private CommandExecutorImpl(
         File workdir,
-        @Singular
         List<File> executables,
         Logger logger,
         SimpleLogger simpleLogger,
         Function<CharSequence, String> wrapLogInfo,
-        @Singular
         List<String> commonArgs,
         boolean useFileCache,
         int batchSize,
@@ -155,6 +152,13 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     public static class Builder {
+
+        public Builder commonArg(String... args) {
+            return commonArgs(Arrays.asList(args));
+        }
+        public Builder executable(File... args) {
+            return executables(Arrays.asList(args));
+        }
 
         public Builder executablesPaths(String... executables) {
             return executablesPaths(Arrays.asList(executables));
