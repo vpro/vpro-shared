@@ -40,6 +40,7 @@ public class FileCachingInputStreamTest {
     @Before
     public void before() {
         log.info("-----{}. Interrupted {}", name.getMethodName(), Thread.interrupted());
+        FileCachingInputStream.openStreams = 0;
     }
 
     @Test
