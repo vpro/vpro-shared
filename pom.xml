@@ -196,21 +196,21 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>5.1.4.RELEASE</spring.version>
-    <spring-security.version>5.1.2.RELEASE</spring-security.version>
+    <spring.version>5.1.5.RELEASE</spring.version>
+    <spring-security.version>5.1.4.RELEASE</spring-security.version>
 
     <jackson2.version>2.9.8</jackson2.version>    <!-- equals to poms-parent -->
     <jackson2.scala.version>2.9.8</jackson2.scala.version>
     <junit.version>4.12</junit.version>
-    <mockito.version>2.23.4</mockito.version>
-    <assertj.version>3.11.1</assertj.version>
+    <mockito.version>2.25.0</mockito.version>
+    <assertj.version>3.12.1</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
     <resteasy.version>3.6.2.Final</resteasy.version>
     <slf4j.version>1.7.25</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.11.1</log4j2.version>
     <camel.version>2.23.1</camel.version>
-    <guava.version>27.0.1-jre</guava.version>
+    <guava.version>27.1-jre</guava.version>
     <javassist.version>3.22.0-CR1</javassist.version>
     <wss4j.version>2.2.2</wss4j.version>
 
@@ -218,7 +218,7 @@
     <httpcomponentscore.version>4.4.11</httpcomponentscore.version>
 
     <hibernate.version>5.4.1.Final</hibernate.version>
-    <hibernate.search.version>5.11.0.Final</hibernate.search.version>
+    <hibernate.search.version>5.11.1.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
     <!--
@@ -230,8 +230,8 @@
     <!--
     <swagger.version>2.0.0-rc2</swagger.version>
     -->
-    <swagger.version>1.5.21</swagger.version>
-    <lombok.version>1.18.4</lombok.version>
+    <swagger.version>1.5.22</swagger.version>
+    <lombok.version>1.18.6</lombok.version>
   </properties>
 
   <dependencyManagement>
