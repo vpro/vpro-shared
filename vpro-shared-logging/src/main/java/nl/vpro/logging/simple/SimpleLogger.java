@@ -28,6 +28,16 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new RemoveFromThreadLocal(before);
     }
 
+    static SimpleLogger threadLocalOr(SimpleLogger logger) {
+        SimpleLogger threadLocal = THREAD_LOCAL.get();
+        if (threadLocal instanceof NOPLogger || threadLocal == null) {
+            return logger;
+        }
+        return threadLocal;
+    }
+    static SimpleLogger threadLocalOr(Logger logger) {
+        return threadLocalOr(slfj4(logger));
+    }
 
     class RemoveFromThreadLocal implements  AutoCloseable {
 
@@ -49,6 +59,11 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
 
     static SimpleLogger slfj4(Logger log) {
         return new Slf4jSimpleLogger(log);
+    }
+
+
+    static SimpleLogger nop() {
+        return new NOPLogger();
     }
 
     static SimpleLogger jul(java.util.logging.Logger log) {
