@@ -108,4 +108,14 @@ public class CommandExecutorImplTest {
         assertEquals(workDir.getAbsolutePath(), actual);
         log.info("Found workdir {}", actual);
     }
+
+    @Test
+    public void builder() {
+        CommandExecutorImpl build = CommandExecutorImpl.builder()
+            .executablesPaths("a", "b")
+            .optional(true)
+            .build();
+        assertThat(build.getBinary().toString()).isEqualTo("[a, b]");
+
+    }
 }

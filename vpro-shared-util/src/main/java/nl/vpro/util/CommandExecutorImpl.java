@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import nl.vpro.logging.simple.Slf4jSimpleLogger;
  */
 public class CommandExecutorImpl implements CommandExecutor {
 
+    @Getter
     private final Supplier<String> binary;
 
     private final List<String> commonArgs;
@@ -81,7 +83,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.logger = getDefaultLogger(binary.get());
     }
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(builderClassName = "Builder", buildMethodName = "_build")
     private CommandExecutorImpl(
         File workdir,
         List<File> executables,
@@ -107,7 +109,16 @@ public class CommandExecutorImpl implements CommandExecutor {
                 throw new RuntimeException("None of " + executables + " can be executed");
             } else {
                 this.logger.debug("None of {} can be executed", executables);
-                binary = () -> getExecutable(executables).map(File::getAbsolutePath).orElse(null);
+                binary = new Supplier<String>() {
+                    @Override
+                    public String get() {
+                        return getExecutable(executables).map(File::getAbsolutePath).orElse(null);
+                    }
+                    @Override
+                    public String toString() {
+                        return "" + executables;
+                    }
+                };
             }
         } else {
             binary = () -> f.get().getAbsolutePath();
@@ -153,11 +164,16 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     public static class Builder {
 
+        private List<String> cargs = new ArrayList<>();
+        private List<File>   execs = new ArrayList<>();
+
         public Builder commonArg(String... args) {
-            return commonArgs(Arrays.asList(args));
+            cargs.addAll(Arrays.asList(args));
+            return this;
         }
         public Builder executable(File... args) {
-            return executables(Arrays.asList(args));
+            execs.addAll(Arrays.asList(args));
+            return this;
         }
 
         public Builder executablesPaths(String... executables) {
@@ -172,6 +188,12 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         public Builder executablesPath(String executable) {
             return executablesPaths(executable);
+        }
+
+        public CommandExecutorImpl build() {
+            commonArgs(cargs);
+            executables(execs);
+            return _build();
         }
 
     }
