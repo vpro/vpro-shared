@@ -20,7 +20,7 @@ public class SkippingIteratorTest {
         List<String> test = Arrays.asList("a", "b", "b", "c");
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator());
-        assertThat(iterator).containsExactly("a", "b", "c");
+        assertThat(iterator).toIterable().containsExactly("a", "b", "c");
 
     }
 
@@ -31,7 +31,7 @@ public class SkippingIteratorTest {
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator(),
             Objects::equals);
-        assertThat(iterator).containsExactly("a", "b", "x", "b", "c", null, "a");
+        assertThat(iterator).toIterable().containsExactly("a", "b", "x", "b", "c", null, "a");
 
     }
 
@@ -42,7 +42,7 @@ public class SkippingIteratorTest {
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator(), (a, b) ->
             Objects.equals(a, b) && "x".equals(a));
-        assertThat(iterator).containsExactly("a", "b", "x", "b", "b", "c", null, null, "a");
+        assertThat(iterator).toIterable().containsExactly("a", "b", "x", "b", "b", "c", null, null, "a");
 
     }
 
@@ -52,7 +52,7 @@ public class SkippingIteratorTest {
         List<String> test = Arrays.asList("a", "b", "b", "b", "c");
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator());
-        assertThat(iterator).containsExactly("a", "b", "c");
+        assertThat(iterator).toIterable().containsExactly("a", "b", "c");
 
     }
 }
