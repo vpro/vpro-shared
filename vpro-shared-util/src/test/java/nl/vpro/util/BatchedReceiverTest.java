@@ -29,7 +29,7 @@ public class BatchedReceiverTest {
 				.batchSize(6)
 				.build();
 
-		assertThat(i).containsExactly(result.toArray(new String[result.size()]));
+		assertThat(i).toIterable().containsExactly(result.toArray(new String[result.size()]));
 
 	}
 
@@ -51,7 +51,7 @@ public class BatchedReceiverTest {
 				.build();
 
 		assertThat(i)
-			.containsExactly(result.subList(10, result.size()).toArray(new String[result.size() -10]));
+			.toIterable().containsExactly(result.subList(10, result.size()).toArray(new String[result.size() -10]));
 
 	}
 
