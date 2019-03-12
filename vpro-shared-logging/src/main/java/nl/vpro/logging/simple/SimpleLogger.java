@@ -179,7 +179,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         SimpleLogger[] array = new SimpleLogger[logger.length + 1];
         array[0] = this;
         for (int i = 1; i <= logger.length; i++) {
-            array[i] = SimpleLogger.slfj4(logger[i]);
+            array[i] = SimpleLogger.slfj4(logger[i - 1]);
         }
         return new ChainedSimpleLogger(array);
 
