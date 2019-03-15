@@ -88,6 +88,16 @@ public class TimeUtilsTest {
     }
 
     @Test
+    public void parseLocalDateTime() {
+        assertThat(
+            TimeUtils.parseLocalDateTime("2019-02-13T09:16").get()).isEqualTo(LocalDateTime.of(2019,2, 13, 9, 16));
+
+         assertThat(
+            TimeUtils.parseLocalDateTime("2019-02-13").get()).isEqualTo(LocalDate.of(2019,2, 13).atStartOfDay());
+
+    }
+
+    @Test
     public void testLarger() {
         assertThat(TimeUtils.isLarger(TimeUtils.parseDuration("PT6M").get(), TimeUtils.parseDuration("PT5M").get())).isTrue();
     }

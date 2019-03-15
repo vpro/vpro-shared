@@ -110,6 +110,31 @@ public class TimeUtils {
         }
     }
 
+
+    /**
+     * @since 2.6
+     */
+    public static Optional<LocalDateTime> parseLocalDateTime(CharSequence d) {
+        if (StringUtils.isBlank(d)) {
+            return Optional.empty();
+        }
+        if (d.toString().startsWith("${")) {// unresolved spring setting;
+            log.warn("Found {} as localdatetime, returing empty", d);
+            return Optional.empty();
+        }
+
+
+        try {
+            return Optional.of(LocalDateTime.parse(d));
+        } catch (DateTimeParseException dtp) {
+            try {
+                return Optional.of(LocalDate.parse(d).atStartOfDay());
+            } catch (DateTimeParseException dtp2) {
+                throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
+            }
+        }
+    }
+
     public static Optional<Duration> durationOf(Integer i) {
         return Optional.ofNullable(i == null ? null : Duration.ofMillis(i));
     }

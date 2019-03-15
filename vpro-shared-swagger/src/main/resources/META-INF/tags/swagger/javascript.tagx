@@ -11,7 +11,7 @@
 
     <jsp:scriptlet>
         if (url == null || url.length() == 0) {
-            url = "../../api/swagger.json";
+            url = "/api/swagger.json";
         }
         if (url.startsWith("/")) {
             url = request.getServletContext().getContextPath() + url;
