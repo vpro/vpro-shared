@@ -1,4 +1,4 @@
-package nl.vpro.hibernate;
+package nl.vpro.hibernate.search;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import nl.vpro.hibernate.search.JsonBridge;
 import nl.vpro.test.util.jackson2.Jackson2TestUtil;
 
 /**

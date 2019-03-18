@@ -8,7 +8,7 @@
     <version>2.6-SNAPSHOT</version>
   </parent>
 
-  <artifactId>vpro-shared-hibernate-shared</artifactId>
+  <artifactId>vpro-shared-hibernate-search</artifactId>
 
   <dependencies>
     <dependency>
@@ -20,9 +20,8 @@
       <artifactId>hibernate-search-orm</artifactId>
     </dependency>
     <dependency>
-      <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-test</artifactId>
-      <scope>test</scope>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
@@ -31,43 +30,13 @@
 
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-xml</artifactId>
+      <artifactId>vpro-shared-test</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>9.4.1208</version>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-hibernate</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-orm</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-entitymanager</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>2.4.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
     </dependency>
   </dependencies>
 </project>

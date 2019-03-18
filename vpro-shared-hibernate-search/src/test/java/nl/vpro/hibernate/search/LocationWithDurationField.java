@@ -1,4 +1,4 @@
-package nl.vpro.hibernate;
+package nl.vpro.hibernate.search;
 
 import java.time.Duration;
 
