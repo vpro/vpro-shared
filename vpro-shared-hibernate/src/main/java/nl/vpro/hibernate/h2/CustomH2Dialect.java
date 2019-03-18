@@ -2,23 +2,22 @@
  * Copyright (C) 2015 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.hibernate.hsql;
+package nl.vpro.hibernate.h2;
 
 import java.util.UUID;
 
 import org.hibernate.boot.model.TypeContributions;
-import org.hibernate.dialect.HSQLDialect;
+import org.hibernate.dialect.H2Dialect;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
 import org.hibernate.type.descriptor.java.UUIDTypeDescriptor;
 import org.hibernate.type.descriptor.sql.VarcharTypeDescriptor;
 
 /**
- *
- * @author Roelof Jan Koekoek
+ * @author Michiel Meeuwissen
  * @since 2.6
  */
-public class CustomHSQLDialect extends HSQLDialect {
+public class CustomH2Dialect extends H2Dialect {
 
     @Override
     public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
