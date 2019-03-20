@@ -191,8 +191,16 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
 
         public CommandExecutorImpl build() {
-            commonArgs(cargs);
-            executables(execs);
+            if (commonArgs != null) {
+                commonArgs.addAll(cargs);
+            } else {
+                commonArgs(cargs);
+            }
+            if (executables != null) {
+                executables.addAll(execs);
+            } else {
+                executables(execs);
+            }
             return _build();
         }
 

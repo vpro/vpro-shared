@@ -17,10 +17,6 @@
       <artifactId>hibernate-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-search-orm</artifactId>
-    </dependency>
-    <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-test</artifactId>
       <scope>test</scope>
@@ -45,7 +41,6 @@
       <version>9.4.1208</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-orm</artifactId>

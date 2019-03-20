@@ -155,8 +155,10 @@ public class URLResource<T> {
             } else {
                 URLConnection connection = openConnection();
                 getCachedResource(connection, 0);
-
             }
+        } catch (java.io.FileNotFoundException fne) {
+            errorCount++;
+            log.warn(fne.getMessage());
         } catch (java.net.UnknownHostException uhe) {
             errorCount++;
             log.warn(uhe.getClass().getName() + " " + uhe.getMessage());
@@ -272,6 +274,7 @@ public class URLResource<T> {
                                 } else {
                                     log.warn("Could not parse {}", s);
                                 }
+
                             } catch (Exception e) {
                                 log.warn("Could not parse {}  because {}", s, e.getMessage());
                             }
