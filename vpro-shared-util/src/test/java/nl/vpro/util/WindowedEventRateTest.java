@@ -69,7 +69,7 @@ public class WindowedEventRateTest {
 
         for (int i = 0; i < 1000; i++) {
             if (i % 100 == 0) {
-                log.info("{} duration: {}", i,  (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() + ")");
+                log.info("{} duration: {}", i, (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() + ")");
             }
             rate.newEvent();
 
@@ -77,7 +77,7 @@ public class WindowedEventRateTest {
 
         Thread.sleep(4800L);
 
-        log.info("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() +")");
+        log.info("duration: " + (System.currentTimeMillis() - start) + " ms. Measured rate " + rate.getRate(TimeUnit.SECONDS) + " #/s (" + rate.isWarmingUp() + ")");
 
         Thread.sleep(201L);
 
@@ -124,4 +124,14 @@ public class WindowedEventRateTest {
         assertThat(rateDuringWarmup).isCloseTo(100.0, withPercentage(20));
     }
 
+    @Test
+    public void builder() {
+
+        WindowedEventRate rate = WindowedEventRate.builder()
+            .window(Duration.ofMinutes(5))
+            .bucketDuration(Duration.ofSeconds(10))
+            .build();
+    }
 }
+
+

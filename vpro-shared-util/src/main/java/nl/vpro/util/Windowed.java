@@ -41,6 +41,12 @@ public abstract class Windowed<T> {
         Duration bucketDuration,
         Integer bucketCount
         ) {
+        if (bucketCount == null) {
+            if (window != null && bucketDuration != null) {
+                bucketCount = (int) (window.toMillis() / bucketDuration.toMillis());
+
+            }
+        }
         int bucketCount1 = bucketCount == null ? 20 : bucketCount;
         buckets = newBuckets(bucketCount1);
         for (int i = 0; i < buckets.length; i++) {
@@ -54,7 +60,7 @@ public abstract class Windowed<T> {
             this.bucketDuration = tempTotalDuration / bucketCount1;
             this.totalDuration = this.bucketDuration * bucketCount1;
             if (bucketDuration != null && this.bucketDuration != bucketDuration.toMillis()) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("The specified bucked duration " + bucketDuration + " didn't equal the calculated one " + Duration.ofMillis(this.bucketDuration));
 
             }
         } else {
