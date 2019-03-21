@@ -30,10 +30,6 @@ SNAPSHOT builds can be found at https://oss.sonatype.org/content/repositories/sn
 
 Release builds will be provided via [maven central](https://search.maven.org/search?q=g:nl.vpro.shared).
 
-## Checkout
-
-The maven build will ensure that this is checked out with git clone --recurse-submodules. It is essential for a correct build of vpro-shared-swagger.war
-
 
 ## TODO
 
