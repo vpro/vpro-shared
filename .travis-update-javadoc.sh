@@ -9,6 +9,6 @@ git config --global user.name "travis-ci"
 
 git add -f docs
 git commit -m "Latest javadoc on successful travis build $TRAVIS_BUILD_NUMBER"
-git push -fq origin  > /dev/null
+git push origin HEAD:master 
 
 echo -e "Published Javadoc.\n"
