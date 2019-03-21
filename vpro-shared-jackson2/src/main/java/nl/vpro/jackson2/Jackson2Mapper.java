@@ -72,35 +72,39 @@ public class Jackson2Mapper extends ObjectMapper {
     }
 
     private Jackson2Mapper() {
+        configureMapper(this);
 
-        AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
+    }
+
+    public static void configureMapper(ObjectMapper mapper) {
+         AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
             new JacksonAnnotationIntrospector(),
-            new JaxbAnnotationIntrospector(getTypeFactory()
+            new JaxbAnnotationIntrospector(mapper.getTypeFactory()
             ));
 
-        setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        setAnnotationIntrospector(introspector);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setAnnotationIntrospector(introspector);
 
-        disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
 
-        enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
-        enable(JsonParser.Feature.ALLOW_COMMENTS);
-        enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
-        enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
-        enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
+        mapper.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+        mapper.enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
+        mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        registerModule(javaTimeModule);
-        registerModule(new DateModule());
+        mapper.registerModule(javaTimeModule);
+        mapper.registerModule(new DateModule());
 
-        setConfig(getSerializationConfig().withView(Views.Normal.class));
-        setConfig(getDeserializationConfig().withView(Views.Normal.class));
+        mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
+        mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
 
 
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
-            registerModule((Module) avro.newInstance());
+            mapper.registerModule((Module) avro.newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
