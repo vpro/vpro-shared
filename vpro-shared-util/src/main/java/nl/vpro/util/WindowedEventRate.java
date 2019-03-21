@@ -19,8 +19,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class WindowedEventRate extends Windowed<AtomicLong> {
 
-    private final Consumer<WindowedEventRate> reporter;
-
     /**
      * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
      * @param bucketDuration The duration of one bucket (or <code>null</code> if window specified).
@@ -34,7 +32,6 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         Consumer<WindowedEventRate> reporter
         ) {
         super(window, bucketDuration, bucketCount);
-        this.reporter = reporter;
         if (reporter != null) {
             ThreadPools.backgroundExecutor.scheduleAtFixedRate(
                 () -> reporter.accept(WindowedEventRate.this), 0, this.bucketDuration, TimeUnit.MILLISECONDS);
