@@ -842,9 +842,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return build(engine, service, null, buildFurther);
     }
 
-    @Deprecated
     protected <T> T build(ClientHttpEngine engine, Class<T> service) {
-        return build(engine, service, null, this::buildResteasy);
+        return build(engine, service, null, null);
     }
 
     protected <T, S> T build(ClientHttpEngine engine, Class<T> service,  Class<S> restEasyInterface, Consumer<ResteasyClientBuilder> buildFurther) {
@@ -860,15 +859,29 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return build(engine, service, restEasyInterface, errorClass, buildFurther);
     }
 
+
+    protected <T, S> T buildWithErrorClass(
+        ClientHttpEngine engine,
+        Class<T> service,
+        Class<S> restEasyInterface,
+        Class<?> errorClass) {
+        return build(engine, service, restEasyInterface, errorClass, null);
+    }
+
     protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass, Consumer<ResteasyClientBuilder> buildFurther) {
         return buildWithErrorClass(engine, service, null, errorClass, buildFurther);
     }
+
+      protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
+        return buildWithErrorClass(engine, service, null, errorClass, null);
+    }
+
     protected <T> T build(Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
         return build(getClientHttpEngine(), service, buildFurther);
     }
 
     protected <T> T build(Class<T> service) {
-        return build(service, this::buildResteasy);
+        return build(service, null);
     }
 
     private <T> T buildResteasy(ClientHttpEngine engine, Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
@@ -886,6 +899,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         if (buildFurther != null) {
             buildFurther.accept(builder);
         }
+        buildResteasy(builder);
         return builder;
     }
 
@@ -913,7 +927,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     /**
-     * For further building the client you can override this method, which is a default for the different buildFurther arguments.
+     * For further building the client you can override this method.
+     * If you need more control you can also use the several 'buildFurther' arguments.
      */
     protected  void buildResteasy(ResteasyClientBuilder builder) {
 
@@ -927,7 +942,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
 
     protected final ResteasyWebTarget getTarget(ClientHttpEngine engine) {
-        return getTarget(engine, this::buildResteasy);
+        return getTarget(engine, null);
     }
 
     protected String getInfo() {
