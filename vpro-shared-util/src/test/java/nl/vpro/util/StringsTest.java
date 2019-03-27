@@ -23,6 +23,12 @@ public class StringsTest {
 
 
     @Test
+    public void stringsWithNewlines() {
+        List<String> result = Strings.strings("a\n b", "c,d").collect(Collectors.toList());
+        assertThat(result).containsExactly("a", "b", "c", "d");
+    }
+
+    @Test
     public void stringsFile() throws IOException {
         File tempFile = File.createTempFile("test", "test");
         tempFile.deleteOnExit();

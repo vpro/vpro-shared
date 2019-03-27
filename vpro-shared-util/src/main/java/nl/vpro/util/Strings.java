@@ -3,6 +3,7 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -29,13 +30,11 @@ public class Strings {
             return Arrays.stream(new String[]{s});
         } else {
             try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
                 return reader.lines();
             } catch (FileNotFoundException e) {
                 log.error(e.getMessage(), e);
                 return Arrays.stream(new String[]{s});
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
             }
         }
     }
