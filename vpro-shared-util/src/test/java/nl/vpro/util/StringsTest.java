@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,7 @@ public class StringsTest {
     public void stringsFile() throws IOException {
         File tempFile = File.createTempFile("test", "test");
         tempFile.deleteOnExit();
-        Writer writer = new OutputStreamWriter(new FileOutputStream(tempFile), "UTF-8");
+        Writer writer = new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8);
         writer.append("f1\n");
         writer.append("f2\n");
         writer.close();
