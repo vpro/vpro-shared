@@ -871,6 +871,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     protected ResteasyClientBuilder resteasyClientBuilder(ClientHttpEngine engine) {
+        ResteasyClientBuilder builder = defaultResteasyClientBuilder(engine);
+        buildResteasy(builder);
+        return builder;
+    }
+
+     protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
         ResteasyClientBuilder builder = new ResteasyClientBuilder()
             .httpEngine(engine);
         builder.register(new JacksonContextResolver(objectMapper));
@@ -884,7 +890,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             browserCacheFeature.setCache(this.resteasyBrowserCache);
         }
         builder.register(browserCacheFeature);
-        buildResteasy(builder);
         if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
             this.resteasyBrowserCache = browserCacheFeature.getCache();
             log.info("Set browser cache to {}", this.resteasyBrowserCache);
