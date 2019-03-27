@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -786,12 +787,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         ClientHttpEngine engine,
         Class<T> service,
         Class<S> restEasyService,
-        Class<E> errorClass) {
+        Class<E> errorClass,
+        Consumer<ResteasyClientBuilder> buildFurther) {
         T proxy;
         if (restEasyService == null) {
-            proxy = buildResteasy(engine, service);
+            proxy = buildResteasy(engine, service, buildFurther);
         } else {
-            S resteasy = buildResteasy(engine, restEasyService);
+            S resteasy = buildResteasy(engine, restEasyService, buildFurther);
             proxy = (T) Proxy.newProxyInstance(
                 restEasyService.getClassLoader(),
                 new Class[]{restEasyService, service},
@@ -836,33 +838,42 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log, warnThreshold);
     }
 
-    protected <T> T build(ClientHttpEngine engine, Class<T> service) {
-        return build(engine, service, null);
+    protected <T> T build(ClientHttpEngine engine, Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
+        return build(engine, service, null, buildFurther);
     }
 
+    @Deprecated
+    protected <T> T build(ClientHttpEngine engine, Class<T> service) {
+        return build(engine, service, null, this::buildResteasy);
+    }
 
-    protected <T, S> T build(ClientHttpEngine engine, Class<T> service,  Class<S> restEasyInterface) {
-        return build(engine, service, restEasyInterface, null);
+    protected <T, S> T build(ClientHttpEngine engine, Class<T> service,  Class<S> restEasyInterface, Consumer<ResteasyClientBuilder> buildFurther) {
+        return build(engine, service, restEasyInterface, null, buildFurther);
     }
 
     protected <T, S> T buildWithErrorClass(
         ClientHttpEngine engine,
         Class<T> service,
         Class<S> restEasyInterface,
-        Class<?> errorClass) {
-        return build(engine, service, restEasyInterface, errorClass);
+        Class<?> errorClass,
+        Consumer<ResteasyClientBuilder> buildFurther) {
+        return build(engine, service, restEasyInterface, errorClass, buildFurther);
     }
 
-    protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
-        return buildWithErrorClass(engine, service, null, errorClass);
+    protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass, Consumer<ResteasyClientBuilder> buildFurther) {
+        return buildWithErrorClass(engine, service, null, errorClass, buildFurther);
     }
+    protected <T> T build(Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
+        return build(getClientHttpEngine(), service, buildFurther);
+    }
+
     protected <T> T build(Class<T> service) {
-        return build(getClientHttpEngine(), service);
+        return build(service, this::buildResteasy);
     }
 
-    private <T> T buildResteasy(ClientHttpEngine engine, Class<T> service) {
+    private <T> T buildResteasy(ClientHttpEngine engine, Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
 
-        return getTarget(engine)
+        return getTarget(engine, buildFurther)
             .proxyBuilder(service)
             .classloader(classLoader)
             .defaultConsumes(MediaType.APPLICATION_XML)
@@ -870,9 +881,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             .build();
     }
 
-    protected ResteasyClientBuilder resteasyClientBuilder(ClientHttpEngine engine) {
+    protected ResteasyClientBuilder resteasyClientBuilder(ClientHttpEngine engine, Consumer<ResteasyClientBuilder> buildFurther) {
         ResteasyClientBuilder builder = defaultResteasyClientBuilder(engine);
-        buildResteasy(builder);
+        if (buildFurther != null) {
+            buildFurther.accept(builder);
+        }
         return builder;
     }
 
@@ -899,10 +912,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return builder;
     }
 
-    protected abstract void buildResteasy(ResteasyClientBuilder builder);
+    @Deprecated
+    protected  void buildResteasy(ResteasyClientBuilder builder) {
 
-    protected final ResteasyWebTarget getTarget(ClientHttpEngine engine) {
-        return resteasyClientBuilder(engine)
+    }
+
+    protected final ResteasyWebTarget getTarget(ClientHttpEngine engine, Consumer<ResteasyClientBuilder> buildFurther) {
+        return resteasyClientBuilder(engine, buildFurther)
             .build()
             .target(baseUrl);
     }
