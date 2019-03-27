@@ -912,7 +912,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return builder;
     }
 
-    @Deprecated
+    /**
+     * For further building the client you can override this method, which is a default for the different buildFurther arguments.
+     */
     protected  void buildResteasy(ResteasyClientBuilder builder) {
 
     }
@@ -921,6 +923,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return resteasyClientBuilder(engine, buildFurther)
             .build()
             .target(baseUrl);
+    }
+
+
+    protected final ResteasyWebTarget getTarget(ClientHttpEngine engine) {
+        return getTarget(engine, this::buildResteasy);
     }
 
     protected String getInfo() {
