@@ -112,10 +112,12 @@ public class CommandExecutorImplTest {
     @Test
     public void builder() {
         CommandExecutorImpl build = CommandExecutorImpl.builder()
-            .executablesPaths("a", "b")
+            .executablesPath("a")
+            .executable(new File("b"))
+            .executablesPaths("c", "d")
             .optional(true)
             .build();
-        assertThat(build.getBinary().toString()).isEqualTo("[a, b]");
+        assertThat(build.getBinary().toString()).isEqualTo("[a, b, c, d]");
 
     }
 }
