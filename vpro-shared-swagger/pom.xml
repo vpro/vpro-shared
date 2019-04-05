@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>2.6.1-SNAPSHOT</version>
+    <version>2.6.1</version>
   </parent>
   <artifactId>vpro-shared-swagger</artifactId>
   <description>Provides a jar with basic Swagger resources and dependencies. You have to set-up the web.xml wiring yourself.</description>
