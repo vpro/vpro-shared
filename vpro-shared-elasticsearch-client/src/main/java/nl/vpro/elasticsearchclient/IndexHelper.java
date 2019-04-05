@@ -16,6 +16,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -348,7 +350,10 @@ public class IndexHelper {
     }
 
     @SafeVarargs
-    protected final ResponseListener listen(final String requestDescription, final CompletableFuture<ObjectNode> future, Consumer<ObjectNode>... listeners) {
+    protected final ResponseListener listen(
+        @Nonnull final String requestDescription,
+        @Nonnull final CompletableFuture<ObjectNode> future,
+        @Nonnull  Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
@@ -371,6 +376,13 @@ public class IndexHelper {
                 } else {
                     log.error("{}: {}", requestDescription, exception.getMessage(), exception);
                     future.completeExceptionally(exception);
+                    ObjectNode error  = new ObjectNode(Jackson2Mapper.getLenientInstance().getNodeFactory());
+                    error.put("errors", true);
+                    error.putArray("items");
+                    error.put("message", exception.getMessage());
+                    for (Consumer<ObjectNode> rl : listeners) {
+                        rl.accept(error);
+                    }
                 }
 
             }
@@ -598,7 +610,8 @@ public class IndexHelper {
         writeJson(request);
 
         client().performRequestAsync(req,
-            listen("" + request.size() + " bulk operations", future, listeners));
+            listen("" + request.size() + " bulk operations", future, listeners)
+        );
         return future;
     }
 
