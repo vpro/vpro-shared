@@ -2,6 +2,7 @@ package nl.vpro.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class BatchedReceiverTest {
 				.batchSize(6)
 				.build();
 
-		assertThat(i).toIterable().containsExactly(result.toArray(new String[result.size()]));
+		assertThat(i).toIterable().containsExactly(result.toArray(new String[0]));
 
 	}
 
@@ -55,5 +56,28 @@ public class BatchedReceiverTest {
 
 	}
 
+
+
+	@Test
+	public void testWithoutBatch() {
+		final List<String> result = new ArrayList<>();
+		for (int i = 0; i < 23; i++) {
+			result.add("a" + i);
+		}
+		AtomicInteger offset = new AtomicInteger(0);
+		BatchedReceiver<String> i =
+			BatchedReceiver.<String>builder()
+				.batchGetter(() -> {
+					int of = offset.getAndAdd(5);
+					return result.subList(
+						Math.min(of, result.size()),
+						Math.min(of + 5, result.size())).iterator();
+				})
+				.build();
+
+		assertThat(i)
+			.toIterable().containsExactly(result.toArray(new String[0]));
+
+	}
 
 }
