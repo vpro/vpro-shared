@@ -50,7 +50,7 @@ i.forEachRemaining(string -> {
   });
 ```
 ### Resumption token
-You simply provide a `java.util.Supplier`. A lambda would probably not suffice because you might need the previous result the get the next one. E.g. this (using olingo code) 
+You simply provide a `java.util.Supplier`. A lambda would probably not suffice because you might need the previous result the get the next one. E.g. this (using [olingo](https://olingo.apache.org/doc/odata4/index.html) code) 
 ```java
    public Iterator<ClientEntity> iterate(URIBuilder ub) {
         return BatchedReceiver.<ClientEntity>builder()
