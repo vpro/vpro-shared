@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -15,9 +16,10 @@ import java.util.function.Supplier;
  * @since 1.68
  */
 @ToString
+@Slf4j
 public class BatchedReceiver<T> implements Iterator<T> {
 
-	final int batchSize;
+	final Integer batchSize;
 
 	final BiFunction<Long, Integer, Iterator<T>> batchGetter;
 
@@ -28,23 +30,32 @@ public class BatchedReceiver<T> implements Iterator<T> {
 	T next;
 
 
-	@lombok.Builder(builderClassName = "Builder")
+	@lombok.Builder(builderClassName = "Builder", buildMethodName = "_build")
 	public BatchedReceiver(
 			Integer batchSize,
 			Long offset,
 			BiFunction<Long, Integer, Iterator<T>> _batchGetter) {
-		this.batchSize = batchSize == null ? 100 : batchSize;
+		this.batchSize = batchSize;
 		this.batchGetter = _batchGetter;
 		this.offset = offset == null ? 0L : offset;
 	}
 
+	private enum BatchType {
+		BIFUNCTION,
+		SUPPLIER;
+	}
+
 
 	public static class Builder<T>  {
+
+		private BatchType batchType = null;
+
         /**
          *
          * @param batchGetter A function to get the next batch, the parameters are the current necessary offset, and batch size
          */
 	    public Builder<T> batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
+	    	batchType = BatchType.BIFUNCTION;
 	        return _batchGetter(batchGetter);
         }
 
@@ -52,8 +63,24 @@ public class BatchedReceiver<T> implements Iterator<T> {
          * @param batchGetter For 'resumption token' like functionality, the offset and max argument can be irrelevant.
          */
         public Builder<T> batchGetter(final Supplier<Iterator<T>> batchGetter) {
+        	batchType = BatchType.SUPPLIER;
             return _batchGetter((offset, max) -> batchGetter.get());
         }
+
+        public BatchedReceiver<T> build() {
+        	if (_batchGetter == null) {
+        		throw new IllegalStateException("No batch getter defined");
+			}
+        	if (batchType == BatchType.BIFUNCTION && batchSize == null) {
+				log.debug("Specified a bifunction, and nobatch size. The batch size is implicetely set to 100");
+        		batchSize(100);
+			}
+        	if (batchType == BatchType.SUPPLIER && batchSize != null) {
+        		log.warn("Specified a supplier, and a batch size. The batch size is ignored");
+        		batchSize(null);
+			}
+        	return _build();
+		}
 
     }
 
@@ -90,7 +117,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
 				hasNext = true;
 			} else {
 				offset += subCount;
-				if (subCount == batchSize) {
+				if (batchSize == null || subCount == batchSize) {
                     subIterator = batchGetter.apply(offset, batchSize);
                 } else {
 				    subIterator = null;
