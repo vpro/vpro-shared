@@ -12,6 +12,46 @@ import java.util.function.Supplier;
  * Given some API which supplies only 'batched' retrieval (so with offset and max/batchsize parameters),
  * access such an API as an iterator to visit all elements.
  *
+ * If an API provides access to huge set of elements, they often do it with some paging mechanism, or by some 'resumption token' formalism. With {@link BatchedReceiver} this can be morphed into a simple {@link java.util.Iterator}.
+
+ *
+ * <h3>Paging</h3>
+ * The 'batchGetter' argument should be a {@link java.util.function.BiFunction}, returning an iterator for the page described by given offset and batch size
+ * <pre>
+ * {@code
+ * Iterator<String> i = BatchedReceiver.<String>builder()
+ *     .batchGetter((offset, max) ->
+ *        apiClient.getPage(offset, max).iterator()
+ *     )
+ *     .batchSize(6)
+ *     .build();
+ * i.forEachRemaining(string -> {
+ *       ...<do stuff...>
+ *   });
+ * }</pre>
+ * <h3>Resumption token formalism</h3>
+ * You simply provide a {@link java.util.function.Supplier}. A lambda would probably not suffice because you might need the previous result the get the next one. E.g. this (using olingo code)
+ * <pre>
+ * {@code
+ *    public Iterator<ClientEntity> iterate(URIBuilder ub) {
+ *         return BatchedReceiver.<ClientEntity>builder()
+ *             .batchGetter(new Supplier<Iterator<ClientEntity>>() {
+ *                 ClientEntitySet result;
+ *                 @Override
+ *                 public Iterator<ClientEntity> get() {
+ *                     if (result != null) {
+ *                         result = query(result.getNext());
+ *                     } else {
+ *                         result = query(ub);
+ *                     }
+ *                     return result.getEntities().iterator();
+ *                 }
+ *             })
+ *             .build();
+ *     }
+ * }
+ * </pre>
+ *
  * @author Michiel Meeuwissen
  * @since 1.68
  */
