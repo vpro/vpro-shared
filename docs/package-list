@@ -13,6 +13,8 @@ nl.vpro.elasticsearchclient
 nl.vpro.filter
 nl.vpro.guice
 nl.vpro.hibernate
+nl.vpro.hibernate.h2
+nl.vpro.hibernate.hsql
 nl.vpro.hibernate.search
 nl.vpro.jackson2
 nl.vpro.jmx
@@ -21,6 +23,7 @@ nl.vpro.logging.simple
 nl.vpro.mdc
 nl.vpro.persistence
 nl.vpro.resteasy
+nl.vpro.rs.media
 nl.vpro.spring.converters
 nl.vpro.swagger
 nl.vpro.swagger.model
