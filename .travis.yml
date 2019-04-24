@@ -2,14 +2,12 @@ language: java
 env:
   global:
   - SONATYPE_USERNAME=vpro
-  - secure: XatlKXcu1Opzwod0VY0+p81e14qiev8KyU12QKmoIq44P6dWcEAMdMdRF2oAnvfCnfpqDZJ+YGfzqdDJALs2H5aHTIsMLlQc5yHFrWeOoYoCFjplrSwT4Q7wIkTjG8wXwB7CRSqRaoz7gKazUes6jKOGi1uqzeVYy6G6EFVj+oAzAIwJ593XCaR1RWAUERijMUNSWlHzia6zrmpeZjUPTt8H4vUuzPLMwZPR2wJUxe122H7I4bTTNBi/yJ63XbI4xLpH6ayx/FxV/j5hhXZneTpvLhty4g2ypLGs1G8EPmZ3Wt82c4ifz+y1Jy+guoog5s/UDe9xlve1tQq8D9cIsPy7EZsLD+dOHg64QKQkSU/G7MOH74isuKo+IwjTSrCOQ+B/mc81huq+YbIUHaHeic6hTFODGzvXixSobHFROoN3xTpJc0I5651Vh+5x57CzKlYFCoxwF63F79MXcqRs3iQJP3vWiQC+MxYUGfhPhlG9x5XpEE/skgzZC1b8wKDLqs3Zh1CgiAarXT+ogUdhwFsi4+tvNjUV7EC/o9E8VTKXcMPpZ68KUkV3G87RXtHRm91udDCIERXSfdjtlSnIqwlPovZ62fAldUHluS0Wn+1rH+/16qZwMQ17XKBn+kV0D0/VNHmzzX0yigpE3JRRKvbGkTfwRkmnal/V5kq4JE0=
-  - secure: d2atZEpn/jJ7YjS22wj4C4gnhY8sw61yat9V0ujNvf49iMBcJ+ZkZ8QWk2VvYQ0upn9/GEbgcqlQhixhXv2z+MZNQTgo7YTYkP3WtrM+FrSRby/TLLvB7wxCtNMGZbV9X5kN4THoYN8ps8tnp/YKClCwtFhEAZAH5E74KALPRn8HZH9ECX2DTYRHK5NuI8kGiN3scsVXKGKzsSQ6b7/6t5go7behPc2Oz/naDDVecqXH4EAMO/Y7XmJt7Nq2QJYGDfpg42PMXzDValBmzrcisYAmaoXR93NEfChTil+xnLiGcurxHaMtK6ZaWRJwCt2q8pcCsCZu7UZauyIJ2UxO5WawByUUbGwl1tDR5OS8wk8VdgKNLsFrUN2i7oHGhg+7CrjmQocOTwYvo5zZv+gZkZXLvLEb6ms5N5bynuAvBz+nqfYXs2QP27Q6ZGnmk+nS8Lu+7SgC3aJa2H+YOES27jRrr+XMmJkX2xEpJQMCpcUzhKlDqfIqhgXj/6vM+mikew/xjgf1pFVqjxfU/HNQACr4Cq0nYpJ84bdy6RlFs5Cn5xnz3CBXfwNLKAc0jhBMjpbcdWYmUzI0eeaxGp3R8rxSr8fc8/TioksE8tBhr08w7PBHKXYM2B9gjmRdstm8XO8PBu1unEuA3N7DyXhnWtgnvcc8w/FseGpOJa1/cAY=
+  - secure: kkW81iyKJyddQab7dBbZUWNzQEkyKbAJeJYKdTF8si8lik7J2JcZgLuU9YxTuT7rRWvJl3BQyJ7zIU3PWbumtYn0CgFdb/i7jgxdXkXvKf3tLJM30FQ7XUnLGL+CJbfBFoF6l4aslcrkhSh8X0MKO8jXM/XkouUMYDmGmdeWoOMbdURePNGl/CkOWD8LYfk1RPds4gklLxM9F2B1kyY3ylpC19k/UG5O/QLrJ5RkCOI2OvvJBHWMgqasGNTHHphT447AFCEHIw2oNV6L48SdZm2PBPFrbU3mSbNdUaEpfqHFFuzp9EwZBpd1b2ioiNeSYuLM01hI7Ssf3P5PB0xP1t91qhUJx79o5/wFHFPG9Y7bx5NyB+lV0kO5ADPmhEqB9+Ew/OfN99Gl2nfLCqGRJUvOkGCdurKIins6aXzcsmTIWuBNY8hUnK/hxQFVvZbvh4IH1jcN17hw0mQAcJ3N4fxFZFWfWCkUU0ozWGIR3mMWowZ3l+/vgt+E5zDCBUnCcP6f6r+p88CdrG+uObO6QSb+M+tf2njJs4v6z+1fqn9uJOm64PglE4H1FD0qNKC2Afl4q/n5crkh+faX4glIEAkwRLswYQ/7JNXXYXxwmsd4ss4Rm2c82QWav3C44sf2eGIstOx5z1jCxSGI3qX8vpjBQi9gblg1Bn02F2wL4s8=
 jdk:
 - oraclejdk8
 sudo: true
-script: mvn --fail-never -T 1C -Pdeploy clean test deploy --settings .travis-settings.xml -Dgpg.skip=true
+script: mvn --fail-never -T 1C -Pdeploy clean test deploy --settings .travis-settings.xml
+  -Dgpg.skip=true
 after_success:
- - bash <(curl -s https://codecov.io/bash)
- - ./.travis-update-javadoc.sh
-
-
+- bash <(curl -s https://codecov.io/bash)
+- "./.travis-update-javadoc.sh"
