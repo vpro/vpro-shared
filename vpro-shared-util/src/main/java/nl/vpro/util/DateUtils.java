@@ -85,6 +85,11 @@ public class DateUtils {
         return date == null ? null : Date.from(date.toInstant());
     }
 
+    public static Instant toInstant(ZonedDateTime date) {
+        return date == null ? null : date.toInstant();
+    }
+
+
     public static Long toLong(Instant instant) {
         return instant == null ? null : instant.toEpochMilli();
     }
@@ -101,6 +106,11 @@ public class DateUtils {
 
     public static Date toDate(LocalDateTime date, ZoneId zoneId) {
         return date == null ? null : Date.from(date.atZone(zoneId).toInstant());
+    }
+
+
+    public static Instant toInstant(LocalDateTime date, ZoneId zoneId) {
+        return date == null ? null : date.atZone(zoneId).toInstant();
     }
 
     public static boolean isAfter(Instant instant1, Instant instant2) {
