@@ -116,7 +116,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
         		batchSize(100);
 			}
         	if (batchType == BatchType.SUPPLIER && batchSize != null) {
-        		log.warn("Specified a supplier, and a batch size. The batch size is ignored");
+        		log.warn("Specified a supplier, and a batch size. The batch size is ignored", new Exception());
         		batchSize(null);
 			}
         	return _build();
