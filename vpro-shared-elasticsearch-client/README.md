@@ -1,3 +1,5 @@
+[![javadoc](http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-elasticsearch-client.svg?color=blue)](http://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-elasticsearch-client)
+
 # Elasticsearch utils
 
 Depends only on [elastic search restclient](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/index.html). No lucene dependencies.
