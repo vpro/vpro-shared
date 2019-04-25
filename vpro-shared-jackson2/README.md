@@ -8,3 +8,7 @@ Some of them are bundled in modules. E.g. a `nl.vpro.jackson2.DateModule`, which
 (but a bit differently then `com.fasterxml.jackson.datatype.jsr310.JavaTimeModule` does, which it predates).
 
 Also `nl.vpro.jackson2.Views` is provided which defines a few classes which can be used with `@com.fasterxml.jackson.annotation.JsonView`.
+
+## JsonArrayIterator
+
+This package also contains `nl.vpro.jackson2.JsonArrayIterator`. A tool to wrap, using jackson, a stream of json object into an iterator of java objects.
