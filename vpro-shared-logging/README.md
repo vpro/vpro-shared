@@ -1,3 +1,4 @@
+[![javadoc](http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-logging.svg?color=blue)](http://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-logging)
 # VPRO Shared logging
 
 Some utilities related to logging.
