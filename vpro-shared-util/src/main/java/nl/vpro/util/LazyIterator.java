@@ -11,40 +11,40 @@ import java.util.function.Supplier;
  */
 public class LazyIterator<T> implements CloseableIterator<T> {
 
-	private final Supplier<Iterator<T>> supplier;
-	private Iterator<T> iterator;
+    private final Supplier<Iterator<T>> supplier;
+    private Iterator<T> iterator;
 
-	@lombok.Builder
-	public LazyIterator(Supplier<Iterator<T>> supplier) {
-		this.supplier = supplier;
-	}
-
-	public static <S> LazyIterator<S> of(Supplier<Iterator<S>> supplier) {
-	    return new LazyIterator<>(supplier);
+    @lombok.Builder
+    public LazyIterator(Supplier<Iterator<T>> supplier) {
+        this.supplier = supplier;
     }
 
-	@Override
-	public boolean hasNext() {
-		return getSupplied().hasNext();
-	}
+    public static <S> LazyIterator<S> of(Supplier<Iterator<S>> supplier) {
+        return new LazyIterator<>(supplier);
+    }
 
-	@Override
-	public T next() {
-		return getSupplied().next();
-	}
+    @Override
+    public boolean hasNext() {
+        return getSupplied().hasNext();
+    }
 
-	private Iterator<T> getSupplied() {
-		if (iterator == null) {
-			iterator = supplier.get();
-		}
-		return iterator;
-	}
+    @Override
+    public T next() {
+        return getSupplied().next();
+    }
 
-	@Override
-	public void close() throws Exception {
-		if (iterator != null && iterator instanceof AutoCloseable) {
-			((AutoCloseable) iterator).close();
-		}
+    private Iterator<T> getSupplied() {
+        if (iterator == null) {
+            iterator = supplier.get();
+        }
+        return iterator;
+    }
 
-	}
+    @Override
+    public void close() throws Exception {
+        if (iterator != null && iterator instanceof AutoCloseable) {
+            ((AutoCloseable) iterator).close();
+        }
+
+    }
 }
