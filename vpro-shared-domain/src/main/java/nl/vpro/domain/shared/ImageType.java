@@ -27,7 +27,6 @@ public enum ImageType {
     }
 
     private ImageType() {
-        // TODO Auto-generated constructor stub
     }
 
     /**
