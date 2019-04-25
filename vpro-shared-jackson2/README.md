@@ -1,3 +1,5 @@
+[![javadoc](http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-jackson2.svg?color=blue)](http://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-jackson2)
+
 # Jackson2 utilities
 
 We collect some generic Jackson2 utilities. Mainly `com.fasterxml.jackson.databind.JsonSerializer`s and `com.fasterxml.jackson.databind.JsonDeserializer`s.
