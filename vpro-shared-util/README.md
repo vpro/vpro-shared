@@ -1,3 +1,6 @@
+[![javadoc](http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-util.svg?color=blue)](http://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-util)
+
+
 # Shared utilities
 
 Simple utilities with little or no dependencies themselves
