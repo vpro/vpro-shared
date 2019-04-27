@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -9,9 +11,16 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
+import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static nl.vpro.util.URLResource.PROPERTIES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -22,16 +31,47 @@ import static org.mockito.Mockito.when;
 /**
  * @author Michiel Meeuwissen
  * @since 0.37
- * TODO: Use wiremock
  */
+@Slf4j
 public class URLResourceTest {
+
+    @Rule
+    public WireMockRule wireMock = new WireMockRule();
+
+
+    @Before
+    public void init() throws IOException {
+        stubFor(get(urlEqualTo("/broadcasters"))
+            .willReturn(
+                aResponse()
+                    .withBody(IOUtils.resourceToByteArray("/broadcasters.properties"))
+                    .withHeader("Cache-Control", "public, max-age: 3600")
+                    .withHeader("Last-Modified", "Wed, 24 Apr 2019 05:55:21 GMT")
+            ));
+        stubFor(get(urlEqualTo("/broadcasters"))
+            .withHeader("If-Modified-Since", equalTo("Wed, 24 Apr 2019 05:55:21 GMT"))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.SC_NOT_MODIFIED)
+                ));
+        stubFor(get(urlEqualTo("/redirect"))
+            .willReturn(
+                aResponse()
+                    .withHeader("Location", "/broadcasters")
+                    .withStatus(HttpStatus.SC_MOVED_PERMANENTLY)
+                ));
+    }
 
 
 
     @Test
-    public void broadcasters() throws InterruptedException {
+    public void broadcasters() throws InterruptedException, IOException {
+
+
+
+
         URLResource<Properties> broadcasters =
-            URLResource.properties(URI.create("https://poms.omroep.nl/broadcasters/"));
+            URLResource.properties(URI.create("http://localhost:" + wireMock.port() + "/broadcasters"));
 
         assertTrue(broadcasters.get().size() > 0);
         assertEquals(1, broadcasters.getChangesCount());
@@ -47,7 +87,7 @@ public class URLResourceTest {
         broadcasters.setMinAge(Duration.ofMillis(1));
         Thread.sleep(2);
         broadcasters.expire();
-        broadcasters.get();
+        log.info("{}", broadcasters.get().size());
         assertEquals(1, broadcasters.getChangesCount());
         assertEquals(1, broadcasters.getNotModifiedCount());
         assertEquals(1, broadcasters.getNotCheckedCount());
@@ -69,7 +109,7 @@ public class URLResourceTest {
 
     @Test
     public void broadcastersRedirect() {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://poms.omroep.nl/broadcasters/"));
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://localhost:" + wireMock.port() + "/redirect"));
 
         assertTrue(broadcasters.get().size() > 0);
 
