@@ -13,14 +13,12 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static nl.vpro.util.URLResource.PROPERTIES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,12 +33,15 @@ import static org.mockito.Mockito.when;
 @Slf4j
 public class URLResourceTest {
 
+    @ClassRule
+    public static WireMockClassRule wireMockClassRule = new WireMockClassRule(wireMockConfig().dynamicPort());
+
     @Rule
-    public WireMockRule wireMock = new WireMockRule();
+    public WireMockClassRule wireMock = wireMockClassRule;
 
 
     @Before
-    public void init() throws IOException {
+    public  void init() throws IOException {
         stubFor(get(urlEqualTo("/broadcasters"))
             .willReturn(
                 aResponse()
