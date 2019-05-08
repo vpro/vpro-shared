@@ -35,11 +35,6 @@
       <name>Rico Jansen</name>
       <timezone>Europe/Amsterdam</timezone>
     </developer>
-    <developer>
-      <id>eric</id>
-      <name>Eric Kuijt</name>
-      <timezone>Europe/Amsterdam</timezone>
-    </developer>
   </developers>
 
   <ciManagement>
