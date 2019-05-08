@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 2.7
  */
-public class JsonIdAdderInterceptorTest {
+public class JsonIdAdderReaderTest {
 
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -33,7 +33,7 @@ public class JsonIdAdderInterceptorTest {
 
     }
 
-    public static class Base implements BaseI {
+    public static abstract class Base implements BaseI {
 
     }
 
@@ -60,6 +60,17 @@ public class JsonIdAdderInterceptorTest {
         assertThat(o).isInstanceOf(A.class);
     }
 
+
+
+    @Test
+    public void testBase() throws IOException {
+
+        Object o = idAdderInterceptor.readFrom(Object.class,
+            Base.class,
+            null,
+            MediaType.APPLICATION_JSON_TYPE, null, new ByteArrayInputStream("{'objectType': 'a'}".getBytes()));
+        assertThat(o).isInstanceOf(A.class);
+    }
     @Test
     public void testC() throws IOException {
 
