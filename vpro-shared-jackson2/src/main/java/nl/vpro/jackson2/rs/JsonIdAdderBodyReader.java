@@ -15,6 +15,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -48,16 +49,21 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         InputStream entityStream) throws WebApplicationException, IOException {
         Jackson2Mapper mapper = Jackson2Mapper.getLenientInstance(); // TODO somehow get object mapper from resteasy context
         JavaType javaType = mapper.getTypeFactory().constructType(genericType);
-        ObjectNode jsonNode = (ObjectNode) mapper.readTree(entityStream);
-        TypeDeserializer typeDeserializer = mapper.getDeserializationConfig().findTypeDeserializer(javaType);
-        if (typeDeserializer != null) {
-            String propertyName = typeDeserializer.getPropertyName();
-            String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();
-            if (! jsonNode.has(propertyName)) {
-                jsonNode.put(propertyName, propertyValue);
+        JsonNode jsonNode = mapper.readTree(entityStream);
+        if (jsonNode instanceof ObjectNode) {
+            ObjectNode objectNode = (ObjectNode) jsonNode;
+            TypeDeserializer typeDeserializer = mapper.getDeserializationConfig().findTypeDeserializer(javaType);
+            if (typeDeserializer != null) {
+                String propertyName = typeDeserializer.getPropertyName();
+                String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();
+                if (! objectNode.has(propertyName)) {
+                    log.debug("Implicetely setting {} = {} for {}", propertyName, propertyValue, javaType);
+                    objectNode.put(propertyName, propertyValue);
+                }
             }
         }
-        return mapper.treeToValue(jsonNode, (Class) genericType);
+        return mapper.treeToValue(jsonNode, javaType.getRawClass());
+
 
     }
 }
