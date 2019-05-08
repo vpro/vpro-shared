@@ -1,7 +1,10 @@
 package nl.vpro.spring.converters;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalConverter;
@@ -48,7 +51,13 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
     }
 
     @Override
-    public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+    public boolean matches(
+        @Nonnull TypeDescriptor sourceType,
+        @Nonnull TypeDescriptor targetType) {
+        if (sourceType.getType().equals(String.class) &&
+            targetType.getType().equals(List.class)) {
+            return ((ParameterizedType) targetType.getResolvableType().getType()).getActualTypeArguments()[0].equals(Integer.class);
+        }
         return false;
 
     }
