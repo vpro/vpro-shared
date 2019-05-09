@@ -22,7 +22,7 @@ import static nl.vpro.util.TimeUtils.roundToMillis;
  * @author Michiel Meeuwissen
  * @since 1.57
  */
-class CountAspect<T> implements InvocationHandler {
+public class CountAspect<T> implements InvocationHandler {
 
     static ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
 
