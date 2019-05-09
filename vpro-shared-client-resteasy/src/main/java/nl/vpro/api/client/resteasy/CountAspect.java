@@ -110,7 +110,7 @@ public class CountAspect<T> implements InvocationHandler {
         return local;
     }
     @Data
-    static class Local {
+    public static class Local {
 
         final Method method;
         private final long start = System.nanoTime();
