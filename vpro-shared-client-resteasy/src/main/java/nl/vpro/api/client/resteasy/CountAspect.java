@@ -24,7 +24,7 @@ import static nl.vpro.util.TimeUtils.roundToMillis;
  */
 public class CountAspect<T> implements InvocationHandler {
 
-    static ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
+    public static final ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
 
     private final Logger log;
     private final T proxied;
