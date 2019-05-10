@@ -22,9 +22,9 @@ import static nl.vpro.util.TimeUtils.roundToMillis;
  * @author Michiel Meeuwissen
  * @since 1.57
  */
-class CountAspect<T> implements InvocationHandler {
+public class CountAspect<T> implements InvocationHandler {
 
-    static ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
+    public static final ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
 
     private final Logger log;
     private final T proxied;
@@ -110,7 +110,7 @@ class CountAspect<T> implements InvocationHandler {
         return local;
     }
     @Data
-    static class Local {
+    public static class Local {
 
         final Method method;
         private final long start = System.nanoTime();

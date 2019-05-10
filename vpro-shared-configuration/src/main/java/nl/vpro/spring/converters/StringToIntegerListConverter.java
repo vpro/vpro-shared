@@ -51,11 +51,12 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
     }
 
     @Override
-    public boolean matches(@Nonnull TypeDescriptor sourceType, @Nonnull TypeDescriptor targetType) {
-        if (sourceType.getType().equals(String.class) && targetType.getType().equals(List.class)) {
-            if (((ParameterizedType) targetType.getResolvableType().getType()).getActualTypeArguments()[0].equals(Integer.class)) {
-                return true;
-            }
+    public boolean matches(
+        @Nonnull TypeDescriptor sourceType,
+        @Nonnull TypeDescriptor targetType) {
+        if (sourceType.getType().equals(String.class) &&
+            targetType.getType().equals(List.class)) {
+            return ((ParameterizedType) targetType.getResolvableType().getType()).getActualTypeArguments()[0].equals(Integer.class);
         }
         return false;
 
