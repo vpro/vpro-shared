@@ -24,24 +24,31 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
     public List<Integer> convert(String string) {
         List<Integer> result = new ArrayList<>();
         for (String s : string.split("\\s*,\\s*")) {
-            String[] split =  s.split("-", 4);
-            if (split.length == 1) {
-                result.add(Integer.parseInt(split[0]));
-            } else {
-                int i = 0;
-                String first = split[i++];
-                if (first.isEmpty()) {
-                    first = "-" + split[i++];
+            String[] splitByDots = s.split("\\.\\.", 2);
+            if (splitByDots.length == 2) {
+                for (int j = Integer.parseInt(splitByDots[0]); j <= Integer.parseInt(splitByDots[1]); j++) {
+                    result.add(j);
                 }
-                if (split.length == i) {
-                    result.add(Integer.parseInt(first));
+            } else {
+                String[] split =  s.split("-", 4);
+                if (split.length == 1) {
+                    result.add(Integer.parseInt(split[0]));
                 } else {
-                    String second = split[i++];
-                    if (second.isEmpty()) {
-                        second = "-" + split[i];
+                    int i = 0;
+                    String first = split[i++];
+                    if (first.isEmpty()) {
+                        first = "-" + split[i++];
                     }
-                    for (int j = Integer.parseInt(first); j <= Integer.parseInt(second); j++) {
-                        result.add(j);
+                    if (split.length == i) {
+                        result.add(Integer.parseInt(first));
+                    } else {
+                        String second = split[i++];
+                        if (second.isEmpty()) {
+                            second = "-" + split[i];
+                        }
+                        for (int j = Integer.parseInt(first); j <= Integer.parseInt(second); j++) {
+                            result.add(j);
+                        }
                     }
                 }
             }
