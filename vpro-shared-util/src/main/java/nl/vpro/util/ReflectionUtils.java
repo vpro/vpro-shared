@@ -9,6 +9,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.LocaleUtils;
 
 import static nl.vpro.util.ReflectionUtils.ResultAction.IGNORED;
@@ -74,7 +77,10 @@ public class ReflectionUtils {
      *
      * @param setterName How, given a property name the setter methods must be calculated.
      */
-    public static <T> T configureIfNull(T instance, Map<String, String> properties, Collection<Function<String, String>> setterName, Collection<Function<String, String>> getterName) {
+    public static <T> T configureIfNull(@Nonnull T instance,
+                                        @Nonnull Map<String, String> properties,
+                                        @Nonnull Collection<Function<String, String>> setterName,
+                                        @Nonnull Collection<Function<String, String>> getterName) {
         log.debug("Configuring with {}", properties);
         final Set<String> found = new HashSet<>();
         final Set<String> notfound = new HashSet<>();
@@ -112,7 +118,10 @@ public class ReflectionUtils {
     }
 
     public static <T> T configureIfNull(T instance, Map<String, String> properties) {
-        return configureIfNull(instance, properties, Arrays.asList(SETTER, IDENTITY), Arrays.asList(SETTER, IDENTITY));
+        return configureIfNull(instance, properties,
+            Arrays.asList(SETTER, IDENTITY),
+            Arrays.asList(GETTER, IDENTITY)
+        );
     }
 
 
@@ -255,10 +264,14 @@ public class ReflectionUtils {
     }
 
 
-    private static Result  setProperty(Object instance, String fieldName, Collection<String> setterNames, Collection<String> getterNames, Object value, boolean onlyIfNull) {
+    private static Result  setProperty(
+        @Nonnull Object instance,
+        @Nullable String fieldName,
+        @Nonnull Collection<String> setterNames,
+        @Nonnull Collection<String> getterNames,
+        @Nullable Object value, boolean onlyIfNull) {
         String v = value == null ? null : String.valueOf(value);
 
-        Method setter = null;
         Method[] methods = instance.getClass().getMethods();
         Type parameterClass = null;
         if (onlyIfNull) {
@@ -276,7 +289,7 @@ public class ReflectionUtils {
             }
             if (fieldName != null) {
                 try {
-                    Field f = instance.getClass().getField(fieldName);
+                    Field f = getField(instance.getClass(), fieldName);
                     f.setAccessible(true);
                     Object existingValue = f.get(instance);
                     if (existingValue != null) {
@@ -304,7 +317,7 @@ public class ReflectionUtils {
         }
         if (fieldName != null) {
             try {
-                Field f = instance.getClass().getField(fieldName);
+                Field f = getField(instance.getClass(), fieldName);
                 parameterClass = f.getType();
                 f.setAccessible(true);
                 f.set(instance, convert(v, f.getGenericType()));
@@ -373,6 +386,22 @@ public class ReflectionUtils {
         } else {
             throw new UnsupportedOperationException();
         }
+    }
+
+    /**
+     * Returns the first {@link Field} in the hierarchy for the specified name
+     */
+    private static Field getField(@Nonnull Class<?> clazz, final @Nonnull String name) throws NoSuchFieldException {
+        NoSuchFieldException noSuchFieldException = null;
+        while (clazz != null) {
+            try {
+                return clazz.getDeclaredField(name);
+            } catch (NoSuchFieldException e) {
+                noSuchFieldException = e;
+            }
+            clazz = clazz.getSuperclass();
+        }
+        throw noSuchFieldException;
     }
 
 
