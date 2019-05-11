@@ -1,6 +1,8 @@
 package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,9 +11,6 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
 
 /**
  * At VPRO we use an convention for configuring web-application using property-files.
@@ -93,7 +92,7 @@ public class ConfigUtils {
 
         for (String configFile : configFiles) {
             Properties properties = new Properties();
-            log.info("Reading {}", configFile);
+            log.debug("Reading {}", configFile);
             if (configFile.startsWith("classpath:")) {
                 InputStream in = ReflectionUtils.class.getResourceAsStream(configFile.substring("classpath:".length()));
                 if (in != null) {
