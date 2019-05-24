@@ -1,5 +1,7 @@
 package nl.vpro.test.util.jaxb.test;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.*;
 
 /**
@@ -9,6 +11,7 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement
 @XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
+@Getter
 public class A {
     String value = "aa";
 

@@ -7,6 +7,7 @@ import nl.vpro.test.util.jaxb.test.B;
 
 import static nl.vpro.test.util.jaxb.JAXBTestUtil.assertThatXml;
 import static nl.vpro.test.util.jaxb.JAXBTestUtil.roundTripContains;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class JAXBTestUtilTest {
@@ -45,10 +46,19 @@ public class JAXBTestUtilTest {
     }
     @Test
     public void testContainsFluent() {
-        assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
+        A rounded = assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
             "            <value>bb</value>\n" +
                 "               <c>cc</c>\n" +
-                "         </b>");
+                "         </b>").get();
+        assertThat(rounded.getB().getJ()).isEqualTo(2);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testContainsFluentFails() {
+        assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='3'>\n" +
+            "            <value>bb</value>\n" +
+                "        <c>cc</c>\n" +
+                "</b>");
     }
 
 

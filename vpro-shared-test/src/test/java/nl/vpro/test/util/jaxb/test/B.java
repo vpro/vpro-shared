@@ -5,6 +5,8 @@ package nl.vpro.test.util.jaxb.test;
  * @since ...
  */
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -17,6 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "bType")
 @XmlAccessorType(XmlAccessType.FIELD)
+@Getter
 public class B {
     String value = "bb";
 
