@@ -5,17 +5,25 @@
 package nl.vpro.test.util.jaxb;
 
 import junit.framework.ComparisonFailure;
+import lombok.SneakyThrows;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -24,6 +32,11 @@ import javax.xml.validation.Validator;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xmlunit.XMLUnitException;
@@ -51,7 +64,18 @@ public class JAXBTestUtil {
 
 
     public static <T> String marshal(T object) {
-        StringWriter writer = new StringWriter();
+        final StringWriter writer = new StringWriter();
+        marshal(object, (o) -> JAXB.marshal(o, writer));
+        return writer.toString();
+    }
+
+    public static <T> Element marshalToElement(T object) {
+        DOMResult writer = new DOMResult();
+        marshal(object, (o) -> JAXB.marshal(o, writer));
+        return ((Document) writer.getNode()).getDocumentElement();
+    }
+
+    private static <T> void marshal(T object, Consumer<Object> marshaller) {
         Annotation xmlRootElementAnnotation = object.getClass().getAnnotation(XmlRootElement.class);
         if (xmlRootElementAnnotation == null) {
             Class<T> clazz = (Class<T>) object.getClass();
@@ -60,15 +84,13 @@ public class JAXBTestUtil {
                 tagName = Character.toLowerCase(tagName.charAt(0)) + tagName.substring(1);
 
             }
-            JAXB.marshal(new JAXBElement<>(
+            marshaller.accept(new JAXBElement<T>(
                 new QName(LOCAL_URI, tagName, "local"), clazz, object
-            ), writer);
+            ));
         } else {
-            JAXB.marshal(object, writer);
+            marshaller.accept(object);
         }
-        return writer.toString();
     }
-
 
 
     private static Marshaller getMarshallerForUnknownClasses(Class<?>... clazz) throws JAXBException {
@@ -107,7 +129,7 @@ public class JAXBTestUtil {
      *     SAX implementations are not required to preserve or guarantee any order in this. It is hence impossible to make a test using this that succeeds in every java version.
      *     Furthermore roundTripAndSimilar will if not similar still do a test for equals to enforce a clearer message.
      *
-     * @Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripAndSimilar}
+     * @Deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripContains}
      */
     @Deprecated
     @SuppressWarnings("unchecked")
@@ -115,6 +137,45 @@ public class JAXBTestUtil {
         String xml = marshal(input);
         assertThat(xml).contains(contains);
         return (T)JAXB.unmarshal(new StringReader(xml), input.getClass());
+    }
+
+    /**
+     *
+     * @since 2.7
+     * @param input
+     * @param contains
+     * @param <T>
+     * @return
+     */
+    @SneakyThrows
+    public static  <T> T roundTripContains(T input, String contains) {
+        Element xml = marshalToElement(input);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Element elementToFind = builder.parse(new InputSource(new StringReader(contains))).getDocumentElement();
+        elementToFind.normalize();
+        NodeList elementsByTagName = xml.getElementsByTagName(elementToFind.getTagName());
+        boolean found = false;
+        List<Diff> diffs = new ArrayList<>();
+        for (int i = 0; i < elementsByTagName.getLength() ; i++ ) {
+            Node element = elementsByTagName.item(i);
+            element.normalize();
+            Diff diff  = DiffBuilder
+                .compare(elementToFind)
+                .withTest(element)
+                .ignoreWhitespace()
+                .checkForSimilar()
+                .build();
+            diffs.add(diff);
+            if (! diff.hasDifferences()) {
+                found = true;
+            }
+        }
+        if (! found) {
+            Fail.fail(xml + " does not contain " + contains + "\n" + diffs.stream().map(d -> d.toString()).collect(Collectors.toList()));
+        }
+        return (T)JAXB.unmarshal(new DOMSource(xml), input.getClass());
     }
 
 
@@ -312,6 +373,15 @@ public class JAXBTestUtil {
                 Fail.fail(e.getMessage(), e);
             }
             return myself;
+        }
+        public S containsSimilar(String expected) {
+            try {
+                rounded = roundTripContains(actual, expected);
+            } catch (Exception e) {
+                Fail.fail(e.getMessage(), e);
+            }
+            return myself;
+
         }
 
         public AbstractObjectAssert<?, A> andRounded() {
