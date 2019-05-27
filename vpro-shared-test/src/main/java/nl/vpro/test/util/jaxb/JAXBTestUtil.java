@@ -148,10 +148,10 @@ public class JAXBTestUtil {
      * @return
      */
     @SneakyThrows
-    public static  <T> T roundTripContains(T input, String contains) {
+    public static  <T> T roundTripContains(T input, String contains, boolean namespaceAware) {
         Element xml = marshalToElement(input);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
+        factory.setNamespaceAware(namespaceAware);
         DocumentBuilder builder = factory.newDocumentBuilder();
         Element elementToFind = builder.parse(new InputSource(new StringReader(contains))).getDocumentElement();
         elementToFind.normalize();
@@ -177,6 +177,9 @@ public class JAXBTestUtil {
         }
         return (T)JAXB.unmarshal(new DOMSource(xml), input.getClass());
     }
+     public static  <T> T roundTripContains(T input, String contains) {
+         return roundTripContains(input, contains, true);
+     }
 
 
     @SafeVarargs
