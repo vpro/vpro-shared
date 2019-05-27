@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -140,6 +141,7 @@ public class JAXBTestUtil {
     }
 
     /**
+     * Checks whether the
      *
      * @since 2.7
      * @param input
@@ -148,37 +150,51 @@ public class JAXBTestUtil {
      * @return
      */
     @SneakyThrows
-    public static  <T> T roundTripContains(T input, String contains, boolean namespaceAware) {
+    public static  <T> T roundTripContains(T input, boolean namespaceAware, String... contains) {
         Element xml = marshalToElement(input);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(namespaceAware);
         DocumentBuilder builder = factory.newDocumentBuilder();
-        Element elementToFind = builder.parse(new InputSource(new StringReader(contains))).getDocumentElement();
-        elementToFind.normalize();
-        NodeList elementsByTagName = xml.getElementsByTagName(elementToFind.getTagName());
-        boolean found = false;
-        List<Diff> diffs = new ArrayList<>();
-        for (int i = 0; i < elementsByTagName.getLength() ; i++ ) {
-            Node element = elementsByTagName.item(i);
-            element.normalize();
-            Diff diff  = DiffBuilder
-                .compare(elementToFind)
-                .withTest(element)
-                .ignoreWhitespace()
-                .checkForSimilar()
-                .build();
-            diffs.add(diff);
-            if (! diff.hasDifferences()) {
-                found = true;
+        List<Element> elementsToFind = Arrays.stream(contains).map(cont -> {
+                Element elementToFind = builder.parse(new InputSource(new StringReader(cont))).getDocumentElement();
+                elementToFind.normalize();
+                return elementToFind;
+            }).collect(Collectors.toList());
+        for (Element elementToFind : elementsToFind) {
+            NodeList elementsByTagName = xml.getElementsByTagName(elementToFind.getTagName());
+            boolean found = false;
+            List<Diff> diffs = new ArrayList<>();
+            for (int i = 0; i < elementsByTagName.getLength(); i++) {
+                Node element = elementsByTagName.item(i);
+                element.normalize();
+                Diff diff = DiffBuilder
+                    .compare(elementToFind)
+                    .withTest(element)
+                    .ignoreWhitespace()
+                    .checkForSimilar()
+                    .build();
+                diffs.add(diff);
+                if (!diff.hasDifferences()) {
+                    found = true;
+                }
             }
-        }
-        if (! found) {
-            Fail.fail(xml + " does not contain " + contains + "\n" + diffs.stream().map(d -> d.toString()).collect(Collectors.toList()));
+            if (!found) {
+                Fail.fail(xml + " does not contain " + contains + "\n" + diffs.stream().map(d -> d.toString()).collect(Collectors.toList()));
+            }
         }
         return (T)JAXB.unmarshal(new DOMSource(xml), input.getClass());
     }
-     public static  <T> T roundTripContains(T input, String contains) {
-         return roundTripContains(input, contains, true);
+    /**
+     * Checks whether marshalled version of an object contains a certain piece of xml.
+     *
+     * @since 2.7
+     * @param input
+     * @param contains
+     * @param <T>
+     * @return
+     */
+     public static  <T> T roundTripContains(T input, String... contains) {
+         return roundTripContains(input, true, contains);
      }
 
 
