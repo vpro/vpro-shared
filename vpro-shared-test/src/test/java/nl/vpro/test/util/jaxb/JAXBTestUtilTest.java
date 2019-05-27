@@ -5,8 +5,7 @@ import org.junit.Test;
 import nl.vpro.test.util.jaxb.test.A;
 import nl.vpro.test.util.jaxb.test.B;
 
-import static nl.vpro.test.util.jaxb.JAXBTestUtil.assertThatXml;
-import static nl.vpro.test.util.jaxb.JAXBTestUtil.roundTripContains;
+import static nl.vpro.test.util.jaxb.JAXBTestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -38,11 +37,28 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testContains() {
-        roundTripContains(new A(), "<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
+    public void testContainsDeprecated() {
+        roundTrip(new A(), "<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
             "            <value>bb</value>\n" +
                 "               <c>cc</c>\n" +
                 "         </b>");
+    }
+
+
+    @Test
+    public void testContains() {
+        A a = roundTripContains(new A(), " <b i=\"1\" j=\"2\">\n" +
+            "        <value>bb</value>\n" +
+            "        <map>\n" +
+            "            <e>\n" +
+            "                <k>x</k>\n" +
+            "                <v>y</v>\n" +
+            "            </e>\n" +
+            "        </map>\n" +
+            "        <c>cc</c>\n" +
+            "    </b>");
+
+        assertThat(a.getB().getI()).isEqualTo(1);
     }
     @Test
     public void testContainsFluent() {

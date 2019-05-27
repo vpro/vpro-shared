@@ -31,6 +31,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 import org.w3c.dom.Document;
@@ -183,7 +184,9 @@ public class JAXBTestUtil {
                 }
             }
             if (!found) {
-                Fail.fail(xml + " does not contain " + contains + "\n" + diffs.stream().map(d -> d.toString()).collect(Collectors.toList()));
+                StringBuilderWriter writer = new StringBuilderWriter();
+                JAXB.marshal(input, writer);
+                assertThat(writer.toString()).contains(contains);
             }
         }
         return (T)JAXB.unmarshal(new DOMSource(xml), input.getClass());
