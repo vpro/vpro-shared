@@ -156,9 +156,13 @@ public class JAXBTestUtil {
         factory.setNamespaceAware(namespaceAware);
         DocumentBuilder builder = factory.newDocumentBuilder();
         List<Element> elementsToFind = Arrays.stream(contains).map(cont -> {
+            try {
                 Element elementToFind = builder.parse(new InputSource(new StringReader(cont))).getDocumentElement();
                 elementToFind.normalize();
                 return elementToFind;
+            } catch (SAXException | IOException se) {
+                throw new RuntimeException(se);
+            }
             }).collect(Collectors.toList());
         for (Element elementToFind : elementsToFind) {
             NodeList elementsByTagName = xml.getElementsByTagName(elementToFind.getTagName());
