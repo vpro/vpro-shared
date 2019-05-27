@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 2.5
@@ -96,7 +98,7 @@ public class SkipAtStartInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte b[]) throws IOException {
+    public int read(@Nonnull byte b[]) throws IOException {
         if (skip.isEmpty()) {
             return wrapped.read(b, 0, b.length);
         } else {
@@ -105,7 +107,7 @@ public class SkipAtStartInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte b[], int off, int len) throws IOException {
+    public int read(@Nonnull byte b[], int off, int len) throws IOException {
         if (skip.isEmpty()) {
             return wrapped.read(b, off, len);
         } else {

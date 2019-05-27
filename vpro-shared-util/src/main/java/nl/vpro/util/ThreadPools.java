@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.concurrent.*;
 
+import javax.annotation.Nonnull;
+
 /**
  * Utilities related to ThreadPools
  * Perhaps this can be deprecated in favour of {@link  ForkJoinPool#commonPool()}?
@@ -21,7 +23,7 @@ public final class ThreadPools {
         return new ThreadFactory() {
             long counter = 1;
             @Override
-            public Thread newThread(Runnable r) {
+            public Thread newThread(@Nonnull Runnable r) {
                 Thread thread = new Thread(THREAD_GROUP, r);
                 thread.setDaemon(daemon);
                 thread.setPriority(priority);

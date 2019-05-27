@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.SortedSet;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 2.3.1
@@ -20,6 +22,7 @@ public abstract class SortedSetElementWrapper<T, S> extends AbstractSet<S> imple
         this.wrapped = wrapped;
     }
 
+    @Nonnull
     @Override
     public Iterator<S> iterator() {
         return new Iterator<S>() {
@@ -57,17 +60,20 @@ public abstract class SortedSetElementWrapper<T, S> extends AbstractSet<S> imple
 
     }
 
+    @Nonnull
     @Override
     public SortedSet<S> subSet(S fromElement, S toElement) {
         return sub(wrapped.subSet(find(fromElement), find(toElement)));
     }
 
+    @Nonnull
     @Override
     public SortedSet<S> headSet(S toElement) {
         return sub(wrapped.headSet(find(toElement)));
 
     }
 
+    @Nonnull
     @Override
     public SortedSet<S> tailSet(S fromElement) {
         return sub(wrapped.tailSet(find(fromElement)));

@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -19,6 +20,7 @@ public class PrefixingMetadataNamingStrategy extends MetadataNamingStrategy {
         this.postfix = prefix;
     }
 
+    @Nonnull
     @Override
 	public ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException {
         ObjectName name = super.getObjectName(managedBean, beanKey);

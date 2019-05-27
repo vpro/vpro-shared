@@ -59,6 +59,7 @@ public class IterableJsonTest {
             values = v;
         }
 
+        @Nonnull
         @Override
         public Iterator<A> iterator() {
             return values.iterator();

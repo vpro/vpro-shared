@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.*;
 
+import javax.annotation.Nonnull;
+
 /**
  * Extension of properties that remembers insertion order.
  * @author Michiel Meeuwissen
@@ -17,10 +19,12 @@ public class OrderedProperties extends Properties {
         return Collections.enumeration(names);
     }
 
+    @Nonnull
     @Override
     public Set entrySet() {
         return new AbstractSet() {
 
+            @Nonnull
             @Override
             public Iterator iterator() {
                 final Iterator i = names.iterator();

@@ -3,6 +3,8 @@ package nl.vpro.util;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.29
@@ -23,13 +25,13 @@ public class WrappedInputStream  extends InputStream {
     }
 
     @Override
-    public int read(byte b[]) throws IOException {
+    public int read(@Nonnull byte b[]) throws IOException {
         return wrapped.read(b);
     }
 
 
     @Override
-    public int read(byte b[], int off, int len) throws IOException {
+    public int read(@Nonnull byte b[], int off, int len) throws IOException {
         return wrapped.read(b, off, len);
     }
 

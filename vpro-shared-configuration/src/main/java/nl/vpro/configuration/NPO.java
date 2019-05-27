@@ -2,6 +2,7 @@ package nl.vpro.configuration;
 
 import java.io.File;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
 import org.springframework.web.context.ServletContextAware;
@@ -42,7 +43,7 @@ public class NPO implements ServletContextAware {
 
 
     @Override
-    public void setServletContext(ServletContext servletContext) {
+    public void setServletContext(@Nonnull ServletContext servletContext) {
         this.sx = servletContext;
 
     }

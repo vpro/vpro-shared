@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Properties;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.configuration2.AbstractConfiguration;
@@ -43,6 +44,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     /**
      * The implicetely determined configuration file
      */
+    @Nonnull
     @Override
     public File getFile() {
         if (file == null) {
@@ -54,7 +56,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
     @Override
-    public void setServletContext(ServletContext servletContext) {
+    public void setServletContext(@Nonnull ServletContext servletContext) {
         sx = servletContext;
         getFile();
         if (file.exists()) {
@@ -133,11 +135,13 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         return false;
     }
 
+    @Nonnull
     @Override
     public URL getURL() throws IOException {
         return getFile().toURI().toURL();
     }
 
+    @Nonnull
     @Override
     public URI getURI() {
         return getFile().toURI();
@@ -150,8 +154,9 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         return getFile().lastModified();
     }
 
+    @Nonnull
     @Override
-    public Resource createRelative(String relativePath) {
+    public Resource createRelative(@Nonnull String relativePath) {
         return new FileSystemResource(new File(getFile(), relativePath));
     }
 
@@ -160,11 +165,13 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         return getFile().getName();
     }
 
+    @Nonnull
     @Override
     public String getDescription() {
         return getFilename();
     }
 
+    @Nonnull
     @Override
     public InputStream getInputStream() throws IOException {
         return new FileInputStream(getFile());

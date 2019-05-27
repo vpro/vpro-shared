@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.inject.Provider;
 
 import org.springframework.beans.BeansException;
@@ -66,8 +67,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     @Override
     protected void processProperties(
-        ConfigurableListableBeanFactory beanFactory,
-        Properties props) throws BeansException {
+        @Nonnull ConfigurableListableBeanFactory beanFactory,
+        @Nonnull Properties props) throws BeansException {
         super.processProperties(beanFactory, props);
         initMap(props);
         initSystemProperties();

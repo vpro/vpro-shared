@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -54,7 +56,7 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     @Override
-    public int compareTo(Version<T> o) {
+    public int compareTo(@Nonnull Version<T> o) {
         int i = 0;
         while(true) {
             if (parts.length == i || o.parts.length == i) {

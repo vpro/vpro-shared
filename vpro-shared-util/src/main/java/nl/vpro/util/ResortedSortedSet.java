@@ -3,6 +3,8 @@ package nl.vpro.util;
 import java.io.Serializable;
 import java.util.*;
 
+import javax.annotation.Nonnull;
+
 /**
  * A modifiable SortedSet, that wrapped another collection (changes are reflected), with an explicit sort order.
  * @author Michiel Meeuwissen
@@ -32,6 +34,7 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
         this.wrapped = wrapped;
     }
 
+    @Nonnull
     @Override
     public Iterator<T> iterator() {
         final Iterator<T> i = set.iterator();
@@ -88,18 +91,21 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
 
     }
 
+    @Nonnull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
         return new ResortedSortedSet<>(set.subSet(fromElement, toElement), wrapped);
 
     }
 
+    @Nonnull
     @Override
     public SortedSet<T> headSet(T toElement) {
         return new ResortedSortedSet<>(set.headSet(toElement), wrapped);
 
     }
 
+    @Nonnull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
         return new ResortedSortedSet<>(set.tailSet(fromElement), wrapped);

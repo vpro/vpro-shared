@@ -3,6 +3,8 @@ package nl.vpro.util;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 4.3
@@ -25,6 +27,7 @@ public interface TransformingCollection<T, S, U extends Collection<T>, V extends
     V unwrap();
 
 
+    @Nonnull
     @Override
     default Iterator<T> iterator() {
         final Iterator<S> i = unwrap().iterator();

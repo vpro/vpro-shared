@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.annotation.Nonnull;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -106,12 +107,12 @@ public class SwaggerFilter implements Filter {
                     }
 
                     @Override
-                    public void write(byte[] b) throws IOException {
+                    public void write(@Nonnull byte[] b) throws IOException {
                         out.write(b);
                     }
 
                     @Override
-                    public void write(byte[] b, int off, int len) throws IOException {
+                    public void write(@Nonnull byte[] b, int off, int len) throws IOException {
                         out.write(b, off, len);
                     }
                 };

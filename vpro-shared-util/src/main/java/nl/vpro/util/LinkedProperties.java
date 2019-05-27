@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.*;
 
+import javax.annotation.Nonnull;
+
 /**
  * Properties with predictable iteration order.
  * @author Michiel Meeuwissen
@@ -22,9 +24,11 @@ public class LinkedProperties extends Properties {
         return Collections.enumeration(keys);
     }
 
+    @Nonnull
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
         return new AbstractSet<Map.Entry<Object, Object>>() {
+            @Nonnull
             @Override
             public Iterator<Map.Entry<Object, Object>> iterator() {
                 Iterator<Object> keyIterator = keys.iterator();
