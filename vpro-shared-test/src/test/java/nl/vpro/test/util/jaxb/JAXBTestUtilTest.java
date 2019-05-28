@@ -3,6 +3,7 @@ package nl.vpro.test.util.jaxb;
 import org.junit.Test;
 
 import nl.vpro.test.util.jaxb.test.A;
+import nl.vpro.test.util.jaxb.test.ANoNamespace;
 import nl.vpro.test.util.jaxb.test.B;
 
 import static nl.vpro.test.util.jaxb.JAXBTestUtil.*;
@@ -36,6 +37,7 @@ public class JAXBTestUtilTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testContainsDeprecated() {
         roundTrip(new A(), "<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
@@ -60,6 +62,22 @@ public class JAXBTestUtilTest {
 
         assertThat(a.getB().getI()).isEqualTo(1);
     }
+
+    @Test
+    public void testContainsNoNamespace() {
+        ANoNamespace a = roundTripContains(new ANoNamespace(),
+             "<a>xx</a>",
+            "<c>zz</c>");
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testContainsNoNamespaceFails() {
+        ANoNamespace a = roundTripContains(new ANoNamespace(),
+             "<a>xx</a>",
+            "<dd>qq</dd>",
+            "<c>zz</c>");
+    }
+
     @Test
     public void testContainsFluent() {
         A rounded = assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
