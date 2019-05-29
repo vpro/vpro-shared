@@ -248,12 +248,17 @@ public class MBeans {
     }
 
 
-    public boolean isEmpty(String string) {
+    /**
+     * @since 2.8
+     */
+    public static boolean isEmpty(String string) {
         return "String".equals(string) || StringUtils.isEmpty(string);
     }
 
-
-    public boolean isBlank(String string) {
+    /**
+     * @since 2.8
+     */
+    public static boolean isBlank(String string) {
         return "String".equals(string) || StringUtils.isBlank(string);
     }
 }
