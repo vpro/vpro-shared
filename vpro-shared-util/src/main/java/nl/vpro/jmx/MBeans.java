@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
@@ -244,5 +245,15 @@ public class MBeans {
         public String toString() {
             return string.toString();
         }
+    }
+
+
+    public boolean isEmpty(String string) {
+        return "String".equals(string) || StringUtils.isEmpty(string);
+    }
+
+
+    public boolean isBlank(String string) {
+        return "String".equals(string) || StringUtils.isBlank(string);
     }
 }
