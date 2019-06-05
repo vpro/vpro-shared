@@ -249,14 +249,14 @@ public class MBeans {
 
 
     /**
-     * @since 2.8
+     * @since 2.7
      */
     public static boolean isEmpty(String string) {
         return "String".equals(string) || StringUtils.isEmpty(string);
     }
 
     /**
-     * @since 2.8
+     * @since 2.7
      */
     public static boolean isBlank(String string) {
         return "String".equals(string) || StringUtils.isBlank(string);
