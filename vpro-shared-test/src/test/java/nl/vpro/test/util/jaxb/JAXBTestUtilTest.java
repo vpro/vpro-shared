@@ -51,12 +51,12 @@ public class JAXBTestUtilTest {
     public void testContains() {
         A a = roundTripContains(new A(), " <b i=\"1\" j=\"2\">\n" +
             "        <value>bb</value>\n" +
-            "        <map>\n" +
+        /*    "        <map>\n" +
             "            <e>\n" +
             "                <k>x</k>\n" +
             "                <v>y</v>\n" +
             "            </e>\n" +
-            "        </map>\n" +
+            "        </map>\n" +*/
             "        <c>cc</c>\n" +
             "    </b>");
 
