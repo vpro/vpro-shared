@@ -119,8 +119,8 @@
           <version>3.8.0</version>
           <inherited>true</inherited>
           <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
+            <source>11</source>
+            <target>11</target>
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
@@ -364,12 +364,12 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jaxrs-all</artifactId>
+        <artifactId>resteasy-client</artifactId>
         <version>${resteasy.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-client</artifactId>
+        <artifactId>resteasy-core-spi</artifactId>
         <version>${resteasy.version}</version>
       </dependency>
 
@@ -379,6 +379,7 @@
         <version>2.1.1</version>
         <scope>provided</scope>
       </dependency>
+
 
       <dependency>
         <groupId>commons-io</groupId>

@@ -9,7 +9,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.junit.Test;
 
 /**
@@ -44,8 +45,8 @@ public class ParamConvertersTest {
     @Test(expected = NotFoundException.class)
     public void testClient() {
 
-         ResteasyClientBuilder builder = new ResteasyClientBuilder()
-             .httpEngine(ApacheHttpClient4EngineFactory.create())
+         ResteasyClientBuilder builder = new ResteasyClientBuilderImpl()
+             .httpEngine(ApacheHttpClientEngine.create())
 
              ;
         builder.register(new DateParamConverterProvider());
