@@ -91,6 +91,8 @@ public class ViewRefresher implements Runnable {
                 log.debug("Refreshed {}", view);
             } catch (Exception e) {
                 log.warn(e.getClass().getName() + " " + e.getMessage());
+            } catch (Throwable t) {
+                log.error(t.getMessage(), t);
             }
         }
     }

@@ -34,7 +34,13 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         super(window, bucketDuration, bucketCount);
         if (reporter != null) {
             ThreadPools.backgroundExecutor.scheduleAtFixedRate(
-                () -> reporter.accept(WindowedEventRate.this), 0, this.bucketDuration, TimeUnit.MILLISECONDS);
+                () -> {
+                    try {
+                        reporter.accept(WindowedEventRate.this);
+                    } catch (Throwable t) {
+                        log.error(t.getMessage(), t);
+                    }
+            }, 0, this.bucketDuration, TimeUnit.MILLISECONDS);
         }
     }
 
