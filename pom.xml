@@ -364,7 +364,7 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jaxrs</artifactId>
+        <artifactId>resteasy-jaxrs-all</artifactId>
         <version>${resteasy.version}</version>
       </dependency>
       <dependency>
