@@ -1120,6 +1120,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
                     }
                 } catch (InterruptedException ignored) {
                     log.debug(ignored.getMessage());
+                } catch (Throwable t) {
+                    log.error(t.getMessage(), t);
                 }
             }
             log.info("Shut down connection guard");

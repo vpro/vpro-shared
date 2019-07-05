@@ -401,7 +401,7 @@ public class URLResource<T> {
             if (async) {
                 try {
                     URLResource.this.getCachedResource();
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     log.error(e.getMessage());
                 }
             }
