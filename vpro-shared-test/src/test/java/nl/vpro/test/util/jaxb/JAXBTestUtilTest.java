@@ -40,10 +40,10 @@ public class JAXBTestUtilTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testContainsDeprecated() {
-        roundTrip(new A(), "<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
-            "            <value>bb</value>\n" +
-                "               <c>cc</c>\n" +
-                "         </b>");
+        roundTrip(new A(), "<b i=\"1\" j=\"2\">\n" +
+            "        <value>bb</value>\n" +
+            "        <c>cc</c>\n" +
+            "    </b>");
     }
 
 

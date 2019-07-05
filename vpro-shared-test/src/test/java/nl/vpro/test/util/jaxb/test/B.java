@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * This has no XmlRootElement
@@ -34,6 +36,7 @@ public class B {
 
     @XmlAttribute
     Integer j = 2;
+/*
 
     @XmlJavaTypeAdapter(MapAdapter.class)
     Map<String, String> map = new HashMap<>();
@@ -41,6 +44,7 @@ public class B {
     {
         map.put("x", "y");
     }
+*/
 
     C c = new C();
 
