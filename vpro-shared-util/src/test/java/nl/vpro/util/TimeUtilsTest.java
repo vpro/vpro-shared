@@ -61,6 +61,7 @@ public class TimeUtilsTest {
         assertThat(TimeUtils.parseDuration("T5M").get()).isEqualTo(Duration.ofMinutes(5));
         assertThat(TimeUtils.parseDuration("5M").get()).isEqualTo(Duration.ofMinutes(5));
         assertThat(TimeUtils.parseDuration("6s").get()).isEqualTo(Duration.ofSeconds(6));
+        assertThat(TimeUtils.parseDuration("6 s").get()).isEqualTo(Duration.ofSeconds(6));
         assertThat(TimeUtils.parseDuration("7S").get()).isEqualTo(Duration.ofSeconds(7));
         assertThat(TimeUtils.parseDuration("5000").get()).isEqualTo(Duration.ofMillis(5000));
         assertThat(TimeUtils.parseDuration("PT300s").get()).isEqualTo(Duration.ofSeconds(300));
@@ -77,15 +78,23 @@ public class TimeUtilsTest {
 
         assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
 
-        assertThatThrownBy(() -> TimeUtils.parseDuration("can't be parsed"))
+        assertThatThrownBy(() -> TimeUtils.parseDuration("can'tbeparsed"))
             .isExactlyInstanceOf(DateTimeParseException.class)
-            .hasMessage("PTcan't be parsed:Text cannot be parsed to a Duration")
+            .hasMessage("can'tbeparsed:Text cannot be parsed to a Duration")
             .matches((dtm) -> {
-                return ((DateTimeParseException) dtm).getParsedString().equals("PTcan't be parsed");
+                return ((DateTimeParseException) dtm).getParsedString().equals("can'tbeparsed");
             }, "doest match");
 
 
     }
+
+    @Test
+    public void durationToString() {
+        assertThat(TimeUtils.toParsableString(Duration.ofSeconds(5))).isEqualTo("5S");
+        assertThat(TimeUtils.toParsableString(Duration.ofDays(50))).isEqualTo("1200H");
+
+    }
+
 
     @Test
     public void parseLocalDateTime() {

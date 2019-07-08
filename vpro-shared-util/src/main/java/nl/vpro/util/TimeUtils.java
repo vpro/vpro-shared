@@ -82,6 +82,10 @@ public class TimeUtils {
     }
 
     public static Optional<Duration> parseDuration(CharSequence d) {
+        return parseDuration(null, d);
+    }
+
+    private static Optional<Duration> parseDuration(DateTimeParseException original, CharSequence d) {
         if (StringUtils.isBlank(d)) {
             return Optional.empty();
         }
@@ -91,23 +95,35 @@ public class TimeUtils {
         }
 
 
+
         try {
             return Optional.of(Duration.parse(d));
         } catch (DateTimeParseException dtp) {
-            String ds = d.toString();
+            if (original != null) {
+                dtp = original;
+            }
+            String ds = d.toString().replaceAll("\\s*", "");
+            if (ds.length() < d.length()) {
+                return parseDuration(ds);
+            }
             try {
                 return Optional.of(Duration.ofMillis(Long.parseLong(ds)));
             } catch (NumberFormatException nfe) {
                 // ignore
             }
             if (!ds.startsWith("P")) {
-                return parseDuration("P" + ds);
+                return parseDuration(dtp, "P" + ds);
             } else if (!ds.startsWith("PT")){
                 // so it did start with P, just not with PT, and it couldn't be parsed
-                return parseDuration("PT" + ds.substring(1));
+                return parseDuration(dtp, "PT" + ds.substring(1));
             }
+
             throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
         }
+    }
+
+    public static String toParsableString(Duration duration) {
+        return duration.toString().substring(2);
     }
 
 
