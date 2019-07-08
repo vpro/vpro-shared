@@ -6,6 +6,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.resteasy.spi.ReaderException;
 
+
 /**
  *
  * @author Ernst Bunders

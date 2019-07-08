@@ -31,7 +31,6 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -40,6 +39,7 @@ import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -52,7 +52,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
-import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -566,7 +567,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     }
 
-    private HttpClient getHttpClient(
+    private CloseableHttpClient getHttpClient(
         Duration connectionRequestTimeout,
         Duration connectTimeout,
         Duration socketTimeout,
@@ -638,7 +639,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ApacheHttpClient4EngineFactory.create(
+            clientHttpEngine = ApacheHttpClientEngine.create(
                 getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL));
 
         }
@@ -647,8 +648,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ApacheHttpClient4EngineFactory.create(
-                getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null)
+            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null)
             );
         }
         return clientHttpEngineNoTimeout;
@@ -904,7 +904,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
      protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
-        ResteasyClientBuilder builder = new ResteasyClientBuilder()
+        ResteasyClientBuilder builder = new ResteasyClientBuilderImpl()
             .httpEngine(engine);
         builder.register(new JacksonContextResolver(objectMapper));
         builder.register(new AcceptRequestFilter(accept));
