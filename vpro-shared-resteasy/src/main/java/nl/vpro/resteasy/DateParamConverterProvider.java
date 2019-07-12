@@ -24,8 +24,7 @@ public class DateParamConverterProvider implements ParamConverterProvider {
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (annotations != null) {
             for (Annotation annotation : annotations) {
-                log.info("{}");
-
+                log.debug("{}", annotation);
             }
         }
         if (Date.class.isAssignableFrom(rawType)) {
