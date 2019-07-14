@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 
 import org.elasticsearch.client.Client;
 
