@@ -201,7 +201,7 @@
     <mockito.version>2.28.2</mockito.version>
     <assertj.version>3.12.2</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
-    <resteasy.version>4.1.0.Final</resteasy.version>
+    <resteasy.version>4.1.1.Final</resteasy.version>
     <slf4j.version>1.7.25</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.12.0</log4j2.version>
