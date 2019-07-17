@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * @author Michiel Meeuwissen
@@ -36,7 +36,7 @@ public class TransformingSortedSet<T, S> extends AbstractSet<T> implements Sorte
 
 
 
-    @Nonnull
+    @NonNull
     @Override
     public Iterator<T> iterator() {
         return TransformingCollection.super.iterator();
@@ -62,20 +62,20 @@ public class TransformingSortedSet<T, S> extends AbstractSet<T> implements Sorte
         return comparator;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
         return new TransformingSortedSet<>(wrapped.subSet(produce(fromElement), produce(toElement)), transformer, producer);
 
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public SortedSet<T> headSet(T toElement) {
         return new TransformingSortedSet<>(wrapped.headSet(produce(toElement)), transformer, producer);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
         return new TransformingSortedSet<>(wrapped.tailSet(produce(fromElement)), transformer, producer);

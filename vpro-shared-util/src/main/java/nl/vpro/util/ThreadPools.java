@@ -2,7 +2,7 @@ package nl.vpro.util;
 
 import java.util.concurrent.*;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Utilities related to ThreadPools
@@ -23,7 +23,7 @@ public final class ThreadPools {
         return new ThreadFactory() {
             long counter = 1;
             @Override
-            public Thread newThread(@Nonnull Runnable r) {
+            public Thread newThread(@NonNull Runnable r) {
                 Thread thread = new Thread(THREAD_GROUP, r);
                 thread.setDaemon(daemon);
                 thread.setPriority(priority);

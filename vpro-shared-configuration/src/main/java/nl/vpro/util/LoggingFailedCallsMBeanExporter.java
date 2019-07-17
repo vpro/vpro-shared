@@ -2,7 +2,7 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
@@ -20,7 +20,7 @@ import org.springframework.jmx.export.SpringModelMBean;
 @Slf4j
 public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
 
-    @Nonnull
+    @NonNull
     @Override
     protected ModelMBean createModelMBean() throws MBeanException {
         ModelMBean superModelMBean = super.createModelMBean();
@@ -28,9 +28,9 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
         // but this.exposeManagedResourceClassLoader is not visible, so we switch on the type of the returned ModelMBean
         if (superModelMBean instanceof SpringModelMBean) {
             return new SpringModelMBean() {
-                @Nonnull
+                @NonNull
                 @Override
-                public Object invoke(String opName, @Nonnull Object[] opArgs, @Nonnull String[] sig) throws MBeanException, ReflectionException {
+                public Object invoke(String opName, @NonNull Object[] opArgs, @NonNull String[] sig) throws MBeanException, ReflectionException {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | Error | RuntimeException e) {

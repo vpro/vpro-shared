@@ -1,6 +1,6 @@
 package nl.vpro.logging;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
@@ -106,7 +106,7 @@ public class Slf4jHelper {
         }
     }
 
-    public static boolean isEnabled(@Nonnull Logger logger,  @Nonnull  Level level) {
+    public static boolean isEnabled(@NonNull Logger logger,  @NonNull  Level level) {
         switch (level) {
             case TRACE:
                 return logger.isTraceEnabled();
@@ -124,7 +124,7 @@ public class Slf4jHelper {
     }
 
 
-    public static String returnAndWarn(@Nonnull  Logger logger, @Nonnull String format, Object... arg) {
+    public static String returnAndWarn(@NonNull  Logger logger, @NonNull String format, Object... arg) {
         FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
         String message = ft.getMessage();
         logger.warn(message);
@@ -132,7 +132,7 @@ public class Slf4jHelper {
     }
 
 
-    public static String returnAndInfo(@Nonnull  Logger logger, @Nonnull String format, Object... arg) {
+    public static String returnAndInfo(@NonNull  Logger logger, @NonNull String format, Object... arg) {
         FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
         String message = ft.getMessage();
         logger.info(message);

@@ -9,8 +9,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;;
 
 import org.apache.commons.lang3.LocaleUtils;
 
@@ -77,10 +77,10 @@ public class ReflectionUtils {
      *
      * @param setterName How, given a property name the setter methods must be calculated.
      */
-    public static <T> T configureIfNull(@Nonnull T instance,
-                                        @Nonnull Map<String, String> properties,
-                                        @Nonnull Collection<Function<String, String>> setterName,
-                                        @Nonnull Collection<Function<String, String>> getterName) {
+    public static <T> T configureIfNull(@NonNull T instance,
+                                        @NonNull Map<String, String> properties,
+                                        @NonNull Collection<Function<String, String>> setterName,
+                                        @NonNull Collection<Function<String, String>> getterName) {
         log.debug("Configuring with {}", properties);
         final Set<String> found = new HashSet<>();
         final Set<String> notfound = new HashSet<>();
@@ -265,10 +265,10 @@ public class ReflectionUtils {
 
 
     private static Result  setProperty(
-        @Nonnull Object instance,
+        @NonNull Object instance,
         @Nullable String fieldName,
-        @Nonnull Collection<String> setterNames,
-        @Nonnull Collection<String> getterNames,
+        @NonNull Collection<String> setterNames,
+        @NonNull Collection<String> getterNames,
         @Nullable Object value, boolean onlyIfNull) {
         String v = value == null ? null : String.valueOf(value);
 
@@ -391,7 +391,7 @@ public class ReflectionUtils {
     /**
      * Returns the first {@link Field} in the hierarchy for the specified name
      */
-    private static Field getField(@Nonnull Class<?> clazz, final @Nonnull String name) throws NoSuchFieldException {
+    private static Field getField(@NonNull Class<?> clazz, final @NonNull String name) throws NoSuchFieldException {
         NoSuchFieldException noSuchFieldException = null;
         while (clazz != null) {
             try {

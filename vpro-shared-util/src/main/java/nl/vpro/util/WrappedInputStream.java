@@ -3,7 +3,7 @@ package nl.vpro.util;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * @author Michiel Meeuwissen
@@ -25,13 +25,13 @@ public class WrappedInputStream  extends InputStream {
     }
 
     @Override
-    public int read(@Nonnull byte b[]) throws IOException {
+    public int read(@NonNull byte b[]) throws IOException {
         return wrapped.read(b);
     }
 
 
     @Override
-    public int read(@Nonnull byte b[], int off, int len) throws IOException {
+    public int read(@NonNull byte b[], int off, int len) throws IOException {
         return wrapped.read(b, off, len);
     }
 

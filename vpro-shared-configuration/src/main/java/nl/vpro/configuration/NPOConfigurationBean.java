@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Properties;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.configuration2.AbstractConfiguration;
@@ -44,7 +44,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     /**
      * The implicetely determined configuration file
      */
-    @Nonnull
+    @NonNull
     @Override
     public File getFile() {
         if (file == null) {
@@ -56,7 +56,7 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
     }
 
     @Override
-    public void setServletContext(@Nonnull ServletContext servletContext) {
+    public void setServletContext(@NonNull ServletContext servletContext) {
         sx = servletContext;
         getFile();
         if (file.exists()) {
@@ -135,13 +135,13 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         return false;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public URL getURL() throws IOException {
         return getFile().toURI().toURL();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public URI getURI() {
         return getFile().toURI();
@@ -154,9 +154,9 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         return getFile().lastModified();
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Resource createRelative(@Nonnull String relativePath) {
+    public Resource createRelative(@NonNull String relativePath) {
         return new FileSystemResource(new File(getFile(), relativePath));
     }
 
@@ -165,13 +165,13 @@ public class NPOConfigurationBean extends AbstractConfiguration implements Servl
         return getFile().getName();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String getDescription() {
         return getFilename();
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public InputStream getInputStream() throws IOException {
         return new FileInputStream(getFile());

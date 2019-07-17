@@ -5,7 +5,7 @@ import net.sf.json.test.JSONAssert;
 import java.io.StringWriter;
 import java.util.*;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -59,7 +59,7 @@ public class IterableJsonTest {
             values = v;
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public Iterator<A> iterator() {
             return values.iterator();
@@ -85,12 +85,12 @@ public class IterableJsonTest {
 
         }
 
-        public StringIterable(@Nonnull List<String> v) {
+        public StringIterable(@NonNull List<String> v) {
             values = v;
         }
 
         @Override
-        @Nonnull
+        @NonNull
         public Iterator<String> iterator() {
             return values.iterator();
 

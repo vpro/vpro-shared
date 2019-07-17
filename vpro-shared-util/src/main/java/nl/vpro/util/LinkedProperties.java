@@ -2,7 +2,7 @@ package nl.vpro.util;
 
 import java.util.*;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Properties with predictable iteration order.
@@ -24,11 +24,11 @@ public class LinkedProperties extends Properties {
         return Collections.enumeration(keys);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
         return new AbstractSet<Map.Entry<Object, Object>>() {
-            @Nonnull
+            @NonNull
             @Override
             public Iterator<Map.Entry<Object, Object>> iterator() {
                 Iterator<Object> keyIterator = keys.iterator();

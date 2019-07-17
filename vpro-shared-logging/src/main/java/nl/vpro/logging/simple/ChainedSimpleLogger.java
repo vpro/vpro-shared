@@ -2,7 +2,7 @@ package nl.vpro.logging.simple;
 
 import java.util.*;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import org.slf4j.event.Level;
 
@@ -46,7 +46,7 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     }
 
     @Override
-    @Nonnull
+    @NonNull
     public Iterator<SimpleLogger> iterator() {
         return list.iterator();
     }

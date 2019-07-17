@@ -2,7 +2,7 @@ package nl.vpro.util;
 
 import java.util.*;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Extension of properties that remembers insertion order.
@@ -19,12 +19,12 @@ public class OrderedProperties extends Properties {
         return Collections.enumeration(names);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Set entrySet() {
         return new AbstractSet() {
 
-            @Nonnull
+            @NonNull
             @Override
             public Iterator iterator() {
                 final Iterator i = names.iterator();

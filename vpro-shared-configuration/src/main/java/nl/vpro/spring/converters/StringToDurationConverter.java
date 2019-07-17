@@ -2,7 +2,7 @@ package nl.vpro.spring.converters;
 
 import java.time.Duration;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import org.springframework.core.convert.converter.Converter;
 
@@ -14,7 +14,7 @@ import nl.vpro.util.TimeUtils;
  */
 public class StringToDurationConverter implements Converter<String, Duration> {
     @Override
-    public Duration convert(@Nonnull String s) {
+    public Duration convert(@NonNull String s) {
         return TimeUtils.parseDuration(s).orElseThrow(() -> new IllegalArgumentException("Cannot convert to duration " + s));
 
     }

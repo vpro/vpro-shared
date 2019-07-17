@@ -9,8 +9,8 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -64,9 +64,9 @@ public class MBeans {
      */
     public static String returnString(
         @Nullable final String key,
-        @Nonnull final StringSupplierSimpleLogger description,
-        @Nonnull final Duration wait,
-        @Nonnull final Consumer<StringSupplierSimpleLogger> logger) {
+        @NonNull final StringSupplierSimpleLogger description,
+        @NonNull final Duration wait,
+        @NonNull final Consumer<StringSupplierSimpleLogger> logger) {
         if (key != null) {
             if (isRunning(key)) {
                 return "Job " + key + " is still running, so could not be started again with " + description.get();
@@ -109,9 +109,9 @@ public class MBeans {
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
-        @Nonnull StringSupplierSimpleLogger description,
-        @Nonnull Duration wait,
-        @Nonnull Consumer<StringSupplierSimpleLogger> logger) {
+        @NonNull StringSupplierSimpleLogger description,
+        @NonNull Duration wait,
+        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
         return returnString(null, description, wait, logger);
     }
 
@@ -119,14 +119,14 @@ public class MBeans {
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
-        @Nonnull StringSupplierSimpleLogger description,
-        @Nonnull Consumer<StringSupplierSimpleLogger> logger) {
+        @NonNull StringSupplierSimpleLogger description,
+        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
         return returnString(null, description, DEFAULT_DURATION, logger);
     }
 
     public static String returnMultilineString(
-        @Nonnull Logger log,
-        @Nonnull Consumer<StringSupplierSimpleLogger> logger) {
+        @NonNull Logger log,
+        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
         return returnString(multiLine(log), logger);
     }
 
@@ -135,9 +135,9 @@ public class MBeans {
     @Deprecated
     public static String returnString(
         @Nullable final String key,
-        @Nonnull final StringSupplierSimpleLogger description,
-        @Nonnull final  Duration wait,
-        @Nonnull final Callable<String> job) {
+        @NonNull final StringSupplierSimpleLogger description,
+        @NonNull final  Duration wait,
+        @NonNull final Callable<String> job) {
         return returnString(key, description, wait, l -> {
             try {
                 String s = job.call();
@@ -154,26 +154,26 @@ public class MBeans {
      */
     @Deprecated
     public static String returnString(
-        @Nonnull StringSupplierSimpleLogger description,
-        @Nonnull Duration wait,
-        @Nonnull Callable<String> job) {
+        @NonNull StringSupplierSimpleLogger description,
+        @NonNull Duration wait,
+        @NonNull Callable<String> job) {
         return returnString(null, description, wait, job);
     }
 
 
     @Deprecated
     public static String returnString(
-        @Nonnull Supplier<String> description,
-        @Nonnull Duration wait,
-        @Nonnull Callable<String> job) {
+        @NonNull Supplier<String> description,
+        @NonNull Duration wait,
+        @NonNull Callable<String> job) {
         return returnString(null, singleLine(log, description.get()), wait, job);
     }
     /**
      * Defaulting version of {@link #returnString(StringSupplierSimpleLogger, Duration, Callable)} waiting for 5 seconds before time out.*/
     @Deprecated
     public static String returnString(
-        @Nonnull StringSupplierSimpleLogger description,
-        @Nonnull Callable<String> job) {
+        @NonNull StringSupplierSimpleLogger description,
+        @NonNull Callable<String> job) {
         return returnString(description, DEFAULT_DURATION, job);
     }
 

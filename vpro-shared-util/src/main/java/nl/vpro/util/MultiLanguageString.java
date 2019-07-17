@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
@@ -105,7 +105,7 @@ public class MultiLanguageString implements CharSequence {
     }
 
     @Override
-    @Nonnull
+    @NonNull
     public String toString() {
         String s = get(defaultLocale);
         if (s == null) {
