@@ -20,7 +20,7 @@ public class ShowCatalinaBase implements Consumer<Map<String, String>> {
 
     @Override
     public void accept(Map<String, String> stringStringMap) {
-         if (! shown) {
+        if (! shown) {
             String catalinaBase = System.getProperty("catalina.base");
             if (StringUtils.isNotEmpty(catalinaBase)) {
                 System.out.println("CATALINA BASE:\n'" + catalinaBase + File.separator + "'");

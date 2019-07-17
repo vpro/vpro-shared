@@ -16,16 +16,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -351,9 +349,9 @@ public class IndexHelper {
 
     @SafeVarargs
     protected final ResponseListener listen(
-        @Nonnull final String requestDescription,
-        @Nonnull final CompletableFuture<ObjectNode> future,
-        @Nonnull  Consumer<ObjectNode>... listeners) {
+        @NonNull final String requestDescription,
+        @NonNull final CompletableFuture<ObjectNode> future,
+        @NonNull  Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {

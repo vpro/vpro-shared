@@ -11,9 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -285,7 +284,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     @Override
-    public int read(@Nonnull  byte[] b) throws IOException {
+    public int read(@NonNull byte[] b) throws IOException {
         try {
             if (tempFileInputStream == null) {
                 return readFromBuffer(b);

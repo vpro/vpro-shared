@@ -3,7 +3,8 @@ package nl.vpro.util;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.annotation.Nonnull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 
 /**
  * @author Michiel Meeuwissen
@@ -27,7 +28,7 @@ public interface TransformingCollection<T, S, U extends Collection<T>, V extends
     V unwrap();
 
 
-    @Nonnull
+    @NonNull
     @Override
     default Iterator<T> iterator() {
         final Iterator<S> i = unwrap().iterator();

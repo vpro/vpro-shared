@@ -8,8 +8,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletOutputStream;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * To wrap the output stream we need an implementation of a ServletOutputStream
@@ -28,12 +29,12 @@ public class WrappedServletOutputStream extends ServletOutputStream {
     }
 
     @Override
-    public void write(@Nonnull byte[] b) throws IOException {
+    public void write(@NonNull byte[] b) throws IOException {
         stream.write(b);
     }
 
     @Override
-    public void write(@Nonnull byte[] b, int off, int len) throws IOException {
+    public void write(@NonNull byte[] b, int off, int len) throws IOException {
         stream.write(b, off, len);
     }
 }

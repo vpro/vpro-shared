@@ -1,9 +1,9 @@
 package nl.vpro.util;
 
-import javax.annotation.Nonnull;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.lang.Nullable;
@@ -20,7 +20,7 @@ public class PrefixingMetadataNamingStrategy extends MetadataNamingStrategy {
         this.postfix = prefix;
     }
 
-    @Nonnull
+    @NonNull
     @Override
 	public ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException {
         ObjectName name = super.getObjectName(managedBean, beanKey);

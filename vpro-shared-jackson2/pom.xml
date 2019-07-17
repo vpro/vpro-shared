@@ -48,10 +48,6 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.joestelmach</groupId>
       <artifactId>natty</artifactId>
       <version>0.13</version>
