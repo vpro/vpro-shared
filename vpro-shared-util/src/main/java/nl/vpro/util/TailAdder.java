@@ -48,7 +48,7 @@ public class TailAdder<T> implements CountedIterator<T> {
     }
 
     @SuppressWarnings("unchecked")
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
         this(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders.toArray(new Function[adders.size()]));
     }

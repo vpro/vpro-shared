@@ -28,7 +28,7 @@ public class HeadAdder<T> implements Iterator<T> {
 
 
     @SuppressWarnings("unchecked")
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private HeadAdder(Iterator<T> wrapped, final boolean onlyIfEmpty, final boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
         this.wrapped = wrapped;
         if (onlyIfEmpty && onlyIfNotEmpty) {

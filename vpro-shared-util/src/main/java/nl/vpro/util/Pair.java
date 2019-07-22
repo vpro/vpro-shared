@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -10,14 +9,14 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor(staticName = "of")
-@lombok.Builder
+@lombok.Builder(builderClassName = "Builder")
 public class Pair<F, S> {
     private F first;
-    @Builder.Default
+    @lombok.Builder.Default
     private String firstDescription = "first";
 
     private S second;
-    @Builder.Default
+    @lombok.Builder.Default
     private String secondDescription = "second";
 
     public static <F, S> Pair<F, S> of(F first, S second){
