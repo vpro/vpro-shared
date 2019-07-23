@@ -55,7 +55,7 @@ public class Copier implements Runnable, Closeable {
      * @param name
      * @param notify
      */
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private Copier(
         InputStream input,
         OutputStream output,

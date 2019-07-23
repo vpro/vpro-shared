@@ -24,7 +24,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
      * @param bucketDuration The duration of one bucket (or <code>null</code> if window specified).
      * @param bucketCount    The number of buckets the total window time is to be divided in.
      */
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private WindowedEventRate(
         Duration window,
         Duration bucketDuration,

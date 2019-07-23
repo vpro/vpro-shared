@@ -15,7 +15,7 @@ public class CallbackIterator<T> implements CountedIterator<T> {
     private Runnable callback;
     private Boolean hasNext;
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     public CallbackIterator(Iterator<T> wrapped, Runnable callback) {
         this.wrapped = wrapped;
         this.callback = callback;

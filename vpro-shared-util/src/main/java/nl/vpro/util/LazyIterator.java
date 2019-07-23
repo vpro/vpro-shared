@@ -14,7 +14,7 @@ public class LazyIterator<T> implements CloseableIterator<T> {
     private final Supplier<Iterator<T>> supplier;
     private Iterator<T> iterator;
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     public LazyIterator(Supplier<Iterator<T>> supplier) {
         this.supplier = supplier;
     }

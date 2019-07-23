@@ -1,6 +1,5 @@
 package nl.vpro.util;
 
-import lombok.Builder;
 import lombok.ToString;
 
 import java.util.Iterator;
@@ -24,7 +23,7 @@ public class SkippingIterator<T> implements Iterator<T> {
 
     private T next;
 
-    @Builder
+    @lombok.Builder(builderClassName = "Builder")
     public SkippingIterator(
         Iterator<T> wrapped,
         BiFunction<T, T, Boolean> comparator) {

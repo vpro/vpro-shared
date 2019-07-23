@@ -1,7 +1,5 @@
 package nl.vpro.util;
 
-import lombok.Builder;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.LongSummaryStatistics;
@@ -12,7 +10,7 @@ import java.util.LongSummaryStatistics;
  */
 public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistics> {
 
-    @Builder
+    @lombok.Builder(builderClassName = "Builder")
     protected WindowedLongSummaryStatistics(
         Duration window,
         Duration bucketDuration,

@@ -23,7 +23,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
         totalSize = null;
     }
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     protected BasicWrappedIterator(
         Supplier<Long> sizeSupplier,
         Supplier<Long> totalSizeSupplier,

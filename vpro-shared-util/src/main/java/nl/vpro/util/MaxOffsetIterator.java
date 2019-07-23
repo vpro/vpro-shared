@@ -56,7 +56,7 @@ public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
         this(wrapped, max, offset, countNulls, null);
     }
 
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     private MaxOffsetIterator(
         @NonNull Iterator<T> wrapped,
         @Nullable Number max,

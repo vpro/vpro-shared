@@ -4,7 +4,7 @@ env:
   - SONATYPE_USERNAME=vpro
   - secure: kkW81iyKJyddQab7dBbZUWNzQEkyKbAJeJYKdTF8si8lik7J2JcZgLuU9YxTuT7rRWvJl3BQyJ7zIU3PWbumtYn0CgFdb/i7jgxdXkXvKf3tLJM30FQ7XUnLGL+CJbfBFoF6l4aslcrkhSh8X0MKO8jXM/XkouUMYDmGmdeWoOMbdURePNGl/CkOWD8LYfk1RPds4gklLxM9F2B1kyY3ylpC19k/UG5O/QLrJ5RkCOI2OvvJBHWMgqasGNTHHphT447AFCEHIw2oNV6L48SdZm2PBPFrbU3mSbNdUaEpfqHFFuzp9EwZBpd1b2ioiNeSYuLM01hI7Ssf3P5PB0xP1t91qhUJx79o5/wFHFPG9Y7bx5NyB+lV0kO5ADPmhEqB9+Ew/OfN99Gl2nfLCqGRJUvOkGCdurKIins6aXzcsmTIWuBNY8hUnK/hxQFVvZbvh4IH1jcN17hw0mQAcJ3N4fxFZFWfWCkUU0ozWGIR3mMWowZ3l+/vgt+E5zDCBUnCcP6f6r+p88CdrG+uObO6QSb+M+tf2njJs4v6z+1fqn9uJOm64PglE4H1FD0qNKC2Afl4q/n5crkh+faX4glIEAkwRLswYQ/7JNXXYXxwmsd4ss4Rm2c82QWav3C44sf2eGIstOx5z1jCxSGI3qX8vpjBQi9gblg1Bn02F2wL4s8=
 jdk:
-- oraclejdk8
+- openjdk8
 sudo: true
 script: mvn --fail-never -T 1C -Pdeploy clean test deploy --settings .travis-settings.xml
   -Dgpg.skip=true

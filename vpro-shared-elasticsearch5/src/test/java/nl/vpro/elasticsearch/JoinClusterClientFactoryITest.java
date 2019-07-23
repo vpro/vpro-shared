@@ -19,6 +19,7 @@ public class JoinClusterClientFactoryITest {
     //String clusterName = "poms10aas";
     String clusterName = System.getProperty("integ.cluster.name", "elasticsearch");
 
+    @SuppressWarnings("deprecation")
     @Test
     public void joinUnicast() throws ExecutionException, InterruptedException {
         JoinClusterClientFactory factory = new JoinClusterClientFactory();
@@ -31,6 +32,7 @@ public class JoinClusterClientFactoryITest {
     }
 
 
+    @SuppressWarnings("deprecation")
     @Test
     @Ignore("Doesn't work?")
     public void joinMulticast() throws ExecutionException, InterruptedException {

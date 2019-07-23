@@ -1,7 +1,5 @@
 package nl.vpro.util;
 
-import lombok.Builder;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
@@ -12,7 +10,7 @@ import java.util.DoubleSummaryStatistics;
  */
 public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStatistics> {
 
-    @Builder
+    @lombok.Builder(builderClassName = "Builder")
     protected WindowedDoubleSummaryStatistics(
         Duration window,
         Duration bucketDuration,
