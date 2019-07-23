@@ -12,15 +12,17 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import javax.inject.Provider;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.io.Resource;
+import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
 
@@ -120,15 +122,13 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
             for (Map.Entry<String, String> logEntry : logMap.entrySet()) {
                 String value = helper.replacePlaceholders(logEntry.getValue(), props);
-/*
-TODO
                 try {
-                    Expression e =  resolver.evaluate(parseExpression(value);
+                    Expression e =  parser.parseExpression(value);
                     value = (String) e.getValue();
                 } catch (ParseException spe) {
                     logger.warn("For " + value + ":" + spe.getMessage());
 
-                }*/
+                }
                 log.info(String.format(value, getMap().get(logEntry.getKey())));
             }
         }
@@ -191,6 +191,8 @@ TODO
         this.systemPropertiesMode = systemPropertiesMode;
 
     }
+
+
 
     @Override
     public void setLocations(Resource[] locations) {

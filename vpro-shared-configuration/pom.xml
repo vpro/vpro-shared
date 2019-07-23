@@ -57,10 +57,9 @@
       <artifactId>vpro-shared-util</artifactId>
       <scope>compile</scope>
     </dependency>
-     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <optional>true</optional>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
     </dependency>
   </dependencies>
 </project>
