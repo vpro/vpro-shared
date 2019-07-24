@@ -8,7 +8,7 @@ import com.neovisionaries.i18n.LanguageCode;
 
 /**
  * @author Michiel Meeuwissen
- * @since 4.8
+ * @since 2.8
  */
 public class Locales {
 
@@ -19,7 +19,11 @@ public class Locales {
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
 
 
-
+    /**
+     * Returns the current default locale for this thread.
+     *
+     * This initializes with {@link Locale#getDefault()}, but can be set per thread.
+     */
     public static Locale getDefault() {
         return DEFAULT.get();
     }

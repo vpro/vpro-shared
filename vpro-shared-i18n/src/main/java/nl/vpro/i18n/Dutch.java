@@ -7,12 +7,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 
 /**
+ * Some utility for working in the Netherlands
+ *
  * @author Michiel Meeuwissen
- * @since 5.9
+ * @since 2.8
  */
 public class Dutch {
 
 
+    /**
+     * The {@link ZoneId} in the Netherlands
+     */
     public static ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
 
 
