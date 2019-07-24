@@ -2,9 +2,7 @@ package nl.vpro.i18n;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -17,7 +15,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.neovisionaries.i18n.LanguageCode;
 
 /**
@@ -30,16 +27,6 @@ import com.neovisionaries.i18n.LanguageCode;
 @Slf4j
 public class LocalizedString implements CharSequence { //implements javax.xml.registry.infomodel.LocalizedString {
 
-    private static final Map<String, String> MAP_TO_ISO = new HashMap<>();
-
-    static {
-        // These codes are mainly used in tva-xml's.
-        //  they just make up stuff.
-        //see http://www-01.sil.org/iso639-3/documentation.asp?id=zxx             -
-        MAP_TO_ISO.put("xx", "zxx");
-        MAP_TO_ISO.put("cz", "cs");
-
-    }
 
 
     public static LocalizedString of(String value, Locale locale) {
@@ -179,11 +166,6 @@ public class LocalizedString implements CharSequence { //implements javax.xml.re
             return null;
         }
         String[] split = v.split("[_-]", 3);
-        String replace = MAP_TO_ISO.get(split[0].toLowerCase());
-        if (replace != null) {
-            log.warn("Found unknown iso language code {}, replaced with {}", split[0], replace);
-            split[0] = replace;
-        }
         LanguageCode languageCode = LanguageCode.getByCode(split[0], false);
         String language = languageCode == null ? split[0] : languageCode.name().toLowerCase();
 
