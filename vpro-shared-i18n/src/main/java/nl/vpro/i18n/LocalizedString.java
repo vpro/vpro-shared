@@ -15,17 +15,20 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.neovisionaries.i18n.LanguageCode;
 
 /**
+ * Basicly wraps a string together with the {@link Locale} describing in what language it is.
+ *
  * @author Michiel Meeuwissen
  * @since 3.2
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @Slf4j
-public class LocalizedString { //implements javax.xml.registry.infomodel.LocalizedString {
+public class LocalizedString implements CharSequence { //implements javax.xml.registry.infomodel.LocalizedString {
 
     private static final Map<String, String> MAP_TO_ISO = new HashMap<>();
 
@@ -58,6 +61,7 @@ public class LocalizedString { //implements javax.xml.registry.infomodel.Localiz
     private Locale locale;
 
     @XmlValue
+    @NonNull
     private String value;
 
     private String charset;
@@ -107,6 +111,24 @@ public class LocalizedString { //implements javax.xml.registry.infomodel.Localiz
             }
         }
         return candidate == null ? null : candidate.getValue();
+
+    }
+
+    @Override
+    public int length() {
+        return value.length();
+
+    }
+
+    @Override
+    public char charAt(int index) {
+        return value.charAt(index);
+
+    }
+
+    @Override
+    public LocalizedString subSequence(int start, int end) {
+        return LocalizedString.of(value.substring(start, end), locale);
 
     }
 
