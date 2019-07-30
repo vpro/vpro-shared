@@ -38,6 +38,7 @@ public class Jackson2Mapper extends ObjectMapper {
         LENIENT.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
+
         PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
         PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
 
