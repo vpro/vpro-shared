@@ -12,7 +12,7 @@ import static java.lang.annotation.ElementType.*;
 
 /**
  * This annotation can be used to  mark an mx bean (annotation with {@link MXBean} operation as for testing only.
- * * See also {@link Description}
+ * See also {@link Description}
  * @author Michiel Meeuwissen
  * @since 1.79
  */
