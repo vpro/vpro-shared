@@ -1,31 +1,51 @@
 package nl.vpro.xml.util;
 
+import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 import javax.xml.namespace.NamespaceContext;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.apache.commons.io.output.StringBuilderWriter;
+
 /**
+ * A wrapper around {@link XMLStreamWriter}, which uses {@link AutoCloseable} to automaticly close the needed elements.
+ *
  * @author Michiel Meeuwissen
  * @since 2.8
  */
-public class XmlStreamWriterUtil {
+public class XMLStreamWriterUtil {
+    private static final XMLOutputFactory FACTORY = XMLOutputFactory.newInstance();
+
 
     final XMLStreamWriter writer;
     final Deque<AutoCloseable> closeables = new ArrayDeque<>();
     int currentDepth = 0;
 
 
-    public XmlStreamWriterUtil(XMLStreamWriter writer) {
+    public XMLStreamWriterUtil(XMLStreamWriter writer) {
         this.writer = writer;
     }
 
+    public XMLStreamWriterUtil(OutputStream outputStream) throws XMLStreamException {
+        this(FACTORY.createXMLStreamWriter(outputStream));
+    }
+    public XMLStreamWriterUtil(Writer writer) throws XMLStreamException {
+        this(FACTORY.createXMLStreamWriter(writer));
+    }
+     public XMLStreamWriterUtil(StringBuilder builder) throws XMLStreamException {
+        this(FACTORY.createXMLStreamWriter(new StringBuilderWriter(builder)));
+    }
+
+
     public AutoCloseable writeElement(String name) throws XMLStreamException {
-        final int closeTo = currentDepth;
         currentDepth++;
+        final int closeTo = currentDepth;
         writer.writeStartElement(name);
 
         AutoCloseable closeable = () -> {
