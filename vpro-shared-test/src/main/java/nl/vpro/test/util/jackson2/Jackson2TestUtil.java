@@ -122,9 +122,16 @@ public class Jackson2TestUtil {
     public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(T o) {
         return new JsonObjectAssert<>(o);
     }
+    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(ObjectMapper mapper, T o) {
+        return new JsonObjectAssert<>(mapper, o);
+    }
 
     public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(Class<T> o, String value) {
         return new JsonObjectAssert<>(o, value);
+    }
+
+    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(ObjectMapper mapper, Class<T> o, String value) {
+        return new JsonObjectAssert<>(mapper, o, value);
     }
 
     public static JsonStringAssert assertThatJson(String o) {
@@ -135,19 +142,34 @@ public class Jackson2TestUtil {
     public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
         A rounded;
+        private final ObjectMapper mapper;
 
         protected JsonObjectAssert(A actual) {
             super(actual, JsonObjectAssert.class);
+            this.mapper = MAPPER;
         }
 
 
         protected JsonObjectAssert(Class<A> actual, String string) {
-            super(read(actual, string), JsonObjectAssert.class);
+            super(read(MAPPER, actual, string), JsonObjectAssert.class);
+            this.mapper = MAPPER;
         }
 
-        protected static <A> A read(Class<A> actual, String string) {
+        protected JsonObjectAssert(ObjectMapper mapper, A actual) {
+            super(actual, JsonObjectAssert.class);
+            this.mapper = mapper;
+        }
+
+
+        protected JsonObjectAssert(ObjectMapper mapper, Class<A> actual, String string) {
+            super(read(mapper, actual, string), JsonObjectAssert.class);
+            this.mapper = mapper;
+        }
+
+
+        protected static <A> A read(ObjectMapper mapper, Class<A> actual, String string) {
             try {
-                return MAPPER.readValue(string, actual);
+                return mapper.readValue(string, actual);
             } catch (IOException e) {
                 Fail.fail(e.getMessage());
                 return null;
@@ -156,7 +178,7 @@ public class Jackson2TestUtil {
 
         public S isSimilarTo(String expected) {
             try {
-                rounded = roundTripAndSimilar(actual, expected);
+                rounded = roundTripAndSimilar(mapper, actual, expected);
             } catch (Exception e) {
                 Fail.fail(e.getMessage());
             }
