@@ -188,16 +188,15 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>5.1.8.RELEASE</spring.version>
-    <spring-security.version>5.1.5.RELEASE</spring-security.version>
-
+    <spring.version>5.1.9.RELEASE</spring.version>
+    <spring-security.version>5.1.6.RELEASE</spring-security.version>
     <jackson2.version>2.9.9.20190807</jackson2.version>    <!-- equals to poms-parent -->
     <junit.version>4.12</junit.version>
-    <mockito.version>2.28.2</mockito.version>
-    <assertj.version>3.12.2</assertj.version>
+    <mockito.version>3.0.0</mockito.version>
+    <assertj.version>3.13.2</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
-    <resteasy.version>4.1.1.Final</resteasy.version>
-    <slf4j.version>1.7.25</slf4j.version>
+    <resteasy.version>4.2.0.Final</resteasy.version>
+    <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.12.0</log4j2.version>
     <camel.version>2.24.1</camel.version>
@@ -397,7 +396,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
-        <version>1.6</version>
+        <version>1.7</version>
       </dependency>
       <dependency>
         <groupId>commons-configuration</groupId>
@@ -617,11 +616,13 @@
         <artifactId>easymock</artifactId>
         <version>4.0.2</version>
       </dependency>
+      <!--
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
-        <version>20180813</version>
+        <version>20190722</version>
       </dependency>
+      -->
       <dependency>
         <groupId>org.apache.wss4j</groupId>
         <artifactId>wss4j-ws-security-dom</artifactId>

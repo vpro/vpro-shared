@@ -1,28 +1,27 @@
 package nl.vpro.web.servlet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.function.Function;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.Function;
 
-import org.json.JSONException;
-import org.json.JSONWriter;
 
 /**
  * Serves a 'configuration.js' for javascript clients.
@@ -115,7 +114,7 @@ public class ConfigurationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
+        throws  IOException {
         resp.setContentType("application/json");
         Map<String, Object> props = getProperties(req);
 
@@ -124,33 +123,40 @@ public class ConfigurationServlet extends HttpServlet {
         } else {
             resp.setHeader("Cache-Control", "max-age=" + props.get("MaxAge") + ", must-revalidate, public");
         }
+        write(req.getParameter("var"), resp.getOutputStream(), getSystem(req), getProperties(req));
+    }
 
+    protected void write(
+            String varName,
+            @NonNull OutputStream outputStream,
+            @NonNull Map<String, String> system,
+            @NonNull Map<String, Object> props
 
-        JSONWriter w = new JSONWriter(resp.getWriter());
+    ) throws IOException {
+        JsonFactory jfactory = new JsonFactory();
+        JsonGenerator w  = jfactory.createGenerator(outputStream, JsonEncoding.UTF8);
 
-        try {
-            String varName = req.getParameter("var");
-            if(varName != null) {
-                resp.getWriter().write("var " + varName + " = ");
-            }
-            w.object();
+        if(varName != null) {
+            outputStream.write(("var " + varName + " = ").getBytes(StandardCharsets.UTF_8));
+        }
+        outputStream.flush();
+        w.writeStartObject();
 
-            for(Map.Entry<String, String> e : getSystem(req).entrySet()) {
-                w.key(e.getKey()).value(e.getValue());
-            }
+        for(Map.Entry<String, String> e : system.entrySet()) {
+            w.writeStringField(e.getKey(), e.getValue());
+        }
 
-            //w.key("version").value(getVersion());
-            w.key("configuration").object();
-            for(Map.Entry<String, Object> prop : props.entrySet()) {
-                w.key(prop.getKey()).value(prop.getValue());
-            }
-            w.endObject();
-            w.endObject();
-            if(varName != null) {
-                resp.getWriter().write(";");
-            }
-        } catch(JSONException e) {
-            throw new ServletException(e);
+        //w.key("version").value(getVersion());
+        w.writeFieldName("configuration");
+        w.writeStartObject();
+        for(Map.Entry<String, Object> prop : props.entrySet()) {
+            w.writeObjectField(prop.getKey(), prop.getValue());
+        }
+        w.writeEndObject();
+        w.writeEndObject();
+        w.flush();
+        if(varName != null) {
+            outputStream.write(';');
         }
 
     }
