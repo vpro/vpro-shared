@@ -189,5 +189,10 @@ public interface CommandExecutor {
             super(message);
             this.exitCode = exitCode;
         }
+
+        @Override
+        public String toString() {
+            return super.toString() + " exitcode: " + exitCode;
+        }
     }
 }
