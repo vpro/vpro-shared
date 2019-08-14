@@ -4,19 +4,19 @@
  */
 package nl.vpro.api.client.resteasy;
 
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-
 
 /**
+ * Fills the Accept header to enforce content negotation in a certain media type.
  * @author Michiel Meeuwissen
  */
 public class AcceptRequestFilter implements ClientRequestFilter {
