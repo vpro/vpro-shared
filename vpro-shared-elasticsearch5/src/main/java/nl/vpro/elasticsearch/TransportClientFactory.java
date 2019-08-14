@@ -78,6 +78,8 @@ public class TransportClientFactory implements  ESClientFactory {
         if (StringUtils.isNotBlank(clusterName)) {
             builder.put("cluster.name", clusterName);
         }
+        builder.put("client.transport.ping_timeout", "15s");
+        builder.put("client.transport.nodes_sampler_interval", "15s");
         TransportClient transportClient = new PreBuiltTransportClient(builder.build());
 
         for (UrlProvider urlProvider : transportAddresses) {
