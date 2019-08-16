@@ -25,12 +25,14 @@ public class Jackson2Mapper extends ObjectMapper {
 
     private static boolean loggedAboutAvro = false;
 
-    public static Jackson2Mapper INSTANCE = new Jackson2Mapper();
-    public static Jackson2Mapper LENIENT = new Jackson2Mapper();
-    public static Jackson2Mapper STRICT = new Jackson2Mapper();
-    public static Jackson2Mapper PRETTY = new Jackson2Mapper();
-    public static Jackson2Mapper PUBLISHER = new Jackson2Mapper();
-    public static Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper();
+    public static final Jackson2Mapper INSTANCE = new Jackson2Mapper();
+    public static final Jackson2Mapper LENIENT = new Jackson2Mapper();
+    public static final Jackson2Mapper STRICT = new Jackson2Mapper();
+    public static final Jackson2Mapper PRETTY = new Jackson2Mapper();
+    public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper();
+    public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper();
+
+    private static ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
 
     static {
@@ -69,6 +71,13 @@ public class Jackson2Mapper extends ObjectMapper {
 
     public static Jackson2Mapper getPrettyPublisherInstance() {
         return PRETTY_PUBLISHER;
+    }
+
+    public static Jackson2Mapper getThreadLocal() {
+        return THREAD_LOCAL.get();
+    }
+    public static void setThreadLocal(Jackson2Mapper set) {
+        THREAD_LOCAL.set(set);
     }
 
     @SneakyThrows({JsonProcessingException.class})
