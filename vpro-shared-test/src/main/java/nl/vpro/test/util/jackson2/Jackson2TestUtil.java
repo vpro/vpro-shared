@@ -4,6 +4,7 @@
  */
 package nl.vpro.test.util.jackson2;
 
+import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.test.JSONAssert;
 
@@ -13,8 +14,8 @@ import java.io.StringWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.databind.*;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.test.util.TestClass;
@@ -30,6 +31,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class Jackson2TestUtil {
 
     private static final ObjectMapper MAPPER = Jackson2Mapper.getPrettyInstance();
+
+
+    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual) {
+        try {
+            JSONAssert.assertJsonEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual));
+        } catch (AssertionFailedError fail) {
+            log.info(fail.getMessage());
+            assertThat(prettify(actual)).isEqualTo(prettify(expected));
+        }
+    }
+
+    public static CharSequence prettify(CharSequence test) {
+        if (test == null) {
+            return null;
+        }
+        try {
+            JsonNode jsonNode = MAPPER.readTree(String.valueOf(test));
+            String pretty = MAPPER.writeValueAsString(jsonNode);
+            return pretty;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void assertJsonEquals(CharSequence expected, CharSequence actual) {
+        assertJsonEquals("", expected, actual);
+    }
+
 
     public static  <T> T roundTrip(T input) throws Exception {
         return roundTrip(input, "");
@@ -83,9 +112,9 @@ public class Jackson2TestUtil {
         return result;
     }
 
-    public static <T> T assertJsonEquals(String text, String expected, Class<T> typeReference) throws IOException {
-        JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected, expected, text);
-        return MAPPER.readValue(text, typeReference);
+    public static <T> T assertJsonEquals(String actual, String expected, Class<T> typeReference) throws IOException {
+        assertJsonEquals("",  expected, actual);
+        return MAPPER.readValue(actual, typeReference);
     }
 
 
@@ -99,18 +128,14 @@ public class Jackson2TestUtil {
         String marshalled = originalWriter.toString();
 
         log.debug("Comparing {} with expected {}", marshalled, expected);
-        JSONAssert.assertJsonEquals("\n" + marshalled + "\nis different from expected\n" + expected,
-            expected,
-            marshalled);
+        assertJsonEquals(expected, marshalled);
         T unmarshalled =  mapper.readValue(marshalled, typeReference);
         StringWriter remarshal = new StringWriter();
         mapper.writeValue(remarshal, unmarshalled);
         String remarshalled  = remarshal.toString();
         log.debug("Comparing {} with expected {}", remarshalled, expected);
 
-        JSONAssert.assertJsonEquals("REMARSHALLED\n" + remarshalled + "\nis different from expected\n" + expected,
-            expected,
-            remarshalled);
+        assertJsonEquals("REMARSHALLED", expected, remarshalled);
         return unmarshalled;
 
     }
@@ -215,7 +240,7 @@ public class Jackson2TestUtil {
         }
 
         public JsonStringAssert isSimilarTo(String expected) {
-            JSONAssert.assertJsonEquals("\n" + actual + "\nis different from expected\n" + expected, expected, String.valueOf(actual));
+            assertJsonEquals("", expected, actual);
             return myself;
         }
     }
