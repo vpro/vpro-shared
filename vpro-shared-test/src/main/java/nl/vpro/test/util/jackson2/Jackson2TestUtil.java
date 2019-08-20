@@ -53,7 +53,7 @@ public class Jackson2TestUtil {
     }
 
     /**
-     * <p>Marshalls input, checks whether it is similar to expected string, and unmarshall it.
+     * <p>Marshalls input, checks whether it is similar to expected string, and unmarshals it, then marshall it again, and it should still be similar.
      * </p>
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
      */
@@ -94,16 +94,25 @@ public class Jackson2TestUtil {
     }
 
     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference) throws Exception {
-        StringWriter writer = new StringWriter();
-        mapper.writeValue(writer, input);
+        StringWriter originalWriter = new StringWriter();
+        mapper.writeValue(originalWriter, input);
+        String marshalled = originalWriter.toString();
 
-        String text = writer.toString();
-
-        log.debug("Comparing {} with expected {}", text, expected);
-        JSONAssert.assertJsonEquals("\n" + text + "\nis different from expected\n" + expected,
+        log.debug("Comparing {} with expected {}", marshalled, expected);
+        JSONAssert.assertJsonEquals("\n" + marshalled + "\nis different from expected\n" + expected,
             expected,
-            text);
-        return mapper.readValue(text, typeReference);
+            marshalled);
+        T unmarshalled =  mapper.readValue(marshalled, typeReference);
+        StringWriter remarshal = new StringWriter();
+        mapper.writeValue(remarshal, unmarshalled);
+        String remarshalled  = remarshal.toString();
+        log.debug("Comparing {} with expected {}", remarshalled, expected);
+
+        JSONAssert.assertJsonEquals("REMARSHALLED\n" + remarshalled + "\nis different from expected\n" + expected,
+            expected,
+            remarshalled);
+        return unmarshalled;
+
     }
 
     /**
