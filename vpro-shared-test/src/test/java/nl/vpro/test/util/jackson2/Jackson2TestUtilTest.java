@@ -1,12 +1,12 @@
 package nl.vpro.test.util.jackson2;
 
-import junit.framework.ComparisonFailure;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 
