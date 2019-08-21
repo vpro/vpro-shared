@@ -40,7 +40,7 @@ public class ElasticSearchIteratorITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9208, "http"))
+            new HttpHost("localhost", 9212, "http"))
             .build();
 
         helper = IndexHelper.builder()
