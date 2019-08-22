@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.vpro.jackson2.Jackson2Mapper;
 
 /**
- * Sometimes resteasy will not unmarshal an json because there is not type information, but the prototype actully specifies it fully. The message body reader will deal with that, by adding the id implicetely (if it is missing) before the actual unmarshall.
+ * Sometimes resteasy will not unmarshal an json because there is no type information, but the prototype actually specifies it fully. The message body reader will deal with that, by adding the id implicetely (if it is missing) before the actual unmarshal.
  *
  * @author Michiel Meeuwissen
  * @since 2.7
