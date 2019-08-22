@@ -10,7 +10,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @author Michiel Meeuwissen
  * @since 2.1
  */
-public class ResortedSortedSet<T extends Comparable<T>> extends AbstractSet<T> implements SortedSet<T>, Serializable {
+public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -23,7 +23,7 @@ public class ResortedSortedSet<T extends Comparable<T>> extends AbstractSet<T> i
         this.wrapped = wrapped;
     }
 
-    public ResortedSortedSet(Collection<T> wrapped) {
+    public  ResortedSortedSet(Collection<T> wrapped) {
         set = new TreeSet<>();
         set.addAll(wrapped);
         this.wrapped = wrapped;
