@@ -23,10 +23,24 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
         this.wrapped = wrapped;
     }
 
-    public  ResortedSortedSet(Collection<T> wrapped) {
-        set = new TreeSet<>();
+    /**
+     * @deprecated Use {@link #of(Collection)} to enforce that the collection contains {@link Comparable}
+     * @param wrapped
+     */
+    @Deprecated()
+    public ResortedSortedSet(Collection<T> wrapped) {
+        this(wrapped, new TreeSet<>());
+    }
+
+    private ResortedSortedSet(Collection<T> wrapped, SortedSet<T> set) {
+        this.set = set;
         set.addAll(wrapped);
         this.wrapped = wrapped;
+    }
+
+    public static <S extends Comparable<?>> ResortedSortedSet<S> of(
+        Collection<S> wrapped) {
+        return new ResortedSortedSet<S>(wrapped, new TreeSet<>());
     }
 
     public ResortedSortedSet(SortedSet<T> set, Collection<T> wrapped) {
