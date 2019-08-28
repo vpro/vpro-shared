@@ -25,7 +25,6 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
 
     /**
      * @deprecated Use {@link #of(Collection)} to enforce that the collection contains {@link Comparable}
-     * @param wrapped
      */
     @Deprecated()
     public ResortedSortedSet(Collection<T> wrapped) {
