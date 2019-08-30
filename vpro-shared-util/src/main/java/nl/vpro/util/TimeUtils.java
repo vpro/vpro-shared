@@ -39,8 +39,12 @@ public class TimeUtils {
         if (StringUtils.isBlank(dateValue)) {
             return Optional.empty();
         }
+        try {
+            // this is the proper XML representation to try that first
+            return Optional.of(OffsetDateTime.parse(dateValue).toInstant());
+        } catch (DateTimeParseException ignored) {
 
-
+        }
         try {
             return Optional.of(LocalDate.parse(dateValue).atStartOfDay().atZone(ZONE_ID).toInstant());
         } catch (DateTimeParseException ignored) {
@@ -52,11 +56,7 @@ public class TimeUtils {
 
         }
         //return Instant.parse(dateValue);
-        try {
-            return Optional.of(OffsetDateTime.parse(dateValue).toInstant());
-        } catch (DateTimeParseException ignored) {
 
-        }
         try {
             return Optional.of(ZonedDateTime.parse(dateValue).toInstant());
         } catch (DateTimeParseException ignored) {
