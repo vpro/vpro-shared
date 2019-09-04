@@ -49,6 +49,40 @@
   </scm>
 
 
+  <modules>
+    <module>vpro-shared-camel</module>
+    <module>vpro-shared-client-resteasy</module>
+    <module>vpro-shared-configuration</module>
+    <module>vpro-shared-ektorp</module>
+    <module>vpro-shared-elasticsearch</module>
+    <module>vpro-shared-elasticsearch5</module>
+    <module>vpro-shared-elasticsearch-client</module>
+    <module>vpro-shared-hibernate</module>
+    <module>vpro-shared-hibernate-search</module>
+    <module>vpro-shared-jackson2</module>
+    <module>vpro-shared-avro</module>
+    <module>vpro-shared-logging</module>
+    <!--
+    <module>vpro-shared-newrelic</module>
+    -->
+    <module>vpro-shared-persistence</module>
+    <module>vpro-shared-resteasy</module>
+    <module>vpro-shared-rs</module>
+    <module>vpro-shared-services</module>
+    <module>vpro-shared-swagger</module>
+    <module>vpro-shared-test</module>
+    <module>vpro-shared-transfer</module>
+    <module>vpro-shared-util</module>
+    <module>vpro-shared-validation</module>
+    <module>vpro-shared-web</module>
+    <module>vpro-shared-ws</module>
+    <module>vpro-shared-xml</module>
+    <module>vpro-shared-guice</module>
+    <module>vpro-shared-couchdb-util</module>
+    <module>vpro-shared-i18n</module>
+
+  </modules>
+
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -151,39 +185,6 @@
 
   </build>
 
-  <modules>
-    <module>vpro-shared-camel</module>
-    <module>vpro-shared-client-resteasy</module>
-    <module>vpro-shared-configuration</module>
-    <module>vpro-shared-ektorp</module>
-    <module>vpro-shared-elasticsearch</module>
-    <module>vpro-shared-elasticsearch5</module>
-    <module>vpro-shared-elasticsearch-client</module>
-    <module>vpro-shared-hibernate</module>
-    <module>vpro-shared-hibernate-search</module>
-    <module>vpro-shared-jackson2</module>
-    <module>vpro-shared-avro</module>
-    <module>vpro-shared-logging</module>
-    <!--
-    <module>vpro-shared-newrelic</module>
-    -->
-    <module>vpro-shared-persistence</module>
-    <module>vpro-shared-resteasy</module>
-    <module>vpro-shared-rs</module>
-    <module>vpro-shared-services</module>
-    <module>vpro-shared-swagger</module>
-    <module>vpro-shared-test</module>
-    <module>vpro-shared-transfer</module>
-    <module>vpro-shared-util</module>
-    <module>vpro-shared-validation</module>
-    <module>vpro-shared-web</module>
-    <module>vpro-shared-ws</module>
-    <module>vpro-shared-xml</module>
-    <module>vpro-shared-guice</module>
-    <module>vpro-shared-couchdb-util</module>
-    <module>vpro-shared-i18n</module>
-
-  </modules>
 
 
   <properties>
