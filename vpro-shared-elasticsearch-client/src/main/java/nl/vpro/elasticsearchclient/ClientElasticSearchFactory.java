@@ -30,20 +30,23 @@ import nl.vpro.util.TimeUtils;
 public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     private String clusterName;
-
     private String unicastHosts;
-
     private boolean implicitJavaToHttpPort = true;
 
     private Duration socketTimeout = Duration.ofSeconds(60);
     private Duration connectionTimeout = Duration.ofSeconds(5);
+    private Duration connectTimeout = Duration.ofSeconds(5);
+
     private Duration maxRetryTimeout = Duration.ofSeconds(60);
 
-    Map<String, RestClient> clients = new HashMap<>();
+    private final Map<String, RestClient> clients = new HashMap<>();
 
     @PostConstruct
     public void init() {
         log.info("Found {}", this);
+    }
+    public void invalidate() {
+        clients.clear();
     }
 
     @Override
@@ -60,17 +63,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
         final RestClientBuilder clientBuilder = RestClient.builder(hosts);
         final RestClient client = clientBuilder
             .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
-                .setConnectTimeout((int) connectionTimeout.toMillis())
-                .setSocketTimeout((int) socketTimeout.toMillis()))
+                .setConnectTimeout((int) connectTimeout.toMillis())
+                .setSocketTimeout((int) socketTimeout.toMillis())
+                .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
+            )
             .setMaxRetryTimeoutMillis((int) maxRetryTimeout.toMillis())
             .build();
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
-        IndexHelper helper = IndexHelper.builder()
-            .client(new SimpleESClientFactory(client, this::toString))
-            .log(l)
-            .build();
-        helper.getClusterNameAsync().whenComplete((foundClusterName, exception) -> {
+        IndexHelper.getClusterName(client).whenComplete((foundClusterName, exception) -> {
             if (exception != null) {
                 future.completeExceptionally(exception);
             }
@@ -137,6 +138,10 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     public void setConnectionTimeoutDuration(String connectionTimeout) {
         this.connectionTimeout = TimeUtils.parseDuration(connectionTimeout).orElse(this.connectionTimeout);
+    }
+
+    public void setConnectTimeoutDuration(String connectTimeout) {
+        this.connectTimeout = TimeUtils.parseDuration(connectTimeout).orElse(this.connectTimeout);
     }
 
     public void setMaxRetryTimeoutDuration(String maxRetryTimeout) {
