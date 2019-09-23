@@ -687,8 +687,14 @@ public class IndexHelper {
 
     @SafeVarargs
     public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
-        final CompletableFuture<String> future = new CompletableFuture<>();
         final RestClient client = client();
+        return getClusterName(log, client, callBacks);
+
+    }
+
+    @SafeVarargs
+    public static CompletableFuture<String> getClusterName(Logger log, RestClient client, final Consumer<String>... callBacks) {
+        final CompletableFuture<String> future = new CompletableFuture<>();
         client.performRequestAsync(new Request("GET", "/_cat/health"), new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
@@ -715,7 +721,7 @@ public class IndexHelper {
 
             @Override
             public void onFailure(Exception exception) {
-                log.error("Error getting clustername from {}: {}", clientFactory, exception.getMessage(), exception);
+                log.error("Error getting clustername from {}: {}", client, exception.getMessage(), exception);
                 future.completeExceptionally(exception);
             }
 
