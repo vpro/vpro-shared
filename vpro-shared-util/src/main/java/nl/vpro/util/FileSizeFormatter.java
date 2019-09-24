@@ -1,7 +1,5 @@
 package nl.vpro.util;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.text.DecimalFormat;
@@ -24,8 +22,6 @@ import java.util.Locale;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-@lombok.Builder(builderClassName = "Builder")
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class FileSizeFormatter {
 
@@ -39,11 +35,15 @@ public class FileSizeFormatter {
 
     public static final DecimalFormatSymbols DECIMAL = DecimalFormatSymbols.getInstance(Locale.US);
 
-    @lombok.Builder.Default
-    private DecimalFormat format = new DecimalFormat("#");
+    private DecimalFormat format;
 
-    @lombok.Builder.Default
-    private boolean mebi = true;
+    private boolean mebi;
+
+    @lombok.Builder(builderClassName = "Builder")
+    public FileSizeFormatter(DecimalFormat format, boolean mebi) {
+        this.format = format== null ? new DecimalFormat("#") : format;
+        this.mebi = mebi;
+    }
 
     public static FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
         .pattern("#.0")
@@ -110,6 +110,9 @@ public class FileSizeFormatter {
 
 
     public static class Builder {
+        {
+            mebi = true;
+        }
         private DecimalFormatSymbols symbols = DECIMAL;
 
         public Builder decimalFormatSymbols(DecimalFormatSymbols decimalFormatSymbols) {
