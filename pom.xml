@@ -191,25 +191,25 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>5.1.9.RELEASE</spring.version>
     <spring-security.version>5.1.6.RELEASE</spring-security.version>
-    <jackson2.version>2.9.9.20190807</jackson2.version>    <!-- equals to poms-parent -->
+    <jackson2.version>2.9.10</jackson2.version>    <!-- equals to poms-parent -->
     <junit.version>4.12</junit.version>
     <mockito.version>3.0.0</mockito.version>
     <assertj.version>3.13.2</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
-    <resteasy.version>4.2.0.Final</resteasy.version>
+    <resteasy.version>4.3.0.Final</resteasy.version>
     <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.12.0</log4j2.version>
     <camel.version>2.24.1</camel.version>
-    <guava.version>28.0-jre</guava.version>
+    <guava.version>28.1-jre</guava.version>
     <javassist.version>3.22.0-CR1</javassist.version>
     <wss4j.version>2.2.3</wss4j.version>
 
-    <httpcomponents.version>4.5.9</httpcomponents.version>
-    <httpcomponentscore.version>4.4.11</httpcomponentscore.version>
+    <httpcomponents.version>4.5.10</httpcomponents.version>
+    <httpcomponentscore.version>4.4.12</httpcomponentscore.version>
 
-    <hibernate.version>5.4.4.Final</hibernate.version>
-    <hibernate.search.version>5.11.2.Final</hibernate.search.version>
+    <hibernate.version>5.4.5.Final</hibernate.version>
+    <hibernate.search.version>5.11.3.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
     <hibernate.validator.version>6.0.17.Final</hibernate.validator.version>
@@ -224,7 +224,7 @@
     <swagger.version>2.0.0-rc2</swagger.version>
     -->
     <swagger.version>1.5.22</swagger.version>
-    <lombok.version>1.18.8</lombok.version>
+    <lombok.version>1.18.10</lombok.version>
   </properties>
 
   <dependencyManagement>
@@ -390,7 +390,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
-        <version>1.7</version>
+        <version>1.8</version>
       </dependency>
       <dependency>
         <groupId>commons-configuration</groupId>
@@ -400,7 +400,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-configuration2</artifactId>
-        <version>2.5</version>
+        <version>2.6</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>

@@ -114,8 +114,8 @@ public class FileSizeFormatter {
 
         public Builder decimalFormatSymbols(DecimalFormatSymbols decimalFormatSymbols) {
             this.symbols = decimalFormatSymbols == null ? DECIMAL : decimalFormatSymbols;
-            if (format != null) {
-                format.setDecimalFormatSymbols(decimalFormatSymbols);
+            if (Builder.this.format != null) {
+                Builder.this.format.setDecimalFormatSymbols(decimalFormatSymbols);
             }
             return this;
         }
