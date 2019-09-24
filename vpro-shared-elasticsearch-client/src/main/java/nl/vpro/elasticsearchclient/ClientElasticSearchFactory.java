@@ -71,7 +71,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
             .build();
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
-        IndexHelper.getClusterName(client).whenComplete((foundClusterName, exception) -> {
+        IndexHelper.getClusterName(log, client).whenComplete((foundClusterName, exception) -> {
             if (exception != null) {
                 future.completeExceptionally(exception);
             }
