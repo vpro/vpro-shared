@@ -72,3 +72,24 @@ You simply provide a `java.util.Supplier`. A lambda would probably not suffice b
             .build();
     }
 ```
+
+## Configuration utility
+At vpro we use to place configuration properties file for all project on similar places.
+
+The can be obtained like this:
+```java
+nl.vpro.util.ConfigUtils#getPropertiesInHome("<my config file>.properties");
+```
+Resolves properties in class path and `user.home`/conf in a standardized way.
+
+We also support a convention to have properties differ per OTAP environment
+```java
+  Map<String, String> properties =
+        ConfigUtils.filtered(env, ConfigUtils.getPropertiesInHome("openskosrepository.properties"));
+```
+
+It is also possible to instantiate obects using reflection.
+```java
+TODO device examples
+```
+ 
