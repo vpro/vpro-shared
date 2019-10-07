@@ -189,8 +189,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>5.1.9.RELEASE</spring.version>
-    <spring-security.version>5.1.6.RELEASE</spring-security.version>
+    <spring.version>5.2.0.RELEASE</spring.version>
+    <spring-security.version>5.2.0.RELEASE</spring-security.version>
     <jackson2.version>2.9.10</jackson2.version>    <!-- equals to poms-parent -->
     <junit.version>4.12</junit.version>
     <mockito.version>3.0.0</mockito.version>
