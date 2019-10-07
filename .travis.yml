@@ -10,4 +10,4 @@ script: mvn --fail-never -T 1C -Pdeploy clean test deploy --settings .travis-set
   -Dgpg.skip=true
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-- "./.travis-update-javadoc.sh"
+#- "./.travis-update-javadoc.sh"
