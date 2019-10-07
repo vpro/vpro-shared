@@ -247,7 +247,11 @@ public class JAXBTestUtil {
                 "expected: " + expected, spe);
         }
     }
-
+    public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, InputStream expected) throws IOException, SAXException {
+        StringWriter write = new StringWriter();
+        IOUtils.copy(expected, write, "UTF-8");
+        return roundTripAndValidateAndSimilar(input, xsd, write.toString());
+    }
     public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, String expected) throws IOException, SAXException {
         String xml = null;
         try {
