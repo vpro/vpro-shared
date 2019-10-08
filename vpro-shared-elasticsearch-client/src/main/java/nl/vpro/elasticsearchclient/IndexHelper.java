@@ -1,19 +1,13 @@
 package nl.vpro.elasticsearchclient;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.concurrent.*;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -24,7 +18,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -51,6 +47,7 @@ public class IndexHelper {
     private Supplier<String> settings;
     private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
+    private ObjectMapper objectMapper;
 
     private File writeJsonDir = null;
 
@@ -115,7 +112,8 @@ public class IndexHelper {
         Supplier<String> indexNameSupplier,
         Supplier<String> settings,
         Map<String, Supplier<String>> mappings,
-        File writeJsonDir
+        File writeJsonDir,
+        ObjectMapper objectMapper
         ) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
@@ -125,6 +123,7 @@ public class IndexHelper {
             this.mappings.putAll(mappings);
         }
         this.writeJsonDir = writeJsonDir;
+        this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
     }
 
 
@@ -388,12 +387,12 @@ public class IndexHelper {
     }
 
     public ObjectNode index(String type, String id, Object o) {
-        return post(indexPath(type, id, null), getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, null), objectMapper.valueToTree(o));
     }
 
 
     public ObjectNode index(String type, String id, Object o, String parent) {
-        return post(indexPath(type, id, parent), getPublisherInstance().valueToTree(o));
+        return post(indexPath(type, id, parent), objectMapper.valueToTree(o));
     }
 
     public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
@@ -402,13 +401,13 @@ public class IndexHelper {
 
     @SafeVarargs
     public final CompletableFuture<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
-        return postAsync(getIndexName() + "/" + type + "/" + encode(id), getPublisherInstance().valueToTree(o), listeners);
+        return postAsync(getIndexName() + "/" + type + "/" + encode(id), objectMapper.valueToTree(o), listeners);
     }
 
 
     @SafeVarargs
     public final Future<ObjectNode> indexAsync(String type, String id, Object o, String parent, Consumer<ObjectNode>... listeners) {
-        return postAsync(indexPath(type, id, parent), getPublisherInstance().valueToTree(o));
+        return postAsync(indexPath(type, id, parent), objectMapper.valueToTree(o), listeners);
     }
 
 
@@ -547,7 +546,7 @@ public class IndexHelper {
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
 
-        ObjectNode jsonNode = getPublisherInstance().valueToTree(o);
+        ObjectNode jsonNode = objectMapper.valueToTree(o);
         return Pair.of(actionLine, jsonNode);
     }
 
