@@ -323,7 +323,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             try {
                 Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
                 Response res = client.performRequest(delete);
-                log.info("Deleted {}", res);
+                log.debug("Deleted {}", res);
             } catch (ResponseException re) {
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
