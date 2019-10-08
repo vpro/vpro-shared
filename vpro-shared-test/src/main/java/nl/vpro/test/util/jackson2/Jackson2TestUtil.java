@@ -89,11 +89,19 @@ public class Jackson2TestUtil {
     public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
         return roundTripAndSimilar(MAPPER, input, expected);
     }
+    public static <T> T roundTripAndSimilar(T input, JsonNode  expected) throws Exception  {
+        return roundTripAndSimilar(MAPPER, input, expected);
+    }
 
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected) throws Exception {
         return roundTripAndSimilar(mapper, input, expected,
             mapper.getTypeFactory().constructType(input.getClass()));
     }
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected) throws Exception {
+        return roundTripAndSimilar(mapper, input, expected,
+            mapper.getTypeFactory().constructType(input.getClass()));
+    }
+
 
     /**
      * Marshalls input, checks whether it is similar to expected string, and unmarshall it. This unmarshalled result must be equal to the input.
@@ -101,6 +109,12 @@ public class Jackson2TestUtil {
      * Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.
      */
     public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
+        T result = roundTripAndSimilar(input, expected);
+        assertThat(result).isEqualTo(input);
+        return result;
+    }
+
+    public static <T> T roundTripAndSimilarAndEquals(T input, JsonNode expected) throws Exception {
         T result = roundTripAndSimilar(input, expected);
         assertThat(result).isEqualTo(input);
         return result;
@@ -138,6 +152,10 @@ public class Jackson2TestUtil {
         assertJsonEquals("REMARSHALLED", expected, remarshalled);
         return unmarshalled;
 
+    }
+
+     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, JavaType typeReference) throws Exception {
+         return roundTripAndSimilar(mapper, input, mapper.writeValueAsString(expected), typeReference);
     }
 
     /**
