@@ -8,9 +8,9 @@ import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.test.JSONAssert;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
@@ -100,6 +100,11 @@ public class Jackson2TestUtil {
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected) throws Exception {
         return roundTripAndSimilar(mapper, input, expected,
             mapper.getTypeFactory().constructType(input.getClass()));
+    }
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, InputStream  expected) throws Exception {
+        StringWriter write = new StringWriter();
+        IOUtils.copy(expected, write, "UTF-8");
+        return roundTripAndSimilar(mapper, input, write.toString());
     }
 
 
