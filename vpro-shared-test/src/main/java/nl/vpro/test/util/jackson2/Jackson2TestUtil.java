@@ -69,6 +69,7 @@ public class Jackson2TestUtil {
      *
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
      */
+    @SuppressWarnings("unchecked")
     public static  <T> T roundTrip(T input, String contains) throws Exception {
         StringWriter writer = new StringWriter();
         MAPPER.writeValue(writer, input);
@@ -224,6 +225,7 @@ public class Jackson2TestUtil {
         }
 
 
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         protected static <A> A read(ObjectMapper mapper, Class<A> actual, String string) {
             try {
                 return mapper.readValue(string, actual);
@@ -233,6 +235,7 @@ public class Jackson2TestUtil {
             }
         }
 
+        @SuppressWarnings({"ResultOfMethodCallIgnored", "CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
             try {
                 rounded = roundTripAndSimilar(mapper, actual, expected);
@@ -243,6 +246,7 @@ public class Jackson2TestUtil {
         }
 
 
+        @SuppressWarnings({"ResultOfMethodCallIgnored", "CatchMayIgnoreException"})
         public S isSimilarTo(JsonNode expected) {
             try {
                 rounded = roundTripAndSimilar(mapper, actual, expected);
