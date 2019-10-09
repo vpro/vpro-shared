@@ -446,7 +446,8 @@ public class IndexHelper {
     }
 
 
-    public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
+    @SafeVarargs
+    public final Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
         return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue(), listeners);
     }
 
