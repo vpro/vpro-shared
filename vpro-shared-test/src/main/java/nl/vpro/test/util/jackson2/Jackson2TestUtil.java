@@ -228,7 +228,7 @@ public class Jackson2TestUtil {
             try {
                 return mapper.readValue(string, actual);
             } catch (IOException e) {
-                Fail.fail(e.getMessage());
+                Fail.fail(e.getMessage(), e);
                 return null;
             }
         }
@@ -237,10 +237,21 @@ public class Jackson2TestUtil {
             try {
                 rounded = roundTripAndSimilar(mapper, actual, expected);
             } catch (Exception e) {
-                Fail.fail(e.getMessage());
+                Fail.fail(e.getMessage(), e);
             }
             return myself;
         }
+
+
+        public S isSimilarTo(JsonNode expected) {
+            try {
+                rounded = roundTripAndSimilar(mapper, actual, expected);
+            } catch (Exception e) {
+                Fail.fail(e.getMessage(), e);
+            }
+            return myself;
+        }
+
         public AbstractObjectAssert<?, A> andRounded() {
             if (rounded == null) {
                 throw new IllegalStateException("No similation was done already.");
