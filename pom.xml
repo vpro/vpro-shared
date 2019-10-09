@@ -53,8 +53,9 @@
     <module>vpro-shared-camel</module>
     <module>vpro-shared-client-resteasy</module>
     <module>vpro-shared-configuration</module>
-    <module>vpro-shared-ektorp</module>
+    <!--
     <module>vpro-shared-elasticsearch</module>
+    -->
     <module>vpro-shared-elasticsearch5</module>
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-hibernate</module>
@@ -78,7 +79,10 @@
     <module>vpro-shared-ws</module>
     <module>vpro-shared-xml</module>
     <module>vpro-shared-guice</module>
+    <!--
+    <module>vpro-shared-ektorp</module>
     <module>vpro-shared-couchdb-util</module>
+   -->
     <module>vpro-shared-i18n</module>
 
   </modules>
