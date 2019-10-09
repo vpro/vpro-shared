@@ -69,10 +69,14 @@
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-resteasy</module>
     <module>vpro-shared-rs</module>
+    <!--
     <module>vpro-shared-services</module>
+    -->
     <module>vpro-shared-swagger</module>
     <module>vpro-shared-test</module>
+    <!--
     <module>vpro-shared-transfer</module>
+    -->
     <module>vpro-shared-util</module>
     <module>vpro-shared-validation</module>
     <module>vpro-shared-web</module>
