@@ -738,8 +738,8 @@ public class IndexHelper {
             String index = jsonNode.get(Fields.INDEX).textValue();
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
-            Integer version = jsonNode.hasNonNull("_version") ? jsonNode.get("_version").intValue() : null;
-            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
+            Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
+            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version, new Exception());
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
