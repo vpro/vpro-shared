@@ -10,8 +10,6 @@
 These are various shared utility modules which are used on several
 places in VPRO artifacts.
 
-[Javadoc can be found here](https://vpro.github.io/vpro-shared/)
-
 
 ## highlights
 
