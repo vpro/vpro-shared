@@ -396,7 +396,14 @@ public class IndexHelper {
     }
 
     public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
-        return post(indexPath(indexRequest.getFirst().get("type").textValue(), indexRequest.getFirst().get("id").textValue(), indexRequest.getFirst().get("parent").textValue()), indexRequest.getSecond());
+        return post(
+            indexPath(
+                indexRequest.getFirst().get(Constants.TYPE).textValue(),
+                indexRequest.getFirst().get(Constants.ID).textValue(),
+                indexRequest.getFirst().get(Constants.PARENT).textValue()
+            ),
+            indexRequest.getSecond()
+        );
     }
 
     @SafeVarargs
@@ -447,7 +454,7 @@ public class IndexHelper {
 
 
     public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
-        return deleteAsync(deleteRequest.getFirst().get("type").textValue(), deleteRequest.getFirst().get("id").textValue(), listeners);
+        return deleteAsync(deleteRequest.getFirst().get(Constants.TYPE).textValue(), deleteRequest.getFirst().get(Constants.ID).textValue(), listeners);
     }
 
 
@@ -541,7 +548,7 @@ public class IndexHelper {
 
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
-        ObjectNode index = actionLine.with("index");
+        ObjectNode index = actionLine.with(Constants.INDEX);
         index.put(Fields.TYPE, type);
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
@@ -552,8 +559,8 @@ public class IndexHelper {
 
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o, String routing) {
         Pair<ObjectNode, ObjectNode> request = indexRequest(type, id, o);
-        request.getFirst().with("index").put(Fields.ROUTING, routing);
-        request.getFirst().with("index").put(Fields.PARENT, routing);
+        request.getFirst().with(Constants.INDEX).put(Fields.ROUTING, routing);
+        request.getFirst().with(Constants.INDEX).put(Fields.PARENT, routing);
         return request;
     }
 
@@ -739,7 +746,7 @@ public class IndexHelper {
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
             Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
-            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version, new Exception());
+            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
