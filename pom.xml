@@ -704,6 +704,12 @@
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker-qual</artifactId>
+      <version>2.11.1</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
 
