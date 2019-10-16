@@ -25,6 +25,13 @@ public class ISO6937Test {
     }
 
     @Test
+
+    public void forName() {
+        Charset iso6037 = Charset.forName("ISO-6937");
+        assertNotNull(iso6037);
+    }
+
+    @Test
     public void conversion()  {
         assertEquals(
             "\u00fc",

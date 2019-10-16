@@ -104,8 +104,9 @@ public class TimeUtils {
             }
             String ds = d.toString().replaceAll("\\s*", "");
             if (ds.length() < d.length()) {
-                return parseDuration(ds);
+                return parseDuration(dtp, ds);
             }
+
             try {
                 return Optional.of(Duration.ofMillis(Long.parseLong(ds)));
             } catch (NumberFormatException nfe) {
