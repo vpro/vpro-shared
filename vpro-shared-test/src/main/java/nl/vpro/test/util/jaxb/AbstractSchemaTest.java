@@ -4,8 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -59,19 +58,19 @@ public class AbstractSchemaTest {
 
     @SneakyThrows
     protected <T extends Enum<T>> void testEnum(String resource, String enumTypeName, Class<T> enumClass) {
-         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document document = dBuilder.parse(getClass().getResourceAsStream(resource));
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodes = (NodeList)xPath.evaluate("/schema/simpleType[@name='" + enumTypeName + "']/restriction/enumeration", document, XPathConstants.NODESET);
 
-        Set<String> valuesInXsd = new TreeSet<>();
+        List<String> valuesInXsd = new ArrayList<>();
         for (int i  = 0; i < nodes.getLength(); i++) {
             valuesInXsd.add(nodes.item(i).getAttributes().getNamedItem("value").getTextContent());
         }
 
-        Set<String> valuesInEnum = new TreeSet<>();
+        List<String> valuesInEnum = new ArrayList<>();
 
         T[] values = enumClass.getEnumConstants();
         for (T v : values) {
@@ -79,8 +78,7 @@ public class AbstractSchemaTest {
             valuesInEnum.add(xmlEnumValue != null ? xmlEnumValue.value() : v.name());
         }
         assertThat(valuesInXsd)
-            .isEqualTo(
-                valuesInEnum);
+            .containsExactlyInAnyOrderElementsOf(valuesInEnum);
     }
 
     private static File getFile(final String namespace) {
