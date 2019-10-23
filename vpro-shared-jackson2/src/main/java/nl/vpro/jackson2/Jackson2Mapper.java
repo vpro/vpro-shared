@@ -119,7 +119,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
-            mapper.registerModule((Module) avro.newInstance());
+            mapper.registerModule((com.fasterxml.jackson.databind.Module) avro.newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
