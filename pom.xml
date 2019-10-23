@@ -678,7 +678,7 @@
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-regions</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
