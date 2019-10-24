@@ -1,5 +1,7 @@
 package nl.vpro.filter;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 
 import javax.servlet.*;
@@ -21,6 +23,7 @@ import nl.vpro.mdc.MDCConstants;
  * @author Michiel Meeuwissen
  * @since 0.30
  */
+@Slf4j
 public class  MDCFilter implements Filter {
 
     @Deprecated
@@ -35,7 +38,7 @@ public class  MDCFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
         if (filterConfig.getInitParameter("clear") != null) {
-            clear = Boolean.valueOf(filterConfig.getInitParameter("clear"));
+            clear = Boolean.parseBoolean(filterConfig.getInitParameter("clear"));
         }
 
     }
@@ -45,9 +48,13 @@ public class  MDCFilter implements Filter {
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response  = (HttpServletResponse) res;
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-            MDC.put(MDCConstants.USER_NAME, auth.getName());
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                MDC.put(MDCConstants.USER_NAME, auth.getName());
+            }
+        } catch (Exception e) {
+            log.debug(e.getMessage());
         }
         String query = request.getQueryString();
         String path = request.getRequestURI().substring(request.getContextPath().length());
