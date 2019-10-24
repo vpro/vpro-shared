@@ -55,7 +55,7 @@
     <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
-      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
