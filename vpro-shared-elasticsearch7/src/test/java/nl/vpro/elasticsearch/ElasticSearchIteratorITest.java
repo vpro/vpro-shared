@@ -31,7 +31,7 @@ public class ElasticSearchIteratorITest {
 
     @Test
     public void test() {
-        ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, SearchHit::getSource);
+        ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, SearchHit::getSourceAsMap);
         i.prepareSearch("apimedia");
         while(i.hasNext()) {
             String mid = String.valueOf(i.next().get("mid"));
