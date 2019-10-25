@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class ESClientTest {
             //.put("cluster.name", "elasticsearch")
             .build();
         TransportClient client = new PreBuiltTransportClient(settings)
-            .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300))
+            .addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"), 9300))
         ;
         log.info("Built {}", client);
         log.info("" + client.connectedNodes());
