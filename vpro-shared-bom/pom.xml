@@ -7,7 +7,7 @@
   <artifactId>vpro-shared-bom</artifactId>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
-  <description>Bill of Materials</description>
+  <description>Bill of Materials of modules in vpro shared</description>
 
   <properties>
 
@@ -15,10 +15,14 @@
 
   <dependencyManagement>
     <dependencies>
-
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-camel</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-client-resteasy</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -28,15 +32,34 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-domain</artifactId>
+        <artifactId>vpro-shared-elasticsearch5</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-integration</artifactId>
+        <artifactId>vpro-shared-elasticsearch-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-guice</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-hibernate</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-hibernate-search</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-i18n</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson2</artifactId>
@@ -44,10 +67,24 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-logging</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-persistence</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-resteasy</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-rs</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger</artifactId>
@@ -55,7 +92,18 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-test</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-util</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-validation</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -73,57 +121,21 @@
         <artifactId>vpro-shared-xml</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-logging</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
-
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate-search</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-validation</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-test</artifactId>
-        <version>${project.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-i18n</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-persistence</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-       <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-rs</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-client-resteasy</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
 
       <!-- not maintained any more -->
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-integration</artifactId>
+        <version>1.75.8</version>
+      </dependency>
+
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-domain</artifactId>
+        <version>1.75.8</version>
+      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-newrelic</artifactId>
@@ -152,6 +164,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-transfer</artifactId>
+        <version>2.8.2</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-avro</artifactId>
         <version>2.8.2</version>
       </dependency>
 
