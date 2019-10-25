@@ -4,9 +4,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -67,7 +65,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
                 .setSocketTimeout((int) socketTimeout.toMillis())
                 .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
             )
-            .setMaxRetryTimeoutMillis((int) maxRetryTimeout.toMillis())
+            //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
             .build();
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
