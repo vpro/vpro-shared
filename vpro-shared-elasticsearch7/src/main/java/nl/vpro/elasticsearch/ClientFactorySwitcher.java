@@ -2,16 +2,14 @@ package nl.vpro.elasticsearch;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.client.Client;
 
+import javax.annotation.PostConstruct;
+import javax.management.*;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import javax.annotation.PostConstruct;
-import javax.management.*;
-
-import org.elasticsearch.client.Client;
 
 /**
  * @author Michiel Meeuwissen
@@ -45,7 +43,7 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
             try {
                 log.info("Using {}", map.get(configured));
                 Client client = client("afterconstruct");
-                long count = client.prepareSearch().execute().get().getHits().getTotalHits();
+                long count = client.prepareSearch().execute().get().getHits().getTotalHits().value;
                 client.close();
                 log.info("Found {} objects in {}", count, this);
 

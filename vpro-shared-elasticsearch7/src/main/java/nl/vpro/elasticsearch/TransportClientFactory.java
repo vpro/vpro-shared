@@ -2,24 +2,21 @@ package nl.vpro.elasticsearch;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.util.UrlProvider;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
+import javax.annotation.PreDestroy;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.annotation.PreDestroy;
-
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-
-import nl.vpro.util.UrlProvider;
 
 /**
  */
@@ -88,7 +85,7 @@ public class TransportClientFactory implements  ESClientFactory {
                 log.info("Port is configured {}, but we need a java protocol port. Taking {}", port, port + 100);
                 port += 100;
             }
-            transportClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(urlProvider.getHost()), port));
+            transportClient.addTransportAddress(new TransportAddress(InetAddress.getByName(urlProvider.getHost()), port));
         }
         log.debug("Build es client {} {} ({})", logName, transportAddresses, clusterName);
 

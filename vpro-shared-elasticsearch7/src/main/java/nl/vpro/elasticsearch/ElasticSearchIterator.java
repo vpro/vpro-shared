@@ -1,18 +1,16 @@
 package nl.vpro.elasticsearch;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.function.Function;
-
+import nl.vpro.util.CountedIterator;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 
-import nl.vpro.util.CountedIterator;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A wrapper around the Elastic Search scroll interface.
@@ -117,7 +115,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Override
     public Optional<Long> getSize() {
         findNext();
-        return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits());
+        return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits().value);
     }
 
     @Override

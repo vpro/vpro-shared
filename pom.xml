@@ -57,6 +57,7 @@
     <module>vpro-shared-elasticsearch</module>
     -->
     <module>vpro-shared-elasticsearch5</module>
+    <module>vpro-shared-elasticsearch7</module>
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-hibernate</module>
     <module>vpro-shared-hibernate-search</module>
