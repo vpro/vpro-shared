@@ -13,6 +13,7 @@ import com.neovisionaries.i18n.LanguageCode;
 public class Locales {
 
     public static Locale DUTCH         = of(LanguageCode.nl);
+    public static Locale ARABIC        = of(LanguageCode.ar);
     public static Locale NETHERLANDISH = of(LanguageCode.nl, CountryCode.NL);
     public static Locale FLEMISH       = of(LanguageCode.nl, CountryCode.BE);
 
