@@ -1,8 +1,10 @@
 package nl.vpro.i18n;
 
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Stream;
 
 import org.meeuw.i18n.Region;
+
 import com.neovisionaries.i18n.CountryCode;
 import com.neovisionaries.i18n.LanguageCode;
 
@@ -16,7 +18,6 @@ public class Locales {
     public static Locale ARABIC        = of(LanguageCode.ar);
     public static Locale NETHERLANDISH = of(LanguageCode.nl, CountryCode.NL);
     public static Locale FLEMISH       = of(LanguageCode.nl, CountryCode.BE);
-    public static Locale ARABIC        = of(LanguageCode.ar);
 
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
@@ -52,6 +53,56 @@ public class Locales {
 
     public static String getCountryName(Region country, Locale locale) {
         return country.getName(locale);
+    }
+
+    public static int score(Locale locale1, Locale locale2) {
+        int score = 0;
+        if (locale1 == null || locale2 == null) {
+            return score;
+        }
+        if (Objects.equals(locale1.getLanguage(), locale2.getLanguage())) {
+            score++;
+        } else {
+            return score;
+        }
+        if (Objects.equals(locale1.getCountry(), locale2.getCountry())) {
+            score++;
+        } else {
+            return score;
+        }
+        if (Objects.equals(locale1.getVariant(), locale2.getVariant())) {
+            score++;
+        }
+        return score;
+    }
+
+    public static Optional<Locale> findBestMatch(Locale request, Stream<Locale> candidates) {
+        Locale locale = null;
+        int score = 0;
+        Iterator<Locale> iterator = candidates.iterator();
+        while(iterator.hasNext()) {
+            Locale candidate = iterator.next();
+            int scoreOfCandidate = score(request, candidate);
+            if (scoreOfCandidate > score) {
+                locale = candidate;
+                score = scoreOfCandidate;
+            }
+        }
+        return Optional.ofNullable(locale);
+    }
+
+
+    public static  Locale simplify(Locale locale) {
+        String variant = locale.getVariant();
+        if (variant != null && variant.length() > 0) {
+            return new Locale(locale.getLanguage(), locale.getCountry());
+        }
+        String country = locale.getCountry();
+        if (country != null && country.length() > 0) {
+            return new Locale(locale.getLanguage());
+        }
+        return locale;
+
     }
 
 }

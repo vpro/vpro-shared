@@ -3,19 +3,18 @@ package nl.vpro.i18n;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Locale;
-import java.util.Objects;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.neovisionaries.i18n.LanguageCode;
+
+import static nl.vpro.i18n.Locales.score;
 
 /**
  * Basicly wraps a string together with the {@link Locale} describing in what language it is.
@@ -90,8 +89,8 @@ public class LocalizedString implements CharSequence { //implements javax.xml.re
         if (strings != null) {
             int score = -1;
             for (LocalizedString string : strings) {
-                int s = string.getScore(locale);
-                if (string.getScore(locale) > score) {
+                int s = score(string.getLocale(), locale);
+                if (s > score) {
                     candidate = string;
                     score = s;
                 }
@@ -119,31 +118,13 @@ public class LocalizedString implements CharSequence { //implements javax.xml.re
 
     }
 
+    @NonNull
     @Override
     public String toString() {
         return value;
     }
 
-    private int getScore(Locale locale) {
-        int score = 0;
-        if (this.locale == null || locale == null) {
-            return score;
-        }
-        if (Objects.equals(locale.getLanguage(), this.locale.getLanguage())) {
-            score++;
-        } else {
-            return score;
-        }
-        if (Objects.equals(locale.getCountry(), this.locale.getCountry())) {
-            score++;
-        } else {
-            return score;
-        }
-        if (Objects.equals(locale.getVariant(), this.locale.getVariant())) {
-            score++;
-        }
-        return score;
-    }
+
 
     public static class XmlLangAdapter extends XmlAdapter<String, Locale> {
 
