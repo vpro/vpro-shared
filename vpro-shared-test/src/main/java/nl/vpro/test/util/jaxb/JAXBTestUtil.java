@@ -4,7 +4,6 @@
  */
 package nl.vpro.test.util.jaxb;
 
-import junit.framework.ComparisonFailure;
 import lombok.SneakyThrows;
 
 import java.io.*;
@@ -327,12 +326,12 @@ public class JAXBTestUtil {
         try {
             Diff diff = builder.build();
             if (diff.hasDifferences()) {
-                throw new ComparisonFailure(diff.toString(), expected, input);
+                throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
             } else {
                 assertThat(diff.hasDifferences()).isFalse();
             }
         } catch (XMLUnitException xue) {
-            throw new ComparisonFailure(xue.getMessage(), expected, input);
+            throw new AssertionError(xue.getMessage() + ": expected:\n" + expected + "\nactual:\n" + input);
         }
     }
 
@@ -350,7 +349,7 @@ public class JAXBTestUtil {
             .checkForSimilar()
             .build();
         if (diff.hasDifferences()) {
-            throw new ComparisonFailure(diff.toString(), expected, bytes.toString());
+            throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
         }
     }
 
@@ -365,7 +364,7 @@ public class JAXBTestUtil {
             .checkForSimilar()
             .build();
         if (diff.hasDifferences()) {
-            throw new ComparisonFailure(diff.toString(), expectedBytes.toString(), bytes.toString());
+            throw new AssertionError(diff.toString() + ": expected:\n" + expectedBytes + "\nactual:\n" + bytes);
         }
     }
 
