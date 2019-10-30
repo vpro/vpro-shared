@@ -6,7 +6,6 @@ package nl.vpro.test.util.jackson2;
 
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.test.JSONAssert;
 
 import java.io.*;
 
@@ -14,6 +13,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
+import org.json.JSONException;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.databind.*;
 
@@ -35,8 +37,10 @@ public class Jackson2TestUtil {
 
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual) {
         try {
-            JSONAssert.assertJsonEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual));
-        } catch (AssertionFailedError fail) {
+
+            JSONAssert.assertEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual), JSONCompareMode.LENIENT);
+
+        } catch (AssertionFailedError | JSONException fail) {
             log.info(fail.getMessage());
             assertThat(prettify(actual)).isEqualTo(prettify(expected));
         }

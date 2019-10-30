@@ -46,9 +46,8 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>net.sf.json-lib</groupId>
-      <artifactId>json-lib</artifactId>
-      <classifier>jdk15</classifier>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
     </dependency>
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
