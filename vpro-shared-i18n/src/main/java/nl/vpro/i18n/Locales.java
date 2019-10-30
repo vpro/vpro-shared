@@ -16,6 +16,8 @@ public class Locales {
     public static Locale ARABIC        = of(LanguageCode.ar);
     public static Locale NETHERLANDISH = of(LanguageCode.nl, CountryCode.NL);
     public static Locale FLEMISH       = of(LanguageCode.nl, CountryCode.BE);
+    public static Locale ARABIC        = of(LanguageCode.ar);
+
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
 
