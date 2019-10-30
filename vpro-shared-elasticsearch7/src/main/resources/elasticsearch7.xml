@@ -7,7 +7,7 @@
         class="java.net.InetAddress"
         factory-method="getLocalHost"/>
 
-  <bean id="esDirect" class="nl.vpro.elasticsearch.TransportClientFactory" autowire-candidate="false">
+  <bean id="esDirect" class="nl.vpro.elasticsearch7.TransportClientFactory" autowire-candidate="false">
     <property name="clusterName" value="${elasticSearch.cluster}"/>
     <property name="implicitHttpToJavaPort" value="true"/>
     <property name="elasticSearchHosts" value="${elasticSearch.unicastHosts}"/>
