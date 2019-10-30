@@ -66,7 +66,7 @@ public class URLResourceTest {
 
 
     @Test
-    public void broadcasters() throws InterruptedException, IOException {
+    public void broadcasters() throws InterruptedException {
 
 
 

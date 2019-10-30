@@ -71,7 +71,7 @@ public class B {
         }
 
         @Override
-        public AdaptedMap marshal(Map<String, String> map) throws Exception {
+        public AdaptedMap marshal(Map<String, String> map) {
         AdaptedMap adaptedMap = new AdaptedMap();
         for(Map.Entry<String, String> mapEntry : map.entrySet()) {
             Entry entry = new Entry();
