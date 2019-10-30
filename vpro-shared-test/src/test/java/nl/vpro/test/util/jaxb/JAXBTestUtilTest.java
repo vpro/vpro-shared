@@ -1,13 +1,13 @@
 package nl.vpro.test.util.jaxb;
 
-import org.junit.Test;
 
-import nl.vpro.test.util.jaxb.test.A;
-import nl.vpro.test.util.jaxb.test.ANoNamespace;
-import nl.vpro.test.util.jaxb.test.B;
+import org.junit.jupiter.api.Test;
+
+import nl.vpro.test.util.jaxb.test.*;
 
 import static nl.vpro.test.util.jaxb.JAXBTestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 
 public class JAXBTestUtilTest {
@@ -70,12 +70,14 @@ public class JAXBTestUtilTest {
             "<c>zz</c>");
     }
 
-    @Test(expected = AssertionError.class)
+    @Test
     public void testContainsNoNamespaceFails() {
-        ANoNamespace a = roundTripContains(new ANoNamespace(),
-             "<a>xx</a>",
-            "<dd>qq</dd>",
-            "<c>zz</c>");
+        assertThatThrownBy(() -> {
+            ANoNamespace a = roundTripContains(new ANoNamespace(),
+                "<a>xx</a>",
+                "<dd>qq</dd>",
+                "<c>zz</c>");
+        }).isInstanceOf(AssertionError.class);
     }
 
     @Test
@@ -87,12 +89,14 @@ public class JAXBTestUtilTest {
         assertThat(rounded.getB().getJ()).isEqualTo(2);
     }
 
-    @Test(expected = AssertionError.class)
+    @Test
     public void testContainsFluentFails() {
-        assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='3'>\n" +
-            "            <value>bb</value>\n" +
+        assertThatThrownBy(() -> {
+            assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='3'>\n" +
+                "            <value>bb</value>\n" +
                 "        <c>cc</c>\n" +
                 "</b>");
+        }).isInstanceOf(AssertionError.class);
     }
 
 

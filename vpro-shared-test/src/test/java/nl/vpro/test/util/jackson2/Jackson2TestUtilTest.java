@@ -1,13 +1,10 @@
 package nl.vpro.test.util.jackson2;
 
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
-import org.junit.ComparisonFailure;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 /**
@@ -52,9 +49,10 @@ public class Jackson2TestUtilTest {
         Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'a'}");
     }
 
-    @Test(expected = ComparisonFailure.class)
-    public void roundTripAndSimilarFail() throws Exception {
-        Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'b'}");
+    @Test
+    public void roundTripAndSimilarFail() {
+        Assertions.assertThrows(AssertionError.class, () ->
+            Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'b'}"));
     }
 
     @Test
@@ -62,9 +60,11 @@ public class Jackson2TestUtilTest {
         Jackson2TestUtil.roundTripAndSimilarValue("a", "\"a\"");
     }
 
-    @Test(expected = ComparisonFailure.class)
-    public void roundTripAndSimilarValueFail() throws Exception {
-        Jackson2TestUtil.roundTripAndSimilarValue("a", "\"b\"");
+    @Test
+    public void roundTripAndSimilarValueFail() {
+        Assertions.assertThrows(AssertionError.class, () ->
+            Jackson2TestUtil.roundTripAndSimilarValue("a", "\"b\"")
+        );
     }
 
 }
