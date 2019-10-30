@@ -7,6 +7,7 @@ package nl.vpro.test.util.jackson2;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -286,6 +287,16 @@ public class Jackson2TestUtil {
         public JsonStringAssert isSimilarTo(String expected) {
             assertJsonEquals("", expected, actual);
             return myself;
+        }
+
+        public JsonStringAssert isSimilarToResource(String resource) {
+            try {
+                String expected = IOUtils.toString(getClass().getResourceAsStream(resource), StandardCharsets.UTF_8);
+                return isSimilarTo(expected);
+            } catch (IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+
         }
     }
 
