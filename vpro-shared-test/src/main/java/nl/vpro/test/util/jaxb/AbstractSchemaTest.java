@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class AbstractSchemaTest {
 
+    @SuppressWarnings("UnstableApiUsage")
     private final static File DIR = Files.createTempDir();
 
     protected static JAXBContext context;
