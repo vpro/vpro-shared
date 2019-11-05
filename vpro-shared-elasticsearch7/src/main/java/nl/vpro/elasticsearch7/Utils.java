@@ -6,14 +6,14 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 2.9
  */
 public class Utils {
 
 
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-dd'T'HH:mm:ss.SSSXXX");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
     public  static String formatDateTime(Instant instant) {
-        return formatter.format(instant.atZone(ZoneId.of("UTC")));
+        return FORMATTER.format(instant.atZone(ZoneId.of("UTC")));
     }
 }
