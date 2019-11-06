@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>elasticsearch-rest-client</artifactId>
-      <version>7.4.1</version>
+      <version>7.4.2</version>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
@@ -41,6 +41,10 @@
     <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-elasticsearch</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

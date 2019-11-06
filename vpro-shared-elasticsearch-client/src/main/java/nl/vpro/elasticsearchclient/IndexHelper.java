@@ -4,7 +4,6 @@ import lombok.*;
 
 import java.io.*;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -24,10 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import nl.vpro.elasticsearch.IndexHelperInterface;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
 import nl.vpro.util.Version;
 
+import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
 import static nl.vpro.elasticsearchclient.Constants.Fields;
 import static nl.vpro.elasticsearchclient.Constants.HITS;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
@@ -40,7 +41,7 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 @ToString
 @Getter
 @Setter
-public class IndexHelper {
+public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     private final Logger log;
     private Supplier<String> indexNameSupplier;
@@ -63,7 +64,7 @@ public class IndexHelper {
 
 
         public Builder mappingResource(String type, String mapping) {
-            return mapping(type, () -> getResourceAsString(mapping));
+            return mapping(type, () -> resourceToString(mapping));
         }
 
         public Builder mappingResource(String mapping) {
@@ -71,7 +72,7 @@ public class IndexHelper {
             String fileName = split[split.length - 1];
             int dot = fileName.lastIndexOf(".");
             String type = fileName.substring(0, dot);
-            return mapping(type, () -> getResourceAsString(mapping));
+            return mapping(type, () -> resourceToString(mapping));
         }
         public Builder mappings(Map<String, Supplier<String>> mappings) {
             this.mappings.putAll(mappings);
@@ -79,28 +80,12 @@ public class IndexHelper {
         }
 
         public Builder settingsResource(final String resource) {
-            return settings(() -> getResourceAsString(resource)
+            return settings(() -> resourceToString(resource)
             );
         }
 
         public Builder indexName(final String indexName) {
             return indexNameSupplier(() -> indexName);
-        }
-    }
-
-    private static String getResourceAsString(String resource) {
-        try {
-            StringWriter e = new StringWriter();
-            InputStream inputStream = IndexHelper.class.getClassLoader().getResourceAsStream(resource);
-            if (inputStream == null) {
-                throw new IllegalStateException("Could not find " + resource);
-            } else {
-                IOUtils.copy(inputStream, e, StandardCharsets.UTF_8);
-                return e.toString();
-
-            }
-        } catch (IOException var3) {
-            throw new IllegalStateException(var3);
         }
     }
 
@@ -150,6 +135,7 @@ public class IndexHelper {
         return this;
     }
 
+    @Override
     public RestClient client() {
         try {
             return clientAsync((c) -> {}).get();
@@ -176,7 +162,9 @@ public class IndexHelper {
 
     }
 
-    public  void createIndex() throws IOException {
+    @Override
+    @SneakyThrows
+    public  void createIndex()  {
 
         if (getIndexName().isEmpty()){
             throw new IllegalStateException("No index name configured");

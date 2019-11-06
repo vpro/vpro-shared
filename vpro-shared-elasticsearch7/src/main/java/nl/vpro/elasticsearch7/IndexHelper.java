@@ -2,13 +2,10 @@ package nl.vpro.elasticsearch7;
 
 import lombok.*;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.apache.commons.io.IOUtils;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -20,6 +17,11 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.IndexHelperInterface;
+
+import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
+
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
  * @author Michiel Meeuwissen
@@ -28,7 +30,7 @@ import org.slf4j.LoggerFactory;
 @ToString
 @Getter
 @Setter
-public class IndexHelper {
+public class IndexHelper implements IndexHelperInterface<Client> {
 
     private final Logger log;
     private Supplier<String> indexNameSupplier;
@@ -45,7 +47,7 @@ public class IndexHelper {
         }
 
         public Builder mappingResource(String type, String mapping) {
-            return mapping(type, () -> getResourceAsString(mapping));
+            return mapping(type, () -> resourceToString(mapping));
         }
         public Builder mappings(Map<String, Supplier<String>> mappings) {
             this.mappings.putAll(mappings);
@@ -53,7 +55,7 @@ public class IndexHelper {
         }
 
         public Builder settingsResource(final String resource) {
-            return settings(() -> getResourceAsString(resource)
+            return settings(() -> resourceToString(resource)
             );
         }
 
@@ -62,21 +64,6 @@ public class IndexHelper {
         }
     }
 
-    private static String getResourceAsString(String resource) {
-        try {
-            StringWriter e = new StringWriter();
-            InputStream inputStream = IndexHelper.class.getClassLoader().getResourceAsStream(resource);
-            if (inputStream == null) {
-                throw new IllegalStateException("Could not find " + resource);
-            } else {
-                IOUtils.copy(inputStream, e, StandardCharsets.UTF_8);
-                return e.toString();
-
-            }
-        } catch (IOException var3) {
-            throw new IllegalStateException(var3);
-        }
-    }
 
 
     @lombok.Builder(builderClassName = "Builder")
@@ -100,13 +87,21 @@ public class IndexHelper {
             .build();
     }
 
-    public static IndexHelper of(Logger log, ESClientFactory client, Supplier<String> indexName, String objectType) {
+    public static IndexHelper.Builder of(Logger log, ESClientFactory client, Supplier<String> indexName, String objectType) {
         return IndexHelper.builder().log(log)
             .client(client)
             .indexNameSupplier(indexName)
             .settingsResource("es/setting.json")
-            .mappingResource(objectType, String.format("es/%s.json", objectType))
-            .build();
+            .mappingResource(objectType, String.format("es/%s.json", objectType));
+    }
+
+    public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
+        return IndexHelper.builder()
+            .log(log)
+            .client(client)
+            .indexNameSupplier(index::getIndexName)
+            .settingsResource(index.getSettingsResource())
+            .mappings(index.mappingsAsMap());
     }
 
     public IndexHelper mapping(String type, Supplier<String> mapping) {
@@ -114,10 +109,12 @@ public class IndexHelper {
         return this;
     }
 
+    @Override
     public Client client() {
         return clientFactory.client(IndexHelper.class.getName() + "." + indexNameSupplier.get());
     }
 
+    @Override
     public  void createIndex() {
 
         if (indexNameSupplier == null){

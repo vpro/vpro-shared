@@ -1,8 +1,12 @@
 package nl.vpro.elasticsearch7;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * @author Michiel Meeuwissen
@@ -16,4 +20,7 @@ public class Utils {
     public  static String formatDateTime(Instant instant) {
         return FORMATTER.format(instant.atZone(ZoneId.of("UTC")));
     }
+
+
+
 }

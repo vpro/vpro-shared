@@ -54,8 +54,9 @@
     <module>vpro-shared-client-resteasy</module>
     <module>vpro-shared-configuration</module>
     <!--
-    <module>vpro-shared-elasticsearch</module>
+    <module>vpro-shared-elasticsearch1</module>
     -->
+    <module>vpro-shared-elasticsearch</module>
     <module>vpro-shared-elasticsearch5</module>
     <module>vpro-shared-elasticsearch7</module>
     <module>vpro-shared-elasticsearch-client</module>
