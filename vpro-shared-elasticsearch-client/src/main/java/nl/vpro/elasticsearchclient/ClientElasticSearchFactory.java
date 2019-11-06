@@ -3,6 +3,7 @@ package nl.vpro.elasticsearchclient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -144,5 +145,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     public void setMaxRetryTimeoutDuration(String maxRetryTimeout) {
         this.maxRetryTimeout = TimeUtils.parseDuration(maxRetryTimeout).orElse(this.maxRetryTimeout);
+    }
+
+    public void shutdown() {
+        clients.values().forEach(restClient -> {
+            try {
+                restClient.close();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        });
     }
 }

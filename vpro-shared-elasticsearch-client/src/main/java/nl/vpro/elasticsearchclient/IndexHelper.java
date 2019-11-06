@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.elasticsearch.IndexHelperInterface;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
@@ -49,8 +50,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
     private ObjectMapper objectMapper;
-
-    private File writeJsonDir = null;
+    private File writeJsonDir;
 
 
     public static class Builder {
@@ -130,6 +130,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             .build();
     }
 
+    public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
+        return IndexHelper.builder()
+            .log(log)
+            .client(client)
+            .indexNameSupplier(index::getIndexName)
+            .settingsResource(index.getSettingsResource())
+            .mappings(index.mappingsAsMap());
+    }
+
     public IndexHelper mapping(String type, Supplier<String> mapping) {
         mappings.put(type, mapping);
         return this;
@@ -171,11 +180,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         }
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.set("settings", Jackson2Mapper.getInstance().readTree(settings.get()));
-        ObjectNode mappingNode = request.with("mappings");
 
-
-        for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
-            mappingNode.set(e.getKey(), Jackson2Mapper.getInstance().readTree(e.getValue().get()));
+        if (mappings.size() == 1 && mappings.containsKey("_doc")) {
+            JsonNode node  =  Jackson2Mapper.getInstance().readTree(mappings.get("_doc").get());
+            request.set("mappings", node);
+        } else {
+            ObjectNode mappingNode = request.with("mappings");
+            for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
+                mappingNode.set(e.getKey(), Jackson2Mapper.getInstance().readTree(e.getValue().get()));
+            }
         }
         HttpEntity entity = entity(request);
 
