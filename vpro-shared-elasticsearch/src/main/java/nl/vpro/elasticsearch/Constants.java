@@ -1,4 +1,4 @@
-package nl.vpro.elasticsearchclient;
+package nl.vpro.elasticsearch;
 
 /**
  * @author Michiel Meeuwissen
@@ -21,7 +21,6 @@ public class Constants {
 
     public static final String SCORE = "_score";
 
-
     public static final String HITS = "hits";
 
     public static final String _SCROLL_ID = "_scroll_id";
@@ -31,11 +30,14 @@ public class Constants {
 
     public static final String QUERY = "query";
 
+    @Deprecated
     public static final String TYPE = "type";
     public static final String ID  = "id";
     public static final String PARENT  = "parent";
 
     public static final String INDEX = "index";
+
+    public static final String DOC = "_doc";
 
 
 

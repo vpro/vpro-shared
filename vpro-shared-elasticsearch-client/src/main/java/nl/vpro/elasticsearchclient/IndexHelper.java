@@ -23,15 +23,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.IndexHelperInterface;
+import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Pair;
 import nl.vpro.util.Version;
 
+import static nl.vpro.elasticsearch.Constants.Fields;
+import static nl.vpro.elasticsearch.Constants.HITS;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
-import static nl.vpro.elasticsearchclient.Constants.Fields;
-import static nl.vpro.elasticsearchclient.Constants.HITS;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 
 /**
@@ -47,6 +46,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     private final Logger log;
     private Supplier<String> indexNameSupplier;
     private Supplier<String> settings;
+    private List<String> aliases;
     private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
     private ObjectMapper objectMapper;
@@ -98,7 +98,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         Supplier<String> settings,
         Map<String, Supplier<String>> mappings,
         File writeJsonDir,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        List<String> aliases
         ) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
@@ -109,6 +110,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         }
         this.writeJsonDir = writeJsonDir;
         this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
+        this.aliases = aliases == null ? Collections.emptyList() : aliases;
     }
 
 
@@ -136,7 +138,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             .client(client)
             .indexNameSupplier(index::getIndexName)
             .settingsResource(index.getSettingsResource())
-            .mappings(index.mappingsAsMap());
+            .mappings(index.mappingsAsMap())
+            .aliases(index.getAliases())
+            ;
     }
 
     public IndexHelper mapping(String type, Supplier<String> mapping) {
@@ -173,16 +177,36 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     @Override
     @SneakyThrows
-    public  void createIndex()  {
+    public  void createIndex(CreateIndex createIndex)  {
 
         if (getIndexName().isEmpty()){
             throw new IllegalStateException("No index name configured");
         }
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-        request.set("settings", Jackson2Mapper.getInstance().readTree(settings.get()));
+        String supplied = indexNameSupplier.get();
 
-        if (mappings.size() == 1 && mappings.containsKey("_doc")) {
-            JsonNode node  =  Jackson2Mapper.getInstance().readTree(mappings.get("_doc").get());
+        String indexName = createIndex.isUseNumberPostfix() ? supplied + "-0" :  supplied;
+
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+
+        if (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix()) {
+            ObjectNode aliases = request.with("aliases");
+            aliases.with(supplied);
+            for (String alias : this.aliases) {
+                aliases.with(alias);
+            }
+        }
+
+        ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
+
+        if (createIndex.isForReindex()) {
+            //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
+            ObjectNode index = settings.with("settings").with("index");
+            index.put("refresh_interval", -1);
+            index.put("number_of_replicas", 0);
+        }
+
+        if (mappings.size() == 1 && mappings.containsKey(Constants.DOC)) {
+            JsonNode node  =  Jackson2Mapper.getInstance().readTree(mappings.get(Constants.DOC).get());
             request.set("mappings", node);
         } else {
             ObjectNode mappingNode = request.with("mappings");
@@ -192,8 +216,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         }
         HttpEntity entity = entity(request);
 
-        log.info("Creating index {} with mappings {}: {}", indexNameSupplier, mappings.keySet(), request.toString());
-        Request req = new Request("PUT", indexNameSupplier.get());
+        log.info("Creating index {} with mappings {}: {}", indexName, mappings.keySet(), request.toString());
+        Request req = new Request("PUT", indexName);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -206,28 +230,27 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     }
 
-
-    /**
-     * Checks whether index exists, and if not, created it.
-     */
-    public void createIndexIfNotExists() {
-        try {
-            Response response = client().performRequest(new Request("HEAD",  getIndexName()));
-            if (response.getStatusLine().getStatusCode() == 404) {
-                log.info("Index '{}' not existing in {}, now creating", getIndexName(), clientFactory);
-                try {
-                    createIndex();
-                } catch (Exception e) {
-                    String c = (e.getCause() != null ? (" " + e.getCause().getMessage()) : "");
-                    log.error(e.getMessage() + c);
-                }
-            } else {
-                log.info("Found {} objects in '{}' of {}", count(), getIndexName(), clientFactory);
-            }
-        } catch( IOException noNodeAvailableException) {
-            log.error(noNodeAvailableException.getMessage());
+    @SneakyThrows
+    public void reputSettings() {
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
+        ObjectNode index = settings.with("settings").with("index");
+        if (!index.has("refresh_interval")) {
+            index.put("refresh_interval", "30s");
         }
+        // remove stuff that cannot be updated
+        index.remove("analysis");
+        index.remove("number_of_shards");
+        HttpEntity entity = entity(request);
+        Request req = new Request("PUT", getIndexName() + "/_settings");
+        req.setEntity(entity);
+        ObjectNode response = read(client().performRequest(req));
+
+        log.info("{}", response);
+
+
     }
+
 
     public boolean checkIndex() {
         try {

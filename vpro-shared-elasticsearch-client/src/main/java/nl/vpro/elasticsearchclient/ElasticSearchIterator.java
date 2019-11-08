@@ -25,7 +25,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.CountedIterator;
 import nl.vpro.util.Version;
 
-import static nl.vpro.elasticsearchclient.Constants.*;
+import static nl.vpro.elasticsearch.Constants.*;
 
 /**
  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}

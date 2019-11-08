@@ -11,14 +11,12 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.NoNodeAvailableException;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.IndexHelperInterface;
+import nl.vpro.elasticsearch.*;
 
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
 
@@ -115,7 +113,7 @@ public class IndexHelper implements IndexHelperInterface<Client> {
     }
 
     @Override
-    public  void createIndex() {
+    public  void createIndex(CreateIndex createIndex) {
 
         if (indexNameSupplier == null){
             throw new IllegalStateException("No index name configured");
@@ -142,25 +140,9 @@ public class IndexHelper implements IndexHelperInterface<Client> {
     }
 
 
-    public void prepareIndex() {
-        try {
-            boolean exists = client().admin().indices().prepareExists(getIndexName()).execute().actionGet().isExists();
-            if (!exists) {
-                log.info("Index '{}' not existing in {}, now creating", getIndexName(), clientFactory);
-                try {
-                    createIndex();
-                } catch (Exception e) {
-                    String c = (e.getCause() != null ? (" " + e.getCause().getMessage()) : "");
-                    log.error(e.getMessage() + c);
-                }
-            } else {
-                log.info("Found {} objects in '{}' of {}", count(), getIndexName(), clientFactory);
-            }
-        } catch( NoNodeAvailableException noNodeAvailableException) {
-            log.error(noNodeAvailableException.getMessage());
-        }
+    public boolean checkIndex() {
+        return  client().admin().indices().prepareExists(getIndexName()).execute().actionGet().isExists();
     }
-
 
     public void deleteIndex() {
         client().admin().indices().prepareDelete(getIndexName()).execute().actionGet();
@@ -170,6 +152,7 @@ public class IndexHelper implements IndexHelperInterface<Client> {
         return client().admin().indices().prepareRefresh(getIndexName()).get();
     }
 
+    @Override
     public long count() {
         return client().prepareSearch(getIndexName()).setSource(new SearchSourceBuilder().size(0)).get().getHits().getTotalHits().value;
     }

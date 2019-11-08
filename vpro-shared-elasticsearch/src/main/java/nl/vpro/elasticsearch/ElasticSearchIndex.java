@@ -3,8 +3,7 @@ package nl.vpro.elasticsearch;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.IOUtils;
@@ -15,23 +14,27 @@ import org.apache.commons.io.IOUtils;
  * @since 2.9
  */
 @lombok.Getter()
-public abstract class ElasticSearchIndex {
+public class ElasticSearchIndex {
 
     private final String indexName;
     private final String mappingResource;
     private final String settingsResource;
+    private final List<String> aliases;
 
-    protected ElasticSearchIndex(String indexName, String mappingResource) {
-        this(indexName, "/es7/setting/" + indexName + ".json", mappingResource);
+    protected ElasticSearchIndex(String indexName, String mappingResource, String... aliases) {
+        this(indexName, "/es7/setting/" + indexName + ".json", mappingResource, Arrays.asList(aliases));
     }
 
-    public ElasticSearchIndex(
+    @lombok.Builder(builderClassName = "Builder")
+    protected ElasticSearchIndex(
         String indexName,
         String settingsResource,
-        String mappingResource) {
+        String mappingResource,
+        @lombok.Singular  List<String> aliases) {
         this.indexName = indexName;
         this.settingsResource = settingsResource;
         this.mappingResource = mappingResource;
+        this.aliases = aliases;
     }
 
 
@@ -57,6 +60,11 @@ public abstract class ElasticSearchIndex {
         return getClass().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ":" + getIndexName() + (aliases.isEmpty() ? "" : " " + aliases);
+    }
+
 
     public static final String resourceToString(String name) {
         try {
@@ -72,4 +80,13 @@ public abstract class ElasticSearchIndex {
         }
     }
 
+    public static class Builder {
+
+        public Builder publishAlias() {
+            if (indexName == null) {
+                throw new IllegalStateException();
+            }
+            return alias(indexName + "-publish");
+        }
+    }
 }

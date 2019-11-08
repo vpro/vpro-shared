@@ -15,6 +15,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import nl.vpro.elasticsearch.Constants;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

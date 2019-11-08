@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import nl.vpro.elasticsearch.Constants;
+
 /**
  * @author Michiel Meeuwissen
  * @since ...
