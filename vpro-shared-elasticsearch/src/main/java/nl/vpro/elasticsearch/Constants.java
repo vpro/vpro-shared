@@ -30,7 +30,9 @@ public class Constants {
 
     public static final String QUERY = "query";
 
-    @Deprecated
+    /**
+     * Deprecated if not {@link #DOC}
+     */
     public static final String TYPE = "type";
     public static final String ID  = "id";
     public static final String PARENT  = "parent";
