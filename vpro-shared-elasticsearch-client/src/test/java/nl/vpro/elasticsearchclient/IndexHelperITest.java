@@ -7,9 +7,7 @@ import java.util.Arrays;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +21,7 @@ public class IndexHelperITest {
 
     RestClient client;
     IndexHelper helper;
-    @Before
+    @BeforeEach
     public void setup() {
 
         client = RestClient.builder(
@@ -43,7 +41,7 @@ public class IndexHelperITest {
 
 
 
-    @After
+    @AfterEach
     public void shutdown() {
         helper.deleteIndex();
         helper.refresh();

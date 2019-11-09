@@ -8,10 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -23,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
-@Ignore("Requires actualy es connection")
+@Disabled("Requires actual es connection")
 @Slf4j
 public class ElasticSearchIteratorITest {
 
@@ -38,7 +36,7 @@ public class ElasticSearchIteratorITest {
     IndexHelper helper;
 
     String index = "test-" + System.currentTimeMillis();
-    @Before
+    @BeforeEach
     public void setup() {
 
         client = RestClient.builder(
@@ -62,7 +60,7 @@ public class ElasticSearchIteratorITest {
         helper.refresh();
 
     }
-    @After
+    @AfterEach
     public void shutdown() {
         helper.deleteIndex();
     }

@@ -6,22 +6,21 @@ import java.util.Arrays;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.75
  */
 @Slf4j
-@Ignore
+@Disabled
 public class IndexHelper2ITest {
 
 
     RestClient client;
     IndexHelper helper;
-    @Before
+    @BeforeEach
     public void setup() {
 
         client = RestClient.builder(

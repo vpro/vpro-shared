@@ -221,7 +221,7 @@
     <log4j2.version>2.12.1</log4j2.version>
     <camel.version>2.24.1</camel.version>
     <guava.version>28.1-jre</guava.version>
-    <javassist.version>3.22.0-CR1</javassist.version>
+    <javassist.version>3.26.0-GA</javassist.version>
     <wss4j.version>2.2.3</wss4j.version>
 
     <httpcomponents.version>4.5.10</httpcomponents.version>
