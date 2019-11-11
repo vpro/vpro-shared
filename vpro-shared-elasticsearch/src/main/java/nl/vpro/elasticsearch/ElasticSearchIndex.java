@@ -44,7 +44,7 @@ public class ElasticSearchIndex {
 
     public Map<String, Supplier<String>> mappingsAsMap() {
         Map<String, Supplier<String>> result = new HashMap<>();
-        result.put("_doc", () -> resourceToString(mappingResource));
+        result.put(Constants.DOC, () -> resourceToString(mappingResource));
         return result;
     }
 
