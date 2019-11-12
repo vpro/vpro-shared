@@ -711,6 +711,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         return _indexRequest(DOC, id, o);
     }
 
+    public Pair<ObjectNode, ObjectNode> indexRequestWithRouting(String id, Object o, String routing) {
+        Pair<ObjectNode, ObjectNode> request = _indexRequest(DOC, id, o);
+        request.getFirst().with(Constants.INDEX).put(Fields.ROUTING, routing);
+        return request;
+    }
+
     private  Pair<ObjectNode, ObjectNode> _indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with(Constants.INDEX);
@@ -745,6 +751,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public Pair<ObjectNode, ObjectNode> deleteRequest(String id) {
         return _deleteRequest(DOC, id);
     }
+
+    public Pair<ObjectNode, ObjectNode> deleteRequestWithRouting(String id, String routing) {
+        Pair<ObjectNode, ObjectNode> request  = _deleteRequest(DOC, id);
+        request.getFirst().with("delete").put(Fields.ROUTING, routing);
+        return request;
+
+    }
+
     protected Pair<ObjectNode, ObjectNode> _deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");

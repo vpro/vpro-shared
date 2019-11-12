@@ -4,9 +4,12 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import org.meeuw.i18n.Region;
+import org.meeuw.i18n.countries.Country;
 
-import com.neovisionaries.i18n.CountryCode;
-import com.neovisionaries.i18n.LanguageCode;
+import com.neovisionaries.i18n.*;
+
+import static com.neovisionaries.i18n.CountryCode.BE;
+import static com.neovisionaries.i18n.CountryCode.NL;
 
 /**
  * @author Michiel Meeuwissen
@@ -16,8 +19,9 @@ public class Locales {
 
     public static Locale DUTCH         = of(LanguageCode.nl);
     public static Locale ARABIC        = of(LanguageCode.ar);
-    public static Locale NETHERLANDISH = of(LanguageCode.nl, CountryCode.NL);
-    public static Locale FLEMISH       = of(LanguageCode.nl, CountryCode.BE);
+    public static Locale NETHERLANDISH = of(LanguageCode.nl, Country.of(NL));
+    public static Locale FLEMISH       = of(LanguageCode.nl, Country.of(BE));
+    public static Locale UNDETERMINED  = of(LanguageAlpha3Code.und);
 
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
@@ -38,12 +42,30 @@ public class Locales {
         DEFAULT.remove();
     }
 
-    public static Locale of(LanguageCode lc, CountryCode code) {
-        return new Locale(lc.name(), code.getAlpha2());
+    public static Locale of(LanguageCode lc, Country  code) {
+        return new Locale(lc.name(), code.getCode());
     }
 
     public static Locale of(LanguageCode lc) {
         return new Locale(lc.name());
+    }
+
+
+    public static Locale of(LanguageAlpha3Code lc) {
+        LanguageCode alpha2 = lc.getAlpha2();
+        if (alpha2 != null){
+            return of(alpha2);
+        } else {
+            return new Locale(lc.name());
+        }
+    }
+    public static Locale of(LanguageAlpha3Code lc, Country code) {
+        LanguageCode alpha2 = lc.getAlpha2();
+        if (alpha2 != null){
+            return of(alpha2, code);
+        } else {
+            return new Locale(lc.name(), code.getCode());
+        }
     }
 
     public static Locale ofString(String s) {
