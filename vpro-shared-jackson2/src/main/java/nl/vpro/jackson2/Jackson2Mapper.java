@@ -27,12 +27,12 @@ public class Jackson2Mapper extends ObjectMapper {
 
     private static boolean loggedAboutAvro = false;
 
-    public static final Jackson2Mapper INSTANCE = new Jackson2Mapper();
-    public static final Jackson2Mapper LENIENT = new Jackson2Mapper();
-    public static final Jackson2Mapper STRICT = new Jackson2Mapper();
-    public static final Jackson2Mapper PRETTY = new Jackson2Mapper();
-    public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper();
-    public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper();
+    public static final Jackson2Mapper INSTANCE = new Jackson2Mapper("instance");
+    public static final Jackson2Mapper LENIENT = new Jackson2Mapper("lenient");
+    public static final Jackson2Mapper STRICT = new Jackson2Mapper("strict");
+    public static final Jackson2Mapper PRETTY = new Jackson2Mapper("pretty");
+    public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
+    public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
 
     private static ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
@@ -87,8 +87,11 @@ public class Jackson2Mapper extends ObjectMapper {
         return getLenientInstance().treeToValue(jsonNode, clazz);
     }
 
-    private Jackson2Mapper() {
+    private final String toString;
+
+    private Jackson2Mapper(String toString) {
         configureMapper(this);
+        this.toString = toString;
 
     }
 
@@ -135,5 +138,10 @@ public class Jackson2Mapper extends ObjectMapper {
             log.error(e.getMessage(), e);
             loggedAboutAvro = true;
         }
+    }
+
+    @Override
+    public String toString() {
+        return Jackson2Mapper.class.getSimpleName() + " (" + toString + ")";
     }
 }
