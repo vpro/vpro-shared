@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
@@ -116,7 +117,8 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
 
-
+        // For example normal support for Optional.
+        mapper.registerModule(new Jdk8Module());
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
             mapper.registerModule((com.fasterxml.jackson.databind.Module) avro.newInstance());
