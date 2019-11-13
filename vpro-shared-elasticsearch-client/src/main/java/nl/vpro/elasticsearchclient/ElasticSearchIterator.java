@@ -9,18 +9,18 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseException;
-import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.CountedIterator;
 import nl.vpro.util.Version;
@@ -63,6 +63,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     private T next;
     private boolean needsNext = true;
     private Collection<String> indices;
+    @Deprecated
     private Collection<String> types;
 
     @Getter
@@ -143,16 +144,31 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             .adapt(jn -> jn.get(Fields.SOURCE));
     }
 
+    @Deprecated
     public ObjectNode prepareSearch(Collection<String> indices, Collection<String> types) {
+        return _prepareSearch(indices, types);
+    }
+
+
+    @Deprecated
+    public ObjectNode prepareSearch(String indices, String... types) {
+        return _prepareSearch(Collections.singletonList(indices), Arrays.asList(types));
+    }
+
+
+    public ObjectNode prepareSearch(String... indices) {
+        return _prepareSearch(Arrays.asList(indices), null);
+    }
+
+    public ObjectNode prepareSearch(ElasticSearchIndex... indices) {
+        return _prepareSearch(Arrays.asList(indices).stream().map(ElasticSearchIndex::getIndexName).collect(Collectors.toList()), null);
+    }
+
+    protected  ObjectNode _prepareSearch(Collection<String> indices, Collection<String> types) {
         request = Jackson2Mapper.getInstance().createObjectNode();
         this.indices = indices == null ? Collections.emptyList() : indices;
         this.types = types == null ? Collections.emptyList() : types;
         return request;
-    }
-
-
-    public ObjectNode prepareSearch(String indices, String... types) {
-        return prepareSearch(Collections.singletonList(indices), Arrays.asList(types));
     }
 
     @Override

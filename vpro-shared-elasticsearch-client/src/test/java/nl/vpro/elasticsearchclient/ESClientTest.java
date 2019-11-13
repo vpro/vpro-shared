@@ -1,13 +1,15 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
 
@@ -20,7 +22,7 @@ public class ESClientTest {
 
 
     @Test
-    @Ignore("Connects to real server")
+    @Disabled("Connects to real server")
     public void test() {
 
         RestClient client = RestClient.builder(
