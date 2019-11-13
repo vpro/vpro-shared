@@ -77,13 +77,13 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
 
     private boolean search_type_scan = false;
 
-    private Version<Integer> esVersion = new Version<>(5);
+    private Version<Integer> esVersion = new Version<>(7);
 
     private Long totalSize = null;
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, Duration.ofMinutes(1), new Version<>(5), false, true);
+        this(client, adapt, Duration.ofMinutes(1), new Version<>(7), false, true);
     }
 
 
@@ -156,7 +156,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     }
 
 
-    public ObjectNode prepareSearch(String... indices) {
+    public ObjectNode prepareSearchOnIndices(String... indices) {
         return _prepareSearch(Arrays.asList(indices), null);
     }
 

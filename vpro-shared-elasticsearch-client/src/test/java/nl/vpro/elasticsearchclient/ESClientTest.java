@@ -34,7 +34,7 @@ public class ESClientTest {
             .client(client)
             .adapt(jsonNode -> jsonNode.get(Constants.Fields.ID).textValue())
             .build()) {
-            ObjectNode search = i.prepareSearch("apimedia", "program", "segment", "group");
+            ObjectNode search = i.prepareSearchOnIndices("apimedia");
             QueryBuilder.asc(search, "publishDate");
             ObjectNode query = search.with(Constants.QUERY);
             QueryBuilder.mustTerm(query, "workflow", "REVOKED");
