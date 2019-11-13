@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
  class AbstractParameterizedClassTest {
     @Nested
-    @ExtendWith({Browsers.class, Browsers2.class})
+    @ExtendWith({Browsers.class})
     class Base {
         int i;
         Base(int i) {

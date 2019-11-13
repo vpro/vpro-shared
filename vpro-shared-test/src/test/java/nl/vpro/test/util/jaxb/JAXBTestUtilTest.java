@@ -91,12 +91,12 @@ public class JAXBTestUtilTest {
 
     @Test
     public void testContainsFluentFails() {
-        assertThatThrownBy(() -> {
+        assertThatThrownBy(() ->
             assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='3'>\n" +
                 "            <value>bb</value>\n" +
                 "        <c>cc</c>\n" +
-                "</b>");
-        }).isInstanceOf(AssertionError.class);
+                "</b>"))
+            .isInstanceOf(AssertionError.class);
     }
 
 

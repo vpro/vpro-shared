@@ -19,6 +19,7 @@ public class ParameterizedClass implements  InvocationInterceptor, BeforeTestExe
     @Override
     public void interceptBeforeEachMethod(InvocationInterceptor.Invocation<Void> invocation,
                                           ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
+        log.info("Intercepting before {}", invocationContext);
         invocation.proceed();
 	}
 
@@ -31,6 +32,7 @@ public class ParameterizedClass implements  InvocationInterceptor, BeforeTestExe
 	@Override
     public void interceptTestMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext,
 			ExtensionContext extensionContext) throws Throwable {
+        log.info("Intercepting {}", invocationContext);
 		invocation.proceed();
 	}
 

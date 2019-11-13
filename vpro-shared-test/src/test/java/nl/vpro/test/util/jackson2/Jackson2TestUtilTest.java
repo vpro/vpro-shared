@@ -45,7 +45,7 @@ public class Jackson2TestUtilTest {
 
 
     @Test
-    public void roundTripAndSimilar() throws Exception {
+    public void roundTripAndSimilar() {
         Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'a'}");
     }
 
@@ -56,7 +56,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void roundTripAndSimilarValue() throws Exception {
+    public void roundTripAndSimilarValue() {
         Jackson2TestUtil.roundTripAndSimilarValue("a", "\"a\"");
     }
 

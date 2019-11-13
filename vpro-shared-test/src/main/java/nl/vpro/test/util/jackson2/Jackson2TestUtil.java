@@ -134,7 +134,7 @@ public class Jackson2TestUtil {
         return result;
     }
 
-    public static <T> T roundTripAndSimilarAndEquals(ObjectMapper mapper, T input, String expected) throws Exception {
+    public static <T> T roundTripAndSimilarAndEquals(ObjectMapper mapper, T input, String expected) {
         T result = roundTripAndSimilar(mapper, input, expected);
         assertThat(result).isEqualTo(input);
         return result;
@@ -176,7 +176,7 @@ public class Jackson2TestUtil {
     /**
      * Can be used if the input is not a stand alone json object.
      */
-    public static <T> T roundTripAndSimilarValue(T input, String expected) throws Exception {
+    public static <T> T roundTripAndSimilarValue(T input, String expected) {
         TestClass<T> embed = new TestClass<>(input);
         JavaType type = Jackson2Mapper.getInstance().getTypeFactory()
             .constructParametricType(TestClass.class, input.getClass());
