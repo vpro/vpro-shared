@@ -4,6 +4,7 @@
  */
 package nl.vpro.test.util.jackson2;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -94,14 +95,14 @@ public class Jackson2TestUtil {
      * </p>
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
      */
-    public static <T> T roundTripAndSimilar(T input, String expected) throws Exception  {
+    public static <T> T roundTripAndSimilar(T input, String expected) {
         return roundTripAndSimilar(MAPPER, input, expected);
     }
     public static <T> T roundTripAndSimilar(T input, JsonNode  expected) throws Exception  {
         return roundTripAndSimilar(MAPPER, input, expected);
     }
 
-    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected) throws Exception {
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected)  {
         return roundTripAndSimilar(mapper, input, expected,
             mapper.getTypeFactory().constructType(input.getClass()));
     }
@@ -121,7 +122,7 @@ public class Jackson2TestUtil {
      * <p>
      * Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.
      */
-    public static <T> T roundTripAndSimilarAndEquals(T input, String expected) throws Exception {
+    public static <T> T roundTripAndSimilarAndEquals(T input, String expected)  {
         T result = roundTripAndSimilar(input, expected);
         assertThat(result).isEqualTo(input);
         return result;
@@ -145,11 +146,12 @@ public class Jackson2TestUtil {
     }
 
 
-    protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference) throws Exception {
+    protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference) {
         return roundTripAndSimilar(MAPPER, input, expected, typeReference);
     }
 
-    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference) throws Exception {
+    @SneakyThrows
+    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference) {
         StringWriter originalWriter = new StringWriter();
         mapper.writeValue(originalWriter, input);
         String marshalled = originalWriter.toString();
