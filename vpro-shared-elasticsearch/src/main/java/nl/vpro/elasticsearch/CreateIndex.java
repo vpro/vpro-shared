@@ -5,20 +5,27 @@ package nl.vpro.elasticsearch;
  * @since 2.9
  */
 @lombok.Data
-@lombok.AllArgsConstructor
-@lombok.Builder(builderClassName = "Builder")
+
 public class CreateIndex {
 
-    private boolean useNumberPostfix;
+    private final boolean useNumberPostfix;
 
-    private boolean forReindex;
+    private final boolean forReindex;
 
-    private Runnable  callBack;
+    private final Runnable  callBack;
 
-    private boolean createAliases;
+    private final boolean createAliases;
 
-    private Integer shards;
+    private final Integer shards;
 
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
+    @lombok.Builder(builderClassName = "Builder")
+    public CreateIndex(boolean useNumberPostfix, boolean forReindex, Runnable callBack, Boolean createAliases, Integer shards) {
+        this.useNumberPostfix = useNumberPostfix;
+        this.forReindex = forReindex;
+        this.callBack = callBack;
+        this.createAliases = createAliases == null || createAliases;
+        this.shards = shards;
+    }
 }
