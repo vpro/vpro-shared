@@ -165,7 +165,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     }
 
     public ObjectNode prepareSearch(ElasticSearchIndex... indices) {
-        return _prepareSearch(Arrays.asList(indices).stream().map(ElasticSearchIndex::getIndexName).collect(Collectors.toList()), null);
+        return _prepareSearch(Arrays.stream(indices).map(ElasticSearchIndex::getIndexName).collect(Collectors.toList()), null);
     }
 
     protected  ObjectNode _prepareSearch(Collection<String> indices, Collection<String> types) {

@@ -17,6 +17,8 @@ public class CreateIndex {
 
     private boolean createAliases;
 
+    private Integer shards;
+
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
 }

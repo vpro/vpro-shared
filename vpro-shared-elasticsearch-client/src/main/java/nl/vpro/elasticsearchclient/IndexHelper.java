@@ -221,6 +221,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             index.put("refresh_interval", -1);
             index.put("number_of_replicas", 0);
         }
+        if (createIndex.getShards() != null) {
+            ObjectNode index = settings.with("settings").with("index");
+            index.put("number_of_shards", createIndex.getShards());
+        }
 
         if (mappings.size() == 1 && mappings.containsKey(DOC)) {
             JsonNode node  =  Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
@@ -356,6 +360,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         String typeString = String.join(",", types);
         if (typeString.length() > 0) {
             path.append("/").append(typeString);
+        } else {
+            //path.append("/_doc");
         }
         path.append("/_search");
         return post(path.toString(), request);
@@ -373,6 +379,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
             Request req = new Request("POST", path);
             req.setEntity(entity(request));
+            log.info("Posting to {}", path);
             return read(client().performRequest(req));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -867,7 +874,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         request.put("size", 0);
         ObjectNode response = search(request, types);
-        return response.get("hits").get("total").longValue();
+        log.info("Found {}", response);
+        JsonNode jsonNode = response.get("hits").get("total");
+        if (jsonNode.has("value")) {
+            // es 7
+            return jsonNode.get("value").longValue();
+        } else {
+            // es 5
+            return jsonNode.longValue();
+        }
     }
 
     /**
