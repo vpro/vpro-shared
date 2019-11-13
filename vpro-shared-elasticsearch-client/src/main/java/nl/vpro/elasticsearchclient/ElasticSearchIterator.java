@@ -155,6 +155,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
         return _prepareSearch(Collections.singletonList(indices), Arrays.asList(types));
     }
 
+    public ObjectNode prepareSearch(String index) {
+        return _prepareSearch(Collections.singletonList(index), null);
+    }
+
 
     public ObjectNode prepareSearchOnIndices(String... indices) {
         return _prepareSearch(Arrays.asList(indices), null);

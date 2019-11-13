@@ -117,6 +117,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             if (aliases == null || aliases.isEmpty()) {
                 aliases = elasticSearchIndex.getAliases();
             }
+            this.elasticSearchIndex = elasticSearchIndex;
         }
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
@@ -204,7 +205,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
 
-        if (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix()) {
+        if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.with("aliases");
             aliases.with(supplied);
             for (String alias : this.aliases) {
@@ -282,7 +283,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public void deleteIndex()  {
         try {
-            client().performRequest(new Request("DELETE", getIndexName()));
+            Response delete = client().performRequest(new Request("DELETE", getIndexName()));
+            log.info("{}", delete);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -290,7 +292,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public void clearIndex() {
         ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client());
-        i.prepareSearch(Collections.singleton(getIndexName()), null);
+        i.prepareSearch(getIndexName());
         List<Pair<ObjectNode, ObjectNode>> bulk = new ArrayList<>();
         while (i.hasNext()) {
             JsonNode node = i.next();
@@ -391,21 +393,22 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             log.debug("posting");
             Request req = new Request("POST", path);
             req.setEntity(entity(request));
-            client.performRequestAsync(req, listen(request.toString(), future, listeners));
+            client.performRequestAsync(req, listen(log, request.toString(), future, listeners));
             }
         );
         return future;
     }
 
     @SafeVarargs
-    protected final ResponseListener listen(
+    static protected final ResponseListener listen(
+        Logger log,
         @NonNull final String requestDescription,
         @NonNull final CompletableFuture<ObjectNode> future,
         @NonNull  Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
-                ObjectNode result = read(response);
+                ObjectNode result = read(log, response);
                 future.complete(result);
                 for (Consumer<ObjectNode> rl : listeners) {
                     rl.accept(result);
@@ -417,7 +420,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
                 if (exception instanceof ResponseException) {
                     ResponseException re = (ResponseException) exception;
                     Response response = re.getResponse();
-                    ObjectNode result = read(response);
+                    ObjectNode result = read(log, response);
                     for (Consumer<ObjectNode> rl : listeners) {
                         rl.accept(result);
                     }
@@ -566,7 +569,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync(new Request("DELETE", getIndexName() + "/" + type + "/" + encode(id)),
-            listen("delete " + type + "/" + id, future, listeners)
+            listen(log, "delete " + type + "/" + id, future, listeners)
         );
         return future;
     }
@@ -795,7 +798,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             Request req = new Request("POST", "_bulk");
             req.setEntity(bulkEntity(request));
 
-            writeJson(request);
+            writeJson(log, writeJsonDir, request);
             ObjectNode result = read(
                 client().performRequest(req)
             );
@@ -809,6 +812,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     @SafeVarargs
     public final CompletableFuture<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
+        return bulkAsync(log, writeJsonDir, client(), request, listeners);
+
+    }
+
+
+    @SafeVarargs
+    public static CompletableFuture<ObjectNode> bulkAsync(Logger log, File jsonDir, RestClient client, Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         if (request.size() == 0) {
             return CompletableFuture.completedFuture(null);
@@ -816,15 +826,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
         Request req = new Request("POST", "_bulk");
         req.setEntity(bulkEntity(request));
-        writeJson(request);
+        writeJson(log, jsonDir, request);
 
-        client().performRequestAsync(req,
-            listen("" + request.size() + " bulk operations", future, listeners)
+        client.performRequestAsync(req,
+            listen(log, "" + request.size() + " bulk operations", future, listeners)
         );
         return future;
     }
 
-    protected HttpEntity bulkEntity(Collection<Pair<ObjectNode, ObjectNode>> request) {
+    protected static HttpEntity bulkEntity(Collection<Pair<ObjectNode, ObjectNode>> request) {
         StringBuilder builder = new StringBuilder();
         for (Pair<ObjectNode, ObjectNode> n : request) {
             builder.append(n.getFirst());
@@ -1065,16 +1075,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         this.writeJsonDir = file;
     }
 
-    protected void writeJson(Collection<Pair<ObjectNode, ObjectNode>> requests) {
+    static protected void writeJson(Logger log, File writeJsonDir, Collection<Pair<ObjectNode, ObjectNode>> requests) {
         for (Pair<ObjectNode, ObjectNode> request: requests) {
             ObjectNode actionLine = request.getFirst();
             if (actionLine.has("index")) {
-                writeJson(actionLine.get("index").get(Fields.ID).textValue(), request.getSecond());
+                writeJson(log, writeJsonDir, actionLine.get("index").get(Fields.ID).textValue(), request.getSecond());
             }
         }
     }
 
-    protected void writeJson(String id, JsonNode jsonNode) {
+    static protected void writeJson(Logger log, File  writeJsonDir, String id, JsonNode jsonNode) {
         if (writeJsonDir != null) {
             File file = new File(writeJsonDir, id.replaceAll(File.separator, "_") + ".json");
             try {

@@ -15,6 +15,8 @@ public class CreateIndex {
 
     private Runnable  callBack;
 
+    private boolean createAliases;
+
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
 }
