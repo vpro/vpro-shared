@@ -1,13 +1,13 @@
 package nl.vpro.jackson2;
 
 import java.io.IOException;
+import java.util.Optional;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,11 +27,17 @@ public class Jackson2MapperTest {
         @XmlAttribute
         EnumValues enumValue;
 
+        @XmlElement
+        Optional<Integer> optional;
+
     }
     @Test
     public void read() throws IOException {
-        A a = Jackson2Mapper.getInstance().readValue("{'integer': 2}", A.class);
+        A a = Jackson2Mapper.getInstance().readValue("{'integer': 2 /* ignore comments */, 'optional': 3}", A.class);
         assertThat(a.integer).isEqualTo(2);
+        assertThat(a.optional).isPresent();
+        assertThat(a.optional.get()).isEqualTo(3);
+
     }
 
     @Test
@@ -56,5 +62,22 @@ public class Jackson2MapperTest {
     public void readUnknownEnumValueLenient() throws IOException {
         A a = Jackson2Mapper.getLenientInstance().readValue("{'enumValue': 'c'}", A.class);
         assertThat(a.enumValue).isNull();
+    }
+
+    @Test
+    public void write() throws JsonProcessingException {
+        A a = new A();
+        a.integer = 2;
+        a.optional = Optional.of(3);
+        assertThat(Jackson2Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2,\"optional\":3}");
+
+    }
+    @Test
+    public void writeWithEmptyOptional() throws JsonProcessingException {
+        A a = new A();
+        a.integer = 2;
+        a.optional = Optional.empty();
+        assertThat(Jackson2Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2}");
+
     }
 }

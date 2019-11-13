@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -105,20 +106,23 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
 
         mapper.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
-        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
         mapper.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
-        mapper.enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
         mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
-        mapper.registerModule(javaTimeModule);
+        mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
+        mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
+
+        mapper.registerModule(new JavaTimeModule());
         mapper.registerModule(new DateModule());
+        // For example normal support for Optional.
+        Jdk8Module jdk8Module = new Jdk8Module();
+        jdk8Module.configureAbsentsAsNulls(true);
+        mapper.registerModule(jdk8Module);
 
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
 
-        // For example normal support for Optional.
-        mapper.registerModule(new Jdk8Module());
+
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
             mapper.registerModule((com.fasterxml.jackson.databind.Module) avro.newInstance());
