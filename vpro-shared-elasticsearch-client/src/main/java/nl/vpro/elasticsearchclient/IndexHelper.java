@@ -379,7 +379,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
 
-    HttpEntity entity(JsonNode node) {
+    public static HttpEntity entity(JsonNode node) {
         return new NStringEntity(saveToString(node), ContentType.APPLICATION_JSON);
     }
 
@@ -679,7 +679,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         return get(type, id).map(jn -> jn.get(Fields.SOURCE));
     }
 
-    public ObjectNode read(Response response) {
+    public  ObjectNode read(Response response) {
+        return read(log, response);
+
+    }
+    public static ObjectNode read(Logger log, Response response) {
         try {
             HttpEntity entity = response.getEntity();
             return Jackson2Mapper.getLenientInstance()
@@ -833,7 +837,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         return new NStringEntity(builder.toString(), ContentType.APPLICATION_JSON);
     }
 
-    protected String saveToString(JsonNode jsonNode) {
+    static protected String saveToString(JsonNode jsonNode) {
         String value = jsonNode.toString();
         String replaced = value.replaceAll("\\p{Cc}", "");
         return replaced;
