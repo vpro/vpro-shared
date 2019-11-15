@@ -158,6 +158,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             ;
     }
 
+    public static IndexHelper.Builder of(String cat, ESClientFactory client, ElasticSearchIndex index) {
+        return IndexHelper.builder()
+            .log(LoggerFactory.getLogger(cat))
+            .client(client)
+            .elasticSearchIndex(index)
+            ;
+    }
     public IndexHelper mapping(String type, Supplier<String> mapping) {
         mappings.put(type, mapping);
         return this;
