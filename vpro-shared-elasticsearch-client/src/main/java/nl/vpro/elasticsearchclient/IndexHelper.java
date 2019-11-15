@@ -111,9 +111,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             if (settings == null) {
                 settings = () -> resourceToString(elasticSearchIndex.getSettingsResource());
             }
-            if (mappings == null) {
-                mappings  = elasticSearchIndex.mappingsAsMap();
-            }
+            this.mappings.putAll(elasticSearchIndex.mappingsAsMap());
             if (aliases == null || aliases.isEmpty()) {
                 aliases = elasticSearchIndex.getAliases();
             }
@@ -224,6 +222,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         if (createIndex.getShards() != null) {
             ObjectNode index = settings.with("settings").with("index");
             index.put("number_of_shards", createIndex.getShards());
+        }
+        if (mappings.isEmpty() && createIndex.isRequireMappings()) {
+            throw new IllegalStateException("No mappings provided in " + this);
         }
 
         if (mappings.size() == 1 && mappings.containsKey(DOC)) {

@@ -140,6 +140,7 @@ public class IndexHelper implements IndexHelperInterface<Client> {
     }
 
 
+    @Override
     public boolean checkIndex() {
         return  client().admin().indices().prepareExists(getIndexName()).execute().actionGet().isExists();
     }

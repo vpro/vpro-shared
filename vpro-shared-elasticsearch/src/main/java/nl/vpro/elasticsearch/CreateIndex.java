@@ -18,14 +18,23 @@ public class CreateIndex {
 
     private final Integer shards;
 
+    private final boolean requireMappings;
+
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
     @lombok.Builder(builderClassName = "Builder")
-    public CreateIndex(boolean useNumberPostfix, boolean forReindex, Runnable callBack, Boolean createAliases, Integer shards) {
+    private  CreateIndex(
+        boolean useNumberPostfix,
+        boolean forReindex,
+        Runnable callBack,
+        Boolean createAliases,
+        Integer shards,
+        Boolean requireMappings) {
         this.useNumberPostfix = useNumberPostfix;
         this.forReindex = forReindex;
         this.callBack = callBack;
         this.createAliases = createAliases == null || createAliases;
         this.shards = shards;
+        this.requireMappings = requireMappings == null || requireMappings;
     }
 }
