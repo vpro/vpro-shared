@@ -212,12 +212,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         }
 
         ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
-
-        if (createIndex.isForReindex()) {
-            //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
-            ObjectNode index = settings.with("settings").with("index");
-            index.put("refresh_interval", -1);
-            index.put("number_of_replicas", 0);
+        if (createIndex.isForReindex()){
+            forReindex(settings);
         }
         if (createIndex.getShards() != null) {
             ObjectNode index = settings.with("settings").with("index");
@@ -253,7 +249,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
     @SneakyThrows
-    public void reputSettings() {
+    public void reputSettings(boolean forReindex) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
         ObjectNode index = settings.with("settings").with("index");
@@ -263,6 +259,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         // remove stuff that cannot be updated
         index.remove("analysis");
         index.remove("number_of_shards");
+        if (forReindex) {
+            forReindex(settings);
+        }
         HttpEntity entity = entity(request);
         Request req = new Request("PUT", getIndexName() + "/_settings");
         req.setEntity(entity);
@@ -270,6 +269,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
         log.info("{}", response);
 
+
+    }
+
+    protected void forReindex(ObjectNode  settings) {
+        //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
+        ObjectNode index = settings.with("settings").with("index");
+        index.put("refresh_interval", -1);
+        index.put("number_of_replicas", 0);
 
     }
 
