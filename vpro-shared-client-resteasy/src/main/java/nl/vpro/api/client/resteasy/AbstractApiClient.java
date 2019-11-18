@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
@@ -376,9 +377,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     protected String getVersion(String prop, ClassLoader loader) {
         Properties properties = new Properties();
         try {
-            properties.load(loader.getResource("/maven.properties").openStream());
+            URL resource = loader.getResource("/maven.properties");
+            if (resource == null) {
+                log.warn("No maven.properties found");
+            } else {
+                properties.load(resource.openStream());
+            }
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            log.warn(e.getClass() + " " + e.getMessage());
         }
         return properties.getProperty(prop);
     }
