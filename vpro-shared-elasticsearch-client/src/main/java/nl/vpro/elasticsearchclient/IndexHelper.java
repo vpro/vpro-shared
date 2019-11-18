@@ -112,7 +112,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             }
             this.mappings.putAll(elasticSearchIndex.mappingsAsMap());
             if (aliases == null || aliases.isEmpty()) {
-                aliases = elasticSearchIndex.getAliases();
+                aliases = new ArrayList<>(elasticSearchIndex.getAliases());
+                if (! aliases.contains(elasticSearchIndex.getIndexName())) {
+                    aliases.add(elasticSearchIndex.getIndexName());
+                }
             }
             this.elasticSearchIndex = elasticSearchIndex;
         }
@@ -211,7 +214,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.with("aliases");
-            aliases.with(supplied);
             for (String alias : this.aliases) {
                 aliases.with(alias);
             }

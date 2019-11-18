@@ -22,6 +22,13 @@ public class CreateIndex {
 
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
+    public static final CreateIndex FOR_TEST = CreateIndex.builder()
+        .createAliases(false)
+        .useNumberPostfix(false)
+        .shards(1)
+        .build();
+
+
     @lombok.Builder(builderClassName = "Builder")
     private  CreateIndex(
         boolean useNumberPostfix,

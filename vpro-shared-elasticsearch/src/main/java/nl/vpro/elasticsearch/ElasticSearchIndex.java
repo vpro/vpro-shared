@@ -21,7 +21,9 @@ public class ElasticSearchIndex {
     private final String settingsResource;
     private final List<String> aliases;
 
-    protected ElasticSearchIndex(String indexName, String mappingResource, String... aliases) {
+    protected ElasticSearchIndex(
+        String indexName,
+        String mappingResource, String... aliases) {
         this(indexName, "/es7/setting/" + indexName + ".json", mappingResource, Arrays.asList(aliases));
     }
 
