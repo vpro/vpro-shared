@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
  *
  * @author arne
  * @version $Id$
+ * @deprecated uses apache configuration 1, which seems to be superseded by configuration2
  */
 public class PropertyConfigurationFactoryBean implements InitializingBean, FactoryBean {
 

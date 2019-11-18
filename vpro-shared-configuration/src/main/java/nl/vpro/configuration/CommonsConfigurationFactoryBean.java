@@ -17,7 +17,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.Properties
  * @see org.springframework.core.io.support.PropertiesLoaderSupport
  * @author Costin Leau
- *
+ * @deprecated uses apache configuration 1, which seems to be superseded by configuration2
  */
 public class CommonsConfigurationFactoryBean implements InitializingBean, FactoryBean<Object> {
 
