@@ -785,7 +785,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public Pair<ObjectNode, ObjectNode> deleteRequestWithRouting(String id, String routing) {
         Pair<ObjectNode, ObjectNode> request  = _deleteRequest(DOC, id);
-        request.getFirst().with("delete").put(Fields.ROUTING, routing);
+        request.getFirst().with("delete")
+            .put(Constants.ROUTING, routing);
         return request;
 
     }

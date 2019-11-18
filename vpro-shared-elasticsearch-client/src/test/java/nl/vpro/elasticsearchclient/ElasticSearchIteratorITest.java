@@ -36,18 +36,19 @@ public class ElasticSearchIteratorITest {
     IndexHelper helper;
 
     String index = "test-" + System.currentTimeMillis();
+
     @BeforeEach
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9212, "http"))
+            new HttpHost("localhost", 9200, "http"))
             .build();
 
         helper = IndexHelper.builder()
             .log(log)
             .client((e) -> client)
-            .settingsResource("setting.json")
-            .mappingResource("test.json")
+            .settingsResource("/setting.json")
+            .mappingResource("/test.json")
             .indexName(index)
             .build();
         log.info("Version: {}", helper.getVersionNumber());

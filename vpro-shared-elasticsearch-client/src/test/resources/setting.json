@@ -1,8 +1,5 @@
 {
     "index": {
-        "mapper": {
-            "dynamic": false
-        },
         "analysis": {
             "analyzer": {
                 "default": {

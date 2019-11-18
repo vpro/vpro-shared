@@ -67,6 +67,10 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     private Collection<String> types;
 
     @Getter
+    @Setter
+    private Collection<String> routing;
+
+    @Getter
     private Instant start;
 
     private Duration scrollContext;
@@ -80,6 +84,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     private Version<Integer> esVersion = new Version<>(7);
 
     private Long totalSize = null;
+
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
@@ -215,6 +220,9 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                     if (search_type_scan) {
                         post.addParameter("search_type", "scan");
                     }
+                    if (routing != null) {
+                        post.addParameter("routing", String.join(",", routing));
+                    }
                     Response res = client.performRequest(post);
                     response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
                 } catch (IOException ioe) {
@@ -227,7 +235,12 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                 }
                 scrollId = response.get(_SCROLL_ID).asText();
                 log.debug("Scroll id {}", scrollId);
-                totalSize = hits.get("total").longValue();
+                JsonNode total = hits.get("total");
+                if (total instanceof ObjectNode) {
+                    totalSize = total.get("value").longValue();
+                } else {
+                    totalSize = total.longValue();
+                }
                 if (totalSize == 0) {
                     hasNext = false;
                     needsNext = false;
