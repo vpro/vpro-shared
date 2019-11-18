@@ -112,8 +112,15 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
         mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
-        mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
-        mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
+        try {
+            mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
+            mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
+        } catch (NoClassDefFoundError noClassDefFoundError) {
+            log.warn(noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
+
+            mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+            mapper.enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
+        }
 
         mapper.registerModule(new JavaTimeModule());
         mapper.registerModule(new DateModule());
