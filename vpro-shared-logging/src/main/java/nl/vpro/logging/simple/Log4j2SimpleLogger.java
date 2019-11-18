@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.slf4j.event.Level;
 
 /**
- *  SimpleLogger that wraps {@link Logger}
+ *  SimpleLogger that wraps log4j2's {@link Logger}.
  * @author Michiel Meeuwissen
  * @since 2.9
  */
