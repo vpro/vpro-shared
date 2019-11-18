@@ -36,6 +36,7 @@ public class Constants {
     public static final String TYPE = "type";
     public static final String ID  = "id";
     public static final String PARENT  = "parent";
+    public static final String ROUTING  = "routing";
 
     public static final String INDEX = "index";
 

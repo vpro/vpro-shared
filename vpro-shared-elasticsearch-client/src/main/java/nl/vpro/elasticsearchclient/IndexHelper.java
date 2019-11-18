@@ -38,7 +38,6 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
  * @author Michiel Meeuwissen
  * @since 0.24
  */
-@ToString
 @Getter
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient> {
@@ -741,8 +740,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
     public Pair<ObjectNode, ObjectNode> indexRequestWithRouting(String id, Object o, String routing) {
-        Pair<ObjectNode, ObjectNode> request = _indexRequest(DOC, id, o);
-        request.getFirst().with(Constants.INDEX).put(Fields.ROUTING, routing);
+        Pair<ObjectNode, ObjectNode> request =
+            _indexRequest(DOC, id, o);
+        request.getFirst()
+            .with(Constants.INDEX)
+            .put(Constants.ROUTING, routing);
         return request;
     }
 
@@ -1103,6 +1105,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             }
         }
         this.writeJsonDir = file;
+    }
+
+    @Override
+    public String toString() {
+        return "IndexHelper{" +
+            "indexName=" + indexNameSupplier.get() +
+            ", aliases=" + aliases +
+            ", writeJsonDir=" + writeJsonDir +
+            ", elasticSearchIndex=" + elasticSearchIndex +
+            '}';
     }
 
     static protected void writeJson(Logger log, File writeJsonDir, Collection<Pair<ObjectNode, ObjectNode>> requests) {
