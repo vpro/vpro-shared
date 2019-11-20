@@ -176,6 +176,26 @@ public abstract class Windowed<T> {
         }
     }
 
+    /**
+     * Returns the current duration of the complete window
+     * If we are warming up, then this will be the time since we started.
+     * Otherwise only the current bucket is 'warming up', and the
+     * relevant duration will be less than the configured 'window', but more than
+     * the given window minus the duration of one bucket.
+     */
+    public Duration getRelevantDuration() {
+        shiftBuckets();
+        if (isWarmingUp()) {
+            return Duration.between(start, Instant.now());
+        } else {
+            return Duration.ofMillis(
+                (buckets.length -1) * bucketDuration // archived buckets (all but one, the current bucket)
+                    +
+                    System.currentTimeMillis() - currentBucketTime // current bucket is not yet complete
+            );
+        }
+    }
+
     @Override
     public String toString() {
         return getStart() + " - " + getStart().plus(getTotalDuration()) + " (" + getBucketCount() + " buckets)" ;
