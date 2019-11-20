@@ -602,7 +602,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
      */
     @Deprecated
     public Optional<JsonNode> get(Enum<?> type, String id) {
-        return _get(type.name(), id);
+        return _get(type.name(), id, null);
     }
 
     /**
@@ -610,19 +610,28 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
      */
     @Deprecated
     public  Optional<JsonNode> get(String type, String id){
-        return _get(type, id);
+        return _get(type, id, null);
     }
     public  Optional<JsonNode> get(String id){
-        return _get(DOC, id);
+        return _get(DOC, id, null);
     }
 
-    protected Optional<JsonNode> _get(String type, String id){
+    public  Optional<JsonNode> getWithRouting(String id, String routing){
+        return _get(DOC, id, routing);
+    }
+
+    protected Optional<JsonNode> _get(String type, String id, String routing) {
         try {
+            Request get = new Request("GET", getIndexName() + "/" + type + "/" + encode(id));
+            if (routing != null){
+                get.addParameter("routing", routing);
+            }
             Response response = client()
-                .performRequest(new Request("GET", getIndexName() + "/" + type + "/" + encode(id)));
+                .performRequest(get);
+
             return Optional.of(read(response));
         } catch (ResponseException re) {
-            if (re.getResponse().getStatusLine().getStatusCode() >= 500) {
+            if (re.getResponse().getStatusLine().getStatusCode() >= 400) {
                 log.error(re.getMessage(), re);
             } else {
                 log.debug(re.getMessage());
