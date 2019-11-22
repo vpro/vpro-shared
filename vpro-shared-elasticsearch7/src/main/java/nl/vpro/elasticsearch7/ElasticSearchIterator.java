@@ -1,20 +1,22 @@
 package nl.vpro.elasticsearch7;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.util.CountedIterator;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.search.SearchHit;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.elasticsearch.action.ActionFuture;
+import org.elasticsearch.action.search.*;
+import org.elasticsearch.client.*;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.search.SearchHit;
+
+import nl.vpro.util.CountedIterator;
+
 /**
  * A wrapper around the Elastic Search scroll interface.
-
+ *
  * @author Michiel Meeuwissen
  * @since 0.47
  */
@@ -121,6 +123,18 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Override
     public Long getCount() {
         return count;
+    }
+
+
+    @Override
+    public void close()  {
+        if (response != null && response.getScrollId() != null) {
+            ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+            clearScrollRequest.addScrollId(response.getScrollId());
+            ActionFuture<ClearScrollResponse> clearScrollResponseActionFuture = client.clearScroll(clearScrollRequest);
+        } else {
+            log.debug("no need to close");
+        }
     }
 
 }
