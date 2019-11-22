@@ -21,6 +21,9 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
         }
     }
 
+    /**
+     * @since 2.9
+     */
     static <T> CloseableIterator<T> empty() {
         return new CloseableIterator<T>() {
             @Override
@@ -36,9 +39,21 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
             }
         };
     }
+
+    /**
+     * <p>Morphs an existing {@link Iterator} into a {@link CloseableIterator}.</p>
+     *
+     * <p>
+     * It it is already a {@link CloseableIterator} it will be returned unchanged.
+     * If it implements {@link AutoCloseable} then its {@link AutoCloseable#close()} method will be called.
+     * If not then the {@link #close()} method will do nothing.
+     * </p>
+     *
+     * @since 2.9
+     */
     @SuppressWarnings("unchecked")
     static <T> CloseableIterator<T> of(final Iterator<T> iterator) {
-        if (iterator instanceof CloseableIterator) {
+         if (iterator instanceof CloseableIterator) {
             return (CloseableIterator) iterator;
         } else {
             return  new CloseableIterator<T>() {
