@@ -46,6 +46,7 @@ public class FileCachingInputStream extends InputStream {
     private final Path tempFile;
     private final boolean deleteTempFile;
     private final InputStream tempFileInputStream;
+    private boolean closed = false;
     private long count = 0;
     static int openStreams = 0;
 
@@ -292,33 +293,50 @@ public class FileCachingInputStream extends InputStream {
                 return readFromFile(b);
             }
         } catch (IOException ioe) {
-            close();
+            if (! closed) {
+                close();
+            }
             throw ioe;
         }
     }
 
     @Override
-    public synchronized void close() throws IOException {
-        if (this.tempFileInputStream != null) {
-            this.tempFileInputStream.close();
-            openStreams--;
-        }
-        if (copier != null) {
-            // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
-            if (copier.interrupt()) {
-                log.info("Interrupted {}", copier);
-            }
-        }
-        if (tempFileInputStream != null) {
-            if (tempFile != null && this.deleteTempFile) {
-                if (Files.deleteIfExists(tempFile)) {
-                    log.debug("Deleted {}", tempFile);
-                } else {
-                    //   openOptions.add(StandardOpenOption.DELETE_ON_CLOSE); would have arranged that!
-                    log.debug("Could not delete because didn't exists any more {}", tempFile);
+    public  void close() throws IOException {
+
+        if (! closed) {
+            synchronized(this) {
+                if (closed) {
+                    log.debug("Closed by other thread in the mean time");
                 }
+
+                if (this.tempFileInputStream != null) {
+                    this.tempFileInputStream.close();
+                    openStreams--;
+                }
+                if (copier != null) {
+                    // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
+                    if (copier.interrupt()) {
+                        log.info("Interrupted {}", copier);
+                    }
+                }
+                if (tempFileInputStream != null) {
+                    if (tempFile != null && this.deleteTempFile) {
+                        if (Files.deleteIfExists(tempFile)) {
+                            log.debug("Deleted {}", tempFile);
+                        } else {
+                            //   openOptions.add(StandardOpenOption.DELETE_ON_CLOSE); would have arranged that!
+                            log.debug("Could not delete because didn't exists any more {}", tempFile);
+                        }
+                    }
+                }
+                closed = true;
             }
+        } else {
+            log.debug("Closed already");
         }
+    }
+    public boolean isClosed() {
+        return closed;
     }
 
     @Override

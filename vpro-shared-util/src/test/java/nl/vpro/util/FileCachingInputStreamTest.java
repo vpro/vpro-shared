@@ -85,12 +85,15 @@ public class FileCachingInputStreamTest {
                     .batchSize(3)
                     .batchConsumer((f, c) -> {
                         if (c.getCount() > 300) {
-                            try {
-                                f.close();
-                            } catch (IOException e) {
-                                log.error(e.getMessage(), e);
+                            // randomly close the file
+                            // this should be dealt with gracefully
+                            if (! f.isClosed()) {
+                                try {
+                                    f.close();
+                                } catch (IOException e) {
+                                    log.error(e.getMessage(), e);
+                                }
                             }
-
                         }
                     })
                     .input(new ByteArrayInputStream(MANY_BYTES))
@@ -106,7 +109,8 @@ public class FileCachingInputStreamTest {
                     out.write(buffer, 0, r);
                 }
             }
-        }).isInstanceOf(IOException.class);
+        }).isInstanceOf(IOException.class)
+            .hasMessageContaining("Stream closed");
         assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
 
 
