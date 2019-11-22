@@ -1,16 +1,14 @@
 package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 
 /**
  * At VPRO we use an convention for configuring web-application using property-files.
@@ -38,13 +36,19 @@ public class ConfigUtils {
 
     /**
      * Given a list of config file names, returns an array of resources representing it.
-     * For every entry this return a 'classpath' url and a file in user.home/conf
+     * For every entry this returns two 'classpath' urls (the original one, and one which could be present in your own project) and a file in user.home/conf
      * @return An array twice the size of the input arguments
      */
     public static String[] getConfigFilesInHome(String... configFiles) {
         return Stream.concat(
-            Arrays.stream(configFiles).map(c -> "classpath:/" + c),
-            Arrays.stream(configFiles).map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
+            Arrays.stream(configFiles)
+                .map(c -> Stream.of(
+                    "classpath:/" + c,
+                    "classpath:/override-" + c))
+                .flatMap(s -> s)
+            ,
+            Arrays.stream(configFiles)
+                .map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)
         ).toArray(String[]::new);
     }
 
