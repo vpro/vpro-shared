@@ -9,13 +9,10 @@ import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 /**
@@ -33,13 +30,10 @@ public class FileCachingInputStreamTest {
             System.arraycopy(HELLO, 0, MANY_BYTES, i * HELLO.length, HELLO.length);
         }
     }
-    @Rule
-    public TestName name = new TestName();
 
-
-    @Before
-    public void before() {
-        log.info("-----{}. Interrupted {}", name.getMethodName(), Thread.interrupted());
+    @BeforeEach
+    public void before(TestInfo testInfo) {
+        log.info("-----{}. Interrupted {}", testInfo.getTestMethod().get().getName(), Thread.interrupted());
         FileCachingInputStream.openStreams = 0;
     }
 
@@ -81,36 +75,38 @@ public class FileCachingInputStreamTest {
     }
 
 
-    @Test(expected = IOException.class)
-    public void testReadFileGetsBroken() throws IOException {
-        try (
-            FileCachingInputStream inputStream = FileCachingInputStream
-                .builder()
-                .outputBuffer(2)
-                .batchSize(3)
-                .batchConsumer((f, c) -> {
-                    if (c.getCount() > 300) {
-                        try {
-                            f.close();
-                        } catch (IOException e) {
-                            log.error(e.getMessage(), e);
+    @Test
+    public void testReadFileGetsBroken()  {
+        assertThatThrownBy(() -> {
+            try (
+                FileCachingInputStream inputStream = FileCachingInputStream
+                    .builder()
+                    .outputBuffer(2)
+                    .batchSize(3)
+                    .batchConsumer((f, c) -> {
+                        if (c.getCount() > 300) {
+                            try {
+                                f.close();
+                            } catch (IOException e) {
+                                log.error(e.getMessage(), e);
+                            }
+
                         }
+                    })
+                    .input(new ByteArrayInputStream(MANY_BYTES))
+                    .initialBuffer(4)
+                    .startImmediately(true)
+                    .build()) {
 
-                    }
-                })
-                .input(new ByteArrayInputStream(MANY_BYTES))
-                .initialBuffer(4)
-                .startImmediately(true)
-                .build()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            int r;
-            byte[] buffer = new byte[10];
-            while ((r = inputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, r);
+                int r;
+                byte[] buffer = new byte[10];
+                while ((r = inputStream.read(buffer)) != -1) {
+                    out.write(buffer, 0, r);
+                }
             }
-        }
+        }).isInstanceOf(IOException.class);
         assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
 
 
@@ -148,7 +144,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(MANY_BYTES))
                 .initialBuffer(4)
                 .startImmediately(false)
-                .build();
+                .build()
         ) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -264,7 +260,7 @@ public class FileCachingInputStreamTest {
                 .initialBuffer(4)
                 .startImmediately(false)
                 .noProgressLogging()
-                .build();) {
+                .build()) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -282,7 +278,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(2048)
-                .build();) {
+                .build()) {
 
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -301,7 +297,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(1)
                 .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(HELLO.length)
-                .build();) {
+                .build()) {
 
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -321,7 +317,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(1)
                 .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(4)
-                .build();) {
+                .build()) {
 
             long count = inputStream.waitForBytesRead(10);
             log.info("Found {}", count);
@@ -373,7 +369,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void performance() throws IOException {
         Instant now = Instant.now();
         try (
@@ -392,7 +388,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void verify() throws IOException {
         Instant now = Instant.now();
         try (
@@ -416,7 +412,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void performanceBenchmark() throws IOException {
         Instant now = Instant.now();
         try (
@@ -432,7 +428,7 @@ public class FileCachingInputStreamTest {
 
 
     @Test
-    @Ignore
+    @Disabled
     public void testLarge() throws IOException {
         Instant now = Instant.now();
         try (
