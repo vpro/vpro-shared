@@ -7,6 +7,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -149,7 +150,7 @@ public class Copier implements Runnable, Closeable {
         if (future != null) {
             throw new IllegalStateException(logPrefix() + "Already running");
         }
-        future = ThreadPools.copyExecutor.submit(this);
+        future = ForkJoinPool.commonPool().submit(this);
         return this;
     }
 
