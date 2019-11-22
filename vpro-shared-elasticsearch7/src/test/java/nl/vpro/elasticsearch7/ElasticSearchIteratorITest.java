@@ -28,12 +28,13 @@ public class ElasticSearchIteratorITest {
 
 
     @Test
-    public void test() {
-        ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, SearchHit::getSourceAsMap);
-        i.prepareSearch("apimedia");
-        while(i.hasNext()) {
-            String mid = String.valueOf(i.next().get("mid"));
-            System.out.println("" + i.getCount() + "/" + i.getTotalSize().orElse(null) + " " + mid);
+    public void test() throws Exception {
+        try (ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, SearchHit::getSourceAsMap)) {
+            i.prepareSearch("apimedia");
+            while(i.hasNext()) {
+                String mid = String.valueOf(i.next().get("mid"));
+                System.out.println("" + i.getCount() + "/" + i.getTotalSize().orElse(null) + " " + mid);
+            }
         }
      }
 }
