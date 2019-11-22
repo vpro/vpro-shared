@@ -311,12 +311,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
     public void clearIndex() {
-        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client());
-        i.prepareSearch(getIndexName());
         List<Pair<ObjectNode, ObjectNode>> bulk = new ArrayList<>();
-        while (i.hasNext()) {
-            JsonNode node = i.next();
-            bulk.add(deleteRequest(node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText()));
+        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client())) {
+            i.prepareSearch(getIndexName());
+
+            while (i.hasNext()) {
+                JsonNode node = i.next();
+                bulk.add(deleteRequest(node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText()));
+            }
         }
         if (bulk.size() > 0) {
             bulk(bulk);
