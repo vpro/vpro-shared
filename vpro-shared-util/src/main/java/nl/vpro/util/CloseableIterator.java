@@ -36,7 +36,8 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
             }
         };
     }
-    static <T> CloseableIterator of(final Iterator<T> iterator) {
+    @SuppressWarnings("unchecked")
+    static <T> CloseableIterator<T> of(final Iterator<T> iterator) {
         if (iterator instanceof CloseableIterator) {
             return (CloseableIterator) iterator;
         } else {
