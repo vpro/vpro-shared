@@ -17,7 +17,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;;
  * @since 3.1
  */
 @Slf4j
-public class MaxOffsetIterator<T> implements AutoCloseable, Iterator<T> {
+public class MaxOffsetIterator<T> implements CloseableIterator<T> {
 
 
     private final Iterator<T> wrapped;
