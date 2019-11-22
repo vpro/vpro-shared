@@ -34,6 +34,9 @@ public class ElasticSearchIteratorITest {
             while(i.hasNext()) {
                 String mid = String.valueOf(i.next().get("mid"));
                 System.out.println("" + i.getCount() + "/" + i.getTotalSize().orElse(null) + " " + mid);
+                if (i.getCount() >= 100) {
+                    break;
+                }
             }
         }
      }

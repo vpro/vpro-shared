@@ -132,6 +132,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
             clearScrollRequest.addScrollId(response.getScrollId());
             ActionFuture<ClearScrollResponse> clearScrollResponseActionFuture = client.clearScroll(clearScrollRequest);
+            log.debug("{}", clearScrollResponseActionFuture);
         } else {
             log.debug("no need to close");
         }
