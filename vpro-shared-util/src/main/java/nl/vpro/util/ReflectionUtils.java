@@ -32,8 +32,18 @@ import static nl.vpro.util.ReflectionUtils.ResultAction.SET;
 @Slf4j
 public class ReflectionUtils {
 
+    /**
+     * A normal 'bean' like setter of a property. The property 'title' is set by {@code setTitle(String}}
+     */
     public static final Function<String, String> SETTER = k -> "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    /**
+     * A normal 'bean' like getter of a property. The property 'title' is gotten by {@code getTitle()}
+     */
     public static final Function<String, String> GETTER = k -> "get" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+
+     /**
+     * A builder like setter of a property. The property 'title' is set by {@code title(String)}
+     */
     public static final Function<String, String> IDENTITY = k -> k;
 
 
@@ -41,16 +51,23 @@ public class ReflectionUtils {
      * Sets a certain property value in an object using reflection
      * @return A {@link Result} object describing what happened
      */
-
     public static Result setProperty(Object instance, String key, Object value) {
-        return setProperty(instance, key, Arrays.asList(SETTER.apply(key), IDENTITY.apply(key)), value);
+        return setProperty(
+            instance,
+            key,
+            Arrays.asList(SETTER.apply(key), IDENTITY.apply(key)), value);
     }
 
     /**
      * Configure an instance using a map of properties.
-     * @param setterName How, given a property name the setter methods must be calculated.
+     * @param setterName How, given a property name, the setter methods must be calculated.
+     *                   This is list of functions to convert the name of a property to a setter-method.
+     *
      */
-    public static <T> T  configured(T instance, Map<String, String> properties, Collection<Function<String, String>> setterName) {
+    public static <T> T  configured(
+        T instance,
+        Map<String, String> properties,
+        Collection<Function<String, String>> setterName) {
         log.debug("Configuring with {}", properties);
         final Set<String> found = new HashSet<>();
         final Set<String> notfound = new HashSet<>();
@@ -73,9 +90,11 @@ public class ReflectionUtils {
     }
 
     /**
-     * Configure an instance using a map of properties.
+     * Configure an instance using a map of properties. Properties are only set if they are in the given instance still {@code null}.
      *
-     * @param setterName How, given a property name the setter methods must be calculated.
+     * @param setterName How, given a property name, the setter methods must be calculated.
+     * @param getterName How, given a property name, the getter methods must be calculated. Needed to check if the current value indeed is still {@code null}
+     *
      */
     public static <T> T configureIfNull(@NonNull T instance,
                                         @NonNull Map<String, String> properties,
@@ -110,13 +129,19 @@ public class ReflectionUtils {
 
 
     /**
-     * Defaulting version of {@link #configured(Object, Map, Collection)}. Using {@link #SETTER}, {@link #IDENTITY} for the setter discovery.
+     * Defaulting version of {@link #configured(Object, Map, Collection)}.
+     * Using {@link #SETTER}, {@link #IDENTITY} for the setter discovery, which means that normal bean like setters and builder pattern setters are supported.
+     *
+     * E.g. if the given properties contain 'title=foo bar' then the code will try {@code setTitle("foo bar")}, or if this method does not exist {@code title("foo bar"}}
 
      */
     public static <T> T configured(T instance, Map<String, String> properties) {
         return configured(instance, properties, Arrays.asList(SETTER, IDENTITY));
     }
 
+    /**
+     * Defaulting version of {@link #configureIfNull(Object, Map, Collection, Collection)} Using {@link #SETTER}, {@link #IDENTITY} for the setter discovery, and {@link #GETTER}, {@link #IDENTITY} for getter.
+     */
     public static <T> T configureIfNull(T instance, Map<String, String> properties) {
         return configureIfNull(instance, properties,
             Arrays.asList(SETTER, IDENTITY),

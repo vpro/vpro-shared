@@ -15,11 +15,11 @@ import org.apache.commons.text.StringSubstitutor;
  * This boils down to a fall back mechanism:
  * <ol>
  *     <li>Look in {@code {user.home}/conf/<application name>.properties}</li>
+ *     <li>Look in {@code <classpath>/override-<applicationname>.properties}</li>
  *     <li>Look in {@code <classpath>/<applicationname>.properties}</li>
  * </ol>
  * This class provides utilities to arrange that. Also it is aware of {@link Env} (explicitely or via an 'env' property)  so that there is a consistent system for
  * varying properties across different OTAP deployments.
-
  *
  * I.e. it provides the means to calculate the actual values of the properties dependent on the available properties and environment.
  *
@@ -136,9 +136,12 @@ public class ConfigUtils {
 
 
 
-    // 'configured' methods
-    // These combine the above methods with methods in {@link ReflectionUtils}
-
+    /**
+     * Creates a configured instance of given class.
+     * @param env The OTAP environment to configure for (see {@link #filtered(Env, Map)}
+     * @param clazz The class to create an instance for
+     * @param config A map of configurations
+     */
     public static <T> T configured(Env env, Class<T> clazz, Map<String, String> config) {
         Map<String, String> properties = filtered(env, config);
         return ReflectionUtils.configured(clazz, properties);
@@ -211,10 +214,44 @@ public class ConfigUtils {
         }
     }
 
+    /**
+     * Defaulting version of {@link #filtered(Env, String, Map)}, with no prefix.
+     */
     public static Map<String, String> filtered(Env e, Map<String, String> properties) {
         return filtered(e, null, properties);
     }
 
+    /**
+     * Given a map of strings, and an {@link Env} create a new map of properties, filtered according to the following ideas.
+     *
+     * First of all, every propery in the source map may be postfixed with {@code .<env>}, this means that it represents the value for a certain environment. In the resulting map it shadows the value (if present) without this postfix.
+     *
+     * Every propery may also be prefixed with a prefix, which will be taken of. If the prefix does not match the prefix argument, the property will be filtered out the resulting map.
+     *
+     * E.g. a properties file like
+     * <pre>
+     *     systema.a.prod=x
+     *     systema.a.test=y
+     *     systema.a=z
+     *     systema.b.dev=8
+     *     systemb.b=7
+     *     systemb.a=5
+     *     systemb.foo=bar
+     * </pre>
+     *
+     * Filtered with arguments `env = {@link Env#DEV}` and prefix 'systema' this becomes
+     * <pre>
+     *     a=z
+     *     b=8
+     * </pre>
+     *
+     * The idea is that the resulting map can be fed to {@link ReflectionUtils#configured(Object, Map)}
+     *
+     * @param env
+     * @param prefix
+     * @param properties
+     * @return
+     */
     public static Map<String, String> filtered(final Env env, String prefix, Map<String, String> properties) {
         log.debug("Filtering{} for {}", prefix == null ? "" : prefix + " ", env);
         Map<String, String> result = new HashMap<>();

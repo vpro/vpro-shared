@@ -2,12 +2,10 @@ package nl.vpro.util;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 public class CallbackIteratorTest {
 
@@ -16,9 +14,9 @@ public class CallbackIteratorTest {
     public void test() {
         Runnable runnable = mock(Runnable.class);
         CallbackIterator<String> i = new CallbackIterator<>(Arrays.asList("A", "B").iterator(), runnable);
-        verifyZeroInteractions(runnable);
+        verifyNoInteractions(runnable);
         i.next();
-        verifyZeroInteractions(runnable);
+        verifyNoInteractions(runnable);
         i.next();
         verify(runnable).run();
         assertThat(i.hasNext()).isFalse();
