@@ -8,6 +8,41 @@
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
   <description>Bill of Materials of modules in vpro shared</description>
+  <url>https://github.com/vpro/vpro-shared</url>
+
+  <licenses>
+    <license>
+      <name>GPLv3</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>mihxil</id>
+      <name>Michiel Meeuwissen</name>
+      <email>michiel.meeuwissen+github@gmail.com</email>
+      <url>https://meeuw.org</url>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>Europe/Amsterdam</timezone>
+    </developer>
+    <developer>
+      <id>rico</id>
+      <name>Rico Jansen</name>
+      <timezone>Europe/Amsterdam</timezone>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://git@github.com/vpro/vpro-shared.git</connection>
+    <developerConnection>scm:git:git@github.com:vpro/vpro-shared.git</developerConnection>
+    <url>https://github.com/vpro/vpro-shared</url>
+    <tag>REL-2.9-SNAPSHOT</tag>
+  </scm>
+
 
   <properties>
 
