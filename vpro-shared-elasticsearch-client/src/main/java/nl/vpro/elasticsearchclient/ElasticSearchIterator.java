@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.CountedIterator;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -46,7 +46,7 @@ import static nl.vpro.elasticsearch.Constants.*;
  * @since 0.47
  */
 @Slf4j
-public class ElasticSearchIterator<T>  implements CountedIterator<T> {
+public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T> {
 
     private final Function<JsonNode, T> adapt;
     private final RestClient client;
@@ -172,6 +172,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     public ObjectNode prepareSearch(ElasticSearchIndex... indices) {
         return _prepareSearch(Arrays.stream(indices).map(ElasticSearchIndex::getIndexName).collect(Collectors.toList()), null);
     }
+
 
     protected  ObjectNode _prepareSearch(Collection<String> indices, Collection<String> types) {
         request = Jackson2Mapper.getInstance().createObjectNode();
@@ -330,6 +331,16 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             totalSize = hits.get("total").longValue();
         }
         return Optional.ofNullable(this.totalSize);
+    }
+
+
+    @Override
+    public Optional<String> getSizeQualifier() {
+        findNext();
+        if (hits != null) {
+            totalSize = hits.get("total").longValue();
+        }
+        return Optional.empty();
     }
 
 

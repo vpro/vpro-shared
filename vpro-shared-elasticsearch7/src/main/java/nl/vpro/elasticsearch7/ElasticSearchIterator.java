@@ -8,11 +8,11 @@ import java.util.function.Function;
 
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.search.*;
-import org.elasticsearch.client.*;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 
-import nl.vpro.util.CountedIterator;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 
 /**
  * A wrapper around the Elastic Search scroll interface.
@@ -21,7 +21,7 @@ import nl.vpro.util.CountedIterator;
  * @since 0.47
  */
 @Slf4j
-public class ElasticSearchIterator<T>  implements CountedIterator<T> {
+public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T> {
 
     final Function<SearchHit, T> adapt;
     final Client client;
@@ -118,6 +118,11 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     public Optional<Long> getSize() {
         findNext();
         return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits().value);
+    }
+
+    public Optional<String> getSizeQualifier() {
+        findNext();
+        return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits().relation.name());
     }
 
     @Override

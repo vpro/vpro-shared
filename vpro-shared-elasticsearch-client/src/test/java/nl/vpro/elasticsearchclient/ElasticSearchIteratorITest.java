@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
-@Disabled("Requires actual es connection")
+//@Disabled("Requires actual es connection")
 @Slf4j
 public class ElasticSearchIteratorITest {
 
