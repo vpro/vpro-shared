@@ -84,7 +84,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private Version<Integer> esVersion = new Version<>(7);
 
     private Long totalSize = null;
-
+    private TotalRelation totalRelation = TotalRelation.EQUAL_TO;
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
@@ -328,19 +328,32 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     public Optional<Long> getSize() {
         findNext();
         if (hits != null) {
-            totalSize = hits.get("total").longValue();
+            JsonNode total  = hits.get("total");
+            if (total.has("value")) {
+                totalSize = total.get("value").longValue();
+            } else {
+                totalSize = hits.get("total").longValue();
+            }
         }
         return Optional.ofNullable(this.totalSize);
     }
 
 
     @Override
-    public Optional<String> getSizeQualifier() {
+    public Optional<TotalRelation> getSizeQualifier() {
         findNext();
         if (hits != null) {
-            totalSize = hits.get("total").longValue();
+            JsonNode total  = hits.get("total");
+            if (total.has("relation")) {
+                String relation = total.get("relation").asText();
+                switch (relation) {
+                    case "eq": this.totalRelation = TotalRelation.EQUAL_TO;
+                    default:
+                        log.info("Unrecognized {}", relation);
+                }
+            }
         }
-        return Optional.empty();
+        return Optional.ofNullable(this.totalRelation);
     }
 
 
