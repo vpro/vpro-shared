@@ -22,5 +22,9 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-util</artifactId>
+    </dependency>
   </dependencies>
 </project>
