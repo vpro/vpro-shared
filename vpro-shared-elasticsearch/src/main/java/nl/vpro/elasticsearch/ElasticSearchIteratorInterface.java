@@ -10,6 +10,15 @@ import nl.vpro.util.CountedIterator;
  */
 public interface ElasticSearchIteratorInterface<T> extends CountedIterator<T> {
 
-        Optional<String> getSizeQualifier();
+
+    Optional<TotalRelation> getSizeQualifier();
+
+    enum TotalRelation {
+        EQUAL_TO,
+        GREATER_THAN_OR_EQUAL_TO
+    }
+
+
+
 
 }
