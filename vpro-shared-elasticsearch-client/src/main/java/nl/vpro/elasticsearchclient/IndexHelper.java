@@ -633,6 +633,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
             return Optional.of(read(response));
         } catch (ResponseException re) {
+            if (re.getResponse().getStatusLine().getStatusCode() == 404) {
+                return Optional.empty();
+            }
             if (re.getResponse().getStatusLine().getStatusCode() >= 400) {
                 log.error(re.getMessage(), re);
             } else {
