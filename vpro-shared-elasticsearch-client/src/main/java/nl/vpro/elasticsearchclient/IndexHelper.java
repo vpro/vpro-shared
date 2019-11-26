@@ -94,7 +94,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(
         Logger log,
-        ESClientFactory client,
+        @lombok.NonNull  ESClientFactory client,
         ElasticSearchIndex elasticSearchIndex,
         Supplier<String> indexNameSupplier,
         Supplier<String> settings,
