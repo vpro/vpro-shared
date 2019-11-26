@@ -1038,8 +1038,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             String index = jsonNode.get(Fields.INDEX).textValue();
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
-            int version = jsonNode.get("_version").intValue();
             if (found) {
+                int version = jsonNode.has(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : -1;
                 logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
             } else {
                 logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory, index, type, encode(id));
