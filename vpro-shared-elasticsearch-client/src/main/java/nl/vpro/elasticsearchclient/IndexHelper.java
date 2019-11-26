@@ -356,9 +356,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public ObjectNode search(ObjectNode request) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        StringBuilder path =  new StringBuilder((indexName == null ? "" : indexName));
-        path.append("/_search");
-        return post(path.toString(), request);
+        return post((indexName == null ? "" : indexName) + "/_search", request);
     }
 
     /**
@@ -425,7 +423,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
     @SafeVarargs
-    static protected final ResponseListener listen(
+    static protected ResponseListener listen(
         Logger log,
         @NonNull final String requestDescription,
         @NonNull final CompletableFuture<ObjectNode> future,
@@ -486,10 +484,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
         return post(
-            indexPath(
-                indexRequest.getFirst().get(Constants.TYPE).textValue(),
-                indexRequest.getFirst().get(Constants.ID).textValue(),
-                indexRequest.getFirst().get(Constants.PARENT).textValue()
+            _indexPath(
+                indexRequest.getFirst().get(TYPE).textValue(),
+                indexRequest.getFirst().get(ID).textValue(),
+                indexRequest.getFirst().get(PARENT).textValue()
             ),
             indexRequest.getSecond()
         );
@@ -525,7 +523,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
      */
     @Deprecated
     protected String indexPath(String type, String id, @Nullable  String parent) {
-        return _indexPath(DOC, id, null);
+        return _indexPath(type, id, parent);
     }
 
     protected String _indexPath(String type, String id, String parent) {
@@ -759,15 +757,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         Pair<ObjectNode, ObjectNode> request =
             _indexRequest(DOC, id, o);
         request.getFirst()
-            .with(Constants.INDEX)
-            .put(Constants.ROUTING, routing);
+            .with(INDEX)
+            .put(ROUTING, routing);
         return request;
     }
 
     private  Pair<ObjectNode, ObjectNode> _indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
-        ObjectNode index = actionLine.with(Constants.INDEX);
-        index.put(Fields.TYPE, type);
+        ObjectNode index = actionLine.with(INDEX);
+        if (! DOC.equals(type)) {
+            index.put(Fields.TYPE, type);
+        }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
 
@@ -802,7 +802,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public Pair<ObjectNode, ObjectNode> deleteRequestWithRouting(String id, String routing) {
         Pair<ObjectNode, ObjectNode> request  = _deleteRequest(DOC, id);
         request.getFirst().with("delete")
-            .put(Constants.ROUTING, routing);
+            .put(ROUTING, routing);
         return request;
 
     }
@@ -810,7 +810,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     protected Pair<ObjectNode, ObjectNode> _deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");
-        index.put(Fields.TYPE, type);
+        if (! DOC.equals(type)) {
+            index.put(Fields.TYPE, type);
+        }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
         return Pair.of(actionLine, null);
