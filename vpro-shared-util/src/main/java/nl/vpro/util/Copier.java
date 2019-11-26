@@ -3,11 +3,7 @@ package nl.vpro.util;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.ForkJoinPool;
+import java.io.*;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -110,13 +106,18 @@ public class Copier implements Runnable, Closeable {
                     batchConsumer.accept(this);
                 }
             }
+        } catch (IOException ioe) {
+            if (errorHandler != null) {
+                errorHandler.accept(this, ioe);
+            }
         } catch (Throwable t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
-                log.warn("{}Connector " + toString() + ": " + t.getClass() + " " + t.getMessage(), logPrefix());
+                log.warn("{}Connector {}\n{} {}", logPrefix(), toString(), t.getClass().getName(), t.getMessage());
             }
             if (errorHandler != null) {
                 errorHandler.accept(this, t);
             }
+
         } finally {
             synchronized (this) {
                 ready = true;
@@ -150,7 +151,7 @@ public class Copier implements Runnable, Closeable {
         if (future != null) {
             throw new IllegalStateException(logPrefix() + "Already running");
         }
-        future = ForkJoinPool.commonPool().submit(this);
+        future = ThreadPools.copyExecutor.submit(this);
         return this;
     }
 

@@ -316,7 +316,7 @@ public class FileCachingInputStream extends InputStream {
                 if (copier != null) {
                     // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
                     if (copier.interrupt()) {
-                        log.info("Interrupted {}", copier);
+                        log.debug("Interrupted {}", copier);
                     }
                 }
                 if (tempFileInputStream != null) {
