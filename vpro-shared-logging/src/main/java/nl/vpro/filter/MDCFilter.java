@@ -48,24 +48,25 @@ public class  MDCFilter implements Filter {
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response  = (HttpServletResponse) res;
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null) {
-                MDC.put(MDCConstants.USER_NAME, auth.getName());
-            }
-        } catch (Exception e) {
-            log.debug(e.getMessage());
-        }
-        String query = request.getQueryString();
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        MDC.put(MDCConstants.REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
-
-        String ipAddress = request.getHeader("X-FORWARDED-FOR");
-        if (ipAddress == null) {
-            ipAddress = request.getRemoteAddr();
-        }
-        MDC.put(MDCConstants.REMOTE_ADDR, ipAddress);
         try {
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null) {
+                    MDC.put(MDCConstants.USER_NAME, auth.getName());
+            }
+            } catch (Exception e) {
+                log.debug(e.getMessage());
+            }
+            String query = request.getQueryString();
+            MDC.put(MDCConstants.REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
+
+            String ipAddress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null) {
+                ipAddress = request.getRemoteAddr();
+            }
+            MDC.put(MDCConstants.REMOTE_ADDR, ipAddress);
+
             chain.doFilter(req, res);
         } finally {
             // access logging...
