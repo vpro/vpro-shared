@@ -120,9 +120,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits().value);
     }
 
-    public Optional<String> getSizeQualifier() {
+    @Override
+    public Optional<TotalRelation> getSizeQualifier() {
         findNext();
-        return response == null ? Optional.empty() : Optional.of(response.getHits().getTotalHits().relation.name());
+        return response == null ? Optional.empty() : Optional.of(TotalRelation.valueOf(response.getHits().getTotalHits().relation.name()));
     }
 
     @Override
