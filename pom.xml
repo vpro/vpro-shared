@@ -662,16 +662,28 @@
       <id>vpro-nexus</id>
       <distributionManagement>
         <repository>
-          <id>nexus</id>
+          <id>nexusvpro</id>
           <name>Nexus releases</name>
           <url>http://nexus.vpro.nl/content/repositories/releases</url>
         </repository>
         <snapshotRepository>
-          <id>nexus</id>
+          <id>nexusvpro</id>
           <name>Nexus snapshots</name>
           <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
         </snapshotRepository>
       </distributionManagement>
+      <repositories>
+        <repository>
+          <id>nexusvpro</id>
+          <url>http://nexus.vpro.nl/content/groups/public</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
     </profile>
     <profile>
       <id>deploy</id>
