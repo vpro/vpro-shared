@@ -3,7 +3,7 @@ package nl.vpro.i18n;
 import java.util.*;
 import java.util.stream.Stream;
 
-import org.meeuw.i18n.Region;
+import org.meeuw.i18n.regions.Region;
 import org.meeuw.i18n.countries.Country;
 
 import com.neovisionaries.i18n.*;
