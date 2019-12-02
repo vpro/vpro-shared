@@ -6,7 +6,7 @@ env:
 jdk:
 - openjdk8
 sudo: true
-script: mvn --fail-never -T 1C -Pdeploy clean test deploy --settings .travis-settings.xml
+script: mvn --fail-never -T 1C -Pdeploy,sonatype clean test deploy --settings .travis-settings.xml
   -Dgpg.skip=true
 after_success:
 - bash <(curl -s https://codecov.io/bash)
