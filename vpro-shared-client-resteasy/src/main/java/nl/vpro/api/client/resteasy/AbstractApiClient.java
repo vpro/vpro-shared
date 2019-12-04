@@ -106,44 +106,46 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
     private boolean shutdown = false;
-    private boolean trustAll = false;
+    protected boolean trustAll = false;
 
-    Duration connectionRequestTimeout;
-    Duration connectTimeout;
-    Duration socketTimeout;
+    protected Duration connectionRequestTimeout;
+    protected Duration connectTimeout;
+    protected Duration socketTimeout;
 
-    private Integer maxConnections;
-    private Integer maxConnectionsPerRoute;
-    private Integer maxConnectionsNoTimeout;
-    private Integer maxConnectionsPerRouteNoTimeout;
+    protected Integer maxConnections;
+    protected Integer maxConnectionsPerRoute;
+    protected Integer maxConnectionsNoTimeout;
+    protected Integer maxConnectionsPerRouteNoTimeout;
 
-    Duration connectionInPoolTTL;
+    protected Duration connectionInPoolTTL;
     protected final Map<String, Counter> counter = new HashMap<>();
-    private Duration countWindow = Duration.ofHours(24);
-    private Integer bucketCount = 24;
+    protected Duration countWindow = Duration.ofHours(24);
+    protected Integer bucketCount = 24;
 
-    private Duration warnThreshold = Duration.ofMillis(100);
+    protected Duration warnThreshold = Duration.ofMillis(100);
 
-    private List<Locale> acceptableLanguages = new ArrayList<>();
+    protected List<Locale> acceptableLanguages = new ArrayList<>();
 
-    private MediaType accept;
+    protected MediaType accept;
 
-    private MediaType contentType;
+    protected MediaType contentType;
 
     private BrowserCache resteasyBrowserCache;
 
     private Instant initializationInstant = Instant.now();
 
-    private String mbeanName = null;
+    protected String mbeanName = null;
+
+    protected Boolean registerMBean = false;
 
 
     @Getter
-    private Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
+    protected  Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
 
 
     protected ClassLoader classLoader;
 
-    private final String userAgent;
+    protected final String userAgent;
 
     protected AbstractApiClient(
         String baseUrl,
@@ -192,7 +194,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
         this.userAgent = userAgent == null ? getUserAgent(getClass().getSimpleName(), getVersion("vpro.shared.version", this.classLoader)) : userAgent;
         log.info("Using class loader {}, user agent {}", this.classLoader, this.userAgent);
-        if (registerMBean == null || registerMBean) {
+        this.registerMBean = registerMBean;
+        if (this.registerMBean == null || this.registerMBean) {
             registerBean();
         }
     }
