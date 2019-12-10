@@ -618,7 +618,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
 
     public  List<Optional<JsonNode>> mget(String... ids){
-        if (ids.length == 0) {
+        return mget(Arrays.asList(ids));
+
+    }
+    public  List<Optional<JsonNode>> mget(Collection<String> ids){
+        if (ids.size() == 0) {
             return Collections.emptyList();
         }
         Request get = new Request("GET", getIndexName() + "/_mget");

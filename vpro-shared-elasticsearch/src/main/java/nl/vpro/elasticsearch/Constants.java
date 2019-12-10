@@ -29,6 +29,11 @@ public class Constants {
     public static final String SCROLL = "scroll";
 
     public static final String QUERY = "query";
+    public static final String VERSION = "version";
+    public static final String SORT = "sort";
+    public static final String BOOL = "bool";
+    public static final String RANGE = "range";
+
 
     /**
      * Deprecated if not {@link #DOC}
@@ -37,7 +42,6 @@ public class Constants {
     public static final String ID  = "id";
     public static final String PARENT  = "parent";
     public static final String ROUTING  = "routing";
-
     public static final String INDEX = "index";
 
     public static final String DOC = "_doc";
