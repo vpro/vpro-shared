@@ -35,9 +35,21 @@ public class QueryBuilder {
         ObjectNode clause = must.addObject();
         return clause;
     }
+    public static ObjectNode filter(ObjectNode query) {
+        ObjectNode bool = query.with("bool");
+        ArrayNode must = bool.withArray("filter");
+        ObjectNode clause = must.addObject();
+        return clause;
+    }
 
     public static ObjectNode mustTerm(ObjectNode query, String field, String value) {
         ObjectNode clause = must(query);
+        ObjectNode term = clause.with("term");
+        term.put(field, value);
+        return clause;
+    }
+    public static ObjectNode filterTerm(ObjectNode query, String field, String value) {
+        ObjectNode clause = filter(query);
         ObjectNode term = clause.with("term");
         term.put(field, value);
         return clause;

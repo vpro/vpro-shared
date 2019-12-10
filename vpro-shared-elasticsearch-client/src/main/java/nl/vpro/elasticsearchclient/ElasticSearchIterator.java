@@ -429,13 +429,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         }
     }
 
-    public Stream<T> stream() {
-        return StreamSupport.stream(
-            Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED),
-            false);
-
-    }
-
 
     public static class Builder<T> {
 

@@ -1,7 +1,8 @@
 package nl.vpro.util;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * An iterator that is also {@link AutoCloseable}.
@@ -74,6 +75,14 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
             };
         }
     }
+
+    default  Stream<T> stream() {
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED),
+            false);
+
+    }
+
 
 
 }
