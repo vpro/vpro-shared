@@ -32,7 +32,13 @@ public class Constants {
     public static final String VERSION = "version";
     public static final String SORT = "sort";
     public static final String BOOL = "bool";
+    public static final String MUST = "must";
+    public static final String SHOULD = "should";
     public static final String RANGE = "range";
+    public static final String TERM = "term";
+    public static final String FILTER = "filter";
+
+
 
 
     /**
