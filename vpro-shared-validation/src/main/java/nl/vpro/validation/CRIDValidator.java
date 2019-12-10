@@ -11,7 +11,7 @@ import javax.validation.ConstraintValidatorContext;
 
 public class CRIDValidator implements ConstraintValidator<CRID, String> {
 
-    private static Pattern CRID_PATTERN = Pattern.compile("(?i)crid://.*/.*");
+    public static final Pattern CRID_PATTERN = Pattern.compile("crid://.*/.*", Pattern.CASE_INSENSITIVE);
 
     @Override
     public void initialize(CRID crid) {
