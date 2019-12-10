@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -26,6 +26,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
+import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 
 /**
  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
@@ -88,7 +89,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, Duration.ofMinutes(1), new Version<>(7), false, true);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true);
     }
 
 
@@ -96,13 +97,14 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private ElasticSearchIterator(
         RestClient client,
         Function<JsonNode, T> adapt,
+        Class<T> adaptTo,
         Duration scrollContext,
         Version<Integer> esVersion,
         boolean _autoEsVersion,
         Boolean jsonRequests
 
     ) {
-        this.adapt = adapt;
+        this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
         this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
         if (_autoEsVersion && esVersion == null) {
@@ -125,6 +127,38 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         }
         this.jsonRequests = jsonRequests == null || jsonRequests;
     }
+
+
+    public static <T> Function<JsonNode, T> adapterTo(Class<T> clazz) {
+        return jsonNode -> {
+            try {
+                return Jackson2Mapper.getLenientInstance()
+                    .treeToValue(jsonNode.get(SOURCE), clazz);
+            } catch (Exception e) {
+                return null;
+
+            }
+        };
+    }
+
+    private static <T> Function<JsonNode, T> adapterTo(Function<JsonNode, T> adapter, Class<T> clazz) {
+        if (adapter != null && clazz != null) {
+            throw new IllegalArgumentException();
+        }
+        if (clazz != null) {
+            return jsonNode -> {
+                try {
+                    return Jackson2Mapper.getLenientInstance()
+                        .treeToValue(jsonNode.get(SOURCE), clazz);
+                } catch (Exception e) {
+                    return null;
+
+                }
+            };
+        }
+        return adapter;
+    }
+
 
 
     public static ElasticSearchIterator<JsonNode> of(RestClient client) {
@@ -393,6 +427,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         } else {
             log.debug("no need to close");
         }
+    }
+
+    public Stream<T> stream() {
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED),
+            false);
+
     }
 
 

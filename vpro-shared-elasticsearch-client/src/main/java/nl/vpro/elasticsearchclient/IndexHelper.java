@@ -579,7 +579,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
 
     public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
-        return deleteAsync(deleteRequest.getFirst().get(Constants.TYPE).textValue(), deleteRequest.getFirst().get(Constants.ID).textValue(), listeners);
+        return deleteAsync(deleteRequest.getFirst().get(TYPE).textValue(), deleteRequest.getFirst().get(ID).textValue(), listeners);
     }
 
 
@@ -615,6 +615,37 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public  Optional<JsonNode> get(String id){
         return _get(DOC, id, null);
     }
+
+
+    public  List<Optional<JsonNode>> mget(String... ids){
+        if (ids.length == 0) {
+            return Collections.emptyList();
+        }
+        Request get = new Request("GET", getIndexName() + "/_mget");
+        ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
+        ArrayNode array = body.withArray("ids");
+        for (String id :ids ) {
+            array.add(id);
+        }
+        get.setJsonEntity(saveToString(body));
+        List<Optional<JsonNode>> result = new ArrayList<>();
+        try {
+
+            Response response = client().performRequest(get);
+            ObjectNode objectNode = read(response);
+            ArrayNode docs = objectNode.withArray("docs");
+
+            for (JsonNode n : docs) {
+                result.add(Optional.of(n));
+            }
+            return result;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return result;
+
+    }
+
 
     public  Optional<JsonNode> getWithRouting(String id, String routing){
         return _get(DOC, id, routing);
@@ -763,7 +794,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
     private  Pair<ObjectNode, ObjectNode> _indexRequest(String type, String id, Object o) {
-        ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
         if (! DOC.equals(type)) {
             index.put(Fields.TYPE, type);
@@ -781,8 +812,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     @Deprecated
     public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o, String routing) {
         Pair<ObjectNode, ObjectNode> request = indexRequest(type, id, o);
-        request.getFirst().with(Constants.INDEX).put(Fields.ROUTING, routing);
-        request.getFirst().with(Constants.INDEX).put(Fields.PARENT, routing);
+        request.getFirst().with(INDEX).put(Fields.ROUTING, routing);
+        request.getFirst().with(INDEX).put(Fields.PARENT, routing);
         return request;
     }
 
