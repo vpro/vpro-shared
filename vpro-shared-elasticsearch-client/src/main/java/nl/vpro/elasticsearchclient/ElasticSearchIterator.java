@@ -339,7 +339,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 next = adapt.apply(hits.get(HITS).get(i));
             } else {
                 close();
-                scrollId = null;
             }
             needsNext = false;
         }
@@ -416,6 +415,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
                 Response res = client.performRequest(delete);
                 log.debug("Deleted {}", res);
+                scrollId = null;
             } catch (ResponseException re) {
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
