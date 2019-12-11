@@ -98,6 +98,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             }
             if (hasNext) {
                 next = adapt.apply(hits[i]);
+            } else {
+                close();
             }
             needsNext = false;
         }
@@ -139,6 +141,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             clearScrollRequest.addScrollId(response.getScrollId());
             ActionFuture<ClearScrollResponse> clearScrollResponseActionFuture = client.clearScroll(clearScrollRequest);
             log.debug("{}", clearScrollResponseActionFuture);
+            response = null;
         } else {
             log.debug("no need to close");
         }

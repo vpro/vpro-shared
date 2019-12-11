@@ -338,6 +338,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             if (hasNext) {
                 next = adapt.apply(hits.get(HITS).get(i));
             } else {
+                close();
                 scrollId = null;
             }
             needsNext = false;
