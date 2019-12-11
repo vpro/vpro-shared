@@ -1143,8 +1143,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
                 logger.warn("Unrecognized bulk response {}", n);
 
             }
-
-            logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
+            if (! indexed.isEmpty()) {
+                if (! deleted.isEmpty()) {
+                    logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
+                } else {
+                    logger.info("{} {}/{} indexed: {}", clientFactory, index, type, indexed);
+                }
+            } else if (! deleted.isEmpty()) {
+                logger.info("{} {}/{} revoked: {}", clientFactory, index, type,  deleted);
+            } else {
+                logger.warn("{} {}/{} bulk request didn't yield result", clientFactory, index, type);
+            }
         };
     }
 

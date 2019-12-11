@@ -5,7 +5,7 @@
   <bean id="esRestClientFactory" class="nl.vpro.elasticsearchclient.ClientElasticSearchFactory" autowire-candidate="true">
     <property name="clusterName" value="${elasticSearch.cluster}"/>
     <property name="unicastHosts" value="${elasticSearch.unicastHosts}"/>
-    <property name="implicitJavaToHttpPort" value="true" />
+    <property name="implicitJavaToHttpPort" value="false" />
     <property name="socketTimeoutDuration" value="${elasticSearch.socketTimeout}"/>
     <property name="connectionTimeoutDuration" value="${elasticSearch.connectTimeout}"/>
     <property name="maxRetryTimeoutDuration" value="${elasticSearch.maxRetryTimeout}"/>
