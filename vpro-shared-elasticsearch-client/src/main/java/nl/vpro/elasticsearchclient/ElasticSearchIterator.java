@@ -82,6 +82,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private boolean search_type_scan = false;
 
+    @Getter
     private Version<Integer> esVersion = new Version<>(7);
 
     private Long totalSize = null;
@@ -124,6 +125,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 jsonRequests = esVersion.isNotBefore(5);
             }
             search_type_scan = esVersion.isBefore(2);
+            this.esVersion = esVersion;
         }
         this.jsonRequests = jsonRequests == null || jsonRequests;
     }

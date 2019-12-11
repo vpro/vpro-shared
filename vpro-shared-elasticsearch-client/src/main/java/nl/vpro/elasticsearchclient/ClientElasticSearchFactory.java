@@ -26,11 +26,13 @@ import nl.vpro.util.TimeUtils;
  */
 @Slf4j
 @Data
-public class ClientElasticSearchFactory implements AsyncESClientFactory {
+public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientElasticSearchFactoryMXBean {
+
+    private static int instances = 0;
 
     private String clusterName;
     private String unicastHosts;
-    private boolean implicitJavaToHttpPort = true;
+    private boolean implicitJavaToHttpPort = false;
 
     private Duration socketTimeout = Duration.ofSeconds(60);
     private Duration connectionTimeout = Duration.ofSeconds(5);
@@ -40,12 +42,25 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     private final Map<String, RestClient> clients = new HashMap<>();
 
+    private final int instance = instances++;
+
     @PostConstruct
     public void init() {
         log.info("Found {}", this);
     }
-    public void invalidate() {
+
+
+    @Override
+    public String invalidate() {
+        String keys = clients.keySet().toString();
         clients.clear();
+        return "Cleared " + keys;
+    }
+
+    @Override
+    public String getClients() {
+        return clients.entrySet().toString();
+
     }
 
     @Override
@@ -133,18 +148,22 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory {
 
     public void setSocketTimeoutDuration(String socketTimeout) {
         this.socketTimeout = TimeUtils.parseDuration(socketTimeout).orElse(this.socketTimeout);
+        invalidate();
     }
 
     public void setConnectionTimeoutDuration(String connectionTimeout) {
         this.connectionTimeout = TimeUtils.parseDuration(connectionTimeout).orElse(this.connectionTimeout);
+        invalidate();
     }
 
     public void setConnectTimeoutDuration(String connectTimeout) {
         this.connectTimeout = TimeUtils.parseDuration(connectTimeout).orElse(this.connectTimeout);
+        invalidate();
     }
 
     public void setMaxRetryTimeoutDuration(String maxRetryTimeout) {
         this.maxRetryTimeout = TimeUtils.parseDuration(maxRetryTimeout).orElse(this.maxRetryTimeout);
+        invalidate();
     }
 
     public void shutdown() {
