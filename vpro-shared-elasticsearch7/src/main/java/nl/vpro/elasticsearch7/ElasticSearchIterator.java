@@ -34,7 +34,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     boolean hasNext;
     int i = -1;
     T next;
-    boolean needsNext = true;
+    boolean needsNext;
 
 
     public static ElasticSearchIterator<SearchHit> searchHits(Client client) {
@@ -73,6 +73,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (hits.length == 0) {
                     hasNext = false;
                     needsNext = false;
+                    close();
                     return;
                 }
             }

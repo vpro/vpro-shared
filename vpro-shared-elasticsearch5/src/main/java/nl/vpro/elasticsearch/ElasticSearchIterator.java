@@ -6,8 +6,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.ActionFuture;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
@@ -34,7 +34,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     boolean hasNext;
     int i = -1;
     T next;
-    boolean needsNext = true;
+    boolean needsNext;
 
 
     public static ElasticSearchIterator<SearchHit> searchHits(Client client) {
@@ -73,6 +73,7 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
                 if (hits.length == 0) {
                     hasNext = false;
                     needsNext = false;
+                    close();
                     return;
                 }
             }
@@ -98,6 +99,8 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
             }
             if (hasNext) {
                 next = adapt.apply(hits[i]);
+            } else {
+                close();
             }
             needsNext = false;
         }
@@ -123,6 +126,20 @@ public class ElasticSearchIterator<T>  implements CountedIterator<T> {
     @Override
     public Long getCount() {
         return count;
+    }
+
+
+    @Override
+    public void close()  {
+        if (response != null && response.getScrollId() != null) {
+            ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+            clearScrollRequest.addScrollId(response.getScrollId());
+            ActionFuture<ClearScrollResponse> clearScrollResponseActionFuture = client.clearScroll(clearScrollRequest);
+            log.debug("{}", clearScrollResponseActionFuture);
+            response = null;
+        } else {
+            log.debug("no need to close");
+        }
     }
 
 }
