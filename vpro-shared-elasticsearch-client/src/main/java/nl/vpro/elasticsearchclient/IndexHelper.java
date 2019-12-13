@@ -1137,25 +1137,27 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
             String index = null;
-            String type = null;
             List<String> deleted = new ArrayList<>();
             List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
+                logger.info("{}", on);
                 if (on.has("delete")) {
                     ObjectNode delete = on.with("delete");
                     index = delete.get(Fields.INDEX).textValue();
-                    type = delete.get(Fields.TYPE).textValue();
+                    String type = delete.get(Fields.TYPE).textValue();
                     String id = delete.get(Fields.ID).textValue();
-                    deleted.add(type+ ":" + id);
+                    String result = delete.get("result").textValue();
+                    deleted.add(type+ ":" + id + ":" + result);
                     continue;
                 }
                 if (n.has("index")) {
                     ObjectNode indexResponse = on.with("index");
                     index = indexResponse.get(Fields.INDEX).textValue();
-                    type = indexResponse.get(Fields.TYPE).textValue();
+                    String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
-                    indexed.add(type + ":" + id);
+                    String result = indexResponse.get("result").textValue();
+                    indexed.add(type + ":" + id + ":" + result);
                     continue;
                 }
                 logger.warn("Unrecognized bulk response {}", n);
@@ -1163,14 +1165,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             }
             if (! indexed.isEmpty()) {
                 if (! deleted.isEmpty()) {
-                    logger.info("{} {}/{} indexed: {}, revoked: {}", clientFactory, index, type, indexed, deleted);
+                    logger.info("{} {} indexed: {}, revoked: {}", clientFactory, index, indexed, deleted);
                 } else {
-                    logger.info("{} {}/{} indexed: {}", clientFactory, index, type, indexed);
+                    logger.info("{} {} indexed: {}", clientFactory, index, indexed);
                 }
             } else if (! deleted.isEmpty()) {
-                logger.info("{} {}/{} revoked: {}", clientFactory, index, type,  deleted);
+                logger.info("{} {} revoked: {}", clientFactory, index,  deleted);
             } else {
-                logger.warn("{} {}/{} bulk request didn't yield result", clientFactory, index, type);
+                logger.warn("{} {} bulk request didn't yield result", clientFactory, index);
             }
         };
     }

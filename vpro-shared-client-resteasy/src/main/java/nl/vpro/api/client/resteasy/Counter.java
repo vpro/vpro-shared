@@ -5,9 +5,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -15,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.management.MXBean;
 import javax.management.ObjectName;
 
+import nl.vpro.jmx.MBeans;
 import nl.vpro.util.WindowedEventRate;
 import nl.vpro.util.WindowedLongSummaryStatistics;
 
@@ -51,7 +50,7 @@ public class Counter implements CounterMXBean {
             .bucketCount(bucketCount)
             .build());
         if (name != null) {
-            AbstractApiClient.registerBean(log, name, this);
+            MBeans.registerBean(name, this);
         }
     }
 
@@ -124,7 +123,7 @@ public class Counter implements CounterMXBean {
 
     void shutdown() {
         if (name != null) {
-            AbstractApiClient.unregister(log, name);
+            MBeans.unregister(name);
         }
     }
 

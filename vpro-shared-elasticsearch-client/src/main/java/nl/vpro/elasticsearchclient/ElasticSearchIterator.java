@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.*;
 
@@ -49,6 +50,8 @@ import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 @Slf4j
 public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T> {
 
+
+    private static final Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
     private final Function<JsonNode, T> adapt;
     private final RestClient client;
 
@@ -270,8 +273,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (hits == null) {
                     hits = response.get(HITS);
                 }
-                scrollId = response.get(_SCROLL_ID).asText();
-                log.debug("Scroll id {}", scrollId);
+                String newScrollId = response.get(_SCROLL_ID).asText();
+                if (newScrollId != null) {
+                    log.debug("Scroll id {} -> {}", scrollId, newScrollId);
+                    scrollId = newScrollId;
+                    SCROLL_IDS.add(scrollId);
+                }
+
                 JsonNode total = hits.get("total");
                 if (total instanceof ObjectNode) {
                     totalSize = total.get("value").longValue();
@@ -281,6 +289,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (totalSize == 0) {
                     hasNext = false;
                     needsNext = false;
+                    close();
                     return;
                 }
 
@@ -315,7 +324,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                             String newScrollId = response.get(_SCROLL_ID).asText();
                             if (!scrollId.equals(newScrollId)) {
                                 log.info("new scroll id {}", newScrollId);
+                                SCROLL_IDS.remove(scrollId);
                                 scrollId = newScrollId;
+                                SCROLL_IDS.add(scrollId);
                             }
                         }
 
@@ -416,7 +427,12 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             try {
                 Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
                 Response res = client.performRequest(delete);
-                log.debug("Deleted {}", res);
+                if (res.getStatusLine().getStatusCode() == 200) {
+                    log.debug("Deleted {}", res);
+                    SCROLL_IDS.remove(scrollId);
+                } else {
+                    log.warn("Something wrong {}", res);
+                }
                 scrollId = null;
             } catch (ResponseException re) {
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
