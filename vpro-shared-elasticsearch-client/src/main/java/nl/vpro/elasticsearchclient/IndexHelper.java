@@ -276,6 +276,24 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         ObjectNode response = read(client().performRequest(req));
 
         log.info("{}", response);
+    }
+
+    @SneakyThrows
+    public void reputMappings() {
+        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+
+
+        if (mappings.size() == 1 && mappings.containsKey(DOC)) {
+            request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
+        } else {
+            throw new IllegalStateException();
+        }
+        HttpEntity entity = entity(request);
+        Request req = new Request("PUT", getIndexName() + "/_mapping");
+        req.setEntity(entity);
+        ObjectNode response = read(client().performRequest(req));
+
+        log.info("{}", response);
 
 
     }
