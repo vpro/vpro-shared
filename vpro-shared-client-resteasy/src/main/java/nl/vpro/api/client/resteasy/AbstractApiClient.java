@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -24,14 +23,12 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 import javax.cache.Cache;
-import javax.management.*;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
-import org.apache.http.HttpResponse;
+import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -40,17 +37,13 @@ import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
@@ -59,11 +52,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jmx.MBeans;
 import nl.vpro.resteasy.JacksonContextResolver;
-import nl.vpro.util.LeaveDefaultsProxyHandler;
-import nl.vpro.util.ThreadPools;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.XTrustProvider;
+import nl.vpro.util.*;
 
 /**
  * @author Roelof Jan Koekoek
@@ -508,35 +499,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
     }
 
     private void registerBean() {
-        registerBean(log, getObjectName(), this);
-    }
-
-    protected static synchronized void registerBean(Logger log, ObjectName name, Object object) {
-        try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            unregister(log, name);
-            mbs.registerMBean(object, name);
-        } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    protected static void unregister(Logger log, ObjectName name) {
-        try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            if (mbs.isRegistered(name)) {
-                log.debug("Unregistering mbean {}", name);
-                try {
-                    mbs.unregisterMBean(name);
-                } catch (InstanceNotFoundException e) {
-                    log.error(e.getMessage(), e);
-                }
-            } else {
-                log.debug("Not registered");
-            }
-        } catch (MBeanRegistrationException e) {
-            log.error(e.getMessage(), e);
-        }
+        MBeans.registerBean(getObjectName(), this);
     }
 
     protected ObjectName getObjectName() {

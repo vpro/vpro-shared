@@ -2,12 +2,15 @@ package nl.vpro.jmx;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import javax.management.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;;
@@ -261,4 +264,53 @@ public class MBeans {
     public static boolean isBlank(String string) {
         return "String".equals(string) || StringUtils.isBlank(string);
     }
+
+
+    /**
+     * @since 2.10
+     */
+    public static synchronized void registerBean(ObjectName name, Object object) {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            unregister(name);
+            mbs.registerMBean(object, name);
+        } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @since 2.10
+     */
+    public static void unregister(ObjectName name) {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            if (mbs.isRegistered(name)) {
+                log.debug("Unregistering mbean {}", name);
+                try {
+                    mbs.unregisterMBean(name);
+                } catch (InstanceNotFoundException e) {
+                    log.error(e.getMessage(), e);
+                }
+            } else {
+                log.debug("Not registered");
+            }
+        } catch (MBeanRegistrationException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @since 2.10
+     */
+    public static ObjectName getObjectName(String prefix, Object object) {
+        try {
+            String mbeanName = object.getClass().getSimpleName();
+            return new ObjectName(prefix + "?type=" + mbeanName);
+        } catch (MalformedObjectNameException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
