@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.Pair;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -329,7 +328,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
     public void clearIndex() {
-        List<Pair<ObjectNode, ObjectNode>> bulk = new ArrayList<>();
+        List<BulkRequestEntry> bulk = new ArrayList<>();
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client())) {
             i.prepareSearch(getIndexName());
 
@@ -500,14 +499,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         return post(_indexPath(type, id, parent), objectMapper.valueToTree(o));
     }
 
-    public ObjectNode index(Pair<ObjectNode, ObjectNode> indexRequest) {
+    public ObjectNode index(BulkRequestEntry indexRequest) {
         return post(
             _indexPath(
-                indexRequest.getFirst().get(TYPE).textValue(),
-                indexRequest.getFirst().get(ID).textValue(),
-                indexRequest.getFirst().get(PARENT).textValue()
+                indexRequest.getAction().get(TYPE).textValue(),
+                indexRequest.getAction().get(ID).textValue(),
+                indexRequest.getAction().get(PARENT).textValue()
             ),
-            indexRequest.getSecond()
+            indexRequest.getSource()
         );
     }
 
@@ -580,7 +579,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
      */
     @Deprecated
     public ObjectNode delete(String[] types, String id) {
-        Collection<Pair<ObjectNode, ObjectNode>> bulkRequest = new ArrayList<>();
+        Collection<BulkRequestEntry> bulkRequest = new ArrayList<>();
         for (String type : types) {
             bulkRequest.add(deleteRequest(type, id));
         }
@@ -596,8 +595,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
 
-    public Future<ObjectNode> deleteAsync(Pair<ObjectNode, ObjectNode> deleteRequest, Consumer<ObjectNode>... listeners) {
-        return deleteAsync(deleteRequest.getFirst().get(TYPE).textValue(), deleteRequest.getFirst().get(ID).textValue(), listeners);
+    @SafeVarargs
+    public final Future<ObjectNode> deleteAsync(BulkRequestEntry deleteRequest, Consumer<ObjectNode>... listeners) {
+        return deleteAsync(deleteRequest.getAction().get(TYPE).textValue(), deleteRequest.getSource().get(ID).textValue(), listeners);
     }
 
 
@@ -799,23 +799,23 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
-    public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o) {
+    public BulkRequestEntry indexRequest(String type, String id, Object o) {
         return _indexRequest(type, id, o);
     }
-    public Pair<ObjectNode, ObjectNode> indexRequest(String id, Object o) {
+    public BulkRequestEntry indexRequest(String id, Object o) {
         return _indexRequest(DOC, id, o);
     }
 
-    public Pair<ObjectNode, ObjectNode> indexRequestWithRouting(String id, Object o, String routing) {
-        Pair<ObjectNode, ObjectNode> request =
+    public BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing) {
+        BulkRequestEntry request =
             _indexRequest(DOC, id, o);
-        request.getFirst()
+        request.getAction()
             .with(INDEX)
             .put(ROUTING, routing);
         return request;
     }
 
-    private  Pair<ObjectNode, ObjectNode> _indexRequest(String type, String id, Object o) {
+    private  BulkRequestEntry _indexRequest(String type, String id, Object o) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
         if (! DOC.equals(type)) {
@@ -825,17 +825,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         index.put(Fields.INDEX, getIndexName());
 
         ObjectNode jsonNode = objectMapper.valueToTree(o);
-        return Pair.of(actionLine, jsonNode);
+        return new BulkRequestEntry(actionLine, jsonNode);
     }
 
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
-    public Pair<ObjectNode, ObjectNode> indexRequest(String type, String id, Object o, String routing) {
-        Pair<ObjectNode, ObjectNode> request = indexRequest(type, id, o);
-        request.getFirst().with(INDEX).put(Fields.ROUTING, routing);
-        request.getFirst().with(INDEX).put(Fields.PARENT, routing);
+    public BulkRequestEntry indexRequest(String type, String id, Object o, String routing) {
+        BulkRequestEntry request = indexRequest(type, id, o);
+        request.getAction().with(INDEX).put(Fields.ROUTING, routing);
+        request.getAction().with(INDEX).put(Fields.PARENT, routing);
         return request;
     }
 
@@ -844,23 +844,23 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
-    public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id) {
+    public BulkRequestEntry deleteRequest(String type, String id) {
         return _deleteRequest(type, id);
     }
 
-    public Pair<ObjectNode, ObjectNode> deleteRequest(String id) {
+    public BulkRequestEntry deleteRequest(String id) {
         return _deleteRequest(DOC, id);
     }
 
-    public Pair<ObjectNode, ObjectNode> deleteRequestWithRouting(String id, String routing) {
-        Pair<ObjectNode, ObjectNode> request  = _deleteRequest(DOC, id);
-        request.getFirst().with("delete")
+    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
+        BulkRequestEntry request  = _deleteRequest(DOC, id);
+        request.getSource().with("delete")
             .put(ROUTING, routing);
         return request;
 
     }
 
-    protected Pair<ObjectNode, ObjectNode> _deleteRequest(String type, String id) {
+    protected BulkRequestEntry _deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with("delete");
         if (! DOC.equals(type)) {
@@ -868,27 +868,27 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
-        return Pair.of(actionLine, null);
+        return new BulkRequestEntry(actionLine, null);
     }
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
-    public Pair<ObjectNode, ObjectNode> deleteRequest(Enum<?> type, String id, String routing) {
+    public BulkRequestEntry deleteRequest(Enum<?> type, String id, String routing) {
         return deleteRequest(type.name(), id, routing);
     }
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
-    public Pair<ObjectNode, ObjectNode> deleteRequest(String type, String id, String routing) {
-        Pair<ObjectNode, ObjectNode> request = deleteRequest(type, id);
-        request.getFirst().with("delete").put(Fields.ROUTING, routing);
+    public  BulkRequestEntry deleteRequest(String type, String id, String routing) {
+         BulkRequestEntry request = deleteRequest(type, id);
+        request.getAction().with("delete").put(Fields.ROUTING, routing);
         return request;
     }
 
 
-    public ObjectNode bulk(Collection<Pair<ObjectNode, ObjectNode>> request) {
+    public ObjectNode bulk(Collection<BulkRequestEntry> request) {
 
         try {
             Request req = new Request("POST", "_bulk");
@@ -907,14 +907,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
 
     @SafeVarargs
-    public final CompletableFuture<ObjectNode> bulkAsync(Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> bulkAsync(
+        Collection<BulkRequestEntry> request, Consumer<ObjectNode>... listeners) {
         return bulkAsync(log, writeJsonDir, client(), request, listeners);
 
     }
 
 
     @SafeVarargs
-    public static CompletableFuture<ObjectNode> bulkAsync(Logger log, File jsonDir, RestClient client, Collection<Pair<ObjectNode, ObjectNode>> request, Consumer<ObjectNode>... listeners) {
+    public static CompletableFuture<ObjectNode> bulkAsync(Logger log, File jsonDir, RestClient client, Collection<BulkRequestEntry> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         if (request.size() == 0) {
             return CompletableFuture.completedFuture(null);
@@ -930,13 +931,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         return future;
     }
 
-    protected static HttpEntity bulkEntity(Collection<Pair<ObjectNode, ObjectNode>> request) {
+    protected static HttpEntity bulkEntity(Collection<BulkRequestEntry> request) {
         StringBuilder builder = new StringBuilder();
-        for (Pair<ObjectNode, ObjectNode> n : request) {
-            builder.append(n.getFirst());
+        for (BulkRequestEntry n : request) {
+            builder.append(n.getSource());
             builder.append("\n");
-            if (n.getSecond() != null) {
-                builder.append(saveToString(n.getSecond()));
+            if (n.getSource() != null) {
+                builder.append(saveToString(n.getSource()));
                 builder.append("\n");
             }
         }
@@ -1200,11 +1201,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             '}';
     }
 
-    static protected void writeJson(Logger log, File writeJsonDir, Collection<Pair<ObjectNode, ObjectNode>> requests) {
-        for (Pair<ObjectNode, ObjectNode> request: requests) {
-            ObjectNode actionLine = request.getFirst();
+    static protected void writeJson(Logger log, File writeJsonDir, Collection<BulkRequestEntry> requests) {
+        for (BulkRequestEntry request: requests) {
+            ObjectNode actionLine = request.getAction();
             if (actionLine.has("index")) {
-                writeJson(log, writeJsonDir, actionLine.get("index").get(Fields.ID).textValue(), request.getSecond());
+                writeJson(log, writeJsonDir, actionLine.get("index").get(Fields.ID).textValue(), request.getSource());
             }
         }
     }
