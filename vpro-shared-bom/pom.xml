@@ -156,11 +156,13 @@
         <artifactId>vpro-shared-web</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <!--
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-ws</artifactId>
         <version>${project.version}</version>
       </dependency>
+      -->
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-xml</artifactId>
