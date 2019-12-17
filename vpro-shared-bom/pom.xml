@@ -156,13 +156,6 @@
         <artifactId>vpro-shared-web</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!--
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-ws</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      -->
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-xml</artifactId>
@@ -170,14 +163,17 @@
       </dependency>
 
 
-
       <!-- not maintained any more -->
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-ws</artifactId>
+        <version>2.9.1</version>
+      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-integration</artifactId>
         <version>1.75.8</version>
       </dependency>
-
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-domain</artifactId>
