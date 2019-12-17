@@ -41,6 +41,11 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient> {
 
+    public static final String SEARCH = "/_search";
+    public static final String POST = "POST";
+    public static final String GET = "GET";
+    public static final String PUT = "PUT";
+
     private final Logger log;
     private Supplier<String> indexNameSupplier;
     private Supplier<String> settings;
@@ -242,7 +247,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         HttpEntity entity = entity(request);
 
         log.info("Creating index {} with mappings {}: {}", indexName, mappings.keySet(), request.toString());
-        Request req = new Request("PUT", indexName);
+        Request req = new Request(PUT, indexName);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -270,7 +275,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             forReindex(settings);
         }
         HttpEntity entity = entity(request);
-        Request req = new Request("PUT", getIndexName() + "/_settings");
+        Request req = new Request(PUT, getIndexName() + "/_settings");
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -279,16 +284,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     @SneakyThrows
     public void reputMappings() {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-
-
+        ObjectNode request;
         if (mappings.size() == 1 && mappings.containsKey(DOC)) {
             request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
         } else {
             throw new IllegalStateException();
         }
         HttpEntity entity = entity(request);
-        Request req = new Request("PUT", getIndexName() + "/_mapping");
+        Request req = new Request(PUT, getIndexName() + "/_mapping");
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -346,7 +349,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public boolean refresh() {
 
         try {
-            Response response = client().performRequest(new Request("GET", "_refresh"));
+            Response response = client().performRequest(new Request(GET, "_refresh"));
             JsonNode read = read(response);
             return read != null;
         } catch (IOException e) {
@@ -358,7 +361,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public String getVersionNumber() {
 
         try {
-            Response response = client().performRequest(new Request("GET", ""));
+            Response response = client().performRequest(new Request(GET, ""));
             JsonNode read = read(response);
             return read.get("version").get("number").asText();
         } catch (IOException e) {
@@ -373,7 +376,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public ObjectNode search(ObjectNode request) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        return post((indexName == null ? "" : indexName) + "/_search", request);
+        return post((indexName == null ? "" : indexName) + SEARCH, request);
     }
 
     /**
@@ -396,14 +399,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         } else {
             //path.append("/_doc");
         }
-        path.append("/_search");
+        path.append(SEARCH);
         return post(path.toString(), request);
     }
 
     @SafeVarargs
     public final Future<ObjectNode> searchAsync(ObjectNode request, Consumer<ObjectNode>... listeners) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        return postAsync((indexName == null ? "" : indexName) + "/_search", request, listeners);
+        return postAsync((indexName == null ? "" : indexName) + SEARCH, request, listeners);
     }
 
 
@@ -431,7 +434,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
             log.debug("posting");
-            Request req = new Request("POST", path);
+            Request req = new Request(POST, path);
             req.setEntity(entity(request));
             client.performRequestAsync(req, listen(log, request.toString(), future, listeners));
             }
@@ -604,6 +607,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @SafeVarargs
     @Deprecated
     public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
@@ -643,7 +647,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         if (ids.size() == 0) {
             return Collections.emptyList();
         }
-        Request get = new Request("GET", getIndexName() + "/_mget");
+        Request get = new Request(GET, getIndexName() + "/_mget");
         ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
         ArrayNode array = body.withArray("ids");
         for (String id :ids ) {
@@ -675,7 +679,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     protected Optional<JsonNode> _get(String type, String id, String routing) {
         try {
-            Request get = new Request("GET", getIndexName() + "/" + type + "/" + encode(id));
+            Request get = new Request(GET, getIndexName() + "/" + type + "/" + encode(id));
             if (routing != null){
                 get.addParameter("routing", routing);
             }
@@ -843,6 +847,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public BulkRequestEntry deleteRequest(String type, String id) {
         return _deleteRequest(type, id);
@@ -854,7 +859,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
         BulkRequestEntry request  = _deleteRequest(DOC, id);
-        request.getSource().with("delete")
+        request.getAction().with("delete")
             .put(ROUTING, routing);
         return request;
 
@@ -1030,7 +1035,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     @SafeVarargs
     public static CompletableFuture<String> getClusterName(Logger log, RestClient client, final Consumer<String>... callBacks) {
         final CompletableFuture<String> future = new CompletableFuture<>();
-        client.performRequestAsync(new Request("GET", "/_cat/health"), new ResponseListener() {
+        client.performRequestAsync(new Request(GET, "/_cat/health"), new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
