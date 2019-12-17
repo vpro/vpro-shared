@@ -934,7 +934,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     protected static HttpEntity bulkEntity(Collection<BulkRequestEntry> request) {
         StringBuilder builder = new StringBuilder();
         for (BulkRequestEntry n : request) {
-            builder.append(n.getSource());
+            builder.append(n.getAction());
             builder.append("\n");
             if (n.getSource() != null) {
                 builder.append(saveToString(n.getSource()));
