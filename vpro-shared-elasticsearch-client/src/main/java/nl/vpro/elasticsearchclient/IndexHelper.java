@@ -279,9 +279,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     @SneakyThrows
     public void reputMappings() {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-
-
+        ObjectNode request;
         if (mappings.size() == 1 && mappings.containsKey(DOC)) {
             request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
         } else {
@@ -604,6 +602,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @SafeVarargs
     @Deprecated
     public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
@@ -843,6 +842,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public BulkRequestEntry deleteRequest(String type, String id) {
         return _deleteRequest(type, id);
@@ -854,7 +854,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
 
     public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
         BulkRequestEntry request  = _deleteRequest(DOC, id);
-        request.getSource().with("delete")
+        request.getAction().with("delete")
             .put(ROUTING, routing);
         return request;
 
