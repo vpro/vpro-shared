@@ -60,7 +60,7 @@ import nl.vpro.util.*;
  * @author Roelof Jan Koekoek
  * @since 3.0
  */
-public abstract class AbstractApiClient implements AbstractApiClientMXBean {
+public abstract class AbstractApiClient implements AbstractApiClientMXBean, AutoCloseable {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -994,12 +994,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
 
     @PreDestroy
     public void shutdown() {
-        if(!shutdown) {
-            shutdown = true;
-            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
-                unwatchIdleConnections(connectionManager);
-            }
-        }
+        close();
     }
 
     @Override
@@ -1012,7 +1007,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
         return m.getDeclaringClass().getSimpleName() + "." + m.getName();
     }
 
-    private class MyConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
+    private static class MyConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
 
         @Override
         public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
@@ -1062,6 +1057,27 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean {
             connectionGuardThread = null;
         }
     }
+
+
+    @Override
+    public void close() {
+        if (clientHttpEngine != null) {
+            clientHttpEngine.close();
+            clientHttpEngine = null;
+        }
+        if (clientHttpEngineNoTimeout != null) {
+            clientHttpEngineNoTimeout.close();
+            clientHttpEngineNoTimeout = null;
+        }
+        if(!shutdown) {
+            shutdown = true;
+            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
+                unwatchIdleConnections(connectionManager);
+            }
+        }
+
+    }
+
 
     @Slf4j
     private static class ConnectionGuard implements Runnable {
