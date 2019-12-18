@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import com.google.common.collect.PeekingIterator;
 
 /**
@@ -38,6 +40,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     /**
      * The size, if known, of the collection this iterator is representing
      */
+    @NonNull
     Optional<Long> getSize();
 
     /**
@@ -52,6 +55,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
      *
      * The default implementation is {@link #getSize()}.
      */
+    @NonNull
     default Optional<Long> getTotalSize() {
         return getSize();
     }
