@@ -7,17 +7,30 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * A version is basicly a string existing of a number of parts.
+ *
+ * This base class leaves open how these parts should look like, but we supply an extension where it are integers.
+ *
+ * The point it that these things can now be compared in the logical way, such that e.g. 5.12.0 > 5.2.0
+ *
  * @author Michiel Meeuwissen
  * @since 2.2
  */
 @SuppressWarnings("unchecked")
 public class Version<T extends Comparable<T>> implements Comparable<Version<T>> {
+    public static final String SEPARATOR = ".";
     final T[] parts;
 
     public Version(T... parts) {
         this.parts = parts;
     }
 
+
+    /**
+     * Produces an {@link IntegerVersion}, but ignores everything after the first hyphen.
+     *
+     * In that way something like '5.12-SNAPSHOT' will simply be equivalent to '5.12'.
+     */
     public static IntegerVersion parseIntegers(String string) {
         String[] parts = string.split("-", 2);
         return new IntegerVersion(parts[0]);
@@ -89,6 +102,6 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
 
     @Override
     public String toString() {
-        return StringUtils.join(parts, ".");
+        return StringUtils.join(parts, SEPARATOR);
     }
 }
