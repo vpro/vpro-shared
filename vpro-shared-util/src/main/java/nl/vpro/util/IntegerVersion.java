@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 @XmlJavaTypeAdapter(IntegerVersion.Adapter.class)
 public class IntegerVersion extends Version<Integer> {
 
+    private static final Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
 
     private static final String ESCAPED_SEPARATOR = escapeSpecialRegexChars(SEPARATOR);
 
@@ -63,7 +64,6 @@ public class IntegerVersion extends Version<Integer> {
     }
 
 
-    private static final Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
 
     /**
      * Seems like a usefull method in general, but fow now only used to escape '.'....
