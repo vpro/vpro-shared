@@ -38,7 +38,7 @@ public class Constants {
         public static final String RANGE = "range";
         public static final String TERM = "term";
         public static final String TERMS = "terms";
-        public static final String PREFIX = "terms";
+        public static final String PREFIX = "prefix";
     }
 
     public static final String FILTER = "filter";
