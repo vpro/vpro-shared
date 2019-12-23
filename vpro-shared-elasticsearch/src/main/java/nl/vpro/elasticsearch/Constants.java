@@ -31,11 +31,16 @@ public class Constants {
     public static final String QUERY = "query";
     public static final String VERSION = "version";
     public static final String SORT = "sort";
-    public static final String BOOL = "bool";
-    public static final String MUST = "must";
-    public static final String SHOULD = "should";
-    public static final String RANGE = "range";
-    public static final String TERM = "term";
+    public static class Query {
+        public static final String BOOL = "bool";
+        public static final String MUST = "must";
+        public static final String SHOULD = "should";
+        public static final String RANGE = "range";
+        public static final String TERM = "term";
+        public static final String TERMS = "terms";
+        public static final String PREFIX = "terms";
+    }
+
     public static final String FILTER = "filter";
 
 

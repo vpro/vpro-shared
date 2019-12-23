@@ -220,6 +220,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         return request;
     }
 
+    public ObjectNode getRequest() {
+        if (request == null) {
+            throw new IllegalStateException("prepareSearch not called");
+        }
+        return request;
+    }
+
     @Override
     public boolean hasNext() {
         findNext();
@@ -394,7 +401,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             if (total.has("relation")) {
                 String relation = total.get("relation").asText();
                 switch (relation) {
-                    case "eq": this.totalRelation = TotalRelation.EQUAL_TO;
+                    case "eq":
+                        this.totalRelation = TotalRelation.EQUAL_TO;
+                        break;
                     default:
                         log.info("Unrecognized {}", relation);
                 }
