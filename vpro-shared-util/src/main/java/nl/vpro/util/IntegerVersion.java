@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 public class IntegerVersion extends Version<Integer> {
 
     private static final Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
+
     private static final String ESCAPED_SEPARATOR = escapeSpecialRegexChars(SEPARATOR);
 
     public IntegerVersion(String s) {
