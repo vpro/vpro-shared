@@ -413,7 +413,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public ObjectNode post(String path, ObjectNode request) {
         try {
 
-            Request req = new Request("POST", path);
+            Request req = new Request(POST, path);
             req.setEntity(entity(request));
             log.info("Posting to {}", path);
             return read(client().performRequest(req));
@@ -896,7 +896,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
 
         try {
-            Request req = new Request("POST", "_bulk");
+            Request req = new Request(POST, "_bulk");
             req.setEntity(bulkEntity(request));
 
             writeJson(log, writeJsonDir, request);
@@ -926,7 +926,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             return CompletableFuture.completedFuture(null);
         }
 
-        Request req = new Request("POST", "_bulk");
+        Request req = new Request(POST, "_bulk");
         req.setEntity(bulkEntity(request));
         writeJson(log, jsonDir, request);
 
