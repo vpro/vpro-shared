@@ -48,6 +48,8 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private Function<CharSequence, String> wrapLogInfo = CharSequence::toString;
 
+    private boolean closeStreams = true;
+
 
     public CommandExecutorImpl(String c) {
         this(c, null);
@@ -93,7 +95,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         List<String> commonArgs,
         boolean useFileCache,
         int batchSize,
-        boolean optional
+        boolean optional,
+        Boolean closeStreams
         ) {
          if (workdir != null && !workdir.exists()) {
             throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
@@ -147,6 +150,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.commonArgs = commonArgs;
         this.useFileCache = useFileCache;
         this.batchSize = batchSize;
+        this.closeStreams = closeStreams == null || closeStreams;
 
     }
 
@@ -345,15 +349,17 @@ public class CommandExecutorImpl implements CommandExecutor {
             .input(in)
             .output(out)
             .callback((c) -> {
-                try {
-                    in.close();
-                } catch (IOException ioe) {
-                    logger.warn(ioe.getMessage());
-                }
-                try {
-                    out.close();
-                } catch (IOException ioe) {
-                    logger.warn(ioe.getMessage());
+                if (this.closeStreams) {
+                    try {
+                        in.close();
+                    } catch (IOException ioe) {
+                        logger.warn(ioe.getMessage());
+                    }
+                    try {
+                        out.close();
+                    } catch (IOException ioe) {
+                        logger.warn(ioe.getMessage());
+                    }
                 }
             })
             .errorHandler((c, t) -> errorHandler.accept(t))
