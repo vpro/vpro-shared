@@ -393,7 +393,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         counter.values().forEach(Counter::shutdown);
         counter.clear();
         this.initializationInstant = Instant.now();
-        this.clientHttpEngine = null;
+        closeClients();
     }
 
     @Override
@@ -1060,7 +1060,17 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
 
     @Override
-    public void close() {
+    public synchronized void close() {
+        closeClients();
+        if(!shutdown) {
+            shutdown = true;
+            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
+                unwatchIdleConnections(connectionManager);
+            }
+        }
+    }
+
+    protected synchronized void closeClients() {
         if (clientHttpEngine != null) {
             clientHttpEngine.close();
             clientHttpEngine = null;
@@ -1069,13 +1079,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             clientHttpEngineNoTimeout.close();
             clientHttpEngineNoTimeout = null;
         }
-        if(!shutdown) {
-            shutdown = true;
-            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
-                unwatchIdleConnections(connectionManager);
-            }
-        }
-
     }
 
 
