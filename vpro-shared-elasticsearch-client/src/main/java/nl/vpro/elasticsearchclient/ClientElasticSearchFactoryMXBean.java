@@ -21,4 +21,6 @@ public interface ClientElasticSearchFactoryMXBean {
     String invalidate();
 
     String getClients();
+
+
 }
