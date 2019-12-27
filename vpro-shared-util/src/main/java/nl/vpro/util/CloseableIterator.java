@@ -12,13 +12,15 @@ import java.util.stream.StreamSupport;
 public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
 
 
-    static void closeQuietly(AutoCloseable closeable) {
-        try {
-            if (closeable != null) {
-                closeable.close();
+    static void closeQuietly(AutoCloseable... closeables) {
+        for (AutoCloseable closeable : closeables) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (Exception e) {
+                // ignore
             }
-        } catch (Exception e) {
-            // ignore
         }
     }
 
