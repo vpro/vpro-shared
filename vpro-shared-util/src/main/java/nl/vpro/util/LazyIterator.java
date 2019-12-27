@@ -2,14 +2,17 @@ package nl.vpro.util;
 
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * Wrap's a supplier around an iterator. This way you can delay the instantiation of the actual iterator until the first call
  * of hasNext() or next().
  * @author Michiel Meeuwissen
  */
-public class LazyIterator<T> implements CloseableIterator<T> {
+public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T> {
 
     private final Supplier<Iterator<T>> supplier;
     private Iterator<T> iterator;
@@ -38,6 +41,17 @@ public class LazyIterator<T> implements CloseableIterator<T> {
             iterator = supplier.get();
         }
         return iterator;
+    }
+
+    @Override
+    public @NonNull Optional<Long> getSize() {
+        getSupplied();
+        if (iterator instanceof CountedIterator) {
+            return ((CountedIterator) iterator).getSize();
+        } else {
+            return Optional.empty();
+        }
+
     }
 
     @Override

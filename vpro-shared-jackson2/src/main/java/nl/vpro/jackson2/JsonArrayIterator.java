@@ -1,6 +1,6 @@
 package nl.vpro.jackson2;
 
-import lombok.NonNull;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -11,7 +11,9 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.checkerframework.checker.nullness.qual.Nullable;;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 
 import org.slf4j.Logger;
 import com.fasterxml.jackson.core.*;
@@ -40,6 +42,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private final BiFunction<JsonParser, TreeNode, ? extends T> valueCreator;
 
+    @Getter
+    @Setter
     private Runnable callback;
 
     private boolean callBackHasRun = false;
@@ -50,6 +54,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private int foundNulls = 0;
 
+    @Setter
     private Logger logger = log;
 
     private long count = 0;
@@ -151,18 +156,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
             }
         };
 
-    }
-
-    public void setLogger(Logger log) {
-        this.logger = log;
-    }
-
-    public void setCallback(Runnable callback) {
-        this.callback = callback;
-    }
-
-    public Runnable getCallback() {
-        return callback;
     }
 
     @Override
@@ -269,7 +262,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         }
     }
 
-    public void write(OutputStream out, final Function<T, Void> logging) throws IOException {
+    protected void write(OutputStream out, final Function<T, Void> logging) throws IOException {
         JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out);
         jg.writeStartObject();
         jg.writeArrayFieldStart("array");
@@ -297,11 +290,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     }
 
     @Override
+    @NonNull
     public Optional<Long> getSize() {
         return Optional.ofNullable(size);
     }
 
     @Override
+    @NonNull
     public Optional<Long> getTotalSize() {
         return Optional.ofNullable(totalSize);
     }
