@@ -19,8 +19,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Validator;
 import javax.xml.validation.*;
@@ -293,12 +295,7 @@ public class JAXBTestUtil {
         }
         try {
             Diff diff = builder.build();
-            if (diff.hasDifferences()) {
-                //assertThat(input).isEqualTo(expected);
-                throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
-            } else {
-                assertThat(diff.hasDifferences()).isFalse();
-            }
+            assertNoDifferences(diff, input, expected);
         } catch (XMLUnitException xue) {
             throw new AssertionError(xue.getMessage() + ": expected:\n" + expected + "\nactual:\n" + input);
         }
@@ -416,6 +413,26 @@ public class JAXBTestUtil {
             similar(String.valueOf(actual), expected);
             return myself;
         }
+    }
+
+    protected static void assertNoDifferences(Diff diff, String input, String expected) {
+        if (diff.hasDifferences()) {
+            assertThat(pretty(input)).isEqualTo(pretty(expected));
+            //throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
+        } else {
+            assertThat(diff.hasDifferences()).isFalse();
+        }
+    }
+    @SneakyThrows
+    public static String pretty(String xml) {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+        StreamResult result = new StreamResult(new StringWriter());
+        transformer.transform(new StreamSource(new ByteArrayInputStream(xml.getBytes(UTF_8))), result);
+        String xmlString = result.getWriter().toString();
+        return xmlString;
     }
 
 }
