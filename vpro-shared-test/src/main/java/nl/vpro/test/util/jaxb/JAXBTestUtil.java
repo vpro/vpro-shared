@@ -294,6 +294,7 @@ public class JAXBTestUtil {
         try {
             Diff diff = builder.build();
             if (diff.hasDifferences()) {
+                //assertThat(input).isEqualTo(expected);
                 throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
             } else {
                 assertThat(diff.hasDifferences()).isFalse();
