@@ -1068,6 +1068,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 unwatchIdleConnections(connectionManager);
             }
         }
+        invalidate();
     }
 
     protected synchronized void closeClients() {
