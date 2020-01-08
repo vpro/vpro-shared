@@ -55,7 +55,6 @@ public abstract class LoggerOutputStream extends OutputStream {
         };
     }
 
-
     public static LoggerOutputStream error(SimpleLogger log) {
         return error(log, false);
     }
