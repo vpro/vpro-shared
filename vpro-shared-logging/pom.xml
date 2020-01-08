@@ -46,12 +46,12 @@
       <groupId>com.google.flogger</groupId>
       <artifactId>flogger</artifactId>
       <version>0.4</version>
-      <scope>optional</scope>
+      <optional>true</optional>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <scope>optional</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
