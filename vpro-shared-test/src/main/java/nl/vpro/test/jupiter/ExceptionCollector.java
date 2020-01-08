@@ -29,7 +29,7 @@ public class ExceptionCollector implements InvocationInterceptor, ParameterResol
 
          try {
              invocation.proceed();
-         } catch (Exception e) {
+         } catch (Throwable e) {
              fails.add(new Fail(invocation, invocationContext, e));
              throw e;
          }

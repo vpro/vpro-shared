@@ -33,8 +33,9 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
         Invocation<Void> invocation,
         ReflectiveInvocationContext<Method> invocationContext,
         ExtensionContext extensionContext) throws Throwable {
-
-        if (! fails.isEmpty()){
+        boolean hasNoAbortAnnotation =  invocationContext.getExecutable().getAnnotation(NoAbort.class) != null;
+        boolean skip = ! hasNoAbortAnnotation && ! fails.isEmpty();
+        if (skip) {
              throw new TestAbortedException("An exception occured already " + fails.get(0).getInvocationContext().getExecutable().getName());
          }
         super.interceptTestMethod(invocation, invocationContext, extensionContext);
