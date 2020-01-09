@@ -14,16 +14,17 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>uk.org.lidalia</groupId>
       <artifactId>lidalia-slf4j-ext</artifactId>
-      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-ext</artifactId>
-      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
    <!-- <dependency>
       <groupId>org.slf4j</groupId>
