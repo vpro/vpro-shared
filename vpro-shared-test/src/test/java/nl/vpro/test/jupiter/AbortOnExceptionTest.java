@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(AbortOnException.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
-@Disabled("A test is failing on purpose because we're testing just that")
+//@Disabled("A test is failing on purpose because we're testing just that")
 class AbortOnExceptionTest {
     @Order(1)
     @Test
@@ -25,20 +25,26 @@ class AbortOnExceptionTest {
     @Order(2)
     @Test
     void secondTest() throws Exception {
+        Assumptions.assumeTrue(1 == 0);
         log.info("b");
-        throw new Exception("exception from second test");
     }
     @Order(3)
     @Test
-    void thirdTest(List<Exception> exceptions) {
+    void thirdTest() throws Exception {
         log.info("c");
+        throw new Exception("exception from third test");
+    }
+    @Order(3)
+    @Test
+    void fourthTest() {
+        log.info("d");
         Assertions.fail();
     }
 
-    @Order(4)
+    @Order(5)
     @Test
-    void fourthTest() {
-        log.info("c");
+    void fifthTest() {
+        log.info("e");
         Assertions.fail();
     }
 
