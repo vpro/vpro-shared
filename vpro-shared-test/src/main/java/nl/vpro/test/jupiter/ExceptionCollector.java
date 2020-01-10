@@ -31,6 +31,7 @@ public class ExceptionCollector implements InvocationInterceptor, ParameterResol
          try {
              invocation.proceed();
          } catch (IncompleteExecutionException  te) {
+             log.debug("These kind of exceptions are used by junit itself to abort tests, and are not exception which should kind as failures.");
              throw te;
          } catch (Throwable e) {
              fails.add(new Fail(invocation, invocationContext, e));
@@ -57,7 +58,7 @@ public class ExceptionCollector implements InvocationInterceptor, ParameterResol
     }
 
     @Getter
-    class Fail {
+    static class Fail {
         private final Throwable exception;
         private final ReflectiveInvocationContext<Method>  invocationContext;
         private final Invocation<Void>  invocation;
