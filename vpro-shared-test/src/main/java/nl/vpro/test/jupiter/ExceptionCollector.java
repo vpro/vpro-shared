@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.extension.*;
+import org.opentest4j.IncompleteExecutionException;
 
 /**
  * @author Michiel Meeuwissen
@@ -29,6 +30,8 @@ public class ExceptionCollector implements InvocationInterceptor, ParameterResol
 
          try {
              invocation.proceed();
+         } catch (IncompleteExecutionException  te) {
+             throw te;
          } catch (Throwable e) {
              fails.add(new Fail(invocation, invocationContext, e));
              throw e;

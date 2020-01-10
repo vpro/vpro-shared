@@ -428,7 +428,6 @@ public class JAXBTestUtil {
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
         StreamResult result = new StreamResult(new StringWriter());
         transformer.transform(new StreamSource(new ByteArrayInputStream(xml.getBytes(UTF_8))), result);
         String xmlString = result.getWriter().toString();
