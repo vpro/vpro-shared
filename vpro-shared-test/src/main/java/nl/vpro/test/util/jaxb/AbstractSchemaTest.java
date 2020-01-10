@@ -46,10 +46,6 @@ public class AbstractSchemaTest {
     @BeforeAll
     public static void generateXSDs() throws JAXBException, IOException {
         context = generate(
-
-
-
-
         );
 
     }
@@ -104,7 +100,7 @@ public class AbstractSchemaTest {
             .withFailMessage("" + file + " should be equal to " + getClass().getResource("/schema/" + file.getName())).isFalse();
     }
 
-    protected static JAXBContext generate(Class... classes) throws JAXBException, IOException {
+    protected static JAXBContext generate(Class<?>... classes) throws JAXBException, IOException {
         //DocumentationAdder collector = new DocumentationAdder(classes);
 
         JAXBContext context = JAXBContext.newInstance(classes);
