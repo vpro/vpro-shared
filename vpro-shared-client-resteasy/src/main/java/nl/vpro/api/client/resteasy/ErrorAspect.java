@@ -3,9 +3,7 @@ package nl.vpro.api.client.resteasy;
 import lombok.Getter;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 
 import javax.ws.rs.WebApplicationException;
@@ -112,7 +110,10 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             l.error("Error for {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
-                args == null ? "(no args)" : Arrays.stream(args).map(ErrorAspect.this::valueToString).collect(joining("\n")),
+                args == null ? "(no args)" :
+                    Arrays.stream(args)
+                        .map(ErrorAspect.this::valueToString)
+                        .collect(joining("\n")),
                 mes);
         } else {
 
@@ -148,7 +149,8 @@ public class ErrorAspect<T, E> implements InvocationHandler {
     protected static final String[] HEADERS = new String[] {
         "Set-Cookie", // may give information about which backend server was used
         "X-ProxyInstancename",
-        "Content-Type" // problem may be related to json vs xml?
+        "Content-Type",
+        // problem may be related to json vs xml?
     };
     protected Message getMessage(WebApplicationException we) {
         StringBuilder mes = new StringBuilder();
@@ -183,13 +185,24 @@ public class ErrorAspect<T, E> implements InvocationHandler {
                     mes.append(response.getStatus()).append(':').append(we.getMessage());
                 }
             }
-            for (String s : HEADERS) {
-                List<Object> v = response.getMetadata().get(s);
-                if (v != null) {
+            if (we.getResponse().getStatusInfo().getStatusCode() == HttpResponseCodes.SC_INTERNAL_SERVER_ERROR) {
+                // log all headers, this should be debuggable as good as possible
+                for (Map.Entry<String, List<Object>> s : response.getMetadata().entrySet()) {
                     mes.append("; ");
-                    mes.append(s);
+                    mes.append(s.getKey());
                     mes.append('=');
-                    mes.append(v.stream().map(Objects::toString).collect(joining(",")));
+                    List<Object> value = s.getValue();
+                    mes.append(value.stream().map(Objects::toString).collect(joining(",")));
+                }
+            } else {
+                for (String s : HEADERS) {
+                    List<Object> v = response.getMetadata().get(s);
+                    if (v != null) {
+                        mes.append("; ");
+                        mes.append(s);
+                        mes.append('=');
+                        mes.append(v.stream().map(Objects::toString).collect(joining(",")));
+                    }
                 }
             }
         } catch (IllegalStateException ise) {
@@ -202,6 +215,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
 
         return new Message(error, mes.toString());
     }
+
 
     protected String getMessage(Object o) {
         try {
