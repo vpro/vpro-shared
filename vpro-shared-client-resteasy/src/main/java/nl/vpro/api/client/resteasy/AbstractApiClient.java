@@ -129,10 +129,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     protected Boolean registerMBean = false;
 
-
     @Getter
     protected  Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
-
 
     protected ClassLoader classLoader;
 
@@ -844,7 +842,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         return buildWithErrorClass(engine, service, null, errorClass, buildFurther);
     }
 
-      protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
+    protected <T> T buildWithErrorClass(ClientHttpEngine engine, Class<T> service, Class<?> errorClass) {
         return buildWithErrorClass(engine, service, null, errorClass, null);
     }
 
@@ -976,7 +974,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             .sum();
     }
 
-
     public BrowserCache getBrowserCache() {
         return resteasyBrowserCache;
     }
@@ -984,13 +981,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
+
     public void setBrowserCache(BrowserCache browserCache) {
         if (! Objects.equals(browserCache, this.resteasyBrowserCache)) {
             this.resteasyBrowserCache = browserCache;
             invalidate();
         }
     }
-
 
     @PreDestroy
     public void shutdown() {
