@@ -216,6 +216,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
         return new Message(error, mes.toString());
     }
 
+
     protected String getMessage(Object o) {
         try {
             Method getMessage = o.getClass().getMethod("getMessage");
