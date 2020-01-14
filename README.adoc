@@ -1,5 +1,5 @@
 = VPRO Shared modules
-image:https://travis-ci.org/vpro/vpro-shared.svg?[Build Status,link=https://travis-ci.org/vpro/vpro-shared]
+image:https://travis-ci.org/vpro/vpro-shared.svg[Build Status,link=https://travis-ci.org/vpro/vpro-shared]
 image:https://img.shields.io/maven-central/v/nl.vpro.shared/vpro-shared-parent.svg?label=Maven%20Central[Maven Central,link=https://search.maven.org/search?q=g:%22nl.vpro.shared%22]
 image:http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-parent.svg?color=blue[javadoc,link=http://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-parent]
 image:https://codecov.io/gh/vpro/vpro-shared/branch/master/graph/badge.svg[codecov,link=https://codecov.io/gh/vpro/vpro-shared]
