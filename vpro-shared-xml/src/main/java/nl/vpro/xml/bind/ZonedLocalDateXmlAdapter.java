@@ -34,7 +34,7 @@ public class ZonedLocalDateXmlAdapter extends XmlAdapter<String, LocalDate> {
     }
 
     @Override
-    public String marshal(LocalDate v) throws Exception {
+    public String marshal(LocalDate v) {
         return v.atStartOfDay(DEFAULT_ZONE).format(FORMATTER);
     }
 

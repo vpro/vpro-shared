@@ -28,7 +28,7 @@ public class ElasticSearchIteratorITest {
 
 
     @Test
-    public void test() throws Exception {
+    public void test() {
         try (ElasticSearchIterator<Map<String, Object>> i = new ElasticSearchIterator<>(client, SearchHit::getSourceAsMap)) {
             i.prepareSearch("apimedia");
             while(i.hasNext()) {

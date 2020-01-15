@@ -114,7 +114,7 @@ public class SplashPageFilter implements Filter {
         log.info("Destroying SplashPage Filter.");
     }
 
-    private boolean applyFilter(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+    private boolean applyFilter(HttpServletRequest request, HttpServletResponse response) {
         return isSplashPageActive(request) && withinDateRange() && cookieNotSet(request) && notExcludedByStrategy(request);
     }
 

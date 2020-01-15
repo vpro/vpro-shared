@@ -18,7 +18,7 @@ public class JsonBridgeTest {
     private static final String LONG_STRING = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 
     @Test
-    public void testObjectToString() throws Exception {
+    public void testObjectToString() {
         String string = "[{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/320x180_180.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/640x360_1000.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/854x480_1500.m4v\"}]\n"
             ;
 
@@ -35,7 +35,7 @@ public class JsonBridgeTest {
     }
 
     @Test
-    public void testObjectToStringWithDuration() throws Exception {
+    public void testObjectToStringWithDuration() {
         String string = "[{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/320x180_180.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/640x360_1000.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/854x480_1500.m4v\"}]\n";
 
         JsonBridge bridge = new JsonBridge();

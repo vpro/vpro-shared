@@ -27,7 +27,7 @@ public class LocalizedStringTest {
     }
 
     @Test
-    public void xml() throws IOException, SAXException {
+    public void xml() {
         A a = new A();
         a.string = LocalizedString.of("bla", Locales.DUTCH);
         JAXBTestUtil.roundTripAndSimilar(a, "<local:a xmlns:local=\"uri:local\">\n" +
@@ -36,7 +36,7 @@ public class LocalizedStringTest {
     }
 
     @Test
-    public void json() throws Exception {
+    public void json() {
         A a = new A();
         a.string = LocalizedString.of("bla", Locales.NETHERLANDISH);
         Jackson2TestUtil.roundTripAndSimilar(a, "{\n" +

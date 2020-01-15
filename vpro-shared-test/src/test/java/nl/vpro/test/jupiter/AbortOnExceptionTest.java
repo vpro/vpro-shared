@@ -24,7 +24,7 @@ class AbortOnExceptionTest {
     }
     @Order(2)
     @Test
-    void secondTest() throws Exception {
+    void secondTest() {
         Assumptions.assumeTrue(1 == 0);
         log.info("b");
     }
