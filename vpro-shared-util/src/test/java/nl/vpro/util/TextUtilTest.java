@@ -9,7 +9,7 @@ import java.util.Locale;
 
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static nl.vpro.util.TextUtil.isValid;
 import static nl.vpro.util.TextUtil.sanitize;
@@ -212,5 +212,14 @@ public class TextUtilTest {
             .isEqualTo("Zanger Van Boven is er duidelijk over: “Je kan deze cd zien als een retrospectief van toen tot nu.” Zo staan er nieuwe nummers op het album die enkele weken voor de opnamesessies zijn geschreven, maar ook oude nummers die al meegaan sinds dat de band enkele jaren geleden haar eerste album uitbracht. In sommige nummers zijn de inspiratiebronnen van de band goed te herkennen. Zo doet de gitaar in ‘Voor Het Fatsoen’ denken aan ‘Norwegian Wood’ (The Beatles) en verraadt het connecties met de Engelse beatmuziek uit de jaren 60. ‘Zo is het Maar Net’ heeft iets van ‘Another Brick In The Wall’ (Pink Floyd) en laat zien dat de band zich ook heeft laten vormen door de psychedelische rock uit de jaren 70. Zo is de cd niet alleen een kijkje in de keuken van de band zelf, maar is het ook een greep uit 60 jaar popmuziek.");
 
         assertThat(TextUtil.sanitize("‘Ik hoop dat mensen na mijn film de liefde bedrijven’\u0000.")).isEqualTo("‘Ik hoop dat mensen na mijn film de liefde bedrijven’ .");
+    }
+
+    @Test
+    public void strikeThrough() {
+        assertThat(TextUtil.strikeThrough("foo bar 123")).isEqualTo("f̶o̶o̶ ̶b̶a̶r̶ ̶1̶2̶3̶");
+    }
+    @Test
+    public void underLine() {
+        assertThat(TextUtil.underLine("foo bar 123")).isEqualTo("f̲o̲o̲ ̲b̲a̲r̲ ̲1̲2̲3̲");
     }
 }

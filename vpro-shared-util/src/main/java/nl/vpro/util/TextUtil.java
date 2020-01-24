@@ -225,4 +225,31 @@ public class TextUtil {
             return text;
         }
     }
+
+    /**
+     * Gives a representation of the string which is completely 'stroke through' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String strikeThrough(String s) {
+        return controlEach(s, '\u0336');
+    }
+
+     /**
+     * Gives a representation of the string which is completely 'underlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String underLine(String s) {
+        return controlEach(s, '\u0332');
+    }
+    /**
+     * @since 2.11
+     */
+    public static String controlEach(String s, Character control) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i <  s.length(); i++) {
+            result.append(s.charAt(i));
+            result.append(control);
+        }
+        return result.toString();
+    }
 }
