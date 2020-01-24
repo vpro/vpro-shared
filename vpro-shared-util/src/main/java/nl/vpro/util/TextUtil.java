@@ -234,12 +234,45 @@ public class TextUtil {
         return controlEach(s, '\u0336');
     }
 
-     /**
+    /**
      * Gives a representation of the string which is completely 'underlined' (using unicode control characters)
      * @since 2.11
      */
     public static String underLine(String s) {
         return controlEach(s, '\u0332');
+    }
+
+
+     /**
+     * Gives a representation of the string which is completely 'double underlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String underLineDouble(String s) {
+        return controlEach(s, '\u0333');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'overlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String overLine(String s) {
+        return controlEach(s, '\u0305');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'double overlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String overLineDouble(String s) {
+        return controlEach(s, '\u033f');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'diaeresised under' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String underDiaeresis(String s) {
+        return controlEach(s, '\u0324');
     }
     /**
      * @since 2.11

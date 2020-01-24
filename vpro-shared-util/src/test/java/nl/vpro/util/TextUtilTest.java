@@ -222,4 +222,21 @@ public class TextUtilTest {
     public void underLine() {
         assertThat(TextUtil.underLine("foo bar 123")).isEqualTo("f̲o̲o̲ ̲b̲a̲r̲ ̲1̲2̲3̲");
     }
+    @Test
+    public void underLineDouble() {
+        assertThat(TextUtil.underLineDouble("foo bar 123")).isEqualTo("f̳o̳o̳ ̳b̳a̳r̳ ̳1̳2̳3̳");
+    }
+    @Test
+    public void overLine() {
+        assertThat(TextUtil.overLine("foo bar 123")).isEqualTo("f̅o̅o̅ ̅b̅a̅r̅ ̅1̅2̅3̅");
+    }
+    @Test
+    public void overLineDouble() {
+        assertThat(TextUtil.overLineDouble("foo bar 123")).isEqualTo("f̿o̿o̿ ̿b̿a̿r̿ ̿1̿2̿3̿");
+    }
+    @Test
+    public void underDiaeresis() {
+        assertThat(TextUtil.underDiaeresis("foo bar 123")).isEqualTo("f̤o̤o̤ ̤b̤a̤r̤ ̤1̤2̤3̤");
+    }
 }
+
