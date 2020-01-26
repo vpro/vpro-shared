@@ -4,13 +4,13 @@
  */
 package nl.vpro.util;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.junit.jupiter.api.Test;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.vpro.util.TextUtil.isValid;
 import static nl.vpro.util.TextUtil.sanitize;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,9 +121,9 @@ public class TextUtilTest {
     }
 
     @Test
-    public void testSanitizeUnicodeChar() throws UnsupportedEncodingException {
+    public void testSanitizeUnicodeChar() {
         String result = sanitize("KRO De Re&#252;nie");
-        assertThat(result.getBytes("UTF8")).isEqualTo("KRO De Reünie".getBytes("UTF8"));
+        assertThat(result.getBytes(UTF_8)).isEqualTo("KRO De Reünie".getBytes(UTF_8));
     }
 
     @Test
