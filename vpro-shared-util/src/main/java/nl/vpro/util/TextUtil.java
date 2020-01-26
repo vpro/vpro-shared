@@ -275,6 +275,9 @@ public class TextUtil {
      * @since 2.11
      */
     public static String controlEach(CharSequence s, Character control) {
+        if (s == null) {
+            return null;
+        }
         StringBuilder result = new StringBuilder();
         for (int i = 0; i <  s.length(); i++) {
             result.append(s.charAt(i));
