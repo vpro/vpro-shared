@@ -52,6 +52,7 @@
   <modules>
     <module>vpro-shared-camel</module>
     <module>vpro-shared-client-resteasy</module>
+    <module>vpro-shared-client-resteasy-3</module>
     <module>vpro-shared-configuration</module>
     <module>vpro-shared-elasticsearch</module>
     <module>vpro-shared-elasticsearch5</module>
