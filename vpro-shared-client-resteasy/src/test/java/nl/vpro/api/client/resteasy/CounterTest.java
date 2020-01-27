@@ -5,6 +5,8 @@ import java.time.Duration;
 import org.assertj.core.data.Percentage;
 import org.junit.Test;
 
+import nl.vpro.jmx.Counter;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 /**

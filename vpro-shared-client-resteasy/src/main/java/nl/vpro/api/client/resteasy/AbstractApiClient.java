@@ -52,7 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.jmx.MBeans;
+import nl.vpro.jmx.*;
 import nl.vpro.resteasy.JacksonContextResolver;
 import nl.vpro.util.*;
 
@@ -802,7 +802,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
      * @param service The service interface
      * @param proxy The current proxy object for the service interface
      * @param <T> The type of the service interface
-     * @return  A new proxy, with the functionality of {@link CountAspect} added.
+     * @return  A new proxy, with the functionality of {@link nl.vpro.jmx.CountAspect} added.
      */
     protected <T> T proxyCounter(Class<T> service, T proxy) {
         return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log, warnThreshold);
@@ -879,7 +879,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new JacksonContextResolver(objectMapper));
         builder.register(new AcceptRequestFilter(accept));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
-        builder.register(new CountFilter(getObjectName(), log));
+        builder.register(new CountFilter(log));
 
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 

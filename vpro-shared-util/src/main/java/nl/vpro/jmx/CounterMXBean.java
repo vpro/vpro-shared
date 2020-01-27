@@ -1,12 +1,10 @@
-package nl.vpro.api.client.resteasy3;
+package nl.vpro.jmx;
 
-import nl.vpro.jmx.Description;
-import nl.vpro.jmx.Units;
-
-import javax.management.MXBean;
 import java.time.Duration;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.management.MXBean;
 
 /**
  * @author Michiel Meeuwissen

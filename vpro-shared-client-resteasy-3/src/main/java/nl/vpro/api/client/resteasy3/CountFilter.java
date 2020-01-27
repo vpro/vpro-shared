@@ -1,12 +1,11 @@
 package nl.vpro.api.client.resteasy3;
 
+import javax.management.ObjectName;
+import javax.ws.rs.client.*;
+
 import org.slf4j.Logger;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientResponseContext;
-import javax.ws.rs.client.ClientResponseFilter;
+import nl.vpro.jmx.CountAspect;
 
 /**
  * @author Michiel Meeuwissen
@@ -14,13 +13,11 @@ import javax.ws.rs.client.ClientResponseFilter;
  */
 class CountFilter implements ClientResponseFilter  {
 
-    private final ObjectName name;
     private final Logger log;
 
 
 
     CountFilter(ObjectName name, Logger log) {
-        this.name = name;
         this.log = log;
     }
 
@@ -29,7 +26,7 @@ class CountFilter implements ClientResponseFilter  {
         CountAspect.Local local = CountAspect.currentThreadLocal.get();
 
         if (local != null) {
-            String key = AbstractApiClient.methodToString(local.method);
+            String key = AbstractApiClient.methodToString(local.getMethod());
             if (responseContext.getStatus() != 200) {
                 key += "/" + responseContext.getStatus();
             }
@@ -40,16 +37,6 @@ class CountFilter implements ClientResponseFilter  {
             local.requestEnd(requestContext.getUri(), key);
         } else {
             log.warn("No count aspect local found for {}", requestContext.getUri());
-        }
-
-
-    }
-
-    ObjectName getObjectName(String m) {
-        try {
-            return new ObjectName(name.toString() + ",name=" + m.replaceAll(":", "_"));
-        } catch (MalformedObjectNameException e) {
-            throw new RuntimeException(e);
         }
     }
 }

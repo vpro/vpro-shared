@@ -1,4 +1,4 @@
-package nl.vpro.api.client.resteasy;
+package nl.vpro.jmx;
 
 import lombok.Data;
 
@@ -90,7 +90,7 @@ public class CountAspect<T> implements InvocationHandler {
 
 
     @SuppressWarnings("unchecked")
-    static <T> T proxyCounter(
+    public static <T> T proxyCounter(
         Map<String, Counter> counter,
         Duration countWindow,
         Integer bucketCount,
