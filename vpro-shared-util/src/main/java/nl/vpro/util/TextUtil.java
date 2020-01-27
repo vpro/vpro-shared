@@ -50,7 +50,6 @@ public class TextUtil {
         return input.trim().replaceAll("\\s+", " ");
     }
 
-
     /**
      * Replaces all line separators with a single white space character. The line separator character (\u2028) is
      * forbidden in most modern browsers. These browsers won't render any text containing this character.
@@ -76,7 +75,6 @@ public class TextUtil {
             replaceNonBreakingSpace(input)
 
         );
-
     }
 
     /**
@@ -136,7 +134,6 @@ public class TextUtil {
     }
 
 
-
     private static Set<Pattern> DUTCH_PARTICLES =
         new HashSet<>(
             Arrays.asList(
@@ -185,7 +182,7 @@ public class TextUtil {
     }
 
 
-    static int lastIndexOfWhiteSpace(String s) {
+    static int lastIndexOfWhiteSpace(CharSequence s) {
         for (int i = s.length() - 1; i > 0; i--) {
             if (Character.isWhitespace(s.charAt(i))) {
                 return i;
@@ -224,5 +221,68 @@ public class TextUtil {
         } else {
             return text;
         }
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'stroke through' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String strikeThrough(CharSequence s) {
+        return controlEach(s, '\u0336');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'underlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String underLine(CharSequence s) {
+        return controlEach(s, '\u0332');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'double underlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String underLineDouble(CharSequence s) {
+        return controlEach(s, '\u0333');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'overlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String overLine(CharSequence s) {
+        return controlEach(s, '\u0305');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'double overlined' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String overLineDouble(CharSequence s) {
+        return controlEach(s, '\u033f');
+    }
+
+    /**
+     * Gives a representation of the string which is completely 'diaeresised under' (using unicode control characters)
+     * @since 2.11
+     */
+    public static String underDiaeresis(CharSequence s) {
+        return controlEach(s, '\u0324');
+    }
+
+    /**
+     * @since 2.11
+     */
+    public static String controlEach(CharSequence s, Character control) {
+        if (s == null) {
+            return null;
+        }
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i <  s.length(); i++) {
+            result.append(s.charAt(i));
+            result.append(control);
+        }
+        return result.toString();
     }
 }

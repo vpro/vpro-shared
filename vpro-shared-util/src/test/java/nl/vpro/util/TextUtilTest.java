@@ -4,13 +4,13 @@
  */
 package nl.vpro.util;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.vpro.util.TextUtil.isValid;
 import static nl.vpro.util.TextUtil.sanitize;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,9 +121,9 @@ public class TextUtilTest {
     }
 
     @Test
-    public void testSanitizeUnicodeChar() throws UnsupportedEncodingException {
+    public void testSanitizeUnicodeChar() {
         String result = sanitize("KRO De Re&#252;nie");
-        assertThat(result.getBytes("UTF8")).isEqualTo("KRO De Reünie".getBytes("UTF8"));
+        assertThat(result.getBytes(UTF_8)).isEqualTo("KRO De Reünie".getBytes(UTF_8));
     }
 
     @Test
@@ -213,4 +213,30 @@ public class TextUtilTest {
 
         assertThat(TextUtil.sanitize("‘Ik hoop dat mensen na mijn film de liefde bedrijven’\u0000.")).isEqualTo("‘Ik hoop dat mensen na mijn film de liefde bedrijven’ .");
     }
+
+    @Test
+    public void strikeThrough() {
+        assertThat(TextUtil.strikeThrough("foo bar 123")).isEqualTo("f̶o̶o̶ ̶b̶a̶r̶ ̶1̶2̶3̶");
+    }
+    @Test
+    public void underLine() {
+        assertThat(TextUtil.underLine("foo bar 123")).isEqualTo("f̲o̲o̲ ̲b̲a̲r̲ ̲1̲2̲3̲");
+    }
+    @Test
+    public void underLineDouble() {
+        assertThat(TextUtil.underLineDouble("foo bar 123")).isEqualTo("f̳o̳o̳ ̳b̳a̳r̳ ̳1̳2̳3̳");
+    }
+    @Test
+    public void overLine() {
+        assertThat(TextUtil.overLine("foo bar 123")).isEqualTo("f̅o̅o̅ ̅b̅a̅r̅ ̅1̅2̅3̅");
+    }
+    @Test
+    public void overLineDouble() {
+        assertThat(TextUtil.overLineDouble("foo bar 123")).isEqualTo("f̿o̿o̿ ̿b̿a̿r̿ ̿1̿2̿3̿");
+    }
+    @Test
+    public void underDiaeresis() {
+        assertThat(TextUtil.underDiaeresis("foo bar 123")).isEqualTo("f̤o̤o̤ ̤b̤a̤r̤ ̤1̤2̤3̤");
+    }
 }
+

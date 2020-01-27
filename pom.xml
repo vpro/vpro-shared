@@ -194,14 +194,14 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>5.1.9.RELEASE</spring.version>
-    <spring-security.version>5.1.6.RELEASE</spring-security.version>
+    <spring.version>5.1.13.RELEASE</spring.version>
+    <spring-security.version>5.1.7.RELEASE</spring-security.version>
     <!-- seems to break CAS login:
      <spring.version>5.2.0.RELEASE</spring.version>
      <spring-security.version>5.2.0.RELEASE</spring-security.version>
     -->
-    <jackson2.version>2.10.1</jackson2.version>    <!-- equals to poms-parent -->
-    <junit.version>5.6.0-M1</junit.version>
+    <jackson2.version>2.10.2</jackson2.version>    <!-- equals to poms-parent -->
+    <junit.version>5.6.0</junit.version>
     <mockito.version>3.1.0</mockito.version>
     <assertj.version>3.14.0</assertj.version>
     <mycila.version>2.9.ga</mycila.version>
