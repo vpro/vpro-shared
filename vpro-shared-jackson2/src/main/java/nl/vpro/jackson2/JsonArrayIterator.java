@@ -262,32 +262,44 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         }
     }
 
-    protected void write(OutputStream out, final Function<T, Void> logging) throws IOException {
+
+    /**
+     * Write the entire stream to an output stream
+     */
+    public void write(OutputStream out, final Function<T, Void> logging) throws IOException {
+        write(this, out, logging);
+    }
+
+
+  /**
+     * Write the entire stream to an output stream
+     */
+    public static <T> void write(CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
         JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out);
         jg.writeStartObject();
         jg.writeArrayFieldStart("array");
-        while (hasNext()) {
+        while (iterator.hasNext()) {
             T change = null;
             try {
-                change = next();
+                change = iterator.next();
                 if (change != null) {
                     jg.writeObject(change);
                 } else {
                     jg.writeNull();
                 }
             } catch (Exception e) {
-                logger.warn(e.getMessage());
+                log.warn(e.getMessage());
                 jg.writeObject(e.getMessage());
             }
             if (logging != null) {
                 logging.apply(change);
             }
-
         }
         jg.writeEndArray();
         jg.writeEndObject();
         jg.flush();
     }
+
 
     @Override
     @NonNull

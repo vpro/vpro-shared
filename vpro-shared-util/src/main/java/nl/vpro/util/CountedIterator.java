@@ -1,7 +1,10 @@
 package nl.vpro.util;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -82,5 +85,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     default CountedPeekingIterator<T> peeking() {
         return new CountedPeekingIteratorImpl<>(this);
     }
+
+
 }
 
