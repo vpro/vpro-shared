@@ -4,17 +4,13 @@ import java.util.ArrayList;
 
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 
-import org.jboss.resteasy.core.Headers;
 import org.junit.Before;
 import org.junit.Test;
 
-import nl.vpro.rs.client.AcceptRequestFilter;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -24,7 +20,8 @@ public class AcceptRequestFilterTest {
 
     AcceptRequestFilter instance = new AcceptRequestFilter(MediaType.APPLICATION_JSON_TYPE);
     ClientRequestContext context = mock(ClientRequestContext.class);
-    Headers<Object> headers = new Headers<>();
+    MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
+
     @Before
     public void setup() {
         reset(context);
