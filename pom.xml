@@ -51,6 +51,8 @@
 
   <modules>
     <module>vpro-shared-camel</module>
+    <module>vpro-shared-rs-client</module>
+
     <module>vpro-shared-client-resteasy</module>
     <module>vpro-shared-client-resteasy-3</module>
     <module>vpro-shared-configuration</module>

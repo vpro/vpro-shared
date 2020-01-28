@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -46,8 +45,7 @@ import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -607,9 +605,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         return client.build();
     }
 
+
+
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ApacheHttpClientEngine.create(
+            clientHttpEngine = ApacheHttpClient4EngineFactory.create(
                 getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL));
 
         }
@@ -618,7 +618,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null)
+            clientHttpEngineNoTimeout = ApacheHttpClient4EngineFactory.create(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null)
             );
         }
         return clientHttpEngineNoTimeout;
@@ -802,7 +802,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
      * @param service The service interface
      * @param proxy The current proxy object for the service interface
      * @param <T> The type of the service interface
-     * @return  A new proxy, with the functionality of {@link nl.vpro.jmx.CountAspect} added.
+     * @return  A new proxy, with the functionality of {@link CountAspect} added.
      */
     protected <T> T proxyCounter(Class<T> service, T proxy) {
         return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log, warnThreshold);
@@ -874,7 +874,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
      protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
-        ResteasyClientBuilder builder = new ResteasyClientBuilderImpl()
+         ResteasyClientBuilder builder = new ResteasyClientBuilder()
             .httpEngine(engine);
         builder.register(new JacksonContextResolver(objectMapper));
         builder.register(new AcceptRequestFilter(accept));
@@ -1000,9 +1000,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         super.finalize();
     }
 
-    static String methodToString(Method m) {
-        return m.getDeclaringClass().getSimpleName() + "." + m.getName();
-    }
 
     private static class MyConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
 
