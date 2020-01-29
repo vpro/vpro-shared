@@ -17,6 +17,10 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-rs</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>

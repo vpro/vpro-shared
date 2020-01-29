@@ -13,6 +13,8 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.junit.Test;
 
+import nl.vpro.rs.converters.DateParamConverterProvider;
+
 /**
  * @author Michiel Meeuwissen
  * @since ...
