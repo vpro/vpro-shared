@@ -43,10 +43,6 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-resteasy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-util</artifactId>
     </dependency>
     <dependency>
