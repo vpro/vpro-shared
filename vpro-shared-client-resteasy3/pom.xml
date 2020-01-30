@@ -7,7 +7,7 @@
     <groupId>nl.vpro.shared</groupId>
     <version>2.11-SNAPSHOT</version>
   </parent>
-  <artifactId>vpro-shared-client-resteasy-3</artifactId>
+  <artifactId>vpro-shared-client-resteasy3</artifactId>
 
   <description>
     Utilities related to resteasy api clients.
