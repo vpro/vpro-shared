@@ -13,4 +13,9 @@ public class Convertors extends AbstractModule {
     protected void configure() {
         DurationConvertor.register(binder());
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ":" + DurationConvertor.class.getSimpleName();
+    }
 }

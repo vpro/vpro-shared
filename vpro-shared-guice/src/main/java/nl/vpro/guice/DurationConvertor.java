@@ -1,14 +1,13 @@
 package nl.vpro.guice;
 
 
-import java.time.Duration;
-
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.TypeConverter;
-
 import nl.vpro.util.TimeUtils;
+
+import java.time.Duration;
 
 /**
  * @author Michiel Meeuwissen
@@ -25,6 +24,5 @@ public class DurationConvertor implements TypeConverter {
             return TimeUtils.parseDuration(s).orElse(null);
         }
         return null;
-
     }
 }
