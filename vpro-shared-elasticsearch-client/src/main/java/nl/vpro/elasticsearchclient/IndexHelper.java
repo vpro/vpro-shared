@@ -66,7 +66,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             this.mappings.put(type, mapping);
             return this;
         }
-
+        public Builder mapping(Supplier<String> mapping) {
+            this.mappings.put(DOC, mapping);
+            return this;
+        }
 
         @Deprecated
         public Builder mappingResource(String type, String mapping) {
@@ -74,12 +77,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         }
 
         public Builder mappingResource(String mapping) {
-            String[] split = mapping.split("/");
-            String fileName = split[split.length - 1];
-            int dot = fileName.lastIndexOf(".");
-            String type = fileName.substring(0, dot);
-            return mapping(type, () -> resourceToString(mapping));
+            return mapping(() -> resourceToString(mapping));
         }
+        @Deprecated
         public Builder mappings(Map<String, Supplier<String>> mappings) {
             this.mappings.putAll(mappings);
             return this;
@@ -138,6 +138,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     }
 
 
+    @Deprecated
     public static IndexHelper of(Logger log, ESClientFactory client, String indexName, String objectType) {
         return IndexHelper.builder().log(log)
             .client(client)
@@ -147,6 +148,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             .build();
     }
 
+    @Deprecated
     public static IndexHelper of(Logger log, ESClientFactory client, Supplier<String> indexName, String objectType) {
         return IndexHelper.builder().log(log)
             .client(client)
