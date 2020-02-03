@@ -15,6 +15,7 @@ import java.util.stream.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -114,10 +115,14 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         if (_autoEsVersion && esVersion == null) {
             try {
                 Response response = client.performRequest(new Request("GET", ""));
-                JsonNode read = Jackson2Mapper.getLenientInstance()
-                    .readerFor(ObjectNode.class)
-                    .readValue(response.getEntity().getContent());
-                esVersion = Version.parseIntegers(read.get("version").get("number").asText());
+                try {
+                    JsonNode read = Jackson2Mapper.getLenientInstance()
+                        .readerFor(ObjectNode.class)
+                        .readValue(response.getEntity().getContent());
+                    esVersion = Version.parseIntegers(read.get("version").get("number").asText());
+                } finally {
+                    EntityUtils.consumeQuietly(response.getEntity());
+                }
 
             } catch (IOException e) {
                 throw new IllegalStateException(e);
@@ -270,8 +275,16 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     if (routing != null) {
                         post.addParameter("routing", String.join(",", routing));
                     }
-                    Response res = client.performRequest(post);
-                    response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(res.getEntity().getContent());
+
+                    HttpEntity responseEntity = null;
+                    try {
+                        Response res = client.performRequest(post);
+                        responseEntity = res.getEntity();
+                        response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
+                    } finally {
+                        EntityUtils.consumeQuietly(responseEntity);
+                    }
+
                 } catch (IOException ioe) {
                     //log.error(ioe.getMessage());
                     throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
@@ -321,11 +334,18 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                             post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                             post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                         }
-                        Response res = client.performRequest(post);
-                        response = Jackson2Mapper.getLenientInstance()
-                            .readerFor(JsonNode.class)
-                            .readTree(res.getEntity().getContent()
-                            );
+
+                        HttpEntity responseEntity = null;
+                        try {
+                            Response res = client.performRequest(post);
+                            responseEntity = res.getEntity();
+                            response = Jackson2Mapper.getLenientInstance()
+                                .readerFor(JsonNode.class)
+                                .readTree(responseEntity.getContent()
+                                );
+                        } finally {
+                            EntityUtils.consumeQuietly(responseEntity);
+                        }
                         log.debug("New scroll");
                         if (response.has(_SCROLL_ID)) {
                             String newScrollId = response.get(_SCROLL_ID).asText();
@@ -435,20 +455,28 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         if (scrollId != null) {
             try {
                 Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
-                Response res = client.performRequest(delete);
-                if (res.getStatusLine().getStatusCode() == 200) {
-                    log.debug("Deleted {}", res);
-                    SCROLL_IDS.remove(scrollId);
-                } else {
-                    log.warn("Something wrong {}", res);
+
+                HttpEntity responseEntity = null;
+                try {
+                    Response res = client.performRequest(delete);
+                    responseEntity = res.getEntity();
+                    if (res.getStatusLine().getStatusCode() == 200) {
+                        log.debug("Deleted {}", res);
+                        SCROLL_IDS.remove(scrollId);
+                    } else {
+                        log.warn("Something wrong {}", res);
+                    }
+                    scrollId = null;
+                } finally {
+                    EntityUtils.consumeQuietly(responseEntity);
                 }
-                scrollId = null;
             } catch (ResponseException re) {
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
                 } else {
                     log.warn(re.getMessage());
                 }
+                EntityUtils.consumeQuietly(re.getResponse().getEntity());
             } catch (Exception e) {
                 log.warn(e.getMessage());
             }
