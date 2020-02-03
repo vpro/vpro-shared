@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
@@ -312,7 +313,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public boolean checkIndex() {
         try {
             Response response = client().performRequest(new Request("HEAD", getIndexName()));
-            return response.getStatusLine().getStatusCode() != 404;
+            boolean result =  response.getStatusLine().getStatusCode() != 404;
+            EntityUtils.consumeQuietly(response.getEntity());
+            return result;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return false;
@@ -323,7 +326,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public void deleteIndex()  {
         try {
             Response delete = client().performRequest(new Request("DELETE", getIndexName()));
+
             log.info("{}", delete);
+            EntityUtils.consumeQuietly(delete.getEntity());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -784,6 +789,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
                 return Jackson2Mapper.getLenientInstance()
                     .readerFor(ObjectNode.class)
                     .readValue(inputStream);
+            } finally {
+                EntityUtils.consumeQuietly(entity);
             }
 
         } catch (IOException e) {
