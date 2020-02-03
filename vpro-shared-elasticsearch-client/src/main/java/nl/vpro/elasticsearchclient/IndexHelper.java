@@ -467,9 +467,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
                 if (exception instanceof ResponseException) {
                     ResponseException re = (ResponseException) exception;
                     Response response = re.getResponse();
-                    ObjectNode result = read(log, response);
-                    for (Consumer<ObjectNode> rl : listeners) {
-                        rl.accept(result);
+                    try {
+                        ObjectNode result = read(log, response);
+                        for (Consumer<ObjectNode> rl : listeners) {
+                            rl.accept(result);
+                        }
+                    } finally {
+                        EntityUtils.consumeQuietly(response.getEntity());
                     }
                 } else {
                     log.error("{}: {}", requestDescription, exception.getMessage(), exception);
