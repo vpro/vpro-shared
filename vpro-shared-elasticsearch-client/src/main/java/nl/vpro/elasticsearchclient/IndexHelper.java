@@ -1217,8 +1217,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     static protected void writeJson(Logger log, File  writeJsonDir, String id, JsonNode jsonNode) {
         if (writeJsonDir != null) {
             File file = new File(writeJsonDir, id.replaceAll(File.separator, "_") + ".json");
-            try {
-                Jackson2Mapper.getPrettyInstance().writeValue(new FileOutputStream(file), jsonNode);
+            try (OutputStream out = new FileOutputStream(file)) {
+                Jackson2Mapper.getPrettyInstance().writeValue(out, jsonNode);
                 log.info("Wrote {}", file);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
