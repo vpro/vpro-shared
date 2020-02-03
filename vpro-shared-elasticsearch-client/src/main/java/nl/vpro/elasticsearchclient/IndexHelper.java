@@ -134,7 +134,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
         this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
 
-
     }
 
 
@@ -663,6 +662,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             for (JsonNode n : docs) {
                 result.add(Optional.of(n));
             }
+
             return result;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -780,9 +780,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
     public static ObjectNode read(Logger log, Response response) {
         try {
             HttpEntity entity = response.getEntity();
-            return Jackson2Mapper.getLenientInstance()
-                .readerFor(ObjectNode.class)
-                .readValue(entity.getContent());
+            try (InputStream inputStream = entity.getContent()) {
+                return Jackson2Mapper.getLenientInstance()
+                    .readerFor(ObjectNode.class)
+                    .readValue(inputStream);
+            }
+
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -1038,8 +1041,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             @Override
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                try {
-                    IOUtils.copy(response.getEntity().getContent(), out);
+                try (InputStream inputStream = response.getEntity().getContent()) {
+                    IOUtils.copy(inputStream, out);
                     String[] content = out.toString("UTF-8").split("\\s+");
                     log.info("Found {}", Arrays.asList(content));
                     String clusterName = content[2];
