@@ -44,6 +44,8 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
     public static final String SEARCH = "/_search";
+    public static final String COUNT = "/_count";
+
     public static final String POST = "POST";
     public static final String GET = "GET";
     public static final String PUT = "PUT";
@@ -188,7 +190,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public RestClient client() {
         try {
             return clientAsync((c) -> {
-                log.debug("Created {}", c);
+                log.info("Index {}: {} entries", getIndexName(), count());
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -982,8 +984,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @Override
+    @SneakyThrows
     public long count() {
-        return count(new String[]{});
+        Request get = new Request(GET, getIndexName() + COUNT);
+        Response response = client()
+            .performRequest(get);
+
+        JsonNode result = read(response);
+        return result.get("count").longValue();
+
     }
 
     /**
