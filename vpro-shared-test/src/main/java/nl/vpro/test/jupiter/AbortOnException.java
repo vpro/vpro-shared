@@ -64,6 +64,7 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.METHOD})
     public @interface NoAbort {
+        String value() default "";
     }
     /**
      * @since 2.10
