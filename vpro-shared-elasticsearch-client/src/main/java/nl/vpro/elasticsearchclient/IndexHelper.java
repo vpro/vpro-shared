@@ -56,7 +56,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private Supplier<String> indexNameSupplier;
     private Supplier<String> settings;
     private List<String> aliases;
-    private ESClientFactory clientFactory;
+    private Supplier<RestClient> clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
     private ObjectMapper objectMapper;
     private File writeJsonDir;
@@ -104,7 +104,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(
         Logger log,
-        @lombok.NonNull  ESClientFactory client,
+        @NonNull Supplier<RestClient> client,
         ElasticSearchIndex elasticSearchIndex,
         Supplier<String> indexNameSupplier,
         Supplier<String> settings,

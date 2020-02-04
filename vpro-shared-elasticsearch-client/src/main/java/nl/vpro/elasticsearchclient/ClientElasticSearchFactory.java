@@ -2,21 +2,24 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.util.TimeUtils;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.http.HttpHost;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import nl.vpro.util.TimeUtils;
 
 
 /**
@@ -39,7 +42,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private Duration maxRetryTimeout = Duration.ofSeconds(60);
 
-    private final Map<String, RestClient> clients = new HashMap<>();
+    private final ConcurrentMap<String, RestClient> clients = new ConcurrentHashMap<>();
 
     private final int instance = instances++;
 
@@ -63,25 +66,23 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     }
 
     @Override
-    public CompletableFuture<RestClient> clientAsync(String logName, Consumer<RestClient> callback) {
-        RestClient present = clients.get(logName);
+    public CompletableFuture<RestClient> clientAsync(@Nullable String logName, Consumer<RestClient> callback) {
+        if (logName == null){
+            logName = "NULL";
+        }
+        RestClient present = clients.computeIfAbsent(logName, (ln) -> {
+            final RestClient client = createClient(ln);
+            return client;
+        });
         if (present != null) {
             callback.accept(present);
             return CompletableFuture.completedFuture(present);
         }
 
         Logger l = LoggerFactory.getLogger(logName);
-        HttpHost[] hosts = getHosts();
 
-        final RestClientBuilder clientBuilder = RestClient.builder(hosts);
-        final RestClient client = clientBuilder
-            .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
-                .setConnectTimeout((int) connectTimeout.toMillis())
-                .setSocketTimeout((int) socketTimeout.toMillis())
-                .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
-            )
-            //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
-            .build();
+
+        final RestClient client = createClient(logName);
 
         CompletableFuture<RestClient> future = new CompletableFuture<>();
         IndexHelper.getClusterName(log, client).whenComplete((foundClusterName, exception) -> {
@@ -102,6 +103,21 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         return future;
 
     }
+
+    private RestClient createClient(@NonNull String logName) {
+        HttpHost[] hosts = getHosts();
+        final RestClientBuilder clientBuilder = RestClient.builder(hosts);
+        final RestClient client = clientBuilder
+            .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
+                .setConnectTimeout((int) connectTimeout.toMillis())
+                .setSocketTimeout((int) socketTimeout.toMillis())
+                .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
+            )
+            //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
+            .build();
+        return client;
+    }
+
 
     protected HttpHost[] getHosts() {
         HttpHost[] httpHosts= Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
