@@ -2,23 +2,18 @@ package nl.vpro.util;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.logging.LoggerOutputStream;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.SimpleLoggerWrapper;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import org.slf4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-
-import nl.vpro.logging.LoggerOutputStream;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.SimpleLoggerWrapper;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
 
 /**
  * Wrapper around ProcessorBuilder
@@ -48,7 +43,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private Function<CharSequence, String> wrapLogInfo = CharSequence::toString;
 
-    private boolean closeStreams = true;
+    private Boolean closeStreams = null;
 
 
     public CommandExecutorImpl(String c) {
@@ -150,7 +145,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.commonArgs = commonArgs;
         this.useFileCache = useFileCache;
         this.batchSize = batchSize;
-        this.closeStreams = closeStreams == null || closeStreams;
+        this.closeStreams = closeStreams;
 
     }
 
@@ -349,24 +344,31 @@ public class CommandExecutorImpl implements CommandExecutor {
             .input(in)
             .output(out)
             .callback((c) -> {
-                if (this.closeStreams) {
-                    try {
-                        in.close();
-                    } catch (IOException ioe) {
-                        logger.warn(ioe.getMessage());
-                    }
-                    try {
-                        out.close();
-                    } catch (IOException ioe) {
-                        logger.warn(ioe.getMessage());
-                    }
-                }
+                closeIf(in, out);
             })
             .errorHandler((c, t) -> errorHandler.accept(t))
             .batch(batchSize)
             .build();
         copier.execute();
         return copier;
+    }
+
+    private boolean needsClose(Closeable closeable) {
+        if (this.closeStreams != null) {
+            return this.closeStreams;
+        }
+        return closeable != System.out && closeable != System.in && closeable != System.err;
+    }
+    private void closeIf(Closeable... closeables) {
+        for (Closeable closeable : closeables) {
+            if (needsClose(closeable)) {
+                try {
+                    closeable.close();
+                } catch (IOException ioe) {
+                    logger.warn(ioe.getMessage());
+                }
+            }
+        }
     }
 
 

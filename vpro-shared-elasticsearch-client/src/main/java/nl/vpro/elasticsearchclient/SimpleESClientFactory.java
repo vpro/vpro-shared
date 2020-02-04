@@ -1,8 +1,9 @@
 package nl.vpro.elasticsearchclient;
 
-import java.util.function.Supplier;
-
 import org.elasticsearch.client.RestClient;
+
+import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * @author Michiel Meeuwissen
@@ -17,6 +18,10 @@ public class SimpleESClientFactory implements ESClientFactory {
         this.string = string;
     }
 
+    public SimpleESClientFactory(RestClient client) {
+        this(client, () -> "simple");
+    }
+
     @Override
     public RestClient client(String logName) {
         return client;
@@ -25,5 +30,10 @@ public class SimpleESClientFactory implements ESClientFactory {
     @Override
     public String toString() {
         return string.get();
+    }
+
+    @Override
+    public void close() throws IOException {
+        client.close();
     }
 }

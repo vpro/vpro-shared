@@ -1,14 +1,17 @@
 package nl.vpro.elasticsearchclient;
 
-import lombok.*;
-
-import java.io.*;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import nl.vpro.elasticsearch.CreateIndex;
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.IndexHelperInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.util.Version;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -20,14 +23,16 @@ import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.elasticsearch.*;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.Version;
+import java.io.*;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
@@ -40,7 +45,7 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
  */
 @Getter
 @Setter
-public class IndexHelper implements IndexHelperInterface<RestClient> {
+public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
     public static final String SEARCH = "/_search";
     public static final String POST = "POST";
@@ -1207,6 +1212,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient> {
             }
         }
         this.writeJsonDir = file;
+    }
+
+    @Override
+    public void close() throws Exception {
+        clientFactory.close();
+        clientFactory = null;
     }
 
     @Override
