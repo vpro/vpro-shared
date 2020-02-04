@@ -2,6 +2,7 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,7 +47,7 @@ public class ElasticSearchIteratorITest {
 
         helper = IndexHelper.builder()
             .log(log)
-            .client((e) -> client)
+            .client((logName, callback) -> client)
             .settingsResource("/setting.json")
             .mappingResource("/test.json")
             .indexName(index)
@@ -56,18 +57,28 @@ public class ElasticSearchIteratorITest {
         helper.createIndexIfNotExists();
         for (int i = 0; i < 200; i++) {
             A a = new A();
-            helper.index("test", a.id, a);
+            helper.index(a.id, a);
         }
         helper.refresh();
 
     }
     @AfterEach
-    public void shutdown() {
+    public void shutdown() throws IOException {
         helper.deleteIndex();
     }
+    @BeforeAll
+    public static void waitBefore() throws IOException, InterruptedException {
+        //System.out.println("PID " + ProcessHandle.current().pid());
+        Thread.sleep(10);
+    }
 
+    @AfterAll
+    public static void waitAfter() throws IOException, InterruptedException {
+        Thread.sleep(1000000L);
+    }
 
     @Test
+    @Disabled
     public void test() {
         try (ElasticSearchIterator<String> i = ElasticSearchIterator
             .<String>builder()
@@ -92,6 +103,8 @@ public class ElasticSearchIteratorITest {
 
 
     @Test
+    @Disabled
+
     public void testSources() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client);) {
             i.setJsonRequests(false);
@@ -106,9 +119,9 @@ public class ElasticSearchIteratorITest {
         }
     }
 
-     @Test
+    @Test
+    @Disabled
     public void test15() {
-
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
              .sources(client);) {
             i.setJsonRequests(false);
@@ -136,9 +149,9 @@ public class ElasticSearchIteratorITest {
             .jsonRequests(false)
             .build()
             ;) {
-            i.setJsonRequests(false);
+            i.setJsonRequests(true);
 
-            ObjectNode search = i.prepareSearch(index, "test");
+            ObjectNode search = i.prepareSearch(index);
             //ObjectNode query = search.with("query");
 
             AtomicLong count = new AtomicLong(0);
@@ -150,7 +163,8 @@ public class ElasticSearchIteratorITest {
         }
     }
 
-     @Test
+    @Test
+    @Disabled
     public void testmemberref() {
 
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator

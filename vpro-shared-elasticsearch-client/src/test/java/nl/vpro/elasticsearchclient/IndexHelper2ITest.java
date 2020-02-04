@@ -1,13 +1,12 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.*;
 
 
 /**
@@ -25,7 +24,7 @@ public class IndexHelper2ITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9204, "http"))
+            new HttpHost("localhost", 9200, "http"))
             .build();
 
         helper = IndexHelper.builder()

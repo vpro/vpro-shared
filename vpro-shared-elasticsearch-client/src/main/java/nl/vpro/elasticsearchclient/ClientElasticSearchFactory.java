@@ -6,19 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.http.HttpHost;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.util.TimeUtils;
 
 
@@ -39,10 +39,11 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     private Duration socketTimeout = Duration.ofSeconds(60);
     private Duration connectionTimeout = Duration.ofSeconds(5);
     private Duration connectTimeout = Duration.ofSeconds(5);
-
     private Duration maxRetryTimeout = Duration.ofSeconds(60);
 
-    private final ConcurrentMap<String, RestClient> clients = new ConcurrentHashMap<>();
+    private RestClient client;
+
+    private final ConcurrentHashMap<String, CompletableFuture<RestClient>> clients = new ConcurrentHashMap<>();
 
     private final int instance = instances++;
 
@@ -56,6 +57,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     public String invalidate() {
         String keys = clients.keySet().toString();
         clients.clear();
+        shutdown();
         return "Cleared " + keys;
     }
 
@@ -66,56 +68,62 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     }
 
     @Override
-    public CompletableFuture<RestClient> clientAsync(@Nullable String logName, Consumer<RestClient> callback) {
+    public CompletableFuture<RestClient> clientAsync(
+        @Nullable String logName, Consumer<RestClient> callback) {
         if (logName == null){
             logName = "NULL";
         }
-        RestClient present = clients.computeIfAbsent(logName, (ln) -> {
-            final RestClient client = createClient(ln);
-            return client;
-        });
-        if (present != null) {
-            callback.accept(present);
-            return CompletableFuture.completedFuture(present);
-        }
+        SimpleLogger l = SimpleLogger.slfj4(LoggerFactory.getLogger(logName));
 
-        Logger l = LoggerFactory.getLogger(logName);
-
-
-        final RestClient client = createClient(logName);
-
-        CompletableFuture<RestClient> future = new CompletableFuture<>();
-        IndexHelper.getClusterName(log, client).whenComplete((foundClusterName, exception) -> {
-            if (exception != null) {
-                future.completeExceptionally(exception);
-            }
-            if (clusterName != null && !clusterName.equals(foundClusterName)) {
-                future.completeExceptionally(new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
-                return;
-            }
-            future.complete(client);
-            callback.accept(client);
-            clients.put(logName, client);
-            if (l.isInfoEnabled()) {
-                l.info("Connected to cluster '{}'", foundClusterName);
-            }
+        CompletableFuture<RestClient>  future = clients.computeIfAbsent(logName, (ln) -> {
+            CompletableFuture<RestClient> result = createAndCheckClient(l);
+            result.thenAccept(callback);
+            return result;
         });
         return future;
 
     }
 
-    private RestClient createClient(@NonNull String logName) {
-        HttpHost[] hosts = getHosts();
-        final RestClientBuilder clientBuilder = RestClient.builder(hosts);
-        final RestClient client = clientBuilder
-            .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
-                .setConnectTimeout((int) connectTimeout.toMillis())
-                .setSocketTimeout((int) socketTimeout.toMillis())
-                .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
-            )
-            //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
-            .build();
-        return client;
+    private CompletableFuture<RestClient> createAndCheckClient(SimpleLogger l) {
+        if (createClientIfNeeded()) {
+            CompletableFuture<RestClient> future = new CompletableFuture<>();
+            HttpHost[] hosts = getHosts();
+            IndexHelper.getClusterName(l, client)
+                .whenComplete((foundClusterName, exception) -> {
+                    if (exception != null) {
+                        future.completeExceptionally(exception);
+                    }
+                    if (clusterName != null && !clusterName.equals(foundClusterName)) {
+                        future.completeExceptionally(new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
+                        return;
+                    }
+                    future.complete(client);
+                    if (l.isInfoEnabled()) {
+                        l.info("Connected to cluster '{}'", foundClusterName);
+                    }
+                });
+            return future;
+        } else {
+            return CompletableFuture.completedFuture(client);
+        }
+    }
+
+    private boolean createClientIfNeeded() {
+        if (client == null) {
+            HttpHost[] hosts = getHosts();
+            final RestClientBuilder clientBuilder = RestClient.builder(hosts);
+            client = clientBuilder
+                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
+                    .setConnectTimeout((int) connectTimeout.toMillis())
+                    .setSocketTimeout((int) socketTimeout.toMillis())
+                    .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
+                )
+                //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
+                .build();
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
@@ -149,14 +157,14 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         try {
             HttpHost[] hosts = getHosts();
             if (hosts.length > 0) {
-                return hosts[0].toString();
+                return hosts[0].toString() + ":" + client;
 
             } else {
-                return unicastHosts;
+                return unicastHosts + ":" + client;
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return unicastHosts;
+            return unicastHosts + ":" + client;
         }
 
     }
@@ -182,17 +190,20 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     }
 
     public void shutdown() {
-        clients.values().forEach(restClient -> {
+        if (client != null) {
             try {
-                restClient.close();
+                client.close();
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
-        });
+            client = null;
+        }
     }
 
     @Override
     public void close() {
         shutdown();
     }
+
+
 }

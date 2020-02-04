@@ -1,17 +1,14 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import nl.vpro.elasticsearch.CreateIndex;
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.IndexHelperInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.Version;
+import lombok.*;
+
+import java.io.*;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -23,16 +20,15 @@ import org.elasticsearch.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import nl.vpro.elasticsearch.*;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
@@ -52,11 +48,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static final String GET = "GET";
     public static final String PUT = "PUT";
 
-    private final Logger log;
+    private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
     private Supplier<String> settings;
     private List<String> aliases;
-    private Supplier<RestClient> clientFactory;
+    private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
     private ObjectMapper objectMapper;
     private File writeJsonDir;
@@ -65,6 +61,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public static class Builder {
         private final Map<String, Supplier<String>> mappings = new HashMap<>();
+
+        public Builder log(Logger log){
+            this.simpleLogger(SimpleLogger.slfj4(log));
+            return this;
+        }
 
         @Deprecated
         public Builder mapping(String type, Supplier<String> mapping) {
@@ -103,8 +104,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(
-        Logger log,
-        @NonNull Supplier<RestClient> client,
+        SimpleLogger simpleLogger,
+        @NonNull ESClientFactory client,
         ElasticSearchIndex elasticSearchIndex,
         Supplier<String> indexNameSupplier,
         Supplier<String> settings,
@@ -129,7 +130,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             this.elasticSearchIndex = elasticSearchIndex;
         }
-        this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
+        this.log = simpleLogger == null ? SimpleLogger.slfj4(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
@@ -139,13 +140,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.writeJsonDir = writeJsonDir;
         this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
-
     }
 
 
     @Deprecated
     public static IndexHelper of(Logger log, ESClientFactory client, String indexName, String objectType) {
-        return IndexHelper.builder().log(log)
+        return IndexHelper.builder()
+            .log(log)
             .client(client)
             .indexName(indexName)
             .settingsResource("es/setting.json")
@@ -186,7 +187,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @Override
     public RestClient client() {
         try {
-            return clientAsync((c) -> {}).get();
+            return clientAsync((c) -> {
+                log.info("Created {}", c);
+            }).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -203,11 +206,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (clientFactory instanceof AsyncESClientFactory) {
             return ((AsyncESClientFactory) clientFactory).clientAsync(name, callback);
         } else {
-            RestClient client = clientFactory.client(name);
-            callback.accept(client);
+            RestClient client = clientFactory.client(name, callback);
             return CompletableFuture.completedFuture(client);
         }
-
     }
 
     @Override
@@ -455,7 +456,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @SafeVarargs
     static protected ResponseListener listen(
-        Logger log,
+        SimpleLogger log,
         @NonNull final String requestDescription,
         @NonNull final CompletableFuture<ObjectNode> future,
         @NonNull  Consumer<ObjectNode>... listeners) {
@@ -793,7 +794,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return read(log, response);
 
     }
-    public static ObjectNode read(Logger log, Response response) {
+    public static ObjectNode read(SimpleLogger log, Response response) {
         try {
             HttpEntity entity = response.getEntity();
             try (InputStream inputStream = entity.getContent()) {
@@ -940,7 +941,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     @SafeVarargs
-    public static CompletableFuture<ObjectNode> bulkAsync(Logger log, File jsonDir, RestClient client, Collection<BulkRequestEntry> request, Consumer<ObjectNode>... listeners) {
+    public static CompletableFuture<ObjectNode> bulkAsync(SimpleLogger log, File jsonDir, RestClient client, Collection<BulkRequestEntry> request, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         if (request.size() == 0) {
             return CompletableFuture.completedFuture(null);
@@ -1053,7 +1054,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @SafeVarargs
-    public static CompletableFuture<String> getClusterName(Logger log, RestClient client, final Consumer<String>... callBacks) {
+    public static CompletableFuture<String> getClusterName(SimpleLogger log, RestClient client, final Consumer<String>... callBacks) {
         final CompletableFuture<String> future = new CompletableFuture<>();
         client.performRequestAsync(new Request(GET, "/_cat/health"), new ResponseListener() {
             @Override
@@ -1218,6 +1219,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @Override
     public void close() throws Exception {
+        log.info("Closing {}", clientFactory);
         clientFactory.close();
         clientFactory = null;
     }
@@ -1232,7 +1234,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             '}';
     }
 
-    static protected void writeJson(Logger log, File writeJsonDir, Collection<BulkRequestEntry> requests) {
+    static protected void writeJson(SimpleLogger log, File writeJsonDir, Collection<BulkRequestEntry> requests) {
         for (BulkRequestEntry request: requests) {
             ObjectNode actionLine = request.getAction();
             if (actionLine.has("index")) {
@@ -1241,7 +1243,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    static protected void writeJson(Logger log, File  writeJsonDir, String id, JsonNode jsonNode) {
+    static protected void writeJson(SimpleLogger log, File  writeJsonDir, String id, JsonNode jsonNode) {
         if (writeJsonDir != null) {
             File file = new File(writeJsonDir, id.replaceAll(File.separator, "_") + ".json");
             try (OutputStream out = new FileOutputStream(file)) {
