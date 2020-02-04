@@ -2,22 +2,21 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
-import javax.annotation.PostConstruct;
-
+import nl.vpro.util.TimeUtils;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.vpro.util.TimeUtils;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 
 /**
@@ -174,5 +173,10 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                 log.error(e.getMessage(), e);
             }
         });
+    }
+
+    @Override
+    public void close() {
+        shutdown();
     }
 }

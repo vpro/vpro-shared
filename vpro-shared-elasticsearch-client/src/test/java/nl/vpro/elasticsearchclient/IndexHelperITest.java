@@ -1,13 +1,14 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Arrays;
-
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +31,7 @@ public class IndexHelperITest {
 
         helper = IndexHelper.builder()
             .log(log)
-            .client((e) -> client)
+            .client(new SimpleESClientFactory(client, () -> "simple"))
             .settingsResource("setting.json")
             .mappingResource("test.json")
             .indexName("test-" + System.currentTimeMillis())
