@@ -59,6 +59,7 @@
       <groupId>com.joestelmach</groupId>
       <artifactId>natty</artifactId>
       <version>0.13</version>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>javax.xml.bind</groupId>

@@ -8,7 +8,6 @@
     <version>2.11.1-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-client-resteasy3</artifactId>
-
   <description>
     Utilities related to resteasy api clients.
   </description>

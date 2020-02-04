@@ -8,18 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.Optional;
 
 import javax.xml.bind.DatatypeConverter;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
-import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.Parser;
-
-import nl.vpro.util.BindingUtils;
-import nl.vpro.util.DateUtils;
 
 /**
  * These can be used in conjuction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
@@ -30,7 +24,6 @@ import nl.vpro.util.DateUtils;
 @Slf4j
 public class StringInstantToJsonTimestamp {
 
-    private static Parser PARSER = new Parser(TimeZone.getTimeZone(BindingUtils.DEFAULT_ZONE));
 
 
     public static class Serializer extends JsonSerializer<Object> {
@@ -58,11 +51,12 @@ public class StringInstantToJsonTimestamp {
             return DatatypeConverter.parseTime(value).toInstant();
         } catch (IllegalArgumentException iae) {
             try {
-                List<DateGroup> groups = PARSER.parse(value);
-                if (groups.size() == 1) {
-                    return DateUtils.toInstant(groups.get(0).getDates().get(0));
+
+                Optional<Instant> natty = NattySupport.parseDate(value);
+                if (natty.isPresent()) {
+                    return natty.get();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.debug("Natty couldn't parse {}: {}", value, e.getMessage());
             }
             throw iae;
