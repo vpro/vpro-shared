@@ -111,12 +111,14 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     private boolean createClientIfNeeded() {
         if (client == null) {
             HttpHost[] hosts = getHosts();
-            final RestClientBuilder clientBuilder = RestClient.builder(hosts);
+            final RestClientBuilder clientBuilder = RestClient
+                .builder(hosts);
             client = clientBuilder
-                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
-                    .setConnectTimeout((int) connectTimeout.toMillis())
-                    .setSocketTimeout((int) socketTimeout.toMillis())
-                    .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
+                .setRequestConfigCallback(
+                    requestConfigBuilder -> requestConfigBuilder
+                        .setConnectTimeout((int) connectTimeout.toMillis())
+                        .setSocketTimeout((int) socketTimeout.toMillis())
+                        .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
                 )
                 //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
                 .build();
