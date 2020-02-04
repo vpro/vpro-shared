@@ -290,13 +290,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         log.info("{}", response);
     }
 
+    @SafeVarargs
     @SneakyThrows
-    public void reputMappings() {
+    public final void reputMappings(Consumer<ObjectNode>... consumers) {
         ObjectNode request;
         if (mappings.size() == 1 && mappings.containsKey(DOC)) {
             request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
         } else {
             throw new IllegalStateException();
+        }
+        for(Consumer<ObjectNode> consumer: consumers) {
+            consumer.accept(request);
         }
         HttpEntity entity = entity(request);
         Request req = new Request(PUT, getIndexName() + "/_mapping");
