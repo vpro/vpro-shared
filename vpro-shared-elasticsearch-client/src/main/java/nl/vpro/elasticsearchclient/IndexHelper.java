@@ -796,10 +796,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return get(type, id).map(jn -> jn.get(Fields.SOURCE));
     }
 
+    /**
+     * Reads a response to json, logging to {@link #log}
+     */
     public  ObjectNode read(Response response) {
         return read(log, response);
 
     }
+
+
+    /**
+     * Reads a response to json, using {@link Jackson2Mapper#getLenientInstance()}, catch exceptions,
+     * make sure resources are closed.
+     */
     public static ObjectNode read(SimpleLogger log, Response response) {
         try {
             HttpEntity entity = response.getEntity();
@@ -989,10 +998,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Request get = new Request(GET, getIndexName() + COUNT);
         Response response = client()
             .performRequest(get);
-
         JsonNode result = read(response);
         return result.get("count").longValue();
-
     }
 
     /**
