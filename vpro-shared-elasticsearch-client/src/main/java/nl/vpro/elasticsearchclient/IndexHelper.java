@@ -188,7 +188,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public RestClient client() {
         try {
             return clientAsync((c) -> {
-                log.info("Created {}", c);
+                log.debug("Created {}", c);
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
