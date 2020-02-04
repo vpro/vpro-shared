@@ -122,6 +122,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                 )
                 //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
                 .build();
+            log.info("Created {}", client);
             return true;
         } else {
             return false;
