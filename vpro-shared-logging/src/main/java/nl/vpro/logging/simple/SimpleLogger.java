@@ -155,6 +155,16 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return true;
     }
 
+
+    default boolean isInfoEnabled() {
+        return isEnabled(Level.INFO);
+    }
+
+    default boolean isDebugEnabled() {
+        return isEnabled(Level.DEBUG);
+    }
+
+
     @Override
     default void accept(Level level, CharSequence message) {
         accept(level, message, null);

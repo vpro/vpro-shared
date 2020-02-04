@@ -11,7 +11,6 @@ public interface IndexHelperInterface<C> {
     default void createIndex() {
         createIndex(CreateIndex.DEFAULT);
     }
-
     /**
      * Checks whether index exists
      */
