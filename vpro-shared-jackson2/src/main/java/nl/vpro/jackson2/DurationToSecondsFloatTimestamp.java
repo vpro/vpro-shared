@@ -17,10 +17,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  */
 public class DurationToSecondsFloatTimestamp {
 
+    private DurationToSecondsFloatTimestamp() {}
+
     public static class Serializer extends JsonSerializer<Duration> {
 
 
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(Duration value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -35,7 +37,7 @@ public class DurationToSecondsFloatTimestamp {
 
     public static class Deserializer extends JsonDeserializer<Duration> {
 
-        public static Deserializer INSTANCE = new Deserializer();
+        public static final Deserializer INSTANCE = new Deserializer();
         @Override
         public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
             return Duration.ofMillis((long) (Float.parseFloat(jp.getValueAsString()) * 1000));

@@ -45,13 +45,13 @@ public class FileSizeFormatter {
         this.mebi = mebi;
     }
 
-    public static FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
+    public static final FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
         .pattern("#.0")
         .mebi(true)
         .build();
 
 
-    public static FileSizeFormatter SI = FileSizeFormatter.builder()
+    public static final FileSizeFormatter SI = FileSizeFormatter.builder()
         .pattern("#.0")
         .mebi(false)
         .build();

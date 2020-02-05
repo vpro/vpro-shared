@@ -18,10 +18,11 @@ import static nl.vpro.jackson2.DateModule.ZONE;
 
 public class ZonedDateTimeToJsonTimestamp {
 
+    private ZonedDateTimeToJsonTimestamp() {}
+
     public static class Serializer extends JsonSerializer<ZonedDateTime> {
 
-
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(ZonedDateTime value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -33,10 +34,9 @@ public class ZonedDateTimeToJsonTimestamp {
         }
     }
 
-
     public static class Deserializer extends JsonDeserializer<ZonedDateTime> {
 
-        public static Deserializer INSTANCE = new Deserializer();
+        public static final Deserializer INSTANCE = new Deserializer();
         @Override
         public ZonedDateTime deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             try {

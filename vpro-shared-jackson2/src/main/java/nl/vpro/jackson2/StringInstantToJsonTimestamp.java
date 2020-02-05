@@ -24,10 +24,10 @@ import com.fasterxml.jackson.databind.*;
 @Slf4j
 public class StringInstantToJsonTimestamp {
 
-
+    private StringInstantToJsonTimestamp() {}
 
     public static class Serializer extends JsonSerializer<Object> {
-        public static StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
+        public static final StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
 
         @Override
         public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -65,7 +65,7 @@ public class StringInstantToJsonTimestamp {
 
     public static class Deserializer extends JsonDeserializer<Instant> {
 
-        public static StringInstantToJsonTimestamp.Deserializer INSTANCE = new StringInstantToJsonTimestamp.Deserializer();
+        public static final StringInstantToJsonTimestamp.Deserializer INSTANCE = new StringInstantToJsonTimestamp.Deserializer();
 
         @Override
         public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {

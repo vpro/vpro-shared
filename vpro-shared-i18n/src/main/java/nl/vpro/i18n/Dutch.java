@@ -14,11 +14,10 @@ import java.time.temporal.Temporal;
  */
 public class Dutch {
 
-
     /**
      * The {@link ZoneId} in the Netherlands
      */
-    public static ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
+    public static final ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
 
 
 

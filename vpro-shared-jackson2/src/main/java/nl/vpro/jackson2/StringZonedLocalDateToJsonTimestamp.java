@@ -26,6 +26,8 @@ import static nl.vpro.jackson2.DateModule.ZONE;
  */
 public class StringZonedLocalDateToJsonTimestamp {
 
+    private StringZonedLocalDateToJsonTimestamp() {}
+
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter
             .ofPattern("yyyy-MM-ddZZZZZ")
         .withLocale(Locale.US);
@@ -33,8 +35,7 @@ public class StringZonedLocalDateToJsonTimestamp {
 
     public static class Serializer extends JsonSerializer<Object> {
 
-
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -49,10 +50,9 @@ public class StringZonedLocalDateToJsonTimestamp {
         }
     }
 
-
     public static class Deserializer extends JsonDeserializer<Object> {
 
-        public static Deserializer INSTANCE = new Deserializer();
+        public static final Deserializer INSTANCE = new Deserializer();
         @Override
         public LocalDate deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             try {

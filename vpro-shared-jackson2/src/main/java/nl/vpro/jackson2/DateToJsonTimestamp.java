@@ -13,10 +13,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 public class DateToJsonTimestamp {
 
+    private DateToJsonTimestamp() {}
+
     public static class Serializer extends JsonSerializer<Date> {
 
 
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(Date value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -31,7 +33,7 @@ public class DateToJsonTimestamp {
 
     public static class Deserializer extends StdDeserializer<Date> {
 
-        public static Deserializer INSTANCE = new Deserializer(Date.class);
+        public static final Deserializer INSTANCE = new Deserializer(Date.class);
 
         protected Deserializer(Class<?> vc) {
             super(vc);

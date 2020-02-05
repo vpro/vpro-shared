@@ -1,12 +1,11 @@
 package nl.vpro.persistence;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
 import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
  * @author Michiel Meeuwissen
@@ -15,8 +14,7 @@ import java.time.ZoneId;
 @Converter
 public class LocalDateToDateConverter implements AttributeConverter<LocalDate, Date> {
 
-    public static ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
-
+    public static final ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
 
     @Override
     public Date convertToDatabaseColumn(LocalDate localDate) {

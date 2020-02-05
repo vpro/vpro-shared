@@ -8,7 +8,7 @@ import com.google.inject.AbstractModule;
  */
 public class Convertors extends AbstractModule {
 
-    public static Convertors INSTANCE = new Convertors();
+    public static final Convertors INSTANCE = new Convertors();
     @Override
     protected void configure() {
         DurationConvertor.register(binder());

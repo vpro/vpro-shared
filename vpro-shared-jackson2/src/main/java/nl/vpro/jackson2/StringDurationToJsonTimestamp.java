@@ -21,8 +21,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  */
 public class StringDurationToJsonTimestamp {
 
+    private StringDurationToJsonTimestamp() {}
+
     public static class Serializer extends JsonSerializer<String> {
-        public static StringDurationToJsonTimestamp.Serializer INSTANCE = new StringDurationToJsonTimestamp.Serializer();
+        public static final StringDurationToJsonTimestamp.Serializer INSTANCE = new StringDurationToJsonTimestamp.Serializer();
 
         @Override
         public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -37,7 +39,7 @@ public class StringDurationToJsonTimestamp {
 
     public static class Deserializer extends JsonDeserializer<String> {
 
-        public static StringDurationToJsonTimestamp.Deserializer INSTANCE = new StringDurationToJsonTimestamp.Deserializer();
+        public static final StringDurationToJsonTimestamp.Deserializer INSTANCE = new StringDurationToJsonTimestamp.Deserializer();
 
         @Override
         public String deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {

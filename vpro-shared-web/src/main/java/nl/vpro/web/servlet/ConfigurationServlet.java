@@ -1,26 +1,19 @@
 package nl.vpro.web.servlet;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Function;
+
+import javax.naming.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.*;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import com.fasterxml.jackson.core.*;
 
 
 /**
@@ -49,11 +42,11 @@ import java.util.function.Function;
  */
 public class ConfigurationServlet extends HttpServlet {
 
-    private  static String ATTRIBUTE_NAME = ConfigurationServlet.class.getName() + ".configuration";
+    private static final String ATTRIBUTE_NAME = ConfigurationServlet.class.getName() + ".configuration";
 
     protected String name;
 
-    protected static enum Environment {
+    protected enum Environment {
         PROD,
         TEST,
         ACC,

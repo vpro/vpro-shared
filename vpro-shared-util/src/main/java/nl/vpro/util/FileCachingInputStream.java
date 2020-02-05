@@ -400,8 +400,10 @@ public class FileCachingInputStream extends InputStream {
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         log.error(e.getMessage(), e);
                         this.close();
+                        break;
                     }
                     result = tempFileInputStream.read();
                 }
@@ -437,6 +439,7 @@ public class FileCachingInputStream extends InputStream {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.warn("Interrupted {}", e.getMessage());
+                        Thread.currentThread().interrupt();
                         throw new InterruptedIOException(e.getMessage());
                     }
                     int subResult = Math.max(tempFileInputStream.read(b, totalResult, b.length - totalResult), 0);

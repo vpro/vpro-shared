@@ -16,10 +16,11 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  */
 public class LocalDateTimeToJsonDateWithSpace {
 
+    private LocalDateTimeToJsonDateWithSpace() {}
+
     public static class Serializer extends JsonSerializer<LocalDateTime> {
 
-
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(LocalDateTime value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -31,10 +32,9 @@ public class LocalDateTimeToJsonDateWithSpace {
         }
     }
 
-
     public static class Deserializer extends JsonDeserializer<LocalDateTime> {
 
-        public static Deserializer INSTANCE = new Deserializer();
+        public static final Deserializer INSTANCE = new Deserializer();
 
         @Override
         public LocalDateTime deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {

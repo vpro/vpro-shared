@@ -13,10 +13,11 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class LocalDateToJsonDate {
 
+    private LocalDateToJsonDate() {}
+
     public static class Serializer extends JsonSerializer<LocalDate> {
 
-
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(LocalDate value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -31,7 +32,7 @@ public class LocalDateToJsonDate {
 
     public static class Deserializer extends JsonDeserializer<LocalDate> {
 
-        public static Deserializer INSTANCE = new Deserializer();
+        public static final Deserializer INSTANCE = new Deserializer();
 
         @Override
         public LocalDate deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {

@@ -2,18 +2,16 @@ package nl.vpro.util;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.logging.LoggerOutputStream;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.SimpleLoggerWrapper;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
-import org.slf4j.Logger;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+
+import nl.vpro.logging.LoggerOutputStream;
+import nl.vpro.logging.simple.*;
 
 /**
  * Wrapper around ProcessorBuilder
@@ -297,6 +295,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             return result;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (IOException e) {
             if (CommandExecutor.isBrokenPipe(e)) {

@@ -408,7 +408,7 @@ public class URLResource<T> {
         }
     }
 
-    public static Function<InputStream, Properties> PROPERTIES = inputStream -> {
+    public static final Function<InputStream, Properties> PROPERTIES = inputStream -> {
         Properties props = new Properties();
         try {
             props.load(inputStream);
@@ -418,7 +418,7 @@ public class URLResource<T> {
         return props;
     };
 
-    public static Function<InputStream, Map<String, String>> MAP = inputStream -> {
+    public static final Function<InputStream, Map<String, String>> MAP = inputStream -> {
 
         Properties props = new LinkedProperties();
         try {

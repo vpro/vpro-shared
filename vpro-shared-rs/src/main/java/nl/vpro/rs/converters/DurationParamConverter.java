@@ -14,13 +14,11 @@ import nl.vpro.util.TimeUtils;
 
 public class DurationParamConverter implements ParamConverter<Duration> {
 
-    public static DurationParamConverter INSTANCE = new DurationParamConverter();
+    public static final DurationParamConverter INSTANCE = new DurationParamConverter();
 
     @Override
     public Duration fromString(String value) {
         return TimeUtils.parseDuration(value).orElse(null);
-
-
     }
 
     @Override

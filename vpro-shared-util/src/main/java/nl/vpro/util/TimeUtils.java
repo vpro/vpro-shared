@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class TimeUtils {
 
-    public static ZoneId ZONE_ID =  ZoneId.of("Europe/Amsterdam");
+    public static final ZoneId ZONE_ID =  ZoneId.of("Europe/Amsterdam");
 
 
     public static Optional<ZonedDateTime> parseZoned(CharSequence parse) {

@@ -17,11 +17,11 @@ import static com.neovisionaries.i18n.CountryCode.NL;
  */
 public class Locales {
 
-    public static Locale DUTCH         = of(LanguageCode.nl);
-    public static Locale ARABIC        = of(LanguageCode.ar);
-    public static Locale NETHERLANDISH = of(LanguageCode.nl, Country.of(NL));
-    public static Locale FLEMISH       = of(LanguageCode.nl, Country.of(BE));
-    public static Locale UNDETERMINED  = of(LanguageAlpha3Code.und);
+    public static final Locale DUTCH         = of(LanguageCode.nl);
+    public static final Locale ARABIC        = of(LanguageCode.ar);
+    public static final Locale NETHERLANDISH = of(LanguageCode.nl, Country.of(NL));
+    public static final Locale FLEMISH       = of(LanguageCode.nl, Country.of(BE));
+    public static final Locale UNDETERMINED  = of(LanguageAlpha3Code.und);
 
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);

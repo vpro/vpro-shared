@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
  */
 public class DateModule extends SimpleModule {
 
-    public static ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
+    public static final ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
 
 
     private static final long serialVersionUID = 1L;

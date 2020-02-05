@@ -53,7 +53,7 @@ public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
 
-    public static Consumer<DiffBuilder> IGNORE_ELEMENT_ORDER = df ->df.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText));
+    public static final Consumer<DiffBuilder> IGNORE_ELEMENT_ORDER = df ->df.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText));
 
 
     public static <T> String marshal(T object) {

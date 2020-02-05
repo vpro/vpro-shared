@@ -15,10 +15,12 @@ import com.fasterxml.jackson.databind.*;
  */
 public class DurationToJsonTimestamp {
 
+    private DurationToJsonTimestamp() {}
+
     public static class Serializer extends JsonSerializer<Duration> {
 
 
-        public static Serializer INSTANCE = new Serializer();
+        public static final Serializer INSTANCE = new Serializer();
 
         @Override
         public void serialize(Duration value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -33,7 +35,7 @@ public class DurationToJsonTimestamp {
 
     public static class Deserializer extends JsonDeserializer<Duration> {
 
-        public static Deserializer INSTANCE = new Deserializer();
+        public static final Deserializer INSTANCE = new Deserializer();
         @Override
         public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
             if (jp.getCurrentToken() == JsonToken.VALUE_STRING) {

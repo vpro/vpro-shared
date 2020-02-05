@@ -19,9 +19,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class DateUtils {
 
-    public static Date MIN_VALUE = new Date(Long.MIN_VALUE);
+    public static final Date MIN_VALUE = new Date(Long.MIN_VALUE);
 
-    public static Date MAX_VALUE = new Date(Long.MAX_VALUE);
+    public static final Date MAX_VALUE = new Date(Long.MAX_VALUE);
 
     public static XMLGregorianCalendar toXmlGregorianCalendar(Date date) throws DatatypeConfigurationException {
         return toXmlGregorianCalendar(date, TimeZone.getDefault());
