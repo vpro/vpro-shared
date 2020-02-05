@@ -44,10 +44,15 @@ public class ElasticSearchIndex {
         return () -> resourceToString(settingsResource);
     }
 
+    @Deprecated
     public Map<String, Supplier<String>> mappingsAsMap() {
         Map<String, Supplier<String>> result = new HashMap<>();
-        result.put(Constants.DOC, () -> resourceToString(mappingResource));
+        result.put(Constants.DOC, mapping());
         return result;
+    }
+
+    public Supplier<String> mapping() {
+        return () -> resourceToString(mappingResource);
     }
 
 
