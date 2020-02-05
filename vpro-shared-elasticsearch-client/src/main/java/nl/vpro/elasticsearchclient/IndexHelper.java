@@ -1246,12 +1246,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @Override
     public String toString() {
-        return "IndexHelper{" +
-            "indexName=" + indexNameSupplier.get() +
-            ", aliases=" + aliases +
-            ", writeJsonDir=" + writeJsonDir +
-            ", elasticSearchIndex=" + elasticSearchIndex +
-            '}';
+        StringBuilder builder =  new StringBuilder("IndexHelper{" + getIndexName() + " ");
+        builder.append(clientFactory);
+        if (aliases != null && ! aliases.isEmpty()) {
+            builder.append(", ").append(aliases);
+        }
+        if (writeJsonDir != null) {
+            builder.append(", writeJsonDir=").append(writeJsonDir);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
     static protected void writeJson(SimpleLogger log, File writeJsonDir, Collection<BulkRequestEntry> requests) {
