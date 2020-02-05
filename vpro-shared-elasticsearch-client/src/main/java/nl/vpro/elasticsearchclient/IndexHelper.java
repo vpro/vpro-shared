@@ -44,6 +44,8 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
     public static final String SEARCH = "/_search";
+    public static final String COUNT = "/_count";
+
     public static final String POST = "POST";
     public static final String GET = "GET";
     public static final String PUT = "PUT";
@@ -188,7 +190,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public RestClient client() {
         try {
             return clientAsync((c) -> {
-                log.info("Created {}", c);
+                log.info("Index {}: {} entries", getIndexName(), count());
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -290,13 +292,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         log.info("{}", response);
     }
 
+    @SafeVarargs
     @SneakyThrows
-    public void reputMappings() {
+    public final void reputMappings(Consumer<ObjectNode>... consumers) {
         ObjectNode request;
         if (mappings.size() == 1 && mappings.containsKey(DOC)) {
             request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
         } else {
             throw new IllegalStateException();
+        }
+        for(Consumer<ObjectNode> consumer: consumers) {
+            consumer.accept(request);
         }
         HttpEntity entity = entity(request);
         Request req = new Request(PUT, getIndexName() + "/_mapping");
@@ -790,10 +796,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return get(type, id).map(jn -> jn.get(Fields.SOURCE));
     }
 
+    /**
+     * Reads a response to json, logging to {@link #log}
+     */
     public  ObjectNode read(Response response) {
         return read(log, response);
 
     }
+
+
+    /**
+     * Reads a response to json, using {@link Jackson2Mapper#getLenientInstance()}, catch exceptions,
+     * make sure resources are closed.
+     */
     public static ObjectNode read(SimpleLogger log, Response response) {
         try {
             HttpEntity entity = response.getEntity();
@@ -978,8 +993,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @Override
+    @SneakyThrows
     public long count() {
-        return count(new String[]{});
+        Request get = new Request(GET, getIndexName() + COUNT);
+        Response response = client()
+            .performRequest(get);
+        JsonNode result = read(response);
+        return result.get("count").longValue();
     }
 
     /**

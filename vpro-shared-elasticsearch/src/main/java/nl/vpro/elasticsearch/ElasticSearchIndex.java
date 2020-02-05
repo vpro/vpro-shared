@@ -23,7 +23,8 @@ public class ElasticSearchIndex {
 
     protected ElasticSearchIndex(
         String indexName,
-        String mappingResource, String... aliases) {
+        String mappingResource,
+        String... aliases) {
         this(indexName, "/es7/setting/" + indexName + ".json", mappingResource, Arrays.asList(aliases));
     }
 
