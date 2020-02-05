@@ -5,9 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
@@ -43,7 +42,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private RestClient client;
 
-    private final ConcurrentHashMap<String, CompletableFuture<RestClient>> clients = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<RestClient>> clients = new HashMap<>();
 
     private final int instance = instances++;
 
