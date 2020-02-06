@@ -80,7 +80,7 @@ public class CommandExecutorImplTest {
         find.lines(".")
             .limit(20)
             .forEach(log::info)
-            ;
+        ;
         // wait for whenComplete
         Thread.sleep(100);
         assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR java.lang.IllegalStateException: No binary found");
