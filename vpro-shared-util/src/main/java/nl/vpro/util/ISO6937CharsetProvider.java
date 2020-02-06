@@ -20,7 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class ISO6937CharsetProvider extends CharsetProvider {
 
-    private static ISO6937CharsetProvider INSTANCE = new ISO6937CharsetProvider();
+    private static final ISO6937CharsetProvider INSTANCE = new ISO6937CharsetProvider();
 
     public static Charset forName(String charset) {
 
@@ -339,6 +339,8 @@ public class ISO6937CharsetProvider extends CharsetProvider {
                     return 0x0106; // LATIN CAPITAL LETTER C WITH ACUTE
                 case 0xC245:
                     return 0x00C9; // LATIN CAPITAL LETTER E WITH ACUTE
+                case 0xC7B4:
+                    return 0x00D0; // LATIN CAPITAL LETTER G WITH ACUTE
                 case 0xC249:
                     return 0x00CD; // LATIN CAPITAL LETTER I WITH ACUTE
                 case 0xC24C:
