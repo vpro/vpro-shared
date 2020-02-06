@@ -29,9 +29,9 @@ public class JsonFilter implements Callable<Void> {
 
     final InputStream in;
     final OutputStream out;
-    final List<Replacement> replacements;
+    final List<Replacement<?>> replacements;
 
-    public JsonFilter(InputStream in, OutputStream out, List<Replacement> replacements) {
+    public JsonFilter(InputStream in, OutputStream out, List<Replacement<?>> replacements) {
         this.in = in;
         this.out = out;
         this.replacements = replacements;
@@ -41,7 +41,7 @@ public class JsonFilter implements Callable<Void> {
     @SuppressWarnings("unchecked")
     private <T> T handleReplacements(Deque<String> stack, T value) {
         String fieldName = stack.poll();
-        for (Replacement replacement : replacements) {
+        for (Replacement<?> replacement : replacements) {
             if (replacement.key.equals(fieldName)) {
                 if (replacement.value.equals(value)) {
                     return (T) replacement.newValue;
@@ -53,63 +53,63 @@ public class JsonFilter implements Callable<Void> {
 
     @Override
     public Void call() throws IOException {
-        final JsonParser parser = factory.createParser(in);
-        final JsonGenerator generator = factory.createGenerator(out);
-        Deque<String> stack = new ArrayDeque<>();
-        while (true) {
-            JsonToken token = parser.nextToken();
-            if (token == null) {
-                break;
-            }
-            switch (token) {
-                case START_OBJECT:
-                    generator.writeStartObject();
-                    break;
-                case END_OBJECT:
-                    generator.writeEndObject();
-                    break;
-                case START_ARRAY:
-                    generator.writeStartArray();
-                    break;
-                case END_ARRAY:
-                    generator.writeEndArray();
-                    break;
-                case FIELD_NAME: {
-                    String fieldName = parser.getText();
-                    generator.writeFieldName(fieldName);
-                    stack.push(fieldName);
+        try (final JsonParser parser = factory.createParser(in);
+             final JsonGenerator generator = factory.createGenerator(out)) {
+            Deque<String> stack = new ArrayDeque<>();
+            while (true) {
+                JsonToken token = parser.nextToken();
+                if (token == null) {
                     break;
                 }
-                case VALUE_EMBEDDED_OBJECT:
-                    //generator.writeObject();
-                    stack.poll();
-                    break;
-                case VALUE_STRING:
-                    generator.writeString(handleReplacements(stack, parser.getText()));
-                    break;
-                case VALUE_NUMBER_INT:
-                    generator.writeNumber(handleReplacements(stack, parser.getValueAsInt()));
-                    break;
-                case VALUE_NUMBER_FLOAT:
-                    generator.writeNumber(handleReplacements(stack, parser.getValueAsInt()));
-                    break;
-                case VALUE_TRUE:
-                    generator.writeBoolean(true);
-                    stack.poll();
-                    break;
-                case VALUE_FALSE:
-                    generator.writeBoolean(false);
-                    stack.poll();
-                    break;
-                case VALUE_NULL:
-                    generator.writeNull();
-                    stack.poll();
-                    break;
+                switch (token) {
+                    case START_OBJECT:
+                        generator.writeStartObject();
+                        break;
+                    case END_OBJECT:
+                        generator.writeEndObject();
+                        break;
+                    case START_ARRAY:
+                        generator.writeStartArray();
+                        break;
+                    case END_ARRAY:
+                        generator.writeEndArray();
+                        break;
+                    case FIELD_NAME: {
+                        String fieldName = parser.getText();
+                        generator.writeFieldName(fieldName);
+                        stack.push(fieldName);
+                        break;
+                    }
+                    case VALUE_EMBEDDED_OBJECT:
+                        //generator.writeObject();
+                        stack.poll();
+                        break;
+                    case VALUE_STRING:
+                        generator.writeString(handleReplacements(stack, parser.getText()));
+                        break;
+                    case VALUE_NUMBER_INT:
+                        generator.writeNumber(handleReplacements(stack, parser.getValueAsInt()));
+                        break;
+                    case VALUE_NUMBER_FLOAT:
+                        generator.writeNumber(handleReplacements(stack, parser.getValueAsInt()));
+                        break;
+                    case VALUE_TRUE:
+                        generator.writeBoolean(true);
+                        stack.poll();
+                        break;
+                    case VALUE_FALSE:
+                        generator.writeBoolean(false);
+                        stack.poll();
+                        break;
+                    case VALUE_NULL:
+                        generator.writeNull();
+                        stack.poll();
+                        break;
 
+                }
             }
+            return null;
         }
-        generator.close();
-        return null;
     }
     public static class Replacement<T> {
         private final String key;

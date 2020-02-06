@@ -11,24 +11,24 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class OrderedProperties extends Properties {
 
-    private final List<Object> names = new ArrayList<Object>();
+    private final List<Object> names = new ArrayList<>();
 
 
     @Override
-    public Enumeration propertyNames() {
+    public synchronized Enumeration<?> propertyNames() {
         return Collections.enumeration(names);
     }
 
     @NonNull
     @Override
-    public Set entrySet() {
-        return new AbstractSet() {
+    public Set<Map.Entry<Object, Object>> entrySet() {
+        return new AbstractSet<Map.Entry<Object, Object>>() {
 
             @NonNull
             @Override
-            public Iterator iterator() {
-                final Iterator i = names.iterator();
-                return new Iterator() {
+            public Iterator<Map.Entry<Object, Object>> iterator() {
+                final Iterator<Object> i = names.iterator();
+                return new Iterator<Map.Entry<Object, Object>>() {
 
                     @Override
                     public boolean hasNext() {
@@ -36,9 +36,9 @@ public class OrderedProperties extends Properties {
                     }
 
                     @Override
-                    public Object next() {
+                    public Map.Entry<Object, Object> next() {
                         Object key = i.next();
-                        return new AbstractMap.SimpleEntry(key, OrderedProperties.this.get(key));
+                        return new AbstractMap.SimpleEntry<>(key, OrderedProperties.this.get(key));
                     }
 
                     @Override
@@ -56,7 +56,7 @@ public class OrderedProperties extends Properties {
     }
 
     @Override
-    public Object put(Object key, Object value) {
+    public synchronized Object put(Object key, Object value) {
         names.remove(key);
         names.add(key);
 
@@ -64,7 +64,7 @@ public class OrderedProperties extends Properties {
     }
 
     @Override
-    public Object remove(Object key) {
+    public synchronized Object remove(Object key) {
         names.remove(key);
         return super.remove(key);
     }

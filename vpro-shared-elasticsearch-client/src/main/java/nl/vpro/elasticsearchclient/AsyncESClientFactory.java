@@ -21,7 +21,10 @@ public interface AsyncESClientFactory extends ESClientFactory {
     default RestClient client(String logName, Consumer<RestClient> callback) {
         try {
             return clientAsync(logName, callback).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }  catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }

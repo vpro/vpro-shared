@@ -275,29 +275,30 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
      * Write the entire stream to an output stream
      */
     public static <T> void write(CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
-        JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out);
-        jg.writeStartObject();
-        jg.writeArrayFieldStart("array");
-        while (iterator.hasNext()) {
-            T change = null;
-            try {
-                change = iterator.next();
-                if (change != null) {
-                    jg.writeObject(change);
-                } else {
-                    jg.writeNull();
+        try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
+            jg.writeStartObject();
+            jg.writeArrayFieldStart("array");
+            while (iterator.hasNext()) {
+                T change = null;
+                try {
+                    change = iterator.next();
+                    if (change != null) {
+                        jg.writeObject(change);
+                    } else {
+                        jg.writeNull();
+                    }
+                } catch (Exception e) {
+                    log.warn(e.getMessage());
+                    jg.writeObject(e.getMessage());
                 }
-            } catch (Exception e) {
-                log.warn(e.getMessage());
-                jg.writeObject(e.getMessage());
+                if (logging != null) {
+                    logging.apply(change);
+                }
             }
-            if (logging != null) {
-                logging.apply(change);
-            }
+            jg.writeEndArray();
+            jg.writeEndObject();
+            jg.flush();
         }
-        jg.writeEndArray();
-        jg.writeEndObject();
-        jg.flush();
     }
 
 

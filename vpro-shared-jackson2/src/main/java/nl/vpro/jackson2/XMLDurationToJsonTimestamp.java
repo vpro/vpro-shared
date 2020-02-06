@@ -62,7 +62,11 @@ public class XMLDurationToJsonTimestamp {
         @Override
         public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
             java.time.Duration duration = TimeUtils.parseDuration(value).orElse(null);
-            jgen.writeNumber(duration.toMillis());
+            if (duration != null) {
+                jgen.writeNumber(duration.toMillis());
+            } else {
+                jgen.writeNull();
+            }
         }
     }
 

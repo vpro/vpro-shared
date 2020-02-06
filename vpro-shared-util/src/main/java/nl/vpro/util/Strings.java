@@ -29,10 +29,9 @@ public class Strings {
         if (!file.canRead()) {
             return Arrays.stream(new String[]{s});
         } else {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
                 return reader.lines();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 return Arrays.stream(new String[]{s});
             }

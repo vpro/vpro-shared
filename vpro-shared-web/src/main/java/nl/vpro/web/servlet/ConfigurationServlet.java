@@ -127,29 +127,30 @@ public class ConfigurationServlet extends HttpServlet {
 
     ) throws IOException {
         JsonFactory jfactory = new JsonFactory();
-        JsonGenerator w  = jfactory.createGenerator(outputStream, JsonEncoding.UTF8);
+        try(JsonGenerator w  = jfactory.createGenerator(outputStream, JsonEncoding.UTF8)) {
 
-        if(varName != null) {
-            outputStream.write(("var " + varName + " = ").getBytes(StandardCharsets.UTF_8));
-        }
-        outputStream.flush();
-        w.writeStartObject();
+            if (varName != null) {
+                outputStream.write(("var " + varName + " = ").getBytes(StandardCharsets.UTF_8));
+            }
+            outputStream.flush();
+            w.writeStartObject();
 
-        for(Map.Entry<String, String> e : system.entrySet()) {
-            w.writeStringField(e.getKey(), e.getValue());
-        }
+            for (Map.Entry<String, String> e : system.entrySet()) {
+                w.writeStringField(e.getKey(), e.getValue());
+            }
 
-        //w.key("version").value(getVersion());
-        w.writeFieldName("configuration");
-        w.writeStartObject();
-        for(Map.Entry<String, Object> prop : props.entrySet()) {
-            w.writeObjectField(prop.getKey(), prop.getValue());
-        }
-        w.writeEndObject();
-        w.writeEndObject();
-        w.flush();
-        if(varName != null) {
-            outputStream.write(';');
+            //w.key("version").value(getVersion());
+            w.writeFieldName("configuration");
+            w.writeStartObject();
+            for (Map.Entry<String, Object> prop : props.entrySet()) {
+                w.writeObjectField(prop.getKey(), prop.getValue());
+            }
+            w.writeEndObject();
+            w.writeEndObject();
+            w.flush();
+            if (varName != null) {
+                outputStream.write(';');
+            }
         }
 
     }
@@ -261,7 +262,7 @@ public class ConfigurationServlet extends HttpServlet {
         if(is != null) {
             Properties props = new Properties() {
                 @Override
-                public Object put(Object key, Object value) {
+                public synchronized Object put(Object key, Object value) {
                     keys.put((String)key, (String)value);
                     return super.put(key, value);
                 }

@@ -400,7 +400,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
     @Override
-    public String getConnectionRequestTimeout() {
+    public synchronized String getConnectionRequestTimeout() {
         return String.valueOf(connectionRequestTimeout);
     }
 
@@ -414,7 +414,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
     @Override
-    public String getConnectTimeout() {
+    public synchronized String getConnectTimeout() {
         return String.valueOf(connectTimeout);
     }
 
@@ -428,7 +428,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
     @Override
-    public String getSocketTimeout() {
+    public synchronized String getSocketTimeout() {
         return String.valueOf(socketTimeout);
     }
 
@@ -1012,7 +1012,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             HttpRequestWrapper wrapper = (HttpRequestWrapper)context.getAttribute(HttpClientContext.HTTP_REQUEST);
             if(wrapper.getURI().getPath().endsWith("/media/changes")) {
                 // 30 minutes
-                return 30 * 60 * 1000;
+                return 30L * 60 * 1000;
             }
             // Honor 'keep-alive' header
             HeaderElementIterator it = new BasicHeaderElementIterator(
@@ -1030,7 +1030,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 }
             }
             // 1 minute
-            return 60 * 1000;
+            return 60L * 1000;
         }
     }
 
@@ -1109,6 +1109,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                     }
                 } catch (InterruptedException ignored) {
                     log.debug(ignored.getMessage());
+                    Thread.currentThread().interrupt();
+                    break;
                 } catch (Throwable t) {
                     log.error(t.getMessage(), t);
                 }

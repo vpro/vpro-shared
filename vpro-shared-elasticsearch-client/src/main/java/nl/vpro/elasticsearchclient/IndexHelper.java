@@ -192,7 +192,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return clientAsync((c) -> {
                 log.info("Index {}: {} entries", getIndexName(), count());
             }).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
@@ -1060,7 +1063,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public String getClusterName() {
         try {
             return getClusterNameAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
@@ -1269,7 +1275,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     static protected void writeJson(SimpleLogger log, File  writeJsonDir, String id, JsonNode jsonNode) {
         if (writeJsonDir != null) {
-            File file = new File(writeJsonDir, id.replaceAll(File.separator, "_") + ".json");
+            File file = new File(writeJsonDir, id.replace(
+                File.separator, "_"
+            ) + ".json");
             try (OutputStream out = new FileOutputStream(file)) {
                 Jackson2Mapper.getPrettyInstance().writeValue(out, jsonNode);
                 log.info("Wrote {}", file);

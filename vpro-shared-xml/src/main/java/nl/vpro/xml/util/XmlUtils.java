@@ -58,11 +58,13 @@ public class XmlUtils extends BindingUtils  {
     }
 
     public static ZonedDateTime toZonedDateTime(ZoneId zoneId, XMLGregorianCalendar in) {
-        return toInstant(zoneId, in).atZone(zoneId);
+        Instant instant = toInstant(zoneId, in);
+        return instant == null ? null : instant.atZone(zoneId);
     }
 
     public static OffsetDateTime toOffsetDateTime(ZoneId zoneId, XMLGregorianCalendar in) {
-        return toInstant(zoneId, in).atZone(zoneId).toOffsetDateTime();
+        Instant instant = toInstant(zoneId, in);
+        return instant == null ?  null : instant.atZone(zoneId).toOffsetDateTime();
     }
 
     /**

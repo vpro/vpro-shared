@@ -135,11 +135,13 @@ public interface CommandExecutor {
      * @return  The exit code
      */
     default Stream<String> lines(InputStream in, OutputStream errors, String... args) {
-        try {
+        try (
             PipedInputStream reader = new PipedInputStream();
             PipedOutputStream writer = new PipedOutputStream(reader);
+            BufferedReader result = new BufferedReader(new InputStreamReader(reader))
+        ) {
 
-            BufferedReader result = new BufferedReader(new InputStreamReader(reader));
+
             CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
                 try {
                     writer.flush();

@@ -20,7 +20,7 @@ public class LinkedProperties extends Properties {
     }
 
     @Override
-    public Enumeration<Object> keys() {
+    public synchronized  Enumeration<Object> keys() {
         return Collections.enumeration(keys);
     }
 
@@ -56,7 +56,7 @@ public class LinkedProperties extends Properties {
     }
 
     @Override
-    public Object put(Object key, Object value) {
+    public synchronized Object put(Object key, Object value) {
         keys.add(key);
         return super.put(key, value);
     }
