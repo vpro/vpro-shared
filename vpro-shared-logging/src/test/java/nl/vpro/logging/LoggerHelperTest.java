@@ -6,11 +6,8 @@ package nl.vpro.logging;
 
 import java.io.StringWriter;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
-import org.junit.Test;
+import org.apache.log4j.*;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
