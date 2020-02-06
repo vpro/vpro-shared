@@ -21,6 +21,7 @@ import org.opentest4j.TestAbortedException;
 public class AbortOnException extends ExceptionCollector implements InvocationInterceptor, BeforeAllCallback {
 
     protected boolean active = true;
+    protected int relevantFails = 0;
 
     @Override
     public void beforeAll(ExtensionContext context) {
@@ -46,12 +47,22 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
 
         if (active) {
             boolean hasNoAbortAnnotation = invocationContext.getExecutable().getAnnotation(NoAbort.class) != null;
-            boolean skip = !hasNoAbortAnnotation && !fails.isEmpty();
+
+            boolean skip = !hasNoAbortAnnotation && relevantFails > 0;
             if (skip) {
                 throw new TestAbortedException("An exception occured already " + fails.get(0).getInvocationContext().getExecutable().getName());
             }
         }
-        super.interceptTestMethod(invocation, invocationContext, extensionContext);
+        boolean hasExcept = invocationContext.getExecutable().getAnnotation(Except.class) != null;
+        int sizeOfFails = fails.size();
+        try {
+            super.interceptTestMethod(invocation, invocationContext, extensionContext);
+        } finally {
+            if (!hasExcept) {
+                relevantFails += (fails.size() - sizeOfFails);
+            }
+        }
+
     }
 
 
@@ -66,6 +77,18 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
     public @interface NoAbort {
         String value() default "";
     }
+
+     /**
+      * In combination with {@link AbortOnException}. A test annotated with this abort the rest of the tests  even if it fails
+     *
+     * @since 2.12
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD})
+    public @interface Except {
+        String value() default "";
+    }
+
     /**
      * @since 2.10
      */
