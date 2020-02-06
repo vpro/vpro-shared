@@ -2,21 +2,13 @@ package nl.vpro.swagger;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.*;
 import javax.ws.rs.core.MediaType;
 
 import nl.vpro.jackson2.JsonFilter;
@@ -81,7 +73,7 @@ public class SwaggerFilter implements Filter {
 		newValue.append(req.getContextPath()).append("/api");
         JsonFilter.Replacement<String> replacement =
 				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
-        List<JsonFilter.Replacement> replacements = Collections.singletonList(replacement);
+        List<JsonFilter.Replacement<?>> replacements = Collections.singletonList(replacement);
         final ServletOutputStream servletOutputStream = response.getOutputStream();
         final OutputStream out = transform(servletOutputStream, replacements);
         HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
@@ -129,17 +121,21 @@ public class SwaggerFilter implements Filter {
 
     }
 
-    public OutputStream transform(OutputStream from, List<nl.vpro.jackson2.JsonFilter.Replacement> replacements) throws IOException {
+    public OutputStream transform(OutputStream from, List<nl.vpro.jackson2.JsonFilter.Replacement<?>> replacements) throws IOException {
         PipedInputStream in = new PipedInputStream();
-        final Future[] future = new Future[1];
+        final Future<?>[] future = new Future[1];
         PipedOutputStream out = new PipedOutputStream(in) {
             @Override
             public void close() throws IOException {
                 super.close();
                 try {
                     future[0].get();
-                } catch (ExecutionException | InterruptedException e) {
+                } catch (ExecutionException e) {
                     throw new IOException(e);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException(e);
+
                 }
             }
         };
