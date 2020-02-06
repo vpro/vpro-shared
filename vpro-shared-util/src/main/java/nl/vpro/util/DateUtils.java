@@ -13,15 +13,17 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * @author Roelof Jan Koekoek
  * @since 0.11
  */
 public class DateUtils {
 
-    public static final Date MIN_VALUE = new Date(Long.MIN_VALUE);
+    private static final Date MIN_VALUE = new Date(Long.MIN_VALUE);
 
-    public static final Date MAX_VALUE = new Date(Long.MAX_VALUE);
+    private static final Date MAX_VALUE = new Date(Long.MAX_VALUE);
 
     public static XMLGregorianCalendar toXmlGregorianCalendar(Date date) throws DatatypeConfigurationException {
         return toXmlGregorianCalendar(date, TimeZone.getDefault());
@@ -55,61 +57,63 @@ public class DateUtils {
         return date == null ? MIN_VALUE : date;
     }
 
-
     public static Date nullIsMaximal(Date date) {
         return date == null ? MAX_VALUE : date;
     }
 
+    @Nullable
     public static Date minimalIsNull(Date date) {
         return MIN_VALUE.equals(date) ? null : date;
     }
 
-
+    @Nullable
     public static Date maximalIsNull(Date date) {
         return MAX_VALUE.equals(date) ? null : date;
     }
 
-    public static Instant toInstant(Date date) {
+    @Nullable
+    public static Instant toInstant(@Nullable Date date) {
         if (date instanceof java.sql.Date || date instanceof  java.sql.Time) {
             date = new Date(date.getTime());
         }
         return date == null ? null : date.toInstant();
     }
 
-
-    public static Date toDate (Instant date) {
+    @Nullable
+    public static Date toDate (@Nullable Instant date) {
         return date == null ? null : Date.from(date);
     }
-
-    public static Date toDate(ZonedDateTime date) {
+    @Nullable
+    public static Date toDate(@Nullable ZonedDateTime date) {
         return date == null ? null : Date.from(date.toInstant());
     }
-
-    public static Instant toInstant(ZonedDateTime date) {
+    @Nullable
+    public static Instant toInstant(@Nullable ZonedDateTime date) {
         return date == null ? null : date.toInstant();
     }
 
-
-    public static Long toLong(Instant instant) {
+    @Nullable
+    public static Long toLong(@Nullable Instant instant) {
         return instant == null ? null : instant.toEpochMilli();
     }
 
-    public static Long toLong(Date date) {
+    @Nullable
+    public static Long toLong(@Nullable Date date) {
         return date == null ? null : date.getTime();
     }
 
-
-    public static Date toDate(Duration duration) {
+    @Nullable
+    public static Date toDate(@Nullable Duration duration) {
         return duration == null ? null : new Date(duration.toMillis());
     }
 
-
-    public static Date toDate(LocalDateTime date, ZoneId zoneId) {
+    @Nullable
+    public static Date toDate(@Nullable LocalDateTime date, ZoneId zoneId) {
         return date == null ? null : Date.from(date.atZone(zoneId).toInstant());
     }
 
-
-    public static Instant toInstant(LocalDateTime date, ZoneId zoneId) {
+    @Nullable
+    public static Instant toInstant(@Nullable LocalDateTime date, ZoneId zoneId) {
         return date == null ? null : date.atZone(zoneId).toInstant();
     }
 
