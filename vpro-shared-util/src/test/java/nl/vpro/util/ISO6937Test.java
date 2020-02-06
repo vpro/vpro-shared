@@ -88,7 +88,7 @@ public class ISO6937Test {
 
     @Test
     public void allChars() {
-        String example =
+        StringBuilder example = new StringBuilder(
             "AEIOUaeiou	ÀÈÌÒÙàèìòù\n" +
                 "ACEGILNORSUYZacegilnorsuyz	ÁĆÉÍĹŃÓŔŚÚÝŹáćéíĺńóŕśúýź\n" + // TODO I actually thing G actute, g actue should have been supported too?
                 "ACEGHIJOSUWYaceghijosuwy	ÂĈÊĜĤÎĴÔŜÛŴŶâĉêĝĥîĵôŝûŵŷ\n" +
@@ -101,10 +101,42 @@ public class ISO6937Test {
                 "CGKLNRSTcklnrst	ÇĢĶĻŅŖŞŢçķļņŗşţ\n" +
                 "OUou	ŐŰőű\n" +
                 "AEIUaeiu	ĄĘĮŲąęįų\n" +
-                "CDELNRSTZcdelnrstz	ČĎĚĽŇŘŠŤŽčďěľňřšťž\n";
-        byte[] bytes = example.getBytes(ISO6937);
+                "CDELNRSTZcdelnrstz	ČĎĚĽŇŘŠŤŽčďěľňřšťž\n");
+
+        example.append("¡\n" +
+            "¢\n" +
+            "£\n" +
+            "¤\n" +
+            "¥\n" +
+            //"¦\n" + // commented out ones somewhy don't work
+            "§\n" +
+            "¨\n" +
+            //"©\n" +
+            "ª\n" +
+            "«\n" +
+            //"¬\n" +
+            "\u00AD\n" +
+            //"®\n" +
+            //"¯\n" +
+            "°\n" +
+            "±\n" +
+            "²\n" +
+            "³\n" +
+            "´\n" +
+            "µ\n" +
+            "¶\n" +
+            "·\n" +
+            "¸\n" +
+            //"¹\n" +
+            "º\n" +
+            "»\n" +
+            "¼\n" +
+            "½\n" +
+            "¾\n");
+
+        byte[] bytes = example.toString().getBytes(ISO6937);
         String rounded = new String(bytes, ISO6937);
-        Assertions.assertThat(rounded).isEqualTo(example);
+        Assertions.assertThat(rounded).isEqualTo(example.toString());
 
 
     }
