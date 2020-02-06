@@ -18,12 +18,12 @@ import nl.vpro.logging.LoggerOutputStream;
 @Slf4j
 public class Ssh {
 
-    private final OutputStream STDOUT = LoggerOutputStream.debug(log);
-    private final OutputStream STDERR = LoggerOutputStream.error(log);
+    private static final OutputStream STDOUT = LoggerOutputStream.debug(log);
+    private static final OutputStream STDERR = LoggerOutputStream.error(log);
 
-    private final String remote_host_name;// = "upload.omroep.nl";
-    private final String remote_host_user; // = "vprosmc";
-    private final File   remote_host_private_key_file;// = " key_for_upload_omroep_nl";
+    private final String remote_host_name;  // "upload.omroep.nl"
+    private final String remote_host_user;  // "vprosmc"
+    private final File   remote_host_private_key_file; // " key_for_upload_omroep_nl"
 
     private final CommandExecutor ssh = new CommandExecutorImpl("/usr/bin/ssh");
     private final CommandExecutor scp = CommandExecutorImpl.builder().executablesPaths("/local/bin/scp", "/usr/bin/scp").build();
@@ -38,7 +38,7 @@ public class Ssh {
         this.remote_host_user = remoteHostUser;
 
         if (!remote_host_private_key_file.exists()) {
-            throw new RuntimeException(remote_host_private_key_file + " does not exist");
+            throw new IllegalArgumentException(remote_host_private_key_file + " does not exist");
         }
     }
 
@@ -54,7 +54,7 @@ public class Ssh {
                 remote_host_private_key_file.getAbsolutePath(),
                 remote_host_user + "@" + remote_host_name));
         args.addAll(Arrays.asList(command));
-        ssh.execute(args.toArray(new String[args.size()]));
+        ssh.execute(args.toArray(new String[0]));
 
     }
 
@@ -64,8 +64,9 @@ public class Ssh {
             "-i",
             remote_host_private_key_file.getAbsolutePath(), localFrom.getAbsolutePath(), remote_host_user + "@" + remote_host_name + ":" + remotePath);
 
-        if (result != 0)
-            throw new RuntimeException("Not succeeded upload from " + localFrom + " to  " + remote_host_name + ":" + remotePath);
+        if (result != 0) {
+            throw new SshException("Not succeeded upload from " + localFrom + " to  " + remote_host_name + ":" + remotePath);
+        }
     }
 
     public void download(String remotePath, File localTo) {
@@ -77,8 +78,15 @@ public class Ssh {
                 remote_host_private_key_file.getAbsolutePath(),
                 remote_host_user + "@" + remote_host_name + ":" + remotePath,
                 localTo.getAbsolutePath());
-        if (result != 0)
-            throw new RuntimeException("Not succeeded download from " + remote_host_name + ":" + remotePath + " to  " + localTo);
+        if (result != 0) {
+            throw new SshException("Not succeeded download from " + remote_host_name + ":" + remotePath + " to  " + localTo);
+        }
+    }
+
+    public static class SshException extends RuntimeException  {
+        public SshException(String message) {
+            super(message);
+        }
     }
 
 }
