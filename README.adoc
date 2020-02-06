@@ -13,7 +13,7 @@ places in VPRO artifacts.
 
 * link:vpro-shared-util[vpro-shared-util]: Classes in `nl.vpro.util`. Related to collections and other low level java utilities.
 * link:vpro-shared-logging[vpro-shared-logging]: Utilities related to logging. Mostly related to SLF4j. Also contains a more simple framework 'SimpleLogger', which is easy to implement on the fly
-* link:vpro-shared-elasticsearch5[vpro-shared-eleasticsearch5]: Related to elasticsearch5
+* link:vpro-shared-elasticsearch7[vpro-shared-eleasticsearch5]: Related to elasticsearch7
 * link:vpro-shared-elasticsearch-client[vpro-shared-eleasticsearch-client]: Related to elasticsearch
 * link:vpro-shared-couchdb-util[vpro-shared-couchdb-util]: Lightweight and streaming couchdb clients
 * link:vpro-shared-swagger[vpro-shared-swagger]: War overlay containing swagger frontend
