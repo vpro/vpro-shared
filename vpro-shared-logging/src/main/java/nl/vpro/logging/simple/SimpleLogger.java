@@ -2,6 +2,7 @@ package nl.vpro.logging.simple;
 
 import java.util.function.BiConsumer;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.FormattingTuple;
@@ -18,6 +19,7 @@ import org.slf4j.helpers.MessageFormatter;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
+@FunctionalInterface
 public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
 
     ThreadLocal<SimpleLogger> THREAD_LOCAL = ThreadLocal.withInitial(NOPLogger::new);
@@ -155,7 +157,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return true;
     }
 
-
     default boolean isInfoEnabled() {
         return isEnabled(Level.INFO);
     }
@@ -164,12 +165,12 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return isEnabled(Level.DEBUG);
     }
 
-
     @Override
     default void accept(Level level, CharSequence message) {
         accept(level, message, null);
     }
-    void accept(Level level, CharSequence message, Throwable t);
+
+    void accept(Level level, CharSequence message, @Nullable Throwable t);
 
     /**
      * Returns a new {@link SimpleLogger} that logs to both the current logger and the loggers given as argument.
