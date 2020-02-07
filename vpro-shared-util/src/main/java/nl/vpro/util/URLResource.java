@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class URLResource<T> {
 
-
     @SafeVarargs
     public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {
         return new URLResource<>(url, PROPERTIES, new Properties(), callbacks);
@@ -39,7 +38,6 @@ public class URLResource<T> {
         Consumer<Map<String, String>>... callbacks) {
         return new URLResource<>(url, MAP, new HashMap<>(), callbacks);
     }
-
 
     @SafeVarargs
     public static <S> URLResource<List<S>> beansFromProperties(Function<String, S> constructor, URI url, Consumer<List<S>>... callbacks) {
@@ -72,7 +70,6 @@ public class URLResource<T> {
     private Duration minAge = Duration.of(5, ChronoUnit.MINUTES);
     @Getter
     private Duration errorCache = Duration.of(1, ChronoUnit.MINUTES);
-
 
     private final Function<InputStream, T> reader;
 
@@ -111,16 +108,12 @@ public class URLResource<T> {
         this.empty = empty;
         this.reader = reader;
         this.callbacks = callbacks;
-
     }
 
     @SafeVarargs
     public URLResource(URI url, Function<InputStream, T> reader, Consumer<T>... callbacks) {
         this(url, reader, null, callbacks);
     }
-
-
-
 
     public T get() {
         if (result == null) {
