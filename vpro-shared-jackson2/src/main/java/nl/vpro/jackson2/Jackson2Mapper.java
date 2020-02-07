@@ -34,7 +34,7 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
     public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
 
-    private static ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
+    private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
 
     static {
@@ -79,7 +79,11 @@ public class Jackson2Mapper extends ObjectMapper {
         return THREAD_LOCAL.get();
     }
     public static void setThreadLocal(Jackson2Mapper set) {
-        THREAD_LOCAL.set(set);
+        if (set == null) {
+            THREAD_LOCAL.remove();
+        } else {
+            THREAD_LOCAL.set(set);
+        }
     }
 
     @SneakyThrows({JsonProcessingException.class})
