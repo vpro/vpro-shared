@@ -67,28 +67,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private static Thread connectionGuardThread;
     private static final ThreadFactory THREAD_FACTORY = ThreadPools.createThreadFactory("API Client purge idle connections", true, Thread.NORM_PRIORITY);
     private static final ConnectionGuard GUARD = new ConnectionGuard();
-  /*  static {
-        try {
-            ResteasyProviderFactory resteasyProviderFactory = ResteasyProviderFactory.getInstance();
-            try {
-                if (! resteasyProviderFactory.isRegistered(JacksonContextResolver.class)) {
-                    JacksonContextResolver jacksonContextResolver = new JacksonContextResolver();
-                    resteasyProviderFactory.registerProviderInstance(jacksonContextResolver);
-                } else {
-                    log.info("Already registered {}", JacksonContextResolver.class);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
 
-            //resteasyProviderFactory.addClientErrorInterceptor(new NpoApiClientErrorInterceptor());
-            //resteasyProviderFactory.addClientExceptionMapper(new ExceptionMapper());
-
-            RegisterBuiltin.register(resteasyProviderFactory);
-        } catch (Throwable t) {
-            log.error(t.getClass().getName() + " " + t.getMessage());
-        }
-    }*/
 
     protected String baseUrl;
 
