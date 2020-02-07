@@ -15,6 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DateUtilsTest {
 
+    private static final Date MIN_VALUE = new Date(Long.MIN_VALUE);
+
+    private static final Date MAX_VALUE = new Date(Long.MAX_VALUE);
+
     @Test
     public void testLowest() {
         assertThat(DateUtils.lowest(null,null)).isNull();
@@ -22,7 +26,7 @@ public class DateUtilsTest {
         assertThat(DateUtils.lowest(new Date(0),new Date(1))).isEqualTo(new Date(0));
         assertThat(DateUtils.lowest(null,new Date(0))).isEqualTo(new Date(0));
         assertThat(DateUtils.lowest(new Date(1),new Date(0))).isEqualTo(new Date(0));
-        assertThat(DateUtils.lowest(DateUtils.MIN_VALUE, new Date(0))).isEqualTo(DateUtils.MIN_VALUE);
+        assertThat(DateUtils.lowest(MIN_VALUE, new Date(0))).isEqualTo(MIN_VALUE);
     }
 
     @Test
@@ -32,17 +36,17 @@ public class DateUtilsTest {
         assertThat(DateUtils.highest(new Date(0),new Date(1))).isEqualTo(new Date(1));
         assertThat(DateUtils.highest(null,new Date(0))).isEqualTo(new Date(0));
         assertThat(DateUtils.highest(new Date(1),new Date(0))).isEqualTo(new Date(1));
-        assertThat(DateUtils.highest(DateUtils.MAX_VALUE, new Date(0))).isEqualTo(DateUtils.MAX_VALUE);
+        assertThat(DateUtils.highest(MAX_VALUE, new Date(0))).isEqualTo(MAX_VALUE);
     }
 
     @Test
     public void testNullIsMaximal() {
-        assertThat(DateUtils.nullIsMaximal(null)).isEqualTo(DateUtils.MAX_VALUE);
+        assertThat(DateUtils.nullIsMaximal(null)).isEqualTo(MAX_VALUE);
         assertThat(DateUtils.nullIsMaximal(new Date(100))).isEqualTo(new Date(100));
 
         assertThat(DateUtils.maximalIsNull(null)).isNull();
-        assertThat(DateUtils.maximalIsNull(DateUtils.MAX_VALUE)).isNull();
-        assertThat(DateUtils.maximalIsNull(DateUtils.MIN_VALUE)).isEqualTo(DateUtils.MIN_VALUE);
+        assertThat(DateUtils.maximalIsNull(MAX_VALUE)).isNull();
+        assertThat(DateUtils.maximalIsNull(MIN_VALUE)).isEqualTo(MIN_VALUE);
         assertThat(DateUtils.maximalIsNull(new Date(100))).isEqualTo(new Date(100));
 
     }
@@ -51,12 +55,12 @@ public class DateUtilsTest {
 
     @Test
     public void testNullIsMinimal() {
-        assertThat(DateUtils.nullIsMinimal(null)).isEqualTo(DateUtils.MIN_VALUE);
+        assertThat(DateUtils.nullIsMinimal(null)).isEqualTo(MIN_VALUE);
         assertThat(DateUtils.nullIsMinimal(new Date(100))).isEqualTo(new Date(100));
 
         assertThat(DateUtils.minimalIsNull(null)).isNull();
-        assertThat(DateUtils.minimalIsNull(DateUtils.MAX_VALUE)).isEqualTo(DateUtils.MAX_VALUE);
-        assertThat(DateUtils.minimalIsNull(DateUtils.MIN_VALUE)).isNull();
+        assertThat(DateUtils.minimalIsNull(MAX_VALUE)).isEqualTo(MAX_VALUE);
+        assertThat(DateUtils.minimalIsNull(MIN_VALUE)).isNull();
         assertThat(DateUtils.minimalIsNull(new Date(100))).isEqualTo(new Date(100));
 
     }
