@@ -16,9 +16,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class SkipAtStartInputStream extends InputStream {
 
 
-    private static final int[] UTF8_BYTE_ORDER_MARK =  {0xEF, 0xBB, 0xBF};
-    private static final int[] UTF16_BYTE_ORDER_MARK_BE =  {0xFE, 0xFF};
-    private static final int[] UTF16_BYTE_ORDER_MARK_LE =  {0xFF, 0xFE};
+    static final int[] UTF8_BYTE_ORDER_MARK =  {0xEF, 0xBB, 0xBF};
+    static final int[] UTF16_BYTE_ORDER_MARK_BE =  {0xFE, 0xFF};
+    static final int[] UTF16_BYTE_ORDER_MARK_LE =  {0xFF, 0xFE};
 
     int count = 0;
 
