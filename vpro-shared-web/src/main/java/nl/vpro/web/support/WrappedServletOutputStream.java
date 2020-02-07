@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,7 +18,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class WrappedServletOutputStream extends ServletOutputStream {
 
-    private DataOutputStream stream;
+    private final DataOutputStream stream;
+
 
     public WrappedServletOutputStream(OutputStream stream) {
         this.stream = new DataOutputStream(stream);
@@ -36,5 +38,16 @@ public class WrappedServletOutputStream extends ServletOutputStream {
     @Override
     public void write(@NonNull byte[] b, int off, int len) throws IOException {
         stream.write(b, off, len);
+    }
+
+    @Override
+    public boolean isReady() {
+        return false;
+
+    }
+
+    @Override
+    public void setWriteListener(WriteListener writeListener) {
+
     }
 }

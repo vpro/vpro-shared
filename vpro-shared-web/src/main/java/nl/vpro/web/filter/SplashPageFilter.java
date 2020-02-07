@@ -6,9 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.*;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -56,6 +54,8 @@ public class SplashPageFilter implements Filter {
 
         if(applyFilter(request, response)) {
             Cookie skipSplashCookie = new Cookie(cookieName, Boolean.toString(true));
+            skipSplashCookie.setHttpOnly(true);
+
             int secondsTillEndDate = (int)((endDate.getTime() - new Date().getTime()) / 1000);
             skipSplashCookie.setMaxAge(secondsTillEndDate);
             response.addCookie(skipSplashCookie);
