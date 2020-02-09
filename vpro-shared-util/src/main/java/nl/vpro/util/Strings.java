@@ -3,9 +3,10 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Michiel Meeuwissen
@@ -31,8 +32,14 @@ public class Strings {
         } else {
             try {
                 BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-                return reader.lines();
+                    new InputStreamReader(new FileInputStream(file), UTF_8));
+                return reader.lines().onClose(() -> {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                });
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 return Arrays.stream(new String[]{s});
