@@ -52,7 +52,7 @@ public class ConfigurationServlet extends HttpServlet {
         DEV
     }
 
-    protected Map<String, Map<String, String>> systemPropMap = new HashMap<>();
+    protected final static Map<String, Map<String, String>> SYSTEM_PROP_MAP = new HashMap<>();
 
     public static Context getContext() throws NamingException {
         InitialContext context = new InitialContext();
@@ -187,7 +187,7 @@ public class ConfigurationServlet extends HttpServlet {
     }
     protected Map<String, String> getSystem(HttpServletRequest req) throws IOException {
         String key = getRequestKey(req);
-        Map<String, String> systemProps = systemPropMap.get(key);
+        Map<String, String> systemProps = SYSTEM_PROP_MAP.get(key);
         if(systemProps == null) {
             systemProps = new LinkedHashMap<>();
             systemProps.put("env", getEnvironment().toString());
@@ -207,7 +207,7 @@ public class ConfigurationServlet extends HttpServlet {
             if(u != null) {
                 systemProps.putAll(getProperties(u.openStream()));
             }
-            systemPropMap.put(key, systemProps);
+            SYSTEM_PROP_MAP.put(key, systemProps);
         }
         return systemProps;
     }
