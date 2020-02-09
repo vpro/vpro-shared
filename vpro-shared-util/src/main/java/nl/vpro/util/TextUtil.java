@@ -110,7 +110,7 @@ public class TextUtil {
         }
         // recursive, because sometimes a sanitize operation results new html (see nl.vpro.util.TextUtilTest.testSanitizeIframe())
         String sanitized = _sanitize(input);
-        while (!sanitized.equals(input)) {
+        while (! Objects.equals(sanitized, input)) {
             input = sanitized;
             sanitized = _sanitize(input);
         }
