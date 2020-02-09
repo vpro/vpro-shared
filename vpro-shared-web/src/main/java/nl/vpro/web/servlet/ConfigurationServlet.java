@@ -44,7 +44,6 @@ public class ConfigurationServlet extends HttpServlet {
 
     private static final String ATTRIBUTE_NAME = ConfigurationServlet.class.getName() + ".configuration";
 
-    protected String name;
 
     protected enum Environment {
         PROD,
@@ -71,18 +70,15 @@ public class ConfigurationServlet extends HttpServlet {
         if(name == null || name.length() == 0) {
             throw new IllegalArgumentException(String.format("Must provide a valid configuration name, got: %s", name));
         }
-        this.name = name;
 
-        config.getServletContext().setAttribute(ATTRIBUTE_NAME, new Function<HttpServletRequest, Map<String, Object>>() {
-            @Override
-            public Map<String, Object> apply(HttpServletRequest req) {
-                try {
-                    return ConfigurationServlet.this.getProperties(req);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
 
+        config.getServletContext().setAttribute(ATTRIBUTE_NAME, (Function<HttpServletRequest, Map<String, Object>>) req -> {
+            try {
+                return ConfigurationServlet.this.getProperties(req);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
+
         });
     }
 
@@ -90,6 +86,7 @@ public class ConfigurationServlet extends HttpServlet {
     protected long getLastModified(HttpServletRequest req) {
         long lastModified = -1;
         String env = getEnvironment().toString().toLowerCase();
+        String name = getName();
         for(String s : new String[]{
             getServletContext().getRealPath("/WEB-INF/classes/" + name + ".properties"),
             getServletContext().getRealPath("/WEB-INF/classes/" + name + "." + env + ".properties"),
@@ -163,7 +160,7 @@ public class ConfigurationServlet extends HttpServlet {
         for(Map.Entry<String, String> e : getProperties(is).entrySet()) {
             String value = e.getValue();
             for(Map.Entry<String, String> sp : getSystem(req).entrySet()) {
-                value = value.replaceAll("\\$\\{" + sp.getKey() + "\\}", sp.getValue());
+                value = value.replaceAll("\\$\\{" + sp.getKey() + "}", sp.getValue());
             }
             map.put(e.getKey(), value);
         }
@@ -216,13 +213,13 @@ public class ConfigurationServlet extends HttpServlet {
     }
 
     protected Environment getEnvironment() {
-        String en = System.getProperty("vpro." + name + ".env");
+        String en = System.getProperty("vpro." + getName() + ".env");
         if(en != null) {
             return Environment.valueOf(en.toUpperCase());
         }
         try {
             Context env = getContext();
-            String lookupName = env.composeName("env", "vpro/" + name);
+            String lookupName = env.composeName("env", "vpro/" + getName());
             Object value = env.lookup(lookupName);
             if(value instanceof String) {
                 return Environment.valueOf(((String)value).toUpperCase());
@@ -238,6 +235,7 @@ public class ConfigurationServlet extends HttpServlet {
     protected Map<String, Object> getProperties(HttpServletRequest req) throws IOException {
         Map<String, Object> res = new LinkedHashMap<>();
         String env = getEnvironment().toString().toLowerCase();
+        String name = getName();
         merge(req, getClass().getResourceAsStream("/" + name + ".properties"), res);
         merge(req, getClass().getResourceAsStream("/" + name + "." + env + ".properties"), res);
 
@@ -273,6 +271,10 @@ public class ConfigurationServlet extends HttpServlet {
 
         return keys;
 
+    }
+
+    protected String getName() {
+        return getInitParameter("name");
     }
 }
 
