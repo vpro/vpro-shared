@@ -4,10 +4,7 @@
  */
 package nl.vpro.util;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +37,7 @@ public class TextUtil {
         if(!matcher.find()) {
             return true;
         }
-        return normalizeWhiteSpace(input).equals(normalizeWhiteSpace(sanitize(input)));
+        return Objects.equals(normalizeWhiteSpace(input), normalizeWhiteSpace(sanitize(input)));
     }
 
     public static String normalizeWhiteSpace(String input) {
