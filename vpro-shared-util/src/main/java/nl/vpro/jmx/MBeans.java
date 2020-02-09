@@ -99,7 +99,10 @@ public class MBeans {
         }
         try {
             return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException ie) {
+            log.info(ie.getMessage());
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
             log.info(e.getMessage());
         } catch (TimeoutException e) {
             return description.get() + "\n...\nstill busy. Please check logs";
