@@ -131,6 +131,18 @@ public class WindowedEventRateTest {
             .window(Duration.ofMinutes(5))
             .bucketDuration(Duration.ofSeconds(10))
             .build();
+        assertThat(rate.getBucketCount()).isEqualTo(30);
+    }
+
+    @Test
+    public void builder2() {
+
+        WindowedEventRate rate = WindowedEventRate.builder()
+            .window(Duration.ofMinutes(5))
+            .build();
+        assertThat(rate.getBucketCount()).isEqualTo(20);
+        assertThat(rate.getBucketDuration()).isEqualTo(Duration.ofSeconds(15));
+
     }
 }
 

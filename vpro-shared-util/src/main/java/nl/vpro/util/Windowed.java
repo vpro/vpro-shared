@@ -53,17 +53,21 @@ public abstract class Windowed<T> {
             buckets[i] = initialValue();
         }
         if (window == null && bucketDuration == null) {
+            // if both unspecified, take a default window of 5 minutes
             window = Duration.ofMinutes(5);
         }
         if (window != null) {
             long tempTotalDuration = window.toMillis();
             this.bucketDuration = tempTotalDuration / bucketCount1;
             this.totalDuration = this.bucketDuration * bucketCount1;
+            // if window _and_ bucket Duration are specified, then at this duration must accord with the calculated one
             if (bucketDuration != null && this.bucketDuration != bucketDuration.toMillis()) {
                 throw new IllegalArgumentException("The specified bucked duration " + bucketDuration + " didn't equal the calculated one " + Duration.ofMillis(this.bucketDuration));
 
             }
         } else {
+            assert bucketDuration != null;
+            // cannot happen. If it would have been null, then window would _never_ have been null
             this.bucketDuration = bucketDuration.toMillis();
             this.totalDuration = this.bucketDuration * bucketCount1;
         }

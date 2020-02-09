@@ -3,7 +3,6 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
