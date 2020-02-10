@@ -59,6 +59,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private ObjectMapper objectMapper;
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
+    private boolean countAfterCreate = false;
 
 
     public static class Builder {
@@ -114,7 +115,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Map<String, Supplier<String>> mappings,
         File writeJsonDir,
         ObjectMapper objectMapper,
-        List<String> aliases
+        List<String> aliases,
+        boolean countAfterCreate
         ) {
         if (elasticSearchIndex != null) {
             if (indexNameSupplier == null) {
@@ -142,6 +144,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.writeJsonDir = writeJsonDir;
         this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
+        this.countAfterCreate = countAfterCreate;
     }
 
 
@@ -188,7 +191,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public RestClient client() {
         try {
             return clientAsync((c) -> {
-                log.info("Index {}: {} entries", getIndexName(), count());
+                if (countAfterCreate) {
+                    log.info("Index {}: {} entries: {}", getIndexName(), count(), c);
+                } else {
+                    log.info("Index {}: {}", getIndexName(), c);
+                }
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
