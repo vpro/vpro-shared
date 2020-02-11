@@ -13,6 +13,9 @@ import javax.persistence.Converter;
  */
 @Converter
 public class StringListConverter implements AttributeConverter<List<String>, String> {
+
+    public static final StringListConverter INSTANCE = new StringListConverter();
+
     private static final String SPLIT_CHAR = "\t";
 
     @Override
