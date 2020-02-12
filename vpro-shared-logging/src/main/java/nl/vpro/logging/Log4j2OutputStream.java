@@ -21,4 +21,17 @@ public abstract class Log4j2OutputStream {
         };
     }
 
+    public static LoggerOutputStream info(Logger log) {
+        return info(log, false);
+    }
+
+    public static LoggerOutputStream info(Logger log, boolean skipEmptyLines) {
+        return new LoggerOutputStream(skipEmptyLines) {
+            @Override
+            void log(String line) {
+                log.info(line);
+            }
+        };
+    }
+
 }
