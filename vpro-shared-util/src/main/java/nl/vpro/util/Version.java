@@ -52,6 +52,15 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     public boolean isAfter(Version<T> other) {
         return compareTo(other) > 0;
     }
+
+    public boolean isNotAfter(T... parts) {
+        return isNotAfter(new Version<T>(parts));
+    }
+
+    public boolean isNotAfter(Version<T> other) {
+        return compareTo(other) <= 0;
+    }
+
     public boolean isBefore(T... parts) {
         return isBefore(new Version<T>(parts));
     }
