@@ -50,11 +50,7 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-camel</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-rs-client</artifactId>
@@ -218,6 +214,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch5</artifactId>
+        <version>2.11.1</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-camel</artifactId>
         <version>2.11.1</version>
       </dependency>
     </dependencies>
