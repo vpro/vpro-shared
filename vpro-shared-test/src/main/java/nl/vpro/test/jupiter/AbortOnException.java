@@ -45,10 +45,11 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
         ReflectiveInvocationContext<Method> invocationContext,
         ExtensionContext extensionContext) throws Throwable {
 
+        boolean hasIgnoreAnnotation = invocationContext.getExecutable().getAnnotation(Ignore.class) != null;
         if (active) {
             boolean hasNoAbortAnnotation = invocationContext.getExecutable().getAnnotation(NoAbort.class) != null;
 
-            boolean skip = !hasNoAbortAnnotation && relevantFails > 0;
+            boolean skip = ! hasIgnoreAnnotation && !hasNoAbortAnnotation && relevantFails > 0;
             if (skip) {
                 throw new TestAbortedException("An exception occured already " + fails.get(0).getInvocationContext().getExecutable().getName());
             }
@@ -58,7 +59,7 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
         try {
             super.interceptTestMethod(invocation, invocationContext, extensionContext);
         } finally {
-            if (!hasExcept) {
+            if (!hasExcept && ! hasIgnoreAnnotation) {
                 relevantFails += (fails.size() - sizeOfFails);
             }
         }
@@ -78,8 +79,8 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
         String value() default "";
     }
 
-     /**
-      * In combination with {@link AbortOnException}. A test annotated with this abort the rest of the tests  even if it fails
+    /**
+     * In combination with {@link AbortOnException}. A test annotated with this won't abort the rest of the tests even if it fails
      *
      * @since 2.12
      */
@@ -90,6 +91,20 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
     }
 
     /**
+     * Like having both {@link NoAbort} and {@link Except}, effectively makng the complete test method ignored by the abort on exception logic.
+     *
+     * @since 2.12
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.METHOD})
+    public @interface Ignore {
+        String value() default "";
+    }
+
+    /**
+     * Only it the test class is also 'ordered' apply the abort on exception logic.
+     *
+     * You may place the {@link AbortOnException} on super class, where some sub classes are not ordered, and for those it will not apply then.
      * @since 2.10
      */
     @Retention(RetentionPolicy.RUNTIME)
