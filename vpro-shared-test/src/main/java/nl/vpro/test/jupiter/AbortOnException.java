@@ -79,7 +79,7 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
     }
 
      /**
-      * In combination with {@link AbortOnException}. A test annotated with this abort the rest of the tests  even if it fails
+      * In combination with {@link AbortOnException}. A test annotated with this won't abort the rest of the tests even if it fails
      *
      * @since 2.12
      */
@@ -90,6 +90,9 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
     }
 
     /**
+     * Only it the test class is also 'ordered' apply the abort on exception logic.
+     *
+     * You may place the {@link AbortOnException} on super class, where some sub classes are not ordered, and for those it will not apply then.
      * @since 2.10
      */
     @Retention(RetentionPolicy.RUNTIME)
