@@ -98,7 +98,7 @@ public class SkipAtStartInputStream extends InputStream {
     }
 
     @Override
-    public int read(@NonNull byte b[]) throws IOException {
+    public int read(@NonNull byte[] b) throws IOException {
         if (skip.isEmpty()) {
             return wrapped.read(b, 0, b.length);
         } else {
@@ -107,7 +107,7 @@ public class SkipAtStartInputStream extends InputStream {
     }
 
     @Override
-    public int read(@NonNull byte b[], int off, int len) throws IOException {
+    public int read(@NonNull byte[] b, int off, int len) throws IOException {
         if (skip.isEmpty()) {
             return wrapped.read(b, off, len);
         } else {

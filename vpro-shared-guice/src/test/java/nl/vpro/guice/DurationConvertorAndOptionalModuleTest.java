@@ -38,6 +38,7 @@ public class DurationConvertorAndOptionalModuleTest {
 
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static class A {
         @Inject
         @Named("duration")

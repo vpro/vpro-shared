@@ -14,13 +14,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-
-import nl.vpro.rs.converters.DateParamConverterProvider;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 public class ParamConvertersTest {
 
-
-
     @Path("/api")
 
     public interface TestRestService {
@@ -48,11 +43,11 @@ public class ParamConvertersTest {
         String a(@QueryParam("instant") Instant instant);
 
 
-        @Path("/b")
+        @Path("/b/{date}")
         @GET
         @Produces({MediaType.TEXT_PLAIN})
         @DateFormat("yyyy-MM-dd")
-        String b(@DateFormat("yyyy-MM-dd")  @QueryParam("date") Date instant); // Resteasy geeft deze annotaties helemaal niet door?
+        String b(@PathParam("date")@DateFormat("yyyy-MM-dd")  Date instant); // Resteasy geeft deze annotaties helemaal niet door?
 
         @Path("/c")
         @GET
@@ -80,13 +75,13 @@ public class ParamConvertersTest {
     }
 
     @Test
-    @Disabled("I suppose i don't understand something")
+    //@Disabled("I suppose i don't understand something")
     public void testClientB(
         @WiremockResolver.Wiremock WireMockServer server,
         @WiremockUriResolver.WiremockUri String uri) {
 
         server.stubFor(
-            get(urlEqualTo("/api/b?date=2020-02-17T19%3A00%3A00Z"))
+            get(urlEqualTo("/api/b/2020-02-17"))
                 .willReturn(okForContentType("text/plain", "foo bar b"))
         );
 
@@ -106,8 +101,8 @@ public class ParamConvertersTest {
         ResteasyClientBuilder builder = new ResteasyClientBuilderImpl()
              .httpEngine(ApacheHttpClientEngine.create())
              ;
-        builder.register(new DateParamConverterProvider());
-        builder.register(new DateFormatter());
+        //builder.register(new DateParamConverterProvider());
+        //builder.register(DateFormatter.class);
 
 
 

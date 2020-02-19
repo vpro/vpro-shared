@@ -711,7 +711,7 @@ public class ISO6937CharsetProvider extends CharsetProvider {
          * @param data - the UCS/Unicode data in an array of char
          * @return {@link byte[]}- the ISO 6937 data
          */
-        protected Byte[] convert(char data[]) {
+        protected Byte[] convert(char[] data) {
             List<Byte> bytes = new ArrayList<>();
             for (int i = 0; i < data.length; i++) {
                 char c = data[i];

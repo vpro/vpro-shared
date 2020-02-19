@@ -176,7 +176,7 @@ public class HTMLStripper {
 		}
 	}
 
-	private class AllowedPattern {
+	private static class AllowedPattern {
 		private final Pattern pattern;
 		private boolean inverse = false;
 

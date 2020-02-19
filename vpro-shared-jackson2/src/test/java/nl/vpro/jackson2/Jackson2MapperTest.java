@@ -19,6 +19,7 @@ public class Jackson2MapperTest {
         b;
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @XmlRootElement
     public static class A {
         @XmlElement

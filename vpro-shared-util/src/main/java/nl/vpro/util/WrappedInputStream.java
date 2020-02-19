@@ -25,13 +25,13 @@ public class WrappedInputStream  extends InputStream {
     }
 
     @Override
-    public int read(@NonNull byte b[]) throws IOException {
+    public int read(@NonNull byte[] b) throws IOException {
         return wrapped.read(b);
     }
 
 
     @Override
-    public int read(@NonNull byte b[], int off, int len) throws IOException {
+    public int read(@NonNull byte[] b, int off, int len) throws IOException {
         return wrapped.read(b, off, len);
     }
 
