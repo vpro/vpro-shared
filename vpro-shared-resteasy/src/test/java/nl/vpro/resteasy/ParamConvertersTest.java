@@ -14,6 +14,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -75,7 +76,7 @@ public class ParamConvertersTest {
     }
 
     @Test
-    //@Disabled("I suppose i don't understand something")
+    @Disabled("I suppose i don't understand something")
     public void testClientB(
         @WiremockResolver.Wiremock WireMockServer server,
         @WiremockUriResolver.WiremockUri String uri) {
