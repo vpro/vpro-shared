@@ -284,7 +284,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     }
 
-    @SneakyThrows
+
+    /**
+     * For the current index. Reput the settings.
+     *
+     * Before doing that remove all settings from the settings object, that may not be updated, otherwise ES gives errors.
+     *
+     * @param postProcessSettings You may want to modify the settings objects even further before putting it to ES.
+     */
+      @SneakyThrows
     public void reputSettings(Consumer<ObjectNode> postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
@@ -295,6 +303,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         // remove stuff that cannot be updated
         index.remove("analysis");
         index.remove("number_of_shards");
+
+        // allow to caller to modify it further
+
         postProcessSettings.accept(settings);
         HttpEntity entity = entity(request);
         Request req = new Request(PUT, getIndexName() + "/_settings");
