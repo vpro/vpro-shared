@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -29,6 +30,7 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.*;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -392,6 +394,18 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
             .setUserAgent(userAgent)
+            .setRetryHandler(new HttpRequestRetryHandler() {
+
+                @Override
+                public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                    if (exception instanceof NoHttpResponseException && executionCount < 3) {
+                        log.warn("{} Retrying ({})", exception.getMessage(), executionCount);
+                        return true;
+                    }
+                    return false;
+
+                }
+            })
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
 
         if (connectionManager != null){
