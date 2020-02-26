@@ -285,7 +285,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @SneakyThrows
-    public void reputSettings(boolean forReindex) {
+    public void reputSettings(Consumer<ObjectNode> postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
         ObjectNode index = settings.with("settings").with("index");
@@ -295,9 +295,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         // remove stuff that cannot be updated
         index.remove("analysis");
         index.remove("number_of_shards");
-        if (forReindex) {
-            forReindex(settings);
-        }
+        postProcessSettings.accept(settings);
         HttpEntity entity = entity(request);
         Request req = new Request(PUT, getIndexName() + "/_settings");
         req.setEntity(entity);
@@ -305,6 +303,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
         log.info("{}", response);
     }
+
+    public void reputSettings(boolean forReindex) {
+        reputSettings(forReindex ? IndexHelper::forReindex : (on) -> {});
+    }
+
 
     @SafeVarargs
     @SneakyThrows
@@ -328,7 +331,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     }
 
-    protected void forReindex(ObjectNode  settings) {
+    public static void forReindex(ObjectNode  settings) {
         //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
         ObjectNode index = settings.with("settings").with("index");
         index.put("refresh_interval", -1);
