@@ -1119,7 +1119,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
             @Override
             public void onFailure(Exception exception) {
-                log.error("Error getting clustername from {}: {}", client, exception.getMessage(), exception);
+                if (exception instanceof ConnectException) {
+                    log.info(exception.getMessage());
+                } else {
+                    log.error("Error getting clustername from {}: {}", client, exception.getMessage(), exception);
+                }
                 future.completeExceptionally(exception);
             }
 

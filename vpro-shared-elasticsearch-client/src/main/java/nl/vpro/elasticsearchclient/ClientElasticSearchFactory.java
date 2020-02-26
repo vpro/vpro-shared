@@ -93,7 +93,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                         future.completeExceptionally(exception);
                     }
                     if (clusterName != null && !clusterName.equals(foundClusterName)) {
-                        future.completeExceptionally(new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
+                        future.completeExceptionally(
+                            new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
                         return;
                     }
                     future.complete(client);
