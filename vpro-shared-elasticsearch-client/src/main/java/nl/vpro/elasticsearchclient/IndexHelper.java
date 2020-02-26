@@ -3,6 +3,7 @@ package nl.vpro.elasticsearchclient;
 import lombok.*;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.*;
@@ -203,6 +204,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
+            if (e.getCause() instanceof ConnectException) {
+                clientFactory.invalidate();
+            }
             throw new RuntimeException(e);
         }
     }

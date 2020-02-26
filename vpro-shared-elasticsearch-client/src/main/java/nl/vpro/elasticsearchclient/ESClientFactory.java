@@ -33,4 +33,8 @@ public interface ESClientFactory extends AutoCloseable, Supplier<RestClient> {
         get().close();
     }
 
+    default String invalidate() {
+        return "";
+    }
+
 }
