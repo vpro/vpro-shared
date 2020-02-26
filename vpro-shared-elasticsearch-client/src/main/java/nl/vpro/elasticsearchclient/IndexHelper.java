@@ -292,8 +292,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      *
      * @param postProcessSettings You may want to modify the settings objects even further before putting it to ES.
      */
-      @SneakyThrows
-    public void reputSettings(Consumer<ObjectNode> postProcessSettings) {
+    @SafeVarargs
+    @SneakyThrows
+    public final void reputSettings(Consumer<ObjectNode>... postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
         ObjectNode index = settings.with("settings").with("index");
@@ -305,8 +306,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         index.remove("number_of_shards");
 
         // allow to caller to modify it further
-
-        postProcessSettings.accept(settings);
+        for (Consumer<ObjectNode> consumer : postProcessSettings) {
+            consumer.accept(settings);
+        }
         HttpEntity entity = entity(request);
         Request req = new Request(PUT, getIndexName() + "/_settings");
         req.setEntity(entity);
