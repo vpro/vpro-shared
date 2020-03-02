@@ -2,7 +2,9 @@ package nl.vpro.resteasy;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.lanwen.wiremock.ext.WiremockResolver;
+import ru.lanwen.wiremock.ext.WiremockResolver.Wiremock;
 import ru.lanwen.wiremock.ext.WiremockUriResolver;
+import ru.lanwen.wiremock.ext.WiremockUriResolver.WiremockUri;
 
 import java.time.*;
 import java.util.Date;
@@ -59,8 +61,8 @@ public class ParamConvertersTest {
 
     @Test
     public void testClientA(
-        @WiremockResolver.Wiremock WireMockServer server,
-        @WiremockUriResolver.WiremockUri String uri) {
+        @Wiremock WireMockServer server,
+        @WiremockUri String uri) {
 
         server.stubFor(
             get(urlEqualTo("/api/a?instant=2020-02-17T19%3A00%3A00Z"))
@@ -78,8 +80,8 @@ public class ParamConvertersTest {
     @Test
     @Disabled("I suppose i don't understand something")
     public void testClientB(
-        @WiremockResolver.Wiremock WireMockServer server,
-        @WiremockUriResolver.WiremockUri String uri) {
+        @Wiremock WireMockServer server,
+        @WiremockUri String uri) {
 
         server.stubFor(
             get(urlEqualTo("/api/b/2020-02-17"))
