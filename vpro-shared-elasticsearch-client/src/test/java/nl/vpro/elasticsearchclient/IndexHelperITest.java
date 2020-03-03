@@ -94,4 +94,9 @@ public class IndexHelperITest {
     }
 
 
+    @Test
+    public void unalias() {
+        log.info("{}", helper.unalias("apipagequeries"));
+    }
+
 }
