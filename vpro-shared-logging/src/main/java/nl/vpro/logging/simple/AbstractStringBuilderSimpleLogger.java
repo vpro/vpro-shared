@@ -43,7 +43,7 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
     }
 
     @Override
-    public void accept(Level level, CharSequence message, Throwable t) {
+    public synchronized void accept(Level level, CharSequence message, Throwable t) {
         if (level.toInt() < this.level.toInt()) {
             return;
         }
