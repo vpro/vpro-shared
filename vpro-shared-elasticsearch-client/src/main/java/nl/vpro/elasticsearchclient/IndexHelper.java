@@ -17,8 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +59,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
     private boolean countAfterCreate = false;
+    private final Supplier<Map<String, String>> mdcSupplier;
 
 
     public static class Builder {
@@ -116,7 +116,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         File writeJsonDir,
         ObjectMapper objectMapper,
         List<String> aliases,
-        boolean countAfterCreate
+        boolean countAfterCreate,
+        Supplier<Map<String, String>> mdcSupplier
         ) {
         if (elasticSearchIndex != null) {
             if (indexNameSupplier == null) {
@@ -145,6 +146,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
         this.countAfterCreate = countAfterCreate;
+        this.mdcSupplier = mdcSupplier == null ? MDC::getCopyOfContextMap : mdcSupplier;
     }
 
 
@@ -505,7 +507,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         rl.accept(error);
                     }
                 }
-
             }
         };
     }
@@ -549,7 +550,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return postAsync(getIndexName() + "/" + type + "/" + encode(id), objectMapper.valueToTree(o), listeners);
     }
 
-
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
@@ -558,8 +558,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final Future<ObjectNode> indexAsync(String type, String id, Object o, String parent, Consumer<ObjectNode>... listeners) {
         return postAsync(_indexPath(type, id, parent), objectMapper.valueToTree(o), listeners);
     }
-
-
 
     protected String indexPath(String id) {
         return _indexPath(DOC, id, null);
@@ -592,7 +590,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public ObjectNode delete(String id) {
         return _delete(DOC, id);
     }
-
 
 
     public ObjectNode _delete(String type, String id) {
@@ -630,7 +627,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return deleteAsync(deleteRequest.getAction().get(TYPE).textValue(), deleteRequest.getSource().get(ID).textValue(), listeners);
     }
 
-
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
@@ -661,15 +657,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public  Optional<JsonNode> get(String type, String id){
         return _get(type, id, null);
     }
+
     public  Optional<JsonNode> get(String id){
         return _get(DOC, id, null);
     }
 
-
     public  List<@NonNull Optional<JsonNode>> mget(String... ids){
         return mget(Arrays.asList(ids));
-
     }
+
     public  List<@NonNull Optional<JsonNode>> mget(Collection<String> ids){
         if (ids.size() == 0) {
             return Collections.emptyList();
@@ -696,9 +692,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             log.error(e.getMessage(), e);
         }
         return result;
-
     }
-
 
     public  Optional<JsonNode> getWithRouting(String id, String routing){
         return _get(DOC, id, routing);
@@ -745,7 +739,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public <T> Optional<T> get(Collection<String> type, String id, Function<JsonNode, T> adapter) {
         return _get(type, id, adapter);
     }
-
 
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
@@ -870,7 +863,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         index.put(Fields.INDEX, getIndexName());
 
         ObjectNode jsonNode = objectMapper.valueToTree(o);
-        return new BulkRequestEntry(actionLine, jsonNode);
+        return new BulkRequestEntry(actionLine, jsonNode, mdcSupplier.get());
     }
 
     /**
@@ -914,7 +907,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
-        return new BulkRequestEntry(actionLine, null);
+        return new BulkRequestEntry(actionLine, null, mdcSupplier.get());
     }
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
@@ -961,7 +954,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     @SafeVarargs
-    public static CompletableFuture<ObjectNode> bulkAsync(SimpleLogger log, File jsonDir, RestClient client, Collection<BulkRequestEntry> request, Consumer<ObjectNode>... listeners) {
+    public static CompletableFuture<ObjectNode> bulkAsync(
+        SimpleLogger log,
+        File jsonDir,
+        RestClient client,
+        Collection<BulkRequestEntry> request,
+        Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         if (request.size() == 0) {
             return CompletableFuture.completedFuture(null);
