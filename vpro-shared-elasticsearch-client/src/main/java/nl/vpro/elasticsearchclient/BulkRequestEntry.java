@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
-
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -23,24 +22,21 @@ public class BulkRequestEntry {
     final ObjectNode action;
     final ObjectNode source;
     final Map<String, String> mdc;
+    final String id;
 
-    @MonotonicNonNull
-    String id;
-
-    public BulkRequestEntry(ObjectNode action, ObjectNode source, Map<String, String> mdc) {
+    public BulkRequestEntry(ObjectNode action, ObjectNode source, Function<String, String> unalias, Map<String, String> mdc) {
         this.action = action;
         this.source = source;
         this.mdc = mdc;
-    }
-
-    public String getId() {
-        if (id == null) {
-            id = idFromActionNode(action);
-        }
-        return id;
+        this.id = idFromActionNode(action, unalias);
     }
 
     public static String idFromActionNode(ObjectNode action) {
+        return idFromActionNode(action, s -> s);
+    }
+
+
+    public static String idFromActionNode(ObjectNode action, Function<String, String> unalias) {
         StringBuilder builder = new StringBuilder();
         JsonNode idNode;
         if (action.has("index")) {
@@ -53,7 +49,7 @@ public class BulkRequestEntry {
             throw new IllegalArgumentException("Unrecognized action node " + action);
         }
         builder.append('\t');
-        builder.append(idNode.get(Constants.Fields.INDEX).textValue());
+        builder.append(unalias.apply(idNode.get(Constants.Fields.INDEX).textValue()));
         builder.append('\t');
         builder.append(idNode.get(Constants.Fields.ID).textValue());
         return builder.toString();

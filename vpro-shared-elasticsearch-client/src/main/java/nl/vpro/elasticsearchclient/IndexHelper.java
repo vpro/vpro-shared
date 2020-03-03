@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Suppliers;
 
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -423,6 +424,31 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
     public Version<Integer> getVersion() {
         return Version.parseIntegers(getVersionNumber());
+    }
+
+    private Supplier<Map<String, String>> unaliasing;
+    public String unalias(String alias) {
+        if (unaliasing == null) {
+            unaliasing = Suppliers.memoizeWithExpiration(() -> {
+                Map<String, String> result = new HashMap<>();
+                try {
+                    Request request = new Request(GET, "_cat/aliases");
+                    request.setOptions(request.getOptions().toBuilder().addHeader("accept", "application/json"));
+
+                    Response response = client().performRequest(request);
+                    ArrayNode read = readArray(response);
+                    for (JsonNode i : read) {
+                        result.put(i.get("alias").textValue(), i.get("index").textValue());
+                    }
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+
+                }
+                return result;
+            }, 10, TimeUnit.MINUTES);
+        }
+        return unaliasing.get().getOrDefault(alias, alias);
+
     }
 
 
@@ -832,20 +858,25 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      */
     public  ObjectNode read(Response response) {
         return read(log, response);
-
     }
 
+    /**
+     * Reads a response to json, logging to {@link #log}
+     */
+    public  ArrayNode readArray(Response response) {
+        return read(log, response, ArrayNode.class);
+    }
 
     /**
      * Reads a response to json, using {@link Jackson2Mapper#getLenientInstance()}, catch exceptions,
      * make sure resources are closed.
      */
-    public static ObjectNode read(SimpleLogger log, Response response) {
+    public static <T extends JsonNode> T read(SimpleLogger log, Response response, Class<T> clazz) {
         try {
             HttpEntity entity = response.getEntity();
             try (InputStream inputStream = entity.getContent()) {
                 return Jackson2Mapper.getLenientInstance()
-                    .readerFor(ObjectNode.class)
+                    .readerFor(clazz)
                     .readValue(inputStream);
             } finally {
                 EntityUtils.consumeQuietly(entity);
@@ -856,6 +887,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return null;
         }
     }
+    public static ObjectNode read(SimpleLogger log, Response response) {
+        return read(log, response, ObjectNode.class);
+    }
+
 
     String encode(String id) {
         try {
@@ -896,7 +931,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         index.put(Fields.INDEX, getIndexName());
 
         ObjectNode jsonNode = objectMapper.valueToTree(o);
-        return new BulkRequestEntry(actionLine, jsonNode, mdcSupplier.get());
+        return new BulkRequestEntry(actionLine, jsonNode, this::unalias, mdcSupplier.get());
     }
 
     /**
@@ -909,6 +944,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         request.getAction().with(INDEX).put(Fields.PARENT, routing);
         return request;
     }
+
 
 
     /**
@@ -940,7 +976,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
-        return new BulkRequestEntry(actionLine, null, mdcSupplier.get());
+        return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
     }
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
