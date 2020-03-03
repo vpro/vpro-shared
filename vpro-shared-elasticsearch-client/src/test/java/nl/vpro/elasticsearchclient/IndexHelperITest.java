@@ -1,14 +1,20 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.*;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,8 +38,8 @@ public class IndexHelperITest {
         helper = IndexHelper.builder()
             .log(log)
             .client(new SimpleESClientFactory(client, () -> "simple"))
-            .settingsResource("setting.json")
-            .mappingResource("test.json")
+            .settingsResource("/setting.json")
+            .mappingResource("/test.json")
             .indexName("test-" + System.currentTimeMillis())
             .build();
 
@@ -66,13 +72,25 @@ public class IndexHelperITest {
     }
 
     @Test
-    public void writeJson() {
+    public void writeJson() throws ExecutionException, InterruptedException {
         helper.setWriteJsonDir(new File("/tmp"));
         TestObject test = new TestObject();
         test.setId("a");
         test.setTitle("bla");
 
-        helper.bulk(Arrays.asList(helper.indexRequest("test",  test.getId(), test)));
+        final List<BulkRequestEntry> jobs = Arrays.asList(helper.indexRequest(test.getId(), test));
+        helper.bulkAsync(jobs, new Consumer<ObjectNode>() {
+            @Override
+            public void accept(ObjectNode jsonNodes) {
+                ArrayNode items = jsonNodes.withArray("items");
+                log.info("{}", jobs);
+                for (JsonNode i : items) {
+                    log.info("{}", IndexHelper.find(jobs, (ObjectNode) i));
+
+                }
+
+            }
+        }).get();
     }
 
 
