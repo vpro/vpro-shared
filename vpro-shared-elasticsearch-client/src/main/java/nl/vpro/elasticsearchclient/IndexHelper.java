@@ -362,7 +362,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
             while (i.hasNext()) {
                 JsonNode node = i.next();
-                bulk.add(deleteRequest(node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText()));
+                bulk.add(deleteRequest(
+                    node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText())
+                );
             }
         }
         if (bulk.size() > 0) {
@@ -467,12 +469,18 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return future;
     }
 
+    public static Optional<BulkRequestEntry> find(Collection<BulkRequestEntry> jobs, final ObjectNode responseItem) {
+        return jobs.stream().filter(
+            item -> BulkRequestEntry.idFromActionNode(responseItem).equals(item.getId())
+        ).findFirst();
+    }
+
     @SafeVarargs
     static protected ResponseListener listen(
         SimpleLogger log,
         @NonNull final String requestDescription,
         @NonNull final CompletableFuture<ObjectNode> future,
-        @NonNull  Consumer<ObjectNode>... listeners) {
+        @NonNull Consumer<ObjectNode>... listeners) {
         return new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
