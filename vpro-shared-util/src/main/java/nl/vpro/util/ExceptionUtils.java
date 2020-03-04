@@ -59,7 +59,11 @@ public class ExceptionUtils {
         @Override
         @SneakyThrows
         default void accept(final T e) {
-            acceptWithException(e);
+            try {
+                acceptWithException(e);
+            } catch (Throwable t) {
+                throw t;
+            }
         }
 
         void acceptWithException(T e);
