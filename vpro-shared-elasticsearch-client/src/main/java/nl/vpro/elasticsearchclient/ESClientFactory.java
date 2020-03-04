@@ -38,4 +38,8 @@ public interface ESClientFactory extends AutoCloseable, Supplier<RestClient> {
         return "";
     }
 
+    default String logString() {
+        return toString();
+    }
+
 }

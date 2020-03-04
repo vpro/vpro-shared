@@ -1200,7 +1200,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
             Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
-            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
+            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
@@ -1219,17 +1219,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             String id = jsonNode.get(Fields.ID).textValue();
             if (found) {
                 int version = jsonNode.has(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : -1;
-                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
+                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
             } else {
-                logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory, index, type, encode(id));
+                logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory.logString(), index, type, encode(id));
             }
-            logger.debug("{}{} {}", prefix.get(), clientFactory, jsonNode);
+            logger.debug("{}{} {}", prefix.get(), clientFactory.logString(), jsonNode);
         };
     }
 
 
     public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog) {
-        @SuppressWarnings("MismatchedQueryAndUpdateOfStringBuilder")
         StringBuilder logPrefix = new StringBuilder();
         Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
         Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
@@ -1291,14 +1290,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             if (! indexed.isEmpty()) {
                 if (! deleted.isEmpty()) {
-                    logger.info("{} {} indexed: {}, revoked: {}", clientFactory, index, indexed, deleted);
+                    logger.info("{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
                 } else {
-                    logger.info("{} {} indexed: {}", clientFactory, index, indexed);
+                    logger.info("{} {} indexed: {}", clientFactory.logString(), index, indexed);
                 }
             } else if (! deleted.isEmpty()) {
-                logger.info("{} {} revoked: {}", clientFactory, index,  deleted);
+                logger.info("{} {} revoked: {}", clientFactory.logString(), index,  deleted);
             } else {
-                logger.warn("{} {} bulk request didn't yield result", clientFactory, index);
+                logger.warn("{} {} bulk request didn't yield result", clientFactory.logString(), index);
             }
         };
     }

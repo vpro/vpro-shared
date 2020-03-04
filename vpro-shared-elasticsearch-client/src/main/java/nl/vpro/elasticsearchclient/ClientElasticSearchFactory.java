@@ -157,19 +157,23 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     @Override
     public String toString() {
+        return logString() + ":" + client;
+    }
+
+    @Override
+    public String logString() {
         try {
             HttpHost[] hosts = getHosts();
             if (hosts.length > 0) {
-                return hosts[0].toString() + ":" + client;
+                return hosts[0].toString();
 
             } else {
-                return unicastHosts + ":" + client;
+                return unicastHosts;
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return unicastHosts + ":" + client;
+            return unicastHosts;
         }
-
     }
 
     public void setSocketTimeoutDuration(String socketTimeout) {

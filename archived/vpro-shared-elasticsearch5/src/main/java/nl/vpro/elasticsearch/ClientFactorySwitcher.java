@@ -48,8 +48,10 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
                 long count = client.prepareSearch().execute().get().getHits().getTotalHits();
                 client.close();
                 log.info("Found {} objects in {}", count, this);
-
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException e) {
+                Thread.currentTread().interrupt();
+                log.error(e.getMessage(), e);
+            } catch (ExecutionException e) {
                 log.error(e.getMessage(), e);
             }
         }

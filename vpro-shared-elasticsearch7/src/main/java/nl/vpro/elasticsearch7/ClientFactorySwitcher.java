@@ -49,7 +49,10 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
                 client.close();
                 log.info("Found {} objects in {}", count, this);
 
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException ie) {
+                log.error(ie.getMessage(), ie);
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
                 log.error(e.getMessage(), e);
             }
         }
