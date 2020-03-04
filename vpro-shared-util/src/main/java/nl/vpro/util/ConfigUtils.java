@@ -201,7 +201,6 @@ public class ConfigUtils {
     }
 
     static <K> void substitute(Map<K, String> map, Map<String, String> substMap) {
-
         StringSubstitutor subst = new StringSubstitutor(substMap);
 
         for (Map.Entry<K, String> e : map.entrySet()) {
