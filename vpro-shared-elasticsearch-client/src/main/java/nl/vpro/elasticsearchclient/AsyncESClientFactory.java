@@ -1,6 +1,7 @@
 package nl.vpro.elasticsearchclient;
 
 
+import java.net.ConnectException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -21,7 +22,13 @@ public interface AsyncESClientFactory extends ESClientFactory {
     default RestClient client(String logName, Consumer<RestClient> callback) {
         try {
             return clientAsync(logName, callback).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }  catch (ExecutionException e) {
+            if (e.getCause() instanceof ConnectException) {
+                invalidate();
+            }
             throw new RuntimeException(e);
         }
     }

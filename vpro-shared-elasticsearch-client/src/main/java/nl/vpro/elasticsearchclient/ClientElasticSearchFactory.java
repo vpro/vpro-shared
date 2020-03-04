@@ -5,9 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
@@ -43,7 +42,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private RestClient client;
 
-    private final ConcurrentHashMap<String, CompletableFuture<RestClient>> clients = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<RestClient>> clients = new HashMap<>();
 
     private final int instance = instances++;
 
@@ -94,7 +93,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                         future.completeExceptionally(exception);
                     }
                     if (clusterName != null && !clusterName.equals(foundClusterName)) {
-                        future.completeExceptionally(new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
+                        future.completeExceptionally(
+                            new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
                         return;
                     }
                     future.complete(client);
@@ -157,19 +157,23 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     @Override
     public String toString() {
+        return logString() + ":" + client;
+    }
+
+    @Override
+    public String logString() {
         try {
             HttpHost[] hosts = getHosts();
             if (hosts.length > 0) {
-                return hosts[0].toString() + ":" + client;
+                return hosts[0].toString();
 
             } else {
-                return unicastHosts + ":" + client;
+                return unicastHosts;
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            return unicastHosts + ":" + client;
+            return unicastHosts;
         }
-
     }
 
     public void setSocketTimeoutDuration(String socketTimeout) {

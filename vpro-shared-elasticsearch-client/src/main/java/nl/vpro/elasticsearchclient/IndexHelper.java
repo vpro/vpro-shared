@@ -3,6 +3,7 @@ package nl.vpro.elasticsearchclient;
 import lombok.*;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.*;
@@ -76,7 +77,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             this.mappings.put(type, mapping);
             return this;
         }
-
+        public Builder mapping(Supplier<String> mapping) {
+            this.mappings.put(DOC, mapping);
+            return this;
+        }
 
         @Deprecated
         public Builder mappingResource(String type, String mapping) {
@@ -84,12 +88,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
 
         public Builder mappingResource(String mapping) {
-            String[] split = mapping.split("/");
-            String fileName = split[split.length - 1];
-            int dot = fileName.lastIndexOf(".");
-            String type = fileName.substring(0, dot);
-            return mapping(type, () -> resourceToString(mapping));
+            return mapping(() -> resourceToString(mapping));
         }
+        @Deprecated
         public Builder mappings(Map<String, Supplier<String>> mappings) {
             this.mappings.putAll(mappings);
             return this;
@@ -151,6 +152,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
+    @Deprecated
     public static IndexHelper of(Logger log, ESClientFactory client, String indexName, String objectType) {
         return IndexHelper.builder()
             .log(log)
@@ -161,6 +163,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             .build();
     }
 
+    @Deprecated
     public static IndexHelper of(Logger log, ESClientFactory client, Supplier<String> indexName, String objectType) {
         return IndexHelper.builder().log(log)
             .client(client)
@@ -200,7 +203,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     log.info("Index {}: {}", getIndexName(), c);
                 }
             }).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof ConnectException) {
+                clientFactory.invalidate();
+            }
             throw new RuntimeException(e);
         }
     }
@@ -278,8 +287,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     }
 
+
+    /**
+     * For the current index. Reput the settings.
+     *
+     * Before doing that remove all settings from the settings object, that may not be updated, otherwise ES gives errors.
+     *
+     * @param postProcessSettings You may want to modify the settings objects even further before putting it to ES.
+     */
+    @SafeVarargs
     @SneakyThrows
-    public void reputSettings(boolean forReindex) {
+    public final void reputSettings(Consumer<ObjectNode>... postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
         ObjectNode index = settings.with("settings").with("index");
@@ -289,8 +307,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         // remove stuff that cannot be updated
         index.remove("analysis");
         index.remove("number_of_shards");
-        if (forReindex) {
-            forReindex(settings);
+
+        // allow to caller to modify it further
+        for (Consumer<ObjectNode> consumer : postProcessSettings) {
+            consumer.accept(settings);
         }
         HttpEntity entity = entity(request);
         Request req = new Request(PUT, getIndexName() + "/_settings");
@@ -299,6 +319,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
         log.info("{}", response);
     }
+
+    public void reputSettings(boolean forReindex) {
+        reputSettings(forReindex ? IndexHelper::forReindex : (on) -> {});
+    }
+
 
     @SafeVarargs
     @SneakyThrows
@@ -322,7 +347,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     }
 
-    protected void forReindex(ObjectNode  settings) {
+    public static void forReindex(ObjectNode  settings) {
         //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
         ObjectNode index = settings.with("settings").with("index");
         index.put("refresh_interval", -1);
@@ -1107,7 +1132,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public String getClusterName() {
         try {
             return getClusterNameAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
@@ -1149,7 +1177,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
             @Override
             public void onFailure(Exception exception) {
-                log.error("Error getting clustername from {}: {}", client, exception.getMessage(), exception);
+                if (exception instanceof ConnectException) {
+                    log.info(exception.getMessage());
+                } else {
+                    log.error("Error getting clustername from {}: {}", client, exception.getMessage(), exception);
+                }
                 future.completeExceptionally(exception);
             }
 
@@ -1168,7 +1200,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
             Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
-            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
+            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
@@ -1187,17 +1219,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             String id = jsonNode.get(Fields.ID).textValue();
             if (found) {
                 int version = jsonNode.has(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : -1;
-                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory, index, type, encode(id), version);
+                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
             } else {
-                logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory, index, type, encode(id));
+                logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory.logString(), index, type, encode(id));
             }
-            logger.debug("{}{} {}", prefix.get(), clientFactory, jsonNode);
+            logger.debug("{}{} {}", prefix.get(), clientFactory.logString(), jsonNode);
         };
     }
 
 
     public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog) {
-        @SuppressWarnings("MismatchedQueryAndUpdateOfStringBuilder")
         StringBuilder logPrefix = new StringBuilder();
         Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
         Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
@@ -1259,14 +1290,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             if (! indexed.isEmpty()) {
                 if (! deleted.isEmpty()) {
-                    logger.info("{} {} indexed: {}, revoked: {}", clientFactory, index, indexed, deleted);
+                    logger.info("{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
                 } else {
-                    logger.info("{} {} indexed: {}", clientFactory, index, indexed);
+                    logger.info("{} {} indexed: {}", clientFactory.logString(), index, indexed);
                 }
             } else if (! deleted.isEmpty()) {
-                logger.info("{} {} revoked: {}", clientFactory, index,  deleted);
+                logger.info("{} {} revoked: {}", clientFactory.logString(), index,  deleted);
             } else {
-                logger.warn("{} {} bulk request didn't yield result", clientFactory, index);
+                logger.warn("{} {} bulk request didn't yield result", clientFactory.logString(), index);
             }
         };
     }
@@ -1293,12 +1324,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @Override
     public String toString() {
-        return "IndexHelper{" +
-            "indexName=" + indexNameSupplier.get() +
-            ", aliases=" + aliases +
-            ", writeJsonDir=" + writeJsonDir +
-            ", elasticSearchIndex=" + elasticSearchIndex +
-            '}';
+        StringBuilder builder =  new StringBuilder("IndexHelper{" + getIndexName() + " ");
+        builder.append(clientFactory);
+        if (aliases != null && ! aliases.isEmpty()) {
+            builder.append(", ").append(aliases);
+        }
+        if (writeJsonDir != null) {
+            builder.append(", writeJsonDir=").append(writeJsonDir);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
     static protected void writeJson(SimpleLogger log, File writeJsonDir, Collection<BulkRequestEntry> requests) {
@@ -1312,7 +1347,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     static protected void writeJson(SimpleLogger log, File  writeJsonDir, String id, JsonNode jsonNode) {
         if (writeJsonDir != null) {
-            File file = new File(writeJsonDir, id.replaceAll(File.separator, "_") + ".json");
+            File file = new File(writeJsonDir, id.replace(
+                File.separator, "_"
+            ) + ".json");
             try (OutputStream out = new FileOutputStream(file)) {
                 Jackson2Mapper.getPrettyInstance().writeValue(out, jsonNode);
                 log.info("Wrote {}", file);

@@ -29,8 +29,17 @@ public interface ESClientFactory extends AutoCloseable, Supplier<RestClient> {
         return client(clazz.getName(), (rc) -> {});
     }
 
+    @Override
     default void close() throws IOException {
         get().close();
+    }
+
+    default String invalidate() {
+        return "";
+    }
+
+    default String logString() {
+        return toString();
     }
 
 }
