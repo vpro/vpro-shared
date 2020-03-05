@@ -223,8 +223,8 @@ public class MBeans {
      * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}
      */
     public static class UpdatableString implements StringSupplierSimpleLogger {
+        private final Logger logger;
         private CharSequence string;
-        private Logger logger;
 
         public UpdatableString(Logger logger, String string, Object... args) {
             this.logger = logger;
@@ -267,7 +267,6 @@ public class MBeans {
     public static boolean isBlank(String string) {
         return "String".equals(string) || StringUtils.isBlank(string);
     }
-
 
     /**
      * @since 2.10
