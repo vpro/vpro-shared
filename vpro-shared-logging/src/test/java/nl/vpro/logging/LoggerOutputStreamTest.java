@@ -1,14 +1,18 @@
 package nl.vpro.logging;
 
-import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.time.Duration;
+
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Michiel Meeuwissen
  */
+@Slf4j
 public class LoggerOutputStreamTest {
 
 
@@ -25,6 +29,18 @@ public class LoggerOutputStreamTest {
         instance.write(testString.getBytes());
         instance.close();
         assertEquals(testString + "\n", buf.toString());
+    }
+
+
+
+    @Test
+    public void performance() throws IOException {
+        long nano = System.nanoTime();
+        LoggerOutputStream out = LoggerOutputStream.info(log);
+        for (int i = 0 ; i < 10000; i++) {
+            out.write(("bal bla bla bla " + i + "\n").getBytes());
+        }
+        log.info(""+ Duration.ofNanos(System.nanoTime() - nano));
     }
 
 }
