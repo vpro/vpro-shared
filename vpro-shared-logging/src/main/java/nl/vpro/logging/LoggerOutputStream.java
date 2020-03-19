@@ -1,8 +1,6 @@
 package nl.vpro.logging;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 import org.slf4j.Logger;
 
@@ -10,9 +8,12 @@ import nl.vpro.logging.simple.SimpleLogger;
 
 /**
  * Wraps a {@link Logger} in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
+ *
+ * Supports slf4j and JUL. For log4j2 see, {@link Log4j2OutputStream}
+ *
  * @author Michiel Meeuwissen
  */
-public abstract class LoggerOutputStream extends OutputStream {
+public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
 
 
     public static LoggerOutputStream info(java.util.logging.Logger log) {
@@ -49,7 +50,7 @@ public abstract class LoggerOutputStream extends OutputStream {
     public static LoggerOutputStream info(final SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            final void log(String line) {
                 log.info(line);
             }
         };
@@ -62,7 +63,7 @@ public abstract class LoggerOutputStream extends OutputStream {
     public static LoggerOutputStream error(SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            final void log(String line) {
                 log.error(line);
             }
         };
@@ -76,7 +77,7 @@ public abstract class LoggerOutputStream extends OutputStream {
     public static LoggerOutputStream error(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            final void log(String line) {
                 log.severe(line);
             }
         };
@@ -165,45 +166,8 @@ public abstract class LoggerOutputStream extends OutputStream {
     }
 
 
-    final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    final boolean skipEmptyLines;
-    int lastChar = -1;
-
     LoggerOutputStream(boolean skipEmptyLines) {
-        this.skipEmptyLines = skipEmptyLines;
+        super(skipEmptyLines);
     }
 
-    abstract void log(String line);
-
-
-    @Override
-    public void write(int b) {
-        switch(b) {
-            case '\n':
-                log(skipEmptyLines);
-                break;
-            case '\r':
-                if (lastChar != '\n') {
-                    log(skipEmptyLines);
-                }
-                break;
-            default:
-                buffer.write(b);
-        }
-        lastChar = b;
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-        log(true);
-    }
-
-    private void log(boolean skipEmpty) {
-        String line = buffer.toString();
-        if (!skipEmpty || ! (line == null || line.length() == 0)) {
-            log(line);
-        }
-        buffer.reset();
-    }
 }
