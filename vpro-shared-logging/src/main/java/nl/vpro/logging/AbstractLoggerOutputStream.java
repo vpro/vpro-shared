@@ -1,5 +1,8 @@
 package nl.vpro.logging;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.*;
 
 import org.slf4j.Logger;
@@ -14,11 +17,20 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
     final boolean skipEmptyLines;
     int lastChar = -1;
 
-    AbstractLoggerOutputStream(boolean skipEmptyLines) {
+    @Getter
+    protected long count = 0;
+
+    @Getter
+    @Setter
+    protected Integer max;
+
+    AbstractLoggerOutputStream(boolean skipEmptyLines, Integer max) {
         this.skipEmptyLines = skipEmptyLines;
+        this.max = max;
     }
 
     abstract void log(String line);
+
 
     @Override
     public void write(int b) {
@@ -39,27 +51,6 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
 
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        int blockoffset = off;
-        int blocklen = 0;
-        for (int i = 0; i < len; i++) {
-            if (b[i] == '\n') {
-                if (blocklen > 0) {
-                    buffer.write(b, blockoffset, blocklen);
-                    blockoffset += blocklen;
-                    blocklen = 0;
-                    flush();
-                }
-            } else {
-                blocklen++;
-            }
-        }
-        if (blocklen > 0) {
-            buffer.write(b, blockoffset, blocklen);
-        }
-    }
-
-    @Override
     public void flush() {
         log(skipEmptyLines);
     }
@@ -72,9 +63,21 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
 
     private void log(boolean skipEmpty) {
         String line = buffer.toString();
-        if (! skipEmpty || ! line.isEmpty()) {
-            log(line);
+        try {
+            if (!skipEmpty || !line.isEmpty()) {
+                count++;
+                if (max != null) {
+                    if (count > max) {
+                        if (count == max + 1) {
+                            log("...");
+                        }
+                        return;
+                    }
+                }
+                log(line);
+            }
+        } finally {
+            buffer.reset();
         }
-        buffer.reset();
     }
 }

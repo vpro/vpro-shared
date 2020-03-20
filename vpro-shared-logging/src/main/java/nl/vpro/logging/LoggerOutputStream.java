@@ -43,6 +43,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     }
 
 
+
     public static LoggerOutputStream info(SimpleLogger log) {
         return info(log, false);
     }
@@ -110,19 +111,10 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     }
 
     public static LoggerOutputStream warn(final Logger log, boolean skipEmptyLines, final Integer max) {
-        return new LoggerOutputStream(skipEmptyLines) {
-            private int count = 0;
+        return new LoggerOutputStream(skipEmptyLines, max) {
             @Override
             void log(String line) {
-                if (max != null) {
-                    count++;
-                    if (count >  max) {
-                        if (count == max + 1) {
-                            log.warn("...");
-                        }
-                        return;
-                    }
-                }
+
                 log.warn(line);
             }
         };
@@ -166,8 +158,11 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     }
 
 
+    LoggerOutputStream(boolean skipEmptyLines, Integer max) {
+        super(skipEmptyLines, max);
+    }
     LoggerOutputStream(boolean skipEmptyLines) {
-        super(skipEmptyLines);
+        super(skipEmptyLines, null);
     }
 
 }
