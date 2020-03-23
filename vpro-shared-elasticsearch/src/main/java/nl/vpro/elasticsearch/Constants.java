@@ -31,6 +31,9 @@ public class Constants {
     public static final String QUERY = "query";
     public static final String VERSION = "version";
     public static final String SORT = "sort";
+    public static final String ORDER = "order";
+    public static final String DESC = "desc";
+    public static final String ASC = "asc";
     public static class Query {
         public static final String BOOL = "bool";
         public static final String MUST = "must";
