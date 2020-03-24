@@ -5,6 +5,7 @@ import lombok.*;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -29,6 +30,7 @@ import com.google.common.base.Suppliers;
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -46,6 +48,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public static final String SEARCH = "/_search";
     public static final String COUNT = "/_count";
+    public static final String SETTINGS = "/_settings";
 
     public static final String POST = "POST";
     public static final String GET = "GET";
@@ -1118,6 +1121,24 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 consumer.accept(null);
             }
         });
+    }
+
+    public  JsonNode getActualSettings() throws IOException {
+        Request get = new Request(GET, getIndexName() + SETTINGS);
+        Response response = client()
+            .performRequest(get);
+        JsonNode result = read(response);
+        return result.fields().next().getValue().get("settings").get("index");
+    }
+
+    @SneakyThrows
+    public Duration getRefreshInterval()  {
+        JsonNode refreshInterval = getActualSettings().get("refresh_interval");
+        if (refreshInterval == null) {
+            return Duration.ofSeconds(30);
+        } else {
+            return TimeUtils.parseDuration(refreshInterval.textValue()).orElseThrow(IllegalArgumentException::new);
+        }
     }
 
     public void setIndexName(String indexName) {

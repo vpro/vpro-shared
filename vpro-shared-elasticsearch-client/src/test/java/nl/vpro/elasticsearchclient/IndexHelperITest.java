@@ -3,6 +3,7 @@ package nl.vpro.elasticsearchclient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -69,6 +70,11 @@ public class IndexHelperITest {
     @Test
     public void getClusterName() {
         log.info("clustername: {}", helper.getClusterName());
+    }
+
+    @Test
+    public void getActualSettings() throws IOException {
+        log.info("settings: {}", helper.getActualSettings());
     }
 
     @Test
