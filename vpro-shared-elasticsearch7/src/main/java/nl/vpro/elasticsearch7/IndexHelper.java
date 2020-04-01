@@ -11,6 +11,7 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class IndexHelper implements IndexHelperInterface<Client> {
 
     private final Logger log;
     private Supplier<String> indexNameSupplier;
-    private Supplier<String> settings;
+    private Supplier<Settings> settings;
     private ESClientFactory clientFactory;
     private final Map<String, Supplier<String>> mappings = new HashMap<>();
 
@@ -65,11 +66,16 @@ public class IndexHelper implements IndexHelperInterface<Client> {
 
 
     @lombok.Builder(builderClassName = "Builder")
-    private IndexHelper(Logger log, ESClientFactory client, Supplier<String> indexNameSupplier, Supplier<String> settings, Map<String, Supplier<String>> mappings) {
+    private IndexHelper(
+        Logger log,
+        ESClientFactory client,
+        Supplier<String> indexNameSupplier,
+        Supplier<String> settings,
+        Map<String, Supplier<String>> mappings) {
         this.log = log == null ? LoggerFactory.getLogger(IndexHelper.class) : log;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier;
-        this.settings = settings;
+        this.settings = settings == null ? null : () -> Settings.builder().loadFromSource(settings.get(), XContentType.JSON).build();
         if (mappings != null) {
             this.mappings.putAll(mappings);
         }
@@ -120,9 +126,32 @@ public class IndexHelper implements IndexHelperInterface<Client> {
         }
         try {
             String indexName = indexNameSupplier.get();
+            Settings s = settings.get();
+
+
+            if (createIndex.isForReindex()){
+                s = Settings.builder().put(s)
+                    .put("index.number_of_replicas", 0)
+                    .put("refresh_interval", -1) // Is this correct?
+                    .build();
+            }
+            if (createIndex.getNumberOfReplicas() != null) {
+                s = Settings.builder().put(s).put("index.number_of_shards", createIndex.getShards()).build();
+            }
+            if (createIndex.getShards() != null) {
+                s = Settings.builder().put(s).put("index.number_of_shards", createIndex.getShards()).build();
+            }
+            if (createIndex.isCreateAliases() && createIndex.isUseNumberPostfix()) {
+                throw new UnsupportedOperationException();
+            }
+
+            if (mappings.isEmpty() && createIndex.isRequireMappings()) {
+                throw new IllegalStateException("No mappings provided in " + this);
+            }
+
             CreateIndexRequestBuilder createIndexRequestBuilder = client().admin().indices()
                 .prepareCreate(indexName)
-                .setSettings(settings.get(), XContentType.JSON);
+                .setSettings(s);
             for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
                 createIndexRequestBuilder.addMapping(e.getKey(), e.getValue().get(), XContentType.JSON);
             }

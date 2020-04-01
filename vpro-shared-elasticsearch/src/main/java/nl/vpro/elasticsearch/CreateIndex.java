@@ -18,6 +18,8 @@ public class CreateIndex {
 
     private final Integer shards;
 
+    private final Integer numberOfReplicas;
+
     private final boolean requireMappings;
 
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
@@ -25,6 +27,7 @@ public class CreateIndex {
     public static final CreateIndex FOR_TEST = CreateIndex.builder()
         .createAliases(false)
         .useNumberPostfix(false)
+        .numberOfReplicas(0)
         .shards(1)
         .build();
 
@@ -36,12 +39,14 @@ public class CreateIndex {
         Runnable callBack,
         Boolean createAliases,
         Integer shards,
+        Integer numberOfReplicas,
         Boolean requireMappings) {
         this.useNumberPostfix = useNumberPostfix;
         this.forReindex = forReindex;
         this.callBack = callBack;
         this.createAliases = createAliases == null || createAliases;
         this.shards = shards;
+        this.numberOfReplicas = numberOfReplicas;
         this.requireMappings = requireMappings == null || requireMappings;
     }
 }

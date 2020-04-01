@@ -261,6 +261,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             ObjectNode index = settings.with("settings").with("index");
             index.put("number_of_shards", createIndex.getShards());
         }
+        if (createIndex.getNumberOfReplicas() != null) {
+            ObjectNode index = settings.with("settings").with("index");
+            index.put("number_of_replicas", createIndex.getNumberOfReplicas());
+        }
         if (mappings.isEmpty() && createIndex.isRequireMappings()) {
             throw new IllegalStateException("No mappings provided in " + this);
         }
