@@ -51,7 +51,6 @@ import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 @Slf4j
 public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T> {
 
-
     private static final Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
     private final Function<JsonNode, T> adapt;
     private final RestClient client;
@@ -412,7 +411,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         return Optional.ofNullable(this.totalSize);
     }
 
-
     @Override
     public Optional<TotalRelation> getSizeQualifier() {
         findNext();
@@ -439,13 +437,16 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     }
 
     public Optional<Instant> getETA() {
-        if (getCount() != null && getCount() != 0 && getTotalSize().isPresent()) {
-            Duration duration = Duration.between(start, Instant.now());
-            Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * (getTotalSize().get().doubleValue() / getCount())));
-            return Optional.of(start.plus(estimatedTotalDuration));
-        } else {
-            return Optional.empty();
+        if (count != null && count != 0) {
+            Optional<Long> totalSize = getTotalSize();
+            if (totalSize.isPresent()) {
+                Duration duration = Duration.between(start, Instant.now());
+                Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * (totalSize.get().doubleValue() / getCount())));
+                return Optional.of(start.plus(estimatedTotalDuration));
+            }
         }
+        return Optional.empty();
+
     }
 
 
