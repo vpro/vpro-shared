@@ -3,9 +3,9 @@ package nl.vpro.spring.converters;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
@@ -24,37 +24,39 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
     public List<Integer> convert(String string) {
         List<Integer> result = new ArrayList<>();
         for (String s : string.split("\\s*,\\s*")) {
-            String[] splitByDots = s.split("\\.\\.", 2);
-            if (splitByDots.length == 2) {
-                for (int j = Integer.parseInt(splitByDots[0]); j <= Integer.parseInt(splitByDots[1]); j++) {
-                    result.add(j);
-                }
-            } else {
-                String[] split =  s.split("-", 4);
-                if (split.length == 1) {
-                    result.add(Integer.parseInt(split[0]));
-                } else {
-                    int i = 0;
-                    String first = split[i++];
-                    if (first.isEmpty()) {
-                        first = "-" + split[i++];
-                    }
-                    if (split.length == i) {
-                        result.add(Integer.parseInt(first));
-                    } else {
-                        String second = split[i++];
-                        if (second.isEmpty()) {
-                            second = "-" + split[i];
-                        }
-                        for (int j = Integer.parseInt(first); j <= Integer.parseInt(second); j++) {
-                            result.add(j);
-                        }
-                    }
-                }
-            }
+            add(s, result::add);
         }
         return result;
+    }
 
+    private void add(String s, Consumer<Integer> result) {
+        String[] splitByDots = s.split("\\.\\.", 2);
+        if (splitByDots.length == 2) {
+            addRange(Integer.parseInt(splitByDots[0]), Integer.parseInt(splitByDots[1]), result);
+        } else {
+            String[] split =  s.split("-", 4); // "-5--4"; -> "", "5", "", "4"
+            int i = 0;
+            String first = split[i++];
+            if (first.isEmpty()) {
+                first = "-" + split[i++];
+            }
+            if (split.length == i) {
+                // just one number
+                result.accept(Integer.parseInt(first));
+            } else {
+                // must be a range
+                String second = split[i++];
+                if (second.isEmpty()) {
+                    second = "-" + split[i];
+                }
+                addRange(Integer.parseInt(first), Integer.parseInt(second), result);
+            }
+        }
+    }
+    private void addRange(int start, int end, Consumer<Integer> consumer) {
+        for (int j = start; j <= end; j++) {
+            consumer.accept(j);
+        }
     }
 
     @Override
