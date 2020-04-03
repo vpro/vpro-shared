@@ -1,8 +1,9 @@
 package nl.vpro.spring.converters;
 
-import java.util.Arrays;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.core.convert.TypeDescriptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,5 +34,40 @@ public class StringToIntegerListConverterTest {
     @Test
     public void testConvertNegativeBoth() {
         assertThat(StringToIntegerListConverter.INSTANCE.convert("-2--1")).isEqualTo(Arrays.asList(-2, -1));
+    }
+
+    static class TestClass {
+        public String source;
+
+        public Integer sourceNotMatches;
+
+
+        public List<Integer> target;
+
+        public List<String> targetNotMatches;
+
+        public Map<String, Integer> targetNotMatches2;
+
+
+    }
+    @Test
+    public void matches() throws NoSuchFieldException {
+        TypeDescriptor source = new TypeDescriptor(TestClass.class.getField("source"));
+        TypeDescriptor sourceNotMatches = new TypeDescriptor(TestClass.class.getField("sourceNotMatches"));
+
+        TypeDescriptor target = new TypeDescriptor(TestClass.class.getField("target"));
+        TypeDescriptor targetNotMatches = new TypeDescriptor(TestClass.class.getField("targetNotMatches"));
+        TypeDescriptor targetNotMatches2 = new TypeDescriptor(TestClass.class.getField("targetNotMatches2"));
+
+        StringToIntegerListConverter impl = new StringToIntegerListConverter();
+        assertThat(impl.matches(source, target)).isTrue();
+
+        assertThat(impl.matches(source, targetNotMatches)).isFalse();
+        assertThat(impl.matches(source, targetNotMatches2)).isFalse();
+
+
+        assertThat(impl.matches(sourceNotMatches, target)).isFalse();
+
+
     }
 }
