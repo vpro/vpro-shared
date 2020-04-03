@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -104,7 +105,8 @@ public class TextUtil {
      * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
      * might lead to problems for end users.
      */
-    public static String sanitize(String input) {
+    @Nullable
+    public static String sanitize(@Nullable String input) {
         if (input == null) {
             return null;
         }
