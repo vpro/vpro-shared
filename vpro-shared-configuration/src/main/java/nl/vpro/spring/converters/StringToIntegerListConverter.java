@@ -3,7 +3,7 @@ package nl.vpro.spring.converters;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.core.convert.TypeDescriptor;
@@ -29,7 +29,7 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
         return result;
     }
 
-    private void add(String s, Consumer<Integer> result) {
+    private void add(String s, IntConsumer result) {
         String[] splitByDots = s.split("\\.\\.", 2);
         if (splitByDots.length == 2) {
             addRange(Integer.parseInt(splitByDots[0]), Integer.parseInt(splitByDots[1]), result);
@@ -53,7 +53,7 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
             }
         }
     }
-    private void addRange(int start, int end, Consumer<Integer> consumer) {
+    private void addRange(int start, int end, IntConsumer consumer) {
         for (int j = start; j <= end; j++) {
             consumer.accept(j);
         }
