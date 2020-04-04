@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Formatting file sizes it not always very trivial. This can help.
  *
@@ -35,15 +37,19 @@ public class FileSizeFormatter {
 
     public static final DecimalFormatSymbols DECIMAL = DecimalFormatSymbols.getInstance(Locale.US);
 
-    private DecimalFormat format;
+    private final DecimalFormat format;
 
-    private boolean mebi;
+    /**
+     * Whether to use <a href="https://en.wikipedia.org/wiki/Binary_prefix">binary prefixes</a>
+     */
+    private final boolean mebi;
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(builderClassName = "Builder", toBuilder = true)
     public FileSizeFormatter(DecimalFormat format, boolean mebi) {
         this.format = format== null ? new DecimalFormat("#") : format;
         this.mebi = mebi;
     }
+
 
     public static final FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
         .pattern("#.0")
@@ -56,22 +62,26 @@ public class FileSizeFormatter {
         .mebi(false)
         .build();
 
-    public String format(Number length) {
-        if (length == null) {
+    public String format(@Nullable Number numberOfBytes) {
+        if (numberOfBytes == null) {
             return "? B";
         }
         if (mebi) {
-            return formatMebi(length.floatValue());
+            return formatMebi(numberOfBytes.floatValue());
         } else {
-            return formatSI(length.floatValue());
+            return formatSI(numberOfBytes.floatValue());
         }
     }
 
-    public String formatSpeed(Number length, Duration duration) {
-        if (length == null) {
-            return format(length) + " /s";
+    /**
+     * Given a number of bytes, processed in a certain duration, format it as certain amount of bytes per second.
+     *
+     */
+    public String formatSpeed(@Nullable Number numberOfBytes, Duration duration) {
+        if (numberOfBytes == null) {
+            return format(numberOfBytes) + "/s";
         }
-        Float perSecond = 1000f * length.floatValue() / duration.toMillis();
+        Float perSecond = 1000f * numberOfBytes.floatValue() / duration.toMillis();
         return format(perSecond) + "/s";
     }
 
@@ -132,6 +142,8 @@ public class FileSizeFormatter {
             decimalFormat.setDecimalFormatSymbols(symbols);
             return format(decimalFormat);
         }
+
+
     }
 
 }

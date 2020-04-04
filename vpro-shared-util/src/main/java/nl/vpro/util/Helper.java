@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -22,6 +23,10 @@ import org.apache.commons.lang3.StringUtils;
  * @author r.j.koekoek@vpro.nl
  */
 public class Helper {
+
+    private Helper() {
+
+    }
 
     /**
      * Tests for equality, allowing nulls.
@@ -115,9 +120,9 @@ public class Helper {
     public static String nvl(String... values) {
         String result = null;
         if (values != null) {
-            for (int i = 0; i < values.length; i++) {
-                result = values[i];
-                if (!Helper.isEmpty(result)) {
+            for (String value : values) {
+                result = value;
+                if (StringUtils.isNotEmpty(result)) {
                     break;
                 }
             }
@@ -172,17 +177,17 @@ public class Helper {
      */
     @Deprecated
     public static boolean isEmpty(String str) {
-        return str == null || str.trim().length() == 0;
+        return StringUtils.isEmpty(str);
     }
 
     /**
      * @param str a string
      * @return true when the string is not null and contains text
-     * @deprecated Use {@link StringUtils#isNoneEmpty(CharSequence...)}
+     * @deprecated Use {@link StringUtils#isNotEmpty(CharSequence)}
      */
     @Deprecated
     public static boolean isNotEmpty(String str) {
-        return !isEmpty(str);
+        return StringUtils.isNotEmpty(str);
     }
 
     /**
@@ -192,7 +197,7 @@ public class Helper {
      */
     @Deprecated
     public static boolean isTrimmedEmpty(String str) {
-        return str == null || str.trim().length() == 0;
+        return StringUtils.isBlank(str);
     }
 
     /**
@@ -202,7 +207,7 @@ public class Helper {
      */
     @Deprecated
     public static boolean isTrimmedNotEmpty(String str) {
-        return !isTrimmedEmpty(str);
+        return StringUtils.isNotBlank(str);
     }
 
     /**
@@ -210,8 +215,9 @@ public class Helper {
      * @param arr an array
      * @return true when arr is null or contains no elements
      */
+    @Deprecated
     public static <T> boolean isEmpty(T[] arr) {
-        return arr == null || arr.length == 0;
+        return ArrayUtils.isEmpty(arr);
     }
 
     /**
@@ -219,15 +225,18 @@ public class Helper {
      * @param arr an array
      * @return true when arr is not null and contains elements
      */
+    @Deprecated
     public static <T> boolean isNotEmpty(T[] arr) {
-        return !isEmpty(arr);
+        return ArrayUtils.isNotEmpty(arr);
     }
 
     /**
      * @param <T> some type
      * @param collection the collection
      * @return true when collection is null or contains no elements
+     *
      */
+    @Deprecated
     public static <T> boolean isEmpty(Collection<T> collection) {
         return collection == null || collection.isEmpty();
     }
@@ -237,6 +246,7 @@ public class Helper {
      * @param collection the collection
      * @return true when collection is null or contains no elements
      */
+    @Deprecated
     public static <T> boolean isEmpty(List<T> collection) {
         return collection == null || collection.isEmpty();
     }
@@ -246,6 +256,7 @@ public class Helper {
      * @param collection the collection
      * @return true when collection is not null and contains elements
      */
+    @Deprecated
     public static <T> boolean isNotEmpty(Collection<T> collection) {
         return !isEmpty(collection);
     }
@@ -276,11 +287,7 @@ public class Helper {
      * @param <W> actual used list type
      */
     public static <K, L extends K, V, W extends V> void add(Map<K, List<V>> listMap, L key, W value) {
-        List<V> list = listMap.get(key);
-        if (list == null) {
-            list = new ArrayList<>();
-            listMap.put(key, list);
-        }
+        List<V> list = listMap.computeIfAbsent(key, k -> new ArrayList<>());
         list.add(value);
     }
 
@@ -296,11 +303,7 @@ public class Helper {
      * @param <W> actual used set type
      */
     public static <K, L extends K, V, W extends V> void addToSetMap(Map<K, Set<V>> setMap, L key, W value) {
-        Set<V> set = setMap.get(key);
-        if (set == null) {
-            set = new HashSet<>();
-            setMap.put(key, set);
-        }
+        Set<V> set = setMap.computeIfAbsent(key, k -> new HashSet<>());
         set.add(value);
     }
 
@@ -346,24 +349,24 @@ public class Helper {
             result = null;
         } else if (targetType.equals(BigDecimal.class)) {
             if (value instanceof BigDecimal) {
-                result = (BigDecimal) value;
+                result = value;
             } else if (value instanceof BigInteger) {
                 result = new BigDecimal((BigInteger) value);
             } else if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof Byte) {
 
-                result = BigDecimal.valueOf(((Number) value).longValue());
+                result = BigDecimal.valueOf(value.longValue());
             } else if (value instanceof Double || value instanceof Float) {
-                result = new BigDecimal(((Number) value).toString());
+                result = new BigDecimal(value.toString());
             } else {
                 throw new IllegalArgumentException(String.format("unknown type for value %s (%s)", value, value.getClass()));
             }
         } else if (targetType.equals(BigInteger.class)) {
             if (value instanceof BigInteger) {
-                result = (BigInteger) value;
+                result = value;
             } else if (value instanceof BigDecimal) {
                 result = ((BigDecimal) value).toBigInteger();
             } else {
-                result = BigInteger.valueOf(((Number) value).longValue());
+                result = BigInteger.valueOf(value.longValue());
             }
         } else if (targetType.equals(Long.class)) {
             result = value.longValue();
@@ -501,8 +504,7 @@ public class Helper {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <W extends Annotation> String getAnnotatedProperty(Class<? extends Object> clazz, Class<W> annClazz) {
+    public static <W extends Annotation> String getAnnotatedProperty(Class<?> clazz, Class<W> annClazz) {
         Method[] methods = clazz.getMethods();
         String annotationProperty = null;
         for (Method method : methods) {
@@ -514,19 +516,14 @@ public class Helper {
             }
         }
         if (annotationProperty == null && clazz.getSuperclass() != Object.class) {
-            annotationProperty = getAnnotatedProperty((Class) clazz.getSuperclass(), annClazz);
+            annotationProperty = getAnnotatedProperty(clazz.getSuperclass(), annClazz);
         }
         return annotationProperty;
     }
 
     public static <T> List<T> removeNullEntries(List<T> source) {
-        Iterator<T> iter = source.iterator();
 
-        while (iter.hasNext()) {
-            if (iter.next() == null) {
-                iter.remove();
-            }
-        }
+        source.removeIf(Objects::isNull);
 
         return source;
     }
@@ -555,7 +552,7 @@ public class Helper {
                 if (!first) {
                     sb.append(sep);
                 }
-                sb.append(String.valueOf(t));
+                sb.append(t);
                 first = false;
             }
 
@@ -616,7 +613,7 @@ public class Helper {
             int length = s.length();
             List<String> arrayList = new ArrayList<>(length / maxPartSize + 1);
             for (int start = 0; start < length; start += maxPartSize) {
-                int end = (start + maxPartSize) >= length ? length : start + maxPartSize;
+                int end = Math.min((start + maxPartSize), length);
                 if (end - start >= minPartSize) {
                     arrayList.add(s.substring(start, end));
                 }
