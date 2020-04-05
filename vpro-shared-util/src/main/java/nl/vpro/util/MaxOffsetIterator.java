@@ -53,7 +53,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     }
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls) {
-        this(wrapped, max, offset, countNulls, null);
+        this(wrapped, max, offset, countNulls, null, false);
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -61,7 +61,8 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
         @NonNull Iterator<T> wrapped,
         @Nullable Number max,
         @Nullable Number offset, boolean countNulls,
-        @Nullable @Singular  List<Runnable> callbacks) {
+        @Nullable @Singular  List<Runnable> callbacks,
+        boolean autoClose) {
         //noinspection ConstantConditions
         if (wrapped == null) {
             throw new IllegalArgumentException("Cannot wrap null");
@@ -81,6 +82,9 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
                 }
             }
         };
+        if (autoClose) {
+            autoClose();
+        }
 
     }
 
@@ -90,34 +94,37 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     }
 
     public MaxOffsetIterator<T> autoClose(AutoCloseable... closeables) {
+        final Runnable prev = callback;
         callback = () -> {
-            for (AutoCloseable closeable : closeables) {
-                try {
-                    closeable.close();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+            try {
+                if (prev != null) {
+                    prev.run();
+                }
+            } finally {
+                for (AutoCloseable closeable : closeables) {
+                    try {
+                        closeable.close();
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
                 }
             }
-
         };
         return this;
     }
     public MaxOffsetIterator<T> autoClose() {
         final Runnable prev = callback;
-        callback = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (prev != null) {
-                        prev.run();
-                    }
-                } finally {
-                    if (wrapped instanceof AutoCloseable) {
-                        try {
-                            ((AutoCloseable) wrapped).close();
-                        }catch(Exception e){
-                            log.error(e.getMessage(), e);
-                        }
+        callback = () -> {
+            try {
+                if (prev != null) {
+                    prev.run();
+                }
+            } finally {
+                if (wrapped instanceof AutoCloseable) {
+                    try {
+                        ((AutoCloseable) wrapped).close();
+                    } catch(Exception e){
+                        log.error(e.getMessage(), e);
                     }
                 }
             }
@@ -127,14 +134,12 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
 
     @Override
     public boolean hasNext() {
-        findNext();
-        return hasNext;
+        return findNext();
     }
 
     @Override
     public T next() {
-        findNext();
-        if(!hasNext) {
+        if (!findNext()) {
             throw new NoSuchElementException();
         }
         hasNext = null;
@@ -144,7 +149,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
         return next;
     }
 
-    protected void findNext() {
+    protected boolean findNext() {
         if(hasNext == null) {
             hasNext = false;
 
@@ -179,6 +184,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
                 callback.run();
             }
         }
+        return hasNext;
     }
 
 
