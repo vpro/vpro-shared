@@ -5,10 +5,10 @@ import java.util.Objects;
 /**
  * The next in succession of {@link java.util.function.Predicate} and {@link java.util.function.BiPredicate}.
  *
- * A function with three arguments
+ * A predicate with three arguments
  *
  * @author Michiel Meeuwissen
- * @since 2.12.
+ * @since 2.12.0
  */
 @FunctionalInterface
 public interface TriPredicate<T, U, V> {
