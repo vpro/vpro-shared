@@ -28,7 +28,7 @@ public abstract class Windowed<T> {
 
     private boolean warmingUp = true;
     protected long  currentBucketTime = start.toEpochMilli();
-    protected int   currentBucket = 0;
+    protected int currentBucketIndex = 0;
 
 
     /**
@@ -119,9 +119,8 @@ public abstract class Windowed<T> {
     public T[] getBuckets() {
         shiftBuckets();
         T[] result = newBuckets(buckets.length);
-        int j = buckets.length;
         for (int i = 0; i < buckets.length; i++) {
-            result[buckets.length - 1 - i] = buckets[(currentBucket - i + buckets.length) % buckets.length];
+            result[buckets.length - 1 - i] = buckets[(currentBucketIndex - i + buckets.length) % buckets.length];
         }
         return result;
     }
@@ -132,13 +131,12 @@ public abstract class Windowed<T> {
      */
     public SortedMap<Range<Instant>, T> getRanges() {
         shiftBuckets();
-        Instant now = Instant.now();
         SortedMap<Range<Instant>, T> result = new TreeMap<>(Comparator.comparing(Range::lowerEndpoint));
         Instant end = Instant.ofEpochMilli(currentBucketTime)
             .plusMillis(bucketDuration);
         for (int i = 0; i < buckets.length; i++) {
             Instant begin = end.minusMillis(bucketDuration);
-            result.put(Range.closedOpen(begin, end), buckets[(currentBucket - i + buckets.length) % buckets.length]);
+            result.put(Range.closedOpen(begin, end), buckets[(currentBucketIndex - i + buckets.length) % buckets.length]);
             end = begin;
         }
         return result;
@@ -161,7 +159,7 @@ public abstract class Windowed<T> {
 
     protected T currentBucket() {
         shiftBuckets();
-        return buckets[currentBucket];
+        return buckets[currentBucketIndex];
     }
 
     protected void shiftBuckets() {
@@ -169,11 +167,11 @@ public abstract class Windowed<T> {
         long afterBucketBegin = currentTime - currentBucketTime;
         int i = 0;
         while (afterBucketBegin > bucketDuration && (i++) < buckets.length) {
-            currentBucket++;
+            currentBucketIndex++;
             //log.debug("Shifting buckets");
-            currentBucket %= buckets.length;
-            if (!resetValue(buckets[currentBucket])) {
-                buckets[currentBucket] = initialValue();
+            currentBucketIndex %= buckets.length;
+            if (!resetValue(buckets[currentBucketIndex])) {
+                buckets[currentBucketIndex] = initialValue();
             }
             afterBucketBegin -= bucketDuration;
             currentBucketTime += bucketDuration;

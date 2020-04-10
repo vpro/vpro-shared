@@ -15,6 +15,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Slf4j
 public class Strings {
 
+    private Strings() {
+    }
+
     public static Stream<String> strings(String... strings) {
         return Arrays
             .stream(strings)

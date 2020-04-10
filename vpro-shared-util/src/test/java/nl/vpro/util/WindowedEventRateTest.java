@@ -57,6 +57,7 @@ public class WindowedEventRateTest {
                 .isEqualTo(ranges.get(i + 1).getKey().lowerEndpoint());
         }
 
+
     }
 
 
