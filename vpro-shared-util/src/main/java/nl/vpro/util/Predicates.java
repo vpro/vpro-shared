@@ -10,7 +10,11 @@ import java.util.function.Predicate;
  */
 public class Predicates {
 
-     public static <T> Predicate<T> always(boolean v, String s) {
+    private Predicates() {
+
+    }
+
+    public static <T> Predicate<T> always(boolean v, String s) {
         return new Predicate<T>() {
             @Override
             public boolean test(T t) {
