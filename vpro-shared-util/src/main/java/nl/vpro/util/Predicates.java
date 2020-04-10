@@ -24,10 +24,10 @@ public class Predicates {
     }
 
     public static <T> Predicate<T> alwaysFalse() {
-        return always(false, "false");
+        return always(false, "FALSE");
     }
     public static <T> Predicate<T> alwaysTrue() {
-        return always(true, "true");
+        return always(true, "TRUE");
     }
 
     public static <T, U> BiPredicate<T, U> biAlways(boolean v, String s) {
@@ -45,10 +45,10 @@ public class Predicates {
     }
 
     public static <T, U> BiPredicate<T, U> biAlwaysFalse() {
-        return biAlways(false, "false");
+        return biAlways(false, "FALSE");
     }
     public static <T, U> BiPredicate<T, U> biAlwaysTrue() {
-        return biAlways(true, "true");
+        return biAlways(true, "TRUE");
     }
 
     public static <T, U, V> TriPredicate<T, U, V> triAlways(boolean val, String s) {
@@ -65,9 +65,9 @@ public class Predicates {
         };
     }
     public static <T, U, V> TriPredicate<T, U, V> triAlwaysFalse() {
-        return triAlways(false, "false");
+        return triAlways(false, "FALSE");
     }
     public static <T, U, V> TriPredicate<T, U, V> triAlwaysTrue() {
-        return triAlways(true, "true");
+        return triAlways(true, "TRUE");
     }
 }
