@@ -2,19 +2,10 @@ package nl.vpro.xml.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.*;
+import java.util.*;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.*;
 
 import nl.vpro.util.BindingUtils;
 
@@ -23,7 +14,13 @@ import nl.vpro.util.BindingUtils;
  * @since 0.36
  */
 @Slf4j
-public class XmlUtils extends BindingUtils  {
+public class XmlUtils  {
+
+    public static final ZoneId DEFAULT_ZONE = BindingUtils.DEFAULT_ZONE;
+
+    private XmlUtils() {
+
+    }
 
     static final DatatypeFactory FACTORY;
     static {
