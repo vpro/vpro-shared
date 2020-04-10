@@ -10,6 +10,9 @@ import java.util.function.Predicate;
  */
 public class Predicates {
 
+    private static final String FALSE = "FALSE";
+    private static final String TRUE = "TRUE";
+
     private Predicates() {
 
     }
@@ -28,10 +31,10 @@ public class Predicates {
     }
 
     public static <T> Predicate<T> alwaysFalse() {
-        return always(false, "FALSE");
+        return always(false, FALSE);
     }
     public static <T> Predicate<T> alwaysTrue() {
-        return always(true, "TRUE");
+        return always(true, TRUE);
     }
 
     public static <T, U> BiPredicate<T, U> biAlways(boolean v, String s) {
@@ -49,10 +52,10 @@ public class Predicates {
     }
 
     public static <T, U> BiPredicate<T, U> biAlwaysFalse() {
-        return biAlways(false, "FALSE");
+        return biAlways(false, FALSE);
     }
     public static <T, U> BiPredicate<T, U> biAlwaysTrue() {
-        return biAlways(true, "TRUE");
+        return biAlways(true, TRUE);
     }
 
     public static <T, U, V> TriPredicate<T, U, V> triAlways(boolean val, String s) {
@@ -69,9 +72,9 @@ public class Predicates {
         };
     }
     public static <T, U, V> TriPredicate<T, U, V> triAlwaysFalse() {
-        return triAlways(false, "FALSE");
+        return triAlways(false, FALSE);
     }
     public static <T, U, V> TriPredicate<T, U, V> triAlwaysTrue() {
-        return triAlways(true, "TRUE");
+        return triAlways(true, TRUE);
     }
 }
