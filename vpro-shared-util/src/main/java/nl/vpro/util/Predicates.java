@@ -14,20 +14,10 @@ public class Predicates {
     private static final String TRUE = "TRUE";
 
     private Predicates() {
-
     }
 
     public static <T> Predicate<T> always(boolean v, String s) {
-        return new Predicate<T>() {
-            @Override
-            public boolean test(T t) {
-                return v;
-            }
-            @Override
-            public String toString() {
-                return s;
-            }
-        };
+        return new Always<>(v, s);
     }
 
     public static <T> Predicate<T> alwaysFalse() {
@@ -109,7 +99,6 @@ public class Predicates {
         public String toString() {
             return s;
         }
-
 
         @Override
         public boolean equals(Object o) {
