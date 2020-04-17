@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 
 /**
  * Adapts an existing iterator, to add elements at the end, perhaps based on the last element.
@@ -30,10 +32,9 @@ public class TailAdder<T> implements CountedIterator<T> {
     Boolean adderHasNext = null;
     T last = null;
 
-    @SuppressWarnings("unchecked")
     @SafeVarargs
     public static <T> TailAdder<T> withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
-        return new TailAdder<T>(wrapped, false, false, (Function<T, T>[]) adder);
+        return new TailAdder<>(wrapped, false, false, adder);
     }
 
     @SafeVarargs
@@ -50,7 +51,7 @@ public class TailAdder<T> implements CountedIterator<T> {
     @SuppressWarnings("unchecked")
     @lombok.Builder(builderClassName = "Builder")
     private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
-        this(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders.toArray(new Function[adders.size()]));
+        this(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders.toArray(new Function[0]));
     }
 
     @SafeVarargs
@@ -63,7 +64,7 @@ public class TailAdder<T> implements CountedIterator<T> {
     @SafeVarargs
     @Deprecated
     public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Callable<T>... adder) {
-        this(wrapped, onlyIfEmpty, false, (Function[]) Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
+        this(wrapped, onlyIfEmpty, false, Arrays.stream(adder).map(c -> (Function<T, T>) last1 -> {
             try {
                 return c.call();
             } catch (RuntimeException e) {
@@ -146,7 +147,7 @@ public class TailAdder<T> implements CountedIterator<T> {
     }
 
     @Override
-    public Optional<Long> getSize() {
+    public @NonNull Optional<Long> getSize() {
         if (wrapped instanceof CountedIterator) {
             Optional<Long> wrappedSize = ((CountedIterator) wrapped).getSize();
             if (wrappedSize.isPresent()) {

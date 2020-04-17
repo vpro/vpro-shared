@@ -42,10 +42,9 @@ public class ConfigUtils {
     public static String[] getConfigFilesInHome(String... configFiles) {
         return Stream.concat(
             Arrays.stream(configFiles)
-                .map(c -> Stream.of(
+                .flatMap(c -> Stream.of(
                     "classpath:/" + c,
                     "classpath:/override-" + c))
-                .flatMap(s -> s)
             ,
             Arrays.stream(configFiles)
                 .map(c -> System.getProperty("user.home") + File.separator + "conf" + File.separator + c)

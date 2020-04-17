@@ -20,7 +20,7 @@ public class HTMLStripper {
 	final AllowedPattern allowBody = new AllowedPattern("(?i)script|embed|object|frameset|iframe", true);
 
 	protected enum State {
-		DEFAULT, SCRIPT, ERROR;
+		DEFAULT, SCRIPT, ERROR
 	}
 
 	public String StripHTML(String input) {
@@ -41,6 +41,7 @@ public class HTMLStripper {
 		private static final long serialVersionUID = 1L;
 
 		// purely to make this method public
+		@Override
 		public HTMLEditorKit.Parser getParser() {
 			return super.getParser();
 		}
@@ -52,7 +53,7 @@ public class HTMLStripper {
 		private final Writer out;
 		boolean addNewlines = true;
 		boolean PisDoubleNewline = true;
-		List<HTML.Tag> stack = new ArrayList<HTML.Tag>();
+		List<HTML.Tag> stack = new ArrayList<>();
 		int removeBody = 0;
 		State state = State.DEFAULT;
 		StringBuilder spaceBuffer = new StringBuilder();
@@ -85,7 +86,7 @@ public class HTMLStripper {
 					out.write(text);
 					wrote += text.length;
 				}
-			} catch (IOException ioe) {
+			} catch (IOException ignored) {
 
 			}
 		}
@@ -170,7 +171,7 @@ public class HTMLStripper {
 		public void flush() {
 			try {
 				out.flush();
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 
 			}
 		}
@@ -186,7 +187,7 @@ public class HTMLStripper {
 		}
 
 		boolean allows(String p) {
-			boolean match = pattern.matcher(p).matches() ? true : false;
+			boolean match = pattern.matcher(p).matches();
 			if (inverse)
 				match = !match;
 

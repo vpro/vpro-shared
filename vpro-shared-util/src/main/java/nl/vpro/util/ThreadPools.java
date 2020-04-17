@@ -16,7 +16,7 @@ public final class ThreadPools {
         // this class has no intances
     }
 
-    private static ThreadGroup THREAD_GROUP = new ThreadGroup(ThreadPools.class.getName());
+    private static final ThreadGroup THREAD_GROUP = new ThreadGroup(ThreadPools.class.getName());
 
 
     public static ThreadFactory createThreadFactory(final String namePrefix, final boolean daemon, final int priority) {

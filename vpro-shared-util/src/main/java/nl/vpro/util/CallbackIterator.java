@@ -3,6 +3,8 @@ package nl.vpro.util;
 import java.util.Iterator;
 import java.util.Optional;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 /**
  * An iterator that can call a callback function when its iteration is finished.
  *
@@ -57,6 +59,7 @@ public class CallbackIterator<T> implements CountedIterator<T> {
 
 
     @Override
+    @NonNull
     public Optional<Long> getSize() {
         if (wrapped instanceof CountedIterator) {
             return ((CountedIterator) wrapped).getSize();

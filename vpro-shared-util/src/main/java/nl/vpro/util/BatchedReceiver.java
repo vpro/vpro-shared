@@ -82,7 +82,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
 
 	private enum BatchType {
 		BIFUNCTION,
-		SUPPLIER;
+		SUPPLIER
 	}
 
 

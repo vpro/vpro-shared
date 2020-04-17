@@ -713,8 +713,7 @@ public class ISO6937CharsetProvider extends CharsetProvider {
          */
         protected Byte[] convert(char[] data) {
             List<Byte> bytes = new ArrayList<>();
-            for (int i = 0; i < data.length; i++) {
-                char c = data[i];
+            for (char c : data) {
                 if (c < 128)
                     bytes.add((byte) c);
                 else {
@@ -727,7 +726,7 @@ public class ISO6937CharsetProvider extends CharsetProvider {
                     }
                 }
             }
-            return bytes.toArray(new Byte[bytes.size()]);
+            return bytes.toArray(new Byte[0]);
         }
 
         private int convert(int i) {

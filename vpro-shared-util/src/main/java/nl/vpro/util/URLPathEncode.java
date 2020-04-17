@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
  */
 public class URLPathEncode {
 
-
     /**
      * Escapes every character of the input string for the path part of an URL.
      */

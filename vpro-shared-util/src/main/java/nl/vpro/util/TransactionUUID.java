@@ -16,11 +16,9 @@ import java.util.function.Consumer;
 public class TransactionUUID {
 
 
-    private static List<TransactionUUIDConsumer> consumers = new ArrayList<>();
+    private static final List<TransactionUUIDConsumer> consumers = new ArrayList<>();
     static {
-        ServiceLoader.load(TransactionUUIDConsumer.class).iterator().forEachRemaining(p ->
-            consumers.add(p)
-        );
+        ServiceLoader.load(TransactionUUIDConsumer.class).iterator().forEachRemaining(consumers::add);
         if (! consumers.isEmpty()) {
             log.info("Using consumers {}", consumers);
         }

@@ -2,7 +2,7 @@ package nl.vpro.util;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * The next in succession of {@link java.util.function.Consumer} and {@link java.util.function.BiConsumer}.
@@ -18,7 +18,7 @@ public interface TriConsumer<T, U, V> {
     void accept(T t, U u, V v) throws IOException;
 
     /**
-     * @see {@link java.util.function.BiConsumer#andThen(BiConsumer)}
+     * @see Consumer#andThen(java.util.function.Consumer)
      */
     default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
         Objects.requireNonNull(after);

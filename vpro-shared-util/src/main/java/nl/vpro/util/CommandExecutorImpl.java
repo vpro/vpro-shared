@@ -161,8 +161,8 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     public static class Builder {
 
-        private List<String> cargs = new ArrayList<>();
-        private List<File>   execs = new ArrayList<>();
+        private final List<String> cargs = new ArrayList<>();
+        private final List<File>   execs = new ArrayList<>();
 
         public Builder commonArg(String... args) {
             cargs.addAll(Arrays.asList(args));
@@ -342,9 +342,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             .name(name)
             .input(in)
             .output(out)
-            .callback((c) -> {
-                closeIf(in, out);
-            })
+            .callback((c) -> closeIf(in, out))
             .errorHandler((c, t) -> errorHandler.accept(t))
             .batch(batchSize)
             .build();

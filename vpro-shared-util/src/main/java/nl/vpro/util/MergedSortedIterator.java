@@ -20,6 +20,7 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
      * This uses guava's {@link Iterators#mergeSorted}. This probable performs well, but will use a queue.
      *
      */
+    @SafeVarargs
     public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
         return merge(comparator, Arrays.asList(iterators));
     }

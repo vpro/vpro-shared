@@ -35,7 +35,7 @@ public class HeadAdder<T> implements Iterator<T> {
             throw new IllegalArgumentException("Cant specify both onlyIfEmpty and onlyIfNotEmpty");
         }
         hasFirst = wrapped.hasNext();
-        this.adder = adders.toArray(new Function[adders.size()]);
+        this.adder = adders.toArray(new Function[0]);
         if (adder.length > 0) {
             if (onlyIfEmpty) {
                 adderHasNext = ! hasFirst;

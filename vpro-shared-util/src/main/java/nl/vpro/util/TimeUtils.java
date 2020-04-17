@@ -69,9 +69,9 @@ public class TimeUtils {
         }
 
         try {
-            Long longValue = Long.parseLong(dateValue.toString());
+            long longValue = Long.parseLong(dateValue.toString());
             if (longValue > 1000 && longValue < 9999) {
-                return Optional.of(LocalDate.of(longValue.intValue(), 1, 1).atStartOfDay().atZone(ZONE_ID).toInstant());
+                return Optional.of(LocalDate.of((int) longValue, 1, 1).atStartOfDay().atZone(ZONE_ID).toInstant());
             } else {
                 return Optional.of(Instant.ofEpochMilli(Long.parseLong(dateValue.toString())));
             }
