@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 import javax.management.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class MBeans {
                 return "Job " + key + " is still running, so could not be started again with " + description.get();
             }
         }
-        LockValue value = new LockValue();
+        LockValue value = new LockValue(description);
         if (key != null) {
             locks.put(key, value);
         }
@@ -323,12 +323,22 @@ public class MBeans {
     @Setter
     public static class LockValue {
         Future<?> future;
-        String description;
+
+        @NonNull
+        Supplier<String> description;
+
+        private LockValue(Supplier<String> description) {
+            this.description = description;
+        }
 
         public void cancel() {
             if (future != null){
                 future.cancel(true);
             }
+        }
+        @Override
+        public String toString() {
+            return description.get() + ":" + future;
         }
     }
 
