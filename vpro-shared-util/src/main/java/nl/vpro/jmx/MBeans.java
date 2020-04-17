@@ -1,5 +1,7 @@
 package nl.vpro.jmx;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
@@ -32,23 +34,22 @@ import nl.vpro.logging.simple.StringSupplierSimpleLogger;
 @Slf4j
 public class MBeans {
 
-    private static final Map<String, Future<?>> locks = new ConcurrentHashMap<>();
+    private static final Map<String, LockValue> locks = new ConcurrentHashMap<>();
 
     public static final Duration DEFAULT_DURATION =  Duration.ofSeconds(5);
-
 
     public static boolean isRunning(final String key) {
         return locks.containsKey(key);
     }
 
     public static String cancel(final String key){
-        Future<?> future = locks.get(key);
+        LockValue future = locks.get(key);
         if (future == null) {
             return "Not running";
         }
 
         try {
-            future.cancel(true);
+            future.cancel();
         } finally {
             locks.remove(key);
         }
@@ -75,6 +76,10 @@ public class MBeans {
                 return "Job " + key + " is still running, so could not be started again with " + description.get();
             }
         }
+        LockValue value = new LockValue();
+        if (key != null) {
+            locks.put(key, value);
+        }
         CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
             final String threadName = Thread.currentThread().getName();
             final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -94,9 +99,8 @@ public class MBeans {
             return description.get();
 
         });
-        if (key != null) {
-            locks.put(key, future);
-        }
+        value.setFuture(future);
+
         try {
             return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException ie) {
@@ -314,5 +318,18 @@ public class MBeans {
         }
     }
 
+
+    @Getter
+    @Setter
+    public static class LockValue {
+        Future<?> future;
+        String description;
+
+        public void cancel() {
+            if (future != null){
+                future.cancel(true);
+            }
+        }
+    }
 
 }
