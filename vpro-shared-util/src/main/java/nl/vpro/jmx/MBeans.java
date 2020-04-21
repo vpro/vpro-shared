@@ -34,7 +34,7 @@ import nl.vpro.logging.simple.StringSupplierSimpleLogger;
 @Slf4j
 public class MBeans {
 
-    private static final Map<String, LockValue> locks = new ConcurrentHashMap<>();
+    static final Map<String, LockValue> locks = new ConcurrentHashMap<>();
 
     public static final Duration DEFAULT_DURATION =  Duration.ofSeconds(5);
 
@@ -42,17 +42,13 @@ public class MBeans {
         return locks.containsKey(key);
     }
 
+
     public static String cancel(final String key){
         LockValue future = locks.get(key);
         if (future == null) {
             return "Not running";
         }
-
-        try {
-            future.cancel();
-        } finally {
-            locks.remove(key);
-        }
+        future.cancel();
         return "Cancelled";
 
 
