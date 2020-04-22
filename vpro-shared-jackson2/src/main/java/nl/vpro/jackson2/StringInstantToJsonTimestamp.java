@@ -47,6 +47,13 @@ public class StringInstantToJsonTimestamp {
     }
 
     static Instant parseDateTime(String value) {
+
+        try {
+            long asLong = Long.parseLong(value);
+            return Instant.ofEpochMilli(asLong);
+        } catch (NumberFormatException ignore) {
+
+        }
         try {
             return DatatypeConverter.parseTime(value).toInstant();
         } catch (IllegalArgumentException iae) {
