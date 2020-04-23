@@ -203,16 +203,15 @@
      <spring.version>5.2.0.RELEASE</spring.version>
      <spring-security.version>5.2.0.RELEASE</spring-security.version>
     -->
-    <jackson2.version>2.10.2</jackson2.version>    <!-- equals to poms-parent -->
-    <junit.version>5.6.1</junit.version>
+    <jackson2.version>2.10.3</jackson2.version>    <!-- equals to poms-parent -->
+    <junit.version>5.6.2</junit.version>
     <mockito.version>3.3.3</mockito.version>
     <assertj.version>3.15.0</assertj.version>
-    <mycila.version>2.9.ga</mycila.version>
     <resteasy.version>4.5.3.Final</resteasy.version>
     <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.13.1</log4j2.version>
-    <guava.version>28.2-jre</guava.version>
+    <guava.version>29.0-jre</guava.version>
     <javassist.version>3.26.0-GA</javassist.version>
     <wss4j.version>2.2.3</wss4j.version>
 
@@ -220,10 +219,10 @@
     <httpcomponentscore.version>4.4.13</httpcomponentscore.version>
 
     <hibernate.version>5.4.10.Final</hibernate.version>
-    <hibernate.search.version>5.11.4.Final</hibernate.search.version>
+    <hibernate.search.version>5.11.5.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
-    <hibernate.validator.version>6.1.0.Final</hibernate.validator.version>
+    <hibernate.validator.version>6.1.4.Final</hibernate.validator.version>
 
     <!--
 
@@ -385,16 +384,6 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core</artifactId>
         <version>${spring-security.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.mycila.testing</groupId>
-        <artifactId>mycila-testing-api</artifactId>
-        <version>${mycila.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.mycila.testing.plugins</groupId>
-        <artifactId>mycila-testing-spring</artifactId>
-        <version>${mycila.version}</version>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
