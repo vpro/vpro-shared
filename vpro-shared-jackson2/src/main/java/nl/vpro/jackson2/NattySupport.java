@@ -15,7 +15,7 @@ import nl.vpro.util.DateUtils;
  */
 
 class NattySupport {
-    private static Parser PARSER = new Parser(TimeZone.getTimeZone(BindingUtils.DEFAULT_ZONE));
+    private static final Parser PARSER = new Parser(TimeZone.getTimeZone(BindingUtils.DEFAULT_ZONE));
 
 
     static Optional<Instant> parseDate(String value) {
