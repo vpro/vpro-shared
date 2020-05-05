@@ -203,14 +203,14 @@
      <spring.version>5.2.0.RELEASE</spring.version>
      <spring-security.version>5.2.0.RELEASE</spring-security.version>
     -->
-    <jackson2.version>2.10.3</jackson2.version>    <!-- equals to poms-parent -->
+    <jackson2.version>2.11.0</jackson2.version>    <!-- equals to poms-parent -->
     <junit.version>5.6.2</junit.version>
     <mockito.version>3.3.3</mockito.version>
-    <assertj.version>3.15.0</assertj.version>
+    <assertj.version>3.16.0</assertj.version>
     <resteasy.version>4.5.3.Final</resteasy.version>
     <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
-    <log4j2.version>2.13.1</log4j2.version>
+    <log4j2.version>2.13.2</log4j2.version>
     <guava.version>29.0-jre</guava.version>
     <javassist.version>3.26.0-GA</javassist.version>
     <wss4j.version>2.2.3</wss4j.version>
