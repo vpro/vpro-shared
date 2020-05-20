@@ -2,17 +2,16 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.net.UnknownHostException;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.expression.StandardBeanExpressionResolver;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since ...
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @Slf4j
 public class PropertiesUtilTest {
@@ -48,18 +47,12 @@ public class PropertiesUtilTest {
     }
 
     @Test
-    public void testEL() {
+    public void testEL() throws UnknownHostException {
 
         log.info("{}", test);
         PropertiesUtil properties = applicationContext.getBean(PropertiesUtil.class);
         String v = properties.getMap().get("http.host");
-        StandardBeanExpressionResolver resolver = new StandardBeanExpressionResolver();
-
-        ExpressionParser parser = new SpelExpressionParser();
-        resolver.setExpressionParser(parser);;
-        //Object evaluate = beanFactory.getBeanExpressionResolver().evaluate(v, beanFactory.)
-
-        //log.info("{}", evaluate);
+        assertThat(v).isEqualTo(java.net.InetAddress.getLocalHost().getHostName());
 
     }
 

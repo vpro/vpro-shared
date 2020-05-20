@@ -224,6 +224,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
 
         propertiesMap = new HashMap<>();
+        ExpressionParser parser = new SpelExpressionParser();
+        PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("#{", "}");
         for(Object key : p.keySet()) {
             String keyStr = key.toString();
             String value = p.getProperty(keyStr);
@@ -231,8 +233,13 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 value = "";
             }
             String v = helper.replacePlaceholders(value, p);
-            propertiesMap.put(keyStr, v);
+            String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
+                Expression exp = parser.parseExpression(placeholderName);
+                return (String) exp.getValue();
+            });
+            propertiesMap.put(keyStr, elV);
         }
+
     }
 
     private void initSystemProperties() {
