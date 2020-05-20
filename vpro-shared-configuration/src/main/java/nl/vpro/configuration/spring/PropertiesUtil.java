@@ -25,11 +25,13 @@ import org.springframework.util.PropertyPlaceholderHelper;
 
 /**
  * An extension of {@link PropertyPlaceholderConfigurer} that can do:
- * - exposes the map of properties (for use in e.g. JSP).
- * - expose some properties as system properties
- * - log some things
- * -Using {@link #setRegisterAsSingletonStringRegexp(Pattern)} you can also register specified properties as beans (this is usefull when using {@link javax.inject.Named} in stead of {@link org.springframework.beans.factory.annotation.Value}
- *
+ * <ul>
+ * <li>expose the {@link #getMap()} map} of properties (for use in e.g. JSP).</li>
+ * <li>expose some properties as {@link #setExposeAsSystemProperty(String) system properties}</li>
+ * <li>{@link #setLog log} some things</li>
+ * <li>Using {@link #setRegisterAsSingletonStringRegexp(Pattern)} you can also register specified properties as beans (this is usefull when using {@link javax.inject.Named} in stead of {@link org.springframework.beans.factory.annotation.Value}</li>
+ * <li>Have a {@link #setAfterProperties(List)}  call back}</li>
+ *</ul>
  * @author Michiel Meeuwissen
  */
 @Slf4j
@@ -60,6 +62,9 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     private Pattern registerAsSingletonObjectRegexp = Pattern.compile("^$");
 
 
+    /**
+     * A list of consumers that will receive {@link #getMap()} as soon as it is available.
+     */
     @Getter
     @Setter
     private List<Consumer<Map<String, String>>> afterProperties;
@@ -195,7 +200,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
 
     @Override
-    public void setLocations(Resource[] locations) {
+    public void setLocations(Resource @NonNull [] locations) {
 
         System.out.println("Configuring with");
         for (Resource location : locations) {
