@@ -18,11 +18,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.core.io.Resource;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.ParseException;
+import org.springframework.expression.*;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
 
@@ -114,22 +111,25 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         if (logMap.isEmpty()) {
             log.debug("{}", getMap());
         } else {
-            StandardBeanExpressionResolver resolver = new StandardBeanExpressionResolver();
-
-            ExpressionParser parser = new SpelExpressionParser();
-
             PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
                 placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
+
+            ExpressionParser parser = new SpelExpressionParser();
+            PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("#{", "}");
+
+
             for (Map.Entry<String, String> logEntry : logMap.entrySet()) {
                 String value = helper.replacePlaceholders(logEntry.getValue(), props);
-                try {
-                    Expression e =  parser.parseExpression(value);
-                    value = (String) e.getValue();
-                } catch (ParseException spe) {
-                    logger.warn("For " + value + ":" + spe.getMessage());
-
-                }
-                log.info(String.format(value, getMap().get(logEntry.getKey())));
+                value = propertyPlaceholderHelper.replacePlaceholders(value, (placeholderName) -> {
+                    try {
+                        Expression exp = parser.parseExpression(placeholderName);
+                        return (String) exp.getValue();
+                    } catch (org.springframework.expression.spel.SpelEvaluationException e) {
+                        log.warn(e.getMessage());
+                        return placeholderName;
+                    }
+                });
+                log.info("{}", value);
             }
         }
         if (afterProperties != null) {
@@ -229,13 +229,24 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         for(Object key : p.keySet()) {
             String keyStr = key.toString();
             String value = p.getProperty(keyStr);
-            if (value == null && p.containsKey(keyStr)) {
-                value = "";
+            if (value == null) {
+                if (p.containsKey(keyStr)) {
+                    value = "";
+                } else {
+                    propertiesMap.put(keyStr, null);
+                    continue;
+                }
             }
+
             String v = helper.replacePlaceholders(value, p);
             String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
-                Expression exp = parser.parseExpression(placeholderName);
-                return (String) exp.getValue();
+                try {
+                    Expression exp = parser.parseExpression(placeholderName);
+                    return (String) exp.getValue();
+                } catch (org.springframework.expression.spel.SpelEvaluationException e) {
+                    log.debug(e.getMessage());
+                    return placeholderName;
+                }
             });
             propertiesMap.put(keyStr, elV);
         }
