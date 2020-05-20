@@ -13,6 +13,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import nl.vpro.configuration.spring.PropertiesUtil;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 

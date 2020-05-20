@@ -6,7 +6,7 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd
         ">
 
-  <bean id="properties" class="nl.vpro.util.PropertiesUtil">
+  <bean id="properties" class="nl.vpro.configuration.spring.PropertiesUtil">
     <property name="locations">
       <list>
         <value>classpath:1.properties</value>
