@@ -16,6 +16,14 @@
     <property name="ignoreUnresolvablePlaceholders" value="false"/>
     <property name="ignoreResourceNotFound" value="true"/>
     <property name="exposeAsSystemProperty" value="b"/>
+     <property name="log">
+      <props>
+        <prop key="a">a: ${a}</prop>
+      </props>
+    </property>
+    <property name="afterProperties">
+      <list></list>
+    </property>
   </bean>
 
 

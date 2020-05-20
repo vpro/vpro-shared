@@ -1,4 +1,4 @@
-package nl.vpro.util;
+package nl.vpro.configuration.spring;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,8 +12,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import nl.vpro.configuration.spring.PropertiesUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
