@@ -19,7 +19,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.io.Resource;
-import org.springframework.expression.*;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
 
@@ -55,7 +56,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     /**
      * All properties for which the key matches this regexp will be registered as a singleton String bean, and the most basic
-     * type interference using the value will be attempted. E.g. 'true' will be registered as a {@link Boolean}.
+     * {@link #toObject(String) type interference} using the value will be attempted. E.g. 'true' will be registered as a {@link Boolean}.
      */
     @Getter
     @Setter
@@ -144,7 +145,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         }
     }
 
-    protected Object toObject(String v) {
+    protected static Object toObject(String v) {
         if ("true".equals(v) || "false".equals(v)) {
             return Boolean.valueOf(v);
         }
