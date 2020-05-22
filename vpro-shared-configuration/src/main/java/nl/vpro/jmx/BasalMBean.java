@@ -76,10 +76,10 @@ public class BasalMBean {
             }
         }
         if (f.delete()) {
-            log.info("Deleted " + f);
+            log.info("Deleted {}", f);
             count++;
         } else {
-            log.info("Could not delete " + f);
+            log.info("Could not delete {}", f);
         }
         return count;
     }
