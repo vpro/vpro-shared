@@ -6,6 +6,8 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,6 +87,8 @@ public class TimeUtils {
         return parseDuration(null, d);
     }
 
+    private static final Pattern WEEKS = Pattern.compile("^P(\\d+)W$");
+
     private static Optional<Duration> parseDuration(DateTimeParseException original, CharSequence d) {
         if (StringUtils.isBlank(d)) {
             return Optional.empty();
@@ -102,6 +106,12 @@ public class TimeUtils {
             if (original != null) {
                 dtp = original;
             }
+            // For some reason Duration.parse does not support ISO_8601's PnW format (https://en.wikipedia.org/wiki/ISO_8601#Durations)
+            Matcher matcher = WEEKS.matcher(d);
+            if (matcher.matches()) {
+                return Optional.of(Duration.ofDays(7L * Integer.parseInt(matcher.group(1))));
+            }
+
             String ds = d.toString().replaceAll("\\s*", "");
             if (ds.length() < d.length()) {
                 return parseDuration(dtp, ds);

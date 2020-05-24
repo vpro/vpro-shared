@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.*;
 import java.time.format.DateTimeParseException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Michiel Meeuwissen
  * @since 0.45
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @Slf4j
 public class TimeUtilsTest {
 
@@ -85,6 +85,12 @@ public class TimeUtilsTest {
                 return ((DateTimeParseException) dtm).getParsedString().equals("can'tbeparsed");
             }, "doest match");
 
+
+    }
+
+    @Test
+    public void parseWeek() {
+        assertThat(TimeUtils.parseDuration("P4W").get()).isEqualTo(Duration.ofDays(7 * 4));
 
     }
 
