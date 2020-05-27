@@ -1,8 +1,23 @@
 package nl.vpro.elasticsearchclient;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.util.Version;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.ResponseException;
+import org.elasticsearch.client.RestClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -10,22 +25,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
-import java.util.stream.*;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.entity.NStringEntity;
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.*;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.Version;
+import java.util.stream.Collectors;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
@@ -99,7 +99,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     @lombok.Builder(builderClassName = "Builder")
     private ElasticSearchIterator(
-        RestClient client,
+        @lombok.NonNull RestClient client,
         Function<JsonNode, T> adapt,
         Class<T> adaptTo,
         Duration scrollContext,
@@ -244,6 +244,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 // first call only.
                 if (request == null) {
                     throw new IllegalStateException("prepareSearch not called");
+                }
+                if (client == null) {
+                    throw new IllegalStateException("No client");
                 }
                 try {
                     ArrayNode sort = request.withArray("sort");

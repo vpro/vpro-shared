@@ -2,23 +2,22 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-
-import javax.annotation.PostConstruct;
-
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
 import org.apache.http.HttpHost;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.LoggerFactory;
 
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 
 /**
@@ -164,6 +163,9 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     public String logString() {
         try {
             HttpHost[] hosts = getHosts();
+            if (hosts == null) {
+                throw new RuntimeException("No hosts");
+            }
             if (hosts.length > 0) {
                 return hosts[0].toString();
 
@@ -171,7 +173,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                 return unicastHosts;
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getClass().getName() + ":" + e.getMessage());
             return unicastHosts;
         }
     }
