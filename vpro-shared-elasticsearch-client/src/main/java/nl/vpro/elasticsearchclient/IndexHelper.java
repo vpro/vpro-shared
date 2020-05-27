@@ -1,16 +1,20 @@
 package nl.vpro.elasticsearchclient;
 
-import lombok.*;
-
-import java.io.*;
-import java.net.ConnectException;
-import java.net.URLEncoder;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Suppliers;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import nl.vpro.elasticsearch.CreateIndex;
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.IndexHelperInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
+import nl.vpro.util.Version;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -19,19 +23,24 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Suppliers;
-
-import nl.vpro.elasticsearch.*;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.Version;
+import java.io.*;
+import java.net.ConnectException;
+import java.net.URLEncoder;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
@@ -1258,29 +1267,43 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
         Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
 
+        return consumeBulkResult((i, total) -> {
+                    logPrefix.setLength(0);
+                    logPrefix.append(i).append('/').append(total).append(' ');
+                },
+                deleteLogger,
+                indexLogger,
+                (n) -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
+        );
+    }
+    public static Consumer<ObjectNode> consumeBulkResult(
+            BiConsumer<Integer, Integer> each,
+            Consumer<ObjectNode> deletes,
+            Consumer<ObjectNode> indexes,
+            Consumer<JsonNode> unrecognized) {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
             int i = 0;
             int total = items.size();
             for (JsonNode n : items) {
-                logPrefix.setLength(0);
-                logPrefix.append(++i).append('/').append(total).append(' ');
+                each.accept(++i, total);
                 ObjectNode on = (ObjectNode) n;
                 boolean recognized = false;
                 if (on.has("delete")) {
-                    deleteLogger.accept(on.with("delete"));
+
+                    deletes.accept(on.with("delete"));
                     recognized = true;
                 }
                 if (n.has("index")) {
-                    indexLogger.accept(on.with("index"));
+                    indexes.accept(on.with("index"));
                     recognized = true;
                 }
                 if (! recognized) {
-                    log.warn("{}Unrecognized bulk response {}", logPrefix, n);
+                    unrecognized.accept(n);
                 }
-
             }
         };
+
     }
 
     public Consumer<ObjectNode> bulkLogger(Logger logger) {
