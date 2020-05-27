@@ -741,16 +741,29 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return mget(Arrays.asList(ids));
     }
 
-    public  List<@NonNull Optional<JsonNode>> mget(Collection<String> ids){
+    public  List<@NonNull Optional<JsonNode>> mgetWithRouting(RoutedId... ids){
+        return mgetWithRouting(Arrays.asList(ids));
+    }
+
+    public  List<@NonNull Optional<JsonNode>> mget(Collection<String> ids) {
+        return mgetWithRouting(ids.stream().map(i -> new RoutedId(i, null)).collect(Collectors.toList()));
+    }
+
+    public  List<@NonNull Optional<JsonNode>> mgetWithRouting(Collection<RoutedId> ids){
         if (ids.size() == 0) {
             return Collections.emptyList();
         }
-        Request get = new Request(GET, getIndexName() + "/_mget");
+        Request get = new Request(GET, getIndexName() + "/_mget?routing=AUTO_WEKKERWAKKER");
         ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
-        ArrayNode array = body.withArray("ids");
-        for (String id :ids ) {
-            array.add(id);
+        ArrayNode array = body.withArray("docs");
+        for (RoutedId id :ids ) {
+            ObjectNode doc = array.addObject();
+            doc.put(Fields.ID, id.id);
+            if (id.routing != null) {
+                //doc.put(Fields.ROUTING, id.routing);
+            }
         }
+
         get.setJsonEntity(saveToString(body));
         List<Optional<JsonNode>> result = new ArrayList<>();
         try {
@@ -772,6 +785,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public  Optional<JsonNode> getWithRouting(String id, String routing){
         return _get(DOC, id, routing);
     }
+
+    public  Optional<JsonNode> getWithRouting(RoutedId id){
+        return _get(DOC, id.id, id.routing);
+    }
+
 
     protected Optional<JsonNode> _get(String type, String id, String routing) {
         try {
@@ -1407,4 +1425,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
+
+    @Getter
+    public static class RoutedId {
+        final String id;
+        final String routing;
+
+        public RoutedId(String id, String routing) {
+            this.id = id;
+            this.routing = routing;
+        }
+    }
 }
