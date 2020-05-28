@@ -16,7 +16,7 @@ places in VPRO artifacts.
 * link:vpro-shared-elasticsearch7[vpro-shared-eleasticsearch7]: Related to elasticsearch7
 * link:vpro-shared-elasticsearch-client[vpro-shared-eleasticsearch-client]: Related to elasticsearch
 * link:vpro-shared-couchdb-util[vpro-shared-couchdb-util]: Lightweight and streaming couchdb clients
-* link:vpro-shared-swagger[vpro-shared-swagger]: War overlay containing swagger frontend
+* link:vpro-shared-swagger[vpro-shared-swagger]: Some utilities related to swagger frontend. Depends on webjars.
 * ..
 
 == Builds
