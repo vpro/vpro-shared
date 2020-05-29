@@ -44,7 +44,11 @@ public class IndexHelper2ITest {
 
     @Test
     public void mget2() {
-        log.info("{}", helper.mgetWithRouting(new IndexHelper.RoutedId("AUTO_WEKKERWAKKER/391/RBX_MAX_2248446/episodeRef", "AUTO_WEKKERWAKKER")));
+        log.info("{}", helper.mgetWithRouting(
+                new IndexHelper.RoutedId("AUTO_WEKKERWAKKER/1104/RBX_MAX_13070966/episodeRef", "AUTO_WEKKERWAKKER"),
+                new IndexHelper.RoutedId("AUTO_WEKKERWAKKER/1096/RBX_MAX_13070914/episodeRe", "AUTO_WEKKERWAKKER")
+        ));
+
     }
 
 

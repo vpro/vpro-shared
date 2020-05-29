@@ -744,14 +744,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (ids.size() == 0) {
             return Collections.emptyList();
         }
-        Request get = new Request(GET, getIndexName() + "/_mget?routing=AUTO_WEKKERWAKKER");
+        Request get = new Request(GET, getIndexName() + "/_mget");
+        //get.addParameter("routing", "AUTO_WEKKERWAKKER");
+
         ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
         ArrayNode array = body.withArray("docs");
         for (RoutedId id :ids ) {
             ObjectNode doc = array.addObject();
             doc.put(Fields.ID, id.id);
             if (id.routing != null) {
-                //doc.put(Fields.ROUTING, id.routing);
+                //doc.put(Fields.ROUTING, id.routing); // something wrong with doc?
+                doc.put("routing", id.routing);
             }
         }
 
@@ -763,7 +766,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             ArrayNode docs = objectNode.withArray("docs");
 
             for (JsonNode n : docs) {
-                result.add(Optional.of(n));
+                boolean found = n.get("found").asBoolean();
+                if (found) {
+                    result.add(Optional.of(n));
+                } else {
+                    result.add(Optional.empty());
+                }
             }
 
             return result;
