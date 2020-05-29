@@ -78,8 +78,11 @@ public class FileSizeFormatter {
      *
      */
     public String formatSpeed(@Nullable Number numberOfBytes, Duration duration) {
-        if (numberOfBytes == null) {
-            return format(numberOfBytes) + "/s";
+        if (numberOfBytes == null || duration == null) {
+            return format(null) + "/s";
+        }
+        if (duration.isZero()) {
+            return "\u221E B/s";
         }
         Float perSecond = 1000f * numberOfBytes.floatValue() / duration.toMillis();
         return format(perSecond) + "/s";

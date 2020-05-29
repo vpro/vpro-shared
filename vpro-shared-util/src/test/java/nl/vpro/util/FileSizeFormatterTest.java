@@ -42,6 +42,10 @@ public class FileSizeFormatterTest {
     public void testNull() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT;
         assertThat(formatter.formatSpeed(null, Duration.ofMillis(12344L))).isEqualTo("? B/s");
+        assertThat(formatter.formatSpeed(0, Duration.ofMillis(12344L))).isEqualTo(".0 B/s"); // ?
+        assertThat(formatter.formatSpeed(1000, Duration.ofMillis(0))).isEqualTo("\u221E B/s");
+        assertThat(formatter.formatSpeed(1000, (Duration) null)).isEqualTo("? B/s");
+
     }
 
 
