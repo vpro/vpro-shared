@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 
 /**
- * Filting, or Transforming iterator.
+ * Filtering, or Transforming iterator.
  * @author Michiel Meeuwissen
  * @since 1.3
  */

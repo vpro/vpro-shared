@@ -26,7 +26,6 @@ public class IntegerVersion extends Version<Integer> {
         super(parts);
     }
 
-
     public float toFloat() {
         double result = 0;
         int divider = 1;

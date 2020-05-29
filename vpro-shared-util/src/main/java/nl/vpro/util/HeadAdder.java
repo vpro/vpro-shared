@@ -19,12 +19,11 @@ public class HeadAdder<T> implements Iterator<T> {
 
     private final Iterator<T> wrapped;
 
-    int wrapcount = 0;
-    int addercount = 0;
-    T nextFromAdder;
-    Boolean adderHasNext = null;
+    private int adderCount = 0;
+    private T nextFromAdder;
+    private Boolean adderHasNext;
     private Boolean hasFirst;
-    T first = null;
+    private T first = null;
 
 
     @SuppressWarnings("unchecked")
@@ -62,7 +61,7 @@ public class HeadAdder<T> implements Iterator<T> {
     public T next() {
         findNextFromAdder();
         if (adderHasNext) {
-            addercount++;
+            adderCount++;
             return nextFromAdder;
         }
         if (hasFirst != null) {
@@ -77,11 +76,11 @@ public class HeadAdder<T> implements Iterator<T> {
     private void findNextFromAdder() {
         while(adderHasNext) {
             try {
-                nextFromAdder = adder[addercount].apply(first);
+                nextFromAdder = adder[adderCount].apply(first);
                 return;
             } catch (Exception e) {
-                addercount++;
-                adderHasNext = addercount < adder.length;
+                adderCount++;
+                adderHasNext = adderCount < adder.length;
             }
         }
     }

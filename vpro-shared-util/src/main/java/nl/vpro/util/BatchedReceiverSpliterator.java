@@ -13,14 +13,14 @@ import java.util.function.Supplier;
  * Given some API which supplies only 'batched' retrieval (so with offset and max/batchsize parameters),
  * access such an API as an iterator to visit all elements.
  *
- * If an API provides access to huge set of elements, they often do it with some paging mechanism, or by some 'resumption token' formalism. With {@link BatchedReceiverSpliterator} this can be morphed into a simple {@link Iterator}.
+ * If an API provides access to huge set of elements, they often do it with some paging mechanism, or by some 'resumption token' formalism. With {@link BatchedReceiverSpliterator} this can be morphed into a simple {@link Spliterator}.
 
  *
  * <h3>Paging</h3>
  * The 'batchGetter' argument should be a {@link BiFunction}, returning an iterator for the page described by given offset and batch size
  * <pre>
  * {@code
- * Iterator<String> i = BatchedReceiver.<String>builder()
+ * Spliterator<String> i = BatchedReceiverSpliterator.<String>builder()
  *     .batchGetter((offset, max) ->
  *        apiClient.getPage(offset, max).iterator()
  *     )
