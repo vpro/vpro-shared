@@ -243,7 +243,6 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                     continue;
                 }
             }
-
             String v = helper.replacePlaceholders(value, p);
             String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
                 try {
@@ -254,7 +253,10 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                     return placeholderName;
                 }
             });
-            propertiesMap.put(keyStr, elV);
+            Object prevValue = propertiesMap.put(keyStr, elV);
+            if (prevValue != null) {
+                log.debug("Replaced {}: {} -> {}", keyStr, prevValue, elV);
+            }
         }
 
     }

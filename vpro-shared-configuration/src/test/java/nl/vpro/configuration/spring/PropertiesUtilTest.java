@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
@@ -38,12 +37,8 @@ public class PropertiesUtilTest {
     @Test
     public void testGetMap() {
         PropertiesUtil properties = applicationContext.getBean(PropertiesUtil.class);
-
         assertThat(properties.getMap().get("b")).isEqualTo("B");
         assertThat(properties.getMap().get("c")).isEqualTo("A/B/C");
-
-
-
     }
 
     @Test
@@ -53,13 +48,15 @@ public class PropertiesUtilTest {
         PropertiesUtil properties = applicationContext.getBean(PropertiesUtil.class);
         String v = properties.getMap().get("http.host");
         assertThat(v).isEqualTo(java.net.InetAddress.getLocalHost().getHostName());
+        assertThat(properties.getMap().get("http.host.tooverride")).isEqualTo("michiel.vpro.nl");
+        assertThat(properties.getMap().get("url")).isEqualTo("http://" +java.net.InetAddress.getLocalHost().getHostName());
+
+        assertThat(properties.getMap().get("url.tooverride")).isEqualTo("http://michiel.vpro.nl");
 
     }
 
     @Test
     public void testSetExposeAsSystemProperty() {
-
-
         assertThat(System.getProperty("b")).isEqualTo("B");
         assertThat(System.getProperty("a")).isNull();
         assertThat(System.getProperty("c")).isNull();
