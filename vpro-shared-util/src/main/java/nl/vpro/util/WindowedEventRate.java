@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
+ * An implementation of {@link Windowed} with {@link AtomicLong} values.
+ *
  * Keeps track of an event rate in a current window of a given duration
  * E.g. If you want to report a certain event rate average for the last 5 minutes.
  *

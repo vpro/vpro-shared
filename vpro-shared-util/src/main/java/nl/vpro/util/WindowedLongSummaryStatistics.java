@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LongSummaryStatistics;
 
 /**
+ * {@link LongSummaryStatistics} can be aggregated, and therefor {@link Windowed}.
  * @author Michiel Meeuwissen
  * @since 1.66
  */

@@ -1,10 +1,10 @@
 package nl.vpro.util;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.DoubleSummaryStatistics;
+import java.util.*;
 
 /**
+ * {@link DoubleSummaryStatistics} can be aggregated, and there for {@link Windowed}.
  * @author Michiel Meeuwissen
  * @since 2.2
  */

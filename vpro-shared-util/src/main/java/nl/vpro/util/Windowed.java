@@ -15,6 +15,22 @@ import com.google.common.collect.Range;
  *
  * The idea is that the values in the buckets can be used to calculate averages which are based on sufficiently long times, though sufficiently sensitive for changes. So you actually look at a window in time that slides gradually forward.
  *
+ * The most basic implementation is {@link WindowedEventRate} which simply maintains a value 'events per unit of time':
+ *
+ * e.g.:
+ *<pre>
+ * {@code
+ *   WindowedEventRate rate = WindowedEventRate.builder()
+ *             .bucketCount(5)
+ *             .bucketDuration(Duration.ofSeconds(1))
+ *             .build();
+ *   ...
+ *   rate.newEvent();
+ *
+ *   ..
+ *   System.out.println("Current rate: " + rate.getRate(TimeUnit.SECONDS) + " #/s);
+ * }
+ *</pre>
  * @author Michiel Meeuwissen
  * @since 1.66
  */
