@@ -9,6 +9,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.google.common.annotations.Beta;
+
 /**
  * Given some API which supplies only 'batched' retrieval (so with offset and max/batchsize parameters),
  * access such an API as an iterator to visit all elements.
@@ -54,10 +56,13 @@ import java.util.function.Supplier;
  * </pre>
  *
  * @author Michiel Meeuwissen
- * @since 2.7
+ * @since 2.12
+ *
+ * TODO: Unfinished the idea is to port this for {@link BatchedReceiver}.
  */
 @ToString
 @Slf4j
+@Beta
 public class BatchedReceiverSpliterator<T> implements Spliterator<T> {
 
 	final Integer batchSize;
