@@ -48,7 +48,7 @@ public class CounterTest {
 
         assertThat(counter.getAverageDuration()).isEqualTo("PT0.5S");
 
-        assertThat(counter.getDurationStatistics(1).getCombined().getAverage()).isCloseTo(200.0, Percentage.withPercentage(1));
+        assertThat(counter.getDurationStatistics(1).getWindowValue().getAverage()).isCloseTo(200.0, Percentage.withPercentage(1));
 
 
     }

@@ -81,7 +81,7 @@ public class Counter implements CounterMXBean {
     @Override
     public String getAverageDuration() {
         return
-            Duration.ofMillis((long) (getDurationStatistics().getCombined().getAverage())).toString();
+            Duration.ofMillis((long) (getDurationStatistics().getWindowValue().getAverage())).toString();
             // No standard deviation (introduces commons-math for that?)
     }
     @Override
