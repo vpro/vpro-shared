@@ -2,13 +2,17 @@ package nl.vpro.util;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.function.DoubleConsumer;
 
 /**
  * {@link DoubleSummaryStatistics} can be aggregated, and there for {@link Windowed}.
+ *
+ * Every 'bucket' of the window is one '{@link DoubleSummaryStatistics}, and the {@link #getWindowValue()} is just all bucket values
+ * {@link DoubleSummaryStatistics#combine(DoubleSummaryStatistics)}d.
  * @author Michiel Meeuwissen
  * @since 2.2
  */
-public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStatistics> {
+public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStatistics> implements DoubleConsumer {
 
     @lombok.Builder(builderClassName = "Builder")
     protected WindowedDoubleSummaryStatistics(
@@ -17,6 +21,8 @@ public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStati
         Integer bucketCount) {
         super(window, bucketDuration, bucketCount);
     }
+
+
 
     @Override
     protected DoubleSummaryStatistics[] newBuckets(int bucketCount) {
@@ -29,12 +35,18 @@ public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStati
         return new DoubleSummaryStatistics();
     }
 
+    @Override
+    public void accept(double value) {
+        currentBucket().accept(value);
+    }
+
     public void accept(double... value) {
         DoubleSummaryStatistics currentBucket = currentBucket();
         Arrays.stream(value).forEach(currentBucket);
     }
 
-    public DoubleSummaryStatistics getCombined() {
+    @Override
+    public DoubleSummaryStatistics getWindowValue() {
         DoubleSummaryStatistics result = new DoubleSummaryStatistics();
         DoubleSummaryStatistics[] b = getBuckets();
         for (int i = b.length -1 ; i >= 0; i--) {
@@ -44,9 +56,9 @@ public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStati
         return result;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() + ":" + getCombined().toString();
+    @Deprecated
+    public DoubleSummaryStatistics getCombined() {
+        return getWindowValue();
     }
 
 }

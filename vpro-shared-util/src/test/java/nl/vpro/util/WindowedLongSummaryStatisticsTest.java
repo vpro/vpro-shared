@@ -26,7 +26,7 @@ public class WindowedLongSummaryStatisticsTest {
         Thread.sleep(1000L);
         instance.accept(200L, 300L);
         LongSummaryStatistics[] buckets = instance.getBuckets();
-        LongSummaryStatistics combined = instance.getCombined();
+        LongSummaryStatistics combined = instance.getWindowValue();
         assertThat(buckets[buckets.length - 1].getAverage()).isCloseTo(250, Offset.offset(0.001));
         assertThat(buckets[buckets.length - 2].getAverage()).isCloseTo(150, Offset.offset(0.001));
 

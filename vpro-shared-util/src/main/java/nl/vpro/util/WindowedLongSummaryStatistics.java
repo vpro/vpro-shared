@@ -3,13 +3,15 @@ package nl.vpro.util;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.LongSummaryStatistics;
+import java.util.function.LongConsumer;
 
 /**
  * {@link LongSummaryStatistics} can be aggregated, and therefor {@link Windowed}.
+ * @see WindowedDoubleSummaryStatistics
  * @author Michiel Meeuwissen
  * @since 1.66
  */
-public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistics> {
+public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistics> implements LongConsumer {
 
     @lombok.Builder(builderClassName = "Builder")
     protected WindowedLongSummaryStatistics(
@@ -18,6 +20,8 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
         Integer bucketCount) {
         super(window, bucketDuration, bucketCount);
     }
+
+
 
     @Override
     protected LongSummaryStatistics[] newBuckets(int bucketCount) {
@@ -30,12 +34,18 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
         return new LongSummaryStatistics();
     }
 
+    @Override
+    public void accept(long value) {
+        currentBucket().accept(value);
+    }
+
     public void accept(long... value) {
         LongSummaryStatistics currentBucket = currentBucket();
         Arrays.stream(value).forEach(currentBucket);
     }
 
-    public LongSummaryStatistics getCombined() {
+    @Override
+    public LongSummaryStatistics getWindowValue() {
         LongSummaryStatistics result = new LongSummaryStatistics();
         LongSummaryStatistics[] b = getBuckets();
         for (int i = b.length -1 ; i >= 0; i--) {
@@ -45,9 +55,9 @@ public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistic
         return result;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() + ":" + getCombined().toString();
+    @Deprecated
+    public LongSummaryStatistics getCombined() {
+        return getWindowValue();
     }
 
 }

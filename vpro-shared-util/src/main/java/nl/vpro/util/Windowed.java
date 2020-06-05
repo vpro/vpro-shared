@@ -11,7 +11,9 @@ import java.util.TreeMap;
 import com.google.common.collect.Range;
 
 /**
- * Maintains values duration a certain time window. This window is divided up in a certain number of 'buckets', of which the oldest bucket expires every time after {@code <window duration>/<number of buckets>} and is discarded.
+ * Some metrics can be aggregated per unit of time. A 'Windowed' instance targets to accommodate that.
+ *
+ * This window is divided up in a certain number of 'buckets', of which the oldest bucket expires every time after {@code <window duration>/<number of buckets>} and is discarded.
  *
  * The idea is that the values in the buckets can be used to calculate averages which are based on sufficiently long times, though sufficiently sensitive for changes. So you actually look at a window in time that slides gradually forward.
  *
@@ -31,6 +33,7 @@ import com.google.common.collect.Range;
  *   System.out.println("Current rate: " + rate.getRate(TimeUnit.SECONDS) + " #/s);
  * }
  *</pre>
+ *
  * @author Michiel Meeuwissen
  * @since 1.66
  */
@@ -214,9 +217,11 @@ public abstract class Windowed<T> {
         }
     }
 
+    public abstract T getWindowValue();
+
     @Override
     public String toString() {
-        return getStart() + " - " + getStart().plus(getTotalDuration()) + " (" + getBucketCount() + " buckets)" ;
+        return getStart() + " - " + getStart().plus(getTotalDuration()) + " (" + getBucketCount() + " buckets) :"  + getWindowValue();
     }
 
 

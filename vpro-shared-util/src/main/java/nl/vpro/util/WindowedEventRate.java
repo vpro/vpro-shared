@@ -13,6 +13,9 @@ import java.util.function.Consumer;
  * Keeps track of an event rate in a current window of a given duration
  * E.g. If you want to report a certain event rate average for the last 5 minutes.
  *
+ * Every 'bucket' of the window is just counter, and the associated {@link #getWindowValue()} is just the sum.
+ *
+ * Logically this class also provides {@link #getRate(TimeUnit)}.
  *
  * @author Michiel Meeuwissen
  * @since 0.38
@@ -91,8 +94,15 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         return totalCount;
     }
 
+    @Override
+    public AtomicLong getWindowValue() {
+        return new AtomicLong(getTotalCount());
+    }
 
-
+    /**
+     * The current rate as a number of events per given unit of time
+     * @param unit The unit of time to express the rate in.
+     */
     public double getRate(TimeUnit unit) {
         long totalCount = getTotalCount();
         Duration relevantDuration = getRelevantDuration();
@@ -104,6 +114,14 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         Duration relevantDuration = getRelevantDuration();
         return ((double) totalCount * perInterval.toNanos()) / relevantDuration.toNanos();
     }
+
+    /**
+     * The current rate as a number of events per SI unit of time (the second)
+     */
+    public double getRate() {
+        return getRate(TimeUnit.SECONDS);
+    }
+
 
     public String toString() {
         return "" + getRate(TimeUnit.SECONDS) + " /s" + (isWarmingUp() ? " (warming up)" : "");
