@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * An implementation of {@link Windowed} with {@link AtomicLong} values.
@@ -21,7 +22,7 @@ import java.util.function.Consumer;
  * @since 0.38
  */
 @Slf4j
-public class WindowedEventRate extends Windowed<AtomicLong> {
+public class WindowedEventRate extends Windowed<AtomicLong> implements IntConsumer {
 
     /**
      * @param window         The total time window for which events are going to be measured (or <code>null</code> if bucketDuration specified)
@@ -47,6 +48,8 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
             }, 0, this.bucketDuration, TimeUnit.MILLISECONDS);
         }
     }
+
+   
 
     @Override
     protected AtomicLong[] newBuckets(int bucketCount) {
@@ -81,8 +84,19 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         currentBucket().getAndIncrement();
     }
 
+    /**
+     * Registers a number of events at once.
+     */
     public void newEvents(int count) {
         currentBucket().getAndAdd(count);
+    }
+    
+    /**
+     * Accepting an integer is equivalent to {@link #newEvents(int)}
+     */
+    @Override
+    public void accept(int value) {
+        newEvents(value);
     }
 
     public long getTotalCount() {
@@ -100,8 +114,10 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
     }
 
     /**
-     * The current rate as a number of events per given unit of time
+     * The current rate as a number of events per given unit of time.
+     * See also {@link #getRate(Duration)} and {@link #getRate()}
      * @param unit The unit of time to express the rate in.
+
      */
     public double getRate(TimeUnit unit) {
         long totalCount = getTotalCount();
@@ -109,6 +125,9 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
         return ((double) totalCount * TimeUnit.NANOSECONDS.convert(1, unit)) / relevantDuration.toNanos();
     }
 
+    /**
+     * See also {@link #getRate(TimeUnit)} and {@link #getRate()}
+     */
     public double getRate(Duration perInterval) {
         long totalCount = getTotalCount();
         Duration relevantDuration = getRelevantDuration();
@@ -117,6 +136,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
 
     /**
      * The current rate as a number of events per SI unit of time (the second)
+     * See also {@link #getRate(TimeUnit)}
      */
     public double getRate() {
         return getRate(TimeUnit.SECONDS);
@@ -124,7 +144,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> {
 
 
     public String toString() {
-        return "" + getRate(TimeUnit.SECONDS) + " /s" + (isWarmingUp() ? " (warming up)" : "");
+        return "" + getRate() + " /s" + (isWarmingUp() ? " (warming up)" : "");
     }
 
 
