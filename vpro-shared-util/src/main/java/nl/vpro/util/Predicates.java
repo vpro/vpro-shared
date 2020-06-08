@@ -8,7 +8,7 @@ import java.util.function.Predicate;
  * @author Michiel Meeuwissen
  * @since 2.18
  */
-public class Predicates {
+public final class Predicates {
 
     private static final String FALSE = "FALSE";
     private static final String TRUE = "TRUE";

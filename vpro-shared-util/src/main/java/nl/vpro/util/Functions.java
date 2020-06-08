@@ -5,11 +5,15 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
+ * Provides functions implementation which always return the same value, no matter their arguments.
+ *
+ * With a nicer toString/equals then a standard lambda would do.
+ *
  * @author Michiel Meeuwissen
  * @since 2.12
  */
 
-public class Functions {
+public final class Functions {
 
     private Functions() {
     }
