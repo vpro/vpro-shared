@@ -48,7 +48,7 @@ public final class Predicates {
         return triAlways(true, TRUE);
     }
 
-    protected static class AbstractAlways {
+    protected static abstract class AbstractAlways {
         protected final boolean val;
         private final String s;
 
