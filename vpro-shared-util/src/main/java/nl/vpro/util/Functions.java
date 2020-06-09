@@ -45,12 +45,11 @@ public final class Functions {
     }
 
 
-
-    protected static class Always<A, R> implements Function<A, R> {
-        private final R val;
+    protected static abstract class AbstractAlways<R>  {
+        protected final R val;
         private final String s;
 
-        public Always(R val, String s) {
+        public AbstractAlways(R val, String s) {
             this.val = val;
             this.s = s;
         }
@@ -59,18 +58,23 @@ public final class Functions {
             return s;
         }
 
-
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Functions.Always<?, ?> always = (Functions.Always<?, ?>) o;
+            Functions.AbstractAlways<?> always = (Functions.AbstractAlways<?>) o;
             return Objects.equals(val, always.val);
         }
 
         @Override
         public int hashCode() {
             return Objects.hashCode(val);
+        }
+    }
+
+    protected static final class Always<A, R> extends AbstractAlways<R> implements Function<A, R> {
+        public Always(R val, String s) {
+            super(val, s);
         }
 
         @Override
@@ -79,64 +83,19 @@ public final class Functions {
         }
     }
 
-    protected static class BiAlways<A1, A2, R> implements BiFunction<A1, A2, R> {
-        private final R val;
-        private final String s;
-
+    protected static final class BiAlways<A1, A2, R> extends AbstractAlways<R> implements BiFunction<A1, A2, R> {
         public BiAlways(R val, String s) {
-            this.val = val;
-            this.s = s;
+            super(val, s);
         }
-        @Override
-        public String toString() {
-            return s;
-        }
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Functions.BiAlways<?, ?,  ?> always = (Functions.BiAlways<?, ?, ?>) o;
-            return Objects.equals(val, always.val);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(val);
-        }
-
         @Override
         public R apply(A1 a1, A2 a2) {
             return val;
         }
     }
 
-     protected static class TriAlways<A1, A2, A3, R> implements TriFunction<A1, A2, A3, R> {
-        private final R val;
-        private final String s;
-
+     protected static final class TriAlways<A1, A2, A3, R> extends AbstractAlways<R> implements TriFunction<A1, A2, A3, R> {
         public TriAlways(R val, String s) {
-            this.val = val;
-            this.s = s;
-        }
-        @Override
-        public String toString() {
-            return s;
-        }
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Functions.TriAlways<?, ?, ?, ?> always = (Functions.TriAlways<?, ?, ?, ?>) o;
-            return Objects.equals(val, always.val);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(val);
+            super(val, s);
         }
 
         @Override

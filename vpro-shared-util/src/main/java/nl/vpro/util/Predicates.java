@@ -48,20 +48,16 @@ public final class Predicates {
         return triAlways(true, TRUE);
     }
 
-
-    protected static class Always<T> implements Predicate<T> {
-        private final boolean val;
+    protected static class AbstractAlways {
+        protected final boolean val;
         private final String s;
 
-        public Always(boolean val, String s) {
+
+        public AbstractAlways(boolean val, String s) {
             this.val = val;
             this.s = s;
         }
-        @Override
-        public boolean test(T t) {
-            return val;
 
-        }
         @Override
         public String toString() {
             return s;
@@ -72,7 +68,7 @@ public final class Predicates {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Always<?> always = (Always<?>) o;
+            AbstractAlways always = (AbstractAlways) o;
             return val == always.val;
         }
 
@@ -82,68 +78,39 @@ public final class Predicates {
         }
     }
 
-    protected static class BiAlways<T, U> implements BiPredicate<T, U> {
-        private final boolean val;
-        private final String s;
+    protected static final class Always<T> extends AbstractAlways implements Predicate<T> {
+
+        public Always(boolean val, String s) {
+            super(val, s);
+        }
+
+        @Override
+        public boolean test(T t) {
+            return val;
+
+        }
+    }
+
+    protected static final class BiAlways<T, U> extends AbstractAlways implements BiPredicate<T, U> {
 
         public BiAlways(boolean val, String s) {
-            this.val = val;
-            this.s = s;
+            super(val, s);
         }
         @Override
         public boolean test(T t, U u) {
             return val;
-
-        }
-        @Override
-        public String toString() {
-            return s;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            BiAlways<?, ?> biAlways = (BiAlways<?, ?>) o;
-            return val == biAlways.val;
-        }
-
-        @Override
-        public int hashCode() {
-            return (val ? 1 : 0);
         }
     }
 
-    protected static class TriAlways<T, U, V> implements TriPredicate<T, U, V> {
-        private final boolean val;
-        private final String s;
+    protected static final class TriAlways<T, U, V> extends AbstractAlways implements TriPredicate<T, U, V> {
 
         public TriAlways(boolean val, String s) {
-            this.val = val;
-            this.s = s;
+            super(val, s);
         }
 
         @Override
         public boolean test(T t, U u, V v) {
             return val;
-
-        }
-        @Override
-        public String toString() {
-            return s;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            TriAlways<?, ?, ?> triAlways = (TriAlways<?, ?, ?>) o;
-            return val == triAlways.val;
-        }
-
-        @Override
-        public int hashCode() {
-            return (val ? 1 : 0);
         }
     }
 }
