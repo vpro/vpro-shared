@@ -1252,7 +1252,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
             Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
-            logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
+            if (logger.isInfoEnabled()) {
+                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
+            }
             logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
@@ -1269,13 +1271,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             String index = jsonNode.get(Fields.INDEX).textValue();
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
-            if (found) {
-                int version = jsonNode.has(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : -1;
-                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
-            } else {
-                logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory.logString(), index, type, encode(id));
+            if (logger.isInfoEnabled()) {
+                if (found) {
+                    int version = jsonNode.has(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : -1;
+
+                    logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
+
+                } else {
+                    logger.info("{}{}/{}/{}/{} (not found)", prefix.get(), clientFactory.logString(), index, type, encode(id));
+                }
             }
-            logger.debug("{}{} {}", prefix.get(), clientFactory.logString(), jsonNode);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{}{} {}", prefix.get(), clientFactory.logString(), jsonNode);
+            }
         };
     }
 
@@ -1291,7 +1299,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 },
                 deleteLogger,
                 indexLogger,
-                (n) -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
+                n -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
         );
     }
     public static Consumer<ObjectNode> consumeBulkResult(
