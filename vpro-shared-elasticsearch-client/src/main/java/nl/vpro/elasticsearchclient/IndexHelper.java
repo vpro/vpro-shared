@@ -445,7 +445,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     Response response = client().performRequest(request);
                     ArrayNode read = readArray(response);
                     for (JsonNode i : read) {
-                        result.put(i.get("alias").textValue(), i.get("index").textValue());
+                        result.put(i.get("alias").textValue(), i.get(INDEX).textValue());
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
@@ -679,7 +679,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         ObjectNode bulkResponse = bulk(bulkRequest);
         ObjectNode delete = null;
         for (JsonNode jsonNode : bulkResponse.withArray("items")) {
-            delete = jsonNode.with("delete");
+            delete = jsonNode.with(DELETE);
             if (delete.get("found").booleanValue()) {
                 break;
             }
@@ -995,7 +995,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
         BulkRequestEntry request  = _deleteRequest(DOC, id);
-        request.getAction().with("delete")
+        request.getAction().with(DELETE)
             .put(ROUTING, routing);
         return request;
 
@@ -1003,7 +1003,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     protected BulkRequestEntry _deleteRequest(String type, String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
-        ObjectNode index = actionLine.with("delete");
+        ObjectNode index = actionLine.with(DELETE);
         if (! DOC.equals(type)) {
             index.put(Fields.TYPE, type);
         }
@@ -1158,7 +1158,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Response response = client()
             .performRequest(get);
         JsonNode result = read(response);
-        return result.fields().next().getValue().get("settings").get("index");
+        return result.fields().next().getValue().get("settings").get(INDEX);
     }
 
     @SneakyThrows
@@ -1306,13 +1306,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 each.accept(++i, total);
                 ObjectNode on = (ObjectNode) n;
                 boolean recognized = false;
-                if (on.has("delete")) {
+                if (on.has(DELETE)) {
 
-                    deletes.accept(on.with("delete"));
+                    deletes.accept(on.with(DELETE));
                     recognized = true;
                 }
-                if (n.has("index")) {
-                    indexes.accept(on.with("index"));
+                if (n.has(INDEX)) {
+                    indexes.accept(on.with(INDEX));
                     recognized = true;
                 }
                 if (! recognized) {
@@ -1332,8 +1332,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
                 logger.info("{}", on);
-                if (on.has("delete")) {
-                    ObjectNode delete = on.with("delete");
+                if (on.has(DELETE)) {
+                    ObjectNode delete = on.with(DELETE);
                     index = delete.get(Fields.INDEX).textValue();
                     String type = delete.get(Fields.TYPE).textValue();
                     String id = delete.get(Fields.ID).textValue();
@@ -1341,8 +1341,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     deleted.add(type+ ":" + id + ":" + result);
                     continue;
                 }
-                if (n.has("index")) {
-                    ObjectNode indexResponse = on.with("index");
+                if (n.has(INDEX)) {
+                    ObjectNode indexResponse = on.with(INDEX);
                     index = indexResponse.get(Fields.INDEX).textValue();
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();

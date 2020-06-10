@@ -126,7 +126,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
             for (Map.Entry<String, String> logEntry : logMap.entrySet()) {
                 String value = helper.replacePlaceholders(logEntry.getValue(), props);
-                value = propertyPlaceholderHelper.replacePlaceholders(value, (placeholderName) -> {
+                value = propertyPlaceholderHelper.replacePlaceholders(value, placeholderName -> {
                     try {
                         Expression exp = parser.parseExpression(placeholderName);
                         return (String) exp.getValue();

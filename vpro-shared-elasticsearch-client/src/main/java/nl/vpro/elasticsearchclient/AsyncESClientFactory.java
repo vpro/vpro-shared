@@ -1,6 +1,8 @@
 package nl.vpro.elasticsearchclient;
 
 
+import lombok.Lombok;
+
 import java.net.ConnectException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -24,12 +26,12 @@ public interface AsyncESClientFactory extends ESClientFactory {
             return clientAsync(logName, callback).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            throw Lombok.sneakyThrow(e);
         }  catch (ExecutionException e) {
             if (e.getCause() instanceof ConnectException) {
                 invalidate();
             }
-            throw new RuntimeException(e);
+            throw Lombok.sneakyThrow(e);
         }
     }
 

@@ -4,12 +4,15 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
+
+import static nl.vpro.elasticsearch.Constants.DELETE;
+import static nl.vpro.elasticsearch.Constants.INDEX;
 
 /**
  * @author Michiel Meeuwissen
@@ -24,7 +27,7 @@ public class BulkRequestEntry {
     final Map<String, String> mdc;
     final String id;
 
-    public BulkRequestEntry(ObjectNode action, ObjectNode source, Function<String, String> unalias, Map<String, String> mdc) {
+    public BulkRequestEntry(ObjectNode action, ObjectNode source, UnaryOperator<String> unalias, Map<String, String> mdc) {
         this.action = action;
         this.source = source;
         this.mdc = mdc;
@@ -36,15 +39,15 @@ public class BulkRequestEntry {
     }
 
 
-    public static String idFromActionNode(ObjectNode action, Function<String, String> unalias) {
+    public static String idFromActionNode(ObjectNode action, UnaryOperator<String> unalias) {
         StringBuilder builder = new StringBuilder();
         JsonNode idNode;
-        if (action.has("index")) {
-            builder.append("index");
-            idNode = action.with("index");
-        } else if (action.has("delete")) {
-            builder.append("delete");
-            idNode = action.with("delete");
+        if (action.has(INDEX)) {
+            builder.append(INDEX);
+            idNode = action.with(INDEX);
+        } else if (action.has(DELETE)) {
+            builder.append(DELETE);
+            idNode = action.with(DELETE);
         } else {
             throw new IllegalArgumentException("Unrecognized action node " + action);
         }

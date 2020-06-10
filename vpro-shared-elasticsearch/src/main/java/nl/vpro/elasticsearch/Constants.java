@@ -45,6 +45,7 @@ public class Constants {
     }
 
     public static final String FILTER = "filter";
+    public static final String DELETE = "delete";
 
 
 
