@@ -257,7 +257,7 @@ public class ObjectLocker {
     }
 
     private static  <K extends Serializable> LockHolder<K> acquireLock(long nanoStart, K key, @NonNull  String reason, final @NonNull Map<K, LockHolder<K>> locks, BiFunction<K, K, Boolean> comparable) {
-        return acquireLock(nanoStart, key, reason, locks, false, comparable).get();
+        return acquireLock(nanoStart, key, reason, locks, false, comparable).orElseThrow(IllegalStateException::new);
     }
 
 
