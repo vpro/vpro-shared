@@ -11,6 +11,10 @@ import javax.ws.rs.*;
  */
 public class Utils {
 
+    private Utils() {
+
+    }
+
     /**
      * Creates a string representation of a call to a javax.ws.rs annotated method.
      * So, it considers annotations like {@link Path}, {@link PathParam} and {@link QueryParam} to
