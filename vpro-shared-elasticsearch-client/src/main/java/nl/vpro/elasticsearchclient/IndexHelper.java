@@ -1295,7 +1295,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         );
     }
     public static Consumer<ObjectNode> consumeBulkResult(
-            BiConsumer<Integer, Integer> each,
+            ObjIntConsumer<Integer> each,
             Consumer<ObjectNode> deletes,
             Consumer<ObjectNode> indexes,
             Consumer<JsonNode> unrecognized) {
