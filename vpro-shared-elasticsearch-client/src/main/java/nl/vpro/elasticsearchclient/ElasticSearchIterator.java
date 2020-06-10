@@ -1,23 +1,8 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.Version;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.entity.NStringEntity;
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseException;
-import org.elasticsearch.client.RestClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,6 +11,21 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.*;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
@@ -441,10 +441,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     public Optional<Instant> getETA() {
         if (count != null && count != 0) {
-            Optional<Long> totalSize = getTotalSize();
-            if (totalSize.isPresent()) {
+            Optional<Long> ts = getTotalSize();
+            if (ts.isPresent()) {
                 Duration duration = Duration.between(start, Instant.now());
-                Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * (totalSize.get().doubleValue() / getCount())));
+                Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * (ts.get().doubleValue() / getCount())));
                 return Optional.of(start.plus(estimatedTotalDuration));
             }
         }
