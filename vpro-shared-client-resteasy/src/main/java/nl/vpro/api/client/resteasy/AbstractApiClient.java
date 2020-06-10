@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -30,7 +29,6 @@ import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.http.*;
-import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -76,7 +74,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
+    private final List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
     private boolean shutdown = false;
     protected boolean trustAll = false;
 
@@ -394,17 +392,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             .setDefaultRequestConfig(defaultRequestConfig)
             .setDefaultHeaders(defaultHeaders)
             .setUserAgent(userAgent)
-            .setRetryHandler(new HttpRequestRetryHandler() {
-
-                @Override
-                public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
-                    if (exception instanceof NoHttpResponseException && executionCount < 3) {
-                        log.warn("{} Retrying ({})", exception.getMessage(), executionCount);
-                        return true;
-                    }
-                    return false;
-
+            .setRetryHandler((exception, executionCount, context) -> {
+                if (exception instanceof NoHttpResponseException && executionCount < 3) {
+                    log.warn("{} Retrying ({})", exception.getMessage(), executionCount);
+                    return true;
                 }
+                return false;
+
             })
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
 
@@ -901,7 +895,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
-        private List<HttpClientConnectionManager> connectionManagers = new ArrayList<>();
+        private final List<HttpClientConnectionManager> connectionManagers = new ArrayList<>();
 
         void shutdown() {
             shutdown = true;
@@ -924,8 +918,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                             connectionManager.closeExpiredConnections();
                         }
                     }
-                } catch (InterruptedException ignored) {
-                    log.debug(ignored.getMessage());
+                } catch (InterruptedException ie) {
+                    log.debug(ie.getMessage());
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Throwable t) {
