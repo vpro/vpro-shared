@@ -53,6 +53,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static final String POST = "POST";
     public static final String GET = "GET";
     public static final String PUT = "PUT";
+    public static final String METHOD_DELETE = "DELETE";
 
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
@@ -320,7 +321,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             consumer.accept(settings);
         }
         HttpEntity entity = entity(request);
-        Request req = new Request(PUT, getIndexName() + "/_settings");
+        Request req = new Request(PUT, getIndexName() + SETTINGS);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -328,7 +329,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public void reputSettings(boolean forReindex) {
-        reputSettings(forReindex ? IndexHelper::forReindex : (on) -> {});
+        reputSettings(forReindex ? IndexHelper::forReindex : on -> {});
     }
 
 
@@ -379,7 +380,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public void deleteIndex()  {
         try {
-            Response delete = client().performRequest(new Request("DELETE", getIndexName()));
+            Response delete = client().performRequest(new Request(METHOD_DELETE, getIndexName()));
 
             log.info("{}", delete);
             EntityUtils.consumeQuietly(delete.getEntity());
@@ -660,7 +661,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode _delete(String type, String id) {
         try {
-            client().performRequest(new Request("DELETE", getIndexName() + "/" + type + "/" + encode(id)));
+            client().performRequest(new Request(METHOD_DELETE, getIndexName() + "/" + type + "/" + encode(id)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -702,7 +703,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync(new Request("DELETE", getIndexName() + "/" + type + "/" + encode(id)),
+        client().performRequestAsync(new Request(METHOD_DELETE, getIndexName() + "/" + type + "/" + encode(id)),
             listen(log, "delete " + type + "/" + id, future, listeners)
         );
         return future;
