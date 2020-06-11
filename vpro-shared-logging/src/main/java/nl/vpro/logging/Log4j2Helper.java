@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
  */
 public class Log4j2Helper {
 
+    private Log4j2Helper() {
+    }
+
 
     public static void debugOrInfo(Logger logger, boolean info, String format, Object... argArray) {
         logger.log(info ? Level.INFO : Level.DEBUG, format, argArray);

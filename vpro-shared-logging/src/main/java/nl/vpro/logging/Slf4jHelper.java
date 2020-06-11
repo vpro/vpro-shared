@@ -14,6 +14,9 @@ import org.slf4j.helpers.MessageFormatter;
  */
 public class Slf4jHelper {
 
+    private Slf4jHelper() {
+    }
+
     /**
      * Log at the specified level. If the "logger" is null, nothing is logged.
      * If the "level" is null, nothing is logged. If the "txt" is null,

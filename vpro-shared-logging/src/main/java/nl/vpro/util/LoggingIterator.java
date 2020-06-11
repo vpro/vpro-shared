@@ -7,7 +7,10 @@ import java.util.Iterator;
 
 
 /**
- * An iterator that
+ * An iterator that wraps another one, but adds some logging.
+ *
+ * Once in every 'interval' an element is logged.
+ *
  * @author Michiel Meeuwissen
  * @since 3.1
  */
@@ -19,6 +22,7 @@ public class LoggingIterator<T> implements Iterator<T> {
 	private final int interval;
 	private final Iterator<T> wrapped;
 
+	@lombok.Builder
     public LoggingIterator(Iterator<T> wrapped, org.slf4j.Logger logger, Level level, int interval) {
         this.wrapped = wrapped;
 		this.logger = new Logger(logger);
