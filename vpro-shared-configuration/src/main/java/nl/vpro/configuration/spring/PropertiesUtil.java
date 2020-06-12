@@ -138,6 +138,9 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 log.info("{}", value);
             }
         }
+        if (systemPropertiesMode == PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE) {
+            log.info("");
+        }
         if (afterProperties != null) {
             for (Consumer<Map<String, String>> after : afterProperties) {
                 after.accept(propertiesMap);
