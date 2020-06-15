@@ -17,8 +17,7 @@ public final class Functions {
 
     private Functions() {
     }
-
-
+    
     public static <A, R> Function<A, R> always(R v, String s) {
         return new Functions.Always<>(v, s);
     }
