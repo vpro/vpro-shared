@@ -5,7 +5,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -17,13 +16,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hibernate.SessionFactory;
 import org.slf4j.event.Level;
 
+import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.Slf4jHelper;
 
 /**
@@ -47,8 +46,7 @@ public class ObjectLocker {
 
     static {
         try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            mbs.registerMBean(JMX_INSTANCE, new ObjectName("nl.vpro:name=objectLocker"));
+            MBeans.registerBean(new ObjectName("nl.vpro:name=objectLocker"), JMX_INSTANCE);
         } catch (Throwable t) {
             throw Lombok.sneakyThrow(t);
         }
