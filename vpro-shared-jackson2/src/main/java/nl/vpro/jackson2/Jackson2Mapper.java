@@ -34,6 +34,8 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
     public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
 
+    public static final Jackson2Mapper BACKWARDS_PUBLISHER = new Jackson2Mapper("backwards_publisher");
+
     private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
 
@@ -42,12 +44,16 @@ public class Jackson2Mapper extends ObjectMapper {
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
 
-        PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+        PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
         PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
 
-        PRETTY_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+        PRETTY_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
         PRETTY_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
         PRETTY_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
+
+        BACKWARDS_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+        BACKWARDS_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
+        BACKWARDS_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
 
 
         //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
@@ -73,6 +79,10 @@ public class Jackson2Mapper extends ObjectMapper {
 
     public static Jackson2Mapper getPrettyPublisherInstance() {
         return PRETTY_PUBLISHER;
+    }
+
+    public static Jackson2Mapper getBackwardsPublisherInstance() {
+        return BACKWARDS_PUBLISHER;
     }
 
     public static Jackson2Mapper getThreadLocal() {
