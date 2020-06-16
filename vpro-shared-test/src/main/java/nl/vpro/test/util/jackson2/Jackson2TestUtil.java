@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class Jackson2TestUtil {
 
-    private static final ObjectMapper MAPPER = Jackson2Mapper.getPrettyInstance();
+    private static final ObjectMapper MAPPER = Jackson2Mapper.getPrettyStrictInstance();
 
 
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual) {
