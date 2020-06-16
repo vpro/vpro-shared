@@ -35,7 +35,6 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper PRETTY = new Jackson2Mapper("pretty");
     public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
     public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
-
     public static final Jackson2Mapper BACKWARDS_PUBLISHER = new Jackson2Mapper("backwards_publisher");
 
     private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
@@ -46,6 +45,19 @@ public class Jackson2Mapper extends ObjectMapper {
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
         PRETTY_STRICT.enable(SerializationFeature.INDENT_OUTPUT);
+
+        INSTANCE.setConfig(INSTANCE.getSerializationConfig().withView(Views.Forward.class));
+        INSTANCE.setConfig(INSTANCE.getDeserializationConfig().withView(Views.Forward.class));
+
+        LENIENT.setConfig(LENIENT.getSerializationConfig().withView(Views.Forward.class));
+        LENIENT.setConfig(LENIENT.getDeserializationConfig().withView(Views.Forward.class));
+
+        STRICT.setConfig(STRICT.getSerializationConfig().withView(Views.Forward.class));
+        STRICT.setConfig(STRICT.getDeserializationConfig().withView(Views.Forward.class));
+
+
+        PRETTY_STRICT.setConfig(PRETTY_STRICT.getSerializationConfig().withView(Views.Forward.class));
+        PRETTY_STRICT.setConfig(PRETTY_STRICT.getDeserializationConfig().withView(Views.Forward.class));
 
 
         PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
