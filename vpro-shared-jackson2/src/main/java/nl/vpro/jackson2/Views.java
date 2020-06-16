@@ -8,11 +8,15 @@ package nl.vpro.jackson2;
  */
 public class Views {
 
-    public static class Normal {
+    public interface Normal {
 
     }
 
-    public static class Publisher extends Normal {
+
+    public interface Forward extends Normal {
+
+    }
+    public interface Publisher extends Normal {
 
     }
 
@@ -21,7 +25,7 @@ public class Views {
      *
      * That way we can serialize for checking purposes compatible with old values in ES.
      */
-    public  static class ForwardPublisher extends Publisher {
+    public interface ForwardPublisher extends Publisher, Forward {
 
     }
 

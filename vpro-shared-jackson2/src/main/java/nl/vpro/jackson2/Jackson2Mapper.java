@@ -30,6 +30,8 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper INSTANCE = new Jackson2Mapper("instance");
     public static final Jackson2Mapper LENIENT = new Jackson2Mapper("lenient");
     public static final Jackson2Mapper STRICT = new Jackson2Mapper("strict");
+    public static final Jackson2Mapper PRETTY_STRICT = new Jackson2Mapper("pretty_strict");
+
     public static final Jackson2Mapper PRETTY = new Jackson2Mapper("pretty");
     public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
     public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
@@ -43,20 +45,23 @@ public class Jackson2Mapper extends ObjectMapper {
         LENIENT.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
+        PRETTY_STRICT.enable(SerializationFeature.INDENT_OUTPUT);
+
 
         PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
-        PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
+        PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Forward.class));
 
         PRETTY_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
-        PRETTY_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
+        PRETTY_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Forward.class));
         PRETTY_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
 
-        BACKWARDS_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
-        BACKWARDS_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
+        BACKWARDS_PUBLISHER.setConfig(BACKWARDS_PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
+        BACKWARDS_PUBLISHER.setConfig(BACKWARDS_PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
         BACKWARDS_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
 
 
-        //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especailly because PRETTY is used in tests.
+        //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
+        PRETTY_STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
     }
 
     public static Jackson2Mapper getInstance() {
@@ -69,6 +74,11 @@ public class Jackson2Mapper extends ObjectMapper {
 
     public static Jackson2Mapper getPrettyInstance() {
         return PRETTY;
+    }
+
+
+    public static Jackson2Mapper getPrettyStrictInstance() {
+        return PRETTY_STRICT;
     }
 
 
