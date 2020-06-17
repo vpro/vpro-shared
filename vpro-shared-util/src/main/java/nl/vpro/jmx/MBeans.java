@@ -25,6 +25,7 @@ import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
 import nl.vpro.logging.simple.StringSupplierSimpleLogger;
+import nl.vpro.util.ThreadPools;
 
 /**
  * Utilities to start jmx tasks in the background.
@@ -49,8 +50,16 @@ public class MBeans {
             return "Not running";
         }
         future.cancel();
+        // should not be needed, because happening in finally, but if the called code does reuse to shut down propery, then simply abandon it.
+        ThreadPools.backgroundExecutor.schedule(() -> {
+            LockValue abandoned = locks.remove(key);
+            if (abandoned != null) {
+                log.warn("abandonded {}", abandoned);
+            }},
+            2,
+            TimeUnit.SECONDS
+        );
         return "Cancelled";
-
 
     }
 
@@ -82,6 +91,7 @@ public class MBeans {
             try {
                 Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
                 Thread.currentThread().setName(threadName + ":" + description.get());
+                value.setThread(Thread.currentThread());
                 logger.accept(description);
             } catch (Exception e) {
                 description.error(e.getClass().getName() + " " + e.getMessage(), e);
@@ -319,6 +329,7 @@ public class MBeans {
     @Setter
     public static class LockValue {
         Future<?> future;
+        Thread thread;
 
         @NonNull
         Supplier<String> description;
@@ -330,6 +341,9 @@ public class MBeans {
         public void cancel() {
             if (future != null){
                 future.cancel(true);
+            }
+            if (thread != null) {
+                thread.interrupt();
             }
         }
         @Override

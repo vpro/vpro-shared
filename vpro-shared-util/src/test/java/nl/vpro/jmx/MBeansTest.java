@@ -3,12 +3,11 @@ package nl.vpro.jmx;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.time.Instant;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
-import nl.vpro.logging.simple.StringBuilderSimpleLogger;
-import nl.vpro.logging.simple.StringSupplierSimpleLogger;
+import nl.vpro.logging.simple.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,5 +68,51 @@ public class MBeansTest {
             "...\n" +
             "still busy. Please check logs");
     }
+
+
+    @Test
+    public void cancel() throws InterruptedException {
+        MBeans.returnString("KEY", MBeans.multiLine(log, "Filling media queues"),  Duration.ofMillis(100), (l) -> {
+            int count = 0;
+            while(true) {
+                try {
+                    Thread.sleep(400);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.debug(e.getMessage());
+                }
+                if (Thread.currentThread().isInterrupted()) {
+                    log.info("interrupted");
+                    return;
+                }
+                l.info(count++ + " " + Instant.now());
+            }
+        });
+        MBeans.cancel("KEY");
+        assertThat(MBeans.locks).isEmpty();
+    }
+
+
+
+    @Test
+    public void abandon() throws InterruptedException {
+        MBeans.returnString("KEY", MBeans.multiLine(log, "Filling media queues"),  Duration.ofMillis(100), (l) -> {
+            int count = 0;
+
+            while(true) {
+                try {
+                    Thread.sleep(400);
+                } catch (InterruptedException e) {
+                    log.debug(e.getMessage());
+                }
+                // ignoring interrupt, simply proceed
+                l.info(count++ + " " + Instant.now());
+            }
+        });
+        MBeans.cancel("KEY");
+        Thread.sleep(3000);
+        assertThat(MBeans.locks).isEmpty();
+    }
+
 
 }
