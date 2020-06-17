@@ -968,11 +968,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
 
-        ObjectNode jsonNode = objectMapper.valueToTree(o);
-        for (Consumer<JsonNode> c : consumers) {
-            c.accept(jsonNode);
+        ObjectNode objectNode = objectMapper.valueToTree(o);
+        for (Consumer<ObjectNode> c : consumers) {
+            c.accept(objectNode);
         }
-        return new BulkRequestEntry(actionLine, jsonNode, this::unalias, mdcSupplier.get());
+        return new BulkRequestEntry(actionLine, objectNode, this::unalias, mdcSupplier.get());
     }
 
     /**
