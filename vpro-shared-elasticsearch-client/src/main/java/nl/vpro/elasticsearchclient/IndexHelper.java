@@ -938,24 +938,28 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
+    @SafeVarargs
     @Deprecated
-    public BulkRequestEntry indexRequest(String type, String id, Object o) {
-        return _indexRequest(type, id, o);
+    public final BulkRequestEntry indexRequest(String type, String id, Object o, Consumer<ObjectNode>... consumers) {
+        return _indexRequest(type, id, o, consumers);
     }
-    public BulkRequestEntry indexRequest(String id, Object o) {
-        return _indexRequest(DOC, id, o);
+    @SafeVarargs
+    public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
+        return _indexRequest(DOC, id, o, consumers);
     }
 
-    public BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing) {
+    @SafeVarargs
+    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
         BulkRequestEntry request =
-            _indexRequest(DOC, id, o);
+            _indexRequest(DOC, id, o, consumers);
         request.getAction()
             .with(INDEX)
             .put(ROUTING, routing);
         return request;
     }
 
-    private  BulkRequestEntry _indexRequest(String type, String id, Object o) {
+    @SafeVarargs
+    private final BulkRequestEntry _indexRequest(String type, String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
         if (! DOC.equals(type)) {
@@ -965,6 +969,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         index.put(Fields.INDEX, getIndexName());
 
         ObjectNode jsonNode = objectMapper.valueToTree(o);
+        for (Consumer<JsonNode> c : consumers) {
+            c.accept(jsonNode);
+        }
         return new BulkRequestEntry(actionLine, jsonNode, this::unalias, mdcSupplier.get());
     }
 
