@@ -5,12 +5,13 @@ import java.util.Objects;
 import java.util.function.BinaryOperator;
 
 /**
- *  Represents an operation upon three operands of the same type, producing a result
+ *  Represents an operation upon four operands of the same type, producing a result
  *  of the same type as the operands.  This is a specialization of
- *  {@link TriFunction} for the case where the operands and the result are all of
+ *  {@link QuadriFunction} for the case where the operands and the result are all of
  *  the same type.
  *
  * @see BinaryOperator
+ * @see TernaryOperator
  * @author Michiel Meeuwissen
  * @since 2.12
  */

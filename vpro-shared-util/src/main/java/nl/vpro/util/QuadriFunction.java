@@ -5,7 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * The next in succession of {@link Function} and {@link BiFunction}.
+ * The next in succession of {@link Function}, {@link BiFunction} and {@link TriFunction}
  *
  * A function with four arguments
  *
