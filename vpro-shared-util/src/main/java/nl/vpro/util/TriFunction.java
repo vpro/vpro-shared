@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -15,6 +16,18 @@ import java.util.function.Function;
 public interface TriFunction <T,U,V,R> {
 
     R apply(T t, U u, V v);
+
+    default BiFunction<U, V, R> withArg1(T value) {
+        return (u, v) -> apply(value, u, v);
+    }
+
+    default BiFunction<T, V, R> withArg2(U value) {
+        return (t, v) -> apply(t, value, v);
+    }
+
+    default BiFunction<T, U, R> withArg3(V value) {
+        return (t, u) -> apply(t, u, value);
+    }
 
     /**
      * @see java.util.function.Function#andThen(Function)
