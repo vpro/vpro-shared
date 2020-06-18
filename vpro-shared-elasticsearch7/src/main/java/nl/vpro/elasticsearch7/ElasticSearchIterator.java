@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch7;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.NoSuchElementException;
@@ -26,6 +28,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     final Function<SearchHit, T> adapt;
     final Client client;
 
+    @Getter
+    @Setter
+    boolean version = true;
+
     SearchRequestBuilder builder;
     SearchResponse response;
     SearchHit[] hits;
@@ -42,13 +48,20 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     }
 
     public ElasticSearchIterator(Client client, Function<SearchHit, T> adapt) {
+        this(client, adapt, false);
+    }
+
+    @lombok.Builder
+    protected ElasticSearchIterator(Client client, Function<SearchHit, T> adapt, boolean version) {
         this.adapt = adapt;
         this.client = client;
         needsNext = true;
+        this.version = version;
     }
 
     public SearchRequestBuilder prepareSearch(String... indices) {
         builder = client.prepareSearch(indices);
+        builder.setVersion(true);
         builder.setScroll(TimeValue.timeValueSeconds(60));
         builder.setSize(1000);
         return builder;
