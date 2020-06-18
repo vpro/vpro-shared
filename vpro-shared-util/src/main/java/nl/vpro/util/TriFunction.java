@@ -45,7 +45,7 @@ public interface TriFunction <T,U,V,R> {
     /**
      * @see java.util.function.Function#andThen(Function)
      */
-    default <W> TriFunction<T, U, V, W> andThen(Function<? super R, ? extends W> after) {
+    default <S> TriFunction<T, U, V, S> andThen(Function<? super R, ? extends S> after) {
         Objects.requireNonNull(after);
         return (T t, U u, V v) -> after.apply(apply(t, u, v));
     }
