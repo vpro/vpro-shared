@@ -1,5 +1,7 @@
 package nl.vpro.jmx;
 
+import lombok.SneakyThrows;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,8 +27,9 @@ public class MBeansUtils implements MBeansUtilsMXBean {
     }
 
     @Override
+    @SneakyThrows
     public String cancel(String key) {
-        return MBeans.cancel(key);
+        return MBeans.cancel(key).get();
     }
 
     @Override

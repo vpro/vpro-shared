@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +72,7 @@ public class MBeansTest {
 
 
     @Test
-    public void cancel() throws InterruptedException {
+    public void cancel() throws InterruptedException, ExecutionException {
         MBeans.returnString("KEY", MBeans.multiLine(log, "Filling media queues"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
             while(true) {
@@ -88,14 +89,14 @@ public class MBeansTest {
                 l.info(count++ + " " + Instant.now());
             }
         });
-        MBeans.cancel("KEY");
+        assertThat(MBeans.cancel("KEY").get()).containsIgnoringCase("cancel");
         assertThat(MBeans.locks).isEmpty();
     }
 
 
 
     @Test
-    public void abandon() throws InterruptedException {
+    public void abandon() throws InterruptedException, ExecutionException {
         MBeans.returnString("KEY", MBeans.multiLine(log, "Filling media queues"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
 
@@ -109,8 +110,7 @@ public class MBeansTest {
                 l.info(count++ + " " + Instant.now());
             }
         });
-        MBeans.cancel("KEY");
-        Thread.sleep(3000);
+        assertThat(MBeans.cancel("KEY").get()).containsIgnoringCase("abandon");
         assertThat(MBeans.locks).isEmpty();
     }
 
