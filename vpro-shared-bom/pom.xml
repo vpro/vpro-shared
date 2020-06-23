@@ -3,7 +3,7 @@
 
 
   <groupId>nl.vpro.shared</groupId>
-  <version>2.12.0</version>
+  <version>2.12.1-SNAPSHOT</version>
   <artifactId>vpro-shared-bom</artifactId>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
@@ -40,7 +40,7 @@
     <connection>scm:git:git://git@github.com/vpro/vpro-shared.git</connection>
     <developerConnection>scm:git:git@github.com:vpro/vpro-shared.git</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>REL-2.12.0</tag>
+    <tag>REL-2.12-SNAPSHOT</tag>
   </scm>
 
 
