@@ -229,6 +229,9 @@ public class URLResource<T> {
             } catch (SocketTimeoutException ste) {
                 log.warn("For {} (readTimeout: {}, connectTimeout: {}): {}:{}", url, readTimeout, connectTimeout, ste.getClass().getName(), ste.getMessage());
                 code = -1;
+            } catch (ConnectException ce) {
+                log.warn("For {}: {}", url, ce.getMessage());
+                code = -1;
             } catch (IOException ce) {
                 log.error("For " + connection + " " + ce.getMessage());
                 throw ce;
