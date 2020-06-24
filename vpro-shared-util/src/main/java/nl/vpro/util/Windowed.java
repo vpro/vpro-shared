@@ -68,9 +68,6 @@ public abstract class Windowed<T> {
         }
         int bucketCount1 = bucketCount == null ? 20 : bucketCount;
         buckets = newBuckets(bucketCount1);
-        for (int i = 0; i < buckets.length; i++) {
-            buckets[i] = initialValue();
-        }
         if (window == null && bucketDuration == null) {
             // if both unspecified, take a default window of 5 minutes
             window = Duration.ofMinutes(5);
@@ -89,6 +86,17 @@ public abstract class Windowed<T> {
             // cannot happen. If it would have been null, then window would _never_ have been null
             this.bucketDuration = bucketDuration.toMillis();
             this.totalDuration = this.bucketDuration * bucketCount1;
+        }
+        _init();
+    }
+
+    protected void _init() {
+        init();
+    }
+
+    protected void init() {
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = initialValue();
         }
     }
 
