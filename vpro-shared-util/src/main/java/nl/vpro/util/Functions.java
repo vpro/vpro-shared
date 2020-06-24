@@ -9,6 +9,8 @@ import java.util.function.Function;
  *
  * With a nicer toString/equals then a standard lambda would do.
  *
+ * Also a place for some other 'Function' related utilities.
+ *
  * @author Michiel Meeuwissen
  * @since 2.12
  */
@@ -17,7 +19,7 @@ public final class Functions {
 
     private Functions() {
     }
-    
+
     public static <A, R> Function<A, R> always(R v, String s) {
         return new Functions.Always<>(v, s);
     }
@@ -42,6 +44,25 @@ public final class Functions {
     public static <A1, A2, A3,  R> TriFunction<A1, A2, A3,  R> triAlways(R v) {
         return triAlways(v, "always " + v);
     }
+
+    /**
+     * Morphs a given {@link BiFunction} into a {@link Function}, which a certain given value for the first argument.
+     *
+     * See {@link TriFunction#withArg1(Object)}
+     */
+    public static <A1, A2, R> Function<A2, R> withArg1(BiFunction<A1, A2, R> function, A1 value) {
+        return (a2) -> function.apply(value, a2);
+    }
+
+    /**
+     * Morphs a given {@link BiFunction} into a {@link Function}, which a certain given value for the second argument.
+     *
+     * See {@link TriFunction#withArg2(Object)}
+     */
+    public static <A1, A2, R> Function<A1, R> withArg2(BiFunction<A1, A2, R> function, A2 value) {
+        return (a1) -> function.apply(a1, value);
+    }
+
 
 
     protected static abstract class AbstractAlways<R>  {

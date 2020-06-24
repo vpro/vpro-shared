@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
+import com.google.common.util.concurrent.Futures;
+
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
@@ -44,23 +46,25 @@ public class MBeans {
     }
 
 
-    public static String cancel(final String key){
+    public static Future<String>  cancel(final String key){
         LockValue future = locks.get(key);
         if (future == null) {
-            return "Not running";
+            return Futures.immediateFuture("Not running");
         }
         future.cancel();
         // should not be needed, because happening in finally, but if the called code does reuse to shut down propery, then simply abandon it.
-        ThreadPools.backgroundExecutor.schedule(() -> {
-            LockValue abandoned = locks.remove(key);
-            if (abandoned != null) {
-                log.warn("abandonded {}", abandoned);
-            }},
+        ScheduledFuture<String> schedule = ThreadPools.backgroundExecutor.schedule(() -> {
+                LockValue abandoned = locks.remove(key);
+                if (abandoned != null) {
+                    log.warn("abandonded {}", abandoned);
+                    return "Abandonded";
+                }
+                return "Canceled";
+            },
             2,
             TimeUnit.SECONDS
         );
-        return "Cancelled";
-
+        return schedule;
     }
 
 

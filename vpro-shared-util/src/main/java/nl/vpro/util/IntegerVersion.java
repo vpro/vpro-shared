@@ -48,7 +48,6 @@ public class IntegerVersion extends Version<Integer> {
 
     public static class Adapter extends XmlAdapter<String, IntegerVersion> {
 
-
         @Override
         public IntegerVersion unmarshal(String v) {
             return StringUtils.isBlank(v) ? null : new IntegerVersion(v);
