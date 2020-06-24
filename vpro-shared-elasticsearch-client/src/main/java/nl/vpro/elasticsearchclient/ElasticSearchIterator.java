@@ -32,7 +32,7 @@ import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 
 /**
  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
- * {@code
+ * <pre>{@code
  *        ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client);
  *        JsonNode search = i.prepareSearch("pageupdates-publish");
  *        // fill your request here
@@ -44,7 +44,7 @@ import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
  *             }
  *         });
  *
- * }*
+ * }</pre>
  * @author Michiel Meeuwissen
  * @since 0.47
  */
