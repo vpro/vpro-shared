@@ -1,8 +1,23 @@
 package nl.vpro.elasticsearchclient;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.util.Version;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.ResponseException;
+import org.elasticsearch.client.RestClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -11,21 +26,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.entity.NStringEntity;
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.*;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
@@ -91,9 +91,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private Long totalSize = null;
     private TotalRelation totalRelation = TotalRelation.EQUAL_TO;
 
+    private boolean requestVersion;
+
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true);
     }
 
 
@@ -105,7 +107,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         Duration scrollContext,
         Version<Integer> esVersion,
         boolean _autoEsVersion,
-        Boolean jsonRequests
+        Boolean jsonRequests,
+        Boolean requestVersion
 
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
@@ -135,6 +138,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             this.esVersion = esVersion;
         }
         this.jsonRequests = jsonRequests == null || jsonRequests;
+        this.requestVersion = requestVersion == null || requestVersion;
     }
 
 
@@ -271,6 +275,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     Request post = new Request("POST", builder.toString());
                     post.setEntity(entity);
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                    post.addParameter(VERSION, String.valueOf(this.requestVersion));
                     if (search_type_scan) {
                         post.addParameter("search_type", "scan");
                     }

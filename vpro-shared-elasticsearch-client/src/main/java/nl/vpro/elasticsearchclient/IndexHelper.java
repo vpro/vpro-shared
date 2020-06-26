@@ -941,17 +941,23 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     @Deprecated
     public final BulkRequestEntry indexRequest(String type, String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(type, id, o, consumers);
+        return _indexRequest(type, id, null, o, consumers);
     }
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(DOC, id, o, consumers);
+        return indexRequest(id, (Integer) null, o, consumers);
     }
+
+    @SafeVarargs
+    public final BulkRequestEntry indexRequest(String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
+        return _indexRequest(DOC, id, version, o, consumers);
+    }
+
 
     @SafeVarargs
     public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
         BulkRequestEntry request =
-            _indexRequest(DOC, id, o, consumers);
+            _indexRequest(DOC, id, null, o, consumers);
         request.getAction()
             .with(INDEX)
             .put(ROUTING, routing);
@@ -959,7 +965,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @SafeVarargs
-    private final BulkRequestEntry _indexRequest(String type, String id, Object o, Consumer<ObjectNode>... consumers) {
+    private final BulkRequestEntry _indexRequest(String type, String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
         if (! DOC.equals(type)) {
@@ -967,6 +973,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
+        if (version != null) {
+            index.put(Fields.VERSION, version);
+        }
 
         ObjectNode objectNode = objectMapper.valueToTree(o);
         for (Consumer<ObjectNode> c : consumers) {
