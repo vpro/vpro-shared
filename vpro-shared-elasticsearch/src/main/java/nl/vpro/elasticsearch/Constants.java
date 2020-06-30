@@ -53,13 +53,17 @@ public class Constants {
     /**
      * Deprecated if not {@link #DOC}
      */
-    public static final String TYPE = "type";
-    public static final String ID  = "id";
-    public static final String PARENT  = "parent";
+    public static final String TYPE     = "type";
+    public static final String ID       = "id";
+    public static final String PARENT   = "parent";
     public static final String ROUTING  = "routing";
-    public static final String INDEX = "index";
+    public static final String INDEX    = "index";
+    public static final String UPDATE   = "update";
 
-    public static final String DOC = "_doc";
+    public static final String RETRY_ON_CONFLICT = "retry_on_conflict";
+
+
+    public static final String DOC       = "_doc";
 
 
 
