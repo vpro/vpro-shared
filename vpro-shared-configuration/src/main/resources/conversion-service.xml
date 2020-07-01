@@ -11,6 +11,7 @@
     <property name="converters">
       <list>
         <bean class="nl.vpro.spring.converters.StringToDurationConverter" />
+        <bean class="nl.vpro.spring.converters.StringToTemporalAmountConverter" />
         <bean class="nl.vpro.spring.converters.StringToIntegerListConverter" />
       </list>
     </property>

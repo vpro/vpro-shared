@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAmount;
 import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -132,6 +133,16 @@ public class TimeUtils {
             throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
         }
     }
+
+
+     public static Optional<? extends TemporalAmount> parseTemporalAmount(CharSequence d) {
+         try {
+             return Optional.of(Period.parse(d));
+         } catch (DateTimeParseException dte) {
+             return parseDuration(dte, d);
+         }
+
+     }
 
     public static String toParsableString(Duration duration) {
         return duration.toString().substring(2);
