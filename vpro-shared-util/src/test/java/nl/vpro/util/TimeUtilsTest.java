@@ -95,6 +95,15 @@ public class TimeUtilsTest {
     }
 
     @Test
+    public void parseMonth() {
+        assertThat(TimeUtils.parseTemporalAmount("P1M").get()).isEqualTo(Period.ofMonths(1));
+        assertThat(TimeUtils.parseTemporalAmount("1M").get()).isEqualTo(Duration.ofMinutes(1));
+        assertThat(TimeUtils.parseTemporalAmount("PT1M").get()).isEqualTo(Duration.ofMinutes(1));
+        assertThat(TimeUtils.parseTemporalAmount("T1M").get()).isEqualTo(Duration.ofMinutes(1));
+
+    }
+
+    @Test
     public void durationToString() {
         assertThat(TimeUtils.toParsableString(Duration.ofSeconds(5))).isEqualTo("5S");
         assertThat(TimeUtils.toParsableString(Duration.ofDays(50))).isEqualTo("1200H");

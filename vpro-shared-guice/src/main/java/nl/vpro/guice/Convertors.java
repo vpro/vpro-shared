@@ -12,6 +12,7 @@ public class Convertors extends AbstractModule {
     @Override
     protected void configure() {
         DurationConvertor.register(binder());
+        TemporalAmountConvertor.register(binder());
     }
 
     @Override

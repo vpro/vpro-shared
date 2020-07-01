@@ -11,8 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
 
-import static nl.vpro.elasticsearch.Constants.DELETE;
-import static nl.vpro.elasticsearch.Constants.INDEX;
+import static nl.vpro.elasticsearch.Constants.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -48,6 +47,9 @@ public class BulkRequestEntry {
         } else if (action.has(DELETE)) {
             builder.append(DELETE);
             idNode = action.with(DELETE);
+        } else if (action.has(UPDATE)) {
+            builder.append(UPDATE);
+            idNode = action.with(UPDATE);
         } else {
             throw new IllegalArgumentException("Unrecognized action node " + action);
         }
