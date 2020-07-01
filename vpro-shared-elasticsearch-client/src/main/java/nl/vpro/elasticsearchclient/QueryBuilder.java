@@ -73,13 +73,17 @@ public class QueryBuilder {
     }
 
     public static ObjectNode range(ObjectNode query, String field, Instant start, Instant stop) {
+        return range(query, field, start == null ? null : start.toEpochMilli(), stop == null ? null : stop.toEpochMilli());
+    }
+
+    public static ObjectNode range(ObjectNode query, String field, Long start, Long stop) {
         ObjectNode range = query.with(RANGE);
         ObjectNode fieldObject = range.with(field);
         if (start != null) {
-            fieldObject.put("gte", start.toEpochMilli());
+            fieldObject.put("gte", start);
         }
         if (stop != null) {
-            fieldObject.put("lt", stop.toEpochMilli());
+            fieldObject.put("lt", stop);
         }
         return range;
     }

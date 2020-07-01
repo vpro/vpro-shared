@@ -1394,6 +1394,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     indexed.add(type + ":" + id + ":" + result);
                     continue;
                 }
+                if (n.has(UPDATE)) {
+                    ObjectNode indexResponse = on.with(UPDATE);
+                    index = indexResponse.get(Fields.INDEX).textValue();
+                    String type = indexResponse.get(Fields.TYPE).textValue();
+                    String id = indexResponse.get(Fields.ID).textValue();
+                    String result = indexResponse.get("result").textValue();
+                    indexed.add(type + ":" + id + ":" + result);
+                    continue;
+                }
                 logger.warn("Unrecognized bulk response {}", n);
 
             }
