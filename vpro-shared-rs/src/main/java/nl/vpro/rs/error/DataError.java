@@ -23,14 +23,19 @@ public enum DataError {
 
     @XmlAttribute(name = "code")
     @Getter
-    private int errorCode;
+    private final int errorCode;
     @XmlAttribute(name = "description")
     @Getter
-    private String description;
+    private final String description;
 
     DataError(int errorCode, String description) {
         this.errorCode = errorCode;
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return name() + ":" + errorCode + ":" + description;
     }
 
 }
