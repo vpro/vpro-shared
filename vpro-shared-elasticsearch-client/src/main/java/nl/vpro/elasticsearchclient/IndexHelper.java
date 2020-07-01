@@ -1,20 +1,16 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Suppliers;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import nl.vpro.elasticsearch.CreateIndex;
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.IndexHelperInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.Version;
+import lombok.*;
+
+import java.io.*;
+import java.net.ConnectException;
+import java.net.URLEncoder;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -23,24 +19,19 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.slf4j.*;
 
-import java.io.*;
-import java.net.ConnectException;
-import java.net.URLEncoder;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.ObjIntConsumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Suppliers;
+
+import nl.vpro.elasticsearch.*;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
+import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
@@ -963,18 +954,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return _updateRequest(id,  o, consumers);
     }
 
-    public final Consumer<ObjectNode> retainFields(String... fields) {
-        Set<String> set = new HashSet<>(Arrays.asList(fields));
-        return (objectNode) -> {
-            objectNode.fieldNames().forEachRemaining(f -> {
-                if (! set.contains(f)) {
-                    objectNode.remove(f);
-                }
-            });
-        };
-    }
-
-
     @SafeVarargs
     public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
         BulkRequestEntry request =
@@ -998,25 +977,30 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             index.put(Fields.VERSION, version);
         }
 
-        ObjectNode objectNode = objectMapper.valueToTree(o);
+
+          ObjectNode objectNode  = objectMapper.valueToTree(o);
         for (Consumer<ObjectNode> c : consumers) {
             c.accept(objectNode);
         }
+
         return new BulkRequestEntry(actionLine, objectNode, this::unalias, mdcSupplier.get());
     }
 
     @SafeVarargs
     private final BulkRequestEntry _updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
-        ObjectNode index = actionLine.with(UPDATE);
-        index.put(Fields.ID, id);
-        index.put(Fields.INDEX, getIndexName());
-        index.put(RETRY_ON_CONFLICT, 3);
+        ObjectNode update = actionLine.with(UPDATE);
+        update.put(Fields.ID, id);
+        update.put(Fields.INDEX, getIndexName());
+        update.put(RETRY_ON_CONFLICT, 3);
+        ObjectNode updateNode  = objectMapper.createObjectNode();
         ObjectNode objectNode = objectMapper.valueToTree(o);
         for (Consumer<ObjectNode> c : consumers) {
             c.accept(objectNode);
         }
-        return new BulkRequestEntry(actionLine, objectNode, this::unalias, mdcSupplier.get());
+        updateNode.set(Fields.DOC, objectNode);
+        updateNode.put(Fields.DOC_AS_UPSERT, false);
+        return new BulkRequestEntry(actionLine, updateNode, this::unalias, mdcSupplier.get());
     }
 
     /**
