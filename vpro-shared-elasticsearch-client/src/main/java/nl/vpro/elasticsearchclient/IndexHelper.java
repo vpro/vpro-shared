@@ -1323,24 +1323,26 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-    public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog) {
+    public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog, Logger updateLog) {
         StringBuilder logPrefix = new StringBuilder();
         Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
         Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
 
         return consumeBulkResult((i, total) -> {
-                    logPrefix.setLength(0);
-                    logPrefix.append(i).append('/').append(total).append(' ');
-                },
-                deleteLogger,
-                indexLogger,
-                n -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
+                logPrefix.setLength(0);
+                logPrefix.append(i).append('/').append(total).append(' ');
+            },
+            deleteLogger,
+            indexLogger,
+            indexLogger,
+            n -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
         );
     }
     public static Consumer<ObjectNode> consumeBulkResult(
             ObjIntConsumer<Integer> each,
             Consumer<ObjectNode> deletes,
             Consumer<ObjectNode> indexes,
+            Consumer<ObjectNode> updates,
             Consumer<JsonNode> unrecognized) {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
@@ -1357,6 +1359,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 }
                 if (n.has(INDEX)) {
                     indexes.accept(on.with(INDEX));
+                    recognized = true;
+                }
+                if (n.has(UPDATE)) {
+                    updates.accept(on.with(UPDATE));
                     recognized = true;
                 }
                 if (! recognized) {
