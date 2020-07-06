@@ -1,15 +1,16 @@
 package nl.vpro.configuration;
 
-import java.io.File;
-
-import javax.servlet.ServletContext;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.web.context.ServletContextAware;
 
+import javax.servlet.ServletContext;
+import java.io.File;
+
 /**
  * @author Michiel Meeuwissen
+ * @deprecated  We will not host that way any more.
  */
+@Deprecated
 public class NPO implements ServletContextAware {
 
 
