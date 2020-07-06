@@ -312,6 +312,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             if (sort.isEmpty(null)) {
                 log.debug("No explicit sort given, sorting on _doc!");
                 QueryBuilder.docOrder(request);
+            } else {
+                if (! DOC.equals(sort.get(0).textValue())) {
+                    log.warn("Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
+                }
             }
 
             HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);

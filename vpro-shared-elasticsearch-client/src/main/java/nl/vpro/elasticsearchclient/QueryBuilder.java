@@ -1,12 +1,14 @@
 package nl.vpro.elasticsearchclient;
 
-import java.time.Instant;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import nl.vpro.elasticsearch.Constants;
 
-import static nl.vpro.elasticsearch.Constants.*;
+import java.time.Instant;
+
+import static nl.vpro.elasticsearch.Constants.FILTER;
 import static nl.vpro.elasticsearch.Constants.Query.*;
+import static nl.vpro.elasticsearch.Constants.SORT;
 
 /**
  * @author Michiel Meeuwissen
@@ -29,7 +31,7 @@ public class QueryBuilder {
 
     public static void docOrder(ObjectNode request) {
         ArrayNode sort = request.withArray(SORT);
-        sort.add("_doc");
+        sort.add(Constants.DOC);
     }
 
     public static ObjectNode must(ObjectNode query) {
