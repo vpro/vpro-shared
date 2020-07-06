@@ -38,6 +38,7 @@ public class ErrorResponse {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+            .omitNullValues()
             .add("status", status)
             .add("message", message)
             .add("dataError", dataError)
