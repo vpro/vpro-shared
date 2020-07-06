@@ -1,34 +1,37 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.jmx.MBeans;
-import nl.vpro.util.Version;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.nio.entity.NStringEntity;
-import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseException;
-import org.elasticsearch.client.RestClient;
-import org.meeuw.math.windowed.WindowedEventRate;
 
-import javax.management.ObjectName;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.management.ObjectName;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.*;
+import org.meeuw.math.windowed.WindowedEventRate;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jmx.MBeans;
+import nl.vpro.util.ThreadPools;
+import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
@@ -101,7 +104,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private final boolean requestVersion;
 
     @Getter
-    private final  WindowedEventRate rateMeasurerer;
+    private final  WindowedEventRate rate;
+
+    private final ObjectName objectName;
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
@@ -153,9 +158,12 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.jsonRequests = jsonRequests == null || jsonRequests;
         this.requestVersion = requestVersion == null || requestVersion;
         if (beanName != null) {
-            MBeans.registerBean(new ObjectName("nl.vpro.elasticsearchclient:type=" + beanName), this);
+            objectName = MBeans.registerBean(getClass(), beanName, this);
+        } else {
+            objectName = null;
         }
-        this.rateMeasurerer = rateMeasurerer == null ? WindowedEventRate.builder()
+
+        this.rate = rateMeasurerer == null ? WindowedEventRate.builder()
                 .bucketCount(5)
                 .bucketDuration(Duration.ofMinutes(1))
                 .build() : rateMeasurerer;
@@ -458,9 +466,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         }
         count++;
         needsNext = true;
-        rateMeasurerer.newEvent();
+        rate.newEvent();
         return next;
     }
+
+
 
     @Override
     public Optional<Long> getSize() {
@@ -498,7 +508,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     @Override
     public void close()  {
-
+        if (objectName != null) {
+            ThreadPools.backgroundExecutor.schedule(() -> {
+                MBeans.unregister(objectName);
+            }, 2, TimeUnit.MINUTES);
+        }
         if (scrollId != null) {
             try {
                 Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
@@ -534,7 +548,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     @Override
     public double getSpeed() {
-        return rateMeasurerer.getRate();
+        return rate.getRate();
     }
 
 

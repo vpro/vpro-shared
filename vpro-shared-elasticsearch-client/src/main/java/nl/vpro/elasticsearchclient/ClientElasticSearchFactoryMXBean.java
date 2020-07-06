@@ -9,7 +9,6 @@ import javax.management.MXBean;
 @MXBean
 public interface ClientElasticSearchFactoryMXBean {
 
-
     String getClusterName();
 
     void setClusterName(String clusterName);

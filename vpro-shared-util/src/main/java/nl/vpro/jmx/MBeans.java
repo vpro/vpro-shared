@@ -2,6 +2,7 @@ package nl.vpro.jmx;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
@@ -296,6 +297,17 @@ public class MBeans {
             log.error(e.getMessage(), e);
         }
     }
+
+    /**
+     *
+     */
+    @SneakyThrows
+    public static synchronized ObjectName registerBean(Class<?> clazz, String name,  Object object) {
+        ObjectName objectName = new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
+        registerBean(objectName, object);
+        return
+    }
+
 
     /**
      * @since 2.10

@@ -1,23 +1,26 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.http.HttpHost;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import nl.vpro.jmx.MBeans;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
 
 
 /**
@@ -46,8 +49,11 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     private final int instance = instances++;
 
     @PostConstruct
+    @SneakyThrows
     public void init() {
         log.info("Found {}", this);
+        MBeans.registerBean(getClass(), clusterName, this);
+
     }
 
 
