@@ -22,6 +22,7 @@ import java.util.function.IntConsumer;
  * @since 0.38
  */
 @Slf4j
+@Deprecated
 public class WindowedEventRate extends Windowed<AtomicLong> implements IntConsumer {
 
     /**
@@ -49,7 +50,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> implements IntConsum
         }
     }
 
-   
+
 
     @Override
     protected AtomicLong[] newBuckets(int bucketCount) {
@@ -90,7 +91,7 @@ public class WindowedEventRate extends Windowed<AtomicLong> implements IntConsum
     public void newEvents(int count) {
         currentBucket().getAndAdd(count);
     }
-    
+
     /**
      * Accepting an integer is equivalent to {@link #newEvents(int)}
      */

@@ -11,6 +11,7 @@ import java.util.function.LongConsumer;
  * @author Michiel Meeuwissen
  * @since 1.66
  */
+@Deprecated
 public class WindowedLongSummaryStatistics extends Windowed<LongSummaryStatistics> implements LongConsumer {
 
     @lombok.Builder(builderClassName = "Builder")

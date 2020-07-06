@@ -12,6 +12,7 @@ import java.util.function.DoubleConsumer;
  * @author Michiel Meeuwissen
  * @since 2.2
  */
+@Deprecated
 public class WindowedDoubleSummaryStatistics extends Windowed<DoubleSummaryStatistics> implements DoubleConsumer {
 
     @lombok.Builder(builderClassName = "Builder")

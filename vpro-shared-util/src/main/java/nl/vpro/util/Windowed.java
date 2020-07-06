@@ -38,6 +38,7 @@ import com.google.common.collect.Range;
  * @since 1.66
  */
 @Slf4j
+@Deprecated
 public abstract class Windowed<T> {
 
     protected final T[] buckets;

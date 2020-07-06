@@ -3,18 +3,18 @@ package nl.vpro.jmx;
 import lombok.Builder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+import org.meeuw.math.windowed.WindowedEventRate;
+import org.meeuw.math.windowed.WindowedLongSummaryStatistics;
 
 import javax.management.MXBean;
 import javax.management.ObjectName;
-
-import nl.vpro.util.WindowedEventRate;
-import nl.vpro.util.WindowedLongSummaryStatistics;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static nl.vpro.util.TimeUtils.roundToMillis;
 

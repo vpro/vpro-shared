@@ -10,6 +10,7 @@ import java.util.function.IntConsumer;
  * @author Michiel Meeuwissen
  * @since 1.66
  */
+@Deprecated
 public class WindowedIntSummaryStatistics extends Windowed<IntSummaryStatistics> implements IntConsumer {
 
     @lombok.Builder(builderClassName = "Builder")
