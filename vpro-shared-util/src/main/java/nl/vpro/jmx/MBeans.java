@@ -305,7 +305,7 @@ public class MBeans {
     public static synchronized ObjectName registerBean(Class<?> clazz, String name,  Object object) {
         ObjectName objectName = new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
         registerBean(objectName, object);
-        return
+        return objectName;
     }
 
 
