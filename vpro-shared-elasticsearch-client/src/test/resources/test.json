@@ -6,6 +6,9 @@
     },
     "title": {
       "type": "text"
+    },
+    "value": {
+      "type": "long"
     }
   }
 }

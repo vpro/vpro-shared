@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jmx.MBeans;
 import nl.vpro.util.Version;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -18,7 +19,9 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.RestClient;
+import org.meeuw.math.windowed.WindowedEventRate;
 
+import javax.management.ObjectName;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -77,7 +80,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     @Getter
     private Instant start;
 
-    private Duration scrollContext;
+    @Getter
+    private Duration duration = Duration.ofMillis(0);
+
+
+    private final Duration scrollContext;
 
     @Getter
     @Setter
@@ -91,15 +98,19 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private Long totalSize = null;
     private TotalRelation totalRelation = TotalRelation.EQUAL_TO;
 
-    private boolean requestVersion;
+    private final boolean requestVersion;
+
+    @Getter
+    private final  WindowedEventRate rateMeasurerer;
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null);
     }
 
 
     @lombok.Builder(builderClassName = "Builder")
+    @lombok.SneakyThrows
     private ElasticSearchIterator(
         @lombok.NonNull RestClient client,
         Function<JsonNode, T> adapt,
@@ -108,7 +119,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         Version<Integer> esVersion,
         boolean _autoEsVersion,
         Boolean jsonRequests,
-        Boolean requestVersion
+        Boolean requestVersion,
+        String beanName,
+        WindowedEventRate rateMeasurerer
 
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
@@ -139,6 +152,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         }
         this.jsonRequests = jsonRequests == null || jsonRequests;
         this.requestVersion = requestVersion == null || requestVersion;
+        if (beanName != null) {
+            MBeans.registerBean(new ObjectName("nl.vpro.elasticsearchclient:type=" + beanName), this);
+        }
+        this.rateMeasurerer = rateMeasurerer == null ? WindowedEventRate.builder()
+                .bucketCount(5)
+                .bucketDuration(Duration.ofMinutes(1))
+                .build() : rateMeasurerer;
     }
 
 
@@ -244,155 +264,187 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     protected void findNext() {
         if (needsNext) {
-            if (response == null) {
-                // first call only.
-                if (request == null) {
-                    throw new IllegalStateException("prepareSearch not called");
-                }
-                if (client == null) {
-                    throw new IllegalStateException("No client");
-                }
+            synchronized (this) {
+                long start = System.nanoTime();
                 try {
-                    ArrayNode sort = request.withArray("sort");
-                    if (sort.isEmpty(null)) {
-                        log.debug("No explicit sort given, sorting on _doc!");
-                        QueryBuilder.docOrder(request);
-                    }
-
-                    HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
-                    StringBuilder builder = new StringBuilder();
-                    if (! indices.isEmpty()) {
-                        builder.append(String.join(",", indices));
-                    }
-                    if (!types.isEmpty()) {
-                        if (builder.length() > 0) {
-                            builder.append("/");
+                    if (response == null) {
+                        if (!firstBatch()) {
+                            return;
                         }
-                        builder.append(String.join(",", types));
                     }
-                    builder.append("/_search");
-                    start = Instant.now();
-                    Request post = new Request("POST", builder.toString());
-                    post.setEntity(entity);
-                    post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
-                    post.addParameter(VERSION, String.valueOf(this.requestVersion));
-                    if (search_type_scan) {
-                        post.addParameter("search_type", "scan");
+                    i++;
+                    boolean newHasNext = i < hits.get(HITS).size();
+                    if (!newHasNext) {
+                        nextBatch();
+                    } else {
+                        hasNext = true;
                     }
-                    if (routing != null) {
-                        post.addParameter("routing", String.join(",", routing));
+                    if (hasNext) {
+                        next = adapt.apply(hits.get(HITS).get(i));
+                    } else {
+                        close();
                     }
-
-                    HttpEntity responseEntity = null;
-                    try {
-                        Response res = client.performRequest(post);
-                        responseEntity = res.getEntity();
-                        response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
-                    } finally {
-                        EntityUtils.consumeQuietly(responseEntity);
-                    }
-
-                } catch (IOException ioe) {
-                    //log.error(ioe.getMessage());
-                    throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
-
-                }
-                if (hits == null) {
-                    hits = response.get(HITS);
-                }
-                String newScrollId = response.get(_SCROLL_ID).asText();
-                if (newScrollId != null) {
-                    log.debug("Scroll id {} -> {}", scrollId, newScrollId);
-                    scrollId = newScrollId;
-                    SCROLL_IDS.add(scrollId);
-                }
-
-                JsonNode total = hits.get("total");
-                if (total instanceof ObjectNode) {
-                    totalSize = total.get("value").longValue();
-                } else {
-                    totalSize = total.longValue();
-                }
-                if (totalSize == 0) {
-                    hasNext = false;
                     needsNext = false;
-                    close();
-                    return;
+                } finally {
+                    duration = duration.plusNanos(System.nanoTime() - start);
                 }
-
             }
-
-            i++;
-            boolean newHasNext = i < hits.get(HITS).size();
-            if (!newHasNext) {
-                if (scrollId != null) {
-                    try {
-                        Request post;
-                        if (jsonRequests) {
-                            ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
-                            scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
-                            scrollRequest.put(SCROLL_ID, scrollId);
-
-                            post = new Request("POST", "/_search/scroll");
-                            post.setJsonEntity(scrollRequest.toString());
-
-                        } else {
-                            post = new Request("POST", "/_search/scroll");
-                            post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
-                            post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
-                        }
-
-                        HttpEntity responseEntity = null;
-                        try {
-                            Response res = client.performRequest(post);
-                            responseEntity = res.getEntity();
-                            response = Jackson2Mapper.getLenientInstance()
-                                .readerFor(JsonNode.class)
-                                .readTree(responseEntity.getContent()
-                                );
-                        } finally {
-                            EntityUtils.consumeQuietly(responseEntity);
-                        }
-                        log.debug("New scroll");
-                        if (response.has(_SCROLL_ID)) {
-                            String newScrollId = response.get(_SCROLL_ID).asText();
-                            if (!scrollId.equals(newScrollId)) {
-                                log.info("new scroll id {}", newScrollId);
-                                SCROLL_IDS.remove(scrollId);
-                                scrollId = newScrollId;
-                                SCROLL_IDS.add(scrollId);
-                            }
-                        }
-
-                        hits = response.get(HITS);
-                        i = 0;
-                        hasNext = hits.get(HITS).size() > 0;
-                    } catch(ResponseException re) {
-                        log.warn(re.getMessage());
-                        hits = null;
-                        hasNext = false;
-                    } catch (IOException ioe) {
-                        log.error(ioe.getMessage());
-                        throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
-                    }
-                } else {
-                    log.warn("No scroll id found, so not possible to scroll next batch");
-                    hasNext = false;
-                }
-            } else {
-                hasNext = true;
-            }
-            if (hasNext) {
-                next = adapt.apply(hits.get(HITS).get(i));
-            } else {
-                close();
-            }
-            needsNext = false;
         }
+    }
+
+    @Override
+    public float getFraction() {
+        long total = Duration.between(start, Instant.now()).toMillis();
+        long es = duration.toMillis();
+        return (float) es / total;
+    }
+
+    protected boolean firstBatch() {
+        // first call only.
+        if (request == null) {
+            throw new IllegalStateException("prepareSearch not called");
+        }
+        if (client == null) {
+            throw new IllegalStateException("No client");
+        }
+        try {
+            ArrayNode sort = request.withArray("sort");
+            if (sort.isEmpty(null)) {
+                log.debug("No explicit sort given, sorting on _doc!");
+                QueryBuilder.docOrder(request);
+            }
+
+            HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
+            StringBuilder builder = new StringBuilder();
+            if (! indices.isEmpty()) {
+                builder.append(String.join(",", indices));
+            }
+            if (!types.isEmpty()) {
+                if (builder.length() > 0) {
+                    builder.append("/");
+                }
+                builder.append(String.join(",", types));
+            }
+            builder.append("/_search");
+            start = Instant.now();
+            Request post = new Request("POST", builder.toString());
+            post.setEntity(entity);
+            post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+            post.addParameter(VERSION, String.valueOf(this.requestVersion));
+            if (search_type_scan) {
+                post.addParameter("search_type", "scan");
+            }
+            if (routing != null) {
+                post.addParameter("routing", String.join(",", routing));
+            }
+
+            HttpEntity responseEntity = null;
+            try {
+                Response res = client.performRequest(post);
+                responseEntity = res.getEntity();
+                response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
+            } finally {
+                EntityUtils.consumeQuietly(responseEntity);
+            }
+
+        } catch (IOException ioe) {
+            //log.error(ioe.getMessage());
+            throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
+
+        }
+        if (hits == null) {
+            readResponse();
+        }
+        String newScrollId = response.get(_SCROLL_ID).asText();
+        if (newScrollId != null) {
+            log.debug("Scroll id {} -> {}", scrollId, newScrollId);
+            scrollId = newScrollId;
+            SCROLL_IDS.add(scrollId);
+        }
+
+        JsonNode total = hits.get("total");
+        if (total instanceof ObjectNode) {
+            totalSize = total.get("value").longValue();
+        } else {
+            totalSize = total.longValue();
+        }
+        if (totalSize == 0) {
+            hasNext = false;
+            needsNext = false;
+            close();
+            return false;
+        }
+        return true;
 
     }
 
+    private void nextBatch() {
+        if (scrollId != null) {
+            try {
+                Request post;
+                if (jsonRequests) {
+                    ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
+                    scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
+                    scrollRequest.put(SCROLL_ID, scrollId);
 
+                    post = new Request("POST", "/_search/scroll");
+                    post.setJsonEntity(scrollRequest.toString());
+
+                } else {
+                    post = new Request("POST", "/_search/scroll");
+                    post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                    post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
+                }
+
+                HttpEntity responseEntity = null;
+                try {
+                    Response res = client.performRequest(post);
+                    responseEntity = res.getEntity();
+                    response = Jackson2Mapper.getLenientInstance()
+                            .readerFor(JsonNode.class)
+                            .readTree(responseEntity.getContent()
+                            );
+                } finally {
+                    EntityUtils.consumeQuietly(responseEntity);
+                }
+                log.debug("New scroll");
+                if (response.has(_SCROLL_ID)) {
+                    String newScrollId = response.get(_SCROLL_ID).asText();
+                    if (!scrollId.equals(newScrollId)) {
+                        log.info("new scroll id {}", newScrollId);
+                        SCROLL_IDS.remove(scrollId);
+                        scrollId = newScrollId;
+                        SCROLL_IDS.add(scrollId);
+                    }
+                }
+                readResponse();
+                i = 0;
+                hasNext = hits.get(HITS).size() > 0;
+            } catch(ResponseException re) {
+                log.warn(re.getMessage());
+                hits = null;
+                hasNext = false;
+            } catch (IOException ioe) {
+                log.error(ioe.getMessage());
+                throw new RuntimeException("For request " + request.toString() + ":" + ioe.getMessage(), ioe);
+            }
+        } else {
+            log.warn("No scroll id found, so not possible to scroll next batch");
+            hasNext = false;
+        }
+    }
+
+    protected void readResponse() {
+        hits = response.get(HITS);
+        if (hits != null) {
+            JsonNode total  = hits.get("total");
+            if (total.has("value")) {
+                totalSize = total.get("value").longValue();
+            } else {
+                totalSize = hits.get("total").longValue();
+            }
+        }
+    }
 
     @Override
     public T next() {
@@ -402,20 +454,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         }
         count++;
         needsNext = true;
+        rateMeasurerer.newEvent();
         return next;
     }
 
     @Override
     public Optional<Long> getSize() {
         findNext();
-        if (hits != null) {
-            JsonNode total  = hits.get("total");
-            if (total.has("value")) {
-                totalSize = total.get("value").longValue();
-            } else {
-                totalSize = hits.get("total").longValue();
-            }
-        }
         return Optional.ofNullable(this.totalSize);
     }
 
@@ -444,18 +489,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         return client + " " + request + " " + count;
     }
 
-    public Optional<Instant> getETA() {
-        if (count != null && count != 0) {
-            Optional<Long> ts = getTotalSize();
-            if (ts.isPresent()) {
-                Duration duration = Duration.between(start, Instant.now());
-                Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * (ts.get().doubleValue() / getCount())));
-                return Optional.of(start.plus(estimatedTotalDuration));
-            }
-        }
-        return Optional.empty();
 
-    }
 
 
     @Override
@@ -492,6 +526,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         } else {
             log.debug("no need to close");
         }
+    }
+
+    @Override
+    public double getSpeed() {
+        return rateMeasurerer.getRate();
     }
 
 

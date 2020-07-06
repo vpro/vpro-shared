@@ -3,18 +3,20 @@ package nl.vpro.elasticsearch7;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.function.Function;
-
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import org.elasticsearch.action.ActionFuture;
-import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.search.ClearScrollRequest;
+import org.elasticsearch.action.search.ClearScrollResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 
-import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
+import java.time.Instant;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A wrapper around the Elastic Search scroll interface.
@@ -41,6 +43,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     int i = -1;
     T next;
     boolean needsNext;
+
+    @Getter
+    Instant start;
 
 
     public static ElasticSearchIterator<SearchHit> searchHits(Client client) {
@@ -81,6 +86,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (builder == null) {
                     throw new IllegalStateException("prepareSearch not called");
                 }
+                start = Instant.now();
                 response = builder.get();
                 hits = response.getHits().getHits();
                 if (hits.length == 0) {

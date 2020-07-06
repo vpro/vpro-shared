@@ -1385,11 +1385,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public Consumer<ObjectNode> bulkLogger(Logger logger) {
-        return bulkLogger(logger, Level.INFO, Level.INFO);
+        return bulkLogger(logger, () -> Level.INFO, () ->  Level.INFO);
     }
 
 
-    public Consumer<ObjectNode> bulkLogger(Logger logger, Level singleLevel, Level combinedLevel) {
+    public Consumer<ObjectNode> bulkLogger(Logger logger, Supplier<Level> singleLevel, Supplier<Level> combinedLevel) {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
             String index = null;
@@ -1397,7 +1397,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
-                Slf4jHelper.log(logger, singleLevel, "{}", on);
+                Slf4jHelper.log(logger, singleLevel.get(), "{}", on);
                 if (on.has(DELETE)) {
                     ObjectNode delete = on.with(DELETE);
                     index = delete.get(Fields.INDEX).textValue();
@@ -1430,14 +1430,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             if (! indexed.isEmpty()) {
                 if (! deleted.isEmpty()) {
-                    Slf4jHelper.log(logger, combinedLevel, "{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
+                    Slf4jHelper.log(logger, combinedLevel.get(), "{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
                 } else {
-                    Slf4jHelper.log(logger, combinedLevel, "{} {} indexed: {}", clientFactory.logString(), index, indexed);
+                    Slf4jHelper.log(logger, combinedLevel.get(), "{} {} indexed: {}", clientFactory.logString(), index, indexed);
                 }
             } else if (! deleted.isEmpty()) {
-                Slf4jHelper.log(logger, combinedLevel, "{} {} revoked: {}", clientFactory.logString(), index,  deleted);
+                Slf4jHelper.log(logger, combinedLevel.get(), "{} {} revoked: {}", clientFactory.logString(), index,  deleted);
             } else {
-                Slf4jHelper.log(logger, combinedLevel, "{} {} bulk request didn't yield result", clientFactory.logString(), index);
+                Slf4jHelper.log(logger, combinedLevel.get(), "{} {} bulk request didn't yield result", clientFactory.logString(), index);
             }
         };
     }

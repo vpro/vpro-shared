@@ -1,20 +1,17 @@
 package nl.vpro.elasticsearchclient;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.elasticsearch.Constants;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.*;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.elasticsearch.Constants;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
-//@Disabled("Requires actual es connection")
+@Disabled("Requires actual es connection")
 @Slf4j
 public class ElasticSearchIteratorITest {
 
@@ -30,6 +27,12 @@ public class ElasticSearchIteratorITest {
     public static class A {
         public String id = String.valueOf(ID++);
         public String title = "bar";
+        public int value;
+        public A(String title, int value) {
+            this.title = title;
+            this.value = value;
+
+        }
     }
 
 
@@ -55,8 +58,8 @@ public class ElasticSearchIteratorITest {
         log.info("Version: {}", helper.getVersionNumber());
 
         helper.createIndexIfNotExists();
-        for (int i = 0; i < 200; i++) {
-            A a = new A();
+        for (int i = 0; i < 20000; i++) {
+            A a = new A("bla " + i, i);
             helper.index(a.id, a);
         }
         helper.refresh();
@@ -74,7 +77,7 @@ public class ElasticSearchIteratorITest {
 
     @AfterAll
     public static void waitAfter() throws IOException, InterruptedException {
-        Thread.sleep(1000000L);
+        //Thread.sleep(1000000L);
     }
 
     @Test
