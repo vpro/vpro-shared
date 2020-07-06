@@ -57,6 +57,10 @@ import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 @Slf4j
 public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T> {
 
+    private static long instances = 0;
+
+    private final long instance = instances++;
+
     private static final Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
     private final Function<JsonNode, T> adapt;
     private final RestClient client;
@@ -158,7 +162,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.jsonRequests = jsonRequests == null || jsonRequests;
         this.requestVersion = requestVersion == null || requestVersion;
         if (beanName != null) {
-            objectName = MBeans.registerBean(getClass(), beanName, this);
+            objectName = MBeans.registerBean(this, instance + "-" + beanName);
         } else {
             objectName = null;
         }

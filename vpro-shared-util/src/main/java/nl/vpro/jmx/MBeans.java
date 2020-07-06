@@ -302,8 +302,8 @@ public class MBeans {
      *
      */
     @SneakyThrows
-    public static synchronized ObjectName registerBean(Class<?> clazz, String name,  Object object) {
-        ObjectName objectName = new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
+    public static synchronized ObjectName registerBean(Object object, String name) {
+        ObjectName objectName = getObjectNameWithName(object, name);
         registerBean(objectName, object);
         return objectName;
     }
@@ -340,6 +340,13 @@ public class MBeans {
         } catch (MalformedObjectNameException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SneakyThrows
+    public static ObjectName getObjectNameWithName(Object object, String name) {
+        Class<?> clazz= object.getClass();
+        ObjectName objectName = new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
+        return objectName;
     }
 
 

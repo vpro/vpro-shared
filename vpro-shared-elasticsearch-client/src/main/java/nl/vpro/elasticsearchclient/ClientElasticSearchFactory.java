@@ -52,7 +52,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     @SneakyThrows
     public void init() {
         log.info("Found {}", this);
-        MBeans.registerBean(getClass(), clusterName, this);
+        MBeans.registerBean(this, clusterName);
 
     }
 
