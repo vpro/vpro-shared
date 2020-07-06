@@ -1,16 +1,21 @@
 package nl.vpro.elasticsearchclient;
 
-import lombok.*;
-
-import java.io.*;
-import java.net.ConnectException;
-import java.net.URLEncoder;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Suppliers;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import nl.vpro.elasticsearch.CreateIndex;
+import nl.vpro.elasticsearch.ElasticSearchIndex;
+import nl.vpro.elasticsearch.IndexHelperInterface;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
+import nl.vpro.util.Version;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -19,19 +24,25 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.slf4j.event.Level;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Suppliers;
-
-import nl.vpro.elasticsearch.*;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.Version;
+import java.io.*;
+import java.net.ConnectException;
+import java.net.URLEncoder;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.ObjIntConsumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
@@ -1374,6 +1385,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public Consumer<ObjectNode> bulkLogger(Logger logger) {
+        return bulkLogger(logger, Level.INFO, Level.INFO);
+    }
+
+
+    public Consumer<ObjectNode> bulkLogger(Logger logger, Level singleLevel, Level combinedLevel) {
         return jsonNode -> {
             ArrayNode items = jsonNode.withArray("items");
             String index = null;
@@ -1381,7 +1397,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
-                logger.info("{}", on);
+                Slf4jHelper.log(logger, singleLevel, "{}", on);
                 if (on.has(DELETE)) {
                     ObjectNode delete = on.with(DELETE);
                     index = delete.get(Fields.INDEX).textValue();
@@ -1414,14 +1430,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             if (! indexed.isEmpty()) {
                 if (! deleted.isEmpty()) {
-                    logger.info("{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
+                    Slf4jHelper.log(logger, combinedLevel, "{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
                 } else {
-                    logger.info("{} {} indexed: {}", clientFactory.logString(), index, indexed);
+                    Slf4jHelper.log(logger, combinedLevel, "{} {} indexed: {}", clientFactory.logString(), index, indexed);
                 }
             } else if (! deleted.isEmpty()) {
-                logger.info("{} {} revoked: {}", clientFactory.logString(), index,  deleted);
+                Slf4jHelper.log(logger, combinedLevel, "{} {} revoked: {}", clientFactory.logString(), index,  deleted);
             } else {
-                logger.warn("{} {} bulk request didn't yield result", clientFactory.logString(), index);
+                Slf4jHelper.log(logger, combinedLevel, "{} {} bulk request didn't yield result", clientFactory.logString(), index);
             }
         };
     }
