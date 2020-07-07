@@ -1,26 +1,27 @@
 package nl.vpro.elasticsearch;
 
+import java.util.Date;
+
+import javax.management.MXBean;
+
 import nl.vpro.jmx.Description;
 import nl.vpro.jmx.Units;
 
-import javax.management.MXBean;
-import java.util.Date;
-
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 2.13
  */
 @MXBean
 public interface ElasticSearchIteratorMXBean {
 
 	@Description("When iteration started")
-
 	Date getStartDate();
 
 	@Description("The current estimation for when iteration will be ready")
 	Date getETADate();
 
 	@Description("The current estimation for when iteration will be ready, expressed in seconds since start")
+	@Units("s")
 	Long getETASeconds();
 
 	@Description("The current count")
