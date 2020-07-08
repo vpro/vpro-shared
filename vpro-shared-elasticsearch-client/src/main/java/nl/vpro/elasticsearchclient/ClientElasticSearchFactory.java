@@ -48,12 +48,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private final int instance = instances++;
 
+    private boolean registerMBean = true;
+
     @PostConstruct
     @SneakyThrows
     public void init() {
         log.info("Found {}", this);
-        MBeans.registerBean(this, instance + "-" + clusterName);
-
+        if (registerMBean) {
+            MBeans.registerBean(this, instance + "-" + clusterName);
+        }
     }
 
 
