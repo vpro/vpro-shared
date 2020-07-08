@@ -1,8 +1,9 @@
 package nl.vpro.util;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.Objects;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * Provides functions implementation which always return the same value, no matter their arguments.
@@ -61,6 +62,74 @@ public final class Functions {
      */
     public static <A1, A2, R> Function<A1, R> withArg2(BiFunction<A1, A2, R> function, A2 value) {
         return (a1) -> function.apply(a1, value);
+    }
+
+    /**
+     * Creates a new {@link BiFunction} but implement it using a {@link Function}, simply completely ignoring the second argument
+     */
+    public static <T, U, R> BiFunction<T, U, R> ignoreArg2(Function<T, R> function) {
+        return new Wrapper<T, U, R>(function, "ignore arg2") {
+            @Override
+            public R apply(T t, U u) {
+                return function.apply(t);
+
+            }
+        };
+    }
+
+    /**
+     * Creates a new {@link BiFunction} but implement it using a {@link Function}, simply completely ignoring the first argument
+     */
+    public static <T, U, R> BiFunction<T, U, R> ignoreArg1(Function<U, R> function) {
+        return new Wrapper<T, U, R>(function, "ignore arg1") {
+            @Override
+            public R apply(T t, U u) {
+                return function.apply(u);
+
+            }
+        };
+    }
+
+    /**
+     * Creates a new {@link TriFunction} but implement it using a {@link BiFunction}, simply completely ignoring the second argument
+     */
+    public static <T, U, V, R> TriFunction<T, U, V, R> ignoreArg3(BiFunction<T, U, R> function) {
+        return new BiWrapper<T, U, V, R>(function, "ignore arg3") {
+            @Override
+            public R apply(T t, U u, V v) {
+                return function.apply(t, u);
+
+            }
+        };
+    }
+
+
+    /**
+     * Creates a new {@link TriFunction} but implement it using a {@link BiFunction}, simply completely ignoring the second argument
+     */
+    public static <T, U, V, R> TriFunction<T, U, V, R> ignoreArg2(BiFunction<T, V, R> function) {
+        return new BiWrapper<T, U, V, R>(function, "ignore arg3") {
+            @Override
+            public R apply(T t, U u, V v) {
+                return function.apply(t, v);
+
+            }
+        };
+    }
+
+
+
+    /**
+     * Creates a new {@link TriFunction} but implement it using a {@link BiFunction}, simply completely ignoring the second argument
+     */
+    public static <T, U, V, R> TriFunction<T, U, V, R> ignoreArg1(BiFunction<U, V, R> function) {
+        return new BiWrapper<T, U, V, R>(function, "ignore arg3") {
+            @Override
+            public R apply(T t, U u, V v) {
+                return function.apply(u, v);
+
+            }
+        };
     }
 
 
@@ -122,6 +191,43 @@ public final class Functions {
         public R apply(A1 a1, A2 a2, A3 a3) {
             return val;
         }
+    }
+
+     @EqualsAndHashCode
+    protected static abstract  class BiWrapper<X, Y, Z, R> implements TriFunction<X, Y, Z, R> {
+
+        private final BiFunction<?, ?, R> wrapped;
+        @EqualsAndHashCode.Exclude
+        private final String why;
+
+        public BiWrapper(BiFunction<?, ?, R> wrapped, String why) {
+            this.wrapped = wrapped;
+            this.why = why;
+        }
+
+        @Override
+        public String toString() {
+            return wrapped.toString() + "(" + why  + ")";
+        }
+    }
+    @EqualsAndHashCode
+    protected static abstract  class Wrapper<X, Y, R> implements BiFunction<X, Y, R> {
+
+        private final Function<?, R> wrapped;
+        @EqualsAndHashCode.Exclude
+        private final String why;
+
+        public Wrapper(Function<?, R> wrapped, String why) {
+            this.wrapped = wrapped;
+            this.why = why;
+        }
+
+        @Override
+        public String toString() {
+            return wrapped.toString() + "(" + why  + ")";
+        }
+
+
     }
 
 }
