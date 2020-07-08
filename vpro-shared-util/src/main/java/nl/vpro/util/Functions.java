@@ -72,7 +72,6 @@ public final class Functions {
             @Override
             public R apply(T t, U u) {
                 return function.apply(t);
-
             }
         };
     }
@@ -85,7 +84,6 @@ public final class Functions {
             @Override
             public R apply(T t, U u) {
                 return function.apply(u);
-
             }
         };
     }
@@ -98,7 +96,6 @@ public final class Functions {
             @Override
             public R apply(T t, U u, V v) {
                 return function.apply(t, u);
-
             }
         };
     }
@@ -108,11 +105,10 @@ public final class Functions {
      * Creates a new {@link TriFunction} but implement it using a {@link BiFunction}, simply completely ignoring the second argument
      */
     public static <T, U, V, R> TriFunction<T, U, V, R> ignoreArg2(BiFunction<T, V, R> function) {
-        return new BiWrapper<T, U, V, R>(function, "ignore arg3") {
+        return new BiWrapper<T, U, V, R>(function, "ignore arg2") {
             @Override
             public R apply(T t, U u, V v) {
                 return function.apply(t, v);
-
             }
         };
     }
@@ -123,11 +119,10 @@ public final class Functions {
      * Creates a new {@link TriFunction} but implement it using a {@link BiFunction}, simply completely ignoring the second argument
      */
     public static <T, U, V, R> TriFunction<T, U, V, R> ignoreArg1(BiFunction<U, V, R> function) {
-        return new BiWrapper<T, U, V, R>(function, "ignore arg3") {
+        return new BiWrapper<T, U, V, R>(function, "ignore arg1") {
             @Override
             public R apply(T t, U u, V v) {
                 return function.apply(u, v);
-
             }
         };
     }
