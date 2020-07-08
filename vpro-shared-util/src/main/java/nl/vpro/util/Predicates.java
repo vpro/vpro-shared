@@ -6,7 +6,24 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
- * Provides alwaysFalse/alwaysTrue, with nicer toString
+ * Provides several utility related to {@link Predicate}, {@link BiPredicate} and {@link TriPredicate} like versions of {@link #alwaysFalse} and {@link #alwaysTrue}, with nicer {@link #toString()}, and also
+ * implementing {@link #hashCode()} and {@link #equals(Object)}.
+ *
+ * The point is that these kind of things won't happen if you use lambdas.
+ *
+ * So if they are important than you could use
+ * <pre>
+ * {@code
+ *    Preditor<MyObject> predicate = Predicates.alwaysTrue();
+ * }
+ * </pre>
+ * rather then:
+ * <pre>
+ *  {@code
+ *     Preditor<MyObject> predicate = (o) -> true;
+ *  }
+ * </pre>
+ *
  * @author Michiel Meeuwissen
  * @since 2.18
  */
