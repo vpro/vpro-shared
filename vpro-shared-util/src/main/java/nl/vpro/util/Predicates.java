@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -47,6 +49,69 @@ public final class Predicates {
     public static <T, U, V> TriPredicate<T, U, V> triAlwaysTrue() {
         return triAlways(true, TRUE);
     }
+
+    /**
+     * Creates a new {@link TriPredicate} but implement it using a {@link BiPredicate}, simply completely ignoring the third argument
+     */
+    public static <T, U, V> TriPredicate<T, U, V> ignoreArg3(BiPredicate<T, U> biPredicate) {
+        return new BiWrapper<T, U, V>(biPredicate, "ignore arg3") {
+            @Override
+            public boolean test(T t, U u, V v) {
+                return biPredicate.test(t, u);
+
+            }
+        };
+    }
+    /**
+     * Creates a new {@link TriPredicate} but implement it using a {@link BiPredicate}, simply completely ignoring the second argument
+     */
+    public static <T, U, V> TriPredicate<T, U, V> ignoreArg2(BiPredicate<T, V> biPredicate) {
+        return new BiWrapper<T, U, V>(biPredicate, "ignore arg2") {
+            @Override
+            public boolean test(T t, U u, V v) {
+                return biPredicate.test(t, v);
+
+            }
+        };
+    }
+    /**
+     * Creates a new {@link TriPredicate} but implement it using a {@link BiPredicate}, simply completely ignoring the first argument
+     */
+    public static <T, U, V> TriPredicate<T, U, V> ignoreArg1(BiPredicate<U, V> biPredicate) {
+        return new BiWrapper<T, U, V>(biPredicate, "ignore arg1") {
+            @Override
+            public boolean test(T t, U u, V v) {
+                return biPredicate.test(u, v);
+
+            }
+        };
+    }
+
+    /**
+     * Creates a new {@link BiPredicate} but implement it using a {@link Predicate}, simply completely ignoring the second argument
+     */
+    public static <T, U> BiPredicate<T, U> ignoreArg2(Predicate<T> predicate) {
+        return new Wrapper<T, U>(predicate, "ignore arg2") {
+            @Override
+            public boolean test(T t, U u) {
+                return predicate.test(t);
+
+            }
+        };
+    }
+    /**
+     * Creates a new {@link BiPredicate} but implement it using a {@link Predicate}, simply completely ignoring the first argument
+     */
+    public static <T, U> BiPredicate<T, U> ignoreArg1(Predicate<U> predicate) {
+        return new Wrapper<T, U>(predicate, "ignore arg1") {
+            @Override
+            public boolean test(T t, U u) {
+                return predicate.test(u);
+
+            }
+        };
+    }
+
 
     protected static abstract class AbstractAlways {
         protected final boolean val;
@@ -112,5 +177,42 @@ public final class Predicates {
         public boolean test(T t, U u, V v) {
             return val;
         }
+    }
+
+    @EqualsAndHashCode
+    protected static abstract  class BiWrapper<X, Y, Z> implements TriPredicate<X, Y, Z> {
+
+        private final BiPredicate<?, ?> wrapped;
+        @EqualsAndHashCode.Exclude
+        private final String why;
+
+        public BiWrapper(BiPredicate<?, ?> wrapped, String why) {
+            this.wrapped = wrapped;
+            this.why = why;
+        }
+
+        @Override
+        public String toString() {
+            return wrapped.toString() + "(" + why  + ")";
+        }
+    }
+    @EqualsAndHashCode
+    protected static abstract  class Wrapper<X, Y> implements BiPredicate<X, Y> {
+
+        private final Predicate<?> wrapped;
+        @EqualsAndHashCode.Exclude
+        private final String why;
+
+        public Wrapper(Predicate<?> wrapped, String why) {
+            this.wrapped = wrapped;
+            this.why = why;
+        }
+
+        @Override
+        public String toString() {
+            return wrapped.toString() + "(" + why  + ")";
+        }
+
+
     }
 }
