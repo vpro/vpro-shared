@@ -84,6 +84,18 @@ public class TimeUtils {
 
     }
 
+    /**
+     * Parses a {@link CharSequence} to a duration. This begins for checking emptyness (and returns then an empty {@link Optional} .
+     * Then it basicly calls {@link Duration#parse(CharSequence)}, but if that fails it has several fall backs:
+     * <ul>
+     *     <li>Also a week notation like <code>PT2W</code> as defined by ISO-8601 is supported</li>
+     *     <li>Possible white space breaking the parsing will be ignored</li>
+     *     <li>If the string looks like an unresolved (spring EL) variable, we'll parse to the empty optional</li>
+     *     <li>If the string parses as a {@link Long}, it will be interpreted as a number of milliseconds</li>
+     *     <li>If the string would become a valid ISO-8601 duration by prefixing it with 'P' or 'PT', that will be done too, making those prefixes effectively optional, so that the string like '1s' will parse to one second.</li>
+     * </ul>
+     * @see #parseDuration(CharSequence)
+     */
     public static Optional<Duration> parseDuration(CharSequence d) {
         return parseDuration(null, d);
     }
@@ -98,8 +110,6 @@ public class TimeUtils {
             log.warn("Found {} as duration, returing empty", d);
             return Optional.empty();
         }
-
-
 
         try {
             return Optional.of(Duration.parse(d));
@@ -135,20 +145,22 @@ public class TimeUtils {
     }
 
 
-     public static Optional<? extends TemporalAmount> parseTemporalAmount(CharSequence d) {
-         try {
-             return Optional.of(Period.parse(d));
-         } catch (DateTimeParseException dte) {
-             return parseDuration(dte, d);
-         }
+    /**
+     * Parses a {@link CharSequence} to a {@link TemporalAmount}. First using {@link Period#parse(CharSequence)}, and than, if that fails, using
+     * {@link #parseDuration(CharSequence)}
+     */
+    public static Optional<? extends TemporalAmount> parseTemporalAmount(CharSequence d) {
+        try {
+            return Optional.of(Period.parse(d));
+        } catch (DateTimeParseException dte) {
+            return parseDuration(dte, d);
+        }
 
-     }
+    }
 
     public static String toParsableString(Duration duration) {
         return duration.toString().substring(2);
     }
-
-
     /**
      * @since 2.6
      */

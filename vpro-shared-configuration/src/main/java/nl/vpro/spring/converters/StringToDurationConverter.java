@@ -9,6 +9,7 @@ import org.springframework.core.convert.converter.Converter;
 import nl.vpro.util.TimeUtils;
 
 /**
+ * Converts a {@link String} into an {@link Duration} using {@link TimeUtils#parseDuration(CharSequence)}
  * @author Michiel Meeuwissen
  * @since 2.7
  */

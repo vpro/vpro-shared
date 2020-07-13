@@ -8,6 +8,7 @@ import org.springframework.core.convert.converter.Converter;
 import nl.vpro.util.TimeUtils;
 
 /**
+ * Converts a {@link String} to a {@link TemporalAmount} using {@link TimeUtils#parseTemporalAmount(CharSequence)}
  * @author Michiel Meeuwissen
  * @since 2.13
  */
