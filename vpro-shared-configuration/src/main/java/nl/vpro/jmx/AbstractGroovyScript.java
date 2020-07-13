@@ -19,8 +19,8 @@ import nl.vpro.logging.simple.*;
  */
 public abstract class AbstractGroovyScript {
 
-    protected SimpleLogger logger;
-    protected ApplicationContext applicationContext;
+    protected final SimpleLogger logger;
+    protected final ApplicationContext applicationContext;
 
     protected boolean interrupted = false;
 
