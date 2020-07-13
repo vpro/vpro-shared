@@ -19,7 +19,7 @@ import nl.vpro.logging.simple.SimpleLogger;
  * @author Michiel Meeuwissen
  * @since 3.0
  */
-@ManagedResource(description = "Execute groovy script", objectName = "nl.vpro.media:name=groovy")
+@ManagedResource(description = "Execute groovy script", objectName = "nl.vpro:name=groovy")
 @Slf4j
 public class GroovyMBean {
 
