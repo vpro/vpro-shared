@@ -9,7 +9,7 @@ import nl.vpro.util.TimeUtils;
 
 /**
  * @author Michiel Meeuwissen
- * @since 2.7
+ * @since 2.13
  */
 public class StringToTemporalAmountConverter implements Converter<String, TemporalAmount> {
     @Override
