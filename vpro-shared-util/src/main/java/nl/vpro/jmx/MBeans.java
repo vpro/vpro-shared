@@ -272,6 +272,9 @@ public class MBeans {
 
 
     /**
+     *  A 'visualvm' oriented check whether a string is 'empty'. i.e. not filled.
+     *
+     *  The point being that also the string 'String' is considered empty, because that is the default value in visualvm, so that's the value when untouched.
      * @since 2.7
      */
     public static boolean isEmpty(String string) {
@@ -279,6 +282,9 @@ public class MBeans {
     }
 
     /**
+     * A 'visualvm' oriented check whether a string is 'blank'. i.e. not filled, or only filled with space.
+     *
+     * The point being that also the string 'String' is considered blank, because that is the default value in visualvm, so that's the value when untouched.
      * @since 2.7
      */
     public static boolean isBlank(String string) {
