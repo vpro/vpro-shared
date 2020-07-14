@@ -19,6 +19,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.client.*;
 import org.meeuw.math.windowed.WindowedEventRate;
 
@@ -71,6 +72,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private Long count = -1L;
     private JsonNode hits;
     private String scrollId;
+    private Long checkedOrder = 500L;
 
     private boolean hasNext;
     private int i = -1;
@@ -96,8 +98,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     @Getter
     @Setter
     private boolean jsonRequests = true;
-
-    private boolean search_type_scan = false;
 
     @Getter
     private Version<Integer> esVersion = new Version<>(7);
@@ -156,7 +156,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             if (jsonRequests == null) {
                 jsonRequests = esVersion.isNotBefore(5);
             }
-            search_type_scan = esVersion.isBefore(2);
             this.esVersion = esVersion;
         }
         this.jsonRequests = jsonRequests == null || jsonRequests;
@@ -320,14 +319,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             throw new IllegalStateException("No client");
         }
         try {
-            ArrayNode sort = request.withArray("sort");
+            ArrayNode sort = request.withArray(SORT);
             if (sort.isEmpty(null)) {
                 log.debug("No explicit sort given, sorting on _doc!");
                 QueryBuilder.docOrder(request);
-            } else {
-                if (! DOC.equals(sort.get(0).textValue())) {
-                    log.warn("Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
-                }
+
             }
 
             HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
@@ -347,9 +343,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             post.setEntity(entity);
             post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
             post.addParameter(VERSION, String.valueOf(this.requestVersion));
-            if (search_type_scan) {
-                post.addParameter("search_type", "scan");
-            }
             if (routing != null) {
                 post.addParameter("routing", String.join(",", routing));
             }
@@ -397,6 +390,14 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private void nextBatch() {
         if (scrollId != null) {
             try {
+                if( count > checkedOrder) {
+                    checkedOrder = Long.MAX_VALUE;
+                    ArrayNode sort = request.withArray(SORT);
+                    if (!DOC.equals(sort.get(0).textValue())) {
+                        log.warn("Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
+                    }
+                }
+
                 Request post;
                 if (jsonRequests) {
                     ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
@@ -477,7 +478,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     @Override
-    public Optional<Long> getSize() {
+    public @NonNull Optional<Long> getSize() {
         findNext();
         return Optional.ofNullable(this.totalSize);
     }
@@ -513,9 +514,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     @Override
     public void close()  {
         if (objectName != null) {
-            ThreadPools.backgroundExecutor.schedule(() -> {
-                MBeans.unregister(objectName);
-            }, 2, TimeUnit.MINUTES);
+            ThreadPools.backgroundExecutor.schedule(() -> MBeans.unregister(objectName), 2, TimeUnit.MINUTES);
         }
         if (scrollId != null) {
             try {
