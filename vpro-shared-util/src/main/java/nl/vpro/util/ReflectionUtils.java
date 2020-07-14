@@ -429,6 +429,16 @@ public class ReflectionUtils {
         throw noSuchFieldException;
     }
 
+    public static boolean hasClass(String clazz) {
+        try {
+            Class.forName(clazz);
+            return true;
+        } catch (ClassNotFoundException e) {
+            log.debug(e.getMessage(), e);
+            return false;
+        }
+
+    }
 
     @Getter
     public static class Result {
