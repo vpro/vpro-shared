@@ -3,6 +3,6 @@
   xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
+  <!-- this file is deprecated, just do this: -->
   <bean class="nl.vpro.jmx.MBeansConfiguration" />
 </beans>
