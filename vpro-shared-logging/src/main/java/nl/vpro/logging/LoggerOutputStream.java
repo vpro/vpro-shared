@@ -1,8 +1,10 @@
 package nl.vpro.logging;
 
-import java.io.*;
+import java.io.OutputStream;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import nl.vpro.logging.simple.SimpleLogger;
 
@@ -42,6 +44,19 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
         };
     }
 
+
+
+    public static LoggerOutputStream log(final Logger log, Function<String, Level> level) {
+        return new LoggerOutputStream(false) {
+            @Override
+            void log(String line) {
+                Level l = level.apply(line);
+                if (l != null) {
+                    Slf4jHelper.log(log, l, line);
+                }
+            }
+        };
+    }
 
 
     public static LoggerOutputStream info(SimpleLogger log) {
