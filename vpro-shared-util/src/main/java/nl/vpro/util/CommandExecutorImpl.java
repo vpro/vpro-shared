@@ -302,7 +302,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 logger.debug(e.getMessage());
                 throw new BrokenPipe(e);
             } else {
-                logger.error(e.getMessage(), e);
+                logger.error(e.getClass().getName() + ":" + e.getMessage(), e);
                 throw new RuntimeException(e);
 
             }
@@ -362,7 +362,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 try {
                     closeable.close();
                 } catch (IOException ioe) {
-                    logger.warn(ioe.getMessage());
+                    logger.warn(ioe.getClass().getName() + ":" + ioe.getMessage());
                 }
             }
         }
