@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.io.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -64,7 +65,7 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
     private void log(boolean skipEmpty) {
         String line = buffer.toString();
         try {
-            if (!skipEmpty || !line.isEmpty()) {
+            if (!skipEmpty || !StringUtils.isBlank(line)) {
                 count++;
                 if (max != null) {
                     if (count > max) {
