@@ -70,7 +70,7 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
         return new LoggerOutputStream(false) {
             @Override
             void log(String line) {
-                 Level l = level.apply(line);
+                Level l = level.apply(line);
                 if (l != null) {
                     log.log(l, line);
                 }
