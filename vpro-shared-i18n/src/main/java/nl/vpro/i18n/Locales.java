@@ -17,15 +17,31 @@ import static com.neovisionaries.i18n.CountryCode.NL;
  */
 public class Locales {
 
+    /**
+     * The locale representing the dutch language, leaving unspecified for wich country.
+     */
     public static final Locale DUTCH         = of(LanguageCode.nl);
+    /**
+     * The locale representing the <a href="https://en.wikipedia.org/wiki/Arabic">arabic language</a>, leaving unspecified for wich country.
+     */
     public static final Locale ARABIC        = of(LanguageCode.ar);
+
+    /**
+     * Dutch as spoken in the Netherlands.
+     */
     public static final Locale NETHERLANDISH = of(LanguageCode.nl, Country.of(NL));
+
+    /**
+     * Dutch as spoken in the Flanders
+     */
     public static final Locale FLEMISH       = of(LanguageCode.nl, Country.of(BE));
+
+    /**
+     * The locale representing and 'undetermined' language {@link LanguageAlpha3Code#und}
+     */
     public static final Locale UNDETERMINED  = of(LanguageAlpha3Code.und);
 
-
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
-
 
     /**
      * Returns the current default locale for this thread.
