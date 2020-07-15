@@ -1,6 +1,10 @@
 package nl.vpro.logging;
 
+import java.util.function.Function;
+
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+
 
 /**
  * @author Michiel Meeuwissen
@@ -60,6 +64,20 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
             }
         };
     }
+
+
+    public static LoggerOutputStream log(final Logger log, Function<String, Level> level) {
+        return new LoggerOutputStream(false) {
+            @Override
+            void log(String line) {
+                 Level l = level.apply(line);
+                if (l != null) {
+                    log.log(l, line);
+                }
+            }
+        };
+    }
+
 
     Log4j2OutputStream(boolean skipEmptyLines) {
         super(skipEmptyLines, null);
