@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +26,8 @@ import org.w3c.dom.NodeList;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
 
+import com.github.difflib.DiffUtils;
+import com.github.difflib.patch.Patch;
 import com.google.common.io.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,9 +102,18 @@ public class AbstractSchemaTest {
 
         assertThat(diff.hasDifferences())
             .withFailMessage("" + file + " should be equal to " + getClass().getResource("/schema/" + file.getName()) + ":\n" +
-                Stream.of(diff.getDifferences()).map(Object::toString).collect(Collectors.joining("\n")) +
-                StringUtils.difference(IOUtils.toString(new FileInputStream(file), StandardCharsets.UTF_8), IOUtils.toString(getClass().getResourceAsStream("/schema/" + file.getName()), StandardCharsets.UTF_8))
+                Stream.of(diff.getDifferences()).map(Object::toString).collect(Collectors.joining("\n")) + "\n\n" +
+                differences(Arrays.asList(IOUtils.toString(new FileInputStream(file), StandardCharsets.UTF_8).split("\n")), Arrays.asList(IOUtils.toString(getClass().getResourceAsStream("/schema/" + file.getName()), StandardCharsets.UTF_8).split("\n")))
             ).isFalse();
+    }
+
+    static String differences(List<String> first, List<String> second) {
+
+        Patch<String> patch = DiffUtils.diff(first, second);
+
+
+        return patch.getDeltas().stream().map(Object::toString).collect(Collectors.joining("\n"));
+
     }
 
     public static JAXBContext generate(Class<?>... classes) throws JAXBException, IOException {
