@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,7 +101,8 @@ public class AbstractSchemaTest {
 
         assertThat(diff.hasDifferences())
             .withFailMessage("" + file + " should be equal to " + getClass().getResource("/schema/" + file.getName()) + ":\n" +
-                Stream.of(diff.getDifferences()).map(Object::toString).collect(Collectors.joining("\n"))
+                Stream.of(diff.getDifferences()).map(Object::toString).collect(Collectors.joining("\n")) +
+                StringUtils.difference(IOUtils.toString(new FileInputStream(file), StandardCharsets.UTF_8), IOUtils.toString(getClass().getResourceAsStream("/schema/" + file.getName()), StandardCharsets.UTF_8))
             ).isFalse();
     }
 
