@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.*;
@@ -97,7 +99,9 @@ public class AbstractSchemaTest {
             .build();
 
         assertThat(diff.hasDifferences())
-            .withFailMessage("" + file + " should be equal to " + getClass().getResource("/schema/" + file.getName())).isFalse();
+            .withFailMessage("" + file + " should be equal to " + getClass().getResource("/schema/" + file.getName()) + ":\n" +
+                Stream.of(diff.getDifferences()).map(Object::toString).collect(Collectors.joining("\n"))
+            ).isFalse();
     }
 
     public static JAXBContext generate(Class<?>... classes) throws JAXBException, IOException {
