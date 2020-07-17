@@ -3,6 +3,7 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAmount;
 import java.util.Date;
@@ -238,4 +239,14 @@ public class TimeUtils {
     }
 
 
+    private static final DateTimeFormatter LOCAL_TIME_PATTERN = DateTimeFormatter.ofPattern("H:mm");
+
+
+    public static LocalTime parseLocalTime(CharSequence t) {
+        try {
+            return LocalTime.parse(t);
+        } catch (DateTimeParseException dateTimeParseException) {
+            return LocalTime.parse(t, LOCAL_TIME_PATTERN);
+        }
+    }
 }
