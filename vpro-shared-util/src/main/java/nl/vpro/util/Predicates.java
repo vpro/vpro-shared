@@ -2,8 +2,7 @@ package nl.vpro.util;
 
 import lombok.EqualsAndHashCode;
 
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Provides several utility related to {@link Predicate}, {@link BiPredicate} and {@link TriPredicate} like versions of {@link #alwaysFalse} and {@link #alwaysTrue}, with nicer {@link #toString()}, and also
@@ -127,6 +126,25 @@ public final class Predicates {
 
             }
         };
+    }
+
+
+    /**
+     * Morphs a given {@link BiPredicate} into a {@link Predicate}, which a certain given value for the first argument.
+     *
+     * See {@link TriPredicate#withArg1(Object)}
+     */
+    public static <U, V> Predicate<V> withArg1(BiPredicate<U, V> biPredicate, U u) {
+        return (v) -> biPredicate.test(u, v);
+    }
+
+    /**
+     * Morphs a given {@link BiPredicate} into a {@link Predicate}, which a certain given value for the first argument.
+     *
+     * See {@link TriPredicate#withArg1(Object)}
+     */
+    public static <U, V> Predicate<U> withArg2(BiPredicate<U, V> biPredicate, V v) {
+        return (u) -> biPredicate.test(u, v);
     }
 
 

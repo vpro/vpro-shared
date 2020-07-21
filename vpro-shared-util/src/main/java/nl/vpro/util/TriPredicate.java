@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.Objects;
+import java.util.function.BiPredicate;
 
 /**
  * The next in succession of {@link java.util.function.Predicate} and {@link java.util.function.BiPredicate}.
@@ -67,5 +68,17 @@ public interface TriPredicate<T, U, V> {
     default TriPredicate<T, U, V> or(TriPredicate<? super T, ? super U, ? super V> other) {
         Objects.requireNonNull(other);
         return (T t, U u, V v) -> test(t, u, v) || other.test(t, u, v);
+    }
+
+    default BiPredicate<T, V> withArg1(U u) {
+        return (t, v) -> test(t, u, v);
+    }
+
+    default BiPredicate<T, V> withArg2(U u) {
+        return (t, v) -> test(t, u, v);
+    }
+
+    default BiPredicate<T, U> withArg3(V v) {
+        return (t, u) -> test(t,u, v);
     }
 }
