@@ -1,8 +1,6 @@
 package nl.vpro.jmx;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
@@ -15,19 +13,16 @@ import java.util.function.Supplier;
 
 import javax.management.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
 import com.google.common.util.concurrent.Futures;
 
 import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
-import nl.vpro.logging.simple.StringBuilderSimpleLogger;
-import nl.vpro.logging.simple.StringSupplierSimpleLogger;
+import nl.vpro.logging.simple.*;
 import nl.vpro.util.ThreadPools;
 
 /**
@@ -301,6 +296,8 @@ public class MBeans {
             mbs.registerMBean(object, name);
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             log.error(e.getMessage(), e);
+        } catch (SecurityException se) {
+            log.info("For {}: {}", name, se.getMessage());
         }
     }
 
