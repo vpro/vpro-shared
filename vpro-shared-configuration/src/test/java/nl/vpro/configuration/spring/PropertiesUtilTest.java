@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -33,6 +34,9 @@ public class PropertiesUtilTest {
     @Value("${http.host}")
     private String test;
 
+    @Value("${system}")
+    private String system;
+
 
     @Test
     public void testGetMap() {
@@ -44,7 +48,8 @@ public class PropertiesUtilTest {
     @Test
     public void testEL() throws UnknownHostException {
 
-        log.info("{}", test);
+        log.info("{} {}", test, system);
+        System.setProperty("some.system.property", "foobar");
         PropertiesUtil properties = applicationContext.getBean(PropertiesUtil.class);
         String v = properties.getMap().get("http.host");
         assertThat(v).isEqualTo(java.net.InetAddress.getLocalHost().getHostName());
@@ -52,6 +57,20 @@ public class PropertiesUtilTest {
         assertThat(properties.getMap().get("url")).isEqualTo("http://" +java.net.InetAddress.getLocalHost().getHostName());
 
         assertThat(properties.getMap().get("url.tooverride")).isEqualTo("http://michiel.vpro.nl");
+
+        assertThat(properties.getMap().get("system")).isEqualTo("foobar");
+        assertThat(properties.getMap().get("maybesystem")).isEqualTo("foobar");
+        log.info("{}", properties.getMap());
+
+    }
+
+    @Test
+    public void defaultSpring() throws UnknownHostException {
+
+        log.info("{}", test);
+        System.setProperty("some.system.property", "foobar");
+        org.springframework.beans.factory.config.PropertyPlaceholderConfigurer properties = (PropertyPlaceholderConfigurer) applicationContext.getBean("defaultspring");
+        log.info("{}", properties);
 
     }
 

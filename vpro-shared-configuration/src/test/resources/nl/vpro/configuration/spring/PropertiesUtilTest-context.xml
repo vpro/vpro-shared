@@ -6,7 +6,7 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd
         ">
 
-  <bean id="properties" class="nl.vpro.configuration.spring.PropertiesUtil">
+  <bean id="properties" class="nl.vpro.configuration.spring.PropertiesUtil" lazy-init="true">
     <property name="locations">
       <list>
         <value>classpath:1.properties</value>
@@ -16,6 +16,7 @@
     <property name="ignoreUnresolvablePlaceholders" value="false"/>
     <property name="ignoreResourceNotFound" value="true"/>
     <property name="exposeAsSystemProperty" value="b"/>
+    <property name="searchSystemEnvironment" value="true" />
      <property name="log">
       <props>
         <prop key="a">a: ${a}</prop>
@@ -24,6 +25,18 @@
     <property name="afterProperties">
       <list></list>
     </property>
+  </bean>
+
+  <bean id="defaultspring" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>classpath:1.properties</value>
+        <value>classpath:2.properties</value>
+      </list>
+    </property>
+    <property name="ignoreUnresolvablePlaceholders" value="false"/>
+    <property name="ignoreResourceNotFound" value="true"/>
+    <property name="systemPropertiesMode" value="1" />
   </bean>
 
 
