@@ -17,11 +17,14 @@ import nl.vpro.logging.simple.SimpleLogger;
  * Executor for external commands.
  *
  * Three types of methods:
- *
- * {@link #execute(InputStream, OutputStream, OutputStream, String...)} To synchronously execute and return exit code.
- * {@link #submit(InputStream, OutputStream, OutputStream, Consumer, String...)} For asynchronous execution
- * {@link #lines(InputStream, OutputStream, String...)} For synchronous execution and returing the output as a stream of strings.
- *
+ *<ul>
+ * <li>{@link #execute(InputStream, OutputStream, OutputStream, String...)} To synchronously execute and return exit code.</li>
+ * <li>{@link #submit(InputStream, OutputStream, OutputStream, Consumer, String...)} For asynchronous execution</li>
+ * </ul>
+ * These  two also have versions with a {@link Parameters} argument, so you can use builder pattern to fill in parameters.
+ *<ul>
+ * <li>{@link #lines(InputStream, OutputStream, String...)} For synchronous execution and returing the output as a stream of strings.</li>
+ *</ul>
  * @author Michiel Meeuwissen
  * @since 1.6
  */
@@ -72,7 +75,7 @@ public interface CommandExecutor {
      * @return The exit code
      */
     default int execute(InputStream in, OutputStream out, OutputStream error, String... args) {
-        return execute(Executor.builder()
+        return execute(Parameters.builder()
             .in(in)
             .out(out)
             .errors(error)
@@ -81,9 +84,10 @@ public interface CommandExecutor {
     }
 
 
-    int execute(Executor executor);
-    default int execute(Executor.Builder executor) {
-        return execute(executor.build());
+    int execute(Parameters parameters);
+
+    default int execute(Parameters.Builder parameters) {
+        return execute(parameters.build());
     }
 
    /**
@@ -92,7 +96,7 @@ public interface CommandExecutor {
     * @return A future producing the result code.
     */
     default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, Consumer<Integer> callback, String... args) {
-        return submit(callback, Executor.builder()
+        return submit(callback, Parameters.builder()
             .in(in)
             .out(out)
             .errors(error)
@@ -100,16 +104,16 @@ public interface CommandExecutor {
             .build());
 
     }
-    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Executor.Builder executor) {
-        return submit(callback, executor.build());
+    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Parameters.Builder parameters) {
+        return submit(callback, parameters.build());
     }
 
 
-    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Executor executor) {
+    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Parameters parameters) {
         return CompletableFuture.supplyAsync(() -> {
             Integer result = null;
             try {
-                result = execute(executor);
+                result = execute(parameters);
                 return result;
             } finally {
                 if (callback != null) {
@@ -226,7 +230,13 @@ public interface CommandExecutor {
         }
     }
 
-    class Executor {
+    /**
+     * The parameters of {@link #submit(Consumer, Parameters)}.
+     */
+    class Parameters {
+        /**
+         * InputStream (optional)
+         */
         final InputStream in;
         final OutputStream out;
         final OutputStream errors;
@@ -234,7 +244,7 @@ public interface CommandExecutor {
         final String[] args;
 
         @lombok.Builder(builderClassName = "Builder")
-        public Executor(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, String[] argsArray) {
+        public Parameters(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, String[] argsArray) {
             this.in = in;
             this.out = out;
             this.errors = errors == null ?

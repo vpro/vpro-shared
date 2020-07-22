@@ -220,7 +220,7 @@ public class CommandExecutorImpl implements CommandExecutor {
      * @return  The exit code
      */
     @Override
-    public int execute(Executor executor) {
+    public int execute(Parameters parameters) {
 
         final List<String> command = new ArrayList<>();
         String b = binary.get();
@@ -237,10 +237,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (commonArgs != null) {
                 command.addAll(commonArgs);
             }
-            Collections.addAll(command, executor.args);
+            Collections.addAll(command, parameters.args);
             logger.info(toString(command));
             p = pb.start();
-            executor.consumer.accept(p);
+            parameters.consumer.accept(p);
 
             final ProcessTimeoutHandle handle;
             if (processTimeout > 0L) {
@@ -248,10 +248,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            final Copier inputCopier = executor.in != null ? copyThread("input copier", executor.in, p.getOutputStream(), (e) -> {}) : null;
+            final Copier inputCopier = parameters.in != null ? copyThread("input copier", parameters.in, p.getOutputStream(), (e) -> {}) : null;
 
             final Copier copier;
-            if (executor.out != null) {
+            if (parameters.out != null) {
                 InputStream commandOutput = p.getInputStream();
                 if (useFileCache) {
                     commandOutput = FileCachingInputStream
@@ -260,7 +260,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                         .noProgressLogging()
                         .build();
                 }
-                copier = copyThread("command output", commandOutput, executor.out,
+                copier = copyThread("command output", commandOutput, parameters.out,
                     (e) -> {
                     Process process = p.destroyForcibly();
                     logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
@@ -269,7 +269,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 copier = null;
             }
 
-            Copier errorCopier = copyThread("error copier", p.getErrorStream(), executor.errors, (e) -> {});
+            Copier errorCopier = copyThread("error copier", p.getErrorStream(), parameters.errors, (e) -> {});
             if (inputCopier != null) {
                 inputCopier.waitFor();
                 p.getOutputStream().close();
@@ -283,10 +283,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (result != 0) {
                 logger.error("Error {} occurred while calling {}", result, String.join(" ", command));
             }
-            if (executor.out != null) {
-                executor.out.flush();
+            if (parameters.out != null) {
+                parameters.out.flush();
             }
-            executor.errors.flush();
+            parameters.errors.flush();
             if (handle != null) {
                 handle.cancel();
             }
