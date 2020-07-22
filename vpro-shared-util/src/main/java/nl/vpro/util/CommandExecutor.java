@@ -71,8 +71,20 @@ public interface CommandExecutor {
      * @param error Stder of the command will be written to this.
      * @return The exit code
      */
-    int execute(InputStream in, OutputStream out, OutputStream error, String... args);
+    default int execute(InputStream in, OutputStream out, OutputStream error, String... args) {
+        return execute(Executor.builder()
+            .in(in)
+            .out(out)
+            .errors(error)
+            .args(args)
+            .build());
+    }
 
+
+    int execute(Executor executor);
+    default int execute(Executor.Builder executor) {
+        return execute(executor.build());
+    }
 
    /**
     * Executes the command in the background.
@@ -80,14 +92,31 @@ public interface CommandExecutor {
     * @return A future producing the result code.
     */
     default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, Consumer<Integer> callback, String... args) {
+        return submit(callback, Executor.builder()
+            .in(in)
+            .out(out)
+            .errors(error)
+            .args(args)
+            .build());
+
+    }
+    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Executor.Builder executor) {
+        return submit(callback, executor.build());
+    }
+
+
+    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             Integer result = null;
             try {
-                result = execute(in, out, error, args);
+                result = execute(executor);
                 return result;
             } finally {
                 if (callback != null) {
-                    callback.accept(result);
+                    synchronized (callback) {
+                        callback.accept(result);
+                        callback.notifyAll();
+                    }
                 }
             }
         });
@@ -194,6 +223,44 @@ public interface CommandExecutor {
         @Override
         public String toString() {
             return super.toString() + " exitcode: " + exitCode;
+        }
+    }
+
+    class Executor {
+        final InputStream in;
+        final OutputStream out;
+        final OutputStream errors;
+        final Consumer<Process> consumer;
+        final String[] args;
+
+        @lombok.Builder(builderClassName = "Builder")
+        public Executor(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, String[] argsArray) {
+            this.in = in;
+            this.out = out;
+            this.errors = errors == null ?
+                LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true) : errors;
+            this.consumer = consumer == null ? (p) -> {} : consumer;
+            this.args = argsArray == null ? new String[0] : argsArray;
+        }
+        public static class Builder {
+
+            public Builder args(String... args) {
+                return argsArray(args);
+            }
+
+            public CompletableFuture<Integer> submit(Consumer<Integer> exitCode, CommandExecutor executor) {
+                return executor.submit(exitCode, this);
+
+            }
+            public CompletableFuture<Integer> submit(CommandExecutor executor) {
+                return submit((exitCode) -> {}, executor);
+
+            }
+            public int execute(CommandExecutor executor) {
+                return executor.execute(this);
+
+            }
+
         }
     }
 }
