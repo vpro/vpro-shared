@@ -1,8 +1,11 @@
 package nl.vpro.util;
 
 import lombok.Getter;
+import lombok.Singular;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -244,18 +247,25 @@ public interface CommandExecutor {
         final String[] args;
 
         @lombok.Builder(builderClassName = "Builder")
-        public Parameters(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, String[] argsArray) {
+        public Parameters(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, @Singular List<String> listArgs) {
             this.in = in;
             this.out = out;
             this.errors = errors == null ?
                 LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true) : errors;
             this.consumer = consumer == null ? (p) -> {} : consumer;
-            this.args = argsArray == null ? new String[0] : argsArray;
+            this.args = listArgs == null ? new String[0] : listArgs.toArray(new String[0]);
         }
         public static class Builder {
 
             public Builder args(String... args) {
-                return argsArray(args);
+                return listArgs(Arrays.asList(args));
+            }
+
+            public Builder arg(String... args) {
+                for (String a : args) {
+                    listArg(a);
+                }
+                return this;
             }
 
             public CompletableFuture<Integer> submit(Consumer<Integer> exitCode, CommandExecutor executor) {
