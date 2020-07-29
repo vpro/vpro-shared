@@ -218,6 +218,7 @@ public final class Predicates {
     protected static abstract  class BiWrapper<X, Y, Z> implements TriPredicate<X, Y, Z> {
 
         private final BiPredicate<?, ?> wrapped;
+
         @EqualsAndHashCode.Exclude
         private final String why;
 
@@ -235,6 +236,7 @@ public final class Predicates {
     protected static abstract  class Wrapper<X, Y> implements BiPredicate<X, Y> {
 
         private final Predicate<?> wrapped;
+
         @EqualsAndHashCode.Exclude
         private final String why;
 

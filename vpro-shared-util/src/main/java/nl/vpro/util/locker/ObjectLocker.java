@@ -3,27 +3,29 @@ package nl.vpro.util.locker;
 import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import nl.vpro.jmx.MBeans;
+import nl.vpro.logging.Slf4jHelper;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.hibernate.SessionFactory;
+import org.slf4j.event.Level;
 
+import javax.management.ObjectName;
 import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.management.ObjectName;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.hibernate.SessionFactory;
-import org.slf4j.event.Level;
-
-import nl.vpro.jmx.MBeans;
-import nl.vpro.logging.Slf4jHelper;
 
 /**
  * @author Michiel Meeuwissen
@@ -182,7 +184,7 @@ public class ObjectLocker {
                     if (monitor) {
                         if (sessionFactory != null) {
                             if (sessionFactory.getCurrentSession().getTransaction().isActive()) {
-                                log.warn("Trying to acquire lock in transaction which active already! {}:{} + {}", summarize(), currentLocks, key);
+                                log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}", summarize(), currentLocks, key);
                             }
                         }
                     }
