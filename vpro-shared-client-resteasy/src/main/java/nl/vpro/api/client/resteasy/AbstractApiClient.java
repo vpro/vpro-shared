@@ -616,7 +616,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
      * @return  A new proxy, with the functionality of {@link nl.vpro.jmx.CountAspect} added.
      */
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, countWindow, bucketCount, getObjectName(), service, proxy, log, warnThreshold);
+        return CountAspect.proxyCounter(counter, countWindow, bucketCount, registerMBean ? getObjectName() : null, service, proxy, log, warnThreshold);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {

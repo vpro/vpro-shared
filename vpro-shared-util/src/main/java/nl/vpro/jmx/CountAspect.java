@@ -81,6 +81,9 @@ public class CountAspect<T> implements InvocationHandler {
     }
 
     ObjectName getObjectName(String m) {
+        if (name == null) {
+            return null;
+        }
         try {
             return new ObjectName(name.toString() + ",name=" + m);
         } catch (MalformedObjectNameException e) {
