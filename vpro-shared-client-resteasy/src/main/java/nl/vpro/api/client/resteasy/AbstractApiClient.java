@@ -106,7 +106,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     protected String mbeanName = null;
 
-    protected Boolean registerMBean = false;
+    protected boolean registerMBean = false;
 
     @Getter
     protected  Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
@@ -162,8 +162,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
         this.userAgent = userAgent == null ? getUserAgent(getClass().getSimpleName(), getVersion("vpro.shared.version", this.classLoader)) : userAgent;
         log.info("Using class loader {}, user agent {}", this.classLoader, this.userAgent);
-        this.registerMBean = registerMBean;
-        if (this.registerMBean == null || this.registerMBean) {
+        this.registerMBean = registerMBean == null || this.registerMBean;
+        if (this.registerMBean) {
             registerBean();
         }
     }
@@ -616,7 +616,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
      * @return  A new proxy, with the functionality of {@link nl.vpro.jmx.CountAspect} added.
      */
     protected <T> T proxyCounter(Class<T> service, T proxy) {
-        return CountAspect.proxyCounter(counter, countWindow, bucketCount, registerMBean ? getObjectName() : null, service, proxy, log, warnThreshold);
+        return CountAspect.proxyCounter(counter, countWindow, bucketCount,
+                registerMBean ? getObjectName() : null, service, proxy, log, warnThreshold);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
