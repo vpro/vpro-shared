@@ -283,6 +283,11 @@ public class JAXBTestUtil {
 
     @SafeVarargs
     public static void similar(String input, String expected, Consumer<DiffBuilder>... build) {
+        similar(input.getBytes(UTF_8), expected.getBytes(UTF_8), build);
+    }
+
+    @SafeVarargs
+    public static void similar(byte[] input, byte[] expected, Consumer<DiffBuilder>... build) {
         DiffBuilder builder = DiffBuilder
             .compare(expected)
             .withTest(input)
@@ -297,7 +302,7 @@ public class JAXBTestUtil {
             Diff diff = builder.build();
             assertNoDifferences(diff, input, expected);
         } catch (XMLUnitException xue) {
-            throw new AssertionError(xue.getMessage() + ": expected:\n" + expected + "\nactual:\n" + input);
+            throw new AssertionError(xue.getMessage() + ": expected:\n" + new String(expected, UTF_8) + "\nactual:\n" + new String(input, UTF_8));
         }
     }
 
@@ -306,32 +311,30 @@ public class JAXBTestUtil {
         return unmarshal(input, result);
     }
 
-    public static void similar(InputStream input, String expected) {
+    @SafeVarargs
+    @SneakyThrows
+    public static void similar(InputStream input, String expected, Consumer<DiffBuilder>... build) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        Diff diff = DiffBuilder
-            .compare(expected)
-            .withTest(input)
-            .ignoreComments()
-            .checkForSimilar()
-            .build();
-        if (diff.hasDifferences()) {
-            throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
-        }
+        IOUtils.copy(input, bytes);
+        similar(bytes.toByteArray(), expected.getBytes(UTF_8), build);
     }
 
-    public static void similar(InputStream input, InputStream expected) throws IOException {
+    @SafeVarargs
+    @SneakyThrows
+    public static void similar(String input, InputStream expected, Consumer<DiffBuilder>... build) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        IOUtils.copy(expected, bytes);
+        similar(input.getBytes(UTF_8), bytes.toByteArray(), build);
+    }
+
+    @SafeVarargs
+    @SneakyThrows
+    public static void similar(InputStream input, InputStream expected, Consumer<DiffBuilder>... build) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         IOUtils.copy(input, bytes);
         ByteArrayOutputStream expectedBytes = new ByteArrayOutputStream();
         IOUtils.copy(expected, expectedBytes);
-        Diff diff = DiffBuilder
-            .compare(expected)
-            .withTest(input)
-            .checkForSimilar()
-            .build();
-        if (diff.hasDifferences()) {
-            throw new AssertionError(diff.toString() + ": expected:\n" + expectedBytes + "\nactual:\n" + bytes);
-        }
+        similar(bytes.toByteArray(), expectedBytes.toByteArray(), build);
     }
 
 
@@ -415,7 +418,7 @@ public class JAXBTestUtil {
         }
     }
 
-    protected static void assertNoDifferences(Diff diff, String input, String expected) {
+    protected static void assertNoDifferences(Diff diff, byte[] input, byte[] expected) {
         if (diff.hasDifferences()) {
             assertThat(pretty(input)).isEqualTo(pretty(expected));
             //throw new AssertionError(diff.toString() + ": expected:\n" + expected + "\nactual:\n" + input);
@@ -423,13 +426,17 @@ public class JAXBTestUtil {
             assertThat(diff.hasDifferences()).isFalse();
         }
     }
-    @SneakyThrows
     public static String pretty(String xml) {
+        return pretty(xml.getBytes(UTF_8));
+    }
+
+    @SneakyThrows
+    public static String pretty(byte[] xml) {
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         StreamResult result = new StreamResult(new StringWriter());
-        transformer.transform(new StreamSource(new ByteArrayInputStream(xml.getBytes(UTF_8))), result);
+        transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
         String xmlString = result.getWriter().toString();
         return xmlString;
     }
