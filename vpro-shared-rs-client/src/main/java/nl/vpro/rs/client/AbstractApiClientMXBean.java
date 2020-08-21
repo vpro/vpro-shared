@@ -2,6 +2,7 @@ package nl.vpro.rs.client;
 
 import javax.management.MXBean;
 
+import nl.vpro.jmx.Description;
 import nl.vpro.jmx.Units;
 
 /**
@@ -52,6 +53,8 @@ public interface AbstractApiClientMXBean {
 
     void invalidate();
 
+
+    @Description("Just performs a test call. By this one check via jmx whether the client is working. The argument is probably some id of the items in the api this client is serving")
     String test(String arg);
 
 }
