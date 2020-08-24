@@ -251,36 +251,57 @@ public class ConfigUtils {
      * @return
      */
     public static Map<String, String> filtered(final Env env, String prefix, Map<String, String> properties) {
+
+
         log.debug("Filtering{} for {}", prefix == null ? "" : prefix + " ", env);
         Map<String, String> result = new HashMap<>();
+
+        // try split in 3 values, if results array of 1,  those are explicit values
         properties.forEach((key, value) -> {
             String[] split = key.split("\\.", 3);
             if (split.length == 1) {
-                String explicitValue = value;
-                if (env != null) {
-                    String envValue = properties.get(key + "." + env);
-                    if (envValue != null) {
-                        explicitValue = envValue;
-                    }
-                }
-                result.put(key, explicitValue);
+                result.put(key, value);
             }
         });
+
+        // split in 3 values and interpret <prefix>.<key>.<env>
         properties.forEach((key, value) -> {
             String[] split = key.split("\\.", 3);
             if (split.length == 3) {
                 if (!Objects.equals(prefix, split[0])) {
+                    // prefix doesn't match, skip it.
                     return;
                 }
-                split = Arrays.copyOfRange(split, 1, 3);
-            }
-            if (split.length > 1 ) {
-                if ((env == null && split[1].equals("test" ) && !result.containsKey(split[0])) || (env != null && split[1].toUpperCase().equals(env.name()))) {
-                    result.put(split[0], value);
+                Env foundEnv = Env.valueOf(split[2].toUpperCase());
+                if (foundEnv == env) {
+                    result.put(split[1], value);
                 }
+                return;
             }
 
+            if (split.length == 2) {
+                // either <prefix.key> or <key.env>
+                try {
+                    Env foundEnv = Env.valueOf(split[1].toUpperCase());
+                    // found an env
+                    if (foundEnv == env) {
+                        result.put(split[0], value);
+                    } else  if (foundEnv == Env.TEST && env == null) {
+                        if (!result.containsKey(split[0])) {
+                            result.put(split[0], value);
+                        }
+                    }
+                } catch (IllegalArgumentException ia) {
+                    // must then be <prefix>.<key>
+                    if (Objects.equals(prefix, split[0])) {
+                        result.put(split[1], value);
+                    }
+                }
+            } else {
+                // should have been found already.
+            }
         });
+
         return result;
     }
 

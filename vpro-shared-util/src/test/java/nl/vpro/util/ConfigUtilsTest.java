@@ -3,12 +3,10 @@ package nl.vpro.util;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static nl.vpro.util.Env.PROD;
 import static nl.vpro.util.Env.TEST;
@@ -69,16 +67,31 @@ public class ConfigUtilsTest {
 
     Map<String, String> properties;
 
-    @Before
+    Map<String, String> propertiesWithPrefix;
+
+
+    @BeforeEach
     public void init() {
         properties = new HashMap<>();
         properties.put("a", "1");
         properties.put("a.test", "2");
         properties.put("a.prod", "3");
+
         properties.put("b.test", "1");
         properties.put("b.prod", "2");
+
         properties.put("c", "1");
         properties.put("enums", "e,f");
+
+        propertiesWithPrefix = new HashMap<>();
+        propertiesWithPrefix.put("abc.a", "1");
+        propertiesWithPrefix.put("abc.a.test", "2");
+        propertiesWithPrefix.put("abc.a.prod", "3");
+
+        propertiesWithPrefix.put("abc.b.test", "1");
+        propertiesWithPrefix.put("abc.b.prod", "2");
+        propertiesWithPrefix.put("abc.c", "1");
+        propertiesWithPrefix.put("xyz.enums", "e,f");
     }
 
     @Test
@@ -143,6 +156,24 @@ public class ConfigUtilsTest {
         assertThat(ConfigUtils.filtered(PROD, properties).get("c")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(PROD, properties).get("c.test")).isNull();
         assertThat(ConfigUtils.filtered(PROD, properties).get("c.prod")).isNull();
+    }
+
+
+    @Test
+    public void testFilteredWitPrefixA() {
+        assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("a")).isEqualTo("3");
+    }
+
+    @Test
+    public void testFilteredWitPrefixB() {
+        assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("b")).isEqualTo("2");
+    }
+
+    @Test
+    public void testFilteredWitPrefixC() {
+        assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("c")).isEqualTo("1");
+        assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("c.test")).isNull();
+        assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("c.prod")).isNull();
     }
 
     @Test
