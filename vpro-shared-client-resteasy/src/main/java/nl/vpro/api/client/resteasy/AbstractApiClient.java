@@ -46,8 +46,6 @@ import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -420,8 +418,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ApacheHttpClientEngine.create(
-                getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL));
+            clientHttpEngine = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL), false);
 
         }
         return clientHttpEngine;
@@ -429,8 +426,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null)
-            );
+            clientHttpEngineNoTimeout = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null), false);
         }
         return clientHttpEngineNoTimeout;
     }
@@ -686,7 +682,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
      protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
-        ResteasyClientBuilder builder = new ResteasyClientBuilderImpl()
+        ResteasyClientBuilder builder = ResteasyHelper.clientBuilder()
             .httpEngine(engine);
         builder.register(new JacksonContextResolver(objectMapper));
         builder.register(new AcceptRequestFilter(accept));
