@@ -60,7 +60,7 @@ public class ResteasyHelper {
     public static ClientHttpEngine createApacheHttpClient(CloseableHttpClient closeableHttpClient, boolean autoClose) {
         try {
             Class<?> clazz = Class.forName("org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine");
-            return (ClientHttpEngine) clazz.getMethod("create", CloseableHttpClient.class, boolean.class).invoke(null, closeableHttpClient, autoClose);
+            return (ClientHttpEngine) clazz.getMethod("create", HttpClient.class, boolean.class).invoke(null, closeableHttpClient, autoClose);
         } catch (ClassNotFoundException cnf) {
             Class<?> clazz = Class.forName("org.jboss.resteasy.client.jaxrs.engines.factory.ApacheHttpClient4EngineFactory");
             return (ClientHttpEngine) clazz.getMethod("create", HttpClient.class, boolean.class).invoke(null, closeableHttpClient, autoClose);
