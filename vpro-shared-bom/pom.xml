@@ -63,11 +63,6 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-client-resteasy3</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-configuration</artifactId>
         <version>${project.version}</version>
       </dependency>
