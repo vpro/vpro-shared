@@ -12,8 +12,12 @@ import java.util.Optional;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.slf4j.event.Level;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
+
+import nl.vpro.logging.Slf4jHelper;
 
 /**
  * These can be used in conjuction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
@@ -23,6 +27,8 @@ import com.fasterxml.jackson.databind.*;
  */
 @Slf4j
 public class StringInstantToJsonTimestamp {
+
+    private static boolean warnedNatty = false;
 
     private StringInstantToJsonTimestamp() {}
 
@@ -56,11 +62,14 @@ public class StringInstantToJsonTimestamp {
             return DatatypeConverter.parseTime(value).toInstant();
         } catch (IllegalArgumentException iae) {
             try {
-
                 Optional<Instant> natty = NattySupport.parseDate(value);
                 if (natty.isPresent()) {
                     return natty.get();
+                } else {
+                    log.debug("Natty din't match");
                 }
+            } catch (NoClassDefFoundError classNotFoundException) {
+                Slf4jHelper.log(log, warnedNatty ? Level.DEBUG : Level.WARN, "No natty?: " + classNotFoundException.getMessage());
             } catch (Throwable e) {
                 log.debug("Natty couldn't parse {}: {}", value, e.getMessage());
             }
