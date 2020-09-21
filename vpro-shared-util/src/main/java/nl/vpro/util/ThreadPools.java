@@ -22,6 +22,7 @@ public final class ThreadPools {
     public static ThreadFactory createThreadFactory(final String namePrefix, final boolean daemon, final int priority) {
         return new ThreadFactory() {
             long counter = 1;
+
             @Override
             public Thread newThread(@NonNull Runnable r) {
                 Thread thread = new Thread(THREAD_GROUP, r);
@@ -36,6 +37,9 @@ public final class ThreadPools {
         };
     }
 
+    /**
+     * An executor service used for 'copy' threads. Mainly in {@link Copier}, but it can be used for similar processes.
+     */
     public static final ThreadPoolExecutor copyExecutor =
         new ThreadPoolExecutor(0, 2000, 60, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
@@ -44,6 +48,9 @@ public final class ThreadPools {
                 false,
                 Thread.NORM_PRIORITY));
 
+    /**
+     * A scheduled executor service with _fixed pool size_, so should be used to schedule short lived background tasks only.
+     */
     public static final ScheduledExecutorService backgroundExecutor =
         Executors.newScheduledThreadPool(5,
             ThreadPools.createThreadFactory(
@@ -51,6 +58,10 @@ public final class ThreadPools {
                 true,
                 Thread.MIN_PRIORITY));
 
+
+    /**
+     * An executor service used for threads running during bootstrap of the application. Core size is 0, so that after a few minutes (when all is up) all threads will be shut down.
+     */
     public static final ThreadPoolExecutor startUpExecutor =
         new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
