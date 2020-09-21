@@ -19,37 +19,37 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 public class Log4j2MBean {
 
     @ManagedOperation(description="Get current level for category")
-    public String getLevel(String category) {
-        return LogManager.getLogger(category).getLevel().toString();
+    public String getLevel(String name) {
+        return LogManager.getLogger(name).getLevel().toString();
     }
 
     @ManagedOperation(description="Level trace")
-    public void trace(String category) {
-        Configurator.setLevel(category, Level.TRACE);
+    public void trace(String name) {
+        Configurator.setLevel(name, Level.TRACE);
     }
 
     @ManagedOperation(description="Level debug")
-    public void debug(String category) {
-        Configurator.setLevel(category, Level.DEBUG);
+    public void debug(String name) {
+        Configurator.setLevel(name, Level.DEBUG);
     }
 
     @ManagedOperation(description="Level info")
-    public void info(String category) {
-        Configurator.setLevel(category, Level.INFO);
+    public void info(String name) {
+        Configurator.setLevel(name, Level.INFO);
     }
 
     @ManagedOperation(description="Level warn")
-    public void warn(String category) {
-        Configurator.setLevel(category, Level.WARN);
+    public void warn(String name) {
+        Configurator.setLevel(name, Level.WARN);
     }
 
     @ManagedOperation(description="Level error")
-    public void error(String category) {
-        Configurator.setLevel(category, Level.ERROR);
+    public void error(String name) {
+        Configurator.setLevel(name, Level.ERROR);
     }
 
     @ManagedOperation(description="Level fatal")
-    public void fatal(String category) {
-        Configurator.setLevel(category, Level.FATAL);
+    public void fatal(String name) {
+        Configurator.setLevel(name, Level.FATAL);
     }
 }
