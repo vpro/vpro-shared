@@ -242,6 +242,9 @@ public class FileCachingInputStream extends InputStream {
                 .output(tempFileOutputStream)
                 .name(tempFile.toString())
                 .notify(this)
+                .errorHandler((c, e) -> {
+                    future.completeExceptionally(e);
+                })
                 .callback(c -> {
                     try {
                         tempFileOutputStream.close();

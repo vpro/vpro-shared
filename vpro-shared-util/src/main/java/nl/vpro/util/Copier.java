@@ -121,12 +121,15 @@ public class Copier implements Runnable, Closeable {
         } finally {
             synchronized (this) {
                 ready = true;
-                if (callback != null) {
-                    callback.accept(this);
-                }
                 log.debug("{}notifying listeners", logPrefix());
+            }
+            if (callback != null) {
+                callback.accept(this);
+            }
+            synchronized (this) {
                 notifyAll();
             }
+
         }
     }
 
