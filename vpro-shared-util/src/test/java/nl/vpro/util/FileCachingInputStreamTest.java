@@ -209,6 +209,14 @@ public class FileCachingInputStreamTest {
             .noProgressLogging()
             .startImmediately(false)
             .build();
+        inputStream.getFuture().thenApply(fc -> {
+            logs.add("then apply " + fc.getBytesRead());
+            return fc;
+        });
+
+        inputStream.getFuture().thenAccept(fc -> {
+            logs.add("then apply again " + fc.getCount());
+        });
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -218,7 +226,7 @@ public class FileCachingInputStreamTest {
         }
 
         assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
-        assertThat(logs).containsExactly("" + MANY_BYTES.length);
+        assertThat(logs).containsExactly("" + MANY_BYTES.length, "then apply again " + MANY_BYTES.length, "then apply 0");
     }
 
 

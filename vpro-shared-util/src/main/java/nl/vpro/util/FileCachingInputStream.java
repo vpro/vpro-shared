@@ -9,6 +9,7 @@ import java.net.URI;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
@@ -54,6 +55,10 @@ public class FileCachingInputStream extends InputStream {
     private long bytesRead = 0;
 
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
+
+    @Getter
+    private final CompletableFuture<FileCachingInputStream> future = new CompletableFuture<>();
+
 
     @Slf4j
     public static class Builder {
@@ -242,9 +247,11 @@ public class FileCachingInputStream extends InputStream {
                         tempFileOutputStream.close();
                         openStreams--;
                         bc.accept(FileCachingInputStream.this, c);
+                        future.complete(this);
                         //this.tempFileInputStream.close();
                         //openStreams--;
-                    } catch (IOException ignore) {
+                    } catch (IOException ioe) {
+                        future.completeExceptionally(ioe);
 
                     }
                     if (this.deleteTempFile) {
@@ -281,6 +288,7 @@ public class FileCachingInputStream extends InputStream {
             }
         } catch (IOException ioe) {
             close();
+            future.completeExceptionally(ioe);
             throw ioe;
         }
     }
@@ -297,12 +305,14 @@ public class FileCachingInputStream extends InputStream {
             if (! closed) {
                 close();
             }
+            future.completeExceptionally(ioe);
             throw ioe;
         }
     }
 
+
     @Override
-    public  void close() throws IOException {
+    public void close() throws IOException {
 
         if (! closed) {
             synchronized(this) {
@@ -331,6 +341,7 @@ public class FileCachingInputStream extends InputStream {
                     }
                 }
                 closed = true;
+                notifyAll();
             }
         } else {
             log.debug("Closed already");
