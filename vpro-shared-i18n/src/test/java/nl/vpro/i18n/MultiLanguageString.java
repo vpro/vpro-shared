@@ -1,34 +1,31 @@
-package nl.vpro.util;
+package nl.vpro.i18n;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
+
+import static java.util.Locale.ENGLISH;
+import static nl.vpro.i18n.Locales.DUTCH;
 
 /**
  *
  * @author Michiel Meeuwissen
  * @since 0.47
- * @deprecated Moved to nl.vpro.i18n.MultiLanguageString
  */
 public class MultiLanguageString implements CharSequence {
-
-    public static final Locale DEFAULT = new Locale("nl");
 
 
     private final Map<Locale, String> strings = new HashMap<>();
 
     @Getter
     @Setter
-    private Locale defaultLocale = DEFAULT;
+    private Locale defaultLocale = null;
 
 
     private Object[] slf4jArgs;
@@ -47,7 +44,7 @@ public class MultiLanguageString implements CharSequence {
 
     public static Builder en(String text) {
         Builder builder = new Builder();
-        return builder.defaultLocale(Locale.ENGLISH).en(text);
+        return builder.en(text);
     }
     public static Builder builder() {
         return new Builder();
@@ -62,7 +59,6 @@ public class MultiLanguageString implements CharSequence {
     }
 
     public String get(Locale locale) {
-
         String result = strings.get(locale);
         if (result == null && locale.getVariant() != null) {
             result = strings.get(new Locale(locale.getLanguage(), locale.getCountry()));
@@ -108,7 +104,7 @@ public class MultiLanguageString implements CharSequence {
     @Override
     @NonNull
     public String toString() {
-        String s = get(defaultLocale);
+        String s = get(defaultLocale == null ? Locales.getDefault() : defaultLocale);
         if (s == null) {
             return "";
         }
@@ -135,19 +131,19 @@ public class MultiLanguageString implements CharSequence {
         }
 
         public Builder nl(String text) {
-            created.strings.put(new Locale("nl"), text);
+            created.strings.put(DUTCH, text);
             return this;
         }
         public Builder en(String text) {
-            created.strings.put(Locale.ENGLISH, text);
+            created.strings.put(ENGLISH, text);
             return this;
         }
 
-        public Builder.In in(Locale locale) {
+        public In in(Locale locale) {
             return new In(locale);
         }
 
-        public Builder.In in(String locale) {
+        public In in(String locale) {
             return new In(new Locale(locale));
         }
         public MultiLanguageString build() {

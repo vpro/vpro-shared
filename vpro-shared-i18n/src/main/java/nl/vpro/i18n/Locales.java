@@ -58,6 +58,25 @@ public class Locales {
         DEFAULT.remove();
     }
 
+    public static RestoreDefaultLocale with(Locale locale) {
+        final Locale prev = getDefault();
+        setDefault(locale);
+        return new RestoreDefaultLocale(prev);
+    }
+
+    public static class RestoreDefaultLocale implements AutoCloseable {
+        private final Locale prev;
+
+        public RestoreDefaultLocale(Locale prev) {
+            this.prev = prev;
+        }
+
+        @Override
+        public void close()  {
+            setDefault(prev);
+        }
+    }
+
     public static Locale of(LanguageCode lc, Country  code) {
         return new Locale(lc.name(), code.getCode());
     }

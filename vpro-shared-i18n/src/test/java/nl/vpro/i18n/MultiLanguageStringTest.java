@@ -1,4 +1,4 @@
-package nl.vpro.util;
+package nl.vpro.i18n;
 
 import java.util.Locale;
 
@@ -13,8 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MultiLanguageStringTest {
 
+
     @Test
     public void test() {
+
         MultiLanguageString string = MultiLanguageString.builder()
             .nl("Hoi")
             .en("Hello")
@@ -28,8 +30,31 @@ public class MultiLanguageStringTest {
         assertThat(string.get(new Locale("en", "US"))).isEqualTo("Hello");
     }
 
+
+    @Test
+    public void testWithDefaultLocale() {
+
+        MultiLanguageString string = MultiLanguageString.builder()
+            .nl("Hoi")
+            .en("Hello")
+            .in("eo").is("Saluton")
+            .build();
+        try (Locales.RestoreDefaultLocale ignore1 = Locales.with(Locales.DUTCH)) {
+            try (Locales.RestoreDefaultLocale ignore2 = Locales.with(Locale.ENGLISH)) {
+                assertThat(string.toString()).isEqualTo("Hello");
+            }
+            assertThat(string.toString()).isEqualTo("Hoi");
+        }
+
+
+        assertThat(string.get(new Locale("en"))).isEqualTo("Hello");
+        assertThat(string.get(new Locale("eo"))).isEqualTo("Saluton");
+        assertThat(string.get(new Locale("en", "US"))).isEqualTo("Hello");
+    }
+
     @Test
     public void in() {
+
         MultiLanguageString string = MultiLanguageString
             .of(Locale.CHINESE, "asdfad")
             .build();
@@ -50,8 +75,6 @@ public class MultiLanguageStringTest {
         assertThat(string.get(new Locale("en"))).isEqualTo("b A a 1");
         assertThat(string.get(new Locale("eo"))).isEqualTo("c A 1");
         assertThat(string.get(new Locale("en", "US"))).isEqualTo("b A a 1");
-
-
     }
 
     @Test
@@ -68,8 +91,6 @@ public class MultiLanguageStringTest {
         assertThat(string.get(new Locale("en"))).isEqualTo("b 1 a A");
         assertThat(string.get(new Locale("eo"))).isEqualTo("c A 1");
         assertThat(string.get(new Locale("en", "US"))).isEqualTo("b 1 a A");
-
-
     }
 
 }
