@@ -241,6 +241,7 @@ public class FileCachingInputStream extends InputStream {
                     try {
                         tempFileOutputStream.close();
                         openStreams--;
+                        bc.accept(FileCachingInputStream.this, c);
                         //this.tempFileInputStream.close();
                         //openStreams--;
                     } catch (IOException ignore) {

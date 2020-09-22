@@ -6,6 +6,8 @@ import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
@@ -193,11 +195,17 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void testReadNoAutoStart() throws IOException {
+        List<String> logs = new ArrayList<>();
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
+            .batchConsumer((fc, c) -> {
+                if (c.isReady()) {
+                    logs.add("" + c.getCount());
+                }
+            })
             .noProgressLogging()
             .startImmediately(false)
             .build();
@@ -210,6 +218,7 @@ public class FileCachingInputStreamTest {
         }
 
         assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
+        assertThat(logs).containsExactly("" + MANY_BYTES.length);
     }
 
 
