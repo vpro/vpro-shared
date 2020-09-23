@@ -20,7 +20,7 @@ public class Slf4jSimpleLogger implements SimpleLogger {
         this.logger = logger;
     }
 
-    public Slf4jSimpleLogger(Class clazz) {
+    public Slf4jSimpleLogger(Class<?> clazz) {
         this(LoggerFactory.getLogger(clazz));
     }
 
