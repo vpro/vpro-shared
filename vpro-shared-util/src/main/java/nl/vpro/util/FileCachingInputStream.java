@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
@@ -95,7 +96,12 @@ public class FileCachingInputStream extends InputStream {
 
     /**
      * @param batchSize Batch size
+     * @param batchConsumer After reading every batch, you have the possibility to do something yourself too
      * @param path Directory for temporary files
+     * @param logger The logger to which possible logging will happen. Defaults to the logger of the {@link FileCachingInputStream} class itself
+     * @param progressLogging Wether progress logging must be done (every batch)
+     * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explictely false)
+     * @param deleteTempFile Whether the intermediate temporary file must be deleted immediately on closing of this stream
      */
     @lombok.Builder(builderClassName = "Builder")
     @SneakyThrows(IOException.class)
@@ -112,6 +118,7 @@ public class FileCachingInputStream extends InputStream {
         final Boolean startImmediately,
         final Boolean downloadFirst,
         final Boolean progressLogging,
+        final Integer progressLoggingBatch,
         final Path tempPath,
         final Boolean deleteTempFile
     ) {
@@ -197,9 +204,12 @@ public class FileCachingInputStream extends InputStream {
             }
 
             final BiConsumer<FileCachingInputStream, Copier> bc;
-            if (progressLogging == null || progressLogging) {
+            if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
+                AtomicLong batchCount = new AtomicLong(0);
                 bc = (t, c) -> {
-                    log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                    if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
+                        log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                    }
                     if (batchConsumer != null) {
                         batchConsumer.accept(t, c);
                     }
