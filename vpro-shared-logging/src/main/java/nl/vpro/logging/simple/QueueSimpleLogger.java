@@ -1,6 +1,5 @@
 package nl.vpro.logging.simple;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.util.Map;
@@ -70,12 +69,19 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
      * A representation of a log event
      */
     @Getter
-    @lombok.AllArgsConstructor(access = AccessLevel.PROTECTED)
-    @lombok.Builder
     public static class Event {
         private final Level level;
         private final CharSequence message;
         private final Throwable throwable;
         private final Map<String, String> mdc = MDC.getCopyOfContextMap();
+        private final int levelInt;
+
+        @lombok.Builder
+        protected Event(Level level, CharSequence message, Throwable throwable) {
+            this.level = level;
+            this.message = message;
+            this.throwable = throwable;
+            this.levelInt = level.toInt();
+        }
     }
 }
