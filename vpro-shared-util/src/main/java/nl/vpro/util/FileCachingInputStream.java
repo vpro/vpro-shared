@@ -7,9 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.io.IOUtils;
@@ -108,6 +110,7 @@ public class FileCachingInputStream extends InputStream {
         List<OpenOption> openOptions,
         Integer initialBuffer,
         final Boolean startImmediately,
+        final Boolean downloadFirst,
         final Boolean progressLogging,
         final Path tempPath,
         final Boolean deleteTempFile
@@ -194,24 +197,15 @@ public class FileCachingInputStream extends InputStream {
             }
 
             final BiConsumer<FileCachingInputStream, Copier> bc;
-            if (batchConsumer == null) {
-                if (progressLogging == null || progressLogging) {
-                    bc = (t, c) ->
-                        log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
-                } else {
-                    bc = (t, c) -> {
-                    };
-                }
-
-            } else {
-                if (progressLogging != null && progressLogging) {
-                    bc = (t, c) -> {
-                        log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+            if (progressLogging == null || progressLogging) {
+                bc = (t, c) -> {
+                    log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                    if (batchConsumer != null) {
                         batchConsumer.accept(t, c);
-                    };
-                } else {
-                    bc = batchConsumer;
-                }
+                    }
+                };
+            } else {
+                bc = batchConsumer == null ?  (t, c) -> { } : batchConsumer;
             }
 
             final boolean deleteOnClose;
@@ -269,7 +263,11 @@ public class FileCachingInputStream extends InputStream {
                 .batch(batchSize)
                 .batchConsumer(c -> bc.accept(this, c))
                 .build();
-            if (startImmediately == null || startImmediately) {
+
+            if (downloadFirst != null && downloadFirst) {
+                copier.execute();
+                future.get();
+            } else if (startImmediately == null || startImmediately) {
                 // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
                 copier.execute();
             }
@@ -277,6 +275,13 @@ public class FileCachingInputStream extends InputStream {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw e;
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            throw  new RuntimeException(e);
+        } catch (ExecutionException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -467,5 +472,15 @@ public class FileCachingInputStream extends InputStream {
 
         //log.debug("returning {} bytes", totalResult);
         return totalResult;
+    }
+
+    public static BiConsumer<FileCachingInputStream, Copier> throttle(Duration d) {
+        return (fc, c) -> {
+            try {
+                Thread.sleep(d.toMillis());
+            } catch (Exception e) {
+
+            }
+        };
     }
 }
