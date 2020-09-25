@@ -1,20 +1,20 @@
 package nl.vpro.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import java.util.*;
+import java.util.concurrent.*;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Michiel Meeuwissen
  * @since 0.53
  */
-@Ignore("Doest assert anything, just trying out")
+@Disabled("Doest assert anything, just trying out")
+@Slf4j
 public class ThreadPoolsTest {
 
     @Test
@@ -27,7 +27,7 @@ public class ThreadPoolsTest {
                 final int j = k + i;
                 futures.add(te.submit(() -> {
                     Thread.sleep(100);
-                    System.out.println(j);
+                    log.info("{}{}", te, j);
                     return j;
                 }));
             }
@@ -40,7 +40,7 @@ public class ThreadPoolsTest {
 
 
     @Test
-    @Ignore
+    @Disabled
     public void background2() throws ExecutionException, InterruptedException {
       Future<?> f1 = ThreadPools.backgroundExecutor.submit(() -> {
           Thread.sleep(10000);
@@ -59,4 +59,30 @@ public class ThreadPoolsTest {
 
         ThreadPools.shutdown();
     }
+
+    @Test
+    @Disabled
+    public void test() {
+        ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(10);
+        ThreadPoolExecutor e = new ThreadPoolExecutor(2,  4, 600, TimeUnit.SECONDS,
+            queue,
+            ThreadPools.createThreadFactory(
+                "nl.vpro.nep.upload",
+                false,
+                Thread.NORM_PRIORITY));
+
+        for (int i = 0; i < 1000; i++) {
+            int fi = i;
+            log.info("starting " + fi + " " + queue.size() + "/" + e.getPoolSize());
+            e.execute(new Runnable() {
+                @Override
+                @SneakyThrows
+                public void run() {
+                    log.info("running " + fi + " " + queue.size() + "/" + e.getPoolSize());
+                    Thread.sleep(100);
+                }
+            });
+        }
+    }
+
 }
