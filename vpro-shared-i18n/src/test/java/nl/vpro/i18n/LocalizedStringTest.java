@@ -6,8 +6,7 @@ import java.util.Locale;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.junit.Test;
-import org.xml.sax.SAXException;
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.test.util.jackson2.Jackson2TestUtil;
 import nl.vpro.test.util.jaxb.JAXBTestUtil;
