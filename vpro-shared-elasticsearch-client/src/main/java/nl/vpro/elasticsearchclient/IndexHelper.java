@@ -1,21 +1,16 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Suppliers;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import nl.vpro.elasticsearch.CreateIndex;
-import nl.vpro.elasticsearch.ElasticSearchIndex;
-import nl.vpro.elasticsearch.IndexHelperInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.Version;
+import lombok.*;
+
+import java.io.*;
+import java.net.ConnectException;
+import java.net.URLEncoder;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
@@ -24,25 +19,21 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.slf4j.*;
 import org.slf4j.event.Level;
 
-import java.io.*;
-import java.net.ConnectException;
-import java.net.URLEncoder;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.ObjIntConsumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Suppliers;
+
+import nl.vpro.elasticsearch.*;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.TimeUtils;
+import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
@@ -448,23 +439,28 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private Supplier<Map<String, String>> unaliasing;
     public String unalias(String alias) {
         if (unaliasing == null) {
-            unaliasing = Suppliers.memoizeWithExpiration(() -> {
-                Map<String, String> result = new HashMap<>();
-                try {
-                    Request request = new Request(GET, "_cat/aliases");
-                    request.setOptions(request.getOptions().toBuilder().addHeader("accept", "application/json"));
+            if (clientFactory == null) {
+                log.warn("No client factory, can't implicitely unalias");
+                unaliasing = HashMap::new;
+            } else {
+                unaliasing = Suppliers.memoizeWithExpiration(() -> {
+                    Map<String, String> result = new HashMap<>();
+                    try {
+                        Request request = new Request(GET, "_cat/aliases");
+                        request.setOptions(request.getOptions().toBuilder().addHeader("accept", "application/json"));
 
-                    Response response = client().performRequest(request);
-                    ArrayNode read = readArray(response);
-                    for (JsonNode i : read) {
-                        result.put(i.get("alias").textValue(), i.get(INDEX).textValue());
+                        Response response = client().performRequest(request);
+                        ArrayNode read = readArray(response);
+                        for (JsonNode i : read) {
+                            result.put(i.get("alias").textValue(), i.get(INDEX).textValue());
+                        }
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+
                     }
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-
-                }
-                return result;
-            }, 10, TimeUnit.MINUTES);
+                    return result;
+                }, 10, TimeUnit.MINUTES);
+            }
         }
         return unaliasing.get().getOrDefault(alias, alias);
 
