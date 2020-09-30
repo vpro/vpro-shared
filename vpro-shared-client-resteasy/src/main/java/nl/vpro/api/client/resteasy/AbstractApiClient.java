@@ -119,11 +119,39 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected boolean registerMBean = false;
 
     @Getter
-    protected  Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
+    protected Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
 
     protected ClassLoader classLoader;
 
     protected final String userAgent;
+
+
+    @Deprecated
+    protected AbstractApiClient(
+        String baseUrl,
+        Duration connectionRequestTimeout,
+        Duration connectTimeout,
+        Duration socketTimeout,
+        Integer maxConnections,
+        Integer maxConnectionsPerRoute,
+        Integer maxConnectionsNoTimeout,
+        Integer maxConnectionsPerRouteNoTimeout,
+        Duration connectionInPoolTTL,
+        Duration countWindow,
+        Integer bucketCount,
+        Duration warnThreshold,
+        List<Locale> acceptableLanguages,
+        MediaType accept,
+        MediaType contentType,
+        Boolean trustAll,
+        Jackson2Mapper objectMapper,
+        String mbeanName,
+        ClassLoader classLoader,
+        String userAgent,
+        Boolean registerMBean
+    ) {
+        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, connectionInPoolTTL, null, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, contentType, trustAll, objectMapper, mbeanName, classLoader, userAgent, registerMBean);
+    }
 
     protected AbstractApiClient(
         String baseUrl,
