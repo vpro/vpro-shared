@@ -37,22 +37,31 @@ import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.jboss.resteasy.client.jaxrs.*;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.jmx.*;
+import nl.vpro.jmx.CountAspect;
+import nl.vpro.jmx.Counter;
+import nl.vpro.jmx.MBeans;
 import nl.vpro.rs.client.*;
-import nl.vpro.util.*;
+import nl.vpro.util.LeaveDefaultsProxyHandler;
+import nl.vpro.util.ThreadPools;
+import nl.vpro.util.TimeUtils;
+import nl.vpro.util.XTrustProvider;
 
 /**
  * @author Roelof Jan Koekoek
@@ -85,7 +94,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Integer maxConnectionsNoTimeout;
     protected Integer maxConnectionsPerRouteNoTimeout;
 
+
     protected Duration connectionInPoolTTL;
+    protected Duration validateAfterInactivity;
+
     protected final Map<String, Counter> counter = new HashMap<>();
     protected Duration countWindow = Duration.ofHours(24);
     protected Integer bucketCount = 24;
@@ -123,6 +135,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         Integer maxConnectionsNoTimeout,
         Integer maxConnectionsPerRouteNoTimeout,
         Duration connectionInPoolTTL,
+        Duration validateAfterInactivity,
         Duration countWindow,
         Integer bucketCount,
         Duration warnThreshold,
@@ -145,6 +158,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         this.maxConnectionsNoTimeout = maxConnectionsNoTimeout == null ? 3 : maxConnectionsNoTimeout;
         this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout == null ? 3 : maxConnectionsPerRouteNoTimeout;
         this.connectionInPoolTTL = connectionInPoolTTL;
+        this.validateAfterInactivity = validateAfterInactivity;
         setBaseUrl(baseUrl);
         this.countWindow = countWindow == null ? this.countWindow : countWindow;
         this.bucketCount = bucketCount == null ? this.bucketCount : bucketCount;
@@ -181,6 +195,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         }
         return properties.getProperty(prop);
     }
+
     public static String getUserAgent(final String name, final String version) {
         final String javaVersion = System.getProperty("java.version");
         return String.format("%s/%s (Java/%s)", name, version, javaVersion);
@@ -343,8 +358,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         Duration connectTimeout,
         Duration socketTimeout,
         Integer maxConnections,
-        Integer  maxConnectionsPerRoute,
-        Duration connectionInPoolTTL) {
+        Integer maxConnectionsPerRoute,
+        Duration connectionInPoolTTL,
+        Duration validateAfterInactivity) {
         SocketConfig socketConfig = SocketConfig.custom()
             .setTcpNoDelay(true)
             .setSoKeepAlive(true)
@@ -358,8 +374,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         if (maxConnectionsPerRoute == null) {
             maxConnectionsPerRoute = 0;
         }
+        // Why is connectionInPoolTTL the criterion to check?
         if (connectionInPoolTTL != null) {
             connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
+            connectionManager.setValidateAfterInactivity((int) validateAfterInactivity.toMillis());
+
             if (maxConnections > 0) {
                 connectionManager.setMaxTotal(maxConnections);
             }
@@ -418,7 +437,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL), false);
+            clientHttpEngine = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, validateAfterInactivity), false);
 
         }
         return clientHttpEngine;
@@ -426,7 +445,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null), false);
+            clientHttpEngineNoTimeout = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null, validateAfterInactivity), false);
         }
         return clientHttpEngineNoTimeout;
     }
@@ -490,7 +509,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
     public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
-        if (! Objects.equals(this.connectionInPoolTTL, connectionInPoolTTL)) {
+        if (!Objects.equals(this.connectionInPoolTTL, connectionInPoolTTL)) {
             this.connectionInPoolTTL = connectionInPoolTTL;
             clientHttpEngine = null;
             invalidate();
@@ -501,6 +520,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     public String getCountWindowString() {
         return countWindow.toString();
     }
+
     @Override
     public void setCountWindowString(String countWindow) {
         Duration toSet = TimeUtils.parseDuration(countWindow).orElse(Duration.ofSeconds(30));
@@ -708,7 +728,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
      * For further building the client you can override this method.
      * If you need more control you can also use the several 'buildFurther' arguments.
      */
-    protected  void buildResteasy(ResteasyClientBuilder builder) {
+    protected void buildResteasy(ResteasyClientBuilder builder) {
 
     }
 
