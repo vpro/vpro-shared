@@ -2,6 +2,7 @@ package nl.vpro.util.picocli;
 
 import picocli.CommandLine;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import nl.vpro.util.*;
@@ -30,6 +31,13 @@ public class Picocli {
         @Override
         public Instant convert(String value) {
             return TimeUtils.parse(value).orElse(Instant.now());
+        }
+    }
+
+    public static class DurationConverter implements CommandLine.ITypeConverter<Duration> {
+        @Override
+        public Duration convert(String value) {
+            return TimeUtils.parseDuration(value).orElseThrow(() -> new IllegalArgumentException(value));
         }
     }
 
