@@ -155,6 +155,7 @@ public class Jackson2Mapper extends ObjectMapper {
             log.warn(noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
 
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+            //noinspection deprecation
             mapper.enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
         }
 
