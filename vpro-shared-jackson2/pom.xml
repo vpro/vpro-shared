@@ -70,5 +70,20 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <optional>true</optional>
+    </dependency>
+     <dependency>
+       <groupId>com.sun.xml.bind</groupId>
+       <artifactId>jaxb-impl</artifactId>
+       <scope>test</scope>
+    </dependency>
+     <dependency>
+       <groupId>com.sun.xml.bind</groupId>
+       <artifactId>jaxb-core</artifactId>
+       <scope>test</scope>
+     </dependency>
   </dependencies>
 </project>
