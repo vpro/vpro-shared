@@ -1,9 +1,11 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,11 +28,37 @@ public class BulkRequestEntry {
     final Map<String, String> mdc;
     final String id;
 
-    public BulkRequestEntry(ObjectNode action, ObjectNode source, UnaryOperator<String> unalias, Map<String, String> mdc) {
+    @Getter
+    @Setter
+    Consumer<ObjectNode> sourceConsumer;
+
+
+    public BulkRequestEntry(
+        ObjectNode action,
+        ObjectNode source,
+        UnaryOperator<String> unalias,
+        Map<String, String> mdc) {
+        this(action, source, unalias, mdc, null);
+    }
+    @lombok.Builder
+    BulkRequestEntry(
+        ObjectNode action,
+        ObjectNode source,
+        UnaryOperator<String> unalias,
+        Map<String, String> mdc,
+        Consumer<ObjectNode> sourceConsumer) {
         this.action = action;
         this.source = source;
         this.mdc = mdc;
         this.id = idFromActionNode(action, unalias);
+        this.sourceConsumer = sourceConsumer;
+    }
+
+
+    public void use() {
+        if (sourceConsumer != null) {
+            sourceConsumer.accept(source);
+        }
     }
 
     public static String idFromActionNode(ObjectNode action) {
