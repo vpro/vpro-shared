@@ -70,8 +70,8 @@ public interface TriPredicate<T, U, V> {
         return (T t, U u, V v) -> test(t, u, v) || other.test(t, u, v);
     }
 
-    default BiPredicate<T, V> withArg1(U u) {
-        return (t, v) -> test(t, u, v);
+    default BiPredicate<U, V> withArg1(T t) {
+        return (u, v) -> test(t, u, v);
     }
 
     default BiPredicate<T, V> withArg2(U u) {
