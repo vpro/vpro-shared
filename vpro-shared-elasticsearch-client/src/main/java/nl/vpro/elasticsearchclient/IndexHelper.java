@@ -985,12 +985,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
 
 
-          ObjectNode objectNode  = objectMapper.valueToTree(o);
-        for (Consumer<ObjectNode> c : consumers) {
-            c.accept(objectNode);
-        }
-
-        return new BulkRequestEntry(actionLine, objectNode, this::unalias, mdcSupplier.get());
+        ObjectNode objectNode  = objectMapper.valueToTree(o);
+        return new BulkRequestEntry(actionLine, objectNode, this::unalias, mdcSupplier.get(), (on) -> {
+            for (Consumer<ObjectNode> c : consumers) {
+                c.accept(on);
+            }
+        });
     }
 
     @SafeVarargs
@@ -1002,12 +1002,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         update.put(RETRY_ON_CONFLICT, 3);
         ObjectNode updateNode  = objectMapper.createObjectNode();
         ObjectNode objectNode = objectMapper.valueToTree(o);
-        for (Consumer<ObjectNode> c : consumers) {
-            c.accept(objectNode);
-        }
+
         updateNode.set(Fields.DOC, objectNode);
         updateNode.put(Fields.DOC_AS_UPSERT, false);
-        return new BulkRequestEntry(actionLine, updateNode, this::unalias, mdcSupplier.get());
+        return new BulkRequestEntry(actionLine, updateNode, this::unalias, mdcSupplier.get(), (on) -> {
+            for (Consumer<ObjectNode> c : consumers) {
+                c.accept(on);
+            }
+        });
     }
 
     /**
@@ -1026,7 +1028,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public BulkRequestEntry deleteRequest(String type, String id) {
         return _deleteRequest(type, id);
