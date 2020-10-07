@@ -1,6 +1,5 @@
 package nl.vpro.util;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -15,14 +14,13 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {
 
-    void accept(T t, U u, V v) throws IOException;
+    void accept(T t, U u, V v);
 
     /**
      * @see Consumer#andThen(java.util.function.Consumer)
      */
     default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
         Objects.requireNonNull(after);
-
         return (t, u, v ) -> {
             accept(t, u, v);
             after.accept(t, u, v);
