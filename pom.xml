@@ -61,6 +61,7 @@
     <module>vpro-shared-hibernate-search</module>
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-logging</module>
+    <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-resteasy</module>
     <module>vpro-shared-rs</module>
@@ -736,7 +737,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.1.0</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
