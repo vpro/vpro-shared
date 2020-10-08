@@ -114,6 +114,11 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-monitoring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-persistence</artifactId>
         <version>${project.version}</version>
       </dependency>
