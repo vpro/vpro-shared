@@ -1,6 +1,5 @@
 package nl.vpro.monitoring.web;
 
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.MediaType;
@@ -17,13 +16,13 @@ public class HealthController {
     private Status status = Status.STARTING;
 
     @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent contextStartedEvent) {
-        status = Status.STARTED;
+    public void onApplicationEvent(ContextRefreshedEvent refreshedEvent) {
+        status = Status.READY;
     }
 
     @EventListener
     public void onApplicationEvent(ContextStoppedEvent stoppedEvent) {
-        status = Status.STOPPED;
+        status = Status.STOPPING;
     }
 
     @GetMapping
@@ -33,8 +32,8 @@ public class HealthController {
 
     private enum Status {
         STARTING(503, "Application starting"),
-        STARTED(200, "Application ready"),
-        STOPPED(503, "Application shutdown");
+        READY(200, "Application ready"),
+        STOPPING(503, "Application shutdown");
 
         int code;
         String message;
