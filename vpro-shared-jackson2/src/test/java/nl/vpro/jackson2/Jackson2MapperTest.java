@@ -5,12 +5,13 @@ import java.util.Optional;
 
 import javax.xml.bind.annotation.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class Jackson2MapperTest {
 
@@ -30,11 +31,11 @@ public class Jackson2MapperTest {
 
         @XmlElement
         Optional<Integer> optional;
-
     }
+
     @Test
     public void read() throws IOException {
-        A a = Jackson2Mapper.getInstance().readValue("{'integer': 2 /* ignore comments */, 'optional': 3}", A.class);
+        A a = Jackson2Mapper.getInstance().readValue("/* leading comments */\n{'integer': 2 /* ignore comments */, 'optional': 3}", A.class);
         assertThat(a.integer).isEqualTo(2);
         assertThat(a.optional).isPresent();
         assertThat(a.optional.get()).isEqualTo(3);
@@ -53,10 +54,12 @@ public class Jackson2MapperTest {
         assertThat(a.enumValue).isEqualTo(EnumValues.a);
     }
 
-    @Test(expected = InvalidFormatException.class)
+    @Test
     public void readUnknownEnumValue() throws IOException {
-        A a = Jackson2Mapper.getInstance().readValue("{'enumValue': 'c'}", A.class);
-        assertThat(a.enumValue).isNull();
+        assertThatThrownBy(() -> {
+            A a = Jackson2Mapper.getInstance().readValue("{'enumValue': 'c'}", A.class);
+            assertThat(a.enumValue).isNull();
+        }).isInstanceOf(InvalidFormatException.class);
     }
 
     @Test
