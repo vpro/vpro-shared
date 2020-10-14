@@ -170,6 +170,10 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
 
 
+        //SimpleModule module = new SimpleModule();
+        //module.setDeserializerModifier(new AfterUnmarshalModifier());
+        //mapper.registerModule(module);
+
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
             mapper.registerModule((com.fasterxml.jackson.databind.Module) avro.newInstance());
