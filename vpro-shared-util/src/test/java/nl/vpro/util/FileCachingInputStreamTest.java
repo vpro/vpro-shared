@@ -305,9 +305,10 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
-                .initialBuffer(2048)
+                //.initialBuffer(2048)
                 .build()) {
 
+            assertThat(inputStream.getBufferLength()).isEqualTo(HELLO.length);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
