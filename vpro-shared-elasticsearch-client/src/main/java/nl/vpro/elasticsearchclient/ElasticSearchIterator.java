@@ -326,34 +326,35 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
             }
 
-            HttpEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON);
-            StringBuilder builder = new StringBuilder();
-            if (! indices.isEmpty()) {
-                builder.append(String.join(",", indices));
-            }
-            if (!types.isEmpty()) {
-                if (builder.length() > 0) {
-                    builder.append("/");
+            try(NStringEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON)) {
+                StringBuilder builder = new StringBuilder();
+                if (!indices.isEmpty()) {
+                    builder.append(String.join(",", indices));
                 }
-                builder.append(String.join(",", types));
-            }
-            builder.append("/_search");
-            start = Instant.now();
-            Request post = new Request("POST", builder.toString());
-            post.setEntity(entity);
-            post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
-            post.addParameter(VERSION, String.valueOf(this.requestVersion));
-            if (routing != null) {
-                post.addParameter("routing", String.join(",", routing));
-            }
+                if (!types.isEmpty()) {
+                    if (builder.length() > 0) {
+                        builder.append("/");
+                    }
+                    builder.append(String.join(",", types));
+                }
+                builder.append("/_search");
+                start = Instant.now();
+                Request post = new Request("POST", builder.toString());
+                post.setEntity(entity);
+                post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                post.addParameter(VERSION, String.valueOf(this.requestVersion));
+                if (routing != null) {
+                    post.addParameter("routing", String.join(",", routing));
+                }
 
-            HttpEntity responseEntity = null;
-            try {
-                Response res = client.performRequest(post);
-                responseEntity = res.getEntity();
-                response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
-            } finally {
-                EntityUtils.consumeQuietly(responseEntity);
+                HttpEntity responseEntity = null;
+                try {
+                    Response res = client.performRequest(post);
+                    responseEntity = res.getEntity();
+                    response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
+                } finally {
+                    EntityUtils.consumeQuietly(responseEntity);
+                }
             }
 
         } catch (IOException ioe) {
