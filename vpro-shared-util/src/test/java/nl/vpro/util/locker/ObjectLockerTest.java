@@ -133,7 +133,7 @@ public class ObjectLockerTest {
             int depth) {
             this.number = number;
             this.logger = logger;
-            this.sleep = ObjectLockerTest::randomSleep;;
+            this.sleep = ObjectLockerTest::randomSleep;
             this.mid =  () -> mids[random.nextInt(mids.length)];
             this.depth = depth;
         }
@@ -162,7 +162,7 @@ public class ObjectLockerTest {
                     }
 
                 });
-            };
+            }
         }
     }
 

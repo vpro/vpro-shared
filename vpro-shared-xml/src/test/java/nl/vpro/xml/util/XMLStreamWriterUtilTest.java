@@ -44,7 +44,7 @@ public class XMLStreamWriterUtilTest {
 
 
         try (AutoCloseable c1 = util.writeDocument("1.0");
-             AutoCloseable c2 = util.writeElement("a");
+             AutoCloseable c2 = util.writeElement("a")
 
         ) {
             util.writeAttribute("x", "b");
@@ -62,7 +62,7 @@ public class XMLStreamWriterUtilTest {
     @Test
     public void writeWithException() throws Exception {
 
-        try (AutoCloseable c1= util.writeElement("a");) {
+        try (AutoCloseable c1= util.writeElement("a")) {
             util.writeAttribute("x", "b");
             util.writeElement("b");
             util.writeCharacters("BB");

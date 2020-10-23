@@ -17,7 +17,7 @@ public class Jackson2MapperTest {
 
     public enum EnumValues {
         a,
-        b;
+        b
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

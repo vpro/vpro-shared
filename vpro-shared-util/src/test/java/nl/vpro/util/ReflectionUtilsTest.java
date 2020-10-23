@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ReflectionUtilsTest {
 
     public enum AnEnum {
-        X,Y,Z;
+        X,Y,Z
 
     }
     @Getter @Setter

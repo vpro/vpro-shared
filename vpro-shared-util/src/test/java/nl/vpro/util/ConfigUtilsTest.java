@@ -22,7 +22,7 @@ public class ConfigUtilsTest {
 
     public enum E {
         e,
-        f;
+        f
     }
 
     public static class AWithLombok {

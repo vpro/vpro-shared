@@ -53,5 +53,5 @@ public class DateToDurationTest {
         public Date getDuration() {
             return new Date(100);
         }
-    };
+    }
 }

@@ -109,7 +109,7 @@ public class ElasticSearchIteratorITest {
     @Disabled
 
     public void testSources() {
-        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client);) {
+        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client)) {
             i.setJsonRequests(false);
             JsonNode search = i.prepareSearch("pageupdates-publish");
             i.forEachRemaining((node) -> {
@@ -126,7 +126,7 @@ public class ElasticSearchIteratorITest {
     @Disabled
     public void test15() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
-             .sources(client);) {
+             .sources(client)) {
             i.setJsonRequests(false);
             ObjectNode search = i.prepareSearch("apimedia", "program", "group", "segment");
 
@@ -151,7 +151,7 @@ public class ElasticSearchIteratorITest {
             .sourcesBuilder(client)
             .jsonRequests(false)
             .build()
-            ;) {
+        ) {
             i.setJsonRequests(true);
 
             ObjectNode search = i.prepareSearch(index);

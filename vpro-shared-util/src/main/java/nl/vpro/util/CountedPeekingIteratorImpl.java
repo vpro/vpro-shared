@@ -79,5 +79,5 @@ class CountedPeekingIteratorImpl<T> implements  CountedPeekingIterator<T> {
     public CountedPeekingIterator<T> peeking() {
         return this;
     }
-};
+}
 

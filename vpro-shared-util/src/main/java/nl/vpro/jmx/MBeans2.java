@@ -8,8 +8,6 @@ import org.slf4j.event.Level;
 
 import nl.vpro.logging.simple.*;
 
-;
-
 /**
  * See {@link MBeans} but supporting log4j2.
  * @author Michiel Meeuwissen

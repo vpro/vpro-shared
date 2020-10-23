@@ -26,7 +26,7 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     public void accept(Level level, CharSequence message, Throwable t) {
         for (SimpleLogger logger : list) {
             if (logger.isEnabled(level)) {
-                logger.accept(level, message, t);;
+                logger.accept(level, message, t);
             }
         }
     }
@@ -36,7 +36,7 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     public void accept(Level level, CharSequence message) {
         for (SimpleLogger logger : list) {
             if (logger.isEnabled(level)) {
-                logger.accept(level, message);;
+                logger.accept(level, message);
             }
         } }
 

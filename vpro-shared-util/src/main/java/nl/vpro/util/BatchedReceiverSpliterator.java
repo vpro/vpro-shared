@@ -118,8 +118,8 @@ public class BatchedReceiverSpliterator<T> implements Spliterator<T> {
 
 	private enum BatchType {
 		BIFUNCTION,
-		SUPPLIER;
-	}
+		SUPPLIER
+    }
 
 
 	public static class Builder<T>  {
