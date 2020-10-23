@@ -297,17 +297,11 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        try {
-            if (tempFileInputStream == null) {
-                // the stream was small, we are reading from the memory buffer
-                return readFromBuffer();
-            } else {
-                return readFromFile();
-            }
-        } catch (IOException ioe) {
-            close();
-            future.completeExceptionally(ioe);
-            throw ioe;
+        if (tempFileInputStream == null) {
+            // the stream was small, we are reading from the memory buffer
+            return readFromBuffer();
+        } else {
+            return readFromFile();
         }
     }
 
@@ -411,6 +405,11 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+
+    /**
+     *
+     * @see {@link InputStream#read()} This methods must behave exactly according to that.
+     */
     private int readFromFile() throws IOException {
         copier.executeIfNotRunning();
         int result = tempFileInputStream.read();

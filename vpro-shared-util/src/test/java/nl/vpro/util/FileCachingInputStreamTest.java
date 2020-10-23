@@ -374,7 +374,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void ioExceptionFromSource() {
+    public void ioExceptionFromSourceReadBytes() {
         AbstractThrowableAssert<?, ? extends Throwable> o = assertThatThrownBy(() -> {
             int sizeOfStream = 10000;
             try (
@@ -406,6 +406,48 @@ public class FileCachingInputStreamTest {
                     assertThat(n).isNotEqualTo(0);
                     read += n;
                     log.debug("Read {}/{}", n, read);
+                }
+            }
+        })
+            .isInstanceOf(IOException.class)
+            .hasMessage("breaking!");
+            ;
+
+
+    }
+
+    @Test
+    public void ioExceptionFromSourceReadByte() {
+        AbstractThrowableAssert<?, ? extends Throwable> o = assertThatThrownBy(() -> {
+            int sizeOfStream = 10000;
+            try (
+                // an input stream that  will throw IOException when it's busy with file buffering
+                InputStream in = new InputStream() {
+                    private int byteCount = 0;
+
+                    @Override
+                    public int read() throws IOException {
+                        if (byteCount == (sizeOfStream / 2)) {
+                            throw new IOException("breaking!");
+                        }
+                        return byteCount++ < sizeOfStream ? 'a' : -1;
+                    }
+                };
+                FileCachingInputStream stream = FileCachingInputStream.builder()
+                    .outputBuffer(2)
+                    .batchSize(100)
+                    .input(in)
+                    .logger(log)
+                    .initialBuffer(4)
+                    .build()) {
+
+
+                int b;
+                int read = 0;
+                while (IOUtils.EOF != (b = stream.read())) {
+
+                    read++;
+                    log.debug("Read {}", read);
                 }
             }
         })
