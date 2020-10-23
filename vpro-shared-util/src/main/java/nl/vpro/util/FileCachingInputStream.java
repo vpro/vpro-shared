@@ -360,6 +360,11 @@ public class FileCachingInputStream extends InputStream {
         return super.toString() + " for " + tempFile;
     }
 
+
+    /**
+     * Wait until the copier thread read at least the number of bytes given.
+     *
+     */
     public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
         if (copier != null) {
             copier.executeIfNotRunning();
@@ -372,15 +377,24 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    /**
+     * Returns the number of bytes consumed from the input stream so far
+     */
     public long getCount() {
         return copier == null ? bufferLength : copier.getCount();
     }
 
+    /**
+     * If a temp file is used for buffering, you can may obtain it.
+     */
     public Path getTempFile() {
         return tempFile;
     }
 
 
+    /**
+     * One of the paths of {@link #read()}, when it is reading from memory.
+     */
     private int readFromBuffer() {
         if (count < bufferLength) {
             int result = buffer[(int) count++];
@@ -394,6 +408,9 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    /**
+     * One of the paths of {@link #read(byte[])} )}, when it is reading from memory.
+     */
     private int readFromBuffer(byte[] b) {
         int toCopy = Math.min(b.length, bufferLength - (int) count);
         if (toCopy > 0) {
@@ -408,7 +425,7 @@ public class FileCachingInputStream extends InputStream {
 
     /**
      *
-     * @see {@link InputStream#read()} This methods must behave exactly according to that.
+     * See  {@link InputStream#read()} This methods must behave exactly according to that.
      */
     private int readFromFile() throws IOException {
         copier.executeIfNotRunning();
@@ -445,7 +462,7 @@ public class FileCachingInputStream extends InputStream {
 
     /**
      *
-     * @see {@link InputStream#read(byte[])} This methods must behave exactly according to that.
+     * See {@link InputStream#read(byte[])} This methods must behave exactly according to that.
      */
     private int readFromFile(byte[] b) throws IOException {
         copier.executeIfNotRunning();
