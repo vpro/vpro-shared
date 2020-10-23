@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -20,6 +19,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import nl.vpro.logging.Slf4jHelper;
 
