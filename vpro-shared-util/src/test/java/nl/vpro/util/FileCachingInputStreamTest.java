@@ -6,11 +6,11 @@ import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
+import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -174,8 +174,7 @@ public class FileCachingInputStreamTest {
     }
 
     protected FileCachingInputStream slowReader() {
-        return
-        FileCachingInputStream.builder()
+        return FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .batchConsumer((f, c) -> {
@@ -372,6 +371,49 @@ public class FileCachingInputStreamTest {
             assertThat(inputStream.getCount()).isEqualTo(0);
             assertThat(out.toByteArray()).hasSize(0);
         }
+    }
+
+    @Test
+    public void ioExceptionFromSource() {
+        AbstractThrowableAssert<?, ? extends Throwable> o = assertThatThrownBy(() -> {
+            int sizeOfStream = 10000;
+            try (
+                // an input stream that  will throw IOException when it's busy with file buffering
+                InputStream in = new InputStream() {
+                    private int byteCount = 0;
+
+                    @Override
+                    public int read() throws IOException {
+                        if (byteCount == (sizeOfStream / 2)) {
+                            throw new IOException("breaking!");
+                        }
+                        return byteCount++ < sizeOfStream ? 'a' : -1;
+                    }
+                };
+                FileCachingInputStream stream = FileCachingInputStream.builder()
+                    .outputBuffer(2)
+                    .batchSize(100)
+                    .input(in)
+                    .logger(log)
+                    .initialBuffer(4)
+                    .build()) {
+
+                byte[] buffer = new byte[500];
+
+                int n;
+                int read = 0;
+                while (IOUtils.EOF != (n = stream.read(buffer))) {
+                    assertThat(n).isNotEqualTo(0);
+                    read += n;
+                    log.debug("Read {}/{}", n, read);
+                }
+            }
+        })
+            .isInstanceOf(IOException.class)
+            .hasMessage("breaking!");
+            ;
+
+
     }
 
     @Test
