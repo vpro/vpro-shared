@@ -6,13 +6,16 @@ import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.apache.commons.io.IOUtils.EOF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -39,10 +42,11 @@ public class FileCachingInputStreamTest {
         FileCachingInputStream.openStreams = 0;
     }
 
-    @Test
-    public void testRead() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testRead(boolean downloadFirst) throws IOException {
 
-        try(FileCachingInputStream inputStream =  slowReader()) {
+        try(FileCachingInputStream inputStream =  slowReader(downloadFirst)) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -57,10 +61,11 @@ public class FileCachingInputStreamTest {
     }
 
 
-    @Test
-    public void testReadBuffer() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testReadBuffer(boolean downloadFirst) throws IOException {
 
-        try(FileCachingInputStream inputStream = slowReader()) {
+        try(FileCachingInputStream inputStream = slowReader(downloadFirst)) {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -76,7 +81,6 @@ public class FileCachingInputStreamTest {
 
     }
 
-
     @Test
     public void testReadFileGetsBroken()  {
         assertThatThrownBy(() -> {
@@ -85,6 +89,7 @@ public class FileCachingInputStreamTest {
                     .builder()
                     .outputBuffer(2)
                     .batchSize(3)
+                    .downloadFirst(false) // if true exception will come from constructor already
                     .batchConsumer((f, c) -> {
                         if (c.getCount() > 300) {
                             // randomly close the file
@@ -173,7 +178,7 @@ public class FileCachingInputStreamTest {
         assertThat(isInterrupted).withFailMessage("Thread did not get interrupted").isTrue();
     }
 
-    protected FileCachingInputStream slowReader() {
+    protected FileCachingInputStream slowReader(boolean downloadFirst) {
         return FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -189,6 +194,7 @@ public class FileCachingInputStreamTest {
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .startImmediately(true)
+            .downloadFirst(downloadFirst)
             .build();
     }
 
@@ -250,6 +256,8 @@ public class FileCachingInputStreamTest {
         assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
+
+
     @Test
     public void testSimple() throws IOException {
         try (
@@ -297,14 +305,35 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
-                .initialBuffer(2048)
+                //.initialBuffer(2048)
                 .build()) {
 
+            assertThat(inputStream.getBufferLength()).isEqualTo(HELLO.length);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             IOUtils.copy(inputStream, out);
 
+            assertThat(out.toByteArray()).containsExactly(HELLO);
+        }
+    }
+
+    @Test
+    public void testWithLargeBufferByte() throws IOException {
+        try (
+            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(3)
+                .input(new ByteArrayInputStream(HELLO))
+                .initialBuffer(2048)
+                .build()) {
+
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            int n;
+            while (EOF != (n = inputStream.read())) {
+                out.write(n);
+            }
             assertThat(out.toByteArray()).containsExactly(HELLO);
         }
     }
@@ -374,48 +403,45 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void ioExceptionFromSourceReadBytes() {
-        AbstractThrowableAssert<?, ? extends Throwable> o = assertThatThrownBy(() -> {
-            int sizeOfStream = 10000;
-            try (
-                // an input stream that  will throw IOException when it's busy with file buffering
-                InputStream in = new InputStream() {
-                    private int byteCount = 0;
+    public void ioExceptionFromSourceReadBytes() throws IOException {
+        int sizeOfStream = 10000;
+        try (
+            // an input stream that  will throw IOException when it's busy with file buffering
+            InputStream in = new InputStream() {
+                private int byteCount = 0;
 
-                    @Override
-                    public int read() throws IOException {
-                        if (byteCount == (sizeOfStream / 2)) {
-                            throw new IOException("breaking!");
-                        }
-                        return byteCount++ < sizeOfStream ? 'a' : -1;
+                @Override
+                public int read() throws IOException {
+                    if (byteCount == (sizeOfStream / 2)) {
+                        throw new IOException("breaking!");
                     }
-                };
-                FileCachingInputStream stream = FileCachingInputStream.builder()
-                    .outputBuffer(2)
-                    .batchSize(100)
-                    .input(in)
-                    .logger(log)
-                    .initialBuffer(4)
-                    .build()) {
+                    return byteCount++ < sizeOfStream ? 'a' : -1;
+                }
+            };
+            FileCachingInputStream stream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(100)
+                .input(in)
+                .logger(log)
+                .initialBuffer(4)
+                .build()) {
 
-                byte[] buffer = new byte[500];
+            byte[] buffer = new byte[500];
 
-                int n;
+
+            assertThatThrownBy(() -> {
                 int read = 0;
-                while (IOUtils.EOF != (n = stream.read(buffer))) {
-                    assertThat(n).isNotEqualTo(0);
+                int n;
+                while (EOF != (n = stream.read(buffer))) {
+                    assertThat(n).isNotEqualTo(0); // cannot happen (unless buffer length == 0) according to contract
                     read += n;
                     log.debug("Read {}/{}", n, read);
                 }
-            }
-        })
-            .isInstanceOf(IOException.class)
-            .hasMessage("breaking!");
-            ;
+                }
+            )
+                .isInstanceOf(IOException.class)
+                .hasMessage("breaking!");
 
-
-<<<<<<< HEAD
-=======
             assertThat(stream.getFuture()).isCompletedExceptionally();
             assertThat(stream.available()).isEqualTo(0);
             assertThat(stream.getCopier().isReady()).isTrue();
@@ -425,56 +451,43 @@ public class FileCachingInputStreamTest {
                 .hasMessage("breaking!");
 
         }
->>>>>>> f025fe60... MSE-4945 details.
     }
 
     @Test
-    public void ioExceptionFromSourceReadByte() {
-        AbstractThrowableAssert<?, ? extends Throwable> o = assertThatThrownBy(() -> {
-            int sizeOfStream = 10000;
-            try (
-                // an input stream that  will throw IOException when it's busy with file buffering
-                InputStream in = new InputStream() {
-                    private int byteCount = 0;
+    public void ioExceptionFromSourceReadByte() throws IOException {
+        int sizeOfStream = 10000;
+        try (
+            // an input stream that  will throw IOException when it's busy with file buffering
+            InputStream in = new InputStream() {
+                private int byteCount = 0;
 
-                    @Override
-                    public int read() throws IOException {
-                        if (byteCount == (sizeOfStream / 2)) {
-                            throw new IOException("breaking!");
-                        }
-                        return byteCount++ < sizeOfStream ? 'a' : -1;
+                @Override
+                public int read() throws IOException {
+                    if (byteCount == (sizeOfStream / 2)) {
+                        throw new IOException("breaking!");
                     }
-                };
-                FileCachingInputStream stream = FileCachingInputStream.builder()
-                    .outputBuffer(2)
-                    .batchSize(100)
-                    .input(in)
-                    .logger(log)
-                    .initialBuffer(4)
-                    .build()) {
+                    return byteCount++ < sizeOfStream ? 'a' : -1;
+                }
+            };
+            FileCachingInputStream stream = FileCachingInputStream.builder()
+                .outputBuffer(200)
+                .batchSize(100)
+                .input(in)
+                .logger(log)
+                .initialBuffer(4)
+                .build()) {
 
-
-<<<<<<< HEAD
-                int b;
-                int read = 0;
-                while (IOUtils.EOF != (b = stream.read())) {
-
-=======
             assertThatThrownBy(() -> {
                 int read = 0;
                 while (EOF != (stream.read())) {
->>>>>>> f025fe60... MSE-4945 details.
                     read++;
                     log.debug("Read {}", read);
                 }
-            }
-        })
-            .isInstanceOf(IOException.class)
-            .hasMessage("breaking!");
-            ;
-
-
+            }).isInstanceOf(IOException.class)
+                .hasMessage("breaking!");
+        }
     }
+
 
     @Test
     public void createPath() {

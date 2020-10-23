@@ -47,6 +47,8 @@ public class FileCachingInputStream extends InputStream {
     @VisibleForTesting
     private final Copier copier;
     private final byte[] buffer;
+    @Getter(AccessLevel.PACKAGE)
+    @VisibleForTesting
     private final int bufferLength;
 
 
