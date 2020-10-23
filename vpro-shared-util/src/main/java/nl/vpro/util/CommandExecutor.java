@@ -4,10 +4,12 @@ import lombok.Getter;
 import lombok.Singular;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.output.WriterOutputStream;
@@ -65,7 +67,7 @@ public interface CommandExecutor {
     }
 
     default int execute(Writer out, String... args) {
-        return execute(new WriterOutputStream(out, "UTF-8"), LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+        return execute(new WriterOutputStream(out, StandardCharsets.UTF_8), LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
     }
 
 
@@ -98,7 +100,7 @@ public interface CommandExecutor {
     * @param callback will be called when ready.
     * @return A future producing the result code.
     */
-    default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, Consumer<Integer> callback, String... args) {
+    default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, IntConsumer callback, String... args) {
         return submit(callback, Parameters.builder()
             .in(in)
             .out(out)
@@ -107,12 +109,12 @@ public interface CommandExecutor {
             .build());
 
     }
-    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Parameters.Builder parameters) {
+    default CompletableFuture<Integer> submit(IntConsumer callback, Parameters.Builder parameters) {
         return submit(callback, parameters.build());
     }
 
 
-    default CompletableFuture<Integer> submit(Consumer<Integer> callback, Parameters parameters) {
+    default CompletableFuture<Integer> submit(IntConsumer callback, Parameters parameters) {
         return CompletableFuture.supplyAsync(() -> {
             Integer result = null;
             try {
@@ -234,7 +236,7 @@ public interface CommandExecutor {
     }
 
     /**
-     * The parameters of {@link #submit(Consumer, Parameters)}.
+     * The parameters of {@link #submit(IntConsumer, Parameters)}.
      */
     class Parameters {
         /**
@@ -268,7 +270,7 @@ public interface CommandExecutor {
                 return this;
             }
 
-            public CompletableFuture<Integer> submit(Consumer<Integer> exitCode, CommandExecutor executor) {
+            public CompletableFuture<Integer> submit(IntConsumer exitCode, CommandExecutor executor) {
                 return executor.submit(exitCode, this);
 
             }
