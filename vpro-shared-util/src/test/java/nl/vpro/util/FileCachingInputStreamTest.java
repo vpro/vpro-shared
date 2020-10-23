@@ -374,46 +374,48 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void ioExceptionFromSourceReadBytes() {
-        AbstractThrowableAssert<?, ? extends Throwable> o = assertThatThrownBy(() -> {
-            int sizeOfStream = 10000;
-            try (
-                // an input stream that  will throw IOException when it's busy with file buffering
-                InputStream in = new InputStream() {
-                    private int byteCount = 0;
+    public void ioExceptionFromSourceReadBytes() throws IOException {
+        int sizeOfStream = 10000;
+        try (
+            // an input stream that  will throw IOException when it's busy with file buffering
+            InputStream in = new InputStream() {
+                private int byteCount = 0;
 
-                    @Override
-                    public int read() throws IOException {
-                        if (byteCount == (sizeOfStream / 2)) {
-                            throw new IOException("breaking!");
-                        }
-                        return byteCount++ < sizeOfStream ? 'a' : -1;
+                @Override
+                public int read() throws IOException {
+                    if (byteCount == (sizeOfStream / 2)) {
+                        throw new IOException("breaking!");
                     }
-                };
-                FileCachingInputStream stream = FileCachingInputStream.builder()
-                    .outputBuffer(2)
-                    .batchSize(100)
-                    .input(in)
-                    .logger(log)
-                    .initialBuffer(4)
-                    .build()) {
+                    return byteCount++ < sizeOfStream ? 'a' : -1;
+                }
+            };
+            FileCachingInputStream stream = FileCachingInputStream.builder()
+                .outputBuffer(2)
+                .batchSize(100)
+                .input(in)
+                .logger(log)
+                .initialBuffer(4)
+                .build()) {
 
-                byte[] buffer = new byte[500];
+            byte[] buffer = new byte[500];
 
-                int n;
+
+            assertThatThrownBy(() -> {
                 int read = 0;
+                int n;
                 while (IOUtils.EOF != (n = stream.read(buffer))) {
                     assertThat(n).isNotEqualTo(0);
                     read += n;
                     log.debug("Read {}/{}", n, read);
                 }
-            }
-        })
-            .isInstanceOf(IOException.class)
-            .hasMessage("breaking!");
-            ;
+                }
+            )
+                .isInstanceOf(IOException.class)
+                .hasMessage("breaking!");
 
-
+            assertThat(stream.getFuture()).isCompletedExceptionally();
+            assertThat(stream.available()).isEqualTo(0);
+        }
     }
 
     @Test
