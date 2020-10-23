@@ -433,7 +433,7 @@ public class FileCachingInputStreamTest {
                 int read = 0;
                 int n;
                 while (EOF != (n = stream.read(buffer))) {
-                    assertThat(n).isNotEqualTo(0);
+                    assertThat(n).isNotEqualTo(0); // cannot happen (unless buffer length == 0) according to contract
                     read += n;
                     log.debug("Read {}/{}", n, read);
                 }
