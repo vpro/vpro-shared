@@ -42,6 +42,8 @@ public class FileCachingInputStream extends InputStream {
     private static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
 
     private static final int EOF = -1;
+    @Getter(AccessLevel.PACKAGE)
+    @VisibleForTesting
     private final Copier copier;
     private final byte[] buffer;
     private final int bufferLength;

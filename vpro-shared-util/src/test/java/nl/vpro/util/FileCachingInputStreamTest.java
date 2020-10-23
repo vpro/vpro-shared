@@ -414,6 +414,18 @@ public class FileCachingInputStreamTest {
             ;
 
 
+<<<<<<< HEAD
+=======
+            assertThat(stream.getFuture()).isCompletedExceptionally();
+            assertThat(stream.available()).isEqualTo(0);
+            assertThat(stream.getCopier().isReady()).isTrue();
+            assertThatThrownBy(() -> {
+                stream.getCopier().isReadyIOException();
+            }) .isInstanceOf(IOException.class)
+                .hasMessage("breaking!");
+
+        }
+>>>>>>> f025fe60... MSE-4945 details.
     }
 
     @Test
@@ -442,10 +454,16 @@ public class FileCachingInputStreamTest {
                     .build()) {
 
 
+<<<<<<< HEAD
                 int b;
                 int read = 0;
                 while (IOUtils.EOF != (b = stream.read())) {
 
+=======
+            assertThatThrownBy(() -> {
+                int read = 0;
+                while (EOF != (stream.read())) {
+>>>>>>> f025fe60... MSE-4945 details.
                     read++;
                     log.debug("Read {}", read);
                 }

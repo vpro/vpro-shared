@@ -4,6 +4,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -142,19 +143,26 @@ public class Copier implements Runnable, Closeable {
         }
     }
 
+
+    /**
+     * Checks whether this copier is ready. You may want to check {@link #getException()} or use {@link #isReadyIOException()} to deal with unsuccessfull terminations
+     */
     public boolean isReady() {
-        try {
-            return isReadyIOException();
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
-        }
+        return ready;
     }
 
+    /**
+     * Checks whether this copier is ready, but will throw an {@link IOException} it it did not _successfully_ finish.
+     */
     public boolean isReadyIOException() throws IOException {
         if (ready) {
             throwIOExceptionIfNeeded();
         }
         return ready;
+    }
+
+    public Optional<Throwable> getException() {
+        return Optional.ofNullable(expection);
     }
 
     private void throwIOExceptionIfNeeded() throws IOException {
