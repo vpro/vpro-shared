@@ -313,18 +313,10 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public int read(@NonNull byte[] b) throws IOException {
-        try {
-            if (tempFileInputStream == null) {
-                return readFromBuffer(b);
-            } else {
-                return readFromFile(b);
-            }
-        } catch (IOException ioe) {
-            if (! closed) {
-                close();
-            }
-            future.completeExceptionally(ioe);
-            throw ioe;
+        if (tempFileInputStream == null) {
+            return readFromBuffer(b);
+        } else {
+            return readFromFile(b);
         }
     }
 
@@ -424,7 +416,7 @@ public class FileCachingInputStream extends InputStream {
         int result = tempFileInputStream.read();
         while (result == EOF) {
             synchronized (copier) {
-                while (!copier.isReady() && result == EOF) {
+                while (!copier.isReadyIOException() && result == EOF) {
                     log.debug("Copier {} not yet ready", copier.logPrefix());
                     // copier is still busy, wait a second, and try again.
                     try {
@@ -437,7 +429,7 @@ public class FileCachingInputStream extends InputStream {
                     }
                     result = tempFileInputStream.read();
                 }
-                if (copier.isReady() && result == EOF) {
+                if (copier.isReadyIOException() && result == EOF) {
                     // the copier did not return any new results
                     // don't increase count but return now.
                     return EOF;
@@ -452,9 +444,13 @@ public class FileCachingInputStream extends InputStream {
         return result;
     }
 
+    /**
+     *
+     * @see {@link InputStream#read(byte[])} This methods must behave exactly according to that.
+     */
     private int readFromFile(byte[] b) throws IOException {
         copier.executeIfNotRunning();
-        if (copier.isReady() && count == copier.getCount()) {
+        if (copier.isReadyIOException() && count == copier.getCount()) {
             return EOF;
         }
         int totalResult = 0;
@@ -463,7 +459,7 @@ public class FileCachingInputStream extends InputStream {
 
             if (totalResult == 0) {
 
-                while (!copier.isReady() && totalResult == 0) {
+                while (!copier.isReadyIOException() && totalResult == 0) {
                     log.debug("Copier {} not yet ready", copier.logPrefix());
                     try {
                         copier.wait(1000);
@@ -473,13 +469,17 @@ public class FileCachingInputStream extends InputStream {
                         throw new InterruptedIOException(e.getMessage());
                     }
                     int subResult = Math.max(tempFileInputStream.read(b, totalResult, b.length - totalResult), 0);
-                      totalResult += subResult;
+                    totalResult += subResult;
+                }
+                if (totalResult == 0) {
+                    // I doubt this can happen
+                    return EOF;
                 }
 
             }
             count += totalResult;
         }
-
+        assert totalResult != 0;
         //log.debug("returning {} bytes", totalResult);
         return totalResult;
     }
