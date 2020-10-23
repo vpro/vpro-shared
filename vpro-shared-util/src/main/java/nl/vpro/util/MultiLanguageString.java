@@ -19,6 +19,7 @@ import org.slf4j.helpers.MessageFormatter;
  * @since 0.47
  * @deprecated Moved to nl.vpro.i18n.MultiLanguageString
  */
+@Deprecated
 public class MultiLanguageString implements CharSequence {
 
     public static final Locale DEFAULT = new Locale("nl");
