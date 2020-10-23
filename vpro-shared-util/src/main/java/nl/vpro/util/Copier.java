@@ -22,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 public class Copier implements Runnable, Closeable {
 
     private boolean ready;
+    private Throwable errors;
     private long count;
 
     private final InputStream input;
@@ -32,7 +33,6 @@ public class Copier implements Runnable, Closeable {
     private final Consumer<Copier> batchConsumer;
     private Future<?> future;
     private final String name;
-
     private final Object notify;
 
 
@@ -107,26 +107,27 @@ public class Copier implements Runnable, Closeable {
                 }
             }
         } catch (IOException ioe) {
-            if (errorHandler != null) {
-                errorHandler.accept(this, ioe);
-            }
+            errors = ioe;
+            log.debug(ioe.getMessage());
         } catch (Throwable t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
                 log.warn("{}Connector {}\n{} {}", logPrefix(), toString(), t.getClass().getName(), t.getMessage());
             }
-            if (errorHandler != null) {
-                errorHandler.accept(this, t);
-            }
-
+            errors = t;
         } finally {
             synchronized (this) {
                 ready = true;
+                // The copier is ready, but resulted some error, the user requested to be called back, so do that now
+                if (errorHandler != null && errors != null) {
+                    errorHandler.accept(this, errors);
+                }
                 log.debug("{}notifying listeners", logPrefix());
             }
             if (callback != null) {
                 callback.accept(this);
             }
             synchronized (this) {
+                // ready now, notify threads waiting
                 notifyAll();
             }
 
@@ -142,7 +143,28 @@ public class Copier implements Runnable, Closeable {
     }
 
     public boolean isReady() {
+        try {
+            return isReadyIOException();
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    public boolean isReadyIOException() throws IOException {
+        if (ready) {
+            throwIOExceptionIfNeeded();
+        }
         return ready;
+    }
+
+    private void throwIOExceptionIfNeeded() throws IOException {
+        if (errors != null) {
+            if (errors instanceof IOException) {
+                throw (IOException) errors;
+            } else {
+                throw new IOException(errors);
+            }
+        }
     }
 
 
