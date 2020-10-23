@@ -22,7 +22,7 @@ import org.apache.commons.io.IOUtils;
 public class Copier implements Runnable, Closeable {
 
     private boolean ready;
-    private Throwable errors;
+    private Throwable expection;
     private long count;
 
     private final InputStream input;
@@ -107,19 +107,19 @@ public class Copier implements Runnable, Closeable {
                 }
             }
         } catch (IOException ioe) {
-            errors = ioe;
+            expection = ioe;
             log.debug(ioe.getMessage());
         } catch (Throwable t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
                 log.warn("{}Connector {}\n{} {}", logPrefix(), toString(), t.getClass().getName(), t.getMessage());
             }
-            errors = t;
+            expection = t;
         } finally {
             synchronized (this) {
                 ready = true;
                 // The copier is ready, but resulted some error, the user requested to be called back, so do that now
-                if (errorHandler != null && errors != null) {
-                    errorHandler.accept(this, errors);
+                if (errorHandler != null && expection != null) {
+                    errorHandler.accept(this, expection);
                 }
                 log.debug("{}notifying listeners", logPrefix());
             }
@@ -158,16 +158,19 @@ public class Copier implements Runnable, Closeable {
     }
 
     private void throwIOExceptionIfNeeded() throws IOException {
-        if (errors != null) {
-            if (errors instanceof IOException) {
-                throw (IOException) errors;
+        if (expection != null) {
+            if (expection instanceof IOException) {
+                throw (IOException) expection;
             } else {
-                throw new IOException(errors);
+                throw new IOException(expection);
             }
         }
     }
 
 
+    /**
+     * Returns the number of bytes read from the input stream so far
+     */
     public long getCount() {
         return count;
     }
