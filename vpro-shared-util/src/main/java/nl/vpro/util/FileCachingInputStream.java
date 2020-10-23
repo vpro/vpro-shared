@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -20,6 +19,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import nl.vpro.logging.Slf4jHelper;
 
@@ -44,6 +45,8 @@ public class FileCachingInputStream extends InputStream {
     private static final int EOF = -1;
     private final Copier copier;
     private final byte[] buffer;
+    @Getter(AccessLevel.PACKAGE)
+    @VisibleForTesting
     private final int bufferLength;
 
 
@@ -297,34 +300,20 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        try {
-            if (tempFileInputStream == null) {
-                // the stream was small, we are reading from the memory buffer
-                return readFromBuffer();
-            } else {
-                return readFromFile();
-            }
-        } catch (IOException ioe) {
-            close();
-            future.completeExceptionally(ioe);
-            throw ioe;
+        if (tempFileInputStream == null) {
+            // the stream was small, we are reading from the memory buffer
+            return readFromBuffer();
+        } else {
+            return readFromFile();
         }
     }
 
     @Override
     public int read(@NonNull byte[] b) throws IOException {
-        try {
-            if (tempFileInputStream == null) {
-                return readFromBuffer(b);
-            } else {
-                return readFromFile(b);
-            }
-        } catch (IOException ioe) {
-            if (! closed) {
-                close();
-            }
-            future.completeExceptionally(ioe);
-            throw ioe;
+        if (tempFileInputStream == null) {
+            return readFromBuffer(b);
+        } else {
+            return readFromFile(b);
         }
     }
 
@@ -374,6 +363,11 @@ public class FileCachingInputStream extends InputStream {
         return super.toString() + " for " + tempFile;
     }
 
+
+    /**
+     * Wait until the copier thread read at least the number of bytes given.
+     *
+     */
     public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
         if (copier != null) {
             copier.executeIfNotRunning();
@@ -386,15 +380,24 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    /**
+     * Returns the number of bytes consumed from the input stream so far
+     */
     public long getCount() {
         return copier == null ? bufferLength : copier.getCount();
     }
 
+    /**
+     * If a temp file is used for buffering, you can may obtain it.
+     */
     public Path getTempFile() {
         return tempFile;
     }
 
 
+    /**
+     * One of the paths of {@link #read()}, when it is reading from memory.
+     */
     private int readFromBuffer() {
         if (count < bufferLength) {
             int result = buffer[(int) count++];
@@ -408,6 +411,9 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    /**
+     * One of the paths of {@link #read(byte[])} )}, when it is reading from memory.
+     */
     private int readFromBuffer(byte[] b) {
         int toCopy = Math.min(b.length, bufferLength - (int) count);
         if (toCopy > 0) {
@@ -419,12 +425,17 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+
+    /**
+     *
+     * See  {@link InputStream#read()} This methods must behave exactly according to that.
+     */
     private int readFromFile() throws IOException {
         copier.executeIfNotRunning();
         int result = tempFileInputStream.read();
         while (result == EOF) {
             synchronized (copier) {
-                while (!copier.isReady() && result == EOF) {
+                while (!copier.isReadyIOException() && result == EOF) {
                     log.debug("Copier {} not yet ready", copier.logPrefix());
                     // copier is still busy, wait a second, and try again.
                     try {
@@ -437,7 +448,7 @@ public class FileCachingInputStream extends InputStream {
                     }
                     result = tempFileInputStream.read();
                 }
-                if (copier.isReady() && result == EOF) {
+                if (copier.isReadyIOException() && result == EOF) {
                     // the copier did not return any new results
                     // don't increase count but return now.
                     return EOF;
@@ -452,9 +463,13 @@ public class FileCachingInputStream extends InputStream {
         return result;
     }
 
+    /**
+     *
+     * See {@link InputStream#read(byte[])} This methods must behave exactly according to that.
+     */
     private int readFromFile(byte[] b) throws IOException {
         copier.executeIfNotRunning();
-        if (copier.isReady() && count == copier.getCount()) {
+        if (copier.isReadyIOException() && count == copier.getCount()) {
             return EOF;
         }
         int totalResult = 0;
@@ -463,7 +478,7 @@ public class FileCachingInputStream extends InputStream {
 
             if (totalResult == 0) {
 
-                while (!copier.isReady() && totalResult == 0) {
+                while (!copier.isReadyIOException() && totalResult == 0) {
                     log.debug("Copier {} not yet ready", copier.logPrefix());
                     try {
                         copier.wait(1000);
@@ -473,13 +488,17 @@ public class FileCachingInputStream extends InputStream {
                         throw new InterruptedIOException(e.getMessage());
                     }
                     int subResult = Math.max(tempFileInputStream.read(b, totalResult, b.length - totalResult), 0);
-                      totalResult += subResult;
+                    totalResult += subResult;
+                }
+                if (totalResult == 0) {
+                    // I doubt this can happen
+                    return EOF;
                 }
 
             }
             count += totalResult;
         }
-
+        assert totalResult != 0;
         //log.debug("returning {} bytes", totalResult);
         return totalResult;
     }
