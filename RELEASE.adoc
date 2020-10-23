@@ -1,6 +1,18 @@
+## Release to maven central
+
 [source,bash]
 ----
 mvn release:branch -DbranchName=REL-2.12-SNAPSHOT -DdevelopmentVersion=2.13-SNAPSHOT
 git checkout REL-2.12-SNAPSHOT
 mvn -Pdeploy release:prepare release:perform -DreleaseVersion=2.12.0 -DdevelopmentVersion=2.12.1-SNAPSHOT
+----
+
+
+## Getting it faster in vpro-nexus.
+
+Checkout tag and build with -P`vpro-nexus`
+[source,bash]
+----
+git checkout REL-5.16.1
+mvn -Pvpro-nexus deploy
 ----
