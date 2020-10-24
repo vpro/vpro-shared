@@ -15,6 +15,7 @@ public class CRIDValidator implements ConstraintValidator<CRID, String> {
 
     @Override
     public void initialize(CRID crid) {
+        // nothing to initialize
     }
 
     @Override

@@ -17,16 +17,16 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class SecondsToDateAdapter extends XmlAdapter<String, Date> {
 
-    private final static Pattern PATTERN = Pattern.compile("(\\d+)(?:\\.(\\d{1,3})(?:\\d*))?");
+    private static final Pattern PATTERN = Pattern.compile("(\\d+)(?:\\.(\\d{1,3})(?:\\d*))?");
 
     @Override
     public Date unmarshal(String seconds) {
         Matcher matcher = PATTERN.matcher(seconds);
         if(matcher.find()) {
-            long result = Long.valueOf(matcher.group(1)) * 1000;
+            long result = Long.parseLong(matcher.group(1)) * 1000;
 
             if(matcher.group(2) != null) {
-                Long decimalPart = Long.valueOf(matcher.group(2));
+                long decimalPart = Long.parseLong(matcher.group(2));
                 result += decimalPart < 10 ? decimalPart * 100 : decimalPart < 100 ? decimalPart * 10 : decimalPart;
             }
 
