@@ -24,7 +24,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Auke van Leeuwen
  * @author Peter Maas
+ * @deprecated
  */
+@Deprecated
 public class SwfAttachmentFilter implements Filter {
   private static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
   private static final String PARAM_MIMETYPE = "mimetypes";
