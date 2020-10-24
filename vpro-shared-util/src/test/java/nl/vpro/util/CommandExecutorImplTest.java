@@ -2,19 +2,12 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.*;
+import java.nio.file.*;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.*;
 
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
@@ -26,13 +19,11 @@ import static org.junit.Assert.assertEquals;
  * @author Michiel Meeuwissen
  */
 @Slf4j
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 public class CommandExecutorImplTest {
 
-    @Rule
-    public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
 
-
-    @After
+    @AfterEach
     public void check() {
         assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
     }

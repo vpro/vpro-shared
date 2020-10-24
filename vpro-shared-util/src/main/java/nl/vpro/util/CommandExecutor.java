@@ -116,7 +116,7 @@ public interface CommandExecutor {
 
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters parameters) {
         return CompletableFuture.supplyAsync(() -> {
-            Integer result = null;
+            int result = -1;
             try {
                 result = execute(parameters);
                 return result;
