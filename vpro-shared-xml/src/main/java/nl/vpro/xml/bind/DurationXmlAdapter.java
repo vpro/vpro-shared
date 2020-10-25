@@ -14,7 +14,7 @@ import javax.xml.datatype.DatatypeFactory;
 public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, Duration> {
 
 
-    private static DatatypeFactory datatypeFactory;
+    private static final DatatypeFactory datatypeFactory;
     static {
         try {
             datatypeFactory = DatatypeFactory.newInstance();

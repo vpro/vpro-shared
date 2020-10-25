@@ -20,13 +20,14 @@ import org.apache.commons.io.output.StringBuilderWriter;
  * @since 2.8
  */
 public class XMLStreamWriterUtil {
+
     private static final XMLOutputFactory FACTORY = XMLOutputFactory.newInstance();
 
+    private final XMLStreamWriter writer;
 
-    final XMLStreamWriter writer;
-    final Deque<AutoCloseable> closeables = new ArrayDeque<>();
-    int currentDepth = 0;
+    private final Deque<AutoCloseable> closeables = new ArrayDeque<>();
 
+    private int currentDepth = 0;
 
     public XMLStreamWriterUtil(XMLStreamWriter writer) {
         this.writer = writer;

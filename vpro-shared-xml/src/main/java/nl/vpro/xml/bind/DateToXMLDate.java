@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class DateToXMLDate extends XmlAdapter<String, Date> {
 
-    ThreadLocal<DateFormat> DF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
+    private final ThreadLocal<DateFormat> DF = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd"));
 
     @Override
     public Date unmarshal(String date) throws Exception {

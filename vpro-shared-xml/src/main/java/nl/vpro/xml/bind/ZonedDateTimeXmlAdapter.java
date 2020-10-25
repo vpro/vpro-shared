@@ -21,12 +21,12 @@ public class ZonedDateTimeXmlAdapter extends XmlAdapter<String, ZonedDateTime> {
 
     public static final ThreadLocal<Boolean> OMIT_MILLIS_IF_ZERO = ThreadLocal.withInitial(() -> true);
 
-    private final DateTimeFormatter formatter =
+    private static final DateTimeFormatter formatter =
         DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ")
             .withLocale(Locale.US);
 
-    private final DateTimeFormatter formatterNoMillis =
+    private static final DateTimeFormatter formatterNoMillis =
         DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
             .withLocale(Locale.US);
@@ -39,12 +39,12 @@ public class ZonedDateTimeXmlAdapter extends XmlAdapter<String, ZonedDateTime> {
         }
         try {
             return LocalDate.parse(dateValue).atStartOfDay().atZone(DEFAULT_ZONE);
-        } catch (DateTimeParseException dpe) {
+        } catch (DateTimeParseException ignored) {
 
         }
         try {
             return LocalDateTime.parse(dateValue).atZone(DEFAULT_ZONE);
-        } catch (DateTimeParseException dpe) {
+        } catch (DateTimeParseException ignored) {
 
         }
         return ZonedDateTime.parse(dateValue);

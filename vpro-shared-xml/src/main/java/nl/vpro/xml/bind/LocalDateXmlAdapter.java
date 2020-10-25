@@ -14,8 +14,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class LocalDateXmlAdapter extends XmlAdapter<String, Temporal> {
 
-
-
     @Override
     public Temporal unmarshal(String dateValue) {
         if (dateValue == null) {
