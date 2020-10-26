@@ -209,7 +209,7 @@ public class Copier implements Runnable, Closeable {
 
     /**
      *
-     * @return True if any interruption happened. False if the future was canceled or done already, or if cancellng failed.
+     * @return True if any interruption happened. False if the future was canceled or done already, or if cancelling failed.
      * @throws IOException
      */
 
