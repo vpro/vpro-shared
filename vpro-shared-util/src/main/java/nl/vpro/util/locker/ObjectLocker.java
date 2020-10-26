@@ -37,6 +37,10 @@ public class ObjectLocker {
 
     private static SessionFactory sessionFactory;
 
+    public static void setSessionFactory(SessionFactory sessionFactory) {
+        ObjectLocker.sessionFactory = sessionFactory;
+    }
+
     /**
      * The lock the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
      */
