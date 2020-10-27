@@ -11,8 +11,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,7 +43,6 @@ public class ObjectLocker {
     /**
      * The lock the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
      */
-
     static final ThreadLocal<List<LockHolder<? extends Serializable>>> HOLDS = ThreadLocal.withInitial(ArrayList::new);
 
     private static final ObjectLockerAdmin JMX_INSTANCE    = new ObjectLockerAdmin();
@@ -61,9 +59,10 @@ public class ObjectLocker {
 
 
 
-    public static boolean stricltyOne;
-    public static boolean monitor;
-    public static Duration maxLockAcquireTime = Duration.ofMinutes(10);
+    static boolean stricltyOne;
+    static boolean monitor;
+    static Duration maxLockAcquireTime = Duration.ofMinutes(10);
+    static Duration minWaitTime  = Duration.ofSeconds(5);
 
     /**
      * Map key -> ReentrantLock
@@ -98,7 +97,7 @@ public class ObjectLocker {
         @NonNull String reason,
         @NonNull Callable<T> callable,
         @NonNull Map<K, LockHolder<K>> locks,
-        BiFunction<K, K, Boolean> comparable
+        BiPredicate<K, K> comparable
     ) {
         if (key == null) {
             //log.warn("Calling with null mid: {}", reason, new Exception());
@@ -114,62 +113,6 @@ public class ObjectLocker {
         }
     }
 
-    @SneakyThrows
-    public static <T, K extends Serializable> T withObjectsLock(
-        @NonNull Iterable<K> keys,
-        @NonNull String reason,
-        @NonNull Callable<T> callable,
-        @NonNull Map<K, LockHolder<K>> locks,
-        BiFunction<K, K, Boolean> comparable
-    ) {
-
-        final long nanoStart = System.nanoTime();
-        final List<LockHolder<K>> lockList = new ArrayList<>();
-        final List<K> copyOfKeys = new ArrayList<>();
-        for (K key : keys) {
-            if (key != null) {
-                lockList.add(acquireLock(nanoStart, key, reason, locks, comparable));
-                copyOfKeys.add(key);
-            }
-        }
-        try {
-            return callable.call();
-        } finally {
-            int i = 0;
-            for (K key : copyOfKeys) {
-                releaseLock(nanoStart, key, reason, locks, lockList.get(i++));
-            }
-        }
-    }
-    @SneakyThrows
-    private static <T, K extends Serializable> T withObjectsLockIfFree(
-        @NonNull Iterable<K> keys,
-        @NonNull String reason,
-        @NonNull Function<Iterable<K>, T> callable,
-        @NonNull Map<K, LockHolder<K>> locks,
-        BiFunction<K, K, Boolean> comparable) {
-
-        final long nanoStart = System.nanoTime();
-        final List<LockHolder<K>> lockList = new ArrayList<>();
-        final List<K> copyOfKeys = new ArrayList<>();
-        for (K key : keys) {
-            if (key != null) {
-                Optional<LockHolder<K>> reentrantLock = acquireLock(nanoStart, key, reason, locks, true, comparable);
-                if (reentrantLock.isPresent()) {
-                    lockList.add(reentrantLock.get());
-                    copyOfKeys.add(key);
-                }
-            }
-        }
-        try {
-            return callable.apply(copyOfKeys);
-        } finally {
-            int i = 0;
-            for (K key : copyOfKeys) {
-                releaseLock(nanoStart, key, reason, locks, lockList.get(i++));
-            }
-        }
-    }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static  <K extends Serializable> Optional<LockHolder<K>> acquireLock(
@@ -178,12 +121,12 @@ public class ObjectLocker {
         @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
         boolean onlyIfFree,
-        BiFunction<K, K, Boolean> comparable) {
+        BiPredicate<K, K> comparable) {
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
             holder = locks.computeIfAbsent(key, (m) -> {
-                log.trace("New lock for " + m);
+                log.trace("New lock for {}", m);
                 List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
                 if (! currentLocks.isEmpty()) {
                     if (monitor) {
@@ -195,7 +138,7 @@ public class ObjectLocker {
                     }
                     if (stricltyOne && currentLocks.stream()
                         .anyMatch((l) ->
-                            key.getClass().isInstance(l.key) && comparable.apply((K) l.key, key)
+                            key.getClass().isInstance(l.key) && ! comparable.test((K) l.key, key)
                         )) {
                         throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), currentLocks.get(0).summarize(), key));
                     } else {
@@ -220,8 +163,8 @@ public class ObjectLocker {
 
         if (monitor) {
             long start = System.nanoTime();
-            Duration wait = Duration.ofSeconds(5);
-            Duration maxWait = Duration.ofSeconds(30);
+            Duration wait =  minWaitTime;
+            Duration maxWait = minWaitTime.multipliedBy(8);
             try {
                 while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
                     Duration duration = Duration.ofNanos(System.nanoTime() - start);
@@ -261,7 +204,7 @@ public class ObjectLocker {
         return Optional.of(holder);
     }
 
-    private static  <K extends Serializable> LockHolder<K> acquireLock(long nanoStart, K key, @NonNull  String reason, final @NonNull Map<K, LockHolder<K>> locks, BiFunction<K, K, Boolean> comparable) {
+    private static  <K extends Serializable> LockHolder<K> acquireLock(long nanoStart, K key, @NonNull  String reason, final @NonNull Map<K, LockHolder<K>> locks, BiPredicate<K, K> comparable) {
         return acquireLock(nanoStart, key, reason, locks, false, comparable).orElseThrow(IllegalStateException::new);
     }
 
@@ -271,12 +214,8 @@ public class ObjectLocker {
         synchronized (locks) {
             if (lock.lock.getHoldCount() == 1) {
                 if (!lock.lock.hasQueuedThreads()) {
-                    log.trace("Removed " + key);
-                    LockHolder<K> remove = locks.remove(key);
-                    if (remove != null) {
-
-
-                    }
+                    log.trace("Removed {}", key);
+                    locks.remove(key);
                 }
                 JMX_INSTANCE.currentCount.computeIfAbsent(reason, (s) -> new AtomicInteger()).decrementAndGet();
                 Duration duration = Duration.ofNanos(System.nanoTime() - nanoStart);
@@ -284,7 +223,12 @@ public class ObjectLocker {
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             HOLDS.get().remove(lock);
-            lock.lock.unlock();
+            if (lock.lock.isHeldByCurrentThread()) {
+                lock.lock.unlock();
+            } else {
+                // can happen if 'continuing without lock'
+                log.warn("Current lock {} not hold by current thread", lock.lock);
+            }
             locks.notifyAll();
         }
     }
