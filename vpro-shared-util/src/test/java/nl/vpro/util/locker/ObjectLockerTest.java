@@ -99,6 +99,9 @@ public class ObjectLockerTest {
         }
     }
 
+    /**
+     * Tests MSE-4946, this used to throw {{@link IllegalMonitorStateException}}
+     */
     @Test
     public void withMonitor() throws InterruptedException, ExecutionException {
         ObjectLocker.monitor = true;

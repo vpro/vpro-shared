@@ -223,7 +223,7 @@ public class ObjectLocker {
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             HOLDS.get().remove(lock);
-            if (lock.lock.isHeldByCurrentThread()) {
+            if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
                 lock.lock.unlock();
             } else {
                 // can happen if 'continuing without lock'
