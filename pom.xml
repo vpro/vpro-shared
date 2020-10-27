@@ -206,7 +206,7 @@
      <spring-security.version>5.2.0.RELEASE</spring-security.version>
     -->
     <jackson2.version>2.11.0</jackson2.version>    <!-- equals to poms-parent -->
-    <junit.version>5.6.2</junit.version>
+    <junit.version>5.7.0</junit.version>
     <mockito.version>3.3.3</mockito.version>
     <assertj.version>3.16.1</assertj.version>
     <resteasy.version>4.5.5.Final</resteasy.version>
