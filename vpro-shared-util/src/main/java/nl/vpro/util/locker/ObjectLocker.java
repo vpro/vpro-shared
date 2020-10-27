@@ -1,6 +1,5 @@
 package nl.vpro.util.locker;
 
-import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,10 +10,11 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.*;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -55,8 +55,8 @@ public class ObjectLocker {
     static {
         try {
             MBeans.registerBean(new ObjectName("nl.vpro:name=objectLocker"), JMX_INSTANCE);
-        } catch (Throwable t) {
-            throw Lombok.sneakyThrow(t);
+        } catch (MalformedObjectNameException mfoe) {
+            // ignored, the objectname _is_ not malformed
         }
     }
 
@@ -103,7 +103,6 @@ public class ObjectLocker {
         BiPredicate<K, K> comparable
     ) {
         if (key == null) {
-            //log.warn("Calling with null mid: {}", reason, new Exception());
             log.warn("Calling with null key: {}", reason);
             return callable.call();
         }
