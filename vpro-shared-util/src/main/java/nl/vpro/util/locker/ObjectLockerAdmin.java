@@ -15,6 +15,7 @@ import nl.vpro.util.TimeUtils;
  * @since 5.8
  */
 class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
+
     /**
      * Number of locks per 'reason'.
      */
@@ -24,8 +25,10 @@ class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
      * Count per 'reason'.
      */
     Map<String, AtomicInteger> currentCount = new HashMap<>();
+
     @Getter
     int maxConcurrency = 0;
+
     @Getter
     int maxDepth = 0;
 
