@@ -36,6 +36,9 @@ public class ObjectLocker {
 
     private static SessionFactory sessionFactory;
 
+    /**
+     * For logging purpopes we may want to know wether sessions are active.
+     */
     public static void setSessionFactory(SessionFactory sessionFactory) {
         ObjectLocker.sessionFactory = sessionFactory;
     }
@@ -223,6 +226,7 @@ public class ObjectLocker {
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             HOLDS.get().remove(lock);
+            lock.lock.unlock();
             if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
                 lock.lock.unlock();
             } else {

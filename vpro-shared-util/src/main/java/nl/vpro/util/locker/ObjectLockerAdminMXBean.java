@@ -42,9 +42,8 @@ public interface ObjectLockerAdminMXBean {
 
     void setMonitor(boolean monitor);
 
+    boolean isStrictlyOne();
 
-
-
-
+    void setStrictlyOne(boolean strictlyOne);
 
 }
