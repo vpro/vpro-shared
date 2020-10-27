@@ -14,7 +14,7 @@ import nl.vpro.util.TimeUtils;
  * @author Michiel Meeuwissen
  * @since 5.8
  */
-class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
+public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
 
     /**
      * Number of locks per 'reason'.
@@ -76,11 +76,20 @@ class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public boolean isMonitor() {
         return ObjectLocker.monitor;
-
     }
 
     @Override
     public void setMonitor(boolean monitor) {
         ObjectLocker.monitor = monitor;
+    }
+
+    @Override
+    public boolean isStrictlyOne() {
+        return ObjectLocker.stricltyOne;
+    }
+
+    @Override
+    public void setStrictlyOne(boolean strictlyOne) {
+        ObjectLocker.stricltyOne = strictlyOne;
     }
 }
