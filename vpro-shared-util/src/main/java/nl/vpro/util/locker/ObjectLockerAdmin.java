@@ -8,6 +8,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import nl.vpro.jmx.MBeans;
 import nl.vpro.util.TimeUtils;
 
 /**
@@ -15,6 +19,22 @@ import nl.vpro.util.TimeUtils;
  * @since 5.8
  */
 public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
+
+
+    public static final ObjectLockerAdmin JMX_INSTANCE    = new ObjectLockerAdmin();
+
+
+    static {
+        try {
+            MBeans.registerBean(new ObjectName("nl.vpro:name=objectLocker"), JMX_INSTANCE);
+        } catch (MalformedObjectNameException mfoe) {
+            // ignored, the objectname _is_ not malformed
+        }
+    }
+
+   private ObjectLockerAdmin() {
+
+    }
 
     /**
      * Number of locks per 'reason'.

@@ -14,15 +14,13 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.hibernate.SessionFactory;
+import org.hibernate.*;
 import org.slf4j.event.Level;
 
-import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.Slf4jHelper;
+
+import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 
 /**
  * @author Michiel Meeuwissen
@@ -47,19 +45,6 @@ public class ObjectLocker {
      * The lock the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
      */
     static final ThreadLocal<List<LockHolder<? extends Serializable>>> HOLDS = ThreadLocal.withInitial(ArrayList::new);
-
-    private static final ObjectLockerAdmin JMX_INSTANCE    = new ObjectLockerAdmin();
-
-
-
-    static {
-        try {
-            MBeans.registerBean(new ObjectName("nl.vpro:name=objectLocker"), JMX_INSTANCE);
-        } catch (MalformedObjectNameException mfoe) {
-            // ignored, the objectname _is_ not malformed
-        }
-    }
-
 
 
     static boolean stricltyOne;
@@ -117,77 +102,25 @@ public class ObjectLocker {
 
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static  <K extends Serializable> Optional<LockHolder<K>> acquireLock(
+    private static  <K extends Serializable> LockHolder<K> acquireLock(
         long nanoStart,
         K key,
         @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
-        boolean onlyIfFree,
         BiPredicate<K, K> comparable) {
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
-            holder = locks.computeIfAbsent(key, (m) -> {
-                log.trace("New lock for {}", m);
-                List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
-                if (! currentLocks.isEmpty()) {
-                    if (monitor) {
-                        if (sessionFactory != null) {
-                            if (sessionFactory.getCurrentSession().getTransaction().isActive()) {
-                                log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}", summarize(), currentLocks, key);
-                            }
-                        }
-                    }
-                    if (stricltyOne && currentLocks.stream()
-                        .anyMatch((l) ->
-                            key.getClass().isInstance(l.key) && ! comparable.test((K) l.key, key)
-                        )) {
-                        throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), currentLocks.get(0).summarize(), key));
-                    } else {
-                        log.warn("Getting a lock on a different key! {} + {}", currentLocks, key);
-                    }
-                }
-                LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
-                HOLDS.get().add(newHolder);
-                return newHolder;
-                }
-            );
+            holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable));
             if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
-                if (onlyIfFree) {
-                    return Optional.empty();
-                }
                 log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
                 JMX_INSTANCE.maxConcurrency = Math.max(holder.lock.getQueueLength(), JMX_INSTANCE.maxConcurrency);
                 alreadyWaiting = true;
             }
-
         }
 
         if (monitor) {
-            long start = System.nanoTime();
-            Duration wait =  minWaitTime;
-            Duration maxWait = minWaitTime.multipliedBy(8);
-            try {
-                while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
-                    Duration duration = Duration.ofNanos(System.nanoTime() - start);
-                    log.info("Couldn't  acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
-                    if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
-                        log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
-                        break;
-                    }
-                    if (wait.compareTo(maxWait) < 0) {
-                        wait = wait.multipliedBy(2);
-                        if (wait.compareTo(maxWait) > 0) {
-                            wait = maxWait;
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                log.error(e.getMessage(), e);
-                Thread.currentThread().interrupt();
-                return Optional.empty();
-
-            }
+            monitoredLock(holder, key);
         } else {
             holder.lock.lock();
         }
@@ -203,12 +136,65 @@ public class ObjectLocker {
             Duration aquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
             log.debug("Acquired lock for {}  ({}) in {}", key, reason, aquireTime);
         }
-        return Optional.of(holder);
+        return holder;
     }
 
-    private static  <K extends Serializable> LockHolder<K> acquireLock(long nanoStart, K key, @NonNull  String reason, final @NonNull Map<K, LockHolder<K>> locks, BiPredicate<K, K> comparable) {
-        return acquireLock(nanoStart, key, reason, locks, false, comparable).orElseThrow(IllegalStateException::new);
+    private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) {
+        long start = System.nanoTime();
+        Duration wait =  minWaitTime;
+        Duration maxWait = minWaitTime.multipliedBy(8);
+        try {
+            while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
+                Duration duration = Duration.ofNanos(System.nanoTime() - start);
+                    log.info("Couldn't  acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
+                if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
+                    log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
+                    break;
+                }
+                if (wait.compareTo(maxWait) < 0) {
+                    wait = wait.multipliedBy(2);
+                    if (wait.compareTo(maxWait) > 0) {
+                        wait = maxWait;
+                    }
+                }
+            }
+
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException();
+        }
     }
+
+    private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason, BiPredicate<K, K> comparable) {
+        log.trace("New lock for {}", key);
+        List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
+        if (monitor) {
+            if (sessionFactory != null) {
+                Session session = sessionFactory.getCurrentSession();
+                if (session != null) {
+                    Transaction transaction = session.getTransaction();
+                    if (transaction != null && transaction.isActive()) {
+                        log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}", summarize(), currentLocks, key);
+                    }
+                }
+            }
+        }
+        if (! currentLocks.isEmpty()) {
+            if (stricltyOne && currentLocks.stream()
+                .anyMatch((l) ->
+                        key.getClass().isInstance(l.key) && ! comparable.test((K) l.key, key)
+                )) {
+                throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), currentLocks.get(0).summarize(), key));
+            } else {
+                log.warn("Getting a lock on a different key! {} + {}", currentLocks, key);
+            }
+        }
+        LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
+        HOLDS.get().add(newHolder);
+        return newHolder;
+    }
+
 
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -225,7 +211,6 @@ public class ObjectLocker {
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             HOLDS.get().remove(lock);
-            lock.lock.unlock();
             if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
                 lock.lock.unlock();
             } else {

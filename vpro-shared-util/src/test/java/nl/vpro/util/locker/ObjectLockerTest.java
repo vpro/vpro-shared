@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static nl.vpro.util.locker.ObjectLocker.withKeyLock;
@@ -29,12 +30,19 @@ public class ObjectLockerTest {
     }
 
 
+    @AfterEach
+    public void checkEmpty() {
+        assertThat(ObjectLocker.HOLDS.get()).isEmpty();
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLocks()).isEmpty();
+    }
+
     @Test
     public void withLock() throws InterruptedException, ExecutionException {
         final List<String> events = new CopyOnWriteArrayList<>();
         ForkJoinTask<?> submitA = ForkJoinPool.commonPool().submit(() -> {
             withKeyLock("key", "test1", () -> {
                 events.add("a1");
+                assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLocks().stream().map(s -> s.substring(0, 4))).containsExactly("key:");
                 synchronized (events) {
                     events.notifyAll();
                 }
@@ -53,7 +61,8 @@ public class ObjectLockerTest {
         });
         submitA.get();
         assertThat(events).containsExactly("a1", "a2", "b1");
-        assertThat(ObjectLocker.HOLDS.get()).isEmpty();
+
+
     }
 
 
