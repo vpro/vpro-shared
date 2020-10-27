@@ -29,12 +29,12 @@ public class MBeansTest {
 
         assertThat(MBeans.returnString(
             string,
-            Duration.ofMillis(150),
+            Duration.ofMillis(1500),
             () -> {
                 string.info("starting");
                 Thread.sleep(50);
                 string.info("first thing");
-                Thread.sleep(300);
+                Thread.sleep(3000);
                 string.info("second thing thing");
                 return "ready";
 
