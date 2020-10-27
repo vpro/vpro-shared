@@ -107,7 +107,7 @@ public class ObjectLocker {
         K key,
         @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
-        BiPredicate<K, K> comparable) {
+        BiPredicate<K, K> comparable) throws InterruptedException {
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
@@ -139,30 +139,23 @@ public class ObjectLocker {
         return holder;
     }
 
-    private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) {
+    private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) throws InterruptedException {
         long start = System.nanoTime();
         Duration wait =  minWaitTime;
         Duration maxWait = minWaitTime.multipliedBy(8);
-        try {
-            while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
-                Duration duration = Duration.ofNanos(System.nanoTime() - start);
-                    log.info("Couldn't  acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
-                if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
-                    log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
-                    break;
-                }
-                if (wait.compareTo(maxWait) < 0) {
-                    wait = wait.multipliedBy(2);
-                    if (wait.compareTo(maxWait) > 0) {
-                        wait = maxWait;
-                    }
+        while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
+            Duration duration = Duration.ofNanos(System.nanoTime() - start);
+            log.info("Couldn't  acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
+            if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
+                log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
+                break;
+            }
+            if (wait.compareTo(maxWait) < 0) {
+                wait = wait.multipliedBy(2);
+                if (wait.compareTo(maxWait) > 0) {
+                    wait = maxWait;
                 }
             }
-
-        } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException();
         }
     }
 
@@ -230,7 +223,7 @@ public class ObjectLocker {
         final Instant createdAt = Instant.now();
         final String reason;
 
-        public LockHolder(K k, String reason, ReentrantLock lock, Exception cause) {
+        LockHolder(K k, String reason, ReentrantLock lock, Exception cause) {
             this.key = k;
             this.lock = lock;
             this.cause = cause;

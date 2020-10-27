@@ -43,6 +43,7 @@ public class ObjectLockerTest {
             withKeyLock("key", "test1", () -> {
                 events.add("a1");
                 assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLocks().stream().map(s -> s.substring(0, 4))).containsExactly("key:");
+                assertThat(ObjectLocker.HOLDS.get().get(0)).isNotEqualTo("a");
                 synchronized (events) {
                     events.notifyAll();
                 }
@@ -188,6 +189,7 @@ public class ObjectLockerTest {
             });
         }).isInstanceOf(IllegalStateException.class);
     }
+
 
 
     @SneakyThrows
