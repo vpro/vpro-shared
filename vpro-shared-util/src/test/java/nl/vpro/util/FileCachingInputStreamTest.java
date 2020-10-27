@@ -42,6 +42,11 @@ public class FileCachingInputStreamTest {
         FileCachingInputStream.openStreams = 0;
     }
 
+    @AfterEach
+    public void after() {
+        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     public void testRead(boolean downloadFirst) throws IOException {
@@ -118,6 +123,7 @@ public class FileCachingInputStreamTest {
             }
         }).isInstanceOf(IOException.class)
             .hasMessageContaining("Stream closed");
+
         assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
 
 
@@ -176,6 +182,8 @@ public class FileCachingInputStreamTest {
 
         }
         assertThat(isInterrupted).withFailMessage("Thread did not get interrupted").isTrue();
+
+
     }
 
     protected FileCachingInputStream slowReader(boolean downloadFirst) {
@@ -201,7 +209,7 @@ public class FileCachingInputStreamTest {
     @Test
     public void testReadNoAutoStart() throws IOException {
         List<String> logs = new ArrayList<>();
-        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+        try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .input(new ByteArrayInputStream(MANY_BYTES))
@@ -213,47 +221,49 @@ public class FileCachingInputStreamTest {
             })
             .noProgressLogging()
             .startImmediately(false)
-            .build();
-        inputStream.getFuture().thenApply(fc -> {
-            logs.add("then apply " + fc.getBytesRead());
-            return fc;
-        });
+            .build()) {
+            inputStream.getFuture().thenApply(fc -> {
+                logs.add("then apply " + fc.getBytesRead());
+                return fc;
+            });
 
-        inputStream.getFuture().thenAccept(fc -> {
-            logs.add("then apply again " + fc.getCount());
-        });
+            inputStream.getFuture().thenAccept(fc -> {
+                logs.add("then apply again " + fc.getCount());
+            });
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        int r;
-        while ((r = inputStream.read()) != -1) {
-            out.write(r);
+            int r;
+            while ((r = inputStream.read()) != -1) {
+                out.write(r);
+            }
+
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
+            assertThat(logs).containsExactly("" + MANY_BYTES.length, "then apply again " + MANY_BYTES.length, "then apply 0");
         }
-
-        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
-        assertThat(logs).containsExactly("" + MANY_BYTES.length, "then apply again " + MANY_BYTES.length, "then apply 0");
     }
 
 
     @Test
     public void testReadLargeBuffer() throws IOException {
 
-        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+        try(FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(1024)
             .noProgressLogging()
-            .build();
+            .build()) {
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        int r;
-        while ((r = inputStream.read()) != -1) {
-            out.write(r);
+            int r;
+            while ((r = inputStream.read()) != -1) {
+                out.write(r);
+            }
+
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
-
-        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
 
@@ -490,17 +500,18 @@ public class FileCachingInputStreamTest {
 
 
     @Test
-    public void createPath() {
+    public void createPath() throws IOException {
         new File("/tmp/bestaatniet").delete();
-        FileCachingInputStream.builder()
+        try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(1)
             .tempDir("/tmp/bestaatniet")
             .input(new ByteArrayInputStream(HELLO))
             .initialBuffer(HELLO.length)
-            .build();
+            .build()) {
 
-        assertThat(new File("/tmp/bestaatniet")).exists();
+            assertThat(new File("/tmp/bestaatniet")).exists();
+        }
 
     }
 
