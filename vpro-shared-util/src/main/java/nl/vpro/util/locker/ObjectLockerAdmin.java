@@ -60,14 +60,12 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public int getLockCount() {
         return lockCount.values().stream().mapToInt(AtomicInteger::intValue).sum();
-
     }
 
     @Override
     public Map<String, Integer> getLockCounts() {
         return lockCount.entrySet().stream().collect(
             Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue()));
-
     }
 
     @Override
@@ -79,13 +77,11 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     public Map<String, Integer> getCurrentCounts() {
         return currentCount.entrySet().stream().collect(
             Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue()));
-
     }
 
     @Override
     public String getMaxLockAcquireTime() {
         return ObjectLocker.maxLockAcquireTime.toString();
-
     }
 
     @Override
