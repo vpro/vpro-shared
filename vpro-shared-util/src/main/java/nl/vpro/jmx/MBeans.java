@@ -33,6 +33,10 @@ import nl.vpro.util.ThreadPools;
 @Slf4j
 public class MBeans {
 
+    private static final ExecutorService EXECUTOR =
+        Executors.newCachedThreadPool
+            (ThreadPools.createThreadFactory("MBeans", true, Thread.MAX_PRIORITY));
+
     static final Map<String, LockValue> locks = new ConcurrentHashMap<>();
 
     public static final Duration DEFAULT_DURATION =  Duration.ofSeconds(5);
@@ -106,7 +110,7 @@ public class MBeans {
             }
             return description.get();
 
-        });
+        }, EXECUTOR);
         value.setFuture(future);
 
         try {
