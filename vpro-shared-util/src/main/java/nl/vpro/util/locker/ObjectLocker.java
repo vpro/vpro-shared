@@ -85,7 +85,7 @@ public class ObjectLocker {
         @NonNull String reason,
         @NonNull Callable<T> callable,
         @NonNull Map<K, LockHolder<K>> locks,
-        BiPredicate<K, K> comparable
+        BiPredicate<Serializable, K> comparable
     ) {
         if (key == null) {
             log.warn("Calling with null key: {}", reason);
@@ -107,11 +107,12 @@ public class ObjectLocker {
         K key,
         @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
-        BiPredicate<K, K> comparable) throws InterruptedException {
+        BiPredicate<Serializable, K> comparable) throws InterruptedException {
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
-            holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable));
+
+            holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable, getSession()));
             if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
                 log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
                 JMX_INSTANCE.maxConcurrency = Math.max(holder.lock.getQueueLength(), JMX_INSTANCE.maxConcurrency);
@@ -139,6 +140,14 @@ public class ObjectLocker {
         return holder;
     }
 
+    private static Session getSession() {
+        try {
+            return  sessionFactory != null ? sessionFactory.getCurrentSession() : null;
+        } catch (HibernateException ignored) {
+            return null; // ok, no current session
+        }
+    }
+
     private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) throws InterruptedException {
         long start = System.nanoTime();
         Duration wait =  minWaitTime;
@@ -159,24 +168,19 @@ public class ObjectLocker {
         }
     }
 
-    private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason, BiPredicate<K, K> comparable) {
+    private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason, BiPredicate<Serializable, K> comparable, Session session) {
         log.trace("New lock for {}", key);
         List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
-        if (monitor) {
-            if (sessionFactory != null) {
-                Session session = sessionFactory.getCurrentSession();
-                if (session != null) {
-                    Transaction transaction = session.getTransaction();
-                    if (transaction != null && transaction.isActive()) {
-                        log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}", summarize(), currentLocks, key);
-                    }
-                }
+        if (monitor && session != null) {
+            Transaction transaction = session.getTransaction();
+            if (transaction != null && transaction.isActive()) {
+                log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}", summarize(), currentLocks, key);
             }
         }
         if (! currentLocks.isEmpty()) {
             if (stricltyOne && currentLocks.stream()
                 .anyMatch((l) ->
-                        key.getClass().isInstance(l.key) && ! comparable.test((K) l.key, key)
+                        key.getClass().isInstance(l.key) && ! comparable.test(l.key, key)
                 )) {
                 throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), currentLocks.get(0).summarize(), key));
             } else {
