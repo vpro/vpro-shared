@@ -115,7 +115,7 @@ public class ObjectLockerTest {
     @Test
     public void withMonitor() throws InterruptedException, ExecutionException {
         ObjectLocker.monitor = true;
-        ObjectLocker.maxLockAcquireTime = Duration.ofMillis(20);
+        ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofMillis(20).toString());
         ObjectLocker.minWaitTime = Duration.ofMillis(5);
         try {
             final List<String> events = new CopyOnWriteArrayList<>();

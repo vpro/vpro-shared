@@ -91,6 +91,9 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public void setMaxLockAcquireTime(String duration) {
         ObjectLocker.maxLockAcquireTime = TimeUtils.parseDuration(duration).orElse(ObjectLocker.maxLockAcquireTime);
+        if (ObjectLocker.minWaitTime.compareTo(ObjectLocker.maxLockAcquireTime.dividedBy(4)) > 0) {
+            ObjectLocker.minWaitTime = ObjectLocker.maxLockAcquireTime.dividedBy(4);
+        }
     }
 
     @Override
