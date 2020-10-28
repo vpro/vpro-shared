@@ -293,6 +293,13 @@ public class MBeans {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             unregister(name);
+            try {
+                Class<Object> mxBean = (Class<Object>) Class.forName(object.getClass().getName() + "MXBean");
+                mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
+                return;
+            } catch (ClassNotFoundException classNotFoundException) {
+                log.warn(classNotFoundException.getMessage(), classNotFoundException);
+            }
             mbs.registerMBean(object, name);
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             log.error(e.getMessage(), e);

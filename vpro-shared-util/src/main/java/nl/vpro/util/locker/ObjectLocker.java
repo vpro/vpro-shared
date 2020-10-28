@@ -211,7 +211,7 @@ public class ObjectLocker {
                 lock.lock.unlock();
             } else {
                 // can happen if 'continuing without lock'
-                log.warn("Current lock {} not hold by current thread", lock.lock);
+                log.warn("Current lock {} not hold by current thread but by {}", lock, lock.thread.getName());
             }
             locks.notifyAll();
         }
