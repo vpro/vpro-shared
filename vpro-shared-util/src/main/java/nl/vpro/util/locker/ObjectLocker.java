@@ -111,7 +111,6 @@ public class ObjectLocker {
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
-
             holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable, getSession()));
             if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
                 log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
@@ -171,13 +170,13 @@ public class ObjectLocker {
     private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason, BiPredicate<Serializable, K> comparable, Session session) {
         log.trace("New lock for {}", key);
         List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
-        if (monitor && session != null) {
-            Transaction transaction = session.getTransaction();
-            if (transaction != null && transaction.isActive()) {
-                log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}", summarize(), currentLocks, key);
-            }
-        }
         if (! currentLocks.isEmpty()) {
+            if (monitor && session != null) {
+                Transaction transaction = session.getTransaction();
+                if (transaction != null && transaction.isActive()) {
+                    log.warn("Trying to acquire lock in transaction which is active already! {}:{} + {}, and already had locks {}", summarize(), currentLocks, key, currentLocks);
+                }
+            }
             if (stricltyOne && currentLocks.stream()
                 .anyMatch((l) ->
                         key.getClass().isInstance(l.key) && ! comparable.test(l.key, key)
