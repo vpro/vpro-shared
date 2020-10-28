@@ -174,11 +174,11 @@ public class ObjectLockerTest {
                 events.add("a2");
             });
         });
-            synchronized (events) {
-                while (events.isEmpty()) {
-                    events.wait(10);
-                }
+        synchronized (events) {
+            while (events.isEmpty()) {
+                events.wait(10);
             }
+        }
         withKeyLock(new Key("key"), "test2", () -> {
             events.add("b1");
         });
