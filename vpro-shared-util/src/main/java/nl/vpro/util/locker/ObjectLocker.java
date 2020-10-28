@@ -160,10 +160,8 @@ public class ObjectLocker {
             }
             if (wait.compareTo(maxWait) < 0) {
                 wait = wait.multipliedBy(2);
-                if (wait.compareTo(maxWait) > 0) {
-                    wait = maxWait;
-                }
             }
+            log.info("Wait {}", wait);
         }
     }
 
@@ -213,6 +211,7 @@ public class ObjectLocker {
                 // can happen if 'continuing without lock'
                 log.warn("Current lock {} not hold by current thread but by {}", lock, lock.thread.getName());
             }
+
             locks.notifyAll();
         }
     }
