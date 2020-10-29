@@ -14,18 +14,18 @@ import javax.management.*;
 
 public class AnnotatedStandardMXBean extends StandardMBean {
 
-	public <T> AnnotatedStandardMXBean(T implementation, Class<T> mbeanInterface) {
-		super(implementation, mbeanInterface, true);
-	}
+    public <T> AnnotatedStandardMXBean(T implementation, Class<T> mbeanInterface) {
+        super(implementation, mbeanInterface, true);
+    }
 
-	@Override
-	protected String getDescription(MBeanInfo beanInfo) {
-		Description annotation = getMBeanInterface().getAnnotation(Description.class);
-		if (annotation!=null) {
-			return annotation.value();
-		}
-		return beanInfo.getDescription();
-	}
+    @Override
+    protected String getDescription(MBeanInfo beanInfo) {
+        Description annotation = getMBeanInterface().getAnnotation(Description.class);
+        if (annotation!=null) {
+            return annotation.value();
+        }
+        return beanInfo.getDescription();
+    }
 
     /**
      * Returns the description of an Attribute
@@ -44,9 +44,9 @@ public class AnnotatedStandardMXBean extends StandardMBean {
         return info.getDescription();
     }
 
-	/**
-	 * Returns the description of an operation
-	 */
+    /**
+     * Returns the description of an operation
+     */
     @Override
     protected String getDescription(MBeanOperationInfo op) {
         Method m = methodByOperation(getMBeanInterface(), op);
@@ -69,7 +69,7 @@ public class AnnotatedStandardMXBean extends StandardMBean {
         Method m = methodByOperation(getMBeanInterface(), op);
         Units units =  null;
         if (m != null) {
-        	Description description = getParameterAnnotation(m, paramNo, Description.class);
+            Description description = getParameterAnnotation(m, paramNo, Description.class);
 
             units = getParameterAnnotation(m, paramNo, Units.class);
 
@@ -91,7 +91,7 @@ public class AnnotatedStandardMXBean extends StandardMBean {
     protected String getParameterName(MBeanOperationInfo op, MBeanParameterInfo param, int paramNo) {
         Method m = methodByOperation(getMBeanInterface(), op);
         if (m != null) {
-        	Name pname = getParameterAnnotation(m, paramNo, Name.class);
+            Name pname = getParameterAnnotation(m, paramNo, Name.class);
             if (pname != null) {
                 return pname.value();
             }
@@ -103,31 +103,31 @@ public class AnnotatedStandardMXBean extends StandardMBean {
      * Returns the annotation of the given class for the method.
      */
     private static <A extends Annotation> A getParameterAnnotation(Method m, int paramNo, Class<A> annotation) {
-    	for (Annotation a : m.getParameterAnnotations()[paramNo]) {
-    		if (annotation.isInstance(a)) {
+        for (Annotation a : m.getParameterAnnotations()[paramNo]) {
+            if (annotation.isInstance(a)) {
                 return annotation.cast(a);
             }
-    	}
-    	return null;
+        }
+        return null;
     }
 
-	/**
-	 * Finds a method within the interface using the method's name and parameters
-	 */
+    /**
+     * Finds a method within the interface using the method's name and parameters
+     */
     private static Method methodByName(Class<?> mbeanInterface, String name, String... paramTypes) {
-    	try {
-    		final ClassLoader loader = mbeanInterface.getClassLoader();
-    		final Class<?>[] paramClasses = new Class<?>[paramTypes.length];
-    		for (int i = 0; i < paramTypes.length; i++) {
+        try {
+            final ClassLoader loader = mbeanInterface.getClassLoader();
+            final Class<?>[] paramClasses = new Class<?>[paramTypes.length];
+            for (int i = 0; i < paramTypes.length; i++) {
                 paramClasses[i] = classForName(paramTypes[i], loader);
             }
-    		return mbeanInterface.getMethod(name, paramClasses);
-    	} catch (RuntimeException e) {
-    		// avoid accidentally catching unexpected runtime exceptions
-    		throw e;
-    	} catch (Exception e) {
-    		return null;
-    	}
+            return mbeanInterface.getMethod(name, paramClasses);
+        } catch (RuntimeException e) {
+            // avoid accidentally catching unexpected runtime exceptions
+            throw e;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
@@ -135,13 +135,13 @@ public class AnnotatedStandardMXBean extends StandardMBean {
      * Returns the method from the interface for the given bean operation info.
      */
     private static Method methodByOperation(Class<?> mbeanInterface, MBeanOperationInfo op) {
-    	final MBeanParameterInfo[] params = op.getSignature();
-    	final String[] paramTypes = new String[params.length];
-    	for (int i = 0; i < params.length; i++) {
+        final MBeanParameterInfo[] params = op.getSignature();
+        final String[] paramTypes = new String[params.length];
+        for (int i = 0; i < params.length; i++) {
             paramTypes[i] = params[i].getType();
         }
 
-    	return methodByName(mbeanInterface, op.getName(), paramTypes);
+        return methodByName(mbeanInterface, op.getName(), paramTypes);
     }
 
     /**
@@ -149,7 +149,7 @@ public class AnnotatedStandardMXBean extends StandardMBean {
      * <br>
      * This method also retrieves primitive types (unlike {@code Class#forName(String)}).
      */
-	private static Class<?> classForName(String name, ClassLoader loader) throws ClassNotFoundException {
+    private static Class<?> classForName(String name, ClassLoader loader) throws ClassNotFoundException {
         Class<?> c = primitiveClasses.get(name);
         if (c == null) {
             c = Class.forName(name, false, loader);
