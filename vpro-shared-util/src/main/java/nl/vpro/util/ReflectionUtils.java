@@ -9,14 +9,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import org.apache.commons.lang3.LocaleUtils;
-
-import static nl.vpro.util.ReflectionUtils.ResultAction.IGNORED;
-import static nl.vpro.util.ReflectionUtils.ResultAction.NOTFOUND;
-import static nl.vpro.util.ReflectionUtils.ResultAction.SET;
+import static nl.vpro.util.ReflectionUtils.ResultAction.*;
 
 /**
  *
@@ -35,16 +32,25 @@ public class ReflectionUtils {
     /**
      * A normal 'bean' like setter of a property. The property 'title' is set by {@code setTitle(String}}
      */
-    public static final Function<String, String> SETTER = k -> "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    public static final Function<String, String> SETTER = ReflectionUtils::defaultSetter;
     /**
      * A normal 'bean' like getter of a property. The property 'title' is gotten by {@code getTitle()}
      */
-    public static final Function<String, String> GETTER = k -> "get" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    public static final Function<String, String> GETTER = ReflectionUtils::defaultGetter;
 
      /**
      * A builder like setter of a property. The property 'title' is set by {@code title(String)}
      */
     public static final Function<String, String> IDENTITY = k -> k;
+
+    public static String defaultSetter(String k) {
+        return "set" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    }
+
+
+    public static String defaultGetter(String k) {
+        return "get" + Character.toUpperCase(k.charAt(0)) + k.substring(1);
+    }
 
 
     /**
@@ -431,13 +437,38 @@ public class ReflectionUtils {
 
     public static boolean hasClass(String clazz) {
         try {
-            Class.forName(clazz);
+            classForName(clazz, ReflectionUtils.class.getClassLoader());
             return true;
         } catch (ClassNotFoundException e) {
             log.debug(e.getMessage(), e);
             return false;
         }
 
+    }
+
+    /**
+     * Finds the class given its name.
+     * <br>
+     * This method also retrieves primitive types (unlike {@code Class#forName(String)}).
+     */
+    public static Class<?> classForName(String name, ClassLoader loader) throws ClassNotFoundException {
+        Class<?> c = primitiveClasses.get(name);
+        if (c == null) {
+            c = Class.forName(name, false, loader);
+        }
+        return c;
+    }
+
+    public static Class<?> classForName(String name) throws ClassNotFoundException {
+        return classForName(name, ReflectionUtils.class.getClassLoader());
+    }
+
+
+    private static final Map<String, Class<?>> primitiveClasses = new HashMap<>();
+    static {
+        Class<?>[] primitives = {byte.class, short.class, int.class, long.class, float.class, double.class, char.class, boolean.class};
+        for (Class<?> clazz : primitives)
+            primitiveClasses.put(clazz.getName(), clazz);
     }
 
     @Getter

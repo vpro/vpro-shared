@@ -3,13 +3,17 @@ package nl.vpro.jmx;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.management.*;
 
+import static nl.vpro.util.ReflectionUtils.classForName;
+import static nl.vpro.util.ReflectionUtils.defaultGetter;
+
 /**
- * See http://actimem.com/java/jmx-annotations/
+ * Provides support for the annotation {@link Description}, {@link Name} and, {@link Units}. {@link MBeans#registerBean(ObjectName, Object), wraps mbeans in this,
+ * so that the proper metadata of them is visible in mbean clients (like visualvm).
+ *
+ * See http://actimem.com/java/jmx-annotations/, from which this class was largely copied.
  */
 
 public class AnnotatedStandardMXBean extends StandardMBean {
@@ -33,7 +37,7 @@ public class AnnotatedStandardMXBean extends StandardMBean {
     @Override
     protected String getDescription(MBeanAttributeInfo info) {
         String attributeName = info.getName();
-        String getterName = String.format("get%s%s", attributeName.substring(0, 1).toUpperCase(), attributeName.substring(1));
+        String getterName = defaultGetter(attributeName);
         Method m = methodByName(getMBeanInterface(), getterName);
         if (m != null) {
             Description d = m.getAnnotation(Description.class);
@@ -142,26 +146,6 @@ public class AnnotatedStandardMXBean extends StandardMBean {
         }
 
         return methodByName(mbeanInterface, op.getName(), paramTypes);
-    }
-
-    /**
-     * Finds the class given its name.
-     * <br>
-     * This method also retrieves primitive types (unlike {@code Class#forName(String)}).
-     */
-    private static Class<?> classForName(String name, ClassLoader loader) throws ClassNotFoundException {
-        Class<?> c = primitiveClasses.get(name);
-        if (c == null) {
-            c = Class.forName(name, false, loader);
-        }
-        return c;
-    }
-
-    private static final Map<String, Class<?>> primitiveClasses = new HashMap<>();
-    static {
-        Class<?>[] primitives = {byte.class, short.class, int.class, long.class, float.class, double.class, char.class, boolean.class};
-        for (Class<?> clazz : primitives)
-            primitiveClasses.put(clazz.getName(), clazz);
     }
 
 }
