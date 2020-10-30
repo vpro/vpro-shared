@@ -63,11 +63,11 @@ public interface CommandExecutor {
      * @return the exit code
      */
     default int execute(OutputStream out, String... args) {
-        return execute(out, LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+        return execute(out, LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
 
     default int execute(Writer out, String... args) {
-        return execute(new WriterOutputStream(out, StandardCharsets.UTF_8), LoggerOutputStream.error(LoggerFactory.getLogger(getClass())), args);
+        return execute(new WriterOutputStream(out, StandardCharsets.UTF_8), LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
 
 
