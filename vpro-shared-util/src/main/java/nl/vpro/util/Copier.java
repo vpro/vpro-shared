@@ -253,11 +253,11 @@ public class Copier implements Runnable, Closeable {
 
     private void callBack() {
         if (callback != null) {
-            log.info("Calling back");
+            log.debug("Calling back");
             callback.accept(this);
         }
         synchronized (this) {
-            log.info("{}notifying listeners", logPrefix());
+            log.debug("{}notifying listeners", logPrefix());
             // ready now, notify threads waiting
             notifyAll();
         }

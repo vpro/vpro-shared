@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.apache.commons.io.IOUtils.EOF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 
 /**
@@ -27,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @Slf4j
 @Isolated
-@Execution(ExecutionMode.SAME_THREAD)
+@Execution(SAME_THREAD)
 public class FileCachingInputStreamTest {
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static byte[] MANY_BYTES;
@@ -96,6 +97,7 @@ public class FileCachingInputStreamTest {
                 FileCachingInputStream inputStream = FileCachingInputStream
                     .builder()
                     .outputBuffer(2)
+                    .noProgressLogging()
                     .batchSize(3)
                     .downloadFirst(false) // if true exception will come from constructor already
                     .batchConsumer((f, c) -> {
@@ -164,6 +166,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(MANY_BYTES))
                 .initialBuffer(4)
                 .startImmediately(false)
+                .noProgressLogging()
                 .build()
         ) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -231,9 +234,9 @@ public class FileCachingInputStreamTest {
                 return fc;
             });
 
-            inputStream.getFuture().thenAccept(fc -> {
-                logs.add("then apply again " + fc.getCount());
-            });
+            inputStream.getFuture().thenAccept(fc ->
+                logs.add("then apply again " + fc.getCount())
+            );
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -434,6 +437,7 @@ public class FileCachingInputStreamTest {
             };
             FileCachingInputStream stream = FileCachingInputStream.builder()
                 .outputBuffer(2)
+                .noProgressLogging()
                 .batchSize(100)
                 .input(in)
                 .logger(log)
@@ -459,9 +463,9 @@ public class FileCachingInputStreamTest {
             assertThat(stream.getFuture()).isCompletedExceptionally();
             assertThat(stream.available()).isEqualTo(0);
             assertThat(stream.getCopier().isReady()).isTrue();
-            assertThatThrownBy(() -> {
-                stream.getCopier().isReadyIOException();
-            }) .isInstanceOf(IOException.class)
+            assertThatThrownBy(() ->
+                stream.getCopier().isReadyIOException()
+            ) .isInstanceOf(IOException.class)
                 .hasMessage("breaking!");
 
         }
@@ -485,6 +489,7 @@ public class FileCachingInputStreamTest {
             };
             FileCachingInputStream stream = FileCachingInputStream.builder()
                 .outputBuffer(200)
+                .noProgressLogging()
                 .batchSize(100)
                 .input(in)
                 .logger(log)
@@ -516,7 +521,6 @@ public class FileCachingInputStreamTest {
 
             assertThat(new File("/tmp/bestaatniet")).exists();
         }
-
     }
 
     @Test
