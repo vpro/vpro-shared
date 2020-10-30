@@ -206,7 +206,7 @@ class CopierTest {
                 }
             }
 
-            assertThat(batches).containsExactly("0", "20");
+            assertThat(batches).startsWith("0", "20");
             assertThat(copier.isReady()).isTrue();
             assertThat(copier.interrupt()).isFalse();
         }
