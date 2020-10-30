@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
+
+import static nl.vpro.util.CommandExecutor.isBrokenPipe;
 
 /**
  * Wrapper around ProcessorBuilder
@@ -210,8 +213,11 @@ public class CommandExecutorImpl implements CommandExecutor {
      * @return  The exit code
      */
     @Override
+    @SneakyThrows
     public int execute(String... args) {
-        return execute(LoggerOutputStream.info(getLogger()), null, args);
+        try (OutputStream out = LoggerOutputStream.info(getLogger())) {
+            return execute(out, null, args);
+        }
     }
 
 
@@ -271,14 +277,13 @@ public class CommandExecutorImpl implements CommandExecutor {
 
             Copier errorCopier = copyThread("error copier", p.getErrorStream(), parameters.errors, (e) -> {});
             if (inputCopier != null) {
-                inputCopier.waitFor();
-                p.getOutputStream().close();
+                inputCopier.waitForAndClose();
             }
             p.waitFor();
             if (copier != null) {
-                copier.waitFor();
+                copier.waitForAndClose();
             }
-            errorCopier.waitFor();
+            errorCopier.waitForAndClose();
             int result = p.exitValue();
             if (result != 0) {
                 logger.error("Error {} occurred while calling {}", result, String.join(" ", command));
@@ -295,7 +300,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (IOException e) {
-            if (CommandExecutor.isBrokenPipe(e)) {
+            if (isBrokenPipe(e)) {
                 logger.debug(e.getMessage());
                 throw new BrokenPipe(e);
             } else {
@@ -363,7 +368,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-
     static String toString(Iterable<String> args) {
         StringBuilder builder = new StringBuilder();
         for (String a : args) {
@@ -388,7 +392,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             task.cancel();
             PROCESS_MONITOR.purge();
         }
-
     }
 
 

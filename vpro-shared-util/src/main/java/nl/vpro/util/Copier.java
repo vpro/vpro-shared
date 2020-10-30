@@ -130,6 +130,11 @@ public class Copier implements Runnable, Closeable {
         }
     }
 
+    public void waitForAndClose() throws InterruptedException, IOException {
+        waitFor();
+        close();
+    }
+
 
     /**
      * Checks whether this copier is ready. You may want to check {@link #getException()} or use {@link #isReadyIOException()} to deal with unsuccessfull terminations

@@ -8,18 +8,23 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 /**
  * @author Michiel Meeuwissen
  */
 @Slf4j
 @Timeout(value = 10, unit = TimeUnit.SECONDS)
+@Isolated
+@Execution(SAME_THREAD)
 public class CommandExecutorImplTest {
 
 
