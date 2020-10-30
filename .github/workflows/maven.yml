@@ -21,4 +21,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B package --file pom.xml  --threads 1C
+      run: mvn --fail-never -T 1 -B --file pom.xml package
