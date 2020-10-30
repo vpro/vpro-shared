@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.parallel.Isolated;
+import org.junit.jupiter.api.parallel.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @Slf4j
 @Isolated
+@Execution(ExecutionMode.SAME_THREAD)
 public class FileCachingInputStreamTest {
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static byte[] MANY_BYTES;
@@ -192,6 +193,7 @@ public class FileCachingInputStreamTest {
         return FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
+            .noProgressLogging()
             .batchConsumer((f, c) -> {
                 try {
                     //log.info("sleeping");
