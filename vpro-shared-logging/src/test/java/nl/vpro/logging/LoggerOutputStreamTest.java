@@ -36,7 +36,7 @@ public class LoggerOutputStreamTest {
     @Test
     public void performance() throws IOException {
         long nano = System.nanoTime();
-        LoggerOutputStream out = LoggerOutputStream.info(log);
+        LoggerOutputStream out = LoggerOutputStream.debug(log);
         for (int i = 0 ; i < 10000; i++) {
             out.write(("bal bla bla bla " + i + "\n").getBytes());
         }
