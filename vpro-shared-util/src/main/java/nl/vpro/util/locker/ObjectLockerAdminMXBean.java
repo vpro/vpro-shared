@@ -11,7 +11,7 @@ import nl.vpro.jmx.Description;
  */
 public interface ObjectLockerAdminMXBean {
 
-    @Description("The mids currently locked")
+    @Description("The keys currently locked")
     Set<String> getLocks();
 
     @Description("The total number of acquired locks. So this grows continuously.")
@@ -42,9 +42,8 @@ public interface ObjectLockerAdminMXBean {
 
     void setMonitor(boolean monitor);
 
+    boolean isStrictlyOne();
 
-
-
-
+    void setStrictlyOne(boolean strictlyOne);
 
 }

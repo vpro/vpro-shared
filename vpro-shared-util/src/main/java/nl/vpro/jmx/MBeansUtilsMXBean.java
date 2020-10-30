@@ -12,7 +12,7 @@ import javax.management.MXBean;
 public interface MBeansUtilsMXBean {
 
     @Description("Cancel jmx process with key")
-    String cancel(String key);
+    String cancel(@Name("key") String key);
 
     @Description("Running")
     Map<String, String> getRunning();
