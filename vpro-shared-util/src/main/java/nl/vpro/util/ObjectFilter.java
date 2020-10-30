@@ -17,6 +17,8 @@ import java.util.function.Supplier;
 @Slf4j
 public class ObjectFilter {
 
+    private ObjectFilter() {}
+
     public static class Result<T> {
         final T value;
         final int filtered;
@@ -41,10 +43,10 @@ public class ObjectFilter {
     }
 
 
-    @SuppressWarnings("unchecked")
+
     private static <T> Collection<T> filterCollection(
         Collection<T> object,
-        Supplier<Collection> constructor,
+        Supplier<Collection<T>> constructor,
         Predicate<Object> predicate,
         Map<Integer, Object> objects,
         AtomicInteger filterCount
@@ -117,9 +119,9 @@ public class ObjectFilter {
         }
     }
 
-    private static List<Field> listAllFields(Class clazz) {
+    private static List<Field> listAllFields(Class<?> clazz) {
         List<Field> fieldList = new ArrayList<>();
-        Class tmpClass = clazz;
+        Class<?> tmpClass = clazz;
         while (tmpClass != null) {
             fieldList.addAll(Arrays.asList(tmpClass.getDeclaredFields()));
             tmpClass = tmpClass.getSuperclass();
