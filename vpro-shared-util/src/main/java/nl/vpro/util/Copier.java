@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +24,7 @@ import org.apache.commons.io.IOUtils;
 public class Copier implements Runnable, Closeable {
 
     private boolean ready;
-    private Throwable expection;
+    private Throwable exception;
     private long count;
 
     private final InputStream input;
@@ -32,6 +33,7 @@ public class Copier implements Runnable, Closeable {
     private final Consumer<Copier> callback;
     private final BiConsumer<Copier, Throwable> errorHandler;
     private final Consumer<Copier> batchConsumer;
+    @Getter
     private Future<?> future;
     private final String name;
     private final Object notify;
@@ -40,6 +42,7 @@ public class Copier implements Runnable, Closeable {
     public Copier(InputStream i, OutputStream o, long batch) {
         this(i, o, batch, null, null, null,  0, null, null);
     }
+
 
     /**
      *
@@ -51,7 +54,7 @@ public class Copier implements Runnable, Closeable {
      * @param errorHandler
      * @param offset
      * @param name
-     * @param notify
+     * @param notify if a batch was handled notify this object
      */
     @lombok.Builder(builderClassName = "Builder")
     private Copier(
@@ -85,57 +88,41 @@ public class Copier implements Runnable, Closeable {
         try {
             if (batchConsumer == null || batch < 1) {
                 count += IOUtils.copyLarge(input, output);
-                if (notify != null) {
-                    synchronized (notify) {
-                        notify.notifyAll();
-                    }
-                }
+                notifyIfRequested();
             } else {
                 batchConsumer.accept(this);
                 while (true) {
                     long result = IOUtils.copyLarge(input, output, 0, batch);
                     count += result;
-                    if (notify != null) {
-                        synchronized (notify) {
-                            notify.notifyAll();
-                        }
-                    }
-
+                    batchConsumer.accept(this);
+                    notifyIfRequested();
                     if (result < batch) {
                         break;
                     }
-                    batchConsumer.accept(this);
                 }
             }
         } catch (IOException ioe) {
-            expection = ioe;
+            exception = ioe;
             log.debug(ioe.getMessage());
+            notifyIfRequested();
         } catch (Throwable t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
                 log.warn("{}Connector {}\n{} {}", logPrefix(), toString(), t.getClass().getName(), t.getMessage());
             }
-            expection = t;
+            exception = t;
+            notifyIfRequested();
         } finally {
+            log.debug("Ready");
             synchronized (this) {
                 ready = true;
-                // The copier is ready, but resulted some error, the user requested to be called back, so do that now
-                if (errorHandler != null && expection != null) {
-                    errorHandler.accept(this, expection);
-                }
-                log.debug("{}notifying listeners", logPrefix());
+                handleError();
             }
-            if (callback != null) {
-                callback.accept(this);
-            }
-            synchronized (this) {
-                // ready now, notify threads waiting
-                notifyAll();
-            }
-
+            callBack();
         }
     }
 
     public void waitFor() throws InterruptedException {
+        executeIfNotRunning();
         synchronized (this) {
             while (!ready) {
                 wait();
@@ -162,15 +149,15 @@ public class Copier implements Runnable, Closeable {
     }
 
     public Optional<Throwable> getException() {
-        return Optional.ofNullable(expection);
+        return Optional.ofNullable(exception);
     }
 
     private void throwIOExceptionIfNeeded() throws IOException {
-        if (expection != null) {
-            if (expection instanceof IOException) {
-                throw (IOException) expection;
+        if (exception != null) {
+            if (exception instanceof IOException) {
+                throw (IOException) exception;
             } else {
-                throw new IOException(expection);
+                throw new IOException(exception);
             }
         }
     }
@@ -208,6 +195,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     /**
+     * Interrupts the copier. This may be desired if it was detected that the receiver is no longer interested.
      *
      * @return True if any interruption happened. False if the future was canceled or done already, or if cancelling failed.
      * @throws IOException
@@ -224,15 +212,14 @@ public class Copier implements Runnable, Closeable {
                     log.debug("Future is done already");
                     return false;
                 }
-                future.cancel(true);
                 boolean result = future.cancel(true);
                 if (! result) {
                     log.warn("Couldn't cancel {}", future);
                 }
                 return result;
+            }  else {
+                return ! ready;
             }
-
-            return true;
         } finally {
             close();
         }
@@ -242,4 +229,37 @@ public class Copier implements Runnable, Closeable {
         return name == null ? "" : name + ": ";
     }
 
+
+    private void notifyIfRequested() {
+          if (notify != null) {
+              synchronized (notify) {
+                  notify.notifyAll();
+              }
+          }
+    }
+
+    private void handleError() {
+        if (errorHandler != null && exception != null) {
+             // The copier is ready, but resulted some error, the user requested to be called back, so do that now
+            log.debug("Error handling");
+            try {
+                errorHandler.accept(this, exception);
+            } catch(Exception e) {
+                log.error("Error during error handling: {}", e.getMessage(), e);
+                log.error("Error was {}", exception.getMessage(), exception);
+            }
+        }
+    }
+
+    private void callBack() {
+        if (callback != null) {
+            log.info("Calling back");
+            callback.accept(this);
+        }
+        synchronized (this) {
+            log.info("{}notifying listeners", logPrefix());
+            // ready now, notify threads waiting
+            notifyAll();
+        }
+    }
 }
