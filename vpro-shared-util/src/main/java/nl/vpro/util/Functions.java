@@ -14,8 +14,9 @@ import java.util.function.*;
  *
  * @author Michiel Meeuwissen
  * @since 2.12
+ * @deprecated Moved to separate project
  */
-
+@Deprecated
 public final class Functions {
 
     private Functions() {

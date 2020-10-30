@@ -12,6 +12,7 @@ import java.util.function.BiPredicate;
  * @since 2.12.0
  */
 @FunctionalInterface
+@Deprecated
 public interface TriPredicate<T, U, V> {
 
     boolean test(T t, U u, V v);

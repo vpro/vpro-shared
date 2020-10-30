@@ -11,8 +11,10 @@ import java.util.function.Function;
  *
  * @author Michiel Meeuwissen
  * @since 1.72
+ * @deprecated Moved to separate project
  */
 @FunctionalInterface
+@Deprecated
 public interface TriFunction <T,U,V,R> {
 
     R apply(T t, U u, V v);
