@@ -131,8 +131,8 @@ public class ObjectLocker {
         JMX_INSTANCE.maxDepth = Math.max(JMX_INSTANCE.maxDepth, holder.lock.getHoldCount());
         log.trace("{} holdcount {}", Thread.currentThread().hashCode(), holder.lock.getHoldCount());
         if (holder.lock.getHoldCount() == 1) {
-            JMX_INSTANCE.lockCount.computeIfAbsent(reason, (s) -> new AtomicInteger(0)).incrementAndGet();
-            JMX_INSTANCE.currentCount.computeIfAbsent(reason, (s) -> new AtomicInteger()).incrementAndGet();
+            JMX_INSTANCE.lockCount.computeIfAbsent(reason, s -> new AtomicInteger(0)).incrementAndGet();
+            JMX_INSTANCE.currentCount.computeIfAbsent(reason, s -> new AtomicInteger()).incrementAndGet();
             Duration aquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
             log.debug("Acquired lock for {}  ({}) in {}", key, reason, aquireTime);
         }
@@ -176,9 +176,7 @@ public class ObjectLocker {
                 }
             }
             if (stricltyOne && currentLocks.stream()
-                .anyMatch((l) ->
-                        key.getClass().isInstance(l.key) && ! comparable.test(l.key, key)
-                )) {
+                .anyMatch(l -> key.getClass().isInstance(l.key) && ! comparable.test(l.key, key))) {
                 throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), currentLocks.get(0).summarize(), key));
             } else {
                 log.warn("Getting a lock on a different key! {} + {}", currentLocks, key);
@@ -199,7 +197,7 @@ public class ObjectLocker {
                     log.trace("Removed {}", key);
                     locks.remove(key);
                 }
-                JMX_INSTANCE.currentCount.computeIfAbsent(reason, (s) -> new AtomicInteger()).decrementAndGet();
+                JMX_INSTANCE.currentCount.computeIfAbsent(reason, s -> new AtomicInteger()).decrementAndGet();
                 Duration duration = Duration.ofNanos(System.nanoTime() - nanoStart);
                 Slf4jHelper.log(log, duration.compareTo(Duration.ofSeconds(30))> 0 ? Level.WARN :  Level.DEBUG,
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
