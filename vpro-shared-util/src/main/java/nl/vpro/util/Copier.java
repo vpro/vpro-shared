@@ -46,7 +46,7 @@ public class Copier implements Runnable, Closeable {
 
     /**
      *
-     * @param input The input stream to copy from (will be close if ready)
+     * @param input The input stream to copy from (will be closed if ready)
      * @param output The output stream to copy to (will not be implicetely closed)
      * @param batch
      * @param batchConsumer

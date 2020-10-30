@@ -141,8 +141,6 @@ public class FileCachingInputStream extends InputStream {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
 
-
-
         try {
             if (initialBuffer > 0) {
                 // first use an initial buffer of memory only
@@ -174,6 +172,7 @@ public class FileCachingInputStream extends InputStream {
                         }
                     }
                     tempFileInputStream = null;
+                    log.debug("the stream completely fit into the memory buffer");
                     return;
                 } else {
                     buffer = buf;
@@ -202,7 +201,7 @@ public class FileCachingInputStream extends InputStream {
 
 
             final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
-            openStreams++;
+            incStreams();
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
                 tempFileOutputStream.write(buffer);
@@ -242,7 +241,7 @@ public class FileCachingInputStream extends InputStream {
                 effectiveProgressLogging = progressLogging;
             }
             this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
-            openStreams++;
+            incStreams();
              // The copier is responsible for copying the remaining of the stream to the file
             // in a separate thread
             copier = Copier.builder()
@@ -256,12 +255,11 @@ public class FileCachingInputStream extends InputStream {
                 })
                 .callback(c -> {
                     try {
-                        tempFileOutputStream.close();
-                        openStreams--;
+
+                        decStreams(tempFileOutputStream); // output is now closed
                         bc.accept(FileCachingInputStream.this, c);
                         future.complete(this);
-                        //this.tempFileInputStream.close();
-                        //openStreams--;
+
                     } catch (IOException ioe) {
                         future.completeExceptionally(ioe);
 
@@ -329,15 +327,14 @@ public class FileCachingInputStream extends InputStream {
                     log.debug("Closed by other thread in the mean time");
                 }
 
-                if (this.tempFileInputStream != null) {
-                    this.tempFileInputStream.close();
-                    openStreams--;
-                }
                 if (copier != null) {
                     // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
                     if (copier.interrupt()) {
                         log.debug("Interrupted {}", copier);
                     }
+                }
+                if (this.tempFileInputStream != null) {
+                    decStreams( this.tempFileInputStream);
                 }
                 if (tempFileInputStream != null) {
                     if (tempFile != null && this.deleteTempFile) {
@@ -509,9 +506,18 @@ public class FileCachingInputStream extends InputStream {
         return (fc, c) -> {
             try {
                 Thread.sleep(d.toMillis());
-            } catch (Exception e) {
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
 
             }
         };
+    }
+
+    private void incStreams() {
+        openStreams++;
+    }
+    private void decStreams(Closeable autoCloseable) throws IOException {
+        autoCloseable.close();
+        openStreams--;
     }
 }

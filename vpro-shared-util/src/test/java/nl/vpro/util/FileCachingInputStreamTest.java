@@ -42,12 +42,13 @@ public class FileCachingInputStreamTest {
 
     @BeforeEach
     public void before(TestInfo testInfo) {
-        log.info("-----{}. Interrupted {}", testInfo.getTestMethod().get().getName(), Thread.interrupted());
+        log.info(">-----{}. Interrupted {}", testInfo.getTestMethod().get().getName(), Thread.interrupted());
         FileCachingInputStream.openStreams = 0;
     }
 
     @AfterEach
-    public void after() {
+    public void after(TestInfo testInfo) {
+        log.info("<-----{}. Interrupted {}", testInfo.getTestMethod().get().getName(), Thread.interrupted());
         assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
     }
 
@@ -55,10 +56,9 @@ public class FileCachingInputStreamTest {
     @ValueSource(booleans = {true, false})
     public void testRead(boolean downloadFirst) throws IOException {
 
-        try(FileCachingInputStream inputStream =  slowReader(downloadFirst)) {
-
+        try(FileCachingInputStream inputStream =  slowReader(downloadFirst);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+        ) {
             int r;
             while ((r = inputStream.read()) != -1) {
                 out.write(r);
@@ -66,7 +66,6 @@ public class FileCachingInputStreamTest {
 
             assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
-        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
     }
 
 
@@ -86,8 +85,6 @@ public class FileCachingInputStreamTest {
 
             assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
-        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
-
     }
 
     @Test
@@ -128,11 +125,6 @@ public class FileCachingInputStreamTest {
             }
         }).isInstanceOf(IOException.class)
             .hasMessageContaining("Stream closed");
-
-        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
-
-
-
     }
 
 
@@ -197,15 +189,7 @@ public class FileCachingInputStreamTest {
             .outputBuffer(2)
             .batchSize(3)
             .noProgressLogging()
-            .batchConsumer((f, c) -> {
-                try {
-                    //log.info("sleeping");
-                    Thread.sleep(5L);
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage(), e);
-                }
-                //log.info("count:" + c.getCount());
-            })
+            .batchConsumer(FileCachingInputStream.throttle(Duration.ofMillis(5)))
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .startImmediately(true)
@@ -285,11 +269,15 @@ public class FileCachingInputStreamTest {
                 .initialBuffer(4)
                 .noProgressLogging()
                 .startImmediately(true)
-                .build()) {
-
+                .build();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ) {
+            assertThat(FileCachingInputStream.openStreams).isEqualTo(2);
 
-            IOUtils.copy(inputStream, out);
+            IOUtils.copyLarge(inputStream, out);
+
+            assertThat(FileCachingInputStream.openStreams).isEqualTo(1);// tempFileOutputStream was closed by Copier
+            assertThat(inputStream.getCopier().getFuture()).isDone();
 
             assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
@@ -323,14 +311,14 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
                 //.initialBuffer(2048)
-                .build()) {
+                .build();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ) {
 
             assertThat(inputStream.getBufferLength()).isEqualTo(HELLO.length);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
             IOUtils.copy(inputStream, out);
-
+            assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
             assertThat(out.toByteArray()).containsExactly(HELLO);
         }
     }
