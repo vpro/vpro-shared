@@ -1,9 +1,13 @@
 package nl.vpro.util;
 
-import uk.org.lidalia.slf4jext.Level;
-import uk.org.lidalia.slf4jext.Logger;
 
 import java.util.Iterator;
+
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
+import org.slf4j.ext.LoggerWrapper;
+
+import nl.vpro.logging.Slf4jHelper;
 
 
 /**
@@ -23,14 +27,14 @@ public class LoggingIterator<T> implements Iterator<T> {
 	private final Iterator<T> wrapped;
 
 	@lombok.Builder
-    public LoggingIterator(Iterator<T> wrapped, org.slf4j.Logger logger, Level level, int interval) {
+    public LoggingIterator(Iterator<T> wrapped, Logger logger, Level level, int interval) {
         this.wrapped = wrapped;
-		this.logger = new Logger(logger);
+		this.logger = new LoggerWrapper(logger, logger.getName());
         this.level = level;
 		this.interval = interval;
 	}
 
-    public LoggingIterator(Iterator<T> wrapped, org.slf4j.Logger logger, int interval) {
+    public LoggingIterator(Iterator<T> wrapped, Logger logger, int interval) {
         this(wrapped, logger, Level.INFO, interval);
     }
 
@@ -43,7 +47,7 @@ public class LoggingIterator<T> implements Iterator<T> {
 	public T next() {
 		T next = wrapped.next();
 		if (++count % interval == 0 || ! wrapped.hasNext()) {
-            logger.log(level, "{}: {}", count, next);
+            Slf4jHelper.log(logger, level, "{}: {}", count, next);
         }
 		return next;
 
