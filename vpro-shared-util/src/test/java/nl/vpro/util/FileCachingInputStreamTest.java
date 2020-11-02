@@ -42,13 +42,13 @@ public class FileCachingInputStreamTest {
 
     @BeforeEach
     public void before(TestInfo testInfo) {
-        log.info(">-----{}. Interrupted {}", testInfo.getTestMethod().get().getName(), Thread.interrupted());
+        log.info(">-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), Thread.interrupted(), FileCachingInputStream.openStreams);
         FileCachingInputStream.openStreams = 0;
     }
 
     @AfterEach
     public void after(TestInfo testInfo) {
-        log.info("<-----{}. Interrupted {}", testInfo.getTestMethod().get().getName(), Thread.interrupted());
+        log.info("<-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), Thread.interrupted(), FileCachingInputStream.openStreams);
         assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
     }
 
