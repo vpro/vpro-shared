@@ -484,6 +484,7 @@ public class FileCachingInputStream extends InputStream {
                     } catch (InterruptedException e) {
                         log.warn("Interrupted {}", e.getMessage());
                         Thread.currentThread().interrupt();
+                        close();
                         throw new InterruptedIOException(e.getMessage());
                     }
                     int subResult = Math.max(tempFileInputStream.read(b, totalResult, b.length - totalResult), 0);
