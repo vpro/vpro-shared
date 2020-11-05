@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -60,7 +61,7 @@ public class FileCachingInputStream extends InputStream {
 
     private boolean closed = false;
     private long count = 0;
-    static int openStreams = 0;
+    static final AtomicInteger openStreams = new AtomicInteger(0);
 
     @Getter
     private long bytesRead = 0;
@@ -118,7 +119,7 @@ public class FileCachingInputStream extends InputStream {
         final Path path,
         final String filePrefix,
         final long batchSize,
-        final BiConsumer<FileCachingInputStream, Copier> batchConsumer,
+        final Consumer<FileCachingInputStream> batchConsumer,
         Integer outputBuffer,
         final Logger logger,
         List<OpenOption> openOptions,
@@ -210,19 +211,19 @@ public class FileCachingInputStream extends InputStream {
                 tempFileOutputStream.write(buffer);
             }
 
-            final BiConsumer<FileCachingInputStream, Copier> bc;
+            final Consumer<FileCachingInputStream> consumer;
             if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
                 AtomicLong batchCount = new AtomicLong(0);
-                bc = (t, c) -> {
+                consumer = (t) -> {
                     if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
-                        log.info("Creating {} ({} bytes written)", tempFile, c.getCount());
+                        log.info("Creating {} ({} bytes written)", tempFile, t.copier.getCount());
                     }
                     if (batchConsumer != null) {
-                        batchConsumer.accept(t, c);
+                        batchConsumer.accept(t);
                     }
                 };
             } else {
-                bc = batchConsumer == null ?  (t, c) -> { } : batchConsumer;
+                consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
             }
 
             final boolean deleteOnClose;
@@ -277,7 +278,7 @@ public class FileCachingInputStream extends InputStream {
                     Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
                 })
                 .batch(batchSize)
-                .batchConsumer(c -> bc.accept(this, c))
+                .batchConsumer(c -> consumer.accept(this))
                 .build();
 
             if (downloadFirst != null && downloadFirst) {
@@ -400,6 +401,13 @@ public class FileCachingInputStream extends InputStream {
         return copier == null ? bufferLength : copier.getCount();
     }
 
+     /**
+     * Returns whether consuming the inputstream is ready.
+      */
+    public boolean isReady() {
+        return copier == null || copier.isReady();
+    }
+
     /**
      * If a temp file is used for buffering, you can may obtain it.
      */
@@ -518,8 +526,8 @@ public class FileCachingInputStream extends InputStream {
         return totalResult;
     }
 
-    public static BiConsumer<FileCachingInputStream, Copier> throttle(Duration d) {
-        return (fc, c) -> {
+    public static Consumer<FileCachingInputStream> throttle(Duration d) {
+        return (fc) -> {
             try {
                 Thread.sleep(d.toMillis());
             } catch (InterruptedException ignored) {

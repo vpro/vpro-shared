@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -46,7 +47,7 @@ public class FileCachingInputStreamTest {
     @BeforeEach
     public void before(TestInfo testInfo) {
         log.info(">-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), Thread.interrupted(), FileCachingInputStream.openStreams);
-        FileCachingInputStream.openStreams = 0;
+        FileCachingInputStream.openStreams.set(0);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -107,8 +108,8 @@ public class FileCachingInputStreamTest {
                     .noProgressLogging()
                     .batchSize(3)
                     .downloadFirst(false) // if true exception will come from constructor already
-                    .batchConsumer((f, c) -> {
-                        if (c.getCount() > 300) {
+                    .batchConsumer((f) -> {
+                        if (f.getCount() > 300) {
                             // randomly close the file
                             // this should be dealt with gracefully
                             if (! f.isClosed()) {
@@ -172,23 +173,24 @@ public class FileCachingInputStreamTest {
         final AtomicLong interrupted = new AtomicLong(0);
         final AtomicLong closed = new AtomicLong(0);
         boolean isInterrupted = false;
-        try(
+        try{
+            try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
-                .batchConsumer((f, c) -> {
-                    if (c.getCount() > 300) {
+                .batchConsumer((f) -> {
+                    if (f.getCount() > 300) {
                         long i = interrupted.getAndIncrement();
                         if (closed.get() > 0) {
                             throw new RuntimeException("Called while closed!");
                         }
                         if (! thisThread.isInterrupted())  {
-                            log.info("{} Interrupting {} {}", c.getCount(), thisThread, i);
+                            log.info("{} Interrupting {} {}", f.getCount(), thisThread, i);
                             thisThread.interrupt();
                             // According to javadoc this will either cause an exception or set the interrupted status.
 
                         } else {
-                            log.info("{} Interrupted already {} {}", c.getCount(), thisThread, i);
+                            log.info("{} Interrupted already {} {}", f.getCount(), thisThread, i);
                         }
                     }
                 })
@@ -197,13 +199,14 @@ public class FileCachingInputStreamTest {
                 .startImmediately(false)
                 .noProgressLogging()
                 .build()
-        ) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            int r;
-            byte[] buffer = new byte[10];
-            while ((r = inputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, r);
+                int r;
+                byte[] buffer = new byte[10];
+                while ((r = inputStream.read(buffer)) != -1) {
+                    out.write(buffer, 0, r);
+                }
             }
         } catch (ClosedByInterruptException | InterruptedIOException  ie) {
             isInterrupted = true;
@@ -237,9 +240,9 @@ public class FileCachingInputStreamTest {
             .batchSize(3)
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
-            .batchConsumer((fc, c) -> {
-                if (c.isReady()) {
-                    logs.add("" + c.getCount());
+            .batchConsumer((fc) -> {
+                if (fc.isReady()) {
+                    logs.add("" + fc.getCount());
                 }
             })
             .noProgressLogging()
@@ -312,6 +315,37 @@ public class FileCachingInputStreamTest {
         assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testTempFile(boolean deleteTempFile) throws IOException {
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .input(new ByteArrayInputStream(MANY_BYTES))
+            .initialBuffer(4)
+            .noProgressLogging()
+            .deleteTempFile(deleteTempFile)
+            .startImmediately(false)
+            .build();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        IOUtils.copyLarge(inputStream, out);
+
+        inputStream.close();
+
+        assertThat(inputStream.getTempFile()).isNotNull();
+        if (deleteTempFile) {
+            assertThat(inputStream.getTempFile()).doesNotExist();
+        } else {
+            assertThat(inputStream.getTempFile()).exists();
+            assertThat(inputStream.getTempFile()).hasBinaryContent(MANY_BYTES);
+            Files.delete(inputStream.getTempFile());
+        }
+
+
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
+    }
+
     @Test
     public void testNoAutostart() throws IOException {
         try (
@@ -347,7 +381,6 @@ public class FileCachingInputStreamTest {
             assertThat(inputStream.getBufferLength()).isEqualTo(HELLO.length);
 
             IOUtils.copy(inputStream, out);
-            assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
             assertThat(out.toByteArray()).containsExactly(HELLO);
         }
     }
