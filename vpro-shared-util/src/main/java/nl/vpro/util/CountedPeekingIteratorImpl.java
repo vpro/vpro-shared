@@ -53,13 +53,11 @@ class CountedPeekingIteratorImpl<T> implements  CountedPeekingIterator<T> {
     @Override
     public Optional<Long> getSize() {
         return iterator.getSize();
-
     }
 
     @Override
     public Long getCount() {
         return iterator.getCount();
-
     }
 
     @Override
@@ -67,12 +65,9 @@ class CountedPeekingIteratorImpl<T> implements  CountedPeekingIterator<T> {
         return iterator.getTotalSize();
     }
 
-
-
     @Override
     public void close() throws Exception {
         iterator.close();
-
     }
 
     @Override
