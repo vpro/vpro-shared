@@ -14,9 +14,9 @@ import org.slf4j.Logger;
  */
 abstract class AbstractLoggerOutputStream extends OutputStream {
 
-    final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    final boolean skipEmptyLines;
-    int lastChar = -1;
+    private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    private final boolean skipEmptyLines;
+    private int lastChar = -1;
 
     @Getter
     protected long count = 0;
@@ -31,7 +31,6 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
     }
 
     abstract void log(String line);
-
 
     @Override
     public void write(int b) {
@@ -50,7 +49,6 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
         lastChar = b;
     }
 
-
     @Override
     public void flush() {
         log(skipEmptyLines);
@@ -63,9 +61,9 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
     }
 
     private void log(boolean skipEmpty) {
-        String line = buffer.toString();
+        final String line = buffer.toString();
         try {
-            if (!skipEmpty || !StringUtils.isBlank(line)) {
+            if (!skipEmpty || StringUtils.isNotBlank(line)) {
                 count++;
                 if (max != null) {
                     if (count > max) {
