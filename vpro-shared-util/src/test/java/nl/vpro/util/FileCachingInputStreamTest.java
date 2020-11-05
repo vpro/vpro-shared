@@ -127,6 +127,7 @@ public class FileCachingInputStreamTest {
                         }
                     })
                     .input(new ByteArrayInputStream(MANY_BYTES))
+
                     .initialBuffer(4)
                     .startImmediately(true)
                     .build()) {

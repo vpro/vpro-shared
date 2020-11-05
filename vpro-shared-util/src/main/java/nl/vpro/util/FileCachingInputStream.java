@@ -7,8 +7,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -401,11 +400,18 @@ public class FileCachingInputStream extends InputStream {
         return copier == null ? bufferLength : copier.getCount();
     }
 
-     /**
+    /**
      * Returns whether consuming the inputstream is ready.
-      */
+     */
     public boolean isReady() {
         return copier == null || copier.isReady();
+    }
+
+    /**
+     * Returns the exception that may have happened. E.g. for use in the call back.
+     */
+    public Optional<Throwable> getException() {
+        return copier == null ? Optional.empty(): copier.getException();
     }
 
     /**
