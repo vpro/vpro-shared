@@ -52,11 +52,15 @@ public class FileCachingInputStreamTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @AfterEach
-    public void after(TestInfo testInfo) throws InterruptedException {
+    public void after(TestInfo testInfo) {
         boolean wasInterrupted = Thread.interrupted();
         synchronized (FileCachingInputStream.openStreams) {
             if (FileCachingInputStream.openStreams.get() != 0) {
-                FileCachingInputStream.openStreams.wait(1000);
+                try {
+                    FileCachingInputStream.openStreams.wait(1000);
+                } catch (InterruptedException ignored) {
+
+                }
             }
         }
         log.info("<-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), wasInterrupted, FileCachingInputStream.openStreams);
