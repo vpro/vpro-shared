@@ -9,6 +9,9 @@
   </appender>
 
 
+  <logger name="nl.vpro.util">
+    <level value="INFO" />
+  </logger>
   <root>
     <level value="INFO" />
     <appender-ref ref="console"/>

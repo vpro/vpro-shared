@@ -54,7 +54,10 @@ public class FileCachingInputStream extends InputStream {
 
     private final Path tempFile;
     private final boolean deleteTempFile;
+
     private final InputStream tempFileInputStream;
+    private boolean tempFileInputStreamClosed = false;
+
     private boolean closed = false;
     private long count = 0;
     static int openStreams = 0;
@@ -201,7 +204,7 @@ public class FileCachingInputStream extends InputStream {
 
 
             final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
-            incStreams();
+            incStreams(tempFileOutputStream);
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
                 tempFileOutputStream.write(buffer);
@@ -241,7 +244,7 @@ public class FileCachingInputStream extends InputStream {
                 effectiveProgressLogging = progressLogging;
             }
             this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
-            incStreams();
+            incStreams(tempFileInputStream);
              // The copier is responsible for copying the remaining of the stream to the file
             // in a separate thread
             copier = Copier.builder()
@@ -254,10 +257,10 @@ public class FileCachingInputStream extends InputStream {
                     future.completeExceptionally(e);
                 })
                 .callback(c -> {
+                    log.debug("callback for copier");
                     try {
-
-                        decStreams(tempFileOutputStream); // output is now closed
-                        bc.accept(FileCachingInputStream.this, c);
+                        closeAndDecStreams(tempFileOutputStream); // output is now closed
+                        consumer.accept(FileCachingInputStream.this);
                         future.complete(this);
 
                     } catch (IOException ioe) {
@@ -317,41 +320,52 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+    protected synchronized void closeTempFile() throws IOException {
+        if (this.tempFileInputStream != null && ! tempFileInputStreamClosed) {
+            closeAndDecStreams(this.tempFileInputStream);
 
+            if (tempFile != null && this.deleteTempFile) {
+                if (Files.deleteIfExists(tempFile)) {
+                    log.debug("Deleted {}", tempFile);
+                } else {
+                    //   openOptions.add(StandardOpenOption.DELETE_ON_CLOSE); would have arranged that!
+                    log.debug("Could not delete because didn't exists any more {}", tempFile);
+                }
+            }
+            tempFileInputStreamClosed = true;
+        }
+
+    }
+
+    @SneakyThrows
     @Override
     public void close() throws IOException {
 
         if (! closed) {
             synchronized(this) {
+                log.debug("Closing");
                 if (closed) {
                     log.debug("Closed by other thread in the mean time");
+                    return;
                 }
+                closeTempFile();
 
-                if (copier != null) {
-                    // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
-                    if (copier.interrupt()) {
-                        log.debug("Interrupted {}", copier);
-                    }
-                }
-                if (this.tempFileInputStream != null) {
-                    decStreams( this.tempFileInputStream);
-                }
-                if (tempFileInputStream != null) {
-                    if (tempFile != null && this.deleteTempFile) {
-                        if (Files.deleteIfExists(tempFile)) {
-                            log.debug("Deleted {}", tempFile);
-                        } else {
-                            //   openOptions.add(StandardOpenOption.DELETE_ON_CLOSE); would have arranged that!
-                            log.debug("Could not delete because didn't exists any more {}", tempFile);
-                        }
-                    }
-                }
                 closed = true;
                 notifyAll();
+
+            }
+            if (copier != null) {
+                    // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
+                log.debug("Closing copier");
+                copier.waitForAndClose();
+            } else {
+                log.debug("No copier to close");
             }
         } else {
-            log.debug("Closed already");
+            log.debug("Closed already", new Exception());
         }
+
+         log.debug("closed");
     }
     public boolean isClosed() {
         return closed;
@@ -435,7 +449,7 @@ public class FileCachingInputStream extends InputStream {
         while (result == EOF) {
             synchronized (copier) {
                 while (!copier.isReadyIOException() && result == EOF) {
-                    log.debug("Copier {} not yet ready", copier.logPrefix());
+                    log.trace("Copier {} not yet ready", copier);
                     // copier is still busy, wait a second, and try again.
                     try {
                         copier.wait(1000);
@@ -476,13 +490,14 @@ public class FileCachingInputStream extends InputStream {
             totalResult += Math.max(tempFileInputStream.read(b, 0, b.length), 0);
 
             if (totalResult == 0) {
-
                 while (!copier.isReadyIOException() && totalResult == 0) {
-                    log.debug("Copier {} not yet ready", copier.logPrefix());
+                    log.trace("Copier {} not yet ready", copier);
                     try {
                         copier.wait(1000);
                     } catch (InterruptedException e) {
                         log.warn("Interrupted {}", e.getMessage());
+                        copier.close();
+                        future.completeExceptionally(e);
                         Thread.currentThread().interrupt();
                         close();
                         throw new InterruptedIOException(e.getMessage());
@@ -514,11 +529,15 @@ public class FileCachingInputStream extends InputStream {
         };
     }
 
-    private void incStreams() {
-        openStreams++;
+    private void incStreams(Closeable closable) {
+        synchronized (openStreams) {
+            log.debug("{} opened {}", openStreams.incrementAndGet(), closable);
+        }
     }
-    private void decStreams(Closeable autoCloseable) throws IOException {
-        autoCloseable.close();
-        openStreams--;
+    private void closeAndDecStreams(Closeable closable) throws IOException {
+        synchronized (openStreams) {
+            log.debug("{} closing {}", openStreams.decrementAndGet(), closable);
+            closable.close();
+        }
     }
 }

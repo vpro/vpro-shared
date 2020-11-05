@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -20,7 +19,6 @@ import org.apache.commons.io.IOUtils;
  * @since 3.1
  */
 @Slf4j
-@ToString
 public class Copier implements Runnable, Closeable {
 
     private boolean ready;
@@ -35,7 +33,9 @@ public class Copier implements Runnable, Closeable {
     private final Consumer<Copier> batchConsumer;
     @Getter
     private Future<?> future;
+    @Getter(AccessLevel.NONE)
     private final String name;
+    private final String logPrefix;
     private final Object notify;
 
 
@@ -50,8 +50,8 @@ public class Copier implements Runnable, Closeable {
      * @param output The output stream to copy to (will not be implicetely closed)
      * @param batch
      * @param batchConsumer
-     * @param callback
-     * @param errorHandler
+     * @param callback Called when ready
+     * @param errorHandler Called on error
      * @param offset
      * @param name
      * @param notify if a batch was handled notify this object
@@ -76,6 +76,7 @@ public class Copier implements Runnable, Closeable {
         this.errorHandler = errorHandler;
         this.count = offset;
         this.name = name;
+        this.logPrefix = name == null ? "" : name + ": ";
         this.notify = notify;
     }
 
@@ -104,21 +105,25 @@ public class Copier implements Runnable, Closeable {
         } catch (IOException ioe) {
             exception = ioe;
             log.debug(ioe.getMessage());
-            notifyIfRequested();
         } catch (Throwable t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
-                log.warn("{}Connector {}\n{} {}", logPrefix(), toString(), t.getClass().getName(), t.getMessage());
+                log.warn("{}Connector {}\n{} {}", logPrefix, toString(), t.getClass().getName(), t.getMessage());
             }
             exception = t;
-            notifyIfRequested();
         } finally {
-            log.debug("Ready");
-            synchronized (this) {
-                ready = true;
-                handleError();
-            }
-            callBack();
+            log.debug("finally");
+            afterRun();
         }
+    }
+
+    private void afterRun() {
+        log.debug("Ready");
+        synchronized (this) {
+            ready = true;
+        }
+        handleError();
+        notifyIfRequested();
+        callBack();
     }
 
     public void waitFor() throws InterruptedException {
@@ -127,14 +132,15 @@ public class Copier implements Runnable, Closeable {
             while (!ready) {
                 wait();
             }
+            log.debug("ready");
         }
     }
 
     public void waitForAndClose() throws InterruptedException, IOException {
+        log.debug("waitForAndClose");
         waitFor();
         close();
     }
-
 
     /**
      * Checks whether this copier is ready. You may want to check {@link #getException()} or use {@link #isReadyIOException()} to deal with unsuccessfull terminations
@@ -167,7 +173,6 @@ public class Copier implements Runnable, Closeable {
         }
     }
 
-
     /**
      * Returns the number of bytes read from the input stream so far
      */
@@ -176,71 +181,62 @@ public class Copier implements Runnable, Closeable {
     }
 
     public Copier execute() {
-        if (future != null) {
-            throw new IllegalStateException(logPrefix() + "Already running");
+        if (this.future != null) {
+            throw new IllegalStateException(logPrefix + "Already running");
         }
-        future = ThreadPools.copyExecutor.submit(this);
+        this.future = ThreadPools.copyExecutor.submit(this);
         return this;
     }
 
-    public Copier executeIfNotRunning() {
+    public void executeIfNotRunning() {
         if (future == null) {
             execute();
-        }
-        return this;
-    }
-
-    @Override
-    public void close() throws IOException {
-        input.close();
-        if (future != null) {
-            future.cancel(false);
-            future = null;
         }
     }
 
     /**
-     * Interrupts the copier. This may be desired if it was detected that the receiver is no longer interested.
-     *
-     * @return True if any interruption happened. False if the future was canceled or done already, or if cancelling failed.
-     * @throws IOException
+     * Closes and interrupts  the copier if necessary (This may be desired if it was detected that the receiver is no longer interested). And closes associated resources.
      */
+    @Override
+    public void close() throws IOException {
+        log.debug("close");
+        cancelFutureIfNeeded();
+        input.close();
+    }
 
-    public boolean interrupt() throws IOException {
-        try {
-            if (future != null) {
-                if (future.isCancelled()) {
-                    log.debug("Future is cancelled already");
-                    return false;
-                }
-                if (future.isDone()) {
-                    log.debug("Future is done already");
-                    return false;
-                }
-                boolean result = future.cancel(true);
-                if (! result) {
-                    log.warn("Couldn't cancel {}", future);
-                }
-                return result;
-            }  else {
-                return ! ready;
+    boolean cancelFutureIfNeeded() {
+        if (future != null) {
+            if (future.isCancelled()) {
+                log.debug("Future is cancelled already");
+                return false;
             }
-        } finally {
-            close();
+            if (future.isDone()) {
+                log.debug("Future is done already");
+                return false;
+            }
+            boolean result = future.cancel(true);
+            if (! result) {
+                log.warn("Couldn't cancel {}", future);
+            }
+            return result;
+        }  else {
+            return ! ready;
         }
     }
 
-    protected String logPrefix() {
-        return name == null ? "" : name + ": ";
-    }
-
-
+    /**
+     * After each batch, and at the end, we notify listeners.
+     */
     private void notifyIfRequested() {
-          if (notify != null) {
-              synchronized (notify) {
-                  notify.notifyAll();
-              }
-          }
+        if (notify != null) {
+            log.trace("{}notifying listeners", logPrefix);
+            synchronized (notify) {
+                notify.notifyAll();
+            }
+        }
+        synchronized (this) {
+            this.notifyAll();
+        }
     }
 
     private void handleError() {
@@ -260,11 +256,12 @@ public class Copier implements Runnable, Closeable {
         if (callback != null) {
             log.debug("Calling back");
             callback.accept(this);
+            log.debug("Called back");
         }
-        synchronized (this) {
-            log.debug("{}notifying listeners", logPrefix());
-            // ready now, notify threads waiting
-            notifyAll();
-        }
+    }
+
+    @Override
+    public String toString() {
+        return logPrefix + super.toString();
     }
 }

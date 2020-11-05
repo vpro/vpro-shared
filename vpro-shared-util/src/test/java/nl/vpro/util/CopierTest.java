@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 2.18
  */
 @Slf4j
 class CopierTest {
@@ -122,7 +122,7 @@ class CopierTest {
         final List<String> callback = new ArrayList<>();
         final Throwable[] exceptionHolder = new Throwable[1];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Copier copier = Copier
+        try (Copier copier = Copier
             .builder()
             .input(in)
             .output(out)
@@ -133,16 +133,19 @@ class CopierTest {
             .errorHandler((c, e) -> {
                 exceptionHolder[0] = e;
             })
-            .build();
+            .build()) {
 
-        copier.waitFor();
+            copier.waitFor();
 
-        assertThat(copier.isReady()).isTrue();
-        assertThatThrownBy(copier::isReadyIOException).isInstanceOf(IOException.class)
-            .hasMessage("java.lang.RuntimeException: foo bar");
-        assertThat(copier.getException()).isPresent().containsInstanceOf(RuntimeException.class);
-        assertThat(callback).hasSize(1);
-        assertThat(exceptionHolder[0]).isEqualTo(copier.getException().get());
+            assertThat(copier.isReady()).isTrue();
+            assertThatThrownBy(copier::isReadyIOException).isInstanceOf(IOException.class)
+                .hasMessage("java.lang.RuntimeException: foo bar");
+            assertThat(copier.getException()).isPresent().containsInstanceOf(RuntimeException.class);
+            assertThat(callback).hasSize(1);
+            assertThat(exceptionHolder[0]).isEqualTo(copier.getException().get());
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
 
     }
 
@@ -199,7 +202,7 @@ class CopierTest {
                 while(!copier.isReady()) {
                     batches.wait();
                     if (batches.size() >= 2) {
-                        assertThat(copier.interrupt()).isEqualTo(! interrupted);
+                        assertThat(copier.cancelFutureIfNeeded()).isEqualTo(! interrupted);
                         interrupted = true;
                     }
                     log.info("{}", batches);
@@ -208,10 +211,9 @@ class CopierTest {
 
             assertThat(batches).startsWith("0", "20");
             assertThat(copier.isReady()).isTrue();
-            assertThat(copier.interrupt()).isFalse();
+            assertThat(copier.cancelFutureIfNeeded()).isFalse();
         }
     }
-
 
 
     private void assertCopierHappy(Copier copier) throws IOException {

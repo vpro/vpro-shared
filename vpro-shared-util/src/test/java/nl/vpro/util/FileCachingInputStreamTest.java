@@ -1,19 +1,20 @@
 package nl.vpro.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.apache.commons.io.IOUtils.EOF;
@@ -29,10 +30,11 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Slf4j
 @Isolated
 @Execution(SAME_THREAD)
+@TestMethodOrder(MethodOrderer.DisplayName.class)
 public class FileCachingInputStreamTest {
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
-    private static byte[] MANY_BYTES;
-    {
+    private static final byte[] MANY_BYTES;
+    static {
         int ncopies = 100;
         MANY_BYTES = new byte[HELLO.length * ncopies];
         for (int i = 0; i < ncopies; i++) {
@@ -40,16 +42,24 @@ public class FileCachingInputStreamTest {
         }
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @BeforeEach
     public void before(TestInfo testInfo) {
         log.info(">-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), Thread.interrupted(), FileCachingInputStream.openStreams);
         FileCachingInputStream.openStreams = 0;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @AfterEach
-    public void after(TestInfo testInfo) {
-        log.info("<-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), Thread.interrupted(), FileCachingInputStream.openStreams);
-        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
+    public void after(TestInfo testInfo) throws InterruptedException {
+        boolean wasInterrupted = Thread.interrupted();
+        synchronized (FileCachingInputStream.openStreams) {
+            if (FileCachingInputStream.openStreams.get() != 0) {
+                FileCachingInputStream.openStreams.wait(1000);
+            }
+        }
+        log.info("<-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), wasInterrupted, FileCachingInputStream.openStreams);
+        assertThat(FileCachingInputStream.openStreams.get()).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -57,7 +67,7 @@ public class FileCachingInputStreamTest {
     public void testRead(boolean downloadFirst) throws IOException {
 
         try(FileCachingInputStream inputStream =  slowReader(downloadFirst);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream()
         ) {
             int r;
             while ((r = inputStream.read()) != -1) {
@@ -102,8 +112,9 @@ public class FileCachingInputStreamTest {
                             // randomly close the file
                             // this should be dealt with gracefully
                             if (! f.isClosed()) {
+                                log.debug("Closing {}", f);
                                 try {
-                                    f.close();
+                                    f.closeTempFile();
                                 } catch (IOException e) {
                                     log.error(e.getMessage(), e);
                                 }
@@ -128,8 +139,34 @@ public class FileCachingInputStreamTest {
     }
 
 
-    @Test
-    public void testReadFileGetsInterrupted() throws IOException {
+    public static List<InputStream> slowAndNormal() {
+        return  Arrays.asList(
+            new ByteArrayInputStream(MANY_BYTES),
+            new InputStream() {
+                int count = -1;
+                @Override
+                @SneakyThrows
+                public int read() {
+                    count++;
+                    Thread.sleep(5);
+                    if (count >= MANY_BYTES.length) {
+                        return -1;
+                    } else {
+                        return MANY_BYTES[count];
+                    }
+                }
+                @Override
+                public String toString() {
+                    return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
+                }
+            }
+        );
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("slowAndNormal")
+    public void testReadFileGetsInterrupted(InputStream input) throws IOException {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
@@ -155,7 +192,7 @@ public class FileCachingInputStreamTest {
                         }
                     }
                 })
-                .input(new ByteArrayInputStream(MANY_BYTES))
+                .input(input)
                 .initialBuffer(4)
                 .startImmediately(false)
                 .noProgressLogging()
@@ -175,16 +212,11 @@ public class FileCachingInputStreamTest {
             isInterrupted |= thisThread.isInterrupted();
             closed.getAndIncrement();
             log.info("Finally: interrupted: {}: times: {} ", thisThread.isInterrupted(), interrupted.get());
-
-
-
         }
         assertThat(isInterrupted).withFailMessage("Thread did not get interrupted").isTrue();
-
-
     }
 
-    protected FileCachingInputStream slowReader(boolean downloadFirst) {
+    protected static FileCachingInputStream slowReader(boolean downloadFirst) {
         return FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -259,28 +291,25 @@ public class FileCachingInputStreamTest {
 
 
 
-    @Test
+    @RepeatedTest(5)
     public void testSimple() throws IOException {
-        try (
-            FileCachingInputStream inputStream = FileCachingInputStream.builder()
-                .outputBuffer(2)
-                .batchSize(3)
-                .input(new ByteArrayInputStream(MANY_BYTES))
-                .initialBuffer(4)
-                .noProgressLogging()
-                .startImmediately(true)
-                .build();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ) {
-            assertThat(FileCachingInputStream.openStreams).isEqualTo(2);
+        FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .input(new ByteArrayInputStream(MANY_BYTES))
+            .initialBuffer(4)
+            .noProgressLogging()
+            .startImmediately(false)
+            .build();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            IOUtils.copyLarge(inputStream, out);
+        IOUtils.copyLarge(inputStream, out);
 
-            assertThat(FileCachingInputStream.openStreams).isEqualTo(1);// tempFileOutputStream was closed by Copier
-            assertThat(inputStream.getCopier().getFuture()).isDone();
+        inputStream.close();
 
-            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
-        }
+        assertThat(inputStream.getCopier().getFuture()).isDone();
+
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
     @Test
@@ -312,7 +341,7 @@ public class FileCachingInputStreamTest {
                 .input(new ByteArrayInputStream(HELLO))
                 //.initialBuffer(2048)
                 .build();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream()
         ) {
 
             assertThat(inputStream.getBufferLength()).isEqualTo(HELLO.length);
@@ -365,6 +394,7 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void testWaitForBytes() throws IOException, InterruptedException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -377,12 +407,13 @@ public class FileCachingInputStreamTest {
             log.info("Found {}", count);
             assertThat(count).isGreaterThanOrEqualTo(1);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
             IOUtils.copy(inputStream, out);
 
             assertThat(inputStream.getCount()).isEqualTo(HELLO.length);
-            assertThat(out.toByteArray()).containsExactly(HELLO);
+
+
         }
+        assertThat(out.toByteArray()).containsExactly(HELLO);
     }
 
     @Test
@@ -488,7 +519,7 @@ public class FileCachingInputStreamTest {
                 int read = 0;
                 while (EOF != (stream.read())) {
                     read++;
-                    log.debug("Read {}", read);
+                    log.trace("Read {}", read);
                 }
             }).isInstanceOf(IOException.class)
                 .hasMessage("breaking!");
@@ -496,6 +527,7 @@ public class FileCachingInputStreamTest {
     }
 
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void createPath() throws IOException {
         new File("/tmp/bestaatniet").delete();
