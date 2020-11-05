@@ -29,8 +29,13 @@ public class CommandExecutorImplTest {
 
 
     @AfterEach
-    public void check() {
-        assertThat(FileCachingInputStream.openStreams).isEqualTo(0);
+    public void check() throws InterruptedException {
+        synchronized (FileCachingInputStream.openStreams) {
+            if (FileCachingInputStream.openStreams.get() != 0) {
+                FileCachingInputStream.openStreams.wait(1000);
+            }
+        }
+        assertThat(FileCachingInputStream.openStreams.get()).isEqualTo(0);
     }
     @Test
     public void execute() {
