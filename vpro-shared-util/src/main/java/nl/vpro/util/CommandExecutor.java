@@ -203,15 +203,9 @@ public interface CommandExecutor {
 
 
     default Stream<String> lines(String... args) {
-        return lines(false, args);
-    }
-    default Stream<String> nonEmptyLines(String... args) {
-        return lines(true, args);
+        return lines(null, LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
 
-    default Stream<String> lines(boolean skipEmptyLines, String... args) {
-        return lines(null, LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), skipEmptyLines), args);
-    }
     static boolean isBrokenPipe(Throwable ioe) {
          return ioe.getCause() != null && ioe.getCause().getMessage().equalsIgnoreCase("broken pipe");
     }
