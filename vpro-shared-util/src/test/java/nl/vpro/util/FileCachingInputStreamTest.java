@@ -55,7 +55,8 @@ public class FileCachingInputStreamTest {
     public void after(TestInfo testInfo) {
         boolean wasInterrupted = Thread.interrupted();
         synchronized (FileCachingInputStream.openStreams) {
-            if (FileCachingInputStream.openStreams.get() != 0) {
+            int tries = 0;
+            while (FileCachingInputStream.openStreams.get() != 0 && tries++ < 10) {
                 try {
                     FileCachingInputStream.openStreams.wait(1000);
                 } catch (InterruptedException ignored) {
