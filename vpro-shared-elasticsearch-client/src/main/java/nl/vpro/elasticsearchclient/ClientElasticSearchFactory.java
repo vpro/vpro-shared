@@ -50,6 +50,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private boolean registerMBean = true;
 
+    private List<RestClientBuilder.HttpClientConfigCallback> clientConfigCallbacks;
+
     @PostConstruct
     @SneakyThrows
     public void init() {
@@ -122,6 +124,13 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             final RestClientBuilder clientBuilder = RestClient
                 .builder(hosts);
             client = clientBuilder
+                .setHttpClientConfigCallback((hacb) -> {
+                    clientConfigCallbacks.forEach(a -> {
+                        a.customizeHttpClient(hacb);
+                        }
+                    );
+                    return null;
+                })
                 .setRequestConfigCallback(
                     requestConfigBuilder -> requestConfigBuilder
                         .setConnectTimeout((int) connectTimeout.toMillis())
@@ -136,6 +145,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             return false;
         }
     }
+
 
 
     protected HttpHost[] getHosts() {

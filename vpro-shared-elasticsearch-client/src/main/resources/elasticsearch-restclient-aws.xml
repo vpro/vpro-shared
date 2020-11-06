@@ -9,6 +9,15 @@
     <property name="socketTimeoutDuration" value="${elasticSearch.socketTimeout}"/>
     <property name="connectionTimeoutDuration" value="${elasticSearch.connectTimeout}"/>
     <property name="maxRetryTimeoutDuration" value="${elasticSearch.maxRetryTimeout}"/>
+
+    <property name="clientConfigCallbacks">
+      <list>
+        <bean class="nl.vpro.elasticsearchclient.AWSConfigCallback">
+          <constructor-arg name="region" value="${elasticSearch.awsRegion}" />
+          <constructor-arg name="serviceName" value="${elasticSearch.awsServiceName}" />
+        </bean>
+      </list>
+    </property>
   </bean>
 
 
