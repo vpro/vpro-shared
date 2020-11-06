@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -28,51 +27,7 @@ public class Helper {
 
     }
 
-    /**
-     * Tests for equality, allowing nulls.
-     *
-     * @param <T> the type of o1 and o2
-     * @param o1 an object
-     * @param o2 another object
-     * @return true when both o1 and o2 are null or when o1.equals(o2), false otherwise
-     * @deprecated Use {@link java.util.Objects#equals(Object, Object)}
-     */
-    @Deprecated
-    public static <T> boolean equals(T o1, T o2) {
-        return equals(o1, o2, true);
-    }
 
-    /**
-     * Tests for equality, allowing nulls.
-     *
-     * @param <T> the type of o1 and o2
-     * @param o1 an object
-     * @param o2 another object
-     * @return true when both o1 and o2 are null or when o1.equals(o2), false otherwise
-     * @deprecated Use {@link java.util.Objects#equals(Object, Object)}
-     */
-    @Deprecated
-    public static <T> boolean equals(T o1, T o2, boolean nullMeansEqual) {
-        if (nullMeansEqual) {
-            return (o1 == null && o2 == null) || (o1 != null && o1.equals(o2));
-        } else {
-            return (o1 != null && o2 != null && o1.equals(o2));
-        }
-    }
-
-    /**
-     * Tests for inequality, allowing nulls.
-     *
-     * @param <T> the type of o1 and o2
-     * @param o1 an object
-     * @param o2 another object
-     * @return true when either o1 or o2 is null (not both) or when !o1.equals(o2), false otherwise
-     * @deprecated Use {@link java.util.Objects#equals(Object, Object)}
-     */
-    @Deprecated
-    public static <T> boolean notEquals(T o1, T o2) {
-        return ! Objects.equals(o1, o2);
-    }
 
     /**
      * Gives a default in case the value is null.
@@ -107,6 +62,7 @@ public class Helper {
      * all null
      * @see #withDefault(Object, Object)
      */
+    @SafeVarargs
     public static <T> T nvl(T... values) {
         T result = null;
         if (values != null) {
@@ -140,7 +96,7 @@ public class Helper {
      */
     public static <T> T firstNonNull(List<T> values) {
         T result = null;
-        if (!Helper.isEmpty(values)) {
+        if (Helper.isNotEmpty(values)) {
             for (T v : values) {
                 if (v != null) {
                     result = v;
@@ -160,7 +116,7 @@ public class Helper {
      */
     public static <T> T firstNonNull(Set<T> values) {
         T result = null;
-        if (!Helper.isEmpty(values)) {
+        if (Helper.isNotEmpty(values)) {
             for (T v : values) {
                 if (v != null) {
                     result = v;
@@ -170,110 +126,17 @@ public class Helper {
         return result;
     }
 
-    /**
-     * @param str a string
-     * @return true when the string is null or empty
-     * @deprecated Use {@link StringUtils#isEmpty(java.lang.CharSequence)}
-     */
-    @Deprecated
-    public static boolean isEmpty(String str) {
-        return StringUtils.isEmpty(str);
-    }
-
-    /**
-     * @param str a string
-     * @return true when the string is not null and contains text
-     * @deprecated Use {@link StringUtils#isNotEmpty(CharSequence)}
-     */
-    @Deprecated
-    public static boolean isNotEmpty(String str) {
-        return StringUtils.isNotEmpty(str);
-    }
-
-    /**
-     * @param str a string
-     * @return true when the string is null or only contains whitespace
-     * @deprecated Use {@link StringUtils#isBlank(CharSequence)}
-     */
-    @Deprecated
-    public static boolean isTrimmedEmpty(String str) {
-        return StringUtils.isBlank(str);
-    }
-
-    /**
-     * @param str a string
-     * @return true when the string contains non-whitespace characters
-     * @deprecated Use {@link StringUtils#isBlank(CharSequence)}
-     */
-    @Deprecated
-    public static boolean isTrimmedNotEmpty(String str) {
-        return StringUtils.isNotBlank(str);
-    }
-
-    /**
-     * @param <T> some type
-     * @param arr an array
-     * @return true when arr is null or contains no elements
-     */
-    @Deprecated
-    public static <T> boolean isEmpty(T[] arr) {
-        return ArrayUtils.isEmpty(arr);
-    }
-
-    /**
-     * @param <T> some type
-     * @param arr an array
-     * @return true when arr is not null and contains elements
-     */
-    @Deprecated
-    public static <T> boolean isNotEmpty(T[] arr) {
-        return ArrayUtils.isNotEmpty(arr);
-    }
-
-    /**
-     * @param <T> some type
-     * @param collection the collection
-     * @return true when collection is null or contains no elements
-     *
-     */
-    @Deprecated
-    public static <T> boolean isEmpty(Collection<T> collection) {
-        return collection == null || collection.isEmpty();
-    }
-
-    /**
-     * @param <T> some type
-     * @param collection the collection
-     * @return true when collection is null or contains no elements
-     */
-    @Deprecated
-    public static <T> boolean isEmpty(List<T> collection) {
-        return collection == null || collection.isEmpty();
-    }
 
     /**
      * @param <T> some type
      * @param collection the collection
      * @return true when collection is not null and contains elements
      */
-    @Deprecated
-    public static <T> boolean isNotEmpty(Collection<T> collection) {
-        return !isEmpty(collection);
+    private static <T> boolean isNotEmpty(Collection<T> collection) {
+        return collection != null && ! collection.isEmpty();
     }
 
-    /**
-     * Does an unchecked cast to the generic type.
-     *
-     * @param <T> the type to case to
-     * @param o the object to cast
-     * @return o
-     * @deprecated Use generics
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public static <T> T uncheckedCast(Object o) {
-        return (T) o;
-    }
+
 
     /**
      * Adds a value to a map of lists. A value list is created when there is no entry in the map for the given key.
@@ -383,11 +246,11 @@ public class Helper {
         } else {
             throw new IllegalStateException("Unkown Number type");
         }
-        return Helper.<N> uncheckedCast(result);
+        return (N) result;
     }
 
     /**
-     * Tries and find an element in an array. {@link Helper#equals(Object, Object) equals} is used for comparisons. A
+     * Tries and find an element in an array. {@link Objects#equals(Object, Object) equals} is used for comparisons. A
      * linear search is performed - if the input array is sorted, it would be wiser to use
      * {@link Arrays#binarySearch(Object[], Object)}.
      *
@@ -396,6 +259,7 @@ public class Helper {
      * @param array the array to search in
      * @return {@code true} if the array contains the element, {@code false} otherwise
      */
+    @SafeVarargs
     public static <T> boolean arrayContains(T element, T... array) {
         int i = 0;
         int n = array.length;
@@ -530,7 +394,7 @@ public class Helper {
 
     public static StringBuilder appendIfNotEmpty(StringBuilder sb, String s) {
 
-        if (!isEmpty(s)) {
+        if (StringUtils.isNotEmpty(s)) {
             sb.append(s);
         }
 
