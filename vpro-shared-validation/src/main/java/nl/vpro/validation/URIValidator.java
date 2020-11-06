@@ -30,6 +30,9 @@ public class URIValidator implements ConstraintValidator<URI, String> {
         if(value == null) {
             return true;
         }
+        if (StringUtils.isEmpty(value) && annotation.allowEmptyString()) {
+            return true;
+        }
 
         try {
             java.net.URI uri = new java.net.URI(value);

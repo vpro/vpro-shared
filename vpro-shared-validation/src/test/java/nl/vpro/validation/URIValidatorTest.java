@@ -20,11 +20,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class URIValidatorTest {
 
     public static class A {
-
         @URI(mustHaveScheme = true, minHostParts = 3)
         String url;
 
         public A(String url) {
+            this.url = url;
+        }
+    }
+
+    public static class AAllowEmpty {
+        @URI(mustHaveScheme = true, minHostParts = 3, allowEmptyString = true)
+        String url;
+
+        public AAllowEmpty(String url) {
             this.url = url;
         }
     }
@@ -41,15 +49,12 @@ public class URIValidatorTest {
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     Validator validator = factory.getValidator();
 
-
-
     @Test
     public void invalidUrl() {
         A a = new A("http://www.spunk.nl/article/6127/waarom-praten-we-over-sletvrees?fb_action_ids=10202483411149472%2C10202477465200827%2C10202476551657989&fb_action_types=og.likes&fb_source=other_multiline&action_object_map={%2210202483411149472%22%3A513557392073931%2C%2210202477465200827%22%3A734595553235765%2C%2210202476551657989%22%3A537543956332495}&action_type_map={%2210202483411149472%22%3A%22og.likes%22%2C%2210202477465200827%22%3A%22og.likes%22%2C%2210202476551657989%22%3A%22og.likes%22}&action_ref_map=[]");
 
 
-        assertThat( validator.validate(a)).hasSize(1);
-
+        assertThat(validator.validate(a)).hasSize(1);
     }
 
 
@@ -58,7 +63,6 @@ public class URIValidatorTest {
         Lenient a = new Lenient("http://www.spunk.nl/article/6127/waarom-praten-we-over-sletvrees?fb_action_ids=10202483411149472%2C10202477465200827%2C10202476551657989&fb_action_types=og.likes&fb_source=other_multiline&action_object_map={%2210202483411149472%22%3A513557392073931%2C%2210202477465200827%22%3A734595553235765%2C%2210202476551657989%22%3A537543956332495}&action_type_map={%2210202483411149472%22%3A%22og.likes%22%2C%2210202477465200827%22%3A%22og.likes%22%2C%2210202476551657989%22%3A%22og.likes%22}&action_ref_map=[]");
 
         assertThat(validator.validate(a)).isEmpty();
-
     }
 
     @Test
@@ -66,9 +70,7 @@ public class URIValidatorTest {
         assertThat(validator.validate(new A("//www.vpro.nl"))).hasSize(1);
 
         assertThat(validator.validate(new Lenient("//www.vpro.nl"))).hasSize(0);
-
     }
-
 
     @Test
     public void minHostParts() {
@@ -76,9 +78,7 @@ public class URIValidatorTest {
 
         assertThat(validator.validate(new Lenient("http://vpro.nl?{}"))).hasSize(1);
         assertThat(validator.validate(new Lenient("http://www.vpro.nl?{}"))).hasSize(0);
-
     }
-
 
     @Test
     public void noHost() throws URISyntaxException {
@@ -89,8 +89,21 @@ public class URIValidatorTest {
 
         assertThat(validator.validate(new Lenient("http://vpro.nl?{}"))).hasSize(1);
         assertThat(validator.validate(new Lenient("http://www.vpro.nl?{}"))).hasSize(0);
-
     }
 
+    @Test
+    public void emptyString() throws URISyntaxException {
+        A a1 = new A("");
+        A a2 = new A(null);
+
+        assertThat(validator.validate(a1)).hasSize(1);
+        assertThat(validator.validate(a2)).isEmpty();;
+
+        AAllowEmpty ae1 = new AAllowEmpty("");
+        AAllowEmpty ae2 = new AAllowEmpty(null);
+
+        assertThat(validator.validate(ae1)).isEmpty();
+        assertThat(validator.validate(ae2)).isEmpty();
+    }
 
 }

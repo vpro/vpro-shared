@@ -55,4 +55,6 @@ public @interface URI {
      * If the check is lenient, than also 'new URL' will be tried.
      */
     boolean lenient() default false;
+
+    boolean allowEmptyString() default false;
 }
