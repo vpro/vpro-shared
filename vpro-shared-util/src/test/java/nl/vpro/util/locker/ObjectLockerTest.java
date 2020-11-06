@@ -9,15 +9,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.*;
 
-import org.hibernate.*;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 
 import static nl.vpro.util.locker.ObjectLocker.withKeyLock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 /**
@@ -26,13 +22,9 @@ import static org.mockito.Mockito.when;
 @Slf4j
 public class ObjectLockerTest {
 
-    SessionFactory sessionFactory = mock(SessionFactory.class);
-
 
     @BeforeEach
     public void setup() {
-        when(sessionFactory.getCurrentSession()).thenThrow(new HibernateException("no session"));
-        ObjectLocker.setSessionFactory(sessionFactory);
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofSeconds(10).toString());
         ObjectLocker.minWaitTime = Duration.ofSeconds(5);
         ObjectLocker.maxLockAcquireTime = Duration.ofSeconds(60);
@@ -131,30 +123,6 @@ public class ObjectLockerTest {
 
             // the lock took too long (over 20 ms in this), continued without lock
             assertThat(events).containsExactly("a1", "b1", "a2");
-
-        } finally {
-            ObjectLocker.monitor = false;
-        }
-    }
-
-
-    @Test
-    public void withMonitorAndTransaction() throws InterruptedException, ExecutionException {
-        ObjectLocker.monitor = true;
-        ObjectLocker.minWaitTime = Duration.ofMillis(50); // trigger the monitor, it will take about 100ms to get the lock
-
-        Mockito.reset(sessionFactory);
-        Session session = mock(Session.class);
-        Transaction transaction = mock(Transaction.class);
-        when(transaction.isActive()).thenReturn(true);
-        when(session.getTransaction()).thenReturn(transaction);
-        when(sessionFactory.getCurrentSession()).thenReturn(session);
-
-        try {
-            List<String> events = basicLockTest();
-
-
-            assertThat(events).containsExactly("a1", "a2", "b1");
 
         } finally {
             ObjectLocker.monitor = false;
