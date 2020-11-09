@@ -125,11 +125,10 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                 .builder(hosts);
             client = clientBuilder
                 .setHttpClientConfigCallback((hacb) -> {
-                    clientConfigCallbacks.forEach(a -> {
-                        a.customizeHttpClient(hacb);
-                        }
-                    );
-                    return null;
+                    if (clientConfigCallbacks != null) {
+                        clientConfigCallbacks.forEach(a -> a.customizeHttpClient(hacb));
+                    }
+                    return hacb;
                 })
                 .setRequestConfigCallback(
                     requestConfigBuilder -> requestConfigBuilder
