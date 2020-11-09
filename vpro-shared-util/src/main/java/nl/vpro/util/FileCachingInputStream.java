@@ -138,7 +138,7 @@ public class FileCachingInputStream extends InputStream {
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
         if (! this.deleteTempFile) {
             Slf4jHelper.log(log, initialBuffer == null ? Level.WARN : Level.DEBUG,
-                "Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.", initialBuffer == null ? DEFAULT_FILE_BUFFER_SIZE : initialBuffer);
+                "Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.", initialBuffer == null ? DEFAULT_INITIAL_BUFFER_SIZE : initialBuffer);
         }
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
@@ -151,16 +151,18 @@ public class FileCachingInputStream extends InputStream {
 
                 int bufferOffset = 0;
                 int numRead;
+                boolean complete;
                 do {
                     numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
-                    if (numRead > 0) {
+                    complete = numRead == EOF;
+                    if (! complete) {
                         bufferOffset += numRead;
                     }
-                } while (numRead != -1 && bufferOffset < buf.length);
+                } while (! complete && bufferOffset < buf.length);
 
                 bufferLength = bufferOffset;
 
-                if (bufferLength < initialBuffer) {
+                if (complete) {
                     // the buffer was not completely filled.
                     // there will be no need for a file at all.
                     buffer = buf;
@@ -207,7 +209,7 @@ public class FileCachingInputStream extends InputStream {
             incStreams(tempFileOutputStream);
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
-                tempFileOutputStream.write(buffer);
+                tempFileOutputStream.write(buffer, 0, bufferLength);
             }
 
             final Consumer<FileCachingInputStream> consumer;
@@ -253,9 +255,9 @@ public class FileCachingInputStream extends InputStream {
                 .output(tempFileOutputStream)
                 .name(tempFile.toString())
                 .notify(this)
-                .errorHandler((c, e) -> {
-                    future.completeExceptionally(e);
-                })
+                .errorHandler((c, e) ->
+                    future.completeExceptionally(e)
+                )
                 .callback(c -> {
                     log.debug("callback for copier");
                     try {
@@ -311,14 +313,16 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+
     @Override
-    public int read(@NonNull byte[] b) throws IOException {
+    public int read(byte @NonNull[] b, int off, int len) throws IOException {
         if (tempFileInputStream == null) {
-            return readFromBuffer(b);
+            return readFromBuffer(b, off, len);
         } else {
-            return readFromFile(b);
+            return readFromFile(b, off, len);
         }
     }
+
 
     protected synchronized void closeTempFile() throws IOException {
         if (this.tempFileInputStream != null && ! tempFileInputStreamClosed) {
@@ -339,7 +343,7 @@ public class FileCachingInputStream extends InputStream {
 
     @SneakyThrows
     @Override
-    public void close() throws IOException {
+    public void close() {
 
         if (! closed) {
             synchronized(this) {
@@ -375,7 +379,6 @@ public class FileCachingInputStream extends InputStream {
     public String toString() {
         return super.toString() + " for " + tempFile;
     }
-
 
     /**
      * Wait until the copier thread read at least the number of bytes given.
@@ -421,7 +424,6 @@ public class FileCachingInputStream extends InputStream {
         return tempFile;
     }
 
-
     /**
      * One of the paths of {@link #read()}, when it is reading from memory.
      */
@@ -439,19 +441,21 @@ public class FileCachingInputStream extends InputStream {
     }
 
     /**
-     * One of the paths of {@link #read(byte[])} )}, when it is reading from memory.
+     * One of the paths of {@link #read(byte[], int, int)} )}, when it is reading from memory.
      */
-    private int readFromBuffer(byte[] b) {
-        int toCopy = Math.min(b.length, bufferLength - (int) count);
+    private int readFromBuffer(byte[] b, int off, int len) {
+        int toCopy = Math.min(len, bufferLength - (int) count /* remaining bytes in buffer */);
         if (toCopy > 0) {
-            System.arraycopy(buffer, (int) count, b, 0, toCopy);
+            System.arraycopy(buffer, (int) count, b, off, toCopy);
+            synchronized (this) {
+                notifyAll();
+            }
             count += toCopy;
             return toCopy;
         } else {
             return EOF;
         }
     }
-
 
     /**
      *
@@ -486,50 +490,46 @@ public class FileCachingInputStream extends InputStream {
         assert result != EOF;
 
         count++;
-        //log.debug("returning {}", result);
         return result;
     }
 
     /**
      *
-     * See {@link InputStream#read(byte[])} This methods must behave exactly according to that.
+     * See {@link InputStream#read(byte[], int, int)} This methods must behave exactly according to that.
      */
-    private int readFromFile(byte[] b) throws IOException {
+    private int readFromFile(byte[] b, int offset, int length) throws IOException {
         copier.executeIfNotRunning();
         if (copier.isReadyIOException() && count == copier.getCount()) {
             return EOF;
         }
-        int totalResult = 0;
+        int result;
         synchronized (copier) {
-            totalResult += Math.max(tempFileInputStream.read(b, 0, b.length), 0);
+            result = tempFileInputStream.read(b, offset, length);
 
-            if (totalResult == 0) {
-                while (!copier.isReadyIOException() && totalResult == 0) {
-                    log.trace("Copier {} not yet ready", copier);
-                    try {
-                        copier.wait(1000);
-                    } catch (InterruptedException e) {
-                        log.warn("Interrupted {}", e.getMessage());
-                        copier.close();
-                        future.completeExceptionally(e);
-                        Thread.currentThread().interrupt();
-                        close();
-                        throw new InterruptedIOException(e.getMessage());
-                    }
-                    int subResult = Math.max(tempFileInputStream.read(b, totalResult, b.length - totalResult), 0);
-                    totalResult += subResult;
+            while (!copier.isReadyIOException() && result == EOF) {
+                log.trace("Copier {} not yet ready", copier);
+                try {
+                    copier.wait(1000);
+                } catch (InterruptedException e) {
+                    log.warn("Interrupted {}", e.getMessage());
+                    copier.close();
+                    future.completeExceptionally(e);
+                    Thread.currentThread().interrupt();
+                    close();
+                    throw new InterruptedIOException(e.getMessage());
                 }
-                if (totalResult == 0) {
-                    // I doubt this can happen
-                    return EOF;
-                }
-
+                result = tempFileInputStream.read(b, offset, length);
             }
-            count += totalResult;
+            if (result == EOF) {
+                result = tempFileInputStream.read(b, offset, length);
+            }
+            if (result != EOF) {
+                count += result;
+            }
         }
-        assert totalResult != 0;
+        assert result != 0;
         //log.debug("returning {} bytes", totalResult);
-        return totalResult;
+        return result;
     }
 
     public static Consumer<FileCachingInputStream> throttle(Duration d) {
