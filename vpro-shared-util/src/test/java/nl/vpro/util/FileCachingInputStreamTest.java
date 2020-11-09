@@ -12,8 +12,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.parallel.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,15 +35,19 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Execution(SAME_THREAD)
 @TestMethodOrder(MethodOrderer.DisplayName.class)
 public class FileCachingInputStreamTest {
+    private static final Random RANDOM = new Random();
+    private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
+    private static final int SIZE_OF_HUGE_STREAM = 1_000_000_000 + RANDOM.nextInt(1_000_000);
+
+    private static final int SEED_FOR_LARGE_RANDOM_FILE = RANDOM.nextInt();
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static final byte[] MANY_BYTES;
     static {
-        int ncopies = 100;
-        MANY_BYTES = new byte[HELLO.length * ncopies];
-        for (int i = 0; i < ncopies; i++) {
-            System.arraycopy(HELLO, 0, MANY_BYTES, i * HELLO.length, HELLO.length);
-        }
+        MANY_BYTES = new byte[1500];
+        RANDOM.nextBytes(MANY_BYTES);
     }
+
+
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @BeforeEach
@@ -95,8 +101,8 @@ public class FileCachingInputStreamTest {
 
             int r;
             byte[] buffer = new byte[10];
-            while ((r = inputStream.read(buffer)) != -1) {
-                out.write(buffer, 0, r);
+            while ((r = inputStream.read(buffer, 1, 9)) != -1) {
+                out.write(buffer, 1, r);
             }
 
             assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
@@ -359,7 +365,7 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .input(new ByteArrayInputStream(MANY_BYTES))
-                .initialBuffer(4)
+                .initialBuffer(0)
                 .startImmediately(false)
                 .noProgressLogging()
                 .build()) {
@@ -379,7 +385,7 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
-                //.initialBuffer(2048)
+                .initialBuffer(HELLO.length)
                 .build();
             ByteArrayOutputStream out = new ByteArrayOutputStream()
         ) {
@@ -479,7 +485,6 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void ioExceptionFromSourceReadBytes() throws IOException {
-        int sizeOfStream = 10000;
         try (
             // an input stream that  will throw IOException when it's busy with file buffering
             InputStream in = new InputStream() {
@@ -487,10 +492,10 @@ public class FileCachingInputStreamTest {
 
                 @Override
                 public int read() throws IOException {
-                    if (byteCount == (sizeOfStream / 2)) {
+                    if (byteCount == (SIZE_OF_BIG_STREAM / 2)) {
                         throw new IOException("breaking!");
                     }
-                    return byteCount++ < sizeOfStream ? 'a' : -1;
+                    return byteCount++ < SIZE_OF_BIG_STREAM ? 'a' : -1;
                 }
             };
             FileCachingInputStream stream = FileCachingInputStream.builder()
@@ -531,7 +536,6 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void ioExceptionFromSourceReadByte() throws IOException {
-        int sizeOfStream = 10000;
         try (
             // an input stream that  will throw IOException when it's busy with file buffering
             InputStream in = new InputStream() {
@@ -539,10 +543,10 @@ public class FileCachingInputStreamTest {
 
                 @Override
                 public int read() throws IOException {
-                    if (byteCount == (sizeOfStream / 2)) {
+                    if (byteCount == (SIZE_OF_BIG_STREAM / 2)) {
                         throw new IOException("breaking!");
                     }
-                    return byteCount++ < sizeOfStream ? 'a' : -1;
+                    return byteCount++ < SIZE_OF_BIG_STREAM ? 'a' : -1;
                 }
             };
             FileCachingInputStream stream = FileCachingInputStream.builder()
@@ -570,7 +574,7 @@ public class FileCachingInputStreamTest {
     @Test
     public void createPath() throws IOException {
         new File("/tmp/bestaatniet").delete();
-        try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
+        try (FileCachingInputStream ignored = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(1)
             .tempDir("/tmp/bestaatniet")
@@ -582,81 +586,130 @@ public class FileCachingInputStreamTest {
         }
     }
 
+
+    /**
+     * Use {@link FileCachingInputStream} to wrap a huge stream of random bytes (random, so might catch edge cases we didn't think of)
+     */
+    @SuppressWarnings("UnusedAssignment")
     @Test
-    @Disabled
-    public void performance() throws IOException {
-        Instant now = Instant.now();
-        try (
-            FileCachingInputStream inputStream = FileCachingInputStream
-                .builder()
-                .input(new BufferedInputStream(new FileInputStream(new File("/tmp/pageupdates.json"))))
-                .batchSize(1000000000L)
-                .build();
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
-        ) {
-            IOUtils.copyLarge(inputStream, out);
-            System.out.println("Duration " + Duration.between(now, Instant.now()));
-        }
+    public void performanceBenchmarkAndVerify() throws IOException {
+        log.info("Using seed {}", SEED_FOR_LARGE_RANDOM_FILE);
+        final int bufferSize = 8192;
 
 
-    }
-
-    @Test
-    @Disabled
-    public void verify() throws IOException {
-        Instant now = Instant.now();
-        try (
-            FileCachingInputStream inputStream = FileCachingInputStream
-                .builder()
-                .input(
-                    new DelayedInputStream(
-                        new BufferedInputStream(new FileInputStream(new File("/tmp/changes.json"))),
-                        Duration.ofMillis(50)))
-                .batchSize(1000000000L)
-                .build();
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
-        ) {
-            IOUtils.copyLarge(inputStream, out);
-            out.close();
-            assertThat(IOUtils.contentEquals(new FileInputStream(new File("/tmp/changes.json")), new FileInputStream(new File("/tmp/copy.json")))).isTrue();
-            System.out.println("Duration " + Duration.between(now, Instant.now()));
-        }
-
-
-    }
-
-    @Test
-    @Disabled
-    public void performanceBenchmark() throws IOException {
-        Instant now = Instant.now();
-        try (
-            InputStream inputStream = new BufferedInputStream(new FileInputStream(new File("/tmp/pageupdates.json")));
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.json")))
-        ) {
-            IOUtils.copyLarge(inputStream, out);
-            System.out.println("Duration " + Duration.between(now, Instant.now()));
-        }
-
-
-    }
-
-
-    @Test
-    @Disabled
-    public void testLarge() throws IOException {
-        Instant now = Instant.now();
+        // copy a huge stream using file caching input stream
+        File fileCachingDestination = new File("/tmp/fileCaching.bytes");
+        fileCachingDestination.deleteOnExit();
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
-                .input(new FileInputStream(new File("/tmp/test.mp4")))
-                .build()
-            ;
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(new File("/tmp/copy.mp4")))
+                .input(randomStream(SIZE_OF_HUGE_STREAM))
+                .initialBuffer(0)  // Setting it to > 0, will fail the compare because Random#nextBytes() will sometimes skip values values
+                .outputBuffer(bufferSize)
+                .startImmediately(true)
+                .noProgressLogging()
+                .build();
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(fileCachingDestination), bufferSize)
         ) {
+            Instant now = Instant.now();
             IOUtils.copyLarge(inputStream, out);
-            System.out.println("Duration " + Duration.between(now, Instant.now()));
+            assertThat(inputStream.getCount()).isEqualTo(SIZE_OF_HUGE_STREAM);
+            log.info("Duration when using file caching input stream: {}, {} bytes", Duration.between(now, Instant.now()), SIZE_OF_HUGE_STREAM);
+        }
+
+        // check that it arrived correctly
+
+        // size
+        assertThat(fileCachingDestination).hasSize(SIZE_OF_HUGE_STREAM);
+
+        // and also check contents of produced file
+        Random random = new Random(SEED_FOR_LARGE_RANDOM_FILE);
+        int count = 0;
+        try (InputStream in = new FileInputStream(fileCachingDestination)) {
+            byte[] buf = new byte[8000];
+            int read = in.read(buf);
+            byte[] compare = new byte[read];
+            nextBytes(random, count, compare, 0, read);
+            count += read;
+            assertThat(buf).startsWith(compare);
+        }
+
+        // compare with a normal implementation using used buffered streams.
+        File normalDestination = new File("/tmp/normal.bytes");
+        normalDestination.deleteOnExit();
+        try (
+
+            InputStream inputStream = new BufferedInputStream(randomStream(SIZE_OF_HUGE_STREAM), bufferSize);
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(normalDestination), bufferSize)
+        ) {
+            Instant now = Instant.now();
+            IOUtils.copyLarge(inputStream, out);
+            log.info("Duration when just using memory buffered streams: {}, {} bytes", Duration.between(now, Instant.now()), SIZE_OF_HUGE_STREAM);
+        }
+        assertThat(normalDestination).hasSize(SIZE_OF_HUGE_STREAM);
+
+        //assertThat(normalDestination).hasSameBinaryContentAs(fileCachingDestination); // Will do an in memory comparison, this is unusable.
+
+
+    }
+
+    /**
+     * Produces a stream of {@code size} random bytes
+     */
+
+    @SuppressWarnings("SameParameterValue")
+    private InputStream randomStream(final int size) {
+        final Random random = new Random(SEED_FOR_LARGE_RANDOM_FILE);
+
+        return new InputStream() {
+            int count = 0;
+            @Override
+            public int read() {
+                if (count++ > size) {
+                    return EOF;
+                } else {
+                    return (byte) random.nextInt();
+                }
+            }
+            @Override
+            public int read(byte @NonNull [] b, int off, int len) {
+                if (count >= size) {
+                    return EOF;
+                }
+                int l = Math.min(len, size - count);
+
+                nextBytes(random, count, b, off, l);
+                count += l;
+                return l;
+            }
+            @Override
+            public String toString() {
+                return size + " random bytes (seed: " + SEED_FOR_LARGE_RANDOM_FILE + ")";
+            }
+
+        };
+    }
+
+    /**
+     * This can be used in stead of {@link #nextBytes(Random, int, byte[], int, int)} to make an entirely predictable stream of bytes, which can be usefull during debugging.
+     */
+    protected void nextBytes(int count,  byte[] b, int off, int l) {
+        for (int i = off; i < off + l; i++)  {
+            b[i] = (byte) (count + i);
         }
 
     }
 
+    protected void nextBytes(Random random, int count,  byte[] b, int off, int l) {
+        if (off == 0 && l == b.length) {
+            random.nextBytes(b);
+        } else {
+            byte[] bytes = new byte[l];
+            random.nextBytes(bytes);
+            System.arraycopy(bytes, 0, b, off, l);
+        }
+     /*   for (int i = off; i < off + l; i++)  {
+            b[i] = (byte) random.nextInt();
+        }*/
 
+    }
 }
