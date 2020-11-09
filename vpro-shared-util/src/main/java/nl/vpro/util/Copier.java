@@ -105,7 +105,7 @@ public class Copier implements Runnable, Closeable {
         } catch (IOException ioe) {
             exception = ioe;
             log.debug(ioe.getMessage());
-        } catch (Throwable t) {
+        } catch (Exception t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
                 log.warn("{}Connector {}\n{} {}", logPrefix, toString(), t.getClass().getName(), t.getMessage());
             }
