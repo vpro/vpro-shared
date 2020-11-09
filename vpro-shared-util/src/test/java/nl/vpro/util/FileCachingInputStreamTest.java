@@ -220,7 +220,7 @@ public class FileCachingInputStreamTest {
                     out.write(buffer, 0, r);
                 }
             }
-        } catch (ClosedByInterruptException | InterruptedIOException  ie) {
+        } catch (ClosedByInterruptException | InterruptedIOException ie) {
             isInterrupted = true;
             log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
         } finally {
@@ -254,17 +254,16 @@ public class FileCachingInputStreamTest {
             .initialBuffer(4)
             .batchConsumer((fc) -> {
                 if (fc.isReady()) {
-                    logs.add("" + fc.getCount());
+                    logs.add("batch consumes " + fc.getCount());
                 }
             })
             .noProgressLogging()
             .startImmediately(false)
             .build()) {
             inputStream.getFuture().thenApply(fc -> {
-                logs.add("then apply " + fc.getBytesRead());
+                logs.add("then apply " + fc.getCount());
                 return fc;
             });
-
             inputStream.getFuture().thenAccept(fc ->
                 logs.add("then apply again " + fc.getCount())
             );
@@ -275,33 +274,44 @@ public class FileCachingInputStreamTest {
             while ((r = inputStream.read()) != -1) {
                 out.write(r);
             }
-
             assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
-            assertThat(logs).containsExactly("" + MANY_BYTES.length, "then apply again " + MANY_BYTES.length, "then apply 0");
         }
+
+        assertThat(logs).containsExactly(
+            "batch consumes " + MANY_BYTES.length,
+            "then apply again " + MANY_BYTES.length,
+            "then apply " + MANY_BYTES.length
+        );
     }
 
 
     @Test
     public void testReadLargeBuffer() throws IOException {
 
+        assertThat(FileCachingInputStream.DEFAULT_INITIAL_BUFFER_SIZE).isGreaterThan(MANY_BYTES.length);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
         try(FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
             .input(new ByteArrayInputStream(MANY_BYTES))
-            .initialBuffer(1024)
+            .initialBuffer(null)
             .noProgressLogging()
             .build()) {
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            assertThat(inputStream.getBufferLength()).isEqualTo(MANY_BYTES.length);
+
 
             int r;
             while ((r = inputStream.read()) != -1) {
                 out.write(r);
             }
 
-            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
         }
+        out.close();
+        assertThat(out.toByteArray()).hasSize(MANY_BYTES.length);
+
+        assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
 
@@ -386,6 +396,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(HELLO.length)
+                .tempDir("file://tmp/test")
                 .build();
             ByteArrayOutputStream out = new ByteArrayOutputStream()
         ) {
@@ -572,7 +583,7 @@ public class FileCachingInputStreamTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void createPath() {
+    public void createPath() throws IOException {
         new File("/tmp/bestaatniet").delete();
         try (FileCachingInputStream ignored = FileCachingInputStream.builder()
             .outputBuffer(2)

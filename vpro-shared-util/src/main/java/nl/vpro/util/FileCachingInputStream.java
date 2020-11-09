@@ -39,8 +39,8 @@ import nl.vpro.logging.Slf4jHelper;
 
 public class FileCachingInputStream extends InputStream {
 
-    private static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
-    private static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
+    static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
+    static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
 
     private static final int EOF = -1;
     @Getter(AccessLevel.PACKAGE)
@@ -62,9 +62,6 @@ public class FileCachingInputStream extends InputStream {
     private long count = 0;
     static final AtomicInteger openStreams = new AtomicInteger(0);
 
-    @Getter
-    private long bytesRead = 0;
-
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
 
     @Getter
@@ -80,7 +77,7 @@ public class FileCachingInputStream extends InputStream {
 
         public Builder tempDir(String uri) {
             try {
-                return path(Paths.get(URI.create(uri)));
+                return tempDir(URI.create(uri));
             } catch (IllegalArgumentException iae) {
                 log.debug("{}:{} Supposing it a file name", uri, iae.getMessage());
                 return path(Paths.get(uri));
@@ -215,7 +212,7 @@ public class FileCachingInputStream extends InputStream {
             final Consumer<FileCachingInputStream> consumer;
             if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
                 AtomicLong batchCount = new AtomicLong(0);
-                consumer = (t) -> {
+                consumer = t -> {
                     if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
                         log.info("Creating {} ({} bytes written)", tempFile, t.copier.getCount());
                     }
@@ -272,8 +269,8 @@ public class FileCachingInputStream extends InputStream {
                     if (this.deleteTempFile) {
                         try {
                             Files.deleteIfExists(tempFile);
-                        } catch (IOException ignore) {
-
+                        } catch (IOException ioException) {
+                            log.debug(ioException.getMessage());
                         }
                     }
                     Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
@@ -341,9 +338,8 @@ public class FileCachingInputStream extends InputStream {
 
     }
 
-    @SneakyThrows
     @Override
-    public void close() {
+    public void close() throws IOException {
 
         if (! closed) {
             synchronized(this) {
@@ -361,7 +357,11 @@ public class FileCachingInputStream extends InputStream {
             if (copier != null) {
                     // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
                 log.debug("Closing copier");
-                copier.waitForAndClose();
+                try {
+                    copier.waitForAndClose();
+                } catch (InterruptedException interruptedException) {
+                    throw new InterruptedIOException(interruptedException.getMessage());
+                }
             } else {
                 log.debug("No copier to close");
             }
@@ -429,12 +429,11 @@ public class FileCachingInputStream extends InputStream {
      */
     private int readFromBuffer() {
         if (count < bufferLength) {
-            int result = buffer[(int) count++];
-            bytesRead += result;
+            byte result = buffer[(int) count++];
             synchronized (this) {
                 notifyAll();
             }
-            return result;
+            return Byte.toUnsignedInt(result);
         } else {
             return EOF;
         }
@@ -514,8 +513,9 @@ public class FileCachingInputStream extends InputStream {
                     log.warn("Interrupted {}", e.getMessage());
                     copier.close();
                     future.completeExceptionally(e);
-                    Thread.currentThread().interrupt();
                     close();
+                    Thread.currentThread().interrupt();
+
                     throw new InterruptedIOException(e.getMessage());
                 }
                 result = tempFileInputStream.read(b, offset, length);
