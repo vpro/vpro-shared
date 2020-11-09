@@ -13,6 +13,7 @@ import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.output.WriterOutputStream;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -24,7 +25,7 @@ import nl.vpro.logging.simple.SimpleLogger;
  * Three types of methods:
  *<ul>
  * <li>{@link #execute(InputStream, OutputStream, OutputStream, String...)} To synchronously execute and return exit code.</li>
- * <li>{@link #submit(InputStream, OutputStream, OutputStream, Consumer, String...)} For asynchronous execution</li>
+ * <li>{@link #submit(java.io.InputStream, java.io.OutputStream, java.io.OutputStream, java.util.function.IntConsumer, java.lang.String...) For asynchronous execution</li>
  * </ul>
  * These  two also have versions with a {@link Parameters} argument, so you can use builder pattern to fill in parameters.
  *<ul>
@@ -45,7 +46,7 @@ public interface CommandExecutor {
     int execute(String... args);
 
     /**
-     * Executes the command
+     * Executes the command, defaulting version of {@link #execute(java.io.InputStream, java.io.OutputStream, java.io.OutputStream, java.lang.String...)}, where  the first argument is {@code null}
      *
      * @param out Stdout of the command will be written to this.
      * @param errors Stderr of the command will be written to this. To log errors use {@link nl.vpro.logging.LoggerOutputStream#error(org.slf4j.Logger)}
@@ -58,7 +59,7 @@ public interface CommandExecutor {
     }
 
     /**
-     * Executes the command with given arguments. Stderr will be logged via slf4j
+     * Executes the command with given arguments. Stderr will be logged via slf4j. There will be no stdin supplied.
      * @param out Stdout will be written to this.
      * @return the exit code
      */
@@ -66,6 +67,14 @@ public interface CommandExecutor {
         return execute(out, LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
 
+
+    /**
+     * Defaulting version of {@link #execute(OutputStream, String...)}, where the output of the command will be interpreted
+     * as a UTF-stream, and be written to the supplied {@link Writer}.
+     *
+     * @param out Stdout will be written to this.
+     * @return the exit code
+     */
     default int execute(Writer out, String... args) {
         return execute(new WriterOutputStream(out, StandardCharsets.UTF_8), LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
@@ -74,12 +83,12 @@ public interface CommandExecutor {
     /**
      * Executes the command
      *
-     * @param in  Stdin of the command will be taken from this.
+     * @param in  Stdin of the command will be taken from this. This may be {@code null} for no stdin at all.
      * @param out Stdout of the command will be written to this.
      * @param error Stder of the command will be written to this.
      * @return The exit code
      */
-    default int execute(InputStream in, OutputStream out, OutputStream error, String... args) {
+    default int execute(@Nullable InputStream in, OutputStream out, OutputStream error, String... args) {
         return execute(Parameters.builder()
             .in(in)
             .out(out)
@@ -89,8 +98,15 @@ public interface CommandExecutor {
     }
 
 
+    /**
+     * Executes the command .
+     * @param parameters The parameters for doing this wrapped in a {@link Parameters} object.
+     */
     int execute(Parameters parameters);
 
+    /**
+     * This defaulting version of {@link #execute(Parameters)} eliminates the need to call {@link Parameters.Builder#build()}.
+     */
     default int execute(Parameters.Builder parameters) {
         return execute(parameters.build());
     }
@@ -109,10 +125,10 @@ public interface CommandExecutor {
             .build());
 
     }
+
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters.Builder parameters) {
         return submit(callback, parameters.build());
     }
-
 
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters parameters) {
         return CompletableFuture.supplyAsync(() -> {
