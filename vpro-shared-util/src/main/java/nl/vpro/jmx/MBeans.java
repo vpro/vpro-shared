@@ -317,6 +317,7 @@ public class MBeans {
      */
     @SneakyThrows
     public static synchronized ObjectName registerBean(Object object, String name) {
+        name = name.replaceAll("[^a-zA-Z\\-0-9]+", "_");
         ObjectName objectName = getObjectNameWithName(object, name);
         registerBean(objectName, object);
         return objectName;
