@@ -161,20 +161,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     protected HttpHost[] getHosts() {
         HttpHost[] httpHosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
             .filter(s -> !s.isEmpty())
+            .map(s -> {
+                if (! s.startsWith("http:") && ! s.startsWith("https:") && ! s.contains(":")) {
+                    s = s + ":9200";
+                }
+                return s;
+            })
             .map(HttpHost::create)
             .toArray(HttpHost[]::new);
-        int port = -1;
-        for (HttpHost h : httpHosts) {
-            if (h.getPort() != -1) {
-                port = h.getPort();
-            }
-        }
-        final int finalPort = port == -1 ? 9200 : port;
-        return Arrays.stream(httpHosts)
-            .map(h ->
-                h.getPort() == -1 ? new HttpHost(h.getHostName(), finalPort) : h
-            )
-            .toArray(HttpHost[]::new);
+        return httpHosts;
     }
 
     @Override
