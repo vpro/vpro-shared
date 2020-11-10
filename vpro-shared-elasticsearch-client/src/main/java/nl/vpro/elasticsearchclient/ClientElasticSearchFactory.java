@@ -12,7 +12,12 @@ import java.util.function.Consumer;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -35,7 +40,10 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private String clusterName;
     private String unicastHosts;
-    private boolean implicitJavaToHttpPort = false;
+
+    private String basicUser;
+    private String basicPassword;
+
 
     private Duration socketTimeout = Duration.ofSeconds(60);
     private Duration connectionTimeout = Duration.ofSeconds(5);
@@ -57,7 +65,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     public void init() {
         log.info("Found {}", this);
         if (registerMBean) {
-            MBeans.registerBean(this, instance + "-" + clusterName);
+            String name = instance + "-" + clusterName;
+            MBeans.registerBean(this, name);
         }
     }
 
@@ -79,12 +88,12 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     @Override
     public CompletableFuture<RestClient> clientAsync(
         @Nullable String logName, Consumer<RestClient> callback) {
-        if (logName == null){
+        if (logName == null) {
             logName = "NULL";
         }
         SimpleLogger l = SimpleLogger.slfj4(LoggerFactory.getLogger(logName));
 
-        CompletableFuture<RestClient>  future = clients.computeIfAbsent(logName, (ln) -> {
+        CompletableFuture<RestClient> future = clients.computeIfAbsent(logName, (ln) -> {
             CompletableFuture<RestClient> result = createAndCheckClient(l);
             result.thenAccept(callback);
             return result;
@@ -92,6 +101,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         return future;
 
     }
+
 
     private CompletableFuture<RestClient> createAndCheckClient(SimpleLogger l) {
         if (createClientIfNeeded()) {
@@ -123,11 +133,13 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             HttpHost[] hosts = getHosts();
             final RestClientBuilder clientBuilder = RestClient
                 .builder(hosts);
+
             client = clientBuilder
                 .setHttpClientConfigCallback((hacb) -> {
                     if (clientConfigCallbacks != null) {
                         clientConfigCallbacks.forEach(a -> a.customizeHttpClient(hacb));
                     }
+                    setupAuthorizationIfNecessary().customizeHttpClient(hacb);
                     return hacb;
                 })
                 .setRequestConfigCallback(
@@ -146,16 +158,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     }
 
 
-
     protected HttpHost[] getHosts() {
-        HttpHost[] httpHosts= Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
+        HttpHost[] httpHosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
             .filter(s -> !s.isEmpty())
             .map(HttpHost::create)
             .toArray(HttpHost[]::new);
         int port = -1;
         for (HttpHost h : httpHosts) {
             if (h.getPort() != -1) {
-                port  = h.getPort();
+                port = h.getPort();
             }
         }
         final int finalPort = port == -1 ? 9200 : port;
@@ -163,12 +174,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             .map(h ->
                 h.getPort() == -1 ? new HttpHost(h.getHostName(), finalPort) : h
             )
-            .map(h ->
-                h.getPort() >= 9300 && implicitJavaToHttpPort ?
-                    new HttpHost(h.getHostName(), h.getPort() - 100)
-                    : h
-            )
-
             .toArray(HttpHost[]::new);
     }
 
@@ -226,6 +231,21 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             client = null;
         }
     }
+
+    protected RestClientBuilder.HttpClientConfigCallback setupAuthorizationIfNecessary() {
+        return httpClientBuilder -> {
+            if (StringUtils.isNotBlank(basicUser)) {
+                CredentialsProvider credsProvider = new BasicCredentialsProvider();
+                credsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials(basicUser, basicPassword));
+
+                httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+            }
+            return httpClientBuilder;
+        };
+    }
+
+
 
     @Override
     public void close() {
