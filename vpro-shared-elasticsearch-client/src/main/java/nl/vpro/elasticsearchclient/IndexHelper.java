@@ -51,6 +51,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static final String SEARCH = "/_search";
     public static final String COUNT = "/_count";
     public static final String SETTINGS = "/_settings";
+    public static final String MAPPING= "/_mapping";
+    public static final String BULK = "/_bulk";
+
+
 
     public static final String POST = "POST";
     public static final String GET = "GET";
@@ -284,7 +288,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         HttpEntity entity = entity(request);
 
         log.info("Creating index {} with mappings {}: {}", indexName, mappings.keySet(), request.toString());
-        Request req = new Request(PUT, indexName);
+        Request req = new Request(PUT, "/" + indexName);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -323,7 +327,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             consumer.accept(settings);
         }
         HttpEntity entity = entity(request);
-        Request req = new Request(PUT, getIndexName() + SETTINGS);
+        Request req = createPut(SETTINGS);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -348,7 +352,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             consumer.accept(request);
         }
         HttpEntity entity = entity(request);
-        Request req = new Request(PUT, getIndexName() + "/_mapping");
+        Request req = createPut( MAPPING);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -369,7 +373,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @Override
     public boolean checkIndex() {
         try {
-            Response response = client().performRequest(new Request("HEAD", getIndexName()));
+            Response response = client().performRequest(createHead(null));
             boolean result =  response.getStatusLine().getStatusCode() != 404;
             EntityUtils.consumeQuietly(response.getEntity());
             return result;
@@ -382,7 +386,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public void deleteIndex()  {
         try {
-            Response delete = client().performRequest(new Request(METHOD_DELETE, getIndexName()));
+            Response delete = client().performRequest(createDelete(""));
 
             log.info("{}", delete);
             EntityUtils.consumeQuietly(delete.getEntity());
@@ -412,7 +416,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public boolean refresh() {
 
         try {
-            Response response = client().performRequest(new Request(GET, "_refresh"));
+            Response response = client().performRequest(new Request(GET, "/_refresh"));
             JsonNode read = read(response);
             return read != null;
         } catch (IOException e) {
@@ -424,7 +428,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public String getVersionNumber() {
 
         try {
-            Response response = client().performRequest(new Request(GET, ""));
+            Response response = client().performRequest(new Request(GET, "/"));
             JsonNode read = read(response);
             return read.get("version").get("number").asText();
         } catch (IOException e) {
@@ -446,7 +450,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 unaliasing = Suppliers.memoizeWithExpiration(() -> {
                     Map<String, String> result = new HashMap<>();
                     try {
-                        Request request = new Request(GET, "_cat/aliases");
+                        Request request = new Request(GET, "/_cat/aliases");
                         request.setOptions(request.getOptions().toBuilder().addHeader("accept", "application/json"));
 
                         Response response = client().performRequest(request);
@@ -668,7 +672,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode _delete(String type, String id) {
         try {
-            client().performRequest(new Request(METHOD_DELETE, getIndexName() + "/" + type + "/" + encode(id)));
+            client().performRequest(createDelete("/" + type + "/" + encode(id)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -710,7 +714,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
-        client().performRequestAsync(new Request(METHOD_DELETE, getIndexName() + "/" + type + "/" + encode(id)),
+        client().performRequestAsync(createDelete( "/" + type + "/" + encode(id)),
             listen(log, "delete " + type + "/" + id, future, listeners)
         );
         return future;
@@ -752,7 +756,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (ids.size() == 0) {
             return Collections.emptyList();
         }
-        Request get = new Request(GET, getIndexName() + "/_mget");
+        Request get = createGet("/_mget");
         //get.addParameter("routing", "AUTO_WEKKERWAKKER");
 
         ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
@@ -800,7 +804,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     protected Optional<JsonNode> _get(String type, String id, String routing) {
         try {
-            Request get = new Request(GET, getIndexName() + "/" + type + "/" + encode(id));
+            Request get = createGet("/" + type + "/" + encode(id));
             if (routing != null){
                 get.addParameter("routing", routing);
             }
@@ -1076,7 +1080,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
 
         try {
-            Request req = new Request(POST, "_bulk");
+            Request req = new Request(POST, BULK);
             req.setEntity(bulkEntity(request));
 
             writeJson(log, writeJsonDir, request);
@@ -1111,7 +1115,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return CompletableFuture.completedFuture(null);
         }
 
-        Request req = new Request(POST, "_bulk");
+        Request req = new Request(POST, BULK);
         req.setEntity(bulkEntity(request));
         writeJson(log, jsonDir, request);
 
@@ -1144,7 +1148,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @Override
     @SneakyThrows
     public long count() {
-        Request get = new Request(GET, getIndexName() + COUNT);
+        Request get = createGet(COUNT);
         Response response = client()
             .performRequest(get);
         JsonNode result = read(response);
@@ -1198,7 +1202,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  JsonNode getActualSettings() throws IOException {
-        Request get = new Request(GET, getIndexName() + SETTINGS);
+        Request get = createGet(SETTINGS);
         Response response = client()
             .performRequest(get);
         JsonNode result = read(response);
@@ -1452,12 +1456,37 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.writeJsonDir = file;
     }
 
+    protected Request createRequest(String method, String su) {
+        if (su == null) {
+            su = "";
+        }
+        return new Request(method, "/" + getIndexName() + su);
+    }
+
+    protected Request createGet(String su) {
+        return createRequest(GET, su);
+    }
+
+    protected Request createHead(String su) {
+        return createRequest("HEAD", su);
+    }
+    protected Request createPut(String su) {
+        return createRequest(PUT, su);
+    }
+    protected Request createDelete(String su) {
+        return createRequest(METHOD_DELETE, su);
+    }
+
+
+
     @Override
     public void close() throws Exception {
         log.info("Closing {}", clientFactory);
         clientFactory.close();
         clientFactory = null;
     }
+
+
 
     @Override
     public String toString() {
