@@ -5,10 +5,13 @@
   <bean id="esRestClientFactory" class="nl.vpro.elasticsearchclient.ClientElasticSearchFactory" autowire-candidate="true">
     <property name="clusterName" value="${elasticSearch.cluster}"/>
     <property name="unicastHosts" value="${elasticSearch.unicastHosts}"/>
-    <property name="implicitJavaToHttpPort" value="false" />
     <property name="socketTimeoutDuration" value="${elasticSearch.socketTimeout}"/>
     <property name="connectionTimeoutDuration" value="${elasticSearch.connectTimeout}"/>
     <property name="maxRetryTimeoutDuration" value="${elasticSearch.maxRetryTimeout}"/>
+
+    <property name="basicUser" value="${elasticSearch.basicUser:#{null}}"/>
+    <property name="basicPassword" value="${elasticSearch.basicPassword:#{null}}"/>
+
   </bean>
 
 
