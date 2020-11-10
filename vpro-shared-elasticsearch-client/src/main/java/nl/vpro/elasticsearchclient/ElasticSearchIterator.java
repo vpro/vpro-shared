@@ -329,7 +329,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             try(NStringEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON)) {
                 StringBuilder builder = new StringBuilder();
                 if (!indices.isEmpty()) {
-                    builder.append(String.join(",", indices));
+                    builder.append("/").append(String.join(",", indices));
                 }
                 if (!types.isEmpty()) {
                     if (builder.length() > 0) {
