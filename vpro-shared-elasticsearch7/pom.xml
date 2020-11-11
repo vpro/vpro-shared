@@ -9,6 +9,7 @@
   </parent>
 
   <artifactId>vpro-shared-elasticsearch7</artifactId>
+  <description>Utilities using elastic search native transport client</description>
 
   <properties>
     <elasticsearch.version>7.8.0</elasticsearch.version><!-- tied to server version -->
