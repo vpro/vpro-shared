@@ -54,9 +54,12 @@
 
     <module>vpro-shared-client-resteasy</module>
     <module>vpro-shared-configuration</module>
+
     <module>vpro-shared-elasticsearch</module>
     <module>vpro-shared-elasticsearch7</module>
     <module>vpro-shared-elasticsearch-client</module>
+    <module>vpro-shared-elasticsearch-high-level-client</module>
+
     <module>vpro-shared-hibernate</module>
     <module>vpro-shared-hibernate-search</module>
     <module>vpro-shared-jackson2</module>

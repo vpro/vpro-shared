@@ -15,23 +15,21 @@
   </description>
 
   <properties>
-
+    <elasticsearch.version>7.9.3</elasticsearch.version>
   </properties>
 
   <dependencies>
-    <!-- pointless since still needs elastichsearch-core, lucene dependencies -->
-    <!--
     <dependency>
-
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>elasticsearch-rest-high-level-client</artifactId>
-      <version>6.1.1</version>
+      <version>${elasticsearch.version}</version>
+      <scope>optional</scope>
     </dependency>
-   -->
+
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>elasticsearch-rest-client</artifactId>
-      <version>7.8.0</version>
+      <version>${elasticsearch.version}</version>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>

@@ -34,7 +34,7 @@ import nl.vpro.util.TimeUtils;
  */
 @Slf4j
 @Data
-public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientElasticSearchFactoryMXBean {
+public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientElasticSearchFactoryMXBean, ESClientBuilderFactory {
 
     private static int instances = 0;
 
@@ -49,6 +49,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     private Duration connectionTimeout = Duration.ofSeconds(5);
     private Duration connectTimeout = Duration.ofSeconds(5);
     private Duration maxRetryTimeout = Duration.ofSeconds(60);
+
+    private RestClientBuilder clientBuilder;
 
     private RestClient client;
 
@@ -128,13 +130,13 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         }
     }
 
-    private boolean createClientIfNeeded() {
-        if (client == null) {
-            HttpHost[] hosts = getHosts();
-            final RestClientBuilder clientBuilder = RestClient
+    private boolean createClientBuilderIfNeeded() {
+        if (clientBuilder == null) {
+              HttpHost[] hosts = getHosts();
+            clientBuilder = RestClient
                 .builder(hosts);
 
-            client = clientBuilder
+            clientBuilder
                 .setHttpClientConfigCallback((hacb) -> {
                     if (clientConfigCallbacks != null) {
                         clientConfigCallbacks.forEach(a -> a.customizeHttpClient(hacb));
@@ -147,10 +149,22 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                         .setConnectTimeout((int) connectTimeout.toMillis())
                         .setSocketTimeout((int) socketTimeout.toMillis())
                         .setConnectionRequestTimeout((int) connectionTimeout.toMillis())
-                )
+                );
                 //.setMaxRetryTimeout((int) maxRetryTimeout.toMillis())
-                .build();
-            log.info("Created {}: {}", Arrays.asList(hosts), client);
+
+            log.info("Created {}: {}", Arrays.asList(hosts), clientBuilder);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    private boolean createClientIfNeeded() {
+        if (client == null) {
+            createClientBuilderIfNeeded();
+            client =  clientBuilder.build();
+            log.info("Created {}", client);
             return true;
         } else {
             return false;
