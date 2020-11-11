@@ -9,6 +9,7 @@
   </parent>
 
   <artifactId>vpro-shared-elasticsearch</artifactId>
+  <description>Shared interfaces and constants for the other elasticsearch modules in this project</description>
 
   <properties>
   </properties>
