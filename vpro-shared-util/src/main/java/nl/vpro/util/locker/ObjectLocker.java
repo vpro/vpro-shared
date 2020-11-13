@@ -47,16 +47,12 @@ public class ObjectLocker {
      */
     static final Map<Serializable, LockHolder<Serializable>> LOCKED_OBJECTS    = new ConcurrentHashMap<>();
 
-
-
     public static <T> T withKeyLock(
         Serializable id,
         @NonNull String reason,
         @NonNull Callable<T> callable) {
-        return withObjectLock(id, reason, callable, ObjectLocker.LOCKED_OBJECTS, (o1, o2) -> false);
+        return withObjectLock(id, reason, callable, ObjectLocker.LOCKED_OBJECTS, (o1, o2) -> Objects.equals(o1.getClass(), o2.getClass()));
     }
-
-
 
     public static <T> T withKeyLock(
         Serializable id,
@@ -68,6 +64,15 @@ public class ObjectLocker {
         });
     }
 
+
+    /**
+     * @param key The key to lock on
+     * @param reason A description for the reason of locking, which can be used in logging or exceptions
+     * @param locks The map to hold the locks
+     * @param comparable this determines whether two given keys are 'comparable'. If they are comparable, but different, and occuring at the same time, than this means
+     *                   that some code is locking different thing s at the same time, which may be a cause of dead locks. If they are difference but also not comparable, then
+     *                   this remains unknown. We may e.g. be locking on a certain crid and on a mid. They are different, but it is not sure that they are actually about two different objects.
+     */
 
     @SneakyThrows
     public static <T, K extends Serializable> T withObjectLock(
@@ -151,11 +156,13 @@ public class ObjectLocker {
         log.trace("New lock for {}", key);
         List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
         if (! currentLocks.isEmpty()) {
-            if (stricltyOne && currentLocks.stream()
-                .anyMatch(l -> key.getClass().isInstance(l.key) && ! comparable.test(l.key, key))) {
-                throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), currentLocks.get(0).summarize(), key));
-            } else {
-                log.warn("Getting a lock on a different key! {} + {}", currentLocks, key);
+            Optional<LockHolder<? extends Serializable>> compatibleLocks = currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
+            if (compatibleLocks.isPresent()) {
+                if (stricltyOne) {
+                    throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), compatibleLocks.get().summarize(), key));
+                } else {
+                    log.warn("Getting a lock on a different key! {} + {}", compatibleLocks.get().summarize(), key);
+                }
             }
         }
         LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());

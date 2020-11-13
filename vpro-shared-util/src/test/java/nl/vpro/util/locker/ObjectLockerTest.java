@@ -28,6 +28,7 @@ public class ObjectLockerTest {
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofSeconds(10).toString());
         ObjectLocker.minWaitTime = Duration.ofSeconds(5);
         ObjectLocker.maxLockAcquireTime = Duration.ofSeconds(60);
+        ObjectLocker.stricltyOne  = false;
     }
 
 
