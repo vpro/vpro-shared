@@ -164,7 +164,7 @@ public class ObjectLocker {
                     log.warn("Getting a lock on a different key! {} + {}", compatibleLocks.get().summarize(), key);
                 }
             } else {
-                log.info("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
+                log.debug("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
 
             }
         }
