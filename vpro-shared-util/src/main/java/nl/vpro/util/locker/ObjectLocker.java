@@ -163,6 +163,9 @@ public class ObjectLocker {
                 } else {
                     log.warn("Getting a lock on a different key! {} + {}", compatibleLocks.get().summarize(), key);
                 }
+            } else {
+                log.info("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
+
             }
         }
         LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
