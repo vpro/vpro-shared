@@ -22,7 +22,7 @@ public interface ESClientFactory extends AutoCloseable, Supplier<RestClient> {
 
     @Override
     default RestClient get() {
-        return client((String) null, (rc) -> {});
+        return client(null, (rc) -> {});
     }
 
     default RestClient client(Class<?> clazz) {

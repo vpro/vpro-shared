@@ -2,17 +2,19 @@ package nl.vpro.elasticsearch.highlevel;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 
-import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.*;
 
 import nl.vpro.elasticsearchclient.ESClientBuilderFactory;
+import nl.vpro.elasticsearchclient.ESClientFactory;
 
 /**
  */
 @Slf4j
-public class HighLevelClientFactory  {
+public class HighLevelClientFactory  implements ESClientFactory  {
 
     private final ESClientBuilderFactory lowLevelFactory;
 
@@ -23,12 +25,17 @@ public class HighLevelClientFactory  {
         this.lowLevelFactory = lowLevelFactory;
     }
 
+    @Override
+    public RestClient client(String logName, Consumer<RestClient> callback) {
+        return highLevelClient(logName).getLowLevelClient();
+    }
+
     RestHighLevelClient buildClient() {
-        return client("test");
+        return highLevelClient("test");
     }
 
 
-    public RestHighLevelClient client(String logName){
+    public RestHighLevelClient highLevelClient(String logName){
         if (client == null) {
             synchronized (this) {
                 if (client == null) {
