@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -38,17 +39,18 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private static int instances = 0;
 
-    private String clusterName;
-    private String unicastHosts;
+    private String     clusterName;
+    private HttpHost[] hosts;
 
-    private String basicUser;
-    private String basicPassword;
+    private String     basicUser;
+    private String     basicPassword;
 
 
     private Duration socketTimeout = Duration.ofSeconds(60);
     private Duration connectionTimeout = Duration.ofSeconds(5);
     private Duration connectTimeout = Duration.ofSeconds(5);
     private Duration maxRetryTimeout = Duration.ofSeconds(60);
+
 
     private RestClientBuilder clientBuilder;
 
@@ -108,7 +110,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     private CompletableFuture<RestClient> createAndCheckClient(SimpleLogger l) {
         if (createClientIfNeeded()) {
             CompletableFuture<RestClient> future = new CompletableFuture<>();
-            HttpHost[] hosts = getHosts();
+            HttpHost[] hosts = getHttpHosts();
             IndexHelper.getClusterName(l, client)
                 .whenComplete((foundClusterName, exception) -> {
                     if (exception != null) {
@@ -132,7 +134,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private boolean createClientBuilderIfNeeded() {
         if (clientBuilder == null) {
-              HttpHost[] hosts = getHosts();
+              HttpHost[] hosts = getHttpHosts();
             clientBuilder = RestClient
                 .builder(hosts);
 
@@ -171,9 +173,17 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         }
     }
 
+    public void setHttpHosts(HttpHost... hosts) {
+        this.hosts = hosts;
+    }
 
-    protected HttpHost[] getHosts() {
-        HttpHost[] httpHosts = Arrays.stream(unicastHosts.split(("\\s*,\\s*")))
+
+    protected HttpHost[] getHttpHosts() {
+        return hosts;
+    }
+
+    public void setHosts(String hosts) {
+        HttpHost[] httpHosts = Arrays.stream(hosts.split(("\\s*,\\s*")))
             .filter(s -> !s.isEmpty())
             .map(s -> {
                 if (! s.startsWith("http:") && ! s.startsWith("https:") && ! s.contains(":")) {
@@ -183,8 +193,23 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             })
             .map(HttpHost::create)
             .toArray(HttpHost[]::new);
-        return httpHosts;
+        this.hosts = httpHosts;
     }
+
+    public String getHosts() {
+        return Arrays.stream(hosts).map(HttpHost::toHostString).collect(Collectors.joining(","));
+    }
+
+    @Deprecated
+    public void setUnicastHosts(String hosts) {
+        setHosts(hosts);
+    }
+
+    public RestClientBuilder getClientBuilder() {
+        createClientBuilderIfNeeded();
+        return clientBuilder;
+    }
+
 
     @Override
     public String toString() {
@@ -193,21 +218,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     @Override
     public String logString() {
-        try {
-            HttpHost[] hosts = getHosts();
-            if (hosts == null) {
-                throw new RuntimeException("No hosts");
-            }
-            if (hosts.length > 0) {
-                return hosts[0].toString();
-
-            } else {
-                return unicastHosts;
-            }
-        } catch (Exception e) {
-            log.error(e.getClass().getName() + ":" + e.getMessage());
-            return unicastHosts;
-        }
+        return Arrays.stream(hosts).findFirst().map(HttpHost::toHostString).orElse("<empty>");
     }
 
     public void setSocketTimeoutDuration(String socketTimeout) {

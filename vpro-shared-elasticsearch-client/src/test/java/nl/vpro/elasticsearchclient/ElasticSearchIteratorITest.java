@@ -1,17 +1,20 @@
 package nl.vpro.elasticsearchclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.elasticsearch.Constants;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.*;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import nl.vpro.elasticsearch.Constants;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
-@Disabled("Requires actual es connection")
 @Slf4j
 public class ElasticSearchIteratorITest {
 

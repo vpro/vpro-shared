@@ -13,9 +13,9 @@ public interface ClientElasticSearchFactoryMXBean {
 
     void setClusterName(String clusterName);
 
-    String getUnicastHosts();
+    String getHosts();
 
-    void setUnicastHosts(String unicastHosts);
+    void setHosts(String hosts);
 
     String invalidate();
 

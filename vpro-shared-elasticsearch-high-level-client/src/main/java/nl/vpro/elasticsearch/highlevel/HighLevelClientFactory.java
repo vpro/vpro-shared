@@ -46,12 +46,13 @@ public class HighLevelClientFactory  implements ESClientFactory  {
             }
         }
         return client;
-
-
     }
 
     private RestHighLevelClient constructClient(String logName) {
         RestClientBuilder builder = lowLevelFactory.getClientBuilder();
+        if (builder == null) {
+            throw new IllegalStateException();
+        }
         return new RestHighLevelClient(builder);
     }
 

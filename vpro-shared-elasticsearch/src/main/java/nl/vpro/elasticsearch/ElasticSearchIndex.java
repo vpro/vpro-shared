@@ -74,7 +74,7 @@ public class ElasticSearchIndex {
     }
 
 
-    public static final String resourceToString(String name) {
+    public static String resourceToString(String name) {
         try {
             StringWriter writer = new StringWriter();
             InputStream inputStream = ElasticSearchIndex.class.getResourceAsStream(name);

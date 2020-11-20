@@ -66,7 +66,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private final Function<JsonNode, T> adapt;
     private final RestClient client;
 
-    private ObjectNode request;
+    protected ObjectNode request;
     private JsonNode response;
     @Getter
     private Long count = -1L;
@@ -79,6 +79,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private T next;
     private boolean needsNext = true;
     private Collection<String> indices;
+
     @Deprecated
     private Collection<String> types;
 
@@ -120,7 +121,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     @lombok.Builder(builderClassName = "Builder")
     @lombok.SneakyThrows
-    private ElasticSearchIterator(
+    protected ElasticSearchIterator(
         @lombok.NonNull RestClient client,
         Function<JsonNode, T> adapt,
         Class<T> adaptTo,
@@ -200,6 +201,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 }
             };
         }
+        if (adapter == null) {
+            return jsonNode -> (T) jsonNode;
+        }
         return adapter;
     }
 
@@ -221,7 +225,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             .build();
     }
 
-     public static ElasticSearchIterator.Builder<JsonNode> sourcesBuilder(RestClient client) {
+    public static ElasticSearchIterator.Builder<JsonNode> sourcesBuilder(RestClient client) {
         return ElasticSearchIterator.<JsonNode>builder()
             .client(client)
             .adapt(jn -> jn.get(Fields.SOURCE));
@@ -254,9 +258,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     protected  ObjectNode _prepareSearch(Collection<String> indices, Collection<String> types) {
         request = Jackson2Mapper.getInstance().createObjectNode();
-        this.indices = indices == null ? Collections.emptyList() : indices;
         this.types = types == null ? Collections.emptyList() : types;
+        setIndices(indices);
         return request;
+    }
+
+    protected void setIndices(Collection<String> indices) {
+        this.indices = indices == null ? Collections.emptyList() : indices;
     }
 
     public ObjectNode getRequest() {
@@ -331,7 +339,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (!indices.isEmpty()) {
                     builder.append("/").append(String.join(",", indices));
                 }
-                if (!types.isEmpty()) {
+                if (types != null && !types.isEmpty()) {
                     if (builder.length() > 0) {
                         builder.append("/");
                     }
