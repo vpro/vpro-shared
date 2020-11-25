@@ -19,7 +19,9 @@ import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.opentest4j.AssertionFailedError;
 
+import static nl.vpro.util.FileCachingInputStream.throttle;
 import static org.apache.commons.io.IOUtils.EOF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -152,34 +154,49 @@ public class FileCachingInputStreamTest {
     }
 
 
-    public static List<InputStream> slowAndNormal() {
-        return  Arrays.asList(
-            new ByteArrayInputStream(MANY_BYTES),
-            new InputStream() {
-                int count = -1;
-                @Override
-                @SneakyThrows
-                public int read() {
-                    count++;
-                    Thread.sleep(5);
-                    if (count >= MANY_BYTES.length) {
-                        return -1;
-                    } else {
-                        return MANY_BYTES[count];
-                    }
-                }
-                @Override
-                public String toString() {
-                    return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
+    public static Iterator<Object[]> slowAndNormal() {
+
+        return new Iterator<Object[]>() {
+            int count = 0;
+            @Override
+            public boolean hasNext() {
+                return count < 100;
+            }
+
+            @Override
+            public Object[] next() {
+                if (count++ < 10) {
+                    return new Object[] {new ByteArrayInputStream(MANY_BYTES), (long) MANY_BYTES.length};
+
+                } else {
+                    return new Object[] {new InputStream() {
+                        int count = -1;
+                        @Override
+                        @SneakyThrows
+                        public int read() {
+                            count++;
+                            Thread.sleep(5);
+                            if (count >= MANY_BYTES.length) {
+                                return -1;
+                            } else {
+                                return MANY_BYTES[count];
+                            }
+                        }
+                        @Override
+                        public String toString() {
+                            return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
+                        }
+                    }, (long) MANY_BYTES.length};
+
                 }
             }
-        );
+        };
     }
 
 
     @ParameterizedTest
     @MethodSource("slowAndNormal")
-    public void testReadFileGetsInterrupted(InputStream input) throws IOException {
+    public void testReadFileGetsInterrupted(InputStream input, Long expectedCount) throws IOException {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
@@ -191,6 +208,7 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .batchConsumer((f) -> {
+                    log.info("count consumer {} ", f.getCount());
                     if (f.getCount() > 300) {
                         long i = interrupted.getAndIncrement();
                         if (closed.get() > 0) {
@@ -207,9 +225,11 @@ public class FileCachingInputStreamTest {
                     }
                 })
                 .input(input)
+                .expectedCount(expectedCount)
                 .initialBuffer(4)
                 .startImmediately(false)
                 .noProgressLogging()
+                .logger(null)
                 .build()
             ) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -218,11 +238,16 @@ public class FileCachingInputStreamTest {
                 byte[] buffer = new byte[10];
                 while ((r = inputStream.read(buffer)) != -1) {
                     out.write(buffer, 0, r);
+                    log.info("Read {}", r);
                 }
+                log.info("EOF !, {}", r);
+                throw new AssertionFailedError("should not reach this, it should have been interrupted!");
+
             }
         } catch (ClosedByInterruptException | InterruptedIOException ie) {
             isInterrupted = true;
             log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
+
         } finally {
             isInterrupted |= thisThread.isInterrupted();
             closed.getAndIncrement();
@@ -236,7 +261,7 @@ public class FileCachingInputStreamTest {
             .outputBuffer(2)
             .batchSize(3)
             .noProgressLogging()
-            .batchConsumer(FileCachingInputStream.throttle(Duration.ofMillis(5)))
+            .batchConsumer(throttle(Duration.ofMillis(20)))
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .startImmediately(true)
