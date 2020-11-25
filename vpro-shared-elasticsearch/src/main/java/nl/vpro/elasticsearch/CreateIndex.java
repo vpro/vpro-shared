@@ -1,17 +1,27 @@
 package nl.vpro.elasticsearch;
 
 /**
+ * Options for creating indices
  * @author Michiel Meeuwissen
  * @since 2.9
  */
 @lombok.Data
-
 public class CreateIndex {
 
+    /**
+     * Postfix the index name with the first free number
+     */
     private final boolean useNumberPostfix;
 
+    /**
+     * Configure the index for 'reindex', this is normally desired for new indices which are to be filled with existing data
+     * Update times are infinite, no replicas
+     */
     private final boolean forReindex;
 
+    /**
+     * Something to run when finished
+     */
     private final Runnable  callBack;
 
     private final boolean createAliases;
