@@ -21,9 +21,9 @@ import org.apache.commons.io.IOUtils;
 @Slf4j
 public class Copier implements Runnable, Closeable {
 
-    private boolean ready;
-    private Throwable exception;
-    private long count;
+    private volatile boolean ready;
+    private volatile Throwable exception;
+    private volatile long count;
 
     private final InputStream input;
     private final OutputStream output;
