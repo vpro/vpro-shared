@@ -1,11 +1,13 @@
 package nl.vpro.util;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -23,9 +25,10 @@ public class Copier implements Runnable, Closeable {
 
     private volatile boolean ready;
     private volatile Throwable exception;
-    private volatile long count;
+    private final  AtomicLong count = new AtomicLong(0);
 
     private final InputStream input;
+    private final Long expectedCount;
     private final OutputStream output;
     private final long batch;
     private final Consumer<Copier> callback;
@@ -40,7 +43,7 @@ public class Copier implements Runnable, Closeable {
 
 
     public Copier(InputStream i, OutputStream o, long batch) {
-        this(i, o, batch, null, null, null,  0, null, null);
+        this(i, null, o, batch, null, null, null,  0, null, null);
     }
 
 
@@ -59,6 +62,7 @@ public class Copier implements Runnable, Closeable {
     @lombok.Builder(builderClassName = "Builder")
     private Copier(
         InputStream input,
+        Long expectedCount,
         OutputStream output,
         long batch,
         Consumer<Copier> batchConsumer,
@@ -69,12 +73,13 @@ public class Copier implements Runnable, Closeable {
         Object notify
         ) {
         this.input = input;
+        this.expectedCount = expectedCount;
         this.output = output;
         this.batch = batch == 0 ? 8192: batch;
         this.callback = callback;
         this.batchConsumer = batchConsumer;
         this.errorHandler = errorHandler;
-        this.count = offset;
+        this.count.set(offset);
         this.name = name;
         this.logPrefix = name == null ? "" : name + ": ";
         this.notify = notify;
@@ -88,16 +93,17 @@ public class Copier implements Runnable, Closeable {
     public void run() {
         try {
             if (batchConsumer == null || batch < 1) {
-                count += IOUtils.copyLarge(input, output);
+                count.addAndGet(IOUtils.copyLarge(input, output));
                 notifyIfRequested();
             } else {
                 batchConsumer.accept(this);
                 while (true) {
                     long result = IOUtils.copyLarge(input, output, 0, batch);
-                    count += result;
+                    long currentCount = count.addAndGet(result);
                     batchConsumer.accept(this);
                     notifyIfRequested();
-                    if (result < batch) {
+                    if (result < batch && (expectedCount == null || expectedCount == currentCount)) {
+                        log.debug("{} < {}", result, batch);
                         break;
                     }
                 }
@@ -177,7 +183,7 @@ public class Copier implements Runnable, Closeable {
      * Returns the number of bytes read from the input stream so far
      */
     public long getCount() {
-        return count;
+        return count.get();
     }
 
     public Copier execute() {

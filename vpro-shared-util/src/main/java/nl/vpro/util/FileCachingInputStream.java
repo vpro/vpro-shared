@@ -51,15 +51,15 @@ public class FileCachingInputStream extends InputStream {
     @VisibleForTesting
     private final int bufferLength;
 
-
     private final Path tempFile;
     private final boolean deleteTempFile;
+    private final Long expectedCount;
 
     private final InputStream tempFileInputStream;
     private boolean tempFileInputStreamClosed = false;
 
     private volatile boolean closed = false;
-    private long count = 0;
+    private final AtomicLong count = new AtomicLong(0);
     static final AtomicInteger openStreams = new AtomicInteger(0);
 
     private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
@@ -112,6 +112,7 @@ public class FileCachingInputStream extends InputStream {
     @SneakyThrows(IOException.class)
     private FileCachingInputStream(
         final InputStream input,
+        final Long expectedCount,
         final Path path,
         final String filePrefix,
         final long batchSize,
@@ -127,11 +128,11 @@ public class FileCachingInputStream extends InputStream {
         final Path tempPath,
         final Boolean deleteTempFile
     ) {
-
         super();
         if (logger != null) {
             this.log = logger;
         }
+        this.expectedCount = expectedCount;
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
         if (! this.deleteTempFile) {
             Slf4jHelper.log(log, initialBuffer == null ? Level.WARN : Level.DEBUG,
@@ -248,6 +249,7 @@ public class FileCachingInputStream extends InputStream {
             // in a separate thread
             copier = Copier.builder()
                 .input(input)
+                .expectedCount(expectedCount)
                 .offset(bufferLength)
                 .output(tempFileOutputStream)
                 .name(tempFile.toString())
@@ -314,9 +316,12 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public int read(byte @NonNull[] b, int off, int len) throws IOException {
         if (tempFileInputStream == null) {
+            log.debug("From buffer");
             return readFromBuffer(b, off, len);
         } else {
-            return readFromFile(b, off, len);
+            int result = readFromFile(b, off, len);
+            log.debug("From file {}", result);
+            return result;
         }
     }
 
@@ -428,8 +433,8 @@ public class FileCachingInputStream extends InputStream {
      * One of the paths of {@link #read()}, when it is reading from memory.
      */
     private int readFromBuffer() {
-        if (count < bufferLength) {
-            byte result = buffer[(int) count++];
+        if (count.get() < bufferLength) {
+            byte result = buffer[(int) count.getAndIncrement()];
             synchronized (this) {
                 notifyAll();
             }
@@ -443,15 +448,16 @@ public class FileCachingInputStream extends InputStream {
      * One of the paths of {@link #read(byte[], int, int)} )}, when it is reading from memory.
      */
     private int readFromBuffer(byte[] b, int off, int len) {
-        int toCopy = Math.min(len, bufferLength - (int) count /* remaining bytes in buffer */);
+        int toCopy = Math.min(len, bufferLength - (int) count.get() /* remaining bytes in buffer */);
         if (toCopy > 0) {
-            System.arraycopy(buffer, (int) count, b, off, toCopy);
+            System.arraycopy(buffer, (int) count.get(), b, off, toCopy);
             synchronized (this) {
                 notifyAll();
             }
-            count += toCopy;
+            count.addAndGet(toCopy);
             return toCopy;
         } else {
+            log.debug("EOF from buffer");
             return EOF;
         }
     }
@@ -464,9 +470,10 @@ public class FileCachingInputStream extends InputStream {
         copier.executeIfNotRunning();
         int result = tempFileInputStream.read();
         while (result == EOF) {
+            log.debug("EOF, waiting");
             synchronized (copier) {
                 while (!copier.isReadyIOException() && result == EOF) {
-                    log.trace("Copier {} not yet ready", copier);
+                    log.info("Copier {} not yet ready", copier);
                     // copier is still busy, wait a second, and try again.
                     try {
                         copier.wait(1000);
@@ -477,10 +484,12 @@ public class FileCachingInputStream extends InputStream {
                         break;
                     }
                     result = tempFileInputStream.read();
+                    log.debug("Read {}", result);
                 }
                 if (copier.isReadyIOException() && result == EOF) {
                     // the copier did not return any new results
                     // don't increase count but return now.
+                    log.debug("Copier is ready,  no new results");
                     return EOF;
                 }
             }
@@ -488,7 +497,8 @@ public class FileCachingInputStream extends InputStream {
         //noinspection ConstantConditions
         assert result != EOF;
 
-        count++;
+        count.incrementAndGet();
+        log.debug("Returning {}" ,result);
         return result;
     }
 
@@ -498,7 +508,8 @@ public class FileCachingInputStream extends InputStream {
      */
     private int readFromFile(byte[] b, int offset, int length) throws IOException {
         copier.executeIfNotRunning();
-        if (copier.isReadyIOException() && count == copier.getCount()) {
+        if (copier.isReadyIOException() && count.get() == copier.getCount()) {
+            log.debug("Count reached {}", count);
             return EOF;
         }
         int result;
@@ -506,7 +517,7 @@ public class FileCachingInputStream extends InputStream {
             result = tempFileInputStream.read(b, offset, length);
 
             while (!copier.isReadyIOException() && result == EOF) {
-                log.trace("Copier {} not yet ready", copier);
+                log.info("Copier {} not yet ready", copier);
                 try {
                     copier.wait(1000);
                 } catch (InterruptedException e) {
@@ -519,12 +530,13 @@ public class FileCachingInputStream extends InputStream {
                     throw new InterruptedIOException(e.getMessage());
                 }
                 result = tempFileInputStream.read(b, offset, length);
+                log.debug("'result {}", result);
             }
             if (result == EOF) {
                 result = tempFileInputStream.read(b, offset, length);
             }
             if (result != EOF) {
-                count += result;
+                count.addAndGet(result);
             }
         }
         assert result != 0;
