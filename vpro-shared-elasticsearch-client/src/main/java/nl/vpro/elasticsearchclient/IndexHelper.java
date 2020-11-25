@@ -41,6 +41,12 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
+ *
+ * It is associated with one index and one cluster, and constains the methods to create/delete/update the index settings themselves.
+ *
+ * Also it contains utilities to perform some common get/post-operations (like indexing/deleting a node), createing bulk requests, and executing them,
+ * where the index name than can be implicit.
+ *
  * @author Michiel Meeuwissen
  * @since 0.24
  */
@@ -240,6 +246,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
+
+    /**
+     * Creates the asssociated index if it does not yet exists
+     * @param createIndex options for doing that
+     */
     @Override
     @SneakyThrows
     public  void createIndex(CreateIndex createIndex)  {
@@ -361,6 +372,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     }
 
+    /**
+     * Update  the settings json so that is proper for 'reindexing'
+     *
+     * @see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html">reindex</a>
+     */
     public static void forReindex(ObjectNode  settings) {
         //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
         ObjectNode index = settings.with("settings").with("index");
@@ -370,6 +386,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
+    /**
+     * Checks wether the associated index exists
+     */
     @Override
     public boolean checkIndex() {
         try {
@@ -413,6 +432,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
+    /**
+     * Issue a 'refresh' command, so we can be sure that index operations are handled.
+     * Must used in test cases.
+     */
     public boolean refresh() {
 
         try {
@@ -425,6 +448,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
+    /**
+     * Obtains version of connected elasticsearch deployment
+     */
     public String getVersionNumber() {
 
         try {
@@ -436,6 +462,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return null;
         }
     }
+
+    /**
+     * Obtains version of connected elasticsearch deployment as a {@link nl.vpro.util.IntegerVersion}
+     */
     public Version<Integer> getVersion() {
         return Version.parseIntegers(getVersionNumber());
     }

@@ -134,7 +134,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private boolean createClientBuilderIfNeeded() {
         if (clientBuilder == null) {
-              HttpHost[] hosts = getHttpHosts();
+            HttpHost[] hosts = getHttpHosts();
             clientBuilder = RestClient
                 .builder(hosts);
 
@@ -182,6 +182,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         return hosts;
     }
 
+    @Override
     public void setHosts(String hosts) {
         HttpHost[] httpHosts = Arrays.stream(hosts.split(("\\s*,\\s*")))
             .filter(s -> !s.isEmpty())
@@ -193,9 +194,15 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             })
             .map(HttpHost::create)
             .toArray(HttpHost[]::new);
+        if (httpHosts.length == 0) {
+            httpHosts = new HttpHost[] {HttpHost.create("localhost:9200")};
+            log.info("No http hosts configured, defaulting to {}", Arrays.asList(httpHosts));
+        }
         this.hosts = httpHosts;
+
     }
 
+    @Override
     public String getHosts() {
         return Arrays.stream(hosts).map(HttpHost::toHostString).collect(Collectors.joining(","));
     }
@@ -205,6 +212,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         setHosts(hosts);
     }
 
+    @Override
     public RestClientBuilder getClientBuilder() {
         createClientBuilderIfNeeded();
         return clientBuilder;
