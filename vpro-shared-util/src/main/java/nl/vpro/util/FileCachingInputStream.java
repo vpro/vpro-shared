@@ -58,7 +58,7 @@ public class FileCachingInputStream extends InputStream {
     private final InputStream tempFileInputStream;
     private boolean tempFileInputStreamClosed = false;
 
-    private boolean closed = false;
+    private volatile boolean closed = false;
     private long count = 0;
     static final AtomicInteger openStreams = new AtomicInteger(0);
 
