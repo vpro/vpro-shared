@@ -53,7 +53,6 @@ public class FileCachingInputStream extends InputStream {
 
     private final Path tempFile;
     private final boolean deleteTempFile;
-    private final Long expectedCount;
 
     private final InputStream tempFileInputStream;
     private boolean tempFileInputStreamClosed = false;
@@ -132,7 +131,7 @@ public class FileCachingInputStream extends InputStream {
         if (logger != null) {
             this.log = logger;
         }
-        this.expectedCount = expectedCount;
+
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
         if (! this.deleteTempFile) {
             Slf4jHelper.log(log, initialBuffer == null ? Level.WARN : Level.DEBUG,
@@ -473,7 +472,7 @@ public class FileCachingInputStream extends InputStream {
             log.debug("EOF, waiting");
             synchronized (copier) {
                 while (!copier.isReadyIOException() && result == EOF) {
-                    log.info("Copier {} not yet ready", copier);
+                    log.debug("Copier {} not yet ready", copier);
                     // copier is still busy, wait a second, and try again.
                     try {
                         copier.wait(1000);
@@ -517,7 +516,7 @@ public class FileCachingInputStream extends InputStream {
             result = tempFileInputStream.read(b, offset, length);
 
             while (!copier.isReadyIOException() && result == EOF) {
-                log.info("Copier {} not yet ready", copier);
+                log.debug("Copier {} not yet ready", copier);
                 try {
                     copier.wait(1000);
                 } catch (InterruptedException e) {

@@ -97,16 +97,7 @@ public class Copier implements Runnable, Closeable {
                 notifyIfRequested();
             } else {
                 batchConsumer.accept(this);
-                while (true) {
-                    long result = IOUtils.copyLarge(input, output, 0, batch);
-                    long currentCount = count.addAndGet(result);
-                    batchConsumer.accept(this);
-                    notifyIfRequested();
-                    if (result < batch && (expectedCount == null || expectedCount == currentCount)) {
-                        log.debug("{} < {}", result, batch);
-                        break;
-                    }
-                }
+                copy();
             }
         } catch (IOException ioe) {
             exception = ioe;
@@ -120,6 +111,62 @@ public class Copier implements Runnable, Closeable {
             log.debug("finally");
             afterRun();
         }
+    }
+    private void copy() throws IOException {
+        final int[] equalParts = equalsParts();
+        int part = 0;
+        while (true) {
+            byte[] buffer = new byte[equalParts[part]];
+            assert buffer.length > 0;
+            int read = input.read(buffer);
+            if (read == -1) {
+                if (expectedCount != null && count.get() < expectedCount) {
+                    log.warn("read insufficient {} < expected {}", count.get(), expectedCount);
+                }
+                log.debug("breaking on {}", count.get());
+                break;
+            }
+            output.write(buffer, 0, read);
+            count.addAndGet(read);
+            if (++part == equalParts.length) {
+                batchConsumer.accept(this);
+                notifyIfRequested();
+                part = 0;
+            }
+        }
+    }
+    /*
+    private void copyWithIOUtils() throws IOException {
+        while(true) {
+            long result = IOUtils.copyLarge(input, output, 0, batch);
+            long currentCount = count.addAndGet(result);
+            batchConsumer.accept(this);
+            notifyIfRequested();
+            if (result < batch) {
+                checkCount(currentCount);
+                break;
+            }
+        }
+    }*/
+    private void checkCount(long currentCount) {
+        if (expectedCount == null || expectedCount < currentCount) {
+            log.warn("read unsufficient {} < expected {}", count.get(), expectedCount);
+        }
+    }
+    private int[] equalsParts() {
+        return equalsParts(batch);
+    }
+
+    static int[] equalsParts(long batch) {
+        int parts = (int) (batch / 8192) + 1;
+        int[] arr = new int[parts];
+        long whole = batch;
+        for (int i = 0; i < parts; i++) {
+            int v = (int) ((whole + parts - i - 1) / (parts - i));
+            arr[i] = v;
+            whole -= v;
+        }
+        return arr;
     }
 
     private void afterRun() {
@@ -246,14 +293,17 @@ public class Copier implements Runnable, Closeable {
     }
 
     private void handleError() {
-        if (errorHandler != null && exception != null) {
+        if (exception != null) {
              // The copier is ready, but resulted some error, the user requested to be called back, so do that now
-            log.debug("Error handling");
-            try {
-                errorHandler.accept(this, exception);
-            } catch(Exception e) {
-                log.error("Error during error handling: {}", e.getMessage(), e);
-                log.error("Error was {}", exception.getMessage(), exception);
+            if (errorHandler != null) {
+                try {
+                    errorHandler.accept(this, exception);
+                } catch (Exception e) {
+                    log.error("Error during error handling: {}", e.getMessage(), e);
+                    log.error("Error was {}", exception.getMessage(), exception);
+                }
+            } else {
+                log.warn(exception.getMessage());
             }
         }
     }
