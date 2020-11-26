@@ -4,9 +4,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -46,15 +47,17 @@ public class FilteringIteratorTest {
 
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void noSuchElement() {
-        Iterator<String> iterator = new FilteringIterator<>(Arrays.asList("a", "b", "c", null, "d").iterator(), notC);
-        assertEquals("a", iterator.next());
-        assertEquals("b", iterator.next());
-        assertNull(iterator.next());
-        assertEquals("d", iterator.next());
+        assertThatThrownBy(()-> {
+            Iterator<String> iterator = new FilteringIterator<>(Arrays.asList("a", "b", "c", null, "d").iterator(), notC);
+            assertEquals("a", iterator.next());
+            assertEquals("b", iterator.next());
+            assertNull(iterator.next());
+            assertEquals("d", iterator.next());
 
-        iterator.next();
+            iterator.next();
+        }).isInstanceOf(NoSuchElementException.class);
     }
 
 

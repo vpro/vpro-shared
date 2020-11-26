@@ -1,10 +1,8 @@
 package nl.vpro.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +29,7 @@ public class ObjectFilterTest {
             this.parent = parent;
         }
     }
+
     @Test
     public void test() {
         A a1 = new A();

@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import static nl.vpro.util.Version.of;
 import static nl.vpro.util.Version.parseIntegers;
@@ -22,7 +23,7 @@ public class VersionTest {
         assertThat(parseIntegers("2.2.3").isNotBefore(2, 2, 3)).isTrue();
         assertThat(parseIntegers("2.2.3").isNotBefore(2, 2, 4)).isFalse();
     }
-    
+
     @Test
     public void parseWithSnaphot() {
         assertThat(parseIntegers("5.8-SNAPSHOT")).isEqualTo(of(5, 8));

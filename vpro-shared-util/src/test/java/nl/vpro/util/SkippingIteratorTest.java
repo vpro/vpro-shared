@@ -1,10 +1,8 @@
 package nl.vpro.util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -13,7 +11,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @since 1.68
  */
 public class SkippingIteratorTest {
-
 
     @Test
     public void basicTest() {
