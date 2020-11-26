@@ -215,6 +215,14 @@ class CopierTest {
         }
     }
 
+    @Test
+    public void equalsParts() {
+        assertThat(Copier.equalsParts(100)).containsExactly(100);
+        assertThat(Copier.equalsParts(9000)).containsExactly(4500, 4500);
+        assertThat(Copier.equalsParts(9001)).containsExactly(4501, 4500);
+
+    }
+
 
     private void assertCopierHappy(Copier copier) throws IOException {
         assertThat(copier.getCount()).isEqualTo(SIZE);

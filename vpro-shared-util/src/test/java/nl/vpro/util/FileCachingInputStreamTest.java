@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
@@ -41,7 +42,7 @@ public class FileCachingInputStreamTest {
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
     private static final int SIZE_OF_HUGE_STREAM = 1_000_000_000 + RANDOM.nextInt(1_000_000);
 
-    private static final int SEED_FOR_LARGE_RANDOM_FILE = RANDOM.nextInt();
+    private static final int SEED_FOR_LARGE_RANDOM_FILE = -1464881210;//RANDOM.nextInt();
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static final byte[] MANY_BYTES;
     static {
@@ -156,43 +157,55 @@ public class FileCachingInputStreamTest {
 
     public static Iterator<Object[]> slowAndNormal() {
 
+        int slows = 10;
+        int bytearrays = 4;
+        int total = bytearrays + slows;
         return new Iterator<Object[]>() {
             int count = 0;
             @Override
             public boolean hasNext() {
-                return count < 100;
+                return count < total;
             }
 
             @Override
             public Object[] next() {
-                if (count++ < 10) {
-                    return new Object[] {new ByteArrayInputStream(MANY_BYTES), (long) MANY_BYTES.length};
-
+                Long expectedSize = count % 2 == 0 ? (long) MANY_BYTES.length : null;
+                if (count++ < slows) {
+                    return new Object[] {new ByteArrayInputStream(MANY_BYTES), expectedSize};
                 } else {
-                    return new Object[] {new InputStream() {
-                        int count = -1;
-                        @Override
-                        @SneakyThrows
-                        public int read() {
-                            count++;
-                            Thread.sleep(5);
-                            if (count >= MANY_BYTES.length) {
-                                return -1;
-                            } else {
-                                return MANY_BYTES[count];
-                            }
-                        }
-                        @Override
-                        public String toString() {
-                            return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
-                        }
-                    }, (long) MANY_BYTES.length};
+                    return new Object[] {new SlowInputStream(5), expectedSize};
 
                 }
             }
         };
     }
 
+    static class SlowInputStream extends InputStream {
+        final AtomicInteger count = new AtomicInteger(0);
+        final int sleep;
+
+        SlowInputStream(int sleep) {
+            this.sleep = sleep;
+        }
+
+        @Override
+        @SneakyThrows
+        public int read() {
+            Thread.sleep(sleep);
+            if (count.get() > MANY_BYTES.length) {
+                log.info("End of stream at {}", count);
+                return -1;
+            } else {
+                int b = Byte.toUnsignedInt(MANY_BYTES[count.getAndIncrement()]);
+                assert b != -1;
+                return b;
+            }
+        }
+        @Override
+        public String toString() {
+            return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
+        }
+    }
 
     @ParameterizedTest
     @MethodSource("slowAndNormal")
@@ -485,7 +498,7 @@ public class FileCachingInputStreamTest {
                 .build()) {
 
             long count = inputStream.waitForBytesRead(10);
-            log.info("Found {}", count);
+            log.debug("Found {}", count);
             assertThat(count).isGreaterThanOrEqualTo(1);
 
             IOUtils.copy(inputStream, out);
