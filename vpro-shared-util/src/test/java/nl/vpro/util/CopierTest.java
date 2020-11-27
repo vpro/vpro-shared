@@ -32,7 +32,7 @@ class CopierTest {
             copier.execute();
             assertThatThrownBy(copier::execute).isInstanceOf(IllegalStateException.class);
 
-            copier.waitFor();
+            copier.waitForAndClose();
 
             assertThat(out.toByteArray()).hasSize(SIZE);
             assertCopierHappy(copier);
@@ -194,6 +194,7 @@ class CopierTest {
                 })
                 .notify(batches)
                 .build()) {
+            assertThat(copier.cancelFutureIfNeeded()).isFalse();
 
             copier.execute();
 
@@ -228,6 +229,8 @@ class CopierTest {
         assertThat(copier.getCount()).isEqualTo(SIZE);
         assertThat(copier.isReadyIOException()).isTrue();
         assertThat(copier.getException()).isNotPresent();
+        assertThat(copier.cancelFutureIfNeeded()).isFalse(); // should be done
+
     }
 
     private  InputStream randomStream() {

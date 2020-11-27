@@ -13,6 +13,8 @@ import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 
+import static nl.vpro.util.FileCachingInputStream.EOF;
+
 /**
  * Can be used to copy an {@link InputStream} to an {@link OutputStream} in a stand alone thread.
  * Used by {@link FileCachingInputStream}.
@@ -112,6 +114,10 @@ public class Copier implements Runnable, Closeable {
             afterRun();
         }
     }
+
+    /**
+     * We used to use {@link IOUtils#copyLarge(InputStream, OutputStream, long, long)}
+     */
     private void copy() throws IOException {
         final int[] equalParts = equalsParts();
         int part = 0;
@@ -119,10 +125,8 @@ public class Copier implements Runnable, Closeable {
             byte[] buffer = new byte[equalParts[part]];
             assert buffer.length > 0;
             int read = input.read(buffer);
-            if (read == -1) {
-                if (expectedCount != null && count.get() < expectedCount) {
-                    log.warn("read insufficient {} < expected {}", count.get(), expectedCount);
-                }
+            if (read == EOF) {
+                checkCount(count.get());
                 log.debug("breaking on {}", count.get());
                 break;
             }
@@ -135,6 +139,7 @@ public class Copier implements Runnable, Closeable {
             }
         }
     }
+
     /*
     private void copyWithIOUtils() throws IOException {
         while(true) {
@@ -147,7 +152,9 @@ public class Copier implements Runnable, Closeable {
                 break;
             }
         }
-    }*/
+    }
+     */
+
     private void checkCount(long currentCount) {
         if (expectedCount == null || expectedCount < currentCount) {
             log.warn("read unsufficient {} < expected {}", count.get(), expectedCount);
@@ -253,10 +260,16 @@ public class Copier implements Runnable, Closeable {
     @Override
     public void close() throws IOException {
         log.debug("close");
-        cancelFutureIfNeeded();
+        if (cancelFutureIfNeeded()) {
+            log.debug("Cancelled {}", future);
+        }
         input.close();
     }
 
+    /**
+     * If running, cancel the job
+     * @return {@code false} if the future is not running, or not yet running {@code true} if there was a future to cancel
+     */
     boolean cancelFutureIfNeeded() {
         if (future != null) {
             if (future.isCancelled()) {
@@ -273,7 +286,7 @@ public class Copier implements Runnable, Closeable {
             }
             return result;
         }  else {
-            return ! ready;
+            return false;
         }
     }
 
