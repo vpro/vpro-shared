@@ -1,10 +1,11 @@
 package nl.vpro.elasticsearchclient;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import nl.vpro.elasticsearch.Constants;
 
-import java.time.Instant;
+import nl.vpro.elasticsearch.Constants;
 
 import static nl.vpro.elasticsearch.Constants.FILTER;
 import static nl.vpro.elasticsearch.Constants.Query.*;
@@ -53,6 +54,14 @@ public class QueryBuilder {
         term.put(field, value);
         return clause;
     }
+
+    public static ObjectNode mustWildcard(ObjectNode query, String field, String value) {
+        ObjectNode clause = must(query);
+        ObjectNode term = clause.with(WILDCARD);
+        term.put(field, value);
+        return clause;
+    }
+
     public static ObjectNode filterTerm(ObjectNode query, String field, String value) {
         ObjectNode clause = filter(query);
         ObjectNode term = clause.with(TERM);
