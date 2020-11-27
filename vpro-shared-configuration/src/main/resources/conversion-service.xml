@@ -14,7 +14,8 @@
         <bean class="nl.vpro.spring.converters.StringToTemporalAmountConverter" />
         <bean class="nl.vpro.spring.converters.StringToIntegerListConverter" />
         <bean class="nl.vpro.spring.converters.StringToLocalTimeConverter" />
-
+        <bean class="nl.vpro.spring.converters.StringToInstantConverter" />
+        <bean class="nl.vpro.spring.converters.StringToLocalDateTimeConverter" />
       </list>
     </property>
   </bean>
