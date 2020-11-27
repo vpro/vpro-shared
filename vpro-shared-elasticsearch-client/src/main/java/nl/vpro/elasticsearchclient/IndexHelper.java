@@ -1114,19 +1114,22 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
+        if (request.isEmpty()) {
+            return objectMapper.createObjectNode();
+        } else {
+            try {
+                Request req = new Request(POST, BULK);
+                req.setEntity(bulkEntity(request));
 
-        try {
-            Request req = new Request(POST, BULK);
-            req.setEntity(bulkEntity(request));
-
-            writeJson(log, writeJsonDir, request);
-            ObjectNode result = read(
-                client().performRequest(req)
-            );
-            return result;
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return null;
+                writeJson(log, writeJsonDir, request);
+                ObjectNode result = read(
+                    client().performRequest(req)
+                );
+                return result;
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                return null;
+            }
         }
     }
 
