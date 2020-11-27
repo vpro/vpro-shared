@@ -55,6 +55,7 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
     public static final String SEARCH = "/_search";
+    public static final String DELETE_BY_QUERY = "/_delete_by_query";
     public static final String COUNT = "/_count";
     public static final String SETTINGS = "/_settings";
     public static final String MAPPING= "/_mapping";
@@ -504,6 +505,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public ObjectNode search(ObjectNode request) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
         return post((indexName == null ? "" : indexName) + SEARCH, request);
+    }
+
+
+    public ObjectNode deleteByQuery(ObjectNode request) {
+        return post(getIndexName() + DELETE_BY_QUERY, request);
     }
 
     /**
