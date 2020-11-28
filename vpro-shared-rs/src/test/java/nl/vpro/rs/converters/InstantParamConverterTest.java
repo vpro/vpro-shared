@@ -3,11 +3,12 @@ package nl.vpro.rs.converters;
 import java.time.*;
 import java.time.format.DateTimeParseException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.util.TimeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
@@ -54,9 +55,11 @@ public class InstantParamConverterTest {
         assertThat(instance.fromString("2000-01-01T18:20")).isEqualTo(LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(18, 20)).atZone(TimeUtils.ZONE_ID).toInstant());
     }
 
-    @Test(expected= DateTimeParseException.class)
+    @Test
     public void fromError() {
-        instance.fromString("20aaa00-01-01");
+        assertThatThrownBy(() -> {
+            instance.fromString("20aaa00-01-01");
+        }).isInstanceOf(DateTimeParseException.class);
 
 
     }

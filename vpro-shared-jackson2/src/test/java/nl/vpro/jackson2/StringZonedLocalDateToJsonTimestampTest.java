@@ -1,6 +1,5 @@
 package nl.vpro.jackson2;
 
-import static org.junit.Assert.*;
 
 /**
  * @author Michiel Meeuwissen

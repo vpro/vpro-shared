@@ -1,19 +1,15 @@
 package nl.vpro.guice;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.*;
 import com.google.inject.name.Names;
 
 import nl.vpro.util.DefaultValue;
@@ -71,7 +67,7 @@ public class DurationConvertorAndOptionalModuleTest {
     }
 
     private Injector injector;
-    @Before
+    @BeforeEach
     public void setup() {
 
         injector = Guice.createInjector(

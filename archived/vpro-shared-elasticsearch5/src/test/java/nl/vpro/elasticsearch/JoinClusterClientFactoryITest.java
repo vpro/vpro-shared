@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.client.Client;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 @Slf4j

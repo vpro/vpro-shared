@@ -1,6 +1,6 @@
 package nl.vpro.elasticsearch;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.util.UrlProvider;
 

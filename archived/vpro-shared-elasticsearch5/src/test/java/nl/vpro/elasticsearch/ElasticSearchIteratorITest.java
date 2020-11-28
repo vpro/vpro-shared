@@ -6,7 +6,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.util.UrlProvider;
 

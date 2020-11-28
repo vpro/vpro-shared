@@ -4,7 +4,7 @@ import java.util.Collections;
 
 import org.elasticsearch.client.Client;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.util.UrlProvider;
 

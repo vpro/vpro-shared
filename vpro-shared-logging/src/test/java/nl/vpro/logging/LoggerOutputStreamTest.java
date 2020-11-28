@@ -7,7 +7,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
@@ -28,9 +28,8 @@ public class LoggerOutputStreamTest {
         };
         instance.write(testString.getBytes());
         instance.close();
-        assertEquals(testString + "\n", buf.toString());
+        assertThat(buf.toString()).isEqualTo(testString + "\n");
     }
-
 
 
     @Test

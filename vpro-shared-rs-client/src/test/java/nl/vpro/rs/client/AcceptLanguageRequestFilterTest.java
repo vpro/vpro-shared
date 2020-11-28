@@ -6,8 +6,8 @@ import java.util.Locale;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -21,7 +21,7 @@ public class AcceptLanguageRequestFilterTest {
     ClientRequestContext context = mock(ClientRequestContext.class);
     MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
         reset(context);
         when(context.getHeaders()).thenReturn(headers);

@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 

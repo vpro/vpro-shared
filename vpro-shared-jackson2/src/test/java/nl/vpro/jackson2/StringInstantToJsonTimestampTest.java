@@ -6,9 +6,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
@@ -36,9 +37,11 @@ public class StringInstantToJsonTimestampTest {
 
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNotOk() {
-        StringInstantToJsonTimestamp.parseDateTime("dit is echt geen datum");
+        assertThatThrownBy(() -> {
+            StringInstantToJsonTimestamp.parseDateTime("dit is echt geen datum");
+        }).isInstanceOf(IllegalArgumentException.class);
 
     }
 

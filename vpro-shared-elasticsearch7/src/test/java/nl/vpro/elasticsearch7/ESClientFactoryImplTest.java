@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.vpro.util.UrlProvider;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Michiel Meeuwissen

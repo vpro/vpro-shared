@@ -2,7 +2,7 @@ package nl.vpro.ektorp;
 
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.View;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

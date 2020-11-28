@@ -4,11 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URISyntaxException;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

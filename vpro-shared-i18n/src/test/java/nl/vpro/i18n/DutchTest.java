@@ -3,7 +3,7 @@ package nl.vpro.i18n;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

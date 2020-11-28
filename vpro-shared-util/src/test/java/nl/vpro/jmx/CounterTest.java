@@ -3,7 +3,7 @@ package nl.vpro.jmx;
 import java.time.Duration;
 
 import org.assertj.core.data.Percentage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

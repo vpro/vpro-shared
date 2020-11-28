@@ -1,30 +1,22 @@
 package nl.vpro.xml.bind;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import org.junit.Assume;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * @author Michiel Meeuwissen
  * @since 0.32
  */
-@RunWith(Parameterized.class)
 public class InstantXmlAdapterTest {
 
-    private Instant in;
-    private String xml;
-    private String xmlomitisfalse;
-    private boolean marshal;
 
     InstantXmlAdapter instance = new InstantXmlAdapter();
 
@@ -39,37 +31,49 @@ public class InstantXmlAdapterTest {
     };
 
 
-    public InstantXmlAdapterTest(Object in,
-                                 String xml,
-                                 String xml2,
-                                 boolean marshal) {
-        this.in = in instanceof Instant ? (Instant) in : Instant.parse(String.valueOf(in));
-        this.xml = xml;
-        if (xml2 == null) {
-            xmlomitisfalse = xml;
-        } else {
-            xmlomitisfalse = xml2;
-        }
-        this.marshal = marshal;
+    public static Stream<Object[]> parameters() {
+        return Arrays.stream(CASES).map(
+            (c) -> {
+                Object in = c[0];
+                String xml = (String) c[1];
+                String xml2 = (String) c[2];
+                boolean marshal = (boolean) c[3];
+                return new Object[] {
+                    in instanceof Instant ? (Instant) in : Instant.parse(String.valueOf(in)),
+                    xml,
+                    xml2 == null ? xml : xml2,
+                    marshal
+                };
+            }
+        );
     }
 
-    @Parameterized.Parameters
-    public static Collection parameters() {
-        return Arrays.asList(CASES);
-    }
 
-
-    @Test
-    public void testMarshal() {
-        Assume.assumeTrue(marshal);
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testMarshal(
+        Instant in,
+        String xml,
+        String xmlomitisfalse,
+        boolean marshal
+    ) {
+        assumeTrue(marshal);
         InstantXmlAdapter.OMIT_MILLIS_IF_ZERO.remove();
         assertThat(instance.marshal(in)).isEqualTo(xml);
         InstantXmlAdapter.OMIT_MILLIS_IF_ZERO.set(false);
         assertThat(instance.marshal(in)).isEqualTo(xmlomitisfalse);
 
     }
-    @Test
-    public void testUnmarshal() {
+
+    @ParameterizedTest
+    @MethodSource("parameters")
+    public void testUnmarshal(
+        Instant in,
+        String xml,
+        String xmlomitisfalse,
+        boolean marshal
+    ) {
+
         assertThat(instance.unmarshal(xml)).isEqualTo(in.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS));
         assertThat(instance.unmarshal(xmlomitisfalse)).isEqualTo(in.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS));
     }
