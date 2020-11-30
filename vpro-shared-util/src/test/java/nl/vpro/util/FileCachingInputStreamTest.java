@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.IOUtils;
@@ -19,7 +20,9 @@ import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.opentest4j.AssertionFailedError;
 
+import static nl.vpro.util.FileCachingInputStream.throttle;
 import static org.apache.commons.io.IOUtils.EOF;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,13 +36,24 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Slf4j
 @Isolated
 @Execution(SAME_THREAD)
-@TestMethodOrder(MethodOrderer.DisplayName.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 public class FileCachingInputStreamTest {
-    private static final Random RANDOM = new Random();
+    //private static final int SEED = new Random().nextInt();
+    private static final int SEED = -118023437; // gave some troubles
+
+    private static final Random RANDOM = new Random(SEED);
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
     private static final int SIZE_OF_HUGE_STREAM = 1_000_000_000 + RANDOM.nextInt(1_000_000);
-
     private static final int SEED_FOR_LARGE_RANDOM_FILE = RANDOM.nextInt();
+
+    static {
+        log.info("SEED {}", SEED);
+        log.info("SIZE OF BIG {}", SIZE_OF_BIG_STREAM);
+        log.info("SIZE OF HUGE {}", SIZE_OF_HUGE_STREAM);
+        log.info("SEED OF LARGE RANDOM {}", SEED_FOR_LARGE_RANDOM_FILE);
+    }
+
+
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static final byte[] MANY_BYTES;
     static {
@@ -152,34 +166,67 @@ public class FileCachingInputStreamTest {
     }
 
 
-    public static List<InputStream> slowAndNormal() {
-        return  Arrays.asList(
-            new ByteArrayInputStream(MANY_BYTES),
-            new InputStream() {
-                int count = -1;
-                @Override
-                @SneakyThrows
-                public int read() {
-                    count++;
-                    Thread.sleep(5);
-                    if (count >= MANY_BYTES.length) {
-                        return -1;
-                    } else {
-                        return MANY_BYTES[count];
-                    }
+    public static Iterator<Object[]> slowAndNormal() {
+
+        int slows = 10;
+        int bytearrays = 4;
+        int total = bytearrays + slows;
+        return new Iterator<Object[]>() {
+            int count = 0;
+            @Override
+            public boolean hasNext() {
+                return count < total;
+            }
+
+            @Override
+            public Object[] next() {
+                Long expectedSize = count % 2 == 0 ? (long) MANY_BYTES.length : null;
+                byte[] bytes = new byte[1500];
+                {
+                    RANDOM.nextBytes(bytes);
                 }
-                @Override
-                public String toString() {
-                    return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
+                if (count++ < slows) {
+                    return new Object[] {new ByteArrayInputStream(bytes), expectedSize};
+                } else {
+                    return new Object[] {new SlowInputStream(5, bytes), expectedSize};
+
                 }
             }
-        );
+        };
     }
 
+    static class SlowInputStream extends InputStream {
+        final byte[] bytes;
+        final AtomicInteger count = new AtomicInteger(0);
+        final int sleep;
+
+        SlowInputStream(int sleep, byte[] bytes) {
+            this.sleep = sleep;
+            this.bytes = bytes;
+        }
+
+        @Override
+        @SneakyThrows
+        public int read() {
+            Thread.sleep(sleep);
+            if (count.get() > bytes.length) {
+                log.info("End of stream at {}", count);
+                return -1;
+            } else {
+                int b = Byte.toUnsignedInt(bytes[count.getAndIncrement()]);
+                assert b != -1;
+                return b;
+            }
+        }
+        @Override
+        public String toString() {
+            return "Sleepy input stream of " + bytes.length + " bytes";
+        }
+    }
 
     @ParameterizedTest
     @MethodSource("slowAndNormal")
-    public void testReadFileGetsInterrupted(InputStream input) throws IOException {
+    public void testReadFileGetsInterrupted(InputStream input, Long expectedCount) throws IOException {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
@@ -191,6 +238,7 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .batchConsumer((f) -> {
+                    log.debug("count consumer {} ", f.getCount());
                     if (f.getCount() > 300) {
                         long i = interrupted.getAndIncrement();
                         if (closed.get() > 0) {
@@ -210,6 +258,7 @@ public class FileCachingInputStreamTest {
                 .initialBuffer(4)
                 .startImmediately(false)
                 .noProgressLogging()
+                .logger(null)
                 .build()
             ) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -218,11 +267,16 @@ public class FileCachingInputStreamTest {
                 byte[] buffer = new byte[10];
                 while ((r = inputStream.read(buffer)) != -1) {
                     out.write(buffer, 0, r);
+                    log.debug("Read {}", r);
                 }
+                log.info("EOF !, {}", r);
+                throw new AssertionFailedError("should not reach this, it should have been interrupted!");
+
             }
         } catch (ClosedByInterruptException | InterruptedIOException ie) {
             isInterrupted = true;
             log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
+
         } finally {
             isInterrupted |= thisThread.isInterrupted();
             closed.getAndIncrement();
@@ -236,7 +290,7 @@ public class FileCachingInputStreamTest {
             .outputBuffer(2)
             .batchSize(3)
             .noProgressLogging()
-            .batchConsumer(FileCachingInputStream.throttle(Duration.ofMillis(5)))
+            .batchConsumer(throttle(Duration.ofMillis(20)))
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(4)
             .startImmediately(true)
@@ -460,7 +514,7 @@ public class FileCachingInputStreamTest {
                 .build()) {
 
             long count = inputStream.waitForBytesRead(10);
-            log.info("Found {}", count);
+            log.debug("Found {}", count);
             assertThat(count).isGreaterThanOrEqualTo(1);
 
             IOUtils.copy(inputStream, out);
@@ -504,6 +558,7 @@ public class FileCachingInputStreamTest {
                 @Override
                 public int read() throws IOException {
                     if (byteCount == (SIZE_OF_BIG_STREAM / 2)) {
+                        log.info("Breaking now");
                         throw new IOException("breaking!");
                     }
                     return byteCount++ < SIZE_OF_BIG_STREAM ? 'a' : -1;
@@ -604,7 +659,7 @@ public class FileCachingInputStreamTest {
     @SuppressWarnings("UnusedAssignment")
     @Test
     public void performanceBenchmarkAndVerify() throws IOException {
-        log.info("Using seed {}", SEED_FOR_LARGE_RANDOM_FILE);
+        log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
 
@@ -617,20 +672,23 @@ public class FileCachingInputStreamTest {
                 .initialBuffer(0)  // Setting it to > 0, will fail the compare because Random#nextBytes() will sometimes skip values values
                 .outputBuffer(bufferSize)
                 .startImmediately(true)
+                .deleteTempFile(true)
                 .noProgressLogging()
                 .build();
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(fileCachingDestination), bufferSize)
+            FileOutputStream file = new FileOutputStream(fileCachingDestination);
+            OutputStream out = new BufferedOutputStream(file, bufferSize)
         ) {
             Instant now = Instant.now();
-            IOUtils.copyLarge(inputStream, out);
-            assertThat(inputStream.getCount()).isEqualTo(SIZE_OF_HUGE_STREAM);
+            long copied = IOUtils.copyLarge(inputStream, out);
+            assertThat(inputStream.getCount()).withFailMessage("COUNT %d != %d", inputStream.getCount(), SIZE_OF_HUGE_STREAM).isEqualTo(SIZE_OF_HUGE_STREAM);
+            assertThat(copied).withFailMessage("IO COPY %d != %d", copied, SIZE_OF_HUGE_STREAM).isEqualTo(SIZE_OF_HUGE_STREAM);
             log.info("Duration when using file caching input stream: {}, {} bytes", Duration.between(now, Instant.now()), SIZE_OF_HUGE_STREAM);
         }
 
         // check that it arrived correctly
 
         // size
-        assertThat(fileCachingDestination).hasSize(SIZE_OF_HUGE_STREAM);
+        assertThat(fileCachingDestination).withFailMessage("FILE").hasSize(SIZE_OF_HUGE_STREAM);
 
         // and also check contents of produced file
         Random random = new Random(SEED_FOR_LARGE_RANDOM_FILE);
@@ -643,12 +701,17 @@ public class FileCachingInputStreamTest {
             count += read;
             assertThat(buf).startsWith(compare);
         }
+    }
+
+    @Test
+    public void performanceBenchmarkAndVerifyIOUtils() throws IOException {
+        log.info("Using seed {}", SEED);
+        final int bufferSize = 8192;
 
         // compare with a normal implementation using used buffered streams.
         File normalDestination = new File("/tmp/normal.bytes");
         normalDestination.deleteOnExit();
         try (
-
             InputStream inputStream = new BufferedInputStream(randomStream(SIZE_OF_HUGE_STREAM), bufferSize);
             OutputStream out = new BufferedOutputStream(new FileOutputStream(normalDestination), bufferSize)
         ) {
@@ -666,7 +729,6 @@ public class FileCachingInputStreamTest {
     /**
      * Produces a stream of {@code size} random bytes
      */
-
     @SuppressWarnings("SameParameterValue")
     private InputStream randomStream(final int size) {
         final Random random = new Random(SEED_FOR_LARGE_RANDOM_FILE);
@@ -678,7 +740,7 @@ public class FileCachingInputStreamTest {
                 if (count++ > size) {
                     return EOF;
                 } else {
-                    return (byte) random.nextInt();
+                    return random.nextInt();
                 }
             }
             @Override
