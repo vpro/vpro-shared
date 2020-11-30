@@ -2,16 +2,6 @@ package nl.vpro.util;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.*;
-import java.nio.channels.ClosedByInterruptException;
-import java.nio.file.Files;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.*;
@@ -21,6 +11,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
+
+import java.io.*;
+import java.nio.channels.ClosedByInterruptException;
+import java.nio.file.Files;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static nl.vpro.util.FileCachingInputStream.throttle;
 import static org.apache.commons.io.IOUtils.EOF;
@@ -36,13 +38,23 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Slf4j
 @Isolated
 @Execution(SAME_THREAD)
-@TestMethodOrder(MethodOrderer.DisplayName.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 public class FileCachingInputStreamTest {
-    private static final Random RANDOM = new Random();
+    private static final int SEED = new Random().nextInt();
+
+    private static final Random RANDOM = new Random(SEED);
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
     private static final int SIZE_OF_HUGE_STREAM = 1_000_000_000 + RANDOM.nextInt(1_000_000);
+    private static final int SEED_FOR_LARGE_RANDOM_FILE = RANDOM.nextInt();
 
-    private static final int SEED_FOR_LARGE_RANDOM_FILE = -1464881210;//RANDOM.nextInt();
+    static {
+        log.info("SEED {}", SEED);
+        log.info("SIZE OF BIG {}", SIZE_OF_BIG_STREAM);
+        log.info("SIZE OF HUGE {}", SIZE_OF_HUGE_STREAM);
+        log.info("SEED OF LARGE RANDOM {}", SEED_FOR_LARGE_RANDOM_FILE);
+    }
+
+
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static final byte[] MANY_BYTES;
     static {
@@ -170,10 +182,14 @@ public class FileCachingInputStreamTest {
             @Override
             public Object[] next() {
                 Long expectedSize = count % 2 == 0 ? (long) MANY_BYTES.length : null;
+                byte[] bytes = new byte[1500];
+                {
+                    RANDOM.nextBytes(bytes);
+                }
                 if (count++ < slows) {
-                    return new Object[] {new ByteArrayInputStream(MANY_BYTES), expectedSize};
+                    return new Object[] {new ByteArrayInputStream(bytes), expectedSize};
                 } else {
-                    return new Object[] {new SlowInputStream(5), expectedSize};
+                    return new Object[] {new SlowInputStream(5, bytes), expectedSize};
 
                 }
             }
@@ -181,29 +197,31 @@ public class FileCachingInputStreamTest {
     }
 
     static class SlowInputStream extends InputStream {
+        final byte[] bytes;
         final AtomicInteger count = new AtomicInteger(0);
         final int sleep;
 
-        SlowInputStream(int sleep) {
+        SlowInputStream(int sleep, byte[] bytes) {
             this.sleep = sleep;
+            this.bytes = bytes;
         }
 
         @Override
         @SneakyThrows
         public int read() {
             Thread.sleep(sleep);
-            if (count.get() > MANY_BYTES.length) {
+            if (count.get() > bytes.length) {
                 log.info("End of stream at {}", count);
                 return -1;
             } else {
-                int b = Byte.toUnsignedInt(MANY_BYTES[count.getAndIncrement()]);
+                int b = Byte.toUnsignedInt(bytes[count.getAndIncrement()]);
                 assert b != -1;
                 return b;
             }
         }
         @Override
         public String toString() {
-            return "Sleepy input stream of " + MANY_BYTES.length + " bytes";
+            return "Sleepy input stream of " + bytes.length + " bytes";
         }
     }
 
@@ -221,7 +239,7 @@ public class FileCachingInputStreamTest {
                 .outputBuffer(2)
                 .batchSize(3)
                 .batchConsumer((f) -> {
-                    log.info("count consumer {} ", f.getCount());
+                    log.debug("count consumer {} ", f.getCount());
                     if (f.getCount() > 300) {
                         long i = interrupted.getAndIncrement();
                         if (closed.get() > 0) {
@@ -251,7 +269,7 @@ public class FileCachingInputStreamTest {
                 byte[] buffer = new byte[10];
                 while ((r = inputStream.read(buffer)) != -1) {
                     out.write(buffer, 0, r);
-                    log.info("Read {}", r);
+                    log.debug("Read {}", r);
                 }
                 log.info("EOF !, {}", r);
                 throw new AssertionFailedError("should not reach this, it should have been interrupted!");
@@ -642,7 +660,7 @@ public class FileCachingInputStreamTest {
     @SuppressWarnings("UnusedAssignment")
     @Test
     public void performanceBenchmarkAndVerify() throws IOException {
-        log.info("Using seed {}", SEED_FOR_LARGE_RANDOM_FILE);
+        log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
 
@@ -686,7 +704,6 @@ public class FileCachingInputStreamTest {
         File normalDestination = new File("/tmp/normal.bytes");
         normalDestination.deleteOnExit();
         try (
-
             InputStream inputStream = new BufferedInputStream(randomStream(SIZE_OF_HUGE_STREAM), bufferSize);
             OutputStream out = new BufferedOutputStream(new FileOutputStream(normalDestination), bufferSize)
         ) {
@@ -704,7 +721,6 @@ public class FileCachingInputStreamTest {
     /**
      * Produces a stream of {@code size} random bytes
      */
-
     @SuppressWarnings("SameParameterValue")
     private InputStream randomStream(final int size) {
         final Random random = new Random(SEED_FOR_LARGE_RANDOM_FILE);
