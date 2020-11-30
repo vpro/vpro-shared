@@ -9,7 +9,7 @@ import javax.sql.DataSource;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -23,7 +23,7 @@ public class JpaTest {
 
 
     @Test
-    @Ignore("Requires a postgresql instance")
+    @Disabled("Requires a postgresql instance")
     public void testPostgresql() {
         testManager(setupPostgresql());
     }
