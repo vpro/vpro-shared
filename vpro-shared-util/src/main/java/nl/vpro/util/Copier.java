@@ -55,8 +55,8 @@ public class Copier implements Runnable, Closeable {
      * @param output The output stream to copy to (will not be implicetely closed)
      * @param batch
      * @param batchConsumer
-     * @param callback Called when ready
-     * @param errorHandler Called on error
+     * @param callback Called when ready, this should probably close the outputstream
+     * @param errorHandler Called on error, just before callback
      * @param offset
      * @param name
      * @param notify if a batch was handled notify this object
@@ -140,7 +140,7 @@ public class Copier implements Runnable, Closeable {
         }
     }
 
-    /*
+
     private void copyWithIOUtils() throws IOException {
         while(true) {
             long result = IOUtils.copyLarge(input, output, 0, batch);
@@ -153,13 +153,19 @@ public class Copier implements Runnable, Closeable {
             }
         }
     }
-     */
+
 
     private void checkCount(long currentCount) {
-        if (expectedCount != null && expectedCount < currentCount) {
-            log.warn("read unsufficient {} < expected {}", count.get(), expectedCount);
+        if (expectedCount != null) {
+
+            if (currentCount < expectedCount) {
+                log.warn("write unsufficient {} < expected {}", count.get(), expectedCount);
+            } else {
+                log.info("write succeeded {} == {}", count.get(), expectedCount);
+            }
         }
     }
+
     private int[] equalsParts() {
         return equalsParts(batch);
     }
@@ -182,8 +188,8 @@ public class Copier implements Runnable, Closeable {
             ready = true;
         }
         handleError();
-        notifyIfRequested();
         callBack();
+        notifyIfRequested();
     }
 
     public void waitFor() throws InterruptedException {
@@ -259,11 +265,12 @@ public class Copier implements Runnable, Closeable {
      */
     @Override
     public void close() throws IOException {
-        log.debug("close");
+
         if (cancelFutureIfNeeded()) {
             log.debug("Cancelled {}", future);
         }
         input.close();
+        log.debug("closed");
     }
 
     /**
@@ -307,7 +314,7 @@ public class Copier implements Runnable, Closeable {
 
     private void handleError() {
         if (exception != null) {
-             // The copier is ready, but resulted some error, the user requested to be called back, so do that now
+             // The copier is ready, but resulted some error, the user requested to be called back about that, so do that now
             if (errorHandler != null) {
                 try {
                     errorHandler.accept(this, exception);
