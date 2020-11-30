@@ -248,9 +248,8 @@ public class FileCachingInputStreamTest {
                             log.info("{} Interrupting {} {}", f.getCount(), thisThread, i);
                             thisThread.interrupt();
                             // According to javadoc this will either cause an exception or set the interrupted status.
-
                         } else {
-                            log.info("{} Interrupted already {} {}", f.getCount(), thisThread, i);
+                            log.debug("{} Interrupted already {} {}", f.getCount(), thisThread, i);
                         }
                     }
                 })
