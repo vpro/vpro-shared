@@ -188,7 +188,7 @@ public class Copier implements Runnable, Closeable {
             ready = true;
         }
         handleError();
-        callBack();
+        callBack(); // this would close the output stream
         notifyIfRequested();
     }
 
