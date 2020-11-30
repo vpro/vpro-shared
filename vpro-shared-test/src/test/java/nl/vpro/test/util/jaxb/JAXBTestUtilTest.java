@@ -8,7 +8,7 @@ import nl.vpro.test.util.jaxb.test.*;
 import static nl.vpro.test.util.jaxb.JAXBTestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JAXBTestUtilTest {
 
