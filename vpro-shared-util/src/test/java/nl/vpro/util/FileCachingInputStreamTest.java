@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Execution(SAME_THREAD)
 @TestMethodOrder(MethodOrderer.Random.class)
 public class FileCachingInputStreamTest {
-    private static final int SEED = new Random().nextInt();
+    private static final int SEED = -118023437; //new Random().nextInt();
 
     private static final Random RANDOM = new Random(SEED);
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
@@ -659,7 +659,7 @@ public class FileCachingInputStreamTest {
      */
     @SuppressWarnings("UnusedAssignment")
     @Test
-    public void performanceBenchmarkAndVerify() throws IOException {
+    public void performanceBenchmarkAndVerify1() throws IOException {
         log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
@@ -699,6 +699,12 @@ public class FileCachingInputStreamTest {
             count += read;
             assertThat(buf).startsWith(compare);
         }
+    }
+
+    @Test
+    public void performanceBenchmarkAndVerifyComparison() throws IOException {
+        log.info("Using seed {}", SEED);
+        final int bufferSize = 8192;
 
         // compare with a normal implementation using used buffered streams.
         File normalDestination = new File("/tmp/normal.bytes");
@@ -732,7 +738,7 @@ public class FileCachingInputStreamTest {
                 if (count++ > size) {
                     return EOF;
                 } else {
-                    return (byte) random.nextInt();
+                    return random.nextInt();
                 }
             }
             @Override
