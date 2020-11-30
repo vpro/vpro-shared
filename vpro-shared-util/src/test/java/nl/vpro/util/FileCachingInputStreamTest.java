@@ -38,11 +38,21 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Execution(SAME_THREAD)
 @TestMethodOrder(MethodOrderer.Random.class)
 public class FileCachingInputStreamTest {
-    private static final Random RANDOM = new Random();
+    private static final int SEED = new Random().nextInt();
+
+    private static final Random RANDOM = new Random(SEED);
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
     private static final int SIZE_OF_HUGE_STREAM = 1_000_000_000 + RANDOM.nextInt(1_000_000);
-
     private static final int SEED_FOR_LARGE_RANDOM_FILE = RANDOM.nextInt();
+
+    static {
+        log.info("SEED {}", SEED);
+        log.info("SIZE OF BIG {}", SIZE_OF_BIG_STREAM);
+        log.info("SIZE OF HUGE {}", SIZE_OF_HUGE_STREAM);
+        log.info("SEED OF LARGE RANDOM {}", SEED_FOR_LARGE_RANDOM_FILE);
+    }
+
+
     private static final byte[] HELLO = new byte[]{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
     private static final byte[] MANY_BYTES;
     static {
@@ -648,7 +658,7 @@ public class FileCachingInputStreamTest {
     @SuppressWarnings("UnusedAssignment")
     @Test
     public void performanceBenchmarkAndVerify() throws IOException {
-        log.info("Using seed {}", SEED_FOR_LARGE_RANDOM_FILE);
+        log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
 
