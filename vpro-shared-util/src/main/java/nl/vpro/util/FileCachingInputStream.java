@@ -257,9 +257,10 @@ public class FileCachingInputStream extends InputStream {
                     future.completeExceptionally(e)
                 )
                 .callback(c -> {
-                    log.debug("callback for copier");
+                    log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
                     try {
-                        closeAndDecStreams(tempFileOutputStream); // output is now closed
+                        closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
+                        log.debug("{} {}", tempFile, tempFile.toFile().length());
                         consumer.accept(FileCachingInputStream.this);
                         future.complete(this);
 
@@ -316,10 +317,12 @@ public class FileCachingInputStream extends InputStream {
     public int read(byte @NonNull[] b, int off, int len) throws IOException {
         if (tempFileInputStream == null) {
             log.debug("From buffer");
-            return readFromBuffer(b, off, len);
+
+            int result =  readFromBuffer(b, off, len);
+            return result;
         } else {
             int result = readFromFile(b, off, len);
-            log.debug("From file {}", result);
+            log.trace("From file {}", result);
             return result;
         }
     }
@@ -327,8 +330,7 @@ public class FileCachingInputStream extends InputStream {
 
     protected synchronized void closeTempFile() throws IOException {
         if (this.tempFileInputStream != null && ! tempFileInputStreamClosed) {
-            closeAndDecStreams(this.tempFileInputStream);
-
+            closeAndDecStreams("file input", this.tempFileInputStream);
             if (tempFile != null && this.deleteTempFile) {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
@@ -516,7 +518,7 @@ public class FileCachingInputStream extends InputStream {
             result = tempFileInputStream.read(b, offset, length);
 
             while (!copier.isReadyIOException() && result == EOF) {
-                log.debug("Copier {} not yet ready", copier);
+                log.debug("Copier {} {}  {} not yet ready", copier.getCount(), count.get(), result);
                 try {
                     copier.wait(1000);
                 } catch (InterruptedException e) {
@@ -529,13 +531,16 @@ public class FileCachingInputStream extends InputStream {
                     throw new InterruptedIOException(e.getMessage());
                 }
                 result = tempFileInputStream.read(b, offset, length);
-                log.debug("'result {}", result);
+                log.debug("result {}", result);
             }
             if (result == EOF) {
+                log.debug("Copier ready, but found EOF");
                 result = tempFileInputStream.read(b, offset, length);
             }
             if (result != EOF) {
                 count.addAndGet(result);
+            } else {
+                log.debug("EOF {} {}", count.get(), copier.getCount());
             }
         }
         assert result != 0;
@@ -559,9 +564,9 @@ public class FileCachingInputStream extends InputStream {
             log.debug("{} opened {}", openStreams.incrementAndGet(), closable);
         }
     }
-    private void closeAndDecStreams(Closeable closable) throws IOException {
+    private void closeAndDecStreams(String desc, Closeable closable) throws IOException {
         synchronized (openStreams) {
-            log.debug("{} closing {}", openStreams.decrementAndGet(), closable);
+            log.debug("{} closing {} {}", openStreams.decrementAndGet(), desc, closable);
             closable.close();
         }
     }
