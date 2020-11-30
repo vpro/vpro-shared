@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @TestMethodOrder(MethodOrderer.Random.class)
 public class FileCachingInputStreamTest {
     //private static final int SEED = new Random().nextInt();
-    private static final int SEED = -118023437; // gave some troubles
+    private static final int SEED = 535841629; // gave some troubles
 
     private static final Random RANDOM = new Random(SEED);
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
