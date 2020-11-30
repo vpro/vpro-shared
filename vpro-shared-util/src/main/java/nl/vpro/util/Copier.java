@@ -156,7 +156,7 @@ public class Copier implements Runnable, Closeable {
      */
 
     private void checkCount(long currentCount) {
-        if (expectedCount == null || expectedCount < currentCount) {
+        if (expectedCount != null && expectedCount < currentCount) {
             log.warn("read unsufficient {} < expected {}", count.get(), expectedCount);
         }
     }
