@@ -40,7 +40,8 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Execution(SAME_THREAD)
 @TestMethodOrder(MethodOrderer.Random.class)
 public class FileCachingInputStreamTest {
-    private static final int SEED = -118023437; //new Random().nextInt();
+    private static final int SEED = new Random().nextInt();
+    //private static final int SEED = -118023437; // gave some troubles
 
     private static final Random RANDOM = new Random(SEED);
     private static final int SIZE_OF_BIG_STREAM = 10_000 + RANDOM.nextInt(1_000);
@@ -560,6 +561,7 @@ public class FileCachingInputStreamTest {
                 @Override
                 public int read() throws IOException {
                     if (byteCount == (SIZE_OF_BIG_STREAM / 2)) {
+                        log.info("Breaking now");
                         throw new IOException("breaking!");
                     }
                     return byteCount++ < SIZE_OF_BIG_STREAM ? 'a' : -1;
@@ -659,7 +661,7 @@ public class FileCachingInputStreamTest {
      */
     @SuppressWarnings("UnusedAssignment")
     @Test
-    public void performanceBenchmarkAndVerify1() throws IOException {
+    public void performanceBenchmarkAndVerify() throws IOException {
         log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
@@ -670,23 +672,27 @@ public class FileCachingInputStreamTest {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .input(randomStream(SIZE_OF_HUGE_STREAM))
+                .expectedCount((long) SIZE_OF_HUGE_STREAM)
                 .initialBuffer(0)  // Setting it to > 0, will fail the compare because Random#nextBytes() will sometimes skip values values
                 .outputBuffer(bufferSize)
                 .startImmediately(true)
+                .deleteTempFile(true)
                 .noProgressLogging()
                 .build();
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(fileCachingDestination), bufferSize)
+            FileOutputStream file = new FileOutputStream(fileCachingDestination);
+            OutputStream out = new BufferedOutputStream(file, bufferSize)
         ) {
             Instant now = Instant.now();
-            IOUtils.copyLarge(inputStream, out);
-            assertThat(inputStream.getCount()).isEqualTo(SIZE_OF_HUGE_STREAM);
+            long copied = IOUtils.copyLarge(inputStream, out);
+            assertThat(inputStream.getCount()).withFailMessage("COUNT %d != %d", inputStream.getCount(), SIZE_OF_HUGE_STREAM).isEqualTo(SIZE_OF_HUGE_STREAM);
+            assertThat(copied).withFailMessage("IO COPY %d != %d", copied, SIZE_OF_HUGE_STREAM).isEqualTo(SIZE_OF_HUGE_STREAM);
             log.info("Duration when using file caching input stream: {}, {} bytes", Duration.between(now, Instant.now()), SIZE_OF_HUGE_STREAM);
         }
 
         // check that it arrived correctly
 
         // size
-        assertThat(fileCachingDestination).hasSize(SIZE_OF_HUGE_STREAM);
+        assertThat(fileCachingDestination).withFailMessage("FILE").hasSize(SIZE_OF_HUGE_STREAM);
 
         // and also check contents of produced file
         Random random = new Random(SEED_FOR_LARGE_RANDOM_FILE);
@@ -702,7 +708,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void performanceBenchmarkAndVerifyComparison() throws IOException {
+    public void performanceBenchmarkAndVerifyIOUtils() throws IOException {
         log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
