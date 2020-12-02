@@ -13,9 +13,9 @@ import nl.vpro.util.TimeUtils;
  * @since 2.19
  */
 public class StringToInstantConverter implements Converter<String, Instant> {
+
     @Override
     public Instant convert(@NonNull String s) {
         return TimeUtils.parse(s).orElseThrow(() -> new IllegalArgumentException("Cannot parse " + s));
-
     }
 }

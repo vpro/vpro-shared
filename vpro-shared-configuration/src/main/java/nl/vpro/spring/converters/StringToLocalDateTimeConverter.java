@@ -13,6 +13,7 @@ import nl.vpro.util.TimeUtils;
  * @since 2.19
  */
 public class StringToLocalDateTimeConverter implements Converter<String, LocalDateTime> {
+
     @Override
     public LocalDateTime convert(@NonNull String s) {
         return TimeUtils.parseLocalDateTime(s).orElseThrow(() -> new IllegalArgumentException("Cannot parse " + s));

@@ -13,9 +13,9 @@ import nl.vpro.util.TimeUtils;
  * @since 2.13
  */
 public class StringToTemporalAmountConverter implements Converter<String, TemporalAmount> {
+
     @Override
     public TemporalAmount convert(@NonNull String s) {
         return TimeUtils.parseTemporalAmount(s).orElseThrow(() -> new IllegalArgumentException("Cannot convert to temporal amount " + s));
-
     }
 }

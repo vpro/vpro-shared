@@ -62,6 +62,7 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
             }
         }
     }
+
     private void addRange(int start, int end, IntConsumer consumer) {
         for (int j = start; j <= end; j++) {
             consumer.accept(j);
@@ -77,6 +78,5 @@ public class StringToIntegerListConverter implements ConditionalConverter, Conve
             return ((ParameterizedType) targetType.getResolvableType().getType()).getActualTypeArguments()[0].equals(Integer.class);
         }
         return false;
-
     }
 }

@@ -13,9 +13,9 @@ import nl.vpro.util.TimeUtils;
  * @since 2.13
  */
 public class StringToLocalTimeConverter implements Converter<String, LocalTime> {
+
     @Override
     public LocalTime convert(@NonNull String s) {
         return TimeUtils.parseLocalTime(s);
-
     }
 }
