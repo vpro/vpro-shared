@@ -405,7 +405,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         // Why is connectionInPoolTTL the criterion to check?
         if (connectionInPoolTTL != null) {
             connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
-            connectionManager.setValidateAfterInactivity((int) validateAfterInactivity.toMillis());
+            if (validateAfterInactivity != null) {
+                connectionManager.setValidateAfterInactivity((int) validateAfterInactivity.toMillis());
+            }
 
             if (maxConnections > 0) {
                 connectionManager.setMaxTotal(maxConnections);
