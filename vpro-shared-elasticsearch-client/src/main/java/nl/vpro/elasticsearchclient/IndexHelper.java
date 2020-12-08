@@ -1431,10 +1431,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public Consumer<ObjectNode> bulkLogger(Logger logger, Supplier<Level> singleLevel, Supplier<Level> combinedLevel) {
         return jsonNode -> {
-            ArrayNode items = jsonNode.withArray("items");
+            final ArrayNode items = jsonNode.withArray("items");
             String index = null;
-            List<String> deleted = new ArrayList<>();
-            List<String> indexed = new ArrayList<>();
+            final List<String> deleted = new ArrayList<>();
+            final List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
                 Slf4jHelper.log(logger, singleLevel.get(), "{}", on);
