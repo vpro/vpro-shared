@@ -38,6 +38,7 @@ import nl.vpro.util.Version;
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
+import static nl.vpro.logging.Slf4jHelper.log;
 
 /**
  * Some tools to automaticly create indices and put mappings and stuff.
@@ -56,6 +57,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public static final String SEARCH = "/_search";
     public static final String DELETE_BY_QUERY = "/_delete_by_query";
+    public static final String UPDATE_BY_QUERY = "/_update_by_query";
     public static final String COUNT = "/_count";
     public static final String SETTINGS = "/_settings";
     public static final String MAPPING= "/_mapping";
@@ -510,6 +512,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode deleteByQuery(ObjectNode request) {
         return post(getIndexName() + DELETE_BY_QUERY, request);
+    }
+
+    public ObjectNode updateByQuery(ObjectNode request) {
+        return post(getIndexName() + UPDATE_BY_QUERY, request);
     }
 
     /**
@@ -1428,8 +1434,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return bulkLogger(logger, () -> Level.INFO, () ->  Level.INFO);
     }
 
-
     public Consumer<ObjectNode> bulkLogger(Logger logger, Supplier<Level> singleLevel, Supplier<Level> combinedLevel) {
+        return bulkLogger(logger, singleLevel, combinedLevel, true);
+    }
+
+    public Consumer<ObjectNode> bulkLogger(Logger logger, Supplier<Level> singleLevel, Supplier<Level> combinedLevel, boolean singleVerbose) {
         return jsonNode -> {
             final ArrayNode items = jsonNode.withArray("items");
             String index = null;
@@ -1437,14 +1446,20 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             final List<String> indexed = new ArrayList<>();
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
-                Slf4jHelper.log(logger, singleLevel.get(), "{}", on);
+                if (singleVerbose) {
+                    log(logger, singleLevel.get(), "{}", on);
+                }
                 if (on.has(DELETE)) {
                     ObjectNode delete = on.with(DELETE);
                     index = delete.get(Fields.INDEX).textValue();
                     String type = delete.get(Fields.TYPE).textValue();
                     String id = delete.get(Fields.ID).textValue();
                     String result = delete.get("result").textValue();
-                    deleted.add(type+ ":" + id + ":" + result);
+                    String logEntry = logEntry(type, id, result);
+                    deleted.add(logEntry);
+                    if (! singleVerbose) {
+                        log(logger, singleLevel.get(), "delete:{}", logEntry);
+                    }
                     continue;
                 }
                 if (n.has(INDEX)) {
@@ -1453,7 +1468,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
                     String result = indexResponse.get("result").textValue();
-                    indexed.add(type + ":" + id + ":" + result);
+                    String logEntry = logEntry(type, id, result);
+                    indexed.add(logEntry);
+                    if (! singleVerbose) {
+                        log(logger, singleLevel.get(), "indexed:{}", logEntry);
+                    }
                     continue;
                 }
                 if (n.has(UPDATE)) {
@@ -1462,24 +1481,39 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
                     String result = indexResponse.get("result").textValue();
-                    indexed.add(type + ":" + id + ":" + result);
+                    String logEntry = logEntry(type, id, result);
+                    indexed.add(logEntry);
+                    if (! singleVerbose) {
+                        log(logger, singleLevel.get(), "updated:{}", logEntry);
+                    }
                     continue;
                 }
                 logger.warn("Unrecognized bulk response {}", n);
 
             }
-            if (! indexed.isEmpty()) {
-                if (! deleted.isEmpty()) {
-                    Slf4jHelper.log(logger, combinedLevel.get(), "{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
+
+            if (Slf4jHelper.isEnabled(logger, combinedLevel.get())) {
+                if (!indexed.isEmpty()) {
+                    if (!deleted.isEmpty()) {
+                        log(logger, combinedLevel.get(), "{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
+                    } else {
+                        log(logger, combinedLevel.get(), "{} {} indexed: {}", clientFactory.logString(), index, indexed);
+                    }
+                } else if (!deleted.isEmpty()) {
+                    log(logger, combinedLevel.get(), "{} {} revoked: {}", clientFactory.logString(), index, deleted);
                 } else {
-                    Slf4jHelper.log(logger, combinedLevel.get(), "{} {} indexed: {}", clientFactory.logString(), index, indexed);
+                    log(logger, combinedLevel.get(), "{} {} bulk request didn't yield result", clientFactory.logString(), index);
                 }
-            } else if (! deleted.isEmpty()) {
-                Slf4jHelper.log(logger, combinedLevel.get(), "{} {} revoked: {}", clientFactory.logString(), index,  deleted);
-            } else {
-                Slf4jHelper.log(logger, combinedLevel.get(), "{} {} bulk request didn't yield result", clientFactory.logString(), index);
             }
         };
+    }
+
+    private String logEntry(String type, String id, String result){
+        if (DOC.equals(type)) {
+            return id + ":" + result;
+        } else {
+            return type + ":" + id + ":" + result;
+        }
     }
 
     public void setWriteJsonDir(File file) {

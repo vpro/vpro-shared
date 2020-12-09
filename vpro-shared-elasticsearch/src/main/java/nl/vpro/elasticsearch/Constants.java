@@ -32,6 +32,7 @@ public class Constants {
     public static final String SCROLL = "scroll";
 
     public static final String QUERY = "query";
+    public static final String SCRIPT= "script";
     public static final String VERSION = "version";
     public static final String SORT = "sort";
     public static final String ORDER = "order";
