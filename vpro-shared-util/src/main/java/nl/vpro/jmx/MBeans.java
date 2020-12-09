@@ -293,12 +293,13 @@ public class MBeans {
     /**
      * @since 2.10
      */
-    public static synchronized void registerBean(ObjectName name, Object object) {
+    @SuppressWarnings("unchecked")
+    public static synchronized <T> void registerBean(ObjectName name, T object) {
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             unregister(name);
             try {
-                Class<Object> mxBean = (Class<Object>) Class.forName(object.getClass().getName() + "MXBean");
+                Class<T> mxBean = (Class<T>) Class.forName(object.getClass().getName() + "MXBean");
                 mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
                 return;
             } catch (ClassNotFoundException classNotFoundException) {
