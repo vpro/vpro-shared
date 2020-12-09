@@ -171,7 +171,11 @@ public class URLResource<T> {
     }
 
     void getCachedResource(String resource) {
-        T newResult = reader.apply(getClass().getClassLoader().getResourceAsStream(resource));
+        InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resource);
+        if (resourceAsStream == null) {
+            throw new IllegalArgumentException("No resource " + resource);
+        }
+        T newResult = reader.apply(resourceAsStream);
         if (newResult != null) {
             lastLoad = Instant.now();
             lastTry = lastLoad;

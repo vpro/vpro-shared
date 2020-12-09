@@ -302,7 +302,7 @@ public class MBeans {
                 mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
                 return;
             } catch (ClassNotFoundException classNotFoundException) {
-                log.warn(classNotFoundException.getMessage(), classNotFoundException);
+                log.info("interface not found: {} (vpro.jmx annotations not supported)", classNotFoundException.getMessage());
             }
             mbs.registerMBean(object, name);
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
