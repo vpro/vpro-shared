@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.*;
@@ -403,7 +404,17 @@ public class ReflectionUtils {
             try {
                 return Enum.valueOf((Class<? extends Enum>) parameterClass, o);
             } catch (IllegalArgumentException iae) {
-                return Enum.valueOf((Class<? extends Enum>) parameterClass, o.toUpperCase());
+                try {
+                    return Enum.valueOf((Class<? extends Enum>) parameterClass, o.toUpperCase());
+                } catch (IllegalArgumentException iae2) {
+                    try {
+                        Method valueOfXml = parameterClass.getDeclaredMethod("valueOfXml", String.class);
+                        valueOfXml.setAccessible(true);
+                        return valueOfXml.invoke(null, o);
+                    } catch (NoSuchMethodException nsme) {
+                        throw iae2;
+                    }
+                }
             }
         } else if (parameterClass.isAssignableFrom(Locale.class)) {
             return LocaleUtils.toLocale(o);
