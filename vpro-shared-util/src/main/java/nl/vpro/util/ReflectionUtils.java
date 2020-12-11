@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.*;
@@ -411,7 +410,7 @@ public class ReflectionUtils {
                         Method valueOfXml = parameterClass.getDeclaredMethod("valueOfXml", String.class);
                         valueOfXml.setAccessible(true);
                         return valueOfXml.invoke(null, o);
-                    } catch (NoSuchMethodException nsme) {
+                    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException nsme) {
                         throw iae2;
                     }
                 }
