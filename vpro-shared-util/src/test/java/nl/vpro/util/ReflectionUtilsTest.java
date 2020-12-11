@@ -16,8 +16,20 @@ public class ReflectionUtilsTest {
 
     public enum AnEnum {
         X,Y,Z
-
     }
+
+
+    public enum AnEnumWithXmlValue {
+        X,Y,Z;
+
+        private static AnEnumWithXmlValue valueOfXml(String a) {
+            if (a.equals("q")) {
+                return X;
+            }
+            return valueOf(a);
+        }
+    }
+
     @Getter @Setter
     public static class Base {
         private String  a = "A";
@@ -31,13 +43,14 @@ public class ReflectionUtilsTest {
         protected Base() {
 
         }
-
     }
 
     @Getter @Setter
     public static class A extends Base {
         private Integer b;
         private AnEnum  e;
+        private AnEnumWithXmlValue  f;
+
 
 
         public A() {
@@ -59,23 +72,23 @@ public class ReflectionUtilsTest {
 
 
     public static class AWithBuilder extends Base{
-        private Integer b;
-        private AnEnum  e;
+        private final Integer b;
+        private final AnEnum  e;
 
         @lombok.Builder(builderClassName = "Builder")
         public AWithBuilder(String a, Integer b, AnEnum e, List<String> list) {
             super(a, list);
             this.b = b;
             this.e = e;
-
         }
     }
 
-    public static Map<String, String> properties = new HashMap<>();
+    public static final Map<String, String> properties = new HashMap<>();
     static {
         properties.put("a", "B");
         properties.put("b", "3");
         properties.put("e", "y");
+        properties.put("f", "q");
         properties.put("list", "foo,bar");
 
 
@@ -87,7 +100,6 @@ public class ReflectionUtilsTest {
         ReflectionUtils.configureIfNull(a, properties);
         assertThat(a.a).isEqualTo("A");
         assertThat(a.b).isEqualTo(3);
-
     }
 
 
@@ -97,7 +109,6 @@ public class ReflectionUtilsTest {
         ReflectionUtils.configured(a, properties);
         assertThat(a.a).isEqualTo("B");
         assertThat(a.b).isEqualTo(3);
-
     }
 
     @Test
@@ -107,7 +118,7 @@ public class ReflectionUtilsTest {
         assertThat(a.getA()).isEqualTo("B");
         assertThat(a.b).isEqualTo(3);
         assertThat(a.e).isEqualTo(AnEnum.Y);
-
+        assertThat(a.f).isEqualTo(AnEnumWithXmlValue.X);
 
     }
 
@@ -122,8 +133,8 @@ public class ReflectionUtilsTest {
         assertThat(a.getA()).isEqualTo("A");
         assertThat(a.b).isEqualTo(3);
         assertThat(a.e).isEqualTo(AnEnum.Y);
-
     }
+
     @Test
     public void testConfigureBuilder() {
         AWithBuilder.Builder builder = AWithBuilder
@@ -153,7 +164,6 @@ public class ReflectionUtilsTest {
         assertThat(a.b).isEqualTo(3);
         assertThat(a.e).isEqualTo(AnEnum.Y);
         assertThat(a.getList()).containsExactly("foo", "bar");
-
     }
 
 }
