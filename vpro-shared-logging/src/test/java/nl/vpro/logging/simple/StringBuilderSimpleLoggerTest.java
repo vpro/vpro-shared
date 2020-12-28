@@ -1,5 +1,8 @@
 package nl.vpro.logging.simple;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,6 +19,16 @@ public class StringBuilderSimpleLoggerTest {
         logger.info("x:{}", "y", new Exception());
         assertThat(logger.getStringBuilder().toString()).startsWith("INFO x:y\n" +
             "java.lang.Exception");
+    }
+
+    @Test
+    public void test2() {
+        StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
+        Map<String, Object> map = new HashMap<>();
+        map.put("foo", 1);
+        logger.info("map:{}", map);
+
+        assertThat(logger.getStringBuilder().toString()).startsWith("INFO map:{foo=1}");
     }
 
 
