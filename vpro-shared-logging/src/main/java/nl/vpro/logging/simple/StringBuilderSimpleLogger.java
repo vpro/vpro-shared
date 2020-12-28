@@ -35,7 +35,6 @@ public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger
     @Override
     int getLength() {
         return stringBuilder.length();
-
     }
 
     @Override
@@ -62,13 +61,9 @@ public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger
         }
     }
 
-
-
-
     @Override
     public String get() {
         return stringBuilder.toString();
-
     }
 
     @Override
@@ -84,7 +79,6 @@ public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger
         public StringSupplierSimpleLogger chain(SimpleLogger... logger) {
             return build().chain(logger);
         }
-
     }
 
 }

@@ -63,7 +63,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new Slf4jSimpleLogger(log);
     }
 
-
     static SimpleLogger nop() {
         return new NOPLogger();
     }
@@ -72,7 +71,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new JULSimpleLogger(log);
     }
 
-
     static SimpleLogger log4j(org.apache.log4j.Logger  log) {
         return new Log4jSimpleLogger(log);
     }
@@ -80,10 +78,10 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     default String getName() {
         return getClass().getSimpleName();
     }
+
     default void trace(String format, Object... arg) {
         log(Level.TRACE, format, arg);
     }
-
 
     default void debug(String format, Object... arg) {
         log(Level.DEBUG, format, arg);
@@ -95,17 +93,15 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
 
     default void warn(String format, Object... arg) {
         log(Level.WARN, format, arg);
-
     }
 
     default void error(String format, Object... arg) {
         log(Level.ERROR, format, arg);
     }
 
-     default void trace(CharSequence message) {
+    default void trace(CharSequence message) {
         log(Level.TRACE, message);
     }
-
 
     default void debug(CharSequence message) {
         log(Level.DEBUG, message);
@@ -117,7 +113,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
 
     default void warn(CharSequence message) {
         log(Level.WARN, message);
-
     }
 
     default void error(CharSequence message) {
@@ -127,7 +122,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     default void log(Level level, CharSequence message) {
         accept(level, message);
     }
-
 
     default void log(Level level, String format, Object... arg) {
         if (isEnabled(level)) {
@@ -181,7 +175,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         array[0] = this;
         System.arraycopy(logger, 0, array, 1, logger.length);
         return new ChainedSimpleLogger(array);
-
     }
 
 
@@ -192,9 +185,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             array[i] = SimpleLogger.slfj4(logger[i - 1]);
         }
         return new ChainedSimpleLogger(array);
-
     }
-
-
 
 }
