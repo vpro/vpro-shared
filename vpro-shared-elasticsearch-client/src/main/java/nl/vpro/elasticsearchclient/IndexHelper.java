@@ -51,6 +51,7 @@ import static nl.vpro.logging.Slf4jHelper.log;
  * @author Michiel Meeuwissen
  * @since 0.24
  */
+@SuppressWarnings("UnusedReturnValue")
 @Getter
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
@@ -549,11 +550,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-    public ObjectNode post(String path, ObjectNode request) {
+    @SafeVarargs
+    public final ObjectNode post(String path, ObjectNode request, Consumer<Request>... consumers) {
         try {
 
             Request req = new Request(POST, path);
             req.setEntity(entity(request));
+            for (Consumer<Request> c : consumers) {
+                c.accept(req);
+            }
             log.info("Posting to {}", path);
             return read(client().performRequest(req));
         } catch (IOException e) {
@@ -561,6 +566,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             throw new RuntimeException(e);
         }
     }
+
 
 
     public static HttpEntity entity(JsonNode node) {
@@ -633,6 +639,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode index(String id, Object o) {
         return post(indexPath(id), objectMapper.valueToTree(o));
+    }
+
+    public ObjectNode indexWithRouting(String id, Object o, String routing) {
+        return post(indexPath(id), objectMapper.valueToTree(o), req -> req.addParameter(ROUTING, routing));
     }
 
     /**

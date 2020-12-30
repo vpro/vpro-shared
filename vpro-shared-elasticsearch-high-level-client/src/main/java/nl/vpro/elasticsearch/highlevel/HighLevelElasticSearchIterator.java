@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 import org.elasticsearch.client.RestClient;
@@ -25,7 +26,7 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
 
     private SearchSourceBuilder searchSourceBuilder;
 
-    @lombok.Builder(builderClassName = "Builder", builderMethodName = "highLevelBuilder")
+    @lombok.Builder(builderClassName = "HighLevelBuilder", builderMethodName = "highLevelBuilder")
     @lombok.SneakyThrows
     protected HighLevelElasticSearchIterator(
         @lombok.NonNull RestClient client,
@@ -35,10 +36,21 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
         Boolean jsonRequests,
         Boolean requestVersion,
         String beanName,
-        WindowedEventRate rateMeasurerer
-
+        WindowedEventRate rateMeasurerer,
+        List<String> routingIds
     ) {
-        super(client, adapt, adaptTo, scrollContext, null, false, jsonRequests, requestVersion, beanName, rateMeasurerer);
+        super(
+            client,
+            adapt,
+            adaptTo,
+            scrollContext,
+            null,
+            false,
+            jsonRequests,
+            requestVersion,
+            beanName,
+            rateMeasurerer,
+            routingIds);
     }
 
     public SearchSourceBuilder prepareSearchSource(String... indices)  {
@@ -57,6 +69,12 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
             request = jsonNode;
         }
         return super.firstBatch();
+    }
+
+    public static class HighLevelBuilder<T> extends ElasticSearchIterator.AbstractBuilder<T, HighLevelBuilder<T>> {
+        public HighLevelBuilder() {
+
+        }
     }
 
 

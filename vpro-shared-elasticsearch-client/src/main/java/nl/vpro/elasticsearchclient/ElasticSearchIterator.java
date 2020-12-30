@@ -36,6 +36,7 @@ import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
+import static nl.vpro.elasticsearchclient.IndexHelper.POST;
 
 /**
  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
@@ -60,6 +61,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private static long instances = 0;
 
+    @Getter
     private final long instance = instances++;
 
     private static final Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
@@ -115,7 +117,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null);
     }
 
 
@@ -131,8 +133,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         Boolean jsonRequests,
         Boolean requestVersion,
         String beanName,
-        WindowedEventRate rateMeasurerer
-
+        WindowedEventRate rateMeasurerer,
+        List<String> routingIds
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
@@ -171,6 +173,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 .bucketCount(5)
                 .bucketDuration(Duration.ofMinutes(1))
                 .build() : rateMeasurerer;
+
+        this.routing = routingIds;
     }
 
 
@@ -347,12 +351,12 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 }
                 builder.append("/_search");
                 start = Instant.now();
-                Request post = new Request("POST", builder.toString());
+                Request post = new Request(POST, builder.toString());
                 post.setEntity(entity);
                 post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                 post.addParameter(VERSION, String.valueOf(this.requestVersion));
-                if (routing != null) {
-                    post.addParameter("routing", String.join(",", routing));
+                if (routing != null && routing.size() > 0) {
+                    post.addParameter(ROUTING, String.join(",", routing));
                 }
 
                 HttpEntity responseEntity = null;
@@ -413,11 +417,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
                     scrollRequest.put(SCROLL_ID, scrollId);
 
-                    post = new Request("POST", "/_search/scroll");
+                    post = new Request(POST, "/_search/scroll");
                     post.setJsonEntity(scrollRequest.toString());
 
                 } else {
-                    post = new Request("POST", "/_search/scroll");
+                    post = new Request(POST, "/_search/scroll");
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                     post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                 }
@@ -564,12 +568,34 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     }
 
 
-    public static class Builder<T> {
+    protected static abstract class AbstractBuilder<T, SELF extends AbstractBuilder<T, SELF>> {
+
+        protected List<String> routingList;
+        public AbstractBuilder() {
+        }
+
+        protected SELF self() {
+            return (SELF) this;
+        }
+
+        public SELF routing(String routing) {
+            if (routingList == null) {
+                routingList = new ArrayList<>();
+            }
+            routingList.add(routing);
+            return routingIds(routingList);
+        }
+        public abstract SELF routingIds(List<String> routingIds);
+    }
+
+    public static class Builder<T> extends AbstractBuilder<T, Builder<T>> {
+
+
 
         public Builder<T> autoEsVersion() {
             return _autoEsVersion(true);
         }
-        public Builder<T> elasticsearch(int i) {
+        public Builder<T>  elasticsearch(int i) {
             return esVersion(Version.of(i));
         }
     }

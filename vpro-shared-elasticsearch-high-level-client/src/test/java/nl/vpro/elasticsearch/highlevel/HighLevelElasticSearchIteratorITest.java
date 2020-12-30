@@ -44,7 +44,7 @@ class HighLevelElasticSearchIteratorITest {
         String[] titles = {"foo", "bar"};
         for (int i = 0; i < 100; i++) {
             A a = new A(titles[i % titles.length], i);
-            helper.index(a.id, a);
+            helper.indexWithRouting(a.id, a, "a");
         }
         helper.refresh();
     }
@@ -87,6 +87,7 @@ class HighLevelElasticSearchIteratorITest {
         try (HighLevelElasticSearchIterator<A> iterator = HighLevelElasticSearchIterator.<A>highLevelBuilder()
             .client(highLevelClientFactory.client(HighLevelElasticSearchIterator.class))
             .adaptTo(A.class)
+            .routing("a")
             .build()) {
             SearchSourceBuilder sourceBuilder = iterator.prepareSearchSource(helper.getIndexName());
 
