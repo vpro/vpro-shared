@@ -654,7 +654,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public ObjectNode indexWithRouting(String id, Object o, String routing) {
-        return post(indexPath(id), objectMapper.valueToTree(o), req -> req.addParameter(ROUTING, routing));
+        if (o instanceof byte[]) {
+            return postEntity(indexPath(id), entity((byte[]) o), req -> req.addParameter(ROUTING, routing));
+        } else {
+            return post(indexPath(id), objectMapper.valueToTree(o), req -> req.addParameter(ROUTING, routing));
+        }
     }
 
     /**
