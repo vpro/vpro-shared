@@ -12,7 +12,7 @@
 
   <properties>
     <elasticsearch.version>7.10.1</elasticsearch.version>
-    <lucene.elasticsearch.version>8.5.1</lucene.elasticsearch.version>
+    <lucene.elasticsearch.version>8.7.0</lucene.elasticsearch.version>
   </properties>
 
   <dependencies>
@@ -44,7 +44,7 @@
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>elasticsearch-rest-high-level-client</artifactId>
-      <version>${elasticsearch.version}</version>
+      <version>${elasticsearch7.version}</version>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -552,10 +553,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @SafeVarargs
     public final ObjectNode post(String path, ObjectNode request, Consumer<Request>... consumers) {
+        return postEntity(path, entity(request), consumers);
+    }
+
+    @SafeVarargs
+    public final ObjectNode postEntity(String path, HttpEntity entity, Consumer<Request>... consumers) {
         try {
 
             Request req = new Request(POST, path);
-            req.setEntity(entity(request));
+            req.setEntity(entity);
             for (Consumer<Request> c : consumers) {
                 c.accept(req);
             }
@@ -567,10 +573,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-
-
     public static HttpEntity entity(JsonNode node) {
         return new NStringEntity(saveToString(node), ContentType.APPLICATION_JSON);
+    }
+
+    public static HttpEntity entity(byte[] json) {
+        return new NByteArrayEntity(json, ContentType.APPLICATION_JSON);
     }
 
 
@@ -638,7 +646,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public ObjectNode index(String id, Object o) {
-        return post(indexPath(id), objectMapper.valueToTree(o));
+        if (o instanceof byte[]) {
+            return postEntity(indexPath(id), entity((byte[]) o));
+        } else {
+            return post(indexPath(id), objectMapper.valueToTree(o));
+        }
     }
 
     public ObjectNode indexWithRouting(String id, Object o, String routing) {
@@ -697,12 +709,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
-    protected String indexPath(String type, String id, @Nullable  String parent) {
+    protected String indexPath(@NonNull String type, @Nullable String id, @Nullable  String parent) {
         return _indexPath(type, id, parent);
     }
 
-    protected String _indexPath(String type, String id, String parent) {
-        String path = getIndexName() + "/" + type + "/" + encode(id);
+    protected String _indexPath(String type, @Nullable String id, @Nullable String parent) {
+        String path = getIndexName() + "/" + type + (id == null ? "" : ("/" + encode(id)));
         if (parent != null) {
             path += "?parent=" + parent;
         }
@@ -989,7 +1001,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-    String encode(String id) {
+    String encode(@NonNull String id) {
         try {
             return URLEncoder.encode(id, "UTF-8");
         } catch (UnsupportedEncodingException e) {

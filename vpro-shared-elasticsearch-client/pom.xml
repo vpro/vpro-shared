@@ -14,15 +14,13 @@
     Uses low level ES client, to avoid all lucene dependencies.
   </description>
 
-  <properties>
-    <elasticsearch.version>7.9.3</elasticsearch.version>
-  </properties>
+
 
   <dependencies>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>elasticsearch-rest-client</artifactId>
-      <version>${elasticsearch.version}</version>
+      <version>${elasticsearch7.version}</version>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>

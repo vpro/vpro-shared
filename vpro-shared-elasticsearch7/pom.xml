@@ -11,10 +11,7 @@
   <artifactId>vpro-shared-elasticsearch7</artifactId>
   <description>Utilities using elastic search native transport client</description>
 
-  <properties>
-    <elasticsearch.version>7.8.0</elasticsearch.version><!-- tied to server version -->
-    <lucene.elasticsearch.version>8.5.1</lucene.elasticsearch.version>
-  </properties>
+
 
   <dependencies>
     <dependency>
@@ -45,17 +42,12 @@
     <dependency>
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
-      <version>${elasticsearch.version}</version>
+      <version>${elasticsearch7.version}</version>
     </dependency>
-   <!-- <dependency>
-      <groupId>org.elasticsearch.plugin</groupId>
-      <artifactId>transport-netty4-client</artifactId>
-      <version>${elasticsearch.version}</version>
-    </dependency>-->
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>transport</artifactId>
-      <version>${elasticsearch.version}</version>
+      <version>${elasticsearch7.version}</version>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
