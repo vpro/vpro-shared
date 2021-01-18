@@ -42,28 +42,20 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private String     clusterName;
     private HttpHost[] hosts;
-
     private String     basicUser;
     private String     basicPassword;
-
-
     private Duration socketTimeout = Duration.ofSeconds(60);
     private Duration connectionTimeout = Duration.ofSeconds(5);
     private Duration connectTimeout = Duration.ofSeconds(5);
     private Duration maxRetryTimeout = Duration.ofSeconds(60);
-
-
     private RestClientBuilder clientBuilder;
-
     private RestClient client;
+    private boolean registerMBean = true;
+    private List<RestClientBuilder.HttpClientConfigCallback> clientConfigCallbacks;
 
     private final Map<String, CompletableFuture<RestClient>> clients = new ConcurrentHashMap<>();
-
     private final int instance = instances++;
 
-    private boolean registerMBean = true;
-
-    private List<RestClientBuilder.HttpClientConfigCallback> clientConfigCallbacks;
 
     @PostConstruct
     @SneakyThrows
@@ -74,7 +66,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             MBeans.registerBean(this, name);
         }
     }
-
 
     @Override
     public String invalidate() {
@@ -87,7 +78,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     @Override
     public String getClients() {
         return clients.entrySet().toString();
-
     }
 
     @Override
@@ -96,17 +86,14 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         if (logName == null) {
             logName = "NULL";
         }
-        SimpleLogger l = SimpleLogger.slfj4(LoggerFactory.getLogger(logName));
-
+        final SimpleLogger l = SimpleLogger.slfj4(LoggerFactory.getLogger(logName));
         CompletableFuture<RestClient> future = clients.computeIfAbsent(logName, (ln) -> {
             CompletableFuture<RestClient> result = createAndCheckClient(l);
             result.thenAccept(callback);
             return result;
         });
         return future;
-
     }
-
 
     private CompletableFuture<RestClient> createAndCheckClient(SimpleLogger l) {
         if (createClientIfNeeded()) {
@@ -133,7 +120,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         }
     }
 
-    private boolean createClientBuilderIfNeeded() {
+    private synchronized boolean createClientBuilderIfNeeded() {
         if (clientBuilder == null) {
             HttpHost[] hosts = getHttpHosts();
             clientBuilder = RestClient
@@ -162,13 +149,14 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         }
     }
 
-
     private boolean createClientIfNeeded() {
         if (client == null) {
-            createClientBuilderIfNeeded();
-            client =  clientBuilder.build();
-            log.info("Created {}", client);
-            return true;
+            synchronized (this) {
+                createClientBuilderIfNeeded();
+                client = clientBuilder.build();
+                log.info("Created {}", client);
+                return true;
+            }
         } else {
             return false;
         }
@@ -177,7 +165,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     public void setHttpHosts(HttpHost... hosts) {
         this.hosts = hosts;
     }
-
 
     protected HttpHost[] getHttpHosts() {
         return hosts;
@@ -200,7 +187,6 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             log.info("No http hosts configured, defaulting to {}", Arrays.asList(httpHosts));
         }
         this.hosts = httpHosts;
-
     }
 
     @Override
@@ -274,12 +260,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         };
     }
 
-
-
     @Override
     public void close() {
         shutdown();
     }
-
-
 }

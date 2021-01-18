@@ -219,7 +219,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         try {
             return clientAsync((c) -> {
                 if (countAfterCreate) {
-                    log.info("Index {}: {} entries: {}", getIndexName(), count(), c);
+                    log.info("Index {}: entries: {}", getIndexName(), count(c));
                 } else {
                     log.info("Index {}: {}", getIndexName(), c);
                 }
@@ -347,7 +347,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
-        log.info("{}", response);
+        log.info("settings: {}", response);
     }
 
     public void reputSettings(boolean forReindex) {
@@ -372,9 +372,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
-        log.info("{}", response);
-
-
+        log.info("mappings: {}", response);
     }
 
     /**
@@ -387,7 +385,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         ObjectNode index = settings.with("settings").with("index");
         index.put("refresh_interval", -1);
         index.put("number_of_replicas", 0);
-
     }
 
 
@@ -1219,12 +1216,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @Override
     @SneakyThrows
     public long count() {
+        return count(client());
+    }
+
+    @SneakyThrows
+    protected long count(RestClient client) {
         Request get = createGet(COUNT);
-        Response response = client()
-            .performRequest(get);
+        Response response = client.performRequest(get);
         JsonNode result = read(response);
         return result.get("count").longValue();
     }
+
 
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
