@@ -1480,8 +1480,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     index = delete.get(Fields.INDEX).textValue();
                     String type = delete.get(Fields.TYPE).textValue();
                     String id = delete.get(Fields.ID).textValue();
-                    String result = delete.get("result").textValue();
-                    String logEntry = logEntry(type, id, result);
+                    String logEntry = handleResponse(delete, type, id);
                     deleted.add(logEntry);
                     if (! singleVerbose) {
                         log(logger, singleLevel.get(), "delete:{}", logEntry);
@@ -1493,8 +1492,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     index = indexResponse.get(Fields.INDEX).textValue();
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
-                    String result = indexResponse.get("result").textValue();
-                    String logEntry = logEntry(type, id, result);
+                    String logEntry = handleResponse(indexResponse, type, id);
                     indexed.add(logEntry);
                     if (! singleVerbose) {
                         log(logger, singleLevel.get(), "indexed:{}", logEntry);
@@ -1506,8 +1504,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     index = indexResponse.get(Fields.INDEX).textValue();
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
-                    String result = indexResponse.get("result").textValue();
-                    String logEntry = logEntry(type, id, result);
+                    String logEntry = handleResponse(indexResponse, type, id);
                     indexed.add(logEntry);
                     if (! singleVerbose) {
                         log(logger, singleLevel.get(), "updated:{}", logEntry);
@@ -1534,7 +1531,26 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         };
     }
 
-    private String logEntry(String type, String id, String result){
+    static  String handleResponse(JsonNode indexResponse, String type, String id) {
+        int status = -1;
+        if (indexResponse.has("status")) {
+            status = indexResponse.get("status").intValue();
+        }
+        StringBuilder logEntry = new StringBuilder();
+        if (status != 200) {
+            logEntry.append("status:").append(status);
+        }
+        if (indexResponse.has("result")) {
+            String result = indexResponse.get("result").textValue();
+            logEntry.append(" ").append(logEntry(type, id, result));
+        }
+        if (indexResponse.has("error")) {
+            logEntry.append(" ").append(indexResponse.get("error").toString());
+        }
+        return logEntry.toString();
+    }
+
+    static private String logEntry(String type, String id, String result){
         if (DOC.equals(type)) {
             return id + ":" + result;
         } else {
