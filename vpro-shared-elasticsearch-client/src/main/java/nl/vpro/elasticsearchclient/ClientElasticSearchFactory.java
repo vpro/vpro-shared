@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     private RestClient client;
 
-    private final Map<String, CompletableFuture<RestClient>> clients = new HashMap<>();
+    private final Map<String, CompletableFuture<RestClient>> clients = new ConcurrentHashMap<>();
 
     private final int instance = instances++;
 
