@@ -9,13 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.slf4j.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import nl.vpro.mdc.MDCConstants;
+import static nl.vpro.mdc.MDCConstants.*;
 
 /**
  * Puts a few things related to authentication and accountability (remote address) on the Mapped Diagnostic Context of SLF4J
@@ -26,14 +24,9 @@ import nl.vpro.mdc.MDCConstants;
 @Slf4j
 public class  MDCFilter implements Filter {
 
-    @Deprecated
-    public static final String USER_NAME   = MDCConstants.USER_NAME;
-    @Deprecated
-    public static final String REQUEST     = MDCConstants.REQUEST;
-    @Deprecated
-    public static final String REMOTE_ADDR = MDCConstants.REMOTE_ADDR;
 
     boolean clear = false;
+
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -41,45 +34,51 @@ public class  MDCFilter implements Filter {
             clear = Boolean.parseBoolean(filterConfig.getInitParameter("clear"));
         }
 
+
     }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response  = (HttpServletResponse) res;
-        String path = request.getRequestURI().substring(request.getContextPath().length());
+        final HttpServletRequest request = (HttpServletRequest) req;
+        final HttpServletResponse response  = (HttpServletResponse) res;
+        final String path = request.getRequestURI().substring(request.getContextPath().length());
+        final String logPostFix = path.replace('/', '.');
         try {
             try {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null) {
-                    MDC.put(MDCConstants.USER_NAME, auth.getName());
+                    MDC.put(USER_NAME, auth.getName());
             }
             } catch (Exception e) {
                 log.debug(e.getMessage());
             }
             String query = request.getQueryString();
-            MDC.put(MDCConstants.REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
+            MDC.put(REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
 
             String ipAddress = request.getHeader("X-FORWARDED-FOR");
             if (ipAddress == null) {
                 ipAddress = request.getRemoteAddr();
             }
-            MDC.put(MDCConstants.REMOTE_ADDR, ipAddress);
+            MDC.put(REMOTE_ADDR, ipAddress);
 
             chain.doFilter(req, res);
         } finally {
             // access logging...
-            Logger logger = LoggerFactory.getLogger(MDCFilter.class.getName() + path.replace('/', '.'));
-            logger.debug("{} {}", response.getStatus(), response.getContentType());
+            afterLogger(logPostFix).debug("{} {}", response.getStatus(), response.getContentType());
             if (clear) {
                 MDC.clear();
             } else {
-                MDC.remove(MDCConstants.USER_NAME);
-                MDC.remove(MDCConstants.REQUEST);
-                MDC.remove(MDCConstants.REMOTE_ADDR);
+                MDC.remove(USER_NAME);
+                MDC.remove(REQUEST);
+                MDC.remove(REMOTE_ADDR);
             }
         }
+    }
+
+
+    private Logger afterLogger(String postfix) {
+        return LoggerFactory.getLogger(MDCFilter.class.getName() + "." + postfix);
     }
 
     @Override
