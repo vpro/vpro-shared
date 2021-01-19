@@ -11,10 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class MDCConstants {
 
-    public static final String USER_NAME = "userName";
-    public static final String ONBEHALFOF= "onBehalfOf";
-    public static final String REQUEST = "request";
-    public static final String REMOTE_ADDR= "remoteAddr";
+    public static final String USER_NAME    = "userName";
+    public static final String ONBEHALFOF   = "onBehalfOf";
+    public static final String REQUEST      = "request";
+    public static final String REMOTE_ADDR  = "remoteAddr";
+    public static final String BODY         = "body";
+    public static final String HEADERS      = "headers";
 
 
     public static void onBehalfOf(String user) {
