@@ -1198,6 +1198,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         for (BulkRequestEntry n : request) {
             builder.append(n.getAction());
             builder.append("\n");
+            n.use();
             if (n.getSource() != null) {
                 builder.append(saveToString(n.getSource()));
                 builder.append("\n");

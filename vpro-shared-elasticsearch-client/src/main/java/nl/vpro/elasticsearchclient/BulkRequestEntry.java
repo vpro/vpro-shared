@@ -32,6 +32,7 @@ public class BulkRequestEntry {
     @Setter
     Consumer<ObjectNode> sourceConsumer;
 
+    private boolean used = false;
 
     public BulkRequestEntry(
         ObjectNode action,
@@ -40,6 +41,7 @@ public class BulkRequestEntry {
         Map<String, String> mdc) {
         this(action, source, unalias, mdc, null);
     }
+
     @lombok.Builder
     BulkRequestEntry(
         ObjectNode action,
@@ -54,17 +56,20 @@ public class BulkRequestEntry {
         this.sourceConsumer = sourceConsumer;
     }
 
-
     public void use() {
-        if (sourceConsumer != null) {
-            sourceConsumer.accept(source);
+        if (! used) {
+            if (sourceConsumer != null) {
+                sourceConsumer.accept(source);
+            }
+            used = true;
+        } else {
+            log.debug("Used already");
         }
     }
 
     public static String idFromActionNode(ObjectNode action) {
         return idFromActionNode(action, s -> s);
     }
-
 
     public static String idFromActionNode(ObjectNode action, UnaryOperator<String> unalias) {
         StringBuilder builder = new StringBuilder();
