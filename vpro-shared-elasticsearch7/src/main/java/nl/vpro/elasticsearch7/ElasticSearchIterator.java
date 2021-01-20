@@ -3,20 +3,19 @@ package nl.vpro.elasticsearch7;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
-import org.elasticsearch.action.ActionFuture;
-import org.elasticsearch.action.search.ClearScrollRequest;
-import org.elasticsearch.action.search.ClearScrollResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.search.SearchHit;
 
 import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
+
+import org.elasticsearch.action.ActionFuture;
+import org.elasticsearch.action.search.*;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.search.SearchHit;
+
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 
 /**
  * A wrapper around the Elastic Search scroll interface.
