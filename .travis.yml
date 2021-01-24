@@ -1,3 +1,4 @@
+# disabled travis build (out of credits)
 language: java
 env:
   global:
