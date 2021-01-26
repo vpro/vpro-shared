@@ -52,8 +52,6 @@ public class Constants {
     public static final String DELETE = "delete";
 
 
-
-
     /**
      * Deprecated if not {@link #DOC}
      */

@@ -416,21 +416,25 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    public void clearIndex() {
+    public long clearIndex() {
         List<BulkRequestEntry> bulk = new ArrayList<>();
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client())) {
             i.prepareSearch(getIndexName());
 
             while (i.hasNext()) {
                 JsonNode node = i.next();
-                bulk.add(deleteRequest(
-                    node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText())
-                );
+                if (node.has(Fields.ROUTING)) {
+                    bulk.add(deleteRequestWithRouting(node.get(Fields.ID).asText(), node.get(Fields.ROUTING).asText()));
+                } else {
+                    bulk.add(deleteRequest(node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText()));
+                }
             }
         }
         if (bulk.size() > 0) {
-            bulk(bulk);
+            ObjectNode bulkResult = bulk(bulk);
+            bulkLogger(LoggerFactory.getLogger(log.getName())).accept(bulkResult);
         }
+        return bulk.size();
     }
 
 
