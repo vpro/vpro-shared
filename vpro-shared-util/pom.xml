@@ -25,9 +25,9 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.meeuw</groupId>
-      <artifactId>mihxil-math</artifactId>
-      <version>0.3.1</version>
+      <groupId>org.meeuw.math</groupId>
+      <artifactId>mihxil-statistics</artifactId>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
