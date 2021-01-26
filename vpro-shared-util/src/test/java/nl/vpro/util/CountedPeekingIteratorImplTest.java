@@ -19,7 +19,7 @@ class CountedPeekingIteratorImplTest {
             .wrapped(Arrays.asList("a", "b", "c").iterator())
             .size(3L)
             .build();
-        try(CountedPeekingIteratorImpl<String> i = (CountedPeekingIteratorImpl) wrapped.peeking()) {
+        try(CountedPeekingIterator<String> i = wrapped.peeking()) {
 
             assertThat(i.peek()).isEqualTo("a");
             assertThat(i.peek()).isEqualTo("a");

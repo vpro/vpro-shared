@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.google.common.collect.PeekingIterator;
+
 /**
  * An iterator that is also {@link AutoCloseable}.
  * @author Michiel Meeuwissen
@@ -78,11 +80,22 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
         }
     }
 
+    static <S> CloseablePeekingIterator<S> peeking(CloseableIterator<S> wrapped){
+        return wrapped == null ? null : wrapped.peeking();
+    }
+
     default  Stream<T> stream() {
         return StreamSupport.stream(
             Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED),
             false);
 
+    }
+
+    /**
+     * If you need a guava {@link PeekingIterator}, this will make you one. It remains also a {@link CloseableIterator}
+     */
+    default CloseablePeekingIterator<T> peeking() {
+        return new CloseablePeekingIteratorImpl<>(this);
     }
 
 

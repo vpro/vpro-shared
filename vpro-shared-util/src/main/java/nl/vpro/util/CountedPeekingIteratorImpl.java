@@ -2,67 +2,39 @@ package nl.vpro.util;
 
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkState;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 
 /**
  *
  * @author Michiel Meeuwissen
  * @since 5.1
  */
-class CountedPeekingIteratorImpl<T> implements  CountedPeekingIterator<T> {
-    private final CountedIterator<? extends T> iterator;
-    private boolean hasPeeked;
-    private T peekedElement;
+@SuppressWarnings("rawtypes")
+class CountedPeekingIteratorImpl<T> extends CloseablePeekingIteratorImpl<T> implements  CountedPeekingIterator<T> {
+
+    private final CountedIterator<? extends T> wrapped;
 
     public CountedPeekingIteratorImpl(CountedIterator<? extends T> iterator) {
-        this.iterator = iterator;
+        super(iterator);
+        this.wrapped = iterator;
     }
 
     @Override
-    public boolean hasNext() {
-        return hasPeeked || iterator.hasNext();
-    }
-
-    @Override
-    public T next() {
-        if (!hasPeeked) {
-            return iterator.next();
-        }
-        T result = peekedElement;
-        hasPeeked = false;
-        peekedElement = null;
-        return result;
-    }
-
-    @Override
-    public void remove() {
-        checkState(!hasPeeked, "Can't remove after you've peeked at next");
-        iterator.remove();
-    }
-
-    @Override
-    public T peek() {
-        if (!hasPeeked) {
-            peekedElement = iterator.next();
-            hasPeeked = true;
-        }
-        return peekedElement;
-    }
-
-
-    @Override
+    @NonNull
     public Optional<Long> getSize() {
-        return iterator.getSize();
+        return wrapped.getSize();
     }
 
     @Override
     public Long getCount() {
-        return iterator.getCount();
+        return ((CountedIterator) iterator).getCount();
     }
 
     @Override
+    @NonNull
     public Optional<Long> getTotalSize() {
-        return iterator.getTotalSize();
+        return wrapped.getTotalSize();
     }
 
     @Override

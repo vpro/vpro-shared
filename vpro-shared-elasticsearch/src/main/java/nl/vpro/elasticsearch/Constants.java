@@ -18,7 +18,6 @@ public class Constants {
         public static final String DOC  = "doc";
         public static final String DOC_AS_UPSERT  = "doc_as_upsert";
 
-
     }
 
 

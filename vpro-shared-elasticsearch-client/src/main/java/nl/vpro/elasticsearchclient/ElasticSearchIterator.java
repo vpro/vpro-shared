@@ -36,6 +36,7 @@ import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
+import static nl.vpro.elasticsearchclient.IndexHelper.METHOD_DELETE;
 import static nl.vpro.elasticsearchclient.IndexHelper.POST;
 
 /**
@@ -291,7 +292,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 long start = System.nanoTime();
                 try {
                     if (response == null) {
-                        if (!firstBatch()) {
+                        if (! firstBatch()) {
                             return;
                         }
                     }
@@ -335,7 +336,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             if (sort.isEmpty(null)) {
                 log.debug("No explicit sort given, sorting on _doc!");
                 QueryBuilder.docOrder(request);
-
             }
 
             try(NStringEntity entity = new NStringEntity(request.toString(), ContentType.APPLICATION_JSON)) {
@@ -349,7 +349,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     }
                     builder.append(String.join(",", types));
                 }
-                builder.append("/_search");
+                builder.append(IndexHelper.SEARCH);
                 start = Instant.now();
                 Request post = new Request(POST, builder.toString());
                 post.setEntity(entity);
@@ -531,17 +531,17 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         }
         if (scrollId != null) {
             try {
-                Request delete = new Request("DELETE", "/_search/scroll/" + scrollId);
+                Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + scrollId);
 
                 HttpEntity responseEntity = null;
                 try {
                     Response res = client.performRequest(delete);
                     responseEntity = res.getEntity();
                     if (res.getStatusLine().getStatusCode() == 200) {
-                        log.debug("Deleted {}", res);
+                        log.debug("Deleted {} {}", scrollId, res);
                         SCROLL_IDS.remove(scrollId);
                     } else {
-                        log.warn("Something wrong {}", res);
+                        log.warn("Something wrong deleting scroll id {} {}", scrollId, res);
                     }
                     scrollId = null;
                 } finally {
@@ -574,6 +574,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         public AbstractBuilder() {
         }
 
+        @SuppressWarnings("unchecked")
         protected SELF self() {
             return (SELF) this;
         }
