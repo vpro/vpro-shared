@@ -3,18 +3,19 @@ package nl.vpro.jmx;
 import lombok.Builder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.meeuw.math.windowed.WindowedEventRate;
-import org.meeuw.math.windowed.WindowedLongSummaryStatistics;
 
-import javax.management.MXBean;
-import javax.management.ObjectName;
+import java.time.Clock;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import javax.management.MXBean;
+import javax.management.ObjectName;
+
+import org.meeuw.math.windowed.WindowedEventRate;
+import org.meeuw.math.windowed.WindowedLongSummaryStatistics;
 
 import static nl.vpro.util.TimeUtils.roundToMillis;
 
@@ -37,16 +38,19 @@ public class Counter implements CounterMXBean {
     protected Counter(
         ObjectName name,
         Duration countWindow,
-        Integer bucketCount
+        Integer bucketCount,
+        Clock clock
         ) {
         this.name = name;
         rate = WindowedEventRate.builder()
             .window(countWindow)
             .bucketCount(bucketCount)
+            .clock(clock)
             .build();
         durationStatistics.add(WindowedLongSummaryStatistics.builder()
             .window(countWindow)
             .bucketCount(bucketCount)
+            .clock(clock)
             .build());
         if (name != null) {
             MBeans.registerBean(name, this);

@@ -127,9 +127,9 @@ class CopierTest {
             .input(in)
             .output(out)
             .batch(100)
-            .callback((c) -> {
-                callback.add(c.toString());
-            })
+            .callback((c) ->
+                callback.add(c.toString())
+            )
             .errorHandler((c, e) -> {
                 exceptionHolder[0] = e;
             })

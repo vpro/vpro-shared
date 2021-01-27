@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.meeuw.math.TestClock;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -16,13 +17,15 @@ public class CounterTest {
 
     @Test
     public void test() throws InterruptedException {
+        TestClock clock = new  TestClock();
         Counter counter = Counter.builder()
             .bucketCount(10)
             .countWindow(Duration.ofSeconds(10))
+            .clock(clock)
             .build();
 
         counter.eventAndDuration(Duration.ofMillis(500));
-        Thread.sleep(500);
+        clock.sleep(500);
 
         // 1 event in .5 seconds is about 120 /min.
         assertThat(counter.getRate()).isCloseTo(120, Percentage.withPercentage(20));
