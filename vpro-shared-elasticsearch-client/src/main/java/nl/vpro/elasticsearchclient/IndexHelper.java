@@ -37,6 +37,7 @@ import nl.vpro.util.TimeUtils;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
+import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
@@ -57,20 +58,20 @@ import static nl.vpro.logging.Slf4jHelper.log;
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
-    public static final String SEARCH = "/_search";
-    public static final String DELETE_BY_QUERY = "/_delete_by_query";
-    public static final String UPDATE_BY_QUERY = "/_update_by_query";
-    public static final String COUNT = "/_count";
-    public static final String SETTINGS = "/_settings";
-    public static final String MAPPING= "/_mapping";
-    public static final String BULK = "/_bulk";
+    @Deprecated public static final String SEARCH = Paths.SEARCH;
+    @Deprecated public static final String DELETE_BY_QUERY =  Paths.DELETE_BY_QUERY;
+    @Deprecated public static final String UPDATE_BY_QUERY = Paths.DELETE_BY_QUERY;
+    @Deprecated public static final String COUNT = Paths.COUNT;
+    @Deprecated public static final String SETTINGS = Paths.SETTINGS;
+    @Deprecated public static final String MAPPING= Paths.MAPPING;
+    @Deprecated public static final String BULK = Paths.BULK;
 
 
 
-    public static final String POST = "POST";
-    public static final String GET = "GET";
-    public static final String PUT = "PUT";
-    public static final String METHOD_DELETE = "DELETE";
+    @Deprecated public static final String POST = Methods.POST;
+    @Deprecated public static final String GET = Methods.GET;
+    @Deprecated public static final String PUT = Methods.PUT;
+    @Deprecated public static final String METHOD_DELETE = Methods.METHOD_DELETE;
 
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
@@ -343,7 +344,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             consumer.accept(settings);
         }
         HttpEntity entity = entity(request);
-        Request req = createPut(SETTINGS);
+        Request req = createPut(Paths.SETTINGS);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -368,7 +369,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             consumer.accept(request);
         }
         HttpEntity entity = entity(request);
-        Request req = createPut( MAPPING);
+        Request req = createPut(Paths.MAPPING);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
 
@@ -509,16 +510,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode search(ObjectNode request) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        return post((indexName == null ? "" : indexName) + SEARCH, request);
+        return post((indexName == null ? "" : indexName) + Paths.SEARCH, request);
     }
 
 
     public ObjectNode deleteByQuery(ObjectNode request) {
-        return post(getIndexName() + DELETE_BY_QUERY, request);
+        return post(getIndexName() + Paths.DELETE_BY_QUERY, request);
     }
 
     public ObjectNode updateByQuery(ObjectNode request) {
-        return post(getIndexName() + UPDATE_BY_QUERY, request);
+        return post(getIndexName() + Paths.UPDATE_BY_QUERY, request);
     }
 
     /**
@@ -541,14 +542,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         } else {
             //path.append("/_doc");
         }
-        path.append(SEARCH);
+        path.append(Paths.SEARCH);
         return post(path.toString(), request);
     }
 
     @SafeVarargs
     public final Future<ObjectNode> searchAsync(ObjectNode request, Consumer<ObjectNode>... listeners) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        return postAsync((indexName == null ? "" : indexName) + SEARCH, request, listeners);
+        return postAsync((indexName == null ? "" : indexName) + Paths.SEARCH, request, listeners);
     }
 
 
@@ -1153,7 +1154,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return objectMapper.createObjectNode();
         } else {
             try {
-                Request req = new Request(POST, BULK);
+                Request req = new Request(POST, Paths.BULK);
                 req.setEntity(bulkEntity(request));
 
                 writeJson(log, writeJsonDir, request);
@@ -1189,7 +1190,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return CompletableFuture.completedFuture(null);
         }
 
-        Request req = new Request(POST, BULK);
+        Request req = new Request(POST, Paths.BULK);
         req.setEntity(bulkEntity(request));
         writeJson(log, jsonDir, request);
 
@@ -1228,7 +1229,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @SneakyThrows
     protected long count(RestClient client) {
-        Request get = createGet(COUNT);
+        Request get = createGet(Paths.COUNT);
         Response response = client.performRequest(get);
         JsonNode result = read(response);
         return result.get("count").longValue();
@@ -1282,7 +1283,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  JsonNode getActualSettings() throws IOException {
-        Request get = createGet(SETTINGS);
+        Request get = createGet(Paths.SETTINGS);
         Response response = client()
             .performRequest(get);
         JsonNode result = read(response);

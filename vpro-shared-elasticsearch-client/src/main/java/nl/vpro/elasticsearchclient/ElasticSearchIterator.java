@@ -36,8 +36,8 @@ import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
-import static nl.vpro.elasticsearchclient.IndexHelper.METHOD_DELETE;
-import static nl.vpro.elasticsearchclient.IndexHelper.POST;
+import static nl.vpro.elasticsearch.Constants.Methods.METHOD_DELETE;
+import static nl.vpro.elasticsearch.Constants.Methods.POST;
 
 /**
  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
@@ -353,11 +353,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     }
                     builder.append(String.join(",", types));
                 }
-                builder.append(IndexHelper.SEARCH);
+                builder.append(Paths.SEARCH);
                 start = Instant.now();
                 Request post = new Request(POST, builder.toString());
                 post.setEntity(entity);
-                post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                if (! scrollContext.isNegative()) {
+                    post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                }
                 post.addParameter(VERSION, String.valueOf(this.requestVersion));
                 if (routing != null && routing.size() > 0) {
                     post.addParameter(ROUTING, String.join(",", routing));
@@ -421,11 +423,11 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
                     scrollRequest.put(SCROLL_ID, scrollId);
 
-                    post = new Request(POST, "/_search/scroll");
+                    post = new Request(POST, Paths.SCROLL);
                     post.setJsonEntity(scrollRequest.toString());
 
                 } else {
-                    post = new Request(POST, "/_search/scroll");
+                    post = new Request(POST, Paths.SCROLL);
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                     post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                 }

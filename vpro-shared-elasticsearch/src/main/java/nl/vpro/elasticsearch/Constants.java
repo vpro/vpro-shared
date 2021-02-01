@@ -2,12 +2,10 @@ package nl.vpro.elasticsearch;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
  */
 public class Constants {
 
     public static class Fields {
-
         public static final String TYPE    = "_type";
         public static final String ID      = "_id";
         public static final String INDEX   = "_index";
@@ -17,17 +15,13 @@ public class Constants {
         public static final String VERSION  = "_version";
         public static final String DOC  = "doc";
         public static final String DOC_AS_UPSERT  = "doc_as_upsert";
-
     }
 
 
     public static final String SCORE = "_score";
-
     public static final String HITS = "hits";
-
     public static final String _SCROLL_ID = "_scroll_id";
     public static final String SCROLL_ID = "scroll_id";
-
     public static final String SCROLL = "scroll";
 
     public static final String QUERY = "query";
@@ -61,12 +55,26 @@ public class Constants {
     public static final String ROUTING  = "routing";
     public static final String INDEX    = "index";
     public static final String UPDATE   = "update";
-
     public static final String RETRY_ON_CONFLICT = "retry_on_conflict";
-
-
     public static final String DOC       = "_doc";
 
+    public static class Paths {
+        public static String SCROLL = "/_search/scroll";
+        public static final String SEARCH = "/_search";
+        public static final String DELETE_BY_QUERY = "/_delete_by_query";
+        public static final String UPDATE_BY_QUERY = "/_update_by_query";
+        public static final String COUNT = "/_count";
+        public static final String SETTINGS = "/_settings";
+        public static final String MAPPING= "/_mapping";
+        public static final String BULK = "/_bulk";
+    }
+
+    public static class Methods {
+        public static final String POST = "POST";
+        public static final String GET = "GET";
+        public static final String PUT = "PUT";
+        public static final String METHOD_DELETE = "DELETE";
+    }
 
 
 }
