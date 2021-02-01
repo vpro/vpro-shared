@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -172,11 +174,17 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     @Override
     public void setHosts(String hosts) {
-        HttpHost[] httpHosts = Arrays.stream(hosts.split(("\\s*,\\s*")))
+        Pattern pattern = Pattern.compile("\\((.*)\\):(\\d+)");
+        Matcher matcher = pattern.matcher(hosts);
+
+        final String toSplit = matcher.matches() ? matcher.group(1) : hosts;
+        final int defaultPort = matcher.matches() ? Integer.parseInt(matcher.group(2)) : 9200;
+
+        HttpHost[] httpHosts = Arrays.stream(toSplit.split(("\\s*,\\s*")))
             .filter(s -> !s.isEmpty())
             .map(s -> {
                 if (! s.startsWith("http:") && ! s.startsWith("https:") && ! s.contains(":")) {
-                    s = s + ":9200";
+                    s = s + ":" + defaultPort;
                 }
                 return s;
             })
