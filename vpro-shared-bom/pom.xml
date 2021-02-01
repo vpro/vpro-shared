@@ -71,12 +71,6 @@
         <artifactId>vpro-shared-elasticsearch</artifactId>
         <version>${project.version}</version>
       </dependency>
-
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-elasticsearch7</artifactId>
-        <version>${project.version}</version>
-      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-client</artifactId>
@@ -221,6 +215,11 @@
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch5</artifactId>
         <version>2.11.3</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-elasticsearch7</artifactId>
+        <version>2.21.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>

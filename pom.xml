@@ -51,12 +51,10 @@
 
   <modules>
     <module>vpro-shared-rs-client</module>
-
     <module>vpro-shared-client-resteasy</module>
     <module>vpro-shared-configuration</module>
 
     <module>vpro-shared-elasticsearch</module>
-    <module>vpro-shared-elasticsearch7</module>
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-elasticsearch-high-level-client</module>
 
@@ -83,12 +81,14 @@
     <!--
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
         <module>vpro-shared-camel</module>
-    <module>vpro-shared-ws</module>
+        <module>vpro-shared-ws</module>
     <module>vpro-shared-newrelic</module>
     <module>vpro-shared-services</module>
     <module>vpro-shared-avro</module>
     <module>vpro-shared-transfer</module>
     <module>vpro-shared-elasticsearch1</module>
+      <module>vpro-shared-elasticsearch7</module>
+
     <module>vpro-shared-ektorp</module>
     <module>vpro-shared-couchdb-util</module>
    -->
