@@ -210,9 +210,9 @@
     -->
     <jackson2.version>2.11.0</jackson2.version>    <!-- equals to poms-parent -->
     <junit.version>5.7.0</junit.version>
-    <mockito.version>3.3.3</mockito.version>
-    <assertj.version>3.18.1</assertj.version>
-    <resteasy.version>4.5.8.Final</resteasy.version>
+    <mockito.version>3.7.7</mockito.version>
+    <assertj.version>3.19.0</assertj.version>
+    <resteasy.version>4.6.0.Final</resteasy.version>
     <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.14.0</log4j2.version>
@@ -241,9 +241,9 @@
     <swagger.version>2.0.0-rc2</swagger.version>
     -->
     <swagger.version>1.5.22</swagger.version>
-    <lombok.version>1.18.16</lombok.version>
+    <lombok.version>1.18.18</lombok.version>
 
-    <elasticsearch7.version>7.10.1</elasticsearch7.version>
+    <elasticsearch7.version>7.10.2</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.7.0</lucene.elasticsearch7.version>
   </properties>
 
@@ -604,7 +604,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>4.5.2</version>
+        <version>4.6.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -633,7 +633,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.8.0</version>
+      <version>3.10.0</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
