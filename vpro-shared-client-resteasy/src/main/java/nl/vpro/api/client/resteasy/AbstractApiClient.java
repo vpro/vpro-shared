@@ -15,8 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -98,7 +97,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration connectionInPoolTTL;
     protected Duration validateAfterInactivity;
 
-    protected final Map<String, Counter> counter = new HashMap<>();
+    protected final Map<String, Counter> counter = new ConcurrentHashMap<>();
     protected Duration countWindow = Duration.ofHours(24);
     protected Integer bucketCount = 24;
 
