@@ -6,8 +6,7 @@ import java.util.Arrays;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 
 /**
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
  * @since 1.75
  */
 @Slf4j
+@Disabled
 public class IndexHelper2ITest {
 
 
