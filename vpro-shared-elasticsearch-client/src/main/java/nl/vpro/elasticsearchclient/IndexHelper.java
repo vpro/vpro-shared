@@ -37,7 +37,6 @@ import nl.vpro.util.TimeUtils;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
-import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
@@ -567,7 +566,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             for (Consumer<Request> c : consumers) {
                 c.accept(req);
             }
-            log.info("Posting to {}", path);
+            log.debug("Posting to {}", path);
             return read(client().performRequest(req));
         } catch (IOException e) {
             log.error(e.getMessage(), e);

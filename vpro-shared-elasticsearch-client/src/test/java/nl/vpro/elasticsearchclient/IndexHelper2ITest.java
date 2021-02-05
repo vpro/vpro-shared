@@ -24,7 +24,7 @@ public class IndexHelper2ITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9221, "http"))
+            new HttpHost("localhost", 9200, "http"))
             .build();
 
         helper = IndexHelper.builder()

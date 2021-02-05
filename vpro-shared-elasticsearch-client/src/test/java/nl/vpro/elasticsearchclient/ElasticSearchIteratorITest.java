@@ -42,7 +42,7 @@ public class ElasticSearchIteratorITest {
     IndexHelper helper;
 
     String index = "test-" + System.currentTimeMillis();
-
+    int numberOfObjects = 5000;
     @BeforeEach
     public void setup() {
 
@@ -60,7 +60,7 @@ public class ElasticSearchIteratorITest {
         log.info("Version: {}", helper.getVersionNumber());
 
         helper.createIndexIfNotExists();
-        for (int i = 0; i < 20000; i++) {
+        for (int i = 0; i < numberOfObjects; i++) {
             A a = new A("bla " + i, i);
             helper.index(a.id, a);
         }
@@ -109,7 +109,6 @@ public class ElasticSearchIteratorITest {
 
     @Test
     @Disabled
-
     public void testSources() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client)) {
             i.setJsonRequests(false);
@@ -161,10 +160,10 @@ public class ElasticSearchIteratorITest {
 
             AtomicLong count = new AtomicLong(0);
             i.forEachRemaining((node) -> {
-                log.info("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node);
+                log.debug("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node);
                 count.incrementAndGet();
             });
-            assertThat(count.get()).isEqualTo(200);
+            assertThat(count.get()).isEqualTo(numberOfObjects);
         }
     }
 
