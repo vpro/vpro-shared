@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: getong/elasticsearch-action@v1.2
       with:
-        elasticsearch version: '7.10.2'
+        elasticsearch version: '7.6.1'
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
