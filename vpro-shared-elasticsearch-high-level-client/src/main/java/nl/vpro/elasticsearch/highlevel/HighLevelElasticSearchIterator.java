@@ -44,6 +44,7 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     private final Function<SearchHit, T> adapt;
     private final RestHighLevelClient client;
 
+    @Getter
     private SearchResponse response;
     @Getter
     private Long count = -1L;
@@ -83,11 +84,10 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
 
     private final ObjectName objectName;
 
-    private RequestOptions requestOptions = RequestOptions.DEFAULT;
+    @Getter
+    @Setter
+    private RequestOptions requestOptions;
 
-    public static Set<String> getScrollIds() {
-        return Collections.unmodifiableSet(SCROLL_IDS);
-    }
 
 
     @lombok.Builder(builderClassName = "Builder")
@@ -99,7 +99,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         Duration scrollContext,
         String beanName,
         WindowedEventRate rateMeasurerer,
-        List<String> routingIds
+        List<String> routingIds,
+        RequestOptions requestOptions
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
@@ -117,6 +118,7 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
                 .build() : rateMeasurerer;
 
         this.routing = routingIds == null ? null : routingIds.toArray(new String[0]);
+        this.requestOptions = requestOptions == null ? RequestOptions.DEFAULT : requestOptions;
     }
 
 
@@ -213,7 +215,6 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         }
         try {
             SearchRequest searchRequest = new SearchRequest(indices, searchSourceBuilder);
-
             start = Instant.now();
             searchRequest.scroll(getScroll());
             response = client.search(searchRequest, requestOptions);
@@ -309,7 +310,6 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     }
 
 
-
     @Override
     public @NonNull Optional<Long> getSize() {
         findNext();
@@ -332,8 +332,6 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     public String toString() {
         return client + " " + searchSourceBuilder + " " + count;
     }
-
-
 
 
     @Override

@@ -114,11 +114,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private final ObjectName objectName;
 
-    public static Set<String> getScrollIds() {
-        return Collections.unmodifiableSet(SCROLL_IDS);
-    }
-
-
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null);
     }

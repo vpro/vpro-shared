@@ -14,6 +14,11 @@ public interface ElasticSearchIteratorInterface<T> extends CountedIterator<T>, E
 
     Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
 
+    static Set<String> getScrollIds() {
+        return Collections.unmodifiableSet(SCROLL_IDS);
+    }
+
+
 
 
     Optional<TotalRelation> getSizeQualifier();
