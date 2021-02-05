@@ -224,8 +224,8 @@
     <httpcomponents.version>4.5.13</httpcomponents.version>
     <httpcomponentscore.version>4.4.14</httpcomponentscore.version>
 
-    <hibernate.version>5.4.10.Final</hibernate.version>
-    <hibernate.search.version>5.11.5.Final</hibernate.search.version>
+    <hibernate.version>5.4.27.Final</hibernate.version>
+    <hibernate.search.version>5.11.8.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
     <hibernate.validator.version>6.1.4.Final</hibernate.validator.version>
