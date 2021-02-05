@@ -1,17 +1,19 @@
 package nl.vpro.elasticsearch;
 
-import nl.vpro.util.CountedIterator;
-
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import nl.vpro.util.CountedIterator;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
  */
 public interface ElasticSearchIteratorInterface<T> extends CountedIterator<T>, ElasticSearchIteratorMXBean {
+
+    Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
+
 
 
     Optional<TotalRelation> getSizeQualifier();

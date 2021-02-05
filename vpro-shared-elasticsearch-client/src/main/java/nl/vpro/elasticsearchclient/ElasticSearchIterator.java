@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -65,7 +64,6 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     @Getter
     private final long instance = instances++;
 
-    private static final Set<String> SCROLL_IDS = new ConcurrentSkipListSet<>();
     private final Function<JsonNode, T> adapt;
     private final RestClient client;
 
@@ -574,7 +572,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     }
 
 
-    protected static abstract class AbstractBuilder<T, SELF extends AbstractBuilder<T, SELF>> {
+    public static abstract class AbstractBuilder<T, SELF extends AbstractBuilder<T, SELF>> {
 
         protected List<String> routingList;
         public AbstractBuilder() {

@@ -13,12 +13,14 @@ import nl.vpro.elasticsearchclient.IndexHelper;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Michiel Meeuwissen
+ * @since 2.22
  */
 @Slf4j
-class ExtendedElasticSearchIteratorITest {
+class HighLevelElasticSearchIteratorITest {
 
 
     static HighLevelClientFactory highLevelClientFactory;
@@ -57,7 +59,7 @@ class ExtendedElasticSearchIteratorITest {
     @Test
     public void iterator() {
         int count = 0;
-        try (ExtendedElasticSearchIterator<A> iterator = ExtendedElasticSearchIterator.<A>extendedBuilder()
+        try (HighLevelElasticSearchIterator<A> iterator = HighLevelElasticSearchIterator.<A>builder()
             .client(highLevelClientFactory.highLevelClient(ExtendedElasticSearchIterator.class.getName()))
             .adaptTo(A.class)
             .routing("a")
