@@ -13,6 +13,14 @@ jobs:
     env:
        MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
+    - uses: getong/elasticsearch-action@v1.2
+      with:
+        elasticsearch version: '7.6.1'
+        host port: 9200
+        container port: 9200
+        host node port: 9300
+        node port: 9300
+        discovery type: 'single-node'
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
@@ -25,7 +33,7 @@ jobs:
       with:
         servers: '[{"id": "vpro-ossrh", "username": "${{secrets.SONATYPE_USERNAME}}", "password": "${{secrets.SONATYPE_PASSWORD}}"}]'
     - name: Build with Maven
-      run: mvn -B -Pdeploy,sonatype deploy  -Dgpg.skip=true
+      run: mvn -DskipITs=false -B -Pdeploy,sonatype deploy  -Dgpg.skip=true
     - name: Publish to codecov
       run: bash <(curl -s https://codecov.io/bash)
       continue-on-error: true
