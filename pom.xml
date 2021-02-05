@@ -147,6 +147,48 @@
           </execution>
         </executions>
       </plugin>
+       <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.2</version>
+          <configuration>
+            <systemPropertyVariables>
+              <projectArtifactId>${project.artifactId}</projectArtifactId>
+            </systemPropertyVariables>
+            <includes>
+              <include>**/*Test.java</include>
+              <include>**/*Spec.java</include>
+            </includes>
+            <excludes>
+              <exclude>**/*ITest.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.22.2</version>
+          <configuration>
+            <skipITs>${skipITs}</skipITs>
+            <includes>
+              <include>**/*ITest.java</include>
+            </includes>
+          </configuration>
+          <executions>
+            <execution>
+              <id>integration-test</id>
+              <goals>
+                <goal>integration-test</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>verify</id>
+              <goals>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -176,23 +218,6 @@
           <artifactId>buildnumber-maven-plugin</artifactId>
           <version>1.4</version>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.2</version>
-          <configuration>
-            <systemPropertyVariables>
-              <projectArtifactId>${project.artifactId}</projectArtifactId>
-            </systemPropertyVariables>
-            <includes>
-              <include>**/*Test.java</include>
-              <include>**/*Spec.java</include>
-            </includes>
-            <excludes>
-              <exclude>**/*ITest.java</exclude>
-            </excludes>
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -202,6 +227,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skipITs>true</skipITs>
+
     <spring.version>5.1.16.RELEASE</spring.version>
     <spring-security.version>5.3.3.RELEASE</spring-security.version>
     <!-- seems to break CAS login:
@@ -230,12 +257,6 @@
     <validation.api.version>2.0.1.Final</validation.api.version>
     <hibernate.validator.version>6.1.4.Final</hibernate.validator.version>
 
-
-    <!--
-
-    <hibernate.version>5.1.0.Final</hibernate.version>
-    <hibernate.search.version>5.6.0.Beta3</hibernate.search.version>
-    -->
     <ektorp.version>1.5.0</ektorp.version>
     <!--
     <swagger.version>2.0.0-rc2</swagger.version>
