@@ -85,7 +85,7 @@ class HighLevelElasticSearchIteratorITest {
     public void iterator() {
         int count = 0;
         try (HighLevelElasticSearchIterator<A> iterator = HighLevelElasticSearchIterator.<A>highLevelBuilder()
-            .client(highLevelClientFactory.client(HighLevelElasticSearchIterator.class))
+            .client(highLevelClientFactory.highLevelClient(HighLevelElasticSearchIterator.class.getName()))
             .adaptTo(A.class)
             .routing("a")
             .build()) {

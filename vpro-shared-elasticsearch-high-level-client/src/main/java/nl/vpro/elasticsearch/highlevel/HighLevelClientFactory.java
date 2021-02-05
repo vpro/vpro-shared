@@ -30,10 +30,9 @@ public class HighLevelClientFactory  implements ESClientFactory  {
         return highLevelClient(logName).getLowLevelClient();
     }
 
-    RestHighLevelClient buildClient() {
-        return highLevelClient("test");
+    public RestHighLevelClient highLevelClient() {
+        return highLevelClient(null);
     }
-
 
     public RestHighLevelClient highLevelClient(String logName){
         if (client == null) {

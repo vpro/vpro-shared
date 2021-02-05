@@ -1,13 +1,14 @@
 package nl.vpro.elasticsearch.highlevel;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.meeuw.math.windowed.WindowedEventRate;
@@ -22,6 +23,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
  * @author Michiel Meeuwissen
  * @since 2.19
  */
+@Slf4j
 public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> {
 
     private SearchSourceBuilder searchSourceBuilder;
@@ -29,7 +31,7 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
     @lombok.Builder(builderClassName = "HighLevelBuilder", builderMethodName = "highLevelBuilder")
     @lombok.SneakyThrows
     protected HighLevelElasticSearchIterator(
-        @lombok.NonNull RestClient client,
+        @lombok.NonNull RestHighLevelClient client,
         Function<JsonNode, T> adapt,
         Class<T> adaptTo,
         Duration scrollContext,
@@ -40,7 +42,7 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
         List<String> routingIds
     ) {
         super(
-            client,
+            client.getLowLevelClient(),
             adapt,
             adaptTo,
             scrollContext,
@@ -52,6 +54,7 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
             rateMeasurerer,
             routingIds);
     }
+
 
     public SearchSourceBuilder prepareSearchSource(String... indices)  {
         setIndices(Arrays.asList(indices));
