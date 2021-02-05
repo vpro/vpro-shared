@@ -18,10 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
  */
 @Slf4j
-class HighLevelElasticSearchIteratorITest {
+class ExtendedElasticSearchIteratorITest {
 
 
 
@@ -84,8 +83,8 @@ class HighLevelElasticSearchIteratorITest {
     @Test
     public void iterator() {
         int count = 0;
-        try (HighLevelElasticSearchIterator<A> iterator = HighLevelElasticSearchIterator.<A>highLevelBuilder()
-            .client(highLevelClientFactory.highLevelClient(HighLevelElasticSearchIterator.class.getName()))
+        try (ExtendedElasticSearchIterator<A> iterator = ExtendedElasticSearchIterator.<A>extendedBuilder()
+            .client(highLevelClientFactory.highLevelClient(ExtendedElasticSearchIterator.class.getName()))
             .adaptTo(A.class)
             .routing("a")
             .build()) {

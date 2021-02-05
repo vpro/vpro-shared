@@ -20,17 +20,19 @@ import nl.vpro.elasticsearchclient.ElasticSearchIterator;
 import nl.vpro.jackson2.Jackson2Mapper;
 
 /**
+ * Like a low level {@link ElasticSearchIterator}, but with a method {@link #prepareSearchSource}, so queries can be
+ * constructed using 'high level' syntax. All other things, like the type to adapt are still json only.
  * @author Michiel Meeuwissen
  * @since 2.19
  */
 @Slf4j
-public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> {
+public class ExtendedElasticSearchIterator<T> extends ElasticSearchIterator<T> {
 
     private SearchSourceBuilder searchSourceBuilder;
 
-    @lombok.Builder(builderClassName = "HighLevelBuilder", builderMethodName = "highLevelBuilder")
+    @lombok.Builder(builderClassName = "ExtendedBuilder", builderMethodName = "extendedBuilder")
     @lombok.SneakyThrows
-    protected HighLevelElasticSearchIterator(
+    protected ExtendedElasticSearchIterator(
         @lombok.NonNull RestHighLevelClient client,
         Function<JsonNode, T> adapt,
         Class<T> adaptTo,
@@ -74,10 +76,11 @@ public class HighLevelElasticSearchIterator<T> extends ElasticSearchIterator<T> 
         return super.firstBatch();
     }
 
-    public static class HighLevelBuilder<T> extends ElasticSearchIterator.AbstractBuilder<T, HighLevelBuilder<T>> {
-        public HighLevelBuilder() {
+    public static class ExtendedBuilder<T> extends ElasticSearchIterator.AbstractBuilder<T, ExtendedBuilder<T>> {
+        public ExtendedBuilder() {
 
         }
+
     }
 
 
