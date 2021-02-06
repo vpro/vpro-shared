@@ -2,14 +2,6 @@
     "index": {
         "analysis": {
             "analyzer": {
-                "default": {
-                    "type": "dutch"
-                },
-                "dutch": {
-                    "type": "custom",
-                    "tokenizer": "icu_tokenizer",
-                    "filter": ["dutch", "icu_folding"]
-                },
                 "lowercase": {
                     "type": "custom",
                     "tokenizer": "keyword",
@@ -24,12 +16,6 @@
                     "type": "custom",
                     "tokenizer": "extension",
                     "filter": ["lowercase"]
-                }
-            },
-            "filter": {
-                "dutch": {
-                    "language": "Dutch",
-                    "type": "snowball"
                 }
             },
             "tokenizer": {
