@@ -1,4 +1,4 @@
-## Release to maven central
+== Release to maven central
 
 [source,bash]
 ----
@@ -8,7 +8,7 @@ mvn -Pdeploy release:prepare release:perform -DreleaseVersion=2.12.0 -Ddevelopme
 ----
 
 
-## Getting it faster in vpro-nexus.
+== Getting it faster in vpro-nexus.
 
 Checkout tag and build with -P`vpro-nexus`
 [source,bash]
