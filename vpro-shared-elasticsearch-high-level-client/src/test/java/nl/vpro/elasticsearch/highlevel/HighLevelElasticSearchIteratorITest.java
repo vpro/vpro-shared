@@ -2,18 +2,24 @@ package nl.vpro.elasticsearch.highlevel;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.index.query.TermQueryBuilder;
+import java.time.Duration;
+import java.util.NoSuchElementException;
+
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import nl.vpro.elasticsearch.CreateIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ClientElasticSearchFactory;
 import nl.vpro.elasticsearchclient.IndexHelper;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
@@ -57,27 +63,104 @@ class HighLevelElasticSearchIteratorITest {
 
 
     @Test
-    public void iterator() {
-        int count = 0;
+    public void iterateA() {
+        long count = 0;
         try (HighLevelElasticSearchIterator<A> iterator = HighLevelElasticSearchIterator.<A>builder()
-            .client(highLevelClientFactory.highLevelClient(ExtendedElasticSearchIterator.class.getName()))
+            .client(highLevelClientFactory.highLevelClient())
             .adaptTo(A.class)
             .routing("a")
             .build()) {
             SearchSourceBuilder sourceBuilder = iterator.prepareSearchSource(helper.getIndexName());
 
             TermQueryBuilder query = new TermQueryBuilder("title", "foo");
+            sourceBuilder.size(40);
             sourceBuilder.query(query);
 
+            assertThat(iterator.getTotalSize()).contains(50L);
+            assertThat(iterator.getSizeQualifier()).contains(ElasticSearchIteratorInterface.TotalRelation.EQUAL_TO);
 
+            assertThat(iterator.getResponse().getScrollId()).isNotNull();
+            log.info("Iterating: {}", iterator);
             while(iterator.hasNext()) {
                 A next = iterator.next();
                 assertThat(next.title).isEqualTo("foo");
-                log.info("{}", next);
+                if (iterator.getCount() % 5 == 0) {
+                    log.info("{}: {} {}", next, iterator.getSpeed(), iterator.getFraction());
+                }
+                assertThat(count++).isEqualTo(iterator.getCount());
+            }
+            assertThatThrownBy(iterator::next).isInstanceOf(NoSuchElementException.class);
+        }
+        assertThat(count).isEqualTo(50);
+    }
+
+    @Test
+    public void iterateSearchHit() {
+        long count = 0;
+        try (HighLevelElasticSearchIterator<SearchHit> iterator = HighLevelElasticSearchIterator.<SearchHit>builder()
+            .client(highLevelClientFactory.highLevelClient())
+            .routing("a")
+            .build()) {
+            SearchSourceBuilder sourceBuilder = iterator.prepareSearchSource(helper.getIndexName());
+
+            TermQueryBuilder query = new TermQueryBuilder("title", "bar");
+            sourceBuilder.size(13);
+            sourceBuilder.query(query);
+            assertThat(iterator.getSizeQualifier()).contains(ElasticSearchIteratorInterface.TotalRelation.EQUAL_TO);
+
+            assertThat(iterator.getResponse().getScrollId()).isNotNull();
+            log.info("Iterating: {}", iterator);
+            while(iterator.hasNext()) {
+                SearchHit next = iterator.next();
+                if (iterator.getCount() % 5 == 0) {
+                    log.info("{}: {} {}", next, iterator.getRate(), iterator.getFraction());
+                }
+                assertThat(count++).isEqualTo(iterator.getCount());
+            }
+            assertThatThrownBy(iterator::next).isInstanceOf(NoSuchElementException.class);
+        }
+        assertThat(count).isEqualTo(50);
+    }
+
+    @Test
+    public void iterateString() {
+        long count = 0;
+        try (HighLevelElasticSearchIterator<String> iterator = HighLevelElasticSearchIterator.<String>builder()
+            .client(highLevelClientFactory.highLevelClient())
+            .adapt(SearchHit::getId)
+            .beanName("hltest")
+            .scrollContext(Duration.ofMillis(100))
+            .requestOptions(RequestOptions.DEFAULT.toBuilder().addHeader("X-a", "a").build())
+            .build()) {
+
+            assertThatThrownBy(iterator::getTotalSize).isInstanceOf(IllegalStateException.class);
+
+            iterator.prepareSearchSource(helper.getIndexName()).query(
+                 new WildcardQueryBuilder("title", "*")
+            );
+
+
+            assertThat(iterator.getResponse().getScrollId()).isNotNull();
+            log.info("Iterating: {}", iterator);
+            while(iterator.hasNext()) {
+                String next = iterator.next();
+                assertThat(next).matches("\\d+");
                 count++;
             }
         }
-        assertThat(count).isEqualTo(50);
+        assertThat(count).isEqualTo(100);
+    }
+
+    @Test
+    public void illegalConstructions()  {
+        assertThatThrownBy(() -> HighLevelElasticSearchIterator.<String>builder()
+            .client(highLevelClientFactory.highLevelClient())
+            .scrollContext(Duration.ofMillis(-100)).build()).isInstanceOf(IllegalArgumentException.class);
+
+        assertThatThrownBy(() -> HighLevelElasticSearchIterator.<String>builder()
+
+            .build()).isInstanceOf(NullPointerException.class).hasMessage("client is marked non-null but is null");
+
     }
 
 }

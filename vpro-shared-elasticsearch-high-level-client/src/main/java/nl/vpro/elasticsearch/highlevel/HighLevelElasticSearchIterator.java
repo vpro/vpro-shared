@@ -44,13 +44,11 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     private final Function<SearchHit, T> adapt;
     private final RestHighLevelClient client;
 
-    @Getter
     private SearchResponse response;
     @Getter
     private Long count = -1L;
     private SearchHits hits;
     private String scrollId;
-    private Long checkedOrder = 500L;
 
     private boolean hasNext;
     private int i = -1;
@@ -104,7 +102,11 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
-        this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
+        this.scrollContext = scrollContext == null ? Duration.ofSeconds(30) : scrollContext;
+
+        if (this.scrollContext.isNegative()) {
+            throw new IllegalArgumentException();
+        }
 
         if (beanName != null) {
             objectName = MBeans.registerBean(this, instance + "-" + beanName);
@@ -128,12 +130,14 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
                 return Jackson2Mapper.getLenientInstance()
                     .readValue(searchHit.getSourceRef().toBytesRef().bytes, clazz);
             } catch (Exception e) {
+                log.warn("{}: {}", searchHit, e.getMessage());
                 return null;
 
             }
         };
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> Function<SearchHit, T> adapterTo(Function<SearchHit, T> adapter, Class<T> clazz) {
         if (adapter != null && clazz != null) {
             throw new IllegalArgumentException();
@@ -152,13 +156,6 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         this.indices = indices;
         this.searchSourceBuilder = new SearchSourceBuilder();
         return this.searchSourceBuilder;
-    }
-
-    public SearchSourceBuilder getRequest() {
-        if (searchSourceBuilder == null) {
-            throw new IllegalStateException("prepareSearch not called");
-        }
-        return searchSourceBuilder;
     }
 
     @Override
@@ -206,12 +203,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     }
 
     protected boolean firstBatch() {
-        // first call only.
         if (searchSourceBuilder == null) {
             throw new IllegalStateException("prepareSearch not called");
-        }
-        if (client == null) {
-            throw new IllegalStateException("No client");
         }
         try {
             SearchRequest searchRequest = new SearchRequest(indices, searchSourceBuilder);
@@ -247,20 +240,12 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     }
 
     private Scroll getScroll() {
-        if (! scrollContext.isNegative()) {
-            return new Scroll(new TimeValue(scrollContext.toMillis(), TimeUnit.MILLISECONDS));
-        } else {
-            return new Scroll(new TimeValue(30, TimeUnit.SECONDS));
-        }
+        return new Scroll(new TimeValue(scrollContext.toMillis(), TimeUnit.MILLISECONDS));
     }
 
     private void nextBatch() {
         if (scrollId != null) {
             try {
-                if( count > checkedOrder) {
-                    checkedOrder = Long.MAX_VALUE;
-                }
-
                 SearchScrollRequest searchScrollRequest = new SearchScrollRequest(scrollId);
                 searchScrollRequest.scroll(getScroll());
                 response = client.scroll(searchScrollRequest, requestOptions);
@@ -327,6 +312,11 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         return Optional.ofNullable(this.totalRelation);
     }
 
+
+    public SearchResponse getResponse() {
+        findNext();
+        return response;
+    }
 
     @Override
     public String toString() {
