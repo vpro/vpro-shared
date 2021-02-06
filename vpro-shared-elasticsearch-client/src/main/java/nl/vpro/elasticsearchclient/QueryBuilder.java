@@ -16,6 +16,10 @@ import static nl.vpro.elasticsearch.Constants.SORT;
  * @since 1.75
  */
 public class QueryBuilder {
+    private QueryBuilder() {
+
+    }
+
     protected static void sort(ObjectNode request, String field, String dir){
         ArrayNode sort = request.withArray(SORT);
         ObjectNode sortNode  = sort.addObject();
