@@ -15,7 +15,11 @@ import static com.neovisionaries.i18n.CountryCode.NL;
  * @author Michiel Meeuwissen
  * @since 2.8
  */
-public class Locales {
+public final class Locales {
+
+    private Locales() {
+
+    }
 
     /**
      * The locale representing the dutch language, leaving unspecified for wich country.
@@ -51,9 +55,11 @@ public class Locales {
     public static Locale getDefault() {
         return DEFAULT.get();
     }
+
     public static void setDefault(Locale locale) {
         DEFAULT.set(locale);
     }
+
     public static void resetDefault() {
         DEFAULT.remove();
     }
@@ -85,7 +91,6 @@ public class Locales {
         return new Locale(lc.name());
     }
 
-
     public static Locale of(LanguageAlpha3Code lc) {
         LanguageCode alpha2 = lc.getAlpha2();
         if (alpha2 != null){
@@ -94,6 +99,7 @@ public class Locales {
             return new Locale(lc.name());
         }
     }
+
     public static Locale of(LanguageAlpha3Code lc, Country code) {
         LanguageCode alpha2 = lc.getAlpha2();
         if (alpha2 != null){
@@ -107,11 +113,15 @@ public class Locales {
         return s == null ? null : Locale.forLanguageTag(s.replace('_', '-'));
     }
 
-
     public static String getCountryName(Region country, Locale locale) {
         return country.getName(locale);
     }
 
+    /**
+     * Calculates a match score between to locale objects.
+     *
+     * @return an integers from 0 to 3, indicating how many of the locale components match
+     */
     public static int score(Locale locale1, Locale locale2) {
         int score = 0;
         if (locale1 == null || locale2 == null) {
@@ -148,18 +158,24 @@ public class Locales {
         return Optional.ofNullable(locale);
     }
 
+    public static boolean simplifyable(Locale locale){
+        return locale != null && (isNotEmpty(locale.getVariant()) || isNotEmpty(locale.getCountry()));
+    }
 
     public static  Locale simplify(Locale locale) {
         String variant = locale.getVariant();
-        if (variant != null && variant.length() > 0) {
+        if (isNotEmpty(variant)) {
             return new Locale(locale.getLanguage(), locale.getCountry());
         }
         String country = locale.getCountry();
-        if (country != null && country.length() > 0) {
+        if (isNotEmpty(country)) {
             return new Locale(locale.getLanguage());
         }
         return locale;
+    }
 
+    private static boolean isNotEmpty(String s){
+        return s != null && s.length() > 0;
     }
 
 }

@@ -14,7 +14,7 @@ import static java.util.Locale.ENGLISH;
 import static nl.vpro.i18n.Locales.DUTCH;
 
 /**
- *
+ * Represent multiple strings for different locales.
  * @author Michiel Meeuwissen
  * @since 0.47
  */
@@ -59,18 +59,24 @@ public class MultiLanguageString implements CharSequence {
     }
 
     public String get(Locale locale) {
-        String result = strings.get(locale);
-        if (result == null && locale.getVariant() != null) {
-            result = strings.get(new Locale(locale.getLanguage(), locale.getCountry()));
+        LocalizedString localized = getLocalized(locale);
+        if (localized != null) {
+            return localized.getValue();
+        } else {
+            return null;
         }
-        if (result == null && locale.getCountry() != null) {
-            result = strings.get(new Locale(locale.getLanguage()));
+    }
+
+    public LocalizedString getLocalized(Locale locale) {
+        String result = strings.get(locale);
+        while (result == null && Locales.simplifyable(locale)) {
+            locale = Locales.simplify(locale);
+            result = strings.get(locale);
         }
         if (result == null) {
             result = strings.get(defaultLocale);
         }
         if (args != null && result != null) {
-
             MessageFormat ft = new MessageFormat(result);
             ft.setLocale(locale);
             result = ft.format(args);
@@ -79,7 +85,7 @@ public class MultiLanguageString implements CharSequence {
             FormattingTuple ft = MessageFormatter.arrayFormat(result, slf4jArgs);
             result = ft.getMessage();
         }
-        return result;
+        return LocalizedString.of(result, locale);
 
     }
 

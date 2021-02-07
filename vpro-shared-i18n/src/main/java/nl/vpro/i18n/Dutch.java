@@ -14,6 +14,10 @@ import java.time.temporal.Temporal;
  */
 public class Dutch {
 
+    private  Dutch() {
+
+    }
+
     /**
      * The {@link ZoneId} in the Netherlands
      */

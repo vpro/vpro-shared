@@ -1,7 +1,10 @@
 package nl.vpro.i18n;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import javax.xml.XMLConstants;
@@ -24,7 +27,7 @@ import static nl.vpro.i18n.Locales.score;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @Slf4j
-public class LocalizedString implements CharSequence { //implements javax.xml.registry.infomodel.LocalizedString {
+public class LocalizedString implements CharSequence, Serializable { //implements javax.xml.registry.infomodel.LocalizedString {
 
 
 
@@ -44,45 +47,20 @@ public class LocalizedString implements CharSequence { //implements javax.xml.re
     @XmlAttribute(name = "lang", namespace = XMLConstants.XML_NS_URI)
     @JsonProperty("lang")
     @XmlJavaTypeAdapter(value = XmlLangAdapter.class)
+    @Getter
+    @Setter
     private Locale locale;
 
     @XmlValue
     @NonNull
+    @Getter
+    @Setter
     private String value;
 
-    private String charset;
+    @Getter
+    @Setter
+    private String charsetName;
 
-    //@Override
-    public String getCharsetName()  {
-        return charset;
-
-    }
-
-    //@Override
-    public Locale getLocale() {
-        return locale;
-    }
-
-    //@Override
-    public void setLocale(Locale locale) {
-        this.locale = locale;
-    }
-
-    //@Override
-    public String getValue() {
-        return value;
-    }
-
-    //@Override
-    public void setCharsetName(String charsetName) {
-        this.charset = charsetName;
-
-    }
-
-    //@Override
-    public void setValue(String value) {
-        this.value = value;
-    }
 
     public static String get(Locale locale, Iterable<LocalizedString> strings) {
         LocalizedString candidate = null;
@@ -124,7 +102,25 @@ public class LocalizedString implements CharSequence { //implements javax.xml.re
         return value;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        LocalizedString that = (LocalizedString) o;
+
+        if (!locale.equals(that.locale)) return false;
+        if (!value.equals(that.value)) return false;
+        return charsetName != null ? charsetName.equals(that.charsetName) : that.charsetName == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = locale.hashCode();
+        result = 31 * result + value.hashCode();
+        result = 31 * result + (charsetName != null ? charsetName.hashCode() : 0);
+        return result;
+    }
 
     public static class XmlLangAdapter extends XmlAdapter<String, Locale> {
 

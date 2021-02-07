@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
  */
 public class MultiLanguageStringTest {
 
@@ -17,9 +16,9 @@ public class MultiLanguageStringTest {
     @Test
     public void test() {
 
-        MultiLanguageString string = MultiLanguageString.builder()
-            .nl("Hoi")
+        MultiLanguageString string = MultiLanguageString
             .en("Hello")
+            .nl("Hoi")
             .in("eo").is("Saluton")
             .defaultLocale(new Locale("nl"))
             .build();
@@ -27,6 +26,26 @@ public class MultiLanguageStringTest {
         assertThat(string.toString()).isEqualTo("Hoi");
         assertThat(string.get(new Locale("en"))).isEqualTo("Hello");
         assertThat(string.get(new Locale("eo"))).isEqualTo("Saluton");
+        assertThat(string.get(new Locale("en", "US"))).isEqualTo("Hello");
+        assertThat(string.get(new Locale("fr"))).isEqualTo("Hoi");
+
+        assertThat(MultiLanguageString.get(string, Locale.ENGLISH)).isEqualTo("Hello");
+        assertThat(MultiLanguageString.get("Hello", Locale.ENGLISH)).isEqualTo("Hello");
+
+        assertThat(string.length()).isEqualTo(3);
+        assertThat(string.charAt(1)).isEqualTo('o');
+        assertThat(string.subSequence(1, 3)).isEqualTo("oi");
+
+    }
+
+    @Test
+    public void testWithoutDefault() {
+        MultiLanguageString string = MultiLanguageString
+            .en("Hello")
+            .nl("Hoi")
+            .in("eo").is("Saluton")
+            .build();
+        assertThat(string.get(new Locale("fr"))).isNull();
         assertThat(string.get(new Locale("en", "US"))).isEqualTo("Hello");
     }
 
@@ -54,7 +73,6 @@ public class MultiLanguageStringTest {
 
     @Test
     public void in() {
-
         MultiLanguageString string = MultiLanguageString
             .of(Locale.CHINESE, "asdfad")
             .build();
