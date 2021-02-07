@@ -9,8 +9,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
@@ -59,6 +58,10 @@ class HighLevelElasticSearchIteratorITest {
     @AfterAll
     public static void cleanup() {
         helper.deleteIndex();
+    }
+    @AfterEach
+    public void check() {
+        assertThat(ElasticSearchIteratorInterface.getScrollIds()).isEmpty();
     }
 
 
@@ -149,6 +152,28 @@ class HighLevelElasticSearchIteratorITest {
             }
         }
         assertThat(count).isEqualTo(100);
+    }
+
+    @Test
+    public void findNothing() {
+        long count = 0;
+        try (HighLevelElasticSearchIterator<String> iterator = HighLevelElasticSearchIterator.<String>builder()
+            .client(highLevelClientFactory.highLevelClient())
+            .adapt(SearchHit::getId)
+            .build()) {
+
+            iterator.prepareSearchSource(helper.getIndexName()).query(
+                 new TermQueryBuilder("title", "xxyy")
+            );
+
+            assertThat(iterator.getResponse().getScrollId()).isNotNull();
+            log.info("Iterating: {}", iterator);
+            while(iterator.hasNext()) {
+                iterator.next();
+                count++;
+            }
+        }
+        assertThat(count).isEqualTo(0);
     }
 
     @Test

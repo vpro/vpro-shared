@@ -2,7 +2,6 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -68,18 +67,8 @@ public class ElasticSearchIteratorITest {
 
     }
     @AfterEach
-    public void shutdown() throws IOException {
+    public void shutdown() {
         helper.deleteIndex();
-    }
-    @BeforeAll
-    public static void waitBefore() throws IOException, InterruptedException {
-        //System.out.println("PID " + ProcessHandle.current().pid());
-        Thread.sleep(10);
-    }
-
-    @AfterAll
-    public static void waitAfter() throws IOException, InterruptedException {
-        //Thread.sleep(1000000L);
     }
 
     @Test

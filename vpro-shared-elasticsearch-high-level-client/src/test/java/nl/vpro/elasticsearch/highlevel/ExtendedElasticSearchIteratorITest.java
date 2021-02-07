@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import nl.vpro.elasticsearch.CreateIndex;
+import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ClientElasticSearchFactory;
 import nl.vpro.elasticsearchclient.IndexHelper;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
@@ -53,6 +53,10 @@ class ExtendedElasticSearchIteratorITest {
         helper.deleteIndex();
     }
 
+    @AfterEach
+    public void check() {
+        assertThat(ElasticSearchIteratorInterface.getScrollIds()).isEmpty();
+    }
 
     @Test
     public void iterator() {
