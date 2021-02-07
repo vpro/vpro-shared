@@ -183,20 +183,22 @@ public class FileCachingInputStream extends InputStream {
                 bufferLength = 0;
                 buffer = null;
             }
-            // if arriving here, a temp file will be needed
-            if (path != null) {
-                if (! Files.isDirectory(path)) {
-                    Files.createDirectories(path);
-                    log.info("Created {}", path);
+
+            { // if arriving here, a temp file will be needed
+                if (path != null) {
+                    if (!Files.isDirectory(path)) {
+                        Files.createDirectories(path);
+                        log.info("Created {}", path);
+                    }
                 }
+
+                this.tempFile = tempPath == null ? Files.createTempFile(
+                    path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
+                    filePrefix == null ? "file-caching-inputstream" : filePrefix,
+                    null) : tempPath;
+
+                log.debug("Using {}", tempFile);
             }
-
-            this.tempFile = tempPath == null ? Files.createTempFile(
-                path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
-                filePrefix == null ? "file-caching-inputstream" : filePrefix,
-                null) : tempPath;
-
-            log.debug("Using {}", tempFile);
             if (outputBuffer == null) {
                 outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
             }
@@ -260,13 +262,13 @@ public class FileCachingInputStream extends InputStream {
                     log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
                     try {
                         closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
-                        log.debug("{} {}", tempFile, tempFile.toFile().length());
+                        log.debug("{} {} {}", c.isReady(), tempFile, tempFile.toFile().length());
                         consumer.accept(FileCachingInputStream.this);
+                        log.debug("accepted {}", consumer);
                         future.complete(this);
 
                     } catch (IOException ioe) {
                         future.completeExceptionally(ioe);
-
                     }
                     if (this.deleteTempFile) {
                         try {
@@ -358,10 +360,10 @@ public class FileCachingInputStream extends InputStream {
 
                 closed = true;
                 notifyAll();
-
             }
+
             if (copier != null) {
-                    // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
+                // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
                 log.debug("Closing copier");
                 try {
                     copier.waitForAndClose();
@@ -369,7 +371,7 @@ public class FileCachingInputStream extends InputStream {
                     throw new InterruptedIOException(interruptedException.getMessage());
                 }
             } else {
-                log.debug("No copier to close");
+                log.info("No copier to close");
             }
         } else {
             log.debug("Closed already", new Exception());
@@ -490,7 +492,7 @@ public class FileCachingInputStream extends InputStream {
                 if (copier.isReadyIOException() && result == EOF) {
                     // the copier did not return any new results
                     // don't increase count but return now.
-                    log.debug("Copier is ready,  no new results");
+                    log.debug("Copier is ready, no new results");
                     return EOF;
                 }
             }

@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -298,9 +299,11 @@ public class FileCachingInputStreamTest {
             .build();
     }
 
-    @Test
-    public void testReadNoAutoStart() throws IOException {
-        List<String> logs = new ArrayList<>();
+    @RepeatedTest(value = 100)
+    public void testReadAutoStart(RepetitionInfo repetitionInfo) throws IOException {
+
+        final List<String> logs = new CopyOnWriteArrayList<>();
+        final String expected = "[batch consumes " + MANY_BYTES.length + ", then apply again " + MANY_BYTES.length + ", then apply " + MANY_BYTES.length +"]";
         try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -312,7 +315,7 @@ public class FileCachingInputStreamTest {
                 }
             })
             .noProgressLogging()
-            .startImmediately(false)
+            .startImmediately(repetitionInfo.getCurrentRepetition() % 2 == 0)
             .build()) {
             inputStream.getFuture().thenApply(fc -> {
                 logs.add("then apply " + fc.getCount());
@@ -322,20 +325,18 @@ public class FileCachingInputStreamTest {
                 logs.add("then apply again " + fc.getCount())
             );
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             int r;
             while ((r = inputStream.read()) != -1) {
                 out.write(r);
             }
-            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
+            byte[] bytes = out.toByteArray();
+            assertThat(bytes).hasSize(MANY_BYTES.length);
+            assertThat(bytes).containsExactly(MANY_BYTES);
         }
-
-        assertThat(logs).containsExactly(
-            "batch consumes " + MANY_BYTES.length,
-            "then apply again " + MANY_BYTES.length,
-            "then apply " + MANY_BYTES.length
-        );
+        log.debug("Asserting now");
+        assertThat(logs.toString()).isEqualTo(expected);
     }
 
 

@@ -26,6 +26,8 @@ import static nl.vpro.util.FileCachingInputStream.EOF;
 public class Copier implements Runnable, Closeable {
 
     private volatile boolean ready;
+    private volatile boolean readyAndCallbacked;
+
     private volatile Throwable exception;
     private final  AtomicLong count = new AtomicLong(0);
 
@@ -44,21 +46,18 @@ public class Copier implements Runnable, Closeable {
     private final Object notify;
 
 
-    public Copier(InputStream i, OutputStream o, long batch) {
-        this(i, null, o, batch, null, null, null,  0, null, null);
-    }
 
 
     /**
      *
      * @param input The input stream to copy from (will be closed if ready)
      * @param output The output stream to copy to (will not be implicetely closed)
-     * @param batch
-     * @param batchConsumer
+     * @param batch The size of batches (defaults to 8192)
+     * @param batchConsumer Some action to perform after each batch
      * @param callback Called when ready, this should probably close the outputstream
      * @param errorHandler Called on error, just before callback
-     * @param offset
-     * @param name
+     * @param offset Just the initial value for {@link #getCount()}
+     * @param name A name to assign to this copier
      * @param notify if a batch was handled notify this object
      */
     @lombok.Builder(builderClassName = "Builder")
@@ -86,6 +85,11 @@ public class Copier implements Runnable, Closeable {
         this.logPrefix = name == null ? "" : name + ": ";
         this.notify = notify;
     }
+
+    public Copier(InputStream i, OutputStream o, long batch) {
+        this(i, null, o, batch, null, null, null,  0, null, null);
+    }
+
 
     public Copier(InputStream i, OutputStream o) {
         this(i, o, 8192L);
@@ -140,7 +144,7 @@ public class Copier implements Runnable, Closeable {
         }
     }
 
-
+/*
     private void copyWithIOUtils() throws IOException {
         while(true) {
             long result = IOUtils.copyLarge(input, output, 0, batch);
@@ -152,14 +156,14 @@ public class Copier implements Runnable, Closeable {
                 break;
             }
         }
-    }
+    }*/
 
 
     private void checkCount(long currentCount) {
         if (expectedCount != null) {
 
             if (currentCount < expectedCount) {
-                log.warn("write unsufficient {} < expected {}", count.get(), expectedCount);
+                log.warn("write insufficient {} < expected {}", count.get(), expectedCount);
             } else {
                 log.info("write succeeded {} == {}", count.get(), expectedCount);
             }
@@ -188,14 +192,17 @@ public class Copier implements Runnable, Closeable {
             ready = true;
         }
         handleError();
-        callBack(); // this would close the output stream
-        notifyIfRequested();
+        callBack();
+        synchronized(this) {
+            readyAndCallbacked = true;
+            notifyIfRequested();
+        }
     }
 
     public void waitFor() throws InterruptedException {
         executeIfNotRunning();
         synchronized (this) {
-            while (!ready) {
+            while (!readyAndCallbacked) {
                 wait();
             }
             log.debug("ready");
@@ -219,10 +226,10 @@ public class Copier implements Runnable, Closeable {
      * Checks whether this copier is ready, but will throw an {@link IOException} it it did not _successfully_ finish.
      */
     public boolean isReadyIOException() throws IOException {
-        if (ready) {
+        if (readyAndCallbacked) {
             throwIOExceptionIfNeeded();
         }
-        return ready;
+        return readyAndCallbacked;
     }
 
     public Optional<Throwable> getException() {
@@ -265,7 +272,6 @@ public class Copier implements Runnable, Closeable {
      */
     @Override
     public void close() throws IOException {
-
         if (cancelFutureIfNeeded()) {
             log.debug("Cancelled {}", future);
         }
