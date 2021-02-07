@@ -91,7 +91,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testRead(boolean downloadFirst) throws IOException {
+    public void testSlowRead(boolean downloadFirst) throws IOException {
 
         try(FileCachingInputStream inputStream =  slowReader(downloadFirst);
             ByteArrayOutputStream out = new ByteArrayOutputStream()
@@ -108,7 +108,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testReadBuffer(boolean downloadFirst) throws IOException {
+    public void testSlowReadBuffer(boolean downloadFirst) throws IOException {
 
         try(FileCachingInputStream inputStream = slowReader(downloadFirst)) {
 
@@ -303,7 +303,7 @@ public class FileCachingInputStreamTest {
     public void testReadAutoStart(RepetitionInfo repetitionInfo) throws IOException {
 
         final List<String> logs = new CopyOnWriteArrayList<>();
-        final String expected = "[batch consumes " + MANY_BYTES.length + ", then apply again " + MANY_BYTES.length + ", then apply " + MANY_BYTES.length +"]";
+        final String expected = "[batch consumes " + MANY_BYTES.length + ", then apply " + MANY_BYTES.length + ", then apply again " + MANY_BYTES.length +"]";
         try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -320,8 +320,7 @@ public class FileCachingInputStreamTest {
             inputStream.getFuture().thenApply(fc -> {
                 logs.add("then apply " + fc.getCount());
                 return fc;
-            });
-            inputStream.getFuture().thenAccept(fc ->
+            }).thenAccept(fc ->
                 logs.add("then apply again " + fc.getCount())
             );
 

@@ -100,11 +100,11 @@ public class Copier implements Runnable, Closeable {
         try {
             if (batchConsumer == null || batch < 1) {
                 count.addAndGet(IOUtils.copyLarge(input, output));
-                notifyIfRequested();
             } else {
                 batchConsumer.accept(this);
                 copy();
             }
+            output.flush();
         } catch (IOException ioe) {
             exception = ioe;
             log.debug(ioe.getMessage());
@@ -116,6 +116,7 @@ public class Copier implements Runnable, Closeable {
         } finally {
             log.debug("finally");
             afterRun();
+
         }
     }
 
@@ -191,6 +192,7 @@ public class Copier implements Runnable, Closeable {
         synchronized (this) {
             ready = true;
         }
+
         handleError();
         callBack();
         synchronized(this) {

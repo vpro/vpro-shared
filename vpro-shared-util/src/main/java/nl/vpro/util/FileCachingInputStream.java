@@ -492,7 +492,7 @@ public class FileCachingInputStream extends InputStream {
                 if (copier.isReadyIOException() && result == EOF) {
                     // the copier did not return any new results
                     // don't increase count but return now.
-                    log.debug("Copier is ready, no new results");
+                    log.debug("Copier is ready ({} bytes), no new results", copier.getCount());
                     return EOF;
                 }
             }
