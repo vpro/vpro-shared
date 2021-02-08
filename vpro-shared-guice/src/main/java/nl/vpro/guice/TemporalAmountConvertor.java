@@ -27,7 +27,7 @@ public class TemporalAmountConvertor implements TypeConverter {
             // leave to DurationConvertor
             return null;
         }
-        if (rawType.isAssignableFrom(TemporalAmount.class)) {
+        if (TemporalAmount.class.isAssignableFrom(rawType)) {
             return TimeUtils.parseTemporalAmount(s).orElse(null);
         }
         return null;

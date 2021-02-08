@@ -151,6 +151,9 @@ public class TimeUtils {
      * {@link #parseDuration(CharSequence)}
      */
     public static Optional<? extends TemporalAmount> parseTemporalAmount(CharSequence d) {
+        if (d == null) {
+            return Optional.empty();
+        }
         try {
             return Optional.of(Period.parse(d));
         } catch (DateTimeParseException dte) {
