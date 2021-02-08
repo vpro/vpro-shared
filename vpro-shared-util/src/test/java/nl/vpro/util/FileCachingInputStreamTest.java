@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -316,6 +317,7 @@ public class FileCachingInputStreamTest {
             .noProgressLogging()
             .startImmediately(repetitionInfo.getCurrentRepetition() % 2 == 0)
             .deleteTempFile(true)
+            .path(Paths.get(System.getProperty("java.io.tmpdir"), "filecaching"))
             .build()) {
             inputStream.getFuture().thenApply(fc -> {
                 logs.add("then apply " + fc.getCount());

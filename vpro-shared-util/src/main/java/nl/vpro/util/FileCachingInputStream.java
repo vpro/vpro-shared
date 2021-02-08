@@ -70,10 +70,16 @@ public class FileCachingInputStream extends InputStream {
     @Slf4j
     public static class Builder {
 
+        /**
+         * Calls {@link #path} but with an uri argument
+         */
         public Builder tempDir(URI uri) {
             return path(Paths.get(uri));
         }
 
+        /**
+         * Calls {@link #path} but with an string argument
+         */
         public Builder tempDir(String uri) {
             try {
                 return tempDir(URI.create(uri));
@@ -102,6 +108,7 @@ public class FileCachingInputStream extends InputStream {
      * @param batchSize Batch size
      * @param batchConsumer After reading every batch, you have the possibility to do something yourself too
      * @param path Directory for temporary files
+     * @param tempPath Path to temporary file to use
      * @param logger The logger to which possible logging will happen. Defaults to the logger of the {@link FileCachingInputStream} class itself
      * @param progressLogging Wether progress logging must be done (every batch)
      * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explictely false)
@@ -174,7 +181,7 @@ public class FileCachingInputStream extends InputStream {
                         }
                     }
                     tempFileInputStream = null;
-                    log.debug("the stream completely fit into the memory buffer");
+                    log.info("the stream completely fit into the memory buffer");
                     return;
                 } else {
                     buffer = buf;
@@ -186,9 +193,12 @@ public class FileCachingInputStream extends InputStream {
 
             { // if arriving here, a temp file will be needed
                 if (path != null) {
+                    if (tempPath != null) {
+                        throw new IllegalArgumentException("Specify either path or tempPath (or none), but not both");
+                    }
                     if (!Files.isDirectory(path)) {
                         Files.createDirectories(path);
-                        log.info("Created {}", path);
+                        log.info("Created directory {}", path);
                     }
                 }
 
