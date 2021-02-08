@@ -47,12 +47,20 @@ public class LocalizedStringTest {
             "}");
 
     }
+
     @Test
     public void unmarshal() {
         A a = JAXB.unmarshal(new StringReader("<local:a xmlns:local=\"uri:local\">\n" +
             "    <string xml:lang=\"nl_NL\">bla</string>\n" +
             "</local:a>"), A.class);
         assertThat(a.string.getLocale()).isEqualTo(NETHERLANDISH);
+    }
+
+    @Test
+    public void unmarshalAndMarshalNull() {
+        LocalizedString.XmlLangAdapter xml = new LocalizedString.XmlLangAdapter();
+        assertThat(xml.unmarshal(null)).isNull();
+        assertThat(xml.marshal(null)).isNull();
     }
 
 /*
@@ -75,11 +83,11 @@ public class LocalizedStringTest {
         assertThat(LocalizedString.adapt("nl_NL_informal")).isEqualTo(new Locale("nl", "NL", "informal"));
     }
 
-
     @Test
     public void adapNull() {
         assertThat(LocalizedString.adapt(null)).isNull();
     }
+
     @Test
     public void ofNull() {
         assertThat(LocalizedString.of(null, NETHERLANDISH)).isNull();
@@ -113,9 +121,7 @@ public class LocalizedStringTest {
         strings.add(LocalizedString.of("hi", Locale.US));
         strings.add(LocalizedString.builder().value("hi").locale(Locale.US).charsetName("ISO-5589-1").build());
         assertThat(LocalizedString.get(NETHERLANDISH, strings)).isEqualTo("hoi");
-
         assertThat(LocalizedString.get(NETHERLANDISH, null)).isNull();
-
     }
 
 }

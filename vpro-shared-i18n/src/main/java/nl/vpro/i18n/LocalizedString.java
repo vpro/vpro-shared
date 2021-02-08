@@ -135,13 +135,11 @@ public class LocalizedString implements CharSequence, Serializable { //implement
         @Override
         public Locale unmarshal(String v) {
             return adapt(v);
-
         }
 
         @Override
         public String marshal(Locale v) {
             return v == null ? null : v.toString();
-
         }
     }
 
