@@ -66,7 +66,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @Deprecated public static final String BULK = Paths.BULK;
 
 
-
     @Deprecated public static final String POST = Methods.POST;
     @Deprecated public static final String GET = Methods.GET;
     @Deprecated public static final String PUT = Methods.PUT;
@@ -1592,13 +1591,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     protected Request createHead(String su) {
-        return createRequest("HEAD", su);
+        return createRequest(Methods.HEAD, su);
     }
     protected Request createPut(String su) {
-        return createRequest(PUT, su);
+        return createRequest(Methods.PUT, su);
     }
     protected Request createDelete(String su) {
-        return createRequest(METHOD_DELETE, su);
+        return createRequest(Methods.METHOD_DELETE, su);
     }
 
 

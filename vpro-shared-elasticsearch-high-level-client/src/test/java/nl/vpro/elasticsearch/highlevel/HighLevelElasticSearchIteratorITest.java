@@ -119,6 +119,7 @@ class HighLevelElasticSearchIteratorITest {
             log.info("Iterating: {}", iterator);
             while(iterator.hasNext()) {
                 SearchHit next = iterator.next();
+                assertThat(next.getVersion()).isEqualTo(0L);
                 if (iterator.getCount() % 5 == 0) {
                     log.info("{}: {} {}", next, iterator.getRate(), iterator.getFraction());
                 }
@@ -158,7 +159,8 @@ class HighLevelElasticSearchIteratorITest {
         long count = 0;
         try (HighLevelElasticSearchIterator<String> iterator = HighLevelElasticSearchIterator.<String>builder()
             .client(highLevelClientFactory.highLevelClient())
-            .adapt(SearchHit::getId)
+            .requestVersion(true)
+            .adapt(sh -> sh.getId() + ":" + sh.getVersion())
             .beanName("hltest")
             .scrollContext(Duration.ofMillis(100))
             .requestOptions(RequestOptions.DEFAULT.toBuilder().addHeader("X-a", "a").build())
@@ -175,7 +177,7 @@ class HighLevelElasticSearchIteratorITest {
             log.info("Iterating: {}", iterator);
             while(iterator.hasNext()) {
                 String next = iterator.next();
-                assertThat(next).matches("\\d+");
+                assertThat(next).matches("\\d+:1");
                 count++;
             }
         }

@@ -75,6 +75,7 @@ public class Constants {
         public static final String GET = "GET";
         public static final String PUT = "PUT";
         public static final String METHOD_DELETE = "DELETE";
+        public static final String HEAD = "HEAD";
     }
 
 

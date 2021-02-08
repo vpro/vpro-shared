@@ -95,7 +95,7 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     private Long totalSize = null;
     private TotalRelation totalRelation = TotalRelation.EQUAL_TO;
 
-    private final boolean requestVersion = true;
+    private final Boolean requestVersion;
 
     @Getter
     private final WindowedEventRate rate;
@@ -133,7 +133,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         String beanName,
         WindowedEventRate rateMeasurerer,
         List<String> routingIds,
-        RequestOptions requestOptions
+        RequestOptions requestOptions,
+        Boolean requestVersion
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
@@ -156,11 +157,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
 
         this.routing = routingIds == null ? null : routingIds.toArray(new String[0]);
         this.requestOptions = requestOptions == null ? RequestOptions.DEFAULT : requestOptions;
+        this.requestVersion = requestVersion;
     }
-
-
-
-
 
 
     public static <T> Function<SearchHit, T> adapterTo(Class<T> clazz) {
@@ -254,6 +252,9 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         }
         try {
             SearchRequest searchRequest = new SearchRequest(indices, searchSourceBuilder);
+            if (requestVersion != null) {
+                searchSourceBuilder.version(requestVersion);
+            }
             start = Instant.now();
             searchRequest.scroll(getScroll());
             response = client.search(searchRequest, requestOptions);
