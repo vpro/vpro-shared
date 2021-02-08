@@ -236,16 +236,9 @@ public class FileCachingInputStream extends InputStream {
                 consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
             }
 
-            final boolean deleteOnClose;
+            final boolean deleteOnClose = this.deleteTempFile;
             if (openOptions == null) {
                 openOptions = new ArrayList<>();
-                if (this.deleteTempFile) {
-                    deleteOnClose = true;
-                } else {
-                    deleteOnClose = false;
-                }
-            } else {
-                deleteOnClose = false;
             }
             final boolean effectiveProgressLogging;
             if (progressLogging == null) {

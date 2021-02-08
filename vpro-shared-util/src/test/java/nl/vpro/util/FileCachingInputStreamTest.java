@@ -64,14 +64,12 @@ public class FileCachingInputStreamTest {
 
 
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @BeforeEach
     public void before(TestInfo testInfo) {
-        log.info(">-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), Thread.interrupted(), FileCachingInputStream.openStreams);
+        log.info(">-----{}. Interrupted {}, openstreams: {}", testInfo.getDisplayName(), Thread.interrupted(), FileCachingInputStream.openStreams);
         FileCachingInputStream.openStreams.set(0);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @AfterEach
     public void after(TestInfo testInfo) {
         boolean wasInterrupted = Thread.interrupted();
@@ -85,7 +83,7 @@ public class FileCachingInputStreamTest {
                 }
             }
         }
-        log.info("<-----{}. Interrupted {}, openstreams: {}", testInfo.getTestMethod().get().getName(), wasInterrupted, FileCachingInputStream.openStreams);
+        log.info("<-----{}. Interrupted {}, openstreams: {}", testInfo.getDisplayName(), wasInterrupted, FileCachingInputStream.openStreams);
         assertThat(FileCachingInputStream.openStreams.get()).isEqualTo(0);
     }
 
@@ -299,7 +297,7 @@ public class FileCachingInputStreamTest {
             .build();
     }
 
-    @RepeatedTest(value = 100)
+    @RepeatedTest(value = 100, name = "{displayName} {currentRepetition}")
     public void testReadAutoStart(RepetitionInfo repetitionInfo) throws IOException {
 
         final List<String> logs = new CopyOnWriteArrayList<>();
@@ -371,7 +369,7 @@ public class FileCachingInputStreamTest {
 
 
 
-    @RepeatedTest(5)
+    @RepeatedTest(value = 5, name = "{displayName} {currentRepetition}")
     public void testSimple() throws IOException {
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
