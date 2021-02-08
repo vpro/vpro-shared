@@ -316,7 +316,7 @@ public class FileCachingInputStreamTest {
             .noProgressLogging()
             .startImmediately(repetitionInfo.getCurrentRepetition() % 2 == 0)
             .deleteTempFile(true)
-            .path(Paths.get(System.getProperty("java.io.tmpdir"), "filecaching"))
+            .path(Paths.get(System.getProperty("java.io.tmpdir"), "filecaching" + repetitionInfo.getCurrentRepetition()))
             .build()) {
             inputStream.getFuture().thenApply(fc -> {
                 logs.add("then apply " + fc.getCount());
