@@ -219,6 +219,7 @@ public class FileCachingInputStream extends InputStream {
             if (buffer != null) {
                 // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
                 tempFileOutputStream.write(buffer, 0, bufferLength);
+                tempFileOutputStream.flush();
             }
 
             final Consumer<FileCachingInputStream> consumer;

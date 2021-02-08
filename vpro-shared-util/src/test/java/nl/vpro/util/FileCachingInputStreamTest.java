@@ -298,7 +298,7 @@ public class FileCachingInputStreamTest {
             .build();
     }
 
-    @RepeatedTest(value = 100, name = "{displayName} {currentRepetition}")
+    @RepeatedTest(value = 500, name = "{displayName} {currentRepetition}")
     public void testReadAutoStart(RepetitionInfo repetitionInfo) throws IOException {
 
         final List<String> logs = new CopyOnWriteArrayList<>();
