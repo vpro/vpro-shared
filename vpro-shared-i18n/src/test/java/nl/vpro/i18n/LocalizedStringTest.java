@@ -111,7 +111,11 @@ public class LocalizedStringTest {
         strings.add(LocalizedString.of("hoi", NETHERLANDISH));
         strings.add(LocalizedString.of("hey", FLEMISH));
         strings.add(LocalizedString.of("hi", Locale.US));
+        strings.add(LocalizedString.builder().value("hi").locale(Locale.US).charsetName("ISO-5589-1").build());
         assertThat(LocalizedString.get(NETHERLANDISH, strings)).isEqualTo("hoi");
+
+        assertThat(LocalizedString.get(NETHERLANDISH, null)).isNull();
+
     }
 
 }

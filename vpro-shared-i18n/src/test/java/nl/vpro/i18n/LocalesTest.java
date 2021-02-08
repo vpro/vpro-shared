@@ -19,6 +19,7 @@ class LocalesTest {
     @Test
     public void ofString() {
         assertThat(Locales.ofString("nl-NL-informal")).isEqualTo(new Locale("nl", "NL", "informal"));
+        assertThat(Locales.ofString(null)).isNull();
     }
 
 
@@ -57,7 +58,8 @@ class LocalesTest {
             new Locale("en"),
             new Locale("nl", "BE"),
             new Locale("nl", "NL"),
-            new Locale("nl")
+            new Locale("nl"),
+            null
             ))).isNotPresent();
 
         assertThat(Locales.findBestMatch(null, Stream.of(
@@ -66,6 +68,26 @@ class LocalesTest {
             new Locale("nl", "NL"),
             new Locale("nl")
             ))).isNotPresent();
+
+
+          assertThat(Locales.findBestMatch(new Locale("nl", "NL", "informal"), Stream.of(
+            new Locale("en"),
+            new Locale("nl", "BE"),
+            new Locale("nl", "NL"),
+            new Locale("nl")
+            ))).contains(Locales.NETHERLANDISH);
+
+
+        assertThat(Locales.findBestMatch(new Locale("nl", "NL", "informal"), Stream.of(
+            new Locale("en"),
+            null,
+            new Locale("nl", "BE"),
+            new Locale("nl", "NL"),
+            new Locale("nl", "BE", "informal"),
+            new Locale("nl", "NL", "informal"),
+            new Locale("nl", "NL", "formal"),
+            new Locale("nl")
+            ))).contains(new Locale("nl", "NL", "informal"));
 
     }
 

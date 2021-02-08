@@ -29,19 +29,16 @@ import static nl.vpro.i18n.Locales.score;
 @Slf4j
 public class LocalizedString implements CharSequence, Serializable { //implements javax.xml.registry.infomodel.LocalizedString {
 
-
-
     public static LocalizedString of(String value, Locale locale) {
         if (value == null) {
             return null;
         } else {
-            LocalizedString string = new LocalizedString();
-            string.value = value;
-            string.locale = locale;
-            return string;
+            return LocalizedString.builder()
+                .value(value)
+                .locale(locale)
+                .build();
         }
     }
-
 
 
     @XmlAttribute(name = "lang", namespace = XMLConstants.XML_NS_URI)
@@ -61,6 +58,17 @@ public class LocalizedString implements CharSequence, Serializable { //implement
     @Setter
     private String charsetName;
 
+
+    public LocalizedString() {
+
+    }
+
+    @lombok.Builder
+    private LocalizedString(Locale locale, @NonNull String value, String charsetName) {
+        this.locale = locale;
+        this.value = value;
+        this.charsetName = charsetName;
+    }
 
     public static String get(Locale locale, Iterable<LocalizedString> strings) {
         LocalizedString candidate = null;
