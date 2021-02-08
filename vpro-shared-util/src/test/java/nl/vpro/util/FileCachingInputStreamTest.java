@@ -87,7 +87,7 @@ public class FileCachingInputStreamTest {
         assertThat(FileCachingInputStream.openStreams.get()).isEqualTo(0);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{displayName} {arguments}")
     @ValueSource(booleans = {true, false})
     public void testSlowRead(boolean downloadFirst) throws IOException {
 
@@ -104,7 +104,7 @@ public class FileCachingInputStreamTest {
     }
 
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{displayName} {parameters}")
     @ValueSource(booleans = {true, false})
     public void testSlowReadBuffer(boolean downloadFirst) throws IOException {
 
@@ -223,7 +223,8 @@ public class FileCachingInputStreamTest {
         }
     }
 
-    @ParameterizedTest
+
+    @ParameterizedTest(name = "{displayName} {arguments}")
     @MethodSource("slowAndNormal")
     public void testReadFileGetsInterrupted(InputStream input, Long expectedCount) throws IOException {
         final Thread thisThread = Thread.currentThread();
@@ -390,7 +391,7 @@ public class FileCachingInputStreamTest {
         assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{displayName} {arguments}")
     @ValueSource(booleans = {true, false})
     public void testTempFile(boolean deleteTempFile) throws IOException {
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
