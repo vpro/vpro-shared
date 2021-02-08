@@ -97,12 +97,15 @@ class LocalesTest {
         assertThat(Locales.simplify(new Locale("nl", "BE"))).isEqualTo(new Locale("nl"));
         assertThat(Locales.simplify(new Locale("nl", "BE", "youth"))).isEqualTo(new Locale("nl", "BE"));
     }
+
     @Test
     public void simplifiable() {
-
+        assertThat(Locales.simplifyable(null)).isFalse();
         assertThat(Locales.simplifyable(new Locale("nl"))).isFalse();
         assertThat(Locales.simplifyable(new Locale("nl", "BE"))).isTrue();
         assertThat(Locales.simplifyable(new Locale("nl", "BE", "youth"))).isTrue();
+        assertThat(Locales.simplifyable(new Locale("nl", "", ""))).isFalse();
+        assertThat(Locales.simplifyable(new Locale("nl", "", "youth"))).isTrue();
     }
 
     @Test
