@@ -54,7 +54,7 @@ import nl.vpro.util.ThreadPools;
  * @since 2.22
  */
 @Slf4j
-public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorInterface<T> {
+public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorInterface<T>, HighLevelElasticSearchIteratorMXBean {
 
      private static long instances = 0;
 

@@ -119,7 +119,7 @@ class HighLevelElasticSearchIteratorITest {
             log.info("Iterating: {}", iterator);
             while(iterator.hasNext()) {
                 SearchHit next = iterator.next();
-                assertThat(next.getVersion()).isEqualTo(0L);
+                assertThat(next.getVersion()).isEqualTo(-1L); // we didnt request it
                 if (iterator.getCount() % 5 == 0) {
                     log.info("{}: {} {}", next, iterator.getRate(), iterator.getFraction());
                 }
