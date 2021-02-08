@@ -104,7 +104,7 @@ public class FileCachingInputStreamTest {
     }
 
 
-    @ParameterizedTest(name = "{displayName} {parameters}")
+    @ParameterizedTest(name = "{displayName} {arguments}")
     @ValueSource(booleans = {true, false})
     public void testSlowReadBuffer(boolean downloadFirst) throws IOException {
 
