@@ -1,6 +1,5 @@
 package nl.vpro.jmx;
 
-import lombok.Builder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +33,7 @@ public class Counter implements CounterMXBean {
     private final List<WindowedLongSummaryStatistics> durationStatistics = new ArrayList<>();
     private final ObjectName name;
 
-    @Builder
+    @lombok.Builder
     protected Counter(
         ObjectName name,
         Duration countWindow,

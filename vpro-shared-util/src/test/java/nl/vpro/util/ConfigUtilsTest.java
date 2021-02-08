@@ -1,6 +1,5 @@
 package nl.vpro.util;
 
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -30,7 +29,7 @@ public class ConfigUtilsTest {
         Integer b;
         List<E> enums;
 
-        @Builder
+        @lombok.Builder
         public AWithLombok(String a, Integer b, List<E> enums) {
             this.a = a;
             this.b = b;
