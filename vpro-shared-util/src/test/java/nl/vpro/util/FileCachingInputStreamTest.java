@@ -25,8 +25,7 @@ import org.opentest4j.AssertionFailedError;
 
 import static nl.vpro.util.FileCachingInputStream.throttle;
 import static org.apache.commons.io.IOUtils.EOF;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 
@@ -316,6 +315,7 @@ public class FileCachingInputStreamTest {
             })
             .noProgressLogging()
             .startImmediately(repetitionInfo.getCurrentRepetition() % 2 == 0)
+            .deleteTempFile(true)
             .build()) {
             inputStream.getFuture().thenApply(fc -> {
                 logs.add("then apply " + fc.getCount());
@@ -354,7 +354,6 @@ public class FileCachingInputStreamTest {
             .build()) {
 
             assertThat(inputStream.getBufferLength()).isEqualTo(MANY_BYTES.length);
-
 
             int r;
             while ((r = inputStream.read()) != -1) {
@@ -499,6 +498,45 @@ public class FileCachingInputStreamTest {
 
             assertThat(out.toByteArray()).containsExactly(HELLO);
         }
+    }
+
+
+    @Test
+    public void slowInput() throws IOException {
+        PipedInputStream pipedInputStream = new PipedInputStream();
+        PipedOutputStream outputStream = new PipedOutputStream(pipedInputStream);
+        new Thread(() -> {
+            InputStream bytes = new ByteArrayInputStream(MANY_BYTES);
+            try {
+                int r;
+                while ((r = bytes.read()) != -1) {
+                    outputStream.write(r);
+                    Thread.sleep(2);
+                }
+                log.info("ready");
+                outputStream.close();
+            } catch (IOException | InterruptedException e) {
+                log.error(e.getMessage(), e);
+            }
+
+        }).start();
+        try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .outputBuffer(2)
+            .batchSize(3)
+            .input(pipedInputStream)
+            .initialBuffer(4)
+            .noProgressLogging()
+            .startImmediately(true)
+            .build()) {
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            IOUtils.copy(inputStream, out);
+
+            byte[] bytes = out.toByteArray();
+            assertThat(bytes).hasSize(MANY_BYTES.length);
+            assertThat(bytes).containsExactly(MANY_BYTES);
+        }
+
     }
 
 
@@ -723,8 +761,6 @@ public class FileCachingInputStreamTest {
         assertThat(normalDestination).hasSize(SIZE_OF_HUGE_STREAM);
 
         //assertThat(normalDestination).hasSameBinaryContentAs(fileCachingDestination); // Will do an in memory comparison, this is unusable.
-
-
     }
 
     /**
@@ -762,6 +798,7 @@ public class FileCachingInputStreamTest {
 
         };
     }
+
 
     /**
      * This can be used in stead of {@link #nextBytes(Random, int, byte[], int, int)} to make an entirely predictable stream of bytes, which can be usefull during debugging.

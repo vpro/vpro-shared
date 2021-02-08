@@ -230,7 +230,6 @@ public class FileCachingInputStream extends InputStream {
             if (openOptions == null) {
                 openOptions = new ArrayList<>();
                 if (this.deleteTempFile) {
-                    openOptions.add(StandardOpenOption.DELETE_ON_CLOSE);
                     deleteOnClose = true;
                 } else {
                     deleteOnClose = false;
@@ -262,20 +261,13 @@ public class FileCachingInputStream extends InputStream {
                     log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
                     try {
                         closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
-                        log.debug("{} {} {}", c.isReady(), tempFile, tempFile.toFile().length());
+                        log.info("{} {} {}", c.isReady(), tempFile, tempFile.toFile().length());
                         consumer.accept(FileCachingInputStream.this);
                         log.debug("accepted {}", consumer);
                         future.complete(this);
 
                     } catch (IOException ioe) {
                         future.completeExceptionally(ioe);
-                    }
-                    if (this.deleteTempFile) {
-                        try {
-                            Files.deleteIfExists(tempFile);
-                        } catch (IOException ioException) {
-                            log.debug(ioException.getMessage());
-                        }
                     }
                     Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
                 })
@@ -372,6 +364,14 @@ public class FileCachingInputStream extends InputStream {
                 }
             } else {
                 log.info("No copier to close");
+            }
+            if (this.deleteTempFile) {
+                try {
+                    log.debug("Deleting {}", tempFile);
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException ioException) {
+                    log.debug(ioException.getMessage());
+                }
             }
         } else {
             log.debug("Closed already", new Exception());
@@ -568,7 +568,8 @@ public class FileCachingInputStream extends InputStream {
     }
     private void closeAndDecStreams(String desc, Closeable closable) throws IOException {
         synchronized (openStreams) {
-            log.debug("{} closing {} {}", openStreams.decrementAndGet(), desc, closable);
+            int i = openStreams.decrementAndGet();
+            log.debug("{} closing {} {}", i, desc, closable);
             closable.close();
         }
     }

@@ -143,6 +143,7 @@ public class Copier implements Runnable, Closeable {
                 part = 0;
             }
         }
+        log.debug("Copied {} from {} to {}", getCount(), input, output);
     }
 
 /*
@@ -162,7 +163,6 @@ public class Copier implements Runnable, Closeable {
 
     private void checkCount(long currentCount) {
         if (expectedCount != null) {
-
             if (currentCount < expectedCount) {
                 log.warn("write insufficient {} < expected {}", count.get(), expectedCount);
             } else {
