@@ -365,7 +365,7 @@ public class FileCachingInputStream extends InputStream {
             } else {
                 log.info("No copier to close");
             }
-            if (this.deleteTempFile) {
+            if (this.tempFile != null && this.deleteTempFile) {
                 try {
                     log.debug("Deleting {}", tempFile);
                     Files.deleteIfExists(tempFile);
