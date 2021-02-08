@@ -23,6 +23,8 @@ import org.elasticsearch.search.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.meeuw.math.windowed.WindowedEventRate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ElasticSearchIterator;
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -30,6 +32,24 @@ import nl.vpro.jmx.MBeans;
 import nl.vpro.util.ThreadPools;
 
 /**
+  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
+ * <pre>{@code
+ *        try (ElasticSearchIterator<SearchHit> i = ElasticSearchIterator.searchHits(client)) {
+ *        SearchSourceBuilder search = i.prepareSearchSource("pageupdates-publish");
+ *        // fill your request here
+ *
+ *        i.start() // optional
+ *
+ *        i.forEachRemaining((node) -> {
+ *             String url = node.get("url").textValue();
+ *             if (i.getCount() % 1000 == 0) {
+ *                 log.info("{}: {}", i.getCount(), url);
+ *
+ *             }
+ *         });
+ *         }
+ *
+ * }</pre>
  * @author Michiel Meeuwissen
  * @since 2.22
  */
@@ -87,6 +107,21 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     private RequestOptions requestOptions;
 
 
+    public static HighLevelElasticSearchIterator.Builder<SearchHit> searchHitsBuilder(RestHighLevelClient client) {
+        return HighLevelElasticSearchIterator.<SearchHit>builder()
+            .client(client);
+    }
+
+    public static HighLevelElasticSearchIterator<SearchHit> searchHits(RestHighLevelClient client) {
+        return searchHitsBuilder(client).build();
+    }
+
+    public static HighLevelElasticSearchIterator<JsonNode> sources(RestHighLevelClient client) {
+        return HighLevelElasticSearchIterator.<JsonNode>builder()
+            .client(client)
+            .adapt(adapterTo(JsonNode.class))
+            .build();
+    }
 
     @lombok.Builder(builderClassName = "Builder")
     @lombok.SneakyThrows
@@ -122,6 +157,10 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         this.routing = routingIds == null ? null : routingIds.toArray(new String[0]);
         this.requestOptions = requestOptions == null ? RequestOptions.DEFAULT : requestOptions;
     }
+
+
+
+
 
 
     public static <T> Function<SearchHit, T> adapterTo(Class<T> clazz) {
@@ -162,7 +201,14 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     public boolean hasNext() {
         findNext();
         return hasNext;
+    }
 
+    public void start() {
+        if (response != null) {
+            throw new IllegalStateException();
+        } else {
+            firstBatch();
+        }
     }
 
     protected void findNext() {

@@ -11,6 +11,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.jupiter.api.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ClientElasticSearchFactory;
@@ -100,21 +102,47 @@ class HighLevelElasticSearchIteratorITest {
     @Test
     public void iterateSearchHit() {
         long count = 0;
-        try (HighLevelElasticSearchIterator<SearchHit> iterator = HighLevelElasticSearchIterator.<SearchHit>builder()
-            .client(highLevelClientFactory.highLevelClient())
-            .routing("a")
-            .build()) {
+        try (HighLevelElasticSearchIterator<SearchHit> iterator = HighLevelElasticSearchIterator.searchHits(highLevelClientFactory.highLevelClient())) {
             SearchSourceBuilder sourceBuilder = iterator.prepareSearchSource(helper.getIndexName());
 
             TermQueryBuilder query = new TermQueryBuilder("title", "bar");
             sourceBuilder.size(13);
             sourceBuilder.query(query);
+
+            iterator.start();
+
+            assertThatThrownBy(iterator::start).isInstanceOf(IllegalStateException.class);
+
             assertThat(iterator.getSizeQualifier()).contains(ElasticSearchIteratorInterface.TotalRelation.EQUAL_TO);
 
             assertThat(iterator.getResponse().getScrollId()).isNotNull();
             log.info("Iterating: {}", iterator);
             while(iterator.hasNext()) {
                 SearchHit next = iterator.next();
+                if (iterator.getCount() % 5 == 0) {
+                    log.info("{}: {} {}", next, iterator.getRate(), iterator.getFraction());
+                }
+                assertThat(count++).isEqualTo(iterator.getCount());
+            }
+            assertThatThrownBy(iterator::next).isInstanceOf(NoSuchElementException.class);
+        }
+        assertThat(count).isEqualTo(50);
+    }
+
+     @Test
+    public void iterateSources() {
+        long count = 0;
+        try (HighLevelElasticSearchIterator<JsonNode> iterator = HighLevelElasticSearchIterator.sources(highLevelClientFactory.highLevelClient())) {
+
+            SearchSourceBuilder sourceBuilder = iterator.prepareSearchSource(helper.getIndexName());
+            TermQueryBuilder query = new TermQueryBuilder("title", "bar");
+            sourceBuilder.query(query);
+
+            assertThat(iterator.getResponse().getScrollId()).isNotNull();
+            log.info("Iterating: {}", iterator);
+            while(iterator.hasNext()) {
+                JsonNode next = iterator.next();
+                assertThat(next.get("title").textValue()).isEqualTo("bar");
                 if (iterator.getCount() % 5 == 0) {
                     log.info("{}: {} {}", next, iterator.getRate(), iterator.getFraction());
                 }
