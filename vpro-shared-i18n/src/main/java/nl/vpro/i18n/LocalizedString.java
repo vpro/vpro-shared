@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Locale;
 
 import javax.xml.XMLConstants;
@@ -33,13 +34,15 @@ public class LocalizedString implements CharSequence, Serializable { //implement
         if (value == null) {
             return null;
         } else {
-            return LocalizedString.builder()
-                .value(value)
+            return LocalizedString.builderOf(value)
                 .locale(locale)
                 .build();
         }
     }
 
+    public static LocalizedString.Builder builderOf(String value) {
+        return builder().value(value);
+    }
 
     @XmlAttribute(name = "lang", namespace = XMLConstants.XML_NS_URI)
     @JsonProperty("lang")
@@ -64,9 +67,19 @@ public class LocalizedString implements CharSequence, Serializable { //implement
     }
 
     @lombok.Builder
-    private LocalizedString(Locale locale, @NonNull String value, String charsetName) {
+    private LocalizedString(
+        Locale locale,
+        @NonNull String value,
+        String charsetName,
+        Charset charset) {
         this.locale = locale;
         this.value = value;
+        if (charset != null) {
+            if (charsetName != null) {
+                throw new IllegalArgumentException();
+            }
+            charsetName = charset.name();
+        }
         this.charsetName = charsetName;
     }
 

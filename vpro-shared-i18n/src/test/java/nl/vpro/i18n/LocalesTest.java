@@ -37,7 +37,6 @@ class LocalesTest {
     }
 
 
-
     @Test
     public void findBestMatch() {
         assertThat(Locales.findBestMatch(Locales.DUTCH, Stream.of(
@@ -93,9 +92,34 @@ class LocalesTest {
 
     @Test
     public void simplify() {
+        assertThat(Locales.simplify(null)).isNull();
         assertThat(Locales.simplify(new Locale("nl"))).isEqualTo(new Locale("nl"));
         assertThat(Locales.simplify(new Locale("nl", "BE"))).isEqualTo(new Locale("nl"));
         assertThat(Locales.simplify(new Locale("nl", "BE", "youth"))).isEqualTo(new Locale("nl", "BE"));
+    }
+    @Test
+    public void simplifiable() {
+
+        assertThat(Locales.simplifyable(new Locale("nl"))).isFalse();
+        assertThat(Locales.simplifyable(new Locale("nl", "BE"))).isTrue();
+        assertThat(Locales.simplifyable(new Locale("nl", "BE", "youth"))).isTrue();
+    }
+
+    @Test
+    public void setDefault() {
+        Locale.setDefault(Locales.DUTCH);
+        Locales.resetDefault();
+        assertThat(Locales.getDefault()).isEqualTo(Locales.DUTCH);
+        Locales.setDefault(Locale.US);
+        assertThat(Locales.getDefault()).isEqualTo(Locale.US);
+        Locales.resetDefault();
+        Locales.setDefault(Locales.DUTCH);
+
+        try (Locales.RestoreDefaultLocale ac = Locales.with(Locales.FLEMISH)) {
+            assertThat(Locales.getDefault()).isEqualTo(Locales.FLEMISH);
+        }
+        Locales.setDefault(Locales.DUTCH);
+
     }
 
 }

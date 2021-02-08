@@ -163,6 +163,9 @@ public final class Locales {
     }
 
     public static  Locale simplify(Locale locale) {
+        if (locale == null) {
+            return null;
+        }
         String variant = locale.getVariant();
         if (isNotEmpty(variant)) {
             return new Locale(locale.getLanguage(), locale.getCountry());
