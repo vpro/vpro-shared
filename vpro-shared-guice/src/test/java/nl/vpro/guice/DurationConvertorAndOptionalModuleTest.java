@@ -84,8 +84,6 @@ public class DurationConvertorAndOptionalModuleTest {
             new OptionalModule(A.class)
         );
 
-
-
     }
 
     @Test
@@ -98,8 +96,6 @@ public class DurationConvertorAndOptionalModuleTest {
         assertThat(a.b.isPresent()).isFalse();
         assertThat(a.c).isNotNull();
         assertThat(a.d.isPresent()).isTrue();
-
-
     }
 
 
