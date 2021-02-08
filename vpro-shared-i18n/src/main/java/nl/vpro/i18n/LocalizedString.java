@@ -61,25 +61,17 @@ public class LocalizedString implements CharSequence, Serializable { //implement
     @Setter
     private String charsetName;
 
-
     public LocalizedString() {
 
     }
 
-    @lombok.Builder
+    @lombok.Builder(toBuilder = true)
     private LocalizedString(
         Locale locale,
         @NonNull String value,
-        String charsetName,
-        Charset charset) {
+        String charsetName) {
         this.locale = locale;
         this.value = value;
-        if (charset != null) {
-            if (charsetName != null) {
-                throw new IllegalArgumentException();
-            }
-            charsetName = charset.name();
-        }
         this.charsetName = charsetName;
     }
 
@@ -172,6 +164,11 @@ public class LocalizedString implements CharSequence, Serializable { //implement
                 return new Locale(language, split[1].toUpperCase());
             default:
                 return new Locale(language, split[1].toUpperCase(), split[2]);
+        }
+    }
+    public static class Builder {
+        public Builder charset(Charset charset) {
+            return charsetName(charset.name());
         }
     }
 }

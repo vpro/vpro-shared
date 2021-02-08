@@ -134,15 +134,18 @@ public class LocalizedStringTest {
         assertThat(LocalizedString.get(NETHERLANDISH, null)).isNull();
     }
 
-    @SuppressWarnings("EqualsWithItself")
+    @SuppressWarnings({"EqualsWithItself", "ConstantConditions"})
     @Test
     public void equals() {
         LocalizedString hoi = of("hoi", NETHERLANDISH);
         assertThat(hoi.equals(hoi)).isTrue();
+        assertThat(hoi.equals(null)).isFalse();
         assertThat(hoi.equals(new Object())).isFalse();
         assertThat(hoi.equals(of("hoi", Locale.US))).isFalse();
         assertThat(hoi.equals(of("hallo", NETHERLANDISH))).isFalse();
         assertThat(hoi.equals(builderOf("hoi").locale(NETHERLANDISH).charset(UTF_8).build())).isFalse();
+        assertThat(hoi.toBuilder().charsetName("UTF-8").build().equals(builderOf("hoi").locale(NETHERLANDISH).charset(UTF_8).build())).isTrue();
     }
+
 
 }
