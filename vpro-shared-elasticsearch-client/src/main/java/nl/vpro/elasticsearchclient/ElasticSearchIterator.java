@@ -57,7 +57,7 @@ import static nl.vpro.elasticsearch.Constants.Methods.POST;
  * @since 0.47
  */
 @Slf4j
-public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T> {
+public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T>, ElasticSearchIteratorMXBean {
 
     private static long instances = 0;
 
