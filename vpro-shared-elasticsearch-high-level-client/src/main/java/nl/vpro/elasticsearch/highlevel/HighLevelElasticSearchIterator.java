@@ -201,6 +201,11 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         return hasNext;
     }
 
+    /**
+     * Retrieves the first batch of results. From now on you can't modified the query any more.
+     * This will also happen implicitely if you don't call this, but sometimes it make the code clearer when doing it explicitely.
+     *
+     */
     public void start() {
         if (response != null) {
             throw new IllegalStateException();
