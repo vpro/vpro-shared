@@ -224,7 +224,7 @@ public class FileCachingInputStream extends InputStream {
 
             final Consumer<FileCachingInputStream> consumer;
             if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
-                AtomicLong batchCount = new AtomicLong(0);
+                final AtomicLong batchCount = new AtomicLong(0);
                 consumer = t -> {
                     if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
                         log.info("Creating {} ({} bytes written)", tempFile, t.copier.getCount());
