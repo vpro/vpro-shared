@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 2.22
  */
 public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest<E> {
+
     @Property
     default void  equalsConsistentWithComparable(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
         Assume.that(x != null);

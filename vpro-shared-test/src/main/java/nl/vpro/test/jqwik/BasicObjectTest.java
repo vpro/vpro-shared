@@ -9,6 +9,7 @@ import java.util.List;
 import nl.vpro.util.Pair;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 
 /**
@@ -102,6 +103,13 @@ public interface BasicObjectTest<E> {
     @Property
     default void hashCodeIsConsistentWithEquals(@ForAll(EQUAL_DATAPOINTS) Pair<E, E> pair) {
         assertThat(pair.getFirst().hashCode()).isEqualTo(pair.getSecond().hashCode());
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Property
+    default void toString(@ForAll(DATAPOINTS) E object) {
+        Assume.that(object != null);
+        assertThatNoException().isThrownBy(object::toString);
     }
 
 
