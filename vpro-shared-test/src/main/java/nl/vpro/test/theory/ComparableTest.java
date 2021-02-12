@@ -10,7 +10,7 @@ import static org.junit.Assume.assumeNotNull;
  * @author Michiel Meeuwissen
  * @since 1.6
  * @deprecated
- * @see nl.vpro.test.jwik.ComparableTest
+ * @see nl.vpro.test.jqwik.ComparableTest
  */
 @Deprecated
 public abstract class ComparableTest<S extends Comparable<S>> extends ObjectTest<S> {

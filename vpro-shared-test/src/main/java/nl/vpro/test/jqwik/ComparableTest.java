@@ -1,4 +1,4 @@
-package nl.vpro.test.jwik;
+package nl.vpro.test.jqwik;
 
 import net.jqwik.api.*;
 
@@ -11,14 +11,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest<E> {
     @Property
-    default void  equalsConsistentWithComparable(@ForAll(ELEMENTS) E x, @ForAll(ELEMENTS) E y) {
+    default void  equalsConsistentWithComparable(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
         Assume.that(x != null);
         Assume.that(y != null);
         assertThat(x.compareTo(y) == 0).isEqualTo(x.equals(y));
     }
 
     @Property
-    default void compareToNull(@ForAll(ELEMENTS) E x) {
+    default void compareToNull(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);
         assertThatThrownBy(() -> {
             x.compareTo(null);

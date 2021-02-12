@@ -19,7 +19,7 @@ import static org.junit.Assume.assumeThat;
  *
  * @param <T> Type of object which is tested
  * @deprecated
- * @see nl.vpro.test.jwik.BasicObjectTest
+ * @see nl.vpro.test.jqwik.BasicObjectTest
  */
 @Ignore
 @RunWith(Theories.class)

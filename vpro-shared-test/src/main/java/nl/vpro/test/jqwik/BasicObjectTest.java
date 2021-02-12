@@ -1,24 +1,32 @@
-package nl.vpro.test.jwik;
+package nl.vpro.test.jqwik;
 
 
 import net.jqwik.api.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import nl.vpro.util.Pair;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
  * @author Michiel Meeuwissen
- * @since ...
+ * @since 2.22
  */
 public interface BasicObjectTest<E> {
 
-    String ELEMENTS = "elements";
+    String DATAPOINTS = "datapoints";
+
+    String EQUAL_DATAPOINTS = "equalDatapoints";
+
 
     /**
      * For any non-null reference value x, x.equals(x) should return true
      */
     @Property
-    default void equalsIsReflexive(@ForAll(ELEMENTS) E x) {
+    default void equalsIsReflexive(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);;
         assertThat(x.equals(x)).isTrue();
     }
@@ -28,7 +36,7 @@ public interface BasicObjectTest<E> {
      * should return true if and only if y.equals(x) returns true.
      */
     @Property
-    default void equalsIsSymmetric(@ForAll(ELEMENTS) E x, @ForAll(ELEMENTS) E y) {
+    default void equalsIsSymmetric(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
         Assume.that(x != null);
         Assume.that(y != null);
         assertThat(x.equals(y)).isEqualTo(y.equals(x));
@@ -40,12 +48,9 @@ public interface BasicObjectTest<E> {
      * should return true.
      */
     @Property
-    default  void equalsIsTransitive(@ForAll(ELEMENTS) E x, @ForAll(ELEMENTS) E y, @ForAll(ELEMENTS) E z) {
-        Assume.that(x != null);
-        Assume.that(y != null);
-        Assume.that(z != null);
-        Assume.that(x.equals(y) && y.equals(z));
-        assertThat(x.equals(z)).isTrue();
+    default  void equalsIsTransitive(@ForAll(EQUAL_DATAPOINTS) Pair<E, E> p1, @ForAll(EQUAL_DATAPOINTS) Pair<E, E> p2) {
+
+        assertThat(p1.getFirst().equals(p2.getSecond())).isEqualTo(p1.getSecond().equals(p2.getFirst()));
     }
 
     /**
@@ -55,7 +60,7 @@ public interface BasicObjectTest<E> {
      * the objects is modified.
      */
     @Property
-    default void equalsIsConsistent(@ForAll(ELEMENTS) E x, @ForAll(ELEMENTS) E y) {
+    default void equalsIsConsistent(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
         Assume.that(x != null);
         boolean alwaysTheSame = x.equals(y);
 
@@ -69,7 +74,7 @@ public interface BasicObjectTest<E> {
      * return false.
      */
     @Property
-    default void equalsReturnFalseOnNull(@ForAll(ELEMENTS) E x) {
+    default void equalsReturnFalseOnNull(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);
         assertThat(x.equals(null)).isFalse();
     }
@@ -80,7 +85,7 @@ public interface BasicObjectTest<E> {
      * integer.
      */
     @Property
-    default void hashCodeIsSelfConsistent(@ForAll(ELEMENTS) E x) {
+    default void hashCodeIsSelfConsistent(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);
         int alwaysTheSame = x.hashCode();
 
@@ -95,14 +100,27 @@ public interface BasicObjectTest<E> {
      * must produce the same integer result.
      */
     @Property
-    default void hashCodeIsConsistentWithEquals(@ForAll(ELEMENTS) E x, @ForAll(ELEMENTS) E y) {
-        Assume.that(x != null);
-        Assume.that(x.equals(y));
-        assertThat(x.hashCode()).isEqualTo(y.hashCode());
+    default void hashCodeIsConsistentWithEquals(@ForAll(EQUAL_DATAPOINTS) Pair<E, E> pair) {
+        assertThat(pair.getFirst().hashCode()).isEqualTo(pair.getSecond().hashCode());
     }
 
 
     @Provide
-    Arbitrary<? extends E> elements();
+    Arbitrary<? extends E> datapoints();
+
+    @Provide
+    default Arbitrary<? extends Pair<E, E>> equalDatapoints() {
+        List<Pair<E, E>> pairs = new ArrayList<>();
+        datapoints().forEachValue(x -> {
+            datapoints().forEachValue(y -> {
+                if (x != null) {
+                    if (x.equals(y)) {
+                        pairs.add(Pair.of(x, y));
+                    }
+                }
+            });
+        });
+        return Arbitraries.of(pairs);
+    }
 
 }
