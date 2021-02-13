@@ -41,6 +41,8 @@ public class Constants {
         public static final String WILDCARD = "wildcard";
         public static final String TERMS = "terms";
         public static final String PREFIX = "prefix";
+        public static final String SIZE = "size";
+
     }
 
     public static final String FILTER = "filter";
