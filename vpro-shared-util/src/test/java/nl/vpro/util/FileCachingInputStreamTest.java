@@ -298,7 +298,7 @@ public class FileCachingInputStreamTest {
             .build();
     }
 
-    @RepeatedTest(value = 50, name = "{displayName} {currentRepetition}")
+    @RepeatedTest(value = 5000, name = "{displayName} {currentRepetition}")
     public void testReadAutoStart(RepetitionInfo repetitionInfo) throws IOException {
 
         final List<String> logs = new CopyOnWriteArrayList<>();
@@ -311,6 +311,9 @@ public class FileCachingInputStreamTest {
             .batchConsumer((fc) -> {
                 if (fc.isReady()) {
                     logs.add("batch consumes " + fc.getCount());
+                    if (fc.getCount() < 1500) {
+                        log.info("{}", logs, new Exception());
+                    }
                 }
             })
             .noProgressLogging()
@@ -386,7 +389,7 @@ public class FileCachingInputStreamTest {
 
         inputStream.close();
 
-        assertThat(inputStream.getCopier().getFuture()).isDone();
+        assertThat(inputStream.getToFileCopier().getFuture()).isDone();
 
         assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
     }
@@ -502,6 +505,7 @@ public class FileCachingInputStreamTest {
     }
 
 
+    @SuppressWarnings("BusyWait")
     @Test
     public void slowInput() throws IOException {
         PipedInputStream pipedInputStream = new PipedInputStream();
@@ -630,9 +634,9 @@ public class FileCachingInputStreamTest {
 
             assertThat(stream.getFuture()).isCompletedExceptionally();
             assertThat(stream.available()).isEqualTo(0);
-            assertThat(stream.getCopier().isReady()).isTrue();
+            assertThat(stream.getToFileCopier().isReady()).isTrue();
             assertThatThrownBy(() ->
-                stream.getCopier().isReadyIOException()
+                stream.getToFileCopier().isReadyIOException()
             ) .isInstanceOf(IOException.class)
                 .hasMessage("breaking!");
 
