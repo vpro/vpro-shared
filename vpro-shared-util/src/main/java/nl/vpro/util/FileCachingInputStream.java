@@ -7,7 +7,8 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +19,6 @@ import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -41,15 +41,14 @@ public class FileCachingInputStream extends InputStream {
 
     static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
     static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
-
     static final int EOF = -1;
+    static final AtomicInteger openStreams = new AtomicInteger(0);
+
     @Getter(AccessLevel.PACKAGE)
     @VisibleForTesting
-    private final Copier copier;
+    private final Copier toFileCopier;
+
     private final byte[] buffer;
-    @Getter(AccessLevel.PACKAGE)
-    @VisibleForTesting
-    private final int bufferLength;
 
     private final Path tempFile;
     private final boolean deleteTempFile;
@@ -59,50 +58,10 @@ public class FileCachingInputStream extends InputStream {
 
     private volatile boolean closed = false;
     private final AtomicLong count = new AtomicLong(0);
-    static final AtomicInteger openStreams = new AtomicInteger(0);
-
-    private Logger log = LoggerFactory.getLogger(FileCachingInputStream.class);
+    private final Logger log ;
 
     @Getter
     private final CompletableFuture<FileCachingInputStream> future = new CompletableFuture<>();
-
-
-    @Slf4j
-    public static class Builder {
-
-        /**
-         * Calls {@link #path} but with an uri argument
-         */
-        public Builder tempDir(URI uri) {
-            return path(Paths.get(uri));
-        }
-
-        /**
-         * Calls {@link #path} but with an string argument
-         */
-        public Builder tempDir(String uri) {
-            try {
-                return tempDir(URI.create(uri));
-            } catch (IllegalArgumentException iae) {
-                log.debug("{}:{} Supposing it a file name", uri, iae.getMessage());
-                return path(Paths.get(uri));
-            }
-        }
-
-        public Builder tempFile(Path path) {
-            return tempPath(path);
-        }
-
-
-        public Builder tempFile(File file) {
-            return tempPath(file.toPath());
-        }
-
-        public Builder noProgressLogging() {
-            return progressLogging(false);
-        }
-
-    }
 
     /**
      * @param batchSize Batch size
@@ -125,7 +84,6 @@ public class FileCachingInputStream extends InputStream {
         final Consumer<FileCachingInputStream> batchConsumer,
         Integer outputBuffer,
         final Logger logger,
-        List<OpenOption> openOptions,
         Integer initialBuffer,
         final Boolean startImmediately,
         final Boolean downloadFirst,
@@ -135,158 +93,53 @@ public class FileCachingInputStream extends InputStream {
         final Boolean deleteTempFile
     ) {
         super();
-        if (logger != null) {
-            this.log = logger;
-        }
-
+        this.log = logger == null ? LoggerFactory.getLogger(FileCachingInputStream.class) : logger;
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
-        if (! this.deleteTempFile) {
-            Slf4jHelper.log(log, initialBuffer == null ? Level.WARN : Level.DEBUG,
-                "Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.", initialBuffer == null ? DEFAULT_INITIAL_BUFFER_SIZE : initialBuffer);
-        }
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
 
         try {
             if (initialBuffer > 0) {
-                // first use an initial buffer of memory only
-                byte[] buf = new byte[initialBuffer];
-
-                int bufferOffset = 0;
-                int numRead;
-                boolean complete;
-                do {
-                    numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
-                    complete = numRead == EOF;
-                    if (! complete) {
-                        bufferOffset += numRead;
-                    }
-                } while (! complete && bufferOffset < buf.length);
-
-                bufferLength = bufferOffset;
-
-                if (complete) {
-                    // the buffer was not completely filled.
-                    // there will be no need for a file at all.
-                    buffer = buf;
-                    System.arraycopy(buf, 0, buffer, 0, bufferLength);
-
-                    // don't use file later on
-                    copier = null;
-                    this.tempFile = null;
-                    if (tempPath != null) {
-                        try (OutputStream out = Files.newOutputStream(tempPath)) {
-                            IOUtils.copy(new ByteArrayInputStream(buffer), out);
-                        }
-                    }
-                    tempFileInputStream = null;
-                    log.info("the stream completely fit into the memory buffer");
+                if (! this.deleteTempFile) {
+                    log.debug("Initial buffer size {} > 0, if input smaller than this no temp file will be created. This may be unexpected since you specified not to delete the temp file.",  initialBuffer);
+                }
+                //  fill an initial buffer in memory only
+                InitialBufferResult initialBufferResult =
+                    fillInitialBuffer(initialBuffer, input, tempPath);
+                this.buffer = initialBufferResult.buffer;
+                if (initialBufferResult.complete) {
+                    // the buffer was sufficiently large to contain the entire stream
+                    // there will be no need to read from a file input stream at all
+                    this.toFileCopier = null;
+                    this.tempFileInputStream = null;
+                    this.tempFile = initialBufferResult.tempFile;
                     return;
-                } else {
-                    buffer = buf;
                 }
             } else {
-                bufferLength = 0;
-                buffer = null;
+                this.buffer = new byte[0];
             }
 
-            { // if arriving here, a temp file will be needed
-                if (path != null) {
-                    if (tempPath != null) {
-                        throw new IllegalArgumentException("Specify either path or tempPath (or none), but not both");
-                    }
-                    if (!Files.isDirectory(path)) {
-                        Files.createDirectories(path);
-                        log.info("Created directory {}", path);
-                    }
-                }
+            // if arriving here, a temp file will be needed
+            this.tempFile = createTempFile(path, tempPath, filePrefix);
 
-                this.tempFile = tempPath == null ? Files.createTempFile(
-                    path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
-                    filePrefix == null ? "file-caching-inputstream" : filePrefix,
-                    null) : tempPath;
+            OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
 
-                log.debug("Using {}", tempFile);
-            }
-            if (outputBuffer == null) {
-                outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
-            }
+            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(progressLogging, batchConsumer,progressLoggingBatch);
 
-
-            final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
-            incStreams(tempFileOutputStream);
-            if (buffer != null) {
-                // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
-                tempFileOutputStream.write(buffer, 0, bufferLength);
-                tempFileOutputStream.flush();
-            }
-
-            final Consumer<FileCachingInputStream> consumer;
-            if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
-                final AtomicLong batchCount = new AtomicLong(0);
-                consumer = t -> {
-                    if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
-                        log.info("Creating {} ({} bytes written)", tempFile, t.copier.getCount());
-                    }
-                    if (batchConsumer != null) {
-                        batchConsumer.accept(t);
-                    }
-                };
-            } else {
-                consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
-            }
-
-            final boolean deleteOnClose = this.deleteTempFile;
-            if (openOptions == null) {
-                openOptions = new ArrayList<>();
-            }
-            final boolean effectiveProgressLogging;
-            if (progressLogging == null) {
-                effectiveProgressLogging = ! deleteOnClose;
-            } else {
-                effectiveProgressLogging = progressLogging;
-            }
-            this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile, openOptions.toArray(new OpenOption[0])));
+            this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile));
             incStreams(tempFileInputStream);
-             // The copier is responsible for copying the remaining of the stream to the file
-            // in a separate thread
-            copier = Copier.builder()
-                .input(input)
-                .expectedCount(expectedCount)
-                .offset(bufferLength)
-                .output(tempFileOutputStream)
-                .name(tempFile.toString())
-                .notify(this)
-                .errorHandler((c, e) ->
-                    future.completeExceptionally(e)
-                )
-                .callback(c -> {
-                    log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
-                    try {
-                        closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
-                        log.info("{} {} {}", c.isReady(), tempFile, tempFile.toFile().length());
-                        consumer.accept(FileCachingInputStream.this);
-                        log.debug("accepted {}", consumer);
-                        future.complete(this);
 
-                    } catch (IOException ioe) {
-                        future.completeExceptionally(ioe);
-                    }
-                    Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", tempFile, c.getCount());
-                })
-                .batch(batchSize)
-                .batchConsumer(c -> consumer.accept(this))
-                .build();
-
-            if (downloadFirst != null && downloadFirst) {
-                copier.execute();
-                future.get();
-            } else if (startImmediately == null || startImmediately) {
-                // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
-                copier.execute();
-            }
-
+            toFileCopier = createToFileCopier(
+                input,
+                this.buffer.length,
+                tempFileOutputStream,
+                expectedCount,
+                consumer,
+                batchSize,
+                progressLogging
+            );
+            executeCopier(downloadFirst, startImmediately);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -298,6 +151,171 @@ public class FileCachingInputStream extends InputStream {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     *   copier is responsible for copying the remaining of the stream to the file
+     *   in a separate thread
+     */
+    private Copier createToFileCopier(
+        final InputStream input,
+        final int offset,
+        final OutputStream tempFileOutputStream,
+        final Long expectedCount,
+        final Consumer<FileCachingInputStream> consumer,
+        final long batchSize,
+        final Boolean progressLogging) throws ExecutionException, InterruptedException {
+        final boolean effectiveProgressLogging;
+        if (progressLogging == null) {
+            effectiveProgressLogging = ! this.deleteTempFile;
+        } else {
+            effectiveProgressLogging = progressLogging;
+        }
+        final Copier copier = Copier.builder()
+            .input(input)
+            .expectedCount(expectedCount)
+            .offset(offset)
+
+            .output(tempFileOutputStream)
+            .name(this.tempFile.toString())
+            .notify(this)
+            .errorHandler((c, e) ->
+                this.future.completeExceptionally(e)
+            )
+            .callback(c -> {
+                log.info("callback for copier {} {}", c.getCount(), tempFileOutputStream);
+                try {
+                    closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
+                    log.info("{} {} {}", c.isReady(), this.tempFile, this.tempFile.toFile().length());
+                    consumer.accept(FileCachingInputStream.this);
+                    log.debug("accepted {}", consumer);
+                    this.future.complete(this);
+                } catch (IOException ioe) {
+                    this.future.completeExceptionally(ioe);
+                }
+                Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
+            })
+            .batch(batchSize)
+            .batchConsumer(c -> { if (c.isReady() || FileCachingInputStream.this.isReady()) {log.info("batch {} {}", FileCachingInputStream.this.toFileCopier, c.isReady(), new Exception());} consumer.accept(this); })
+            .build();
+
+
+        return copier;
+    }
+
+    private void executeCopier(Boolean downloadFirst, Boolean startImmediately) throws ExecutionException, InterruptedException {
+        if (downloadFirst != null && downloadFirst) {
+            this.toFileCopier.execute();
+            this.future.get();
+        } else if (startImmediately == null || startImmediately) {
+            // if not started immediately, the copier will only be started if the first byte it would produce is actually needed.
+            this.toFileCopier.execute();
+        }
+    }
+
+    /**
+     * Combines the user provided 'batchConsumer' (if there is one), with some other settings, to one 'effective' consumer.
+     */
+    private Consumer<FileCachingInputStream> assembleEffectiveConsumer(
+        final Boolean progressLogging,
+        final Consumer<FileCachingInputStream> batchConsumer,
+        Integer progressLoggingBatch) {
+           final Consumer<FileCachingInputStream> consumer;
+            if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
+                final AtomicLong batchCount = new AtomicLong(0);
+                consumer = t -> {
+                    if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
+                        log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
+                    }
+                    if (batchConsumer != null) {
+                        batchConsumer.accept(t);
+                    }
+                };
+            } else {
+                consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
+            }
+            return consumer;
+    }
+
+    private Path createTempFile(Path path, Path tempPath, String filePrefix) throws IOException {
+        // if arriving here, a temp file will be needed
+        if (path != null) {
+            if (tempPath != null) {
+                throw new IllegalArgumentException("Specify either path or tempPath (or none), but not both");
+            }
+            if (!Files.isDirectory(path)) {
+                Files.createDirectories(path);
+                log.info("Created directory {}", path);
+            }
+        }
+
+        Path tempFile = tempPath == null ? Files.createTempFile(
+            path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
+            filePrefix == null ? "file-caching-inputstream" : filePrefix,
+            null) : tempPath;
+
+        log.debug("Using {}", tempFile);
+        return  tempFile;
+
+    }
+    private OutputStream createTempFileOutputStream(Integer outputBuffer) throws IOException {
+        if (outputBuffer == null) {
+            outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
+        }
+
+
+        final OutputStream tempFileOutputStream = new BufferedOutputStream(Files.newOutputStream(tempFile), outputBuffer);
+        incStreams(tempFileOutputStream);
+        if (buffer != null) {
+            // write the initial buffer to the temp file too, so that this file accurately describes the entire stream
+            tempFileOutputStream.write(buffer, 0, buffer.length);
+            tempFileOutputStream.flush();
+        }
+        return  tempFileOutputStream;
+    }
+
+    private InitialBufferResult fillInitialBuffer(int initialBuffer, InputStream input, Path tempPath) throws IOException {
+        // first use an initial buffer of memory only
+        byte[] buf = new byte[initialBuffer];
+
+        InitialBufferResult.Builder builder = InitialBufferResult.builder();
+        int bufferOffset = 0;
+        int numRead;
+        boolean complete;
+        do {
+            numRead = input.read(buf, bufferOffset, buf.length - bufferOffset);
+            complete = numRead == EOF;
+            if (! complete) {
+                bufferOffset += numRead;
+            }
+        } while (! complete && bufferOffset < buf.length);
+
+        int bufferLength = bufferOffset;
+
+        if (complete) {
+            log.debug("The inputstream gave EOF after {} bytes. Completely fitting into memory buffer", bufferLength);
+            builder.buffer(Arrays.copyOf(buf, bufferLength));
+            if (tempPath != null) {
+                // there is no need for the file., but since an explitely file was
+                // configured write it to that file anyways
+                try (OutputStream out = Files.newOutputStream(tempPath)) {
+                    IOUtils.copy(new ByteArrayInputStream(builder.buffer), out);
+                }
+                builder.tempFile(tempPath);
+            }
+            log.debug("the stream completely fit into the memory buffer");
+            builder.complete(true);
+        } else {
+            builder.buffer(buf);
+            builder.complete(false);
+        }
+        return builder.build();
+    }
+
+
+
+    public int getBufferLength() {
+        return buffer.length;
     }
 
     @Override
@@ -314,9 +332,8 @@ public class FileCachingInputStream extends InputStream {
     @Override
     public int read(byte @NonNull[] b, int off, int len) throws IOException {
         if (tempFileInputStream == null) {
-            log.debug("From buffer");
-
             int result =  readFromBuffer(b, off, len);
+            log.debug("From buffer {}", result);
             return result;
         } else {
             int result = readFromFile(b, off, len);
@@ -358,11 +375,11 @@ public class FileCachingInputStream extends InputStream {
                 notifyAll();
             }
 
-            if (copier != null) {
+            if (toFileCopier != null) {
                 // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
                 log.debug("Closing copier");
                 try {
-                    copier.waitForAndClose();
+                    toFileCopier.waitForAndClose();
                 } catch (InterruptedException interruptedException) {
                     throw new InterruptedIOException(interruptedException.getMessage());
                 }
@@ -397,14 +414,14 @@ public class FileCachingInputStream extends InputStream {
      *
      */
     public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
-        if (copier != null) {
-            copier.executeIfNotRunning();
-            while (copier.getCount() < atLeast && ! copier.isReady()) {
+        if (toFileCopier != null) {
+            toFileCopier.executeIfNotRunning();
+            while (toFileCopier.getCount() < atLeast && ! toFileCopier.isReady()) {
                 wait();
             }
-            return copier.getCount();
+            return toFileCopier.getCount();
         } else {
-            return bufferLength;
+            return buffer.length;
         }
     }
 
@@ -412,21 +429,21 @@ public class FileCachingInputStream extends InputStream {
      * Returns the number of bytes consumed from the input stream so far
      */
     public long getCount() {
-        return copier == null ? bufferLength : copier.getCount();
+        return toFileCopier == null ? buffer.length : toFileCopier.getCount();
     }
 
     /**
      * Returns whether consuming the inputstream is ready.
      */
     public boolean isReady() {
-        return copier == null || copier.isReady();
+        return toFileCopier == null || toFileCopier.isReady();
     }
 
     /**
      * Returns the exception that may have happened. E.g. for use in the call back.
      */
     public Optional<Throwable> getException() {
-        return copier == null ? Optional.empty(): copier.getException();
+        return toFileCopier == null ? Optional.empty(): toFileCopier.getException();
     }
 
     /**
@@ -440,7 +457,7 @@ public class FileCachingInputStream extends InputStream {
      * One of the paths of {@link #read()}, when it is reading from memory.
      */
     private int readFromBuffer() {
-        if (count.get() < bufferLength) {
+        if (count.get() < buffer.length) {
             byte result = buffer[(int) count.getAndIncrement()];
             synchronized (this) {
                 notifyAll();
@@ -455,7 +472,7 @@ public class FileCachingInputStream extends InputStream {
      * One of the paths of {@link #read(byte[], int, int)} )}, when it is reading from memory.
      */
     private int readFromBuffer(byte[] b, int off, int len) {
-        int toCopy = Math.min(len, bufferLength - (int) count.get() /* remaining bytes in buffer */);
+        int toCopy = Math.min(len, buffer.length - (int) count.get() /* remaining bytes in buffer */);
         if (toCopy > 0) {
             System.arraycopy(buffer, (int) count.get(), b, off, toCopy);
             synchronized (this) {
@@ -474,16 +491,16 @@ public class FileCachingInputStream extends InputStream {
      * See  {@link InputStream#read()} This methods must behave exactly according to that.
      */
     private int readFromFile() throws IOException {
-        copier.executeIfNotRunning();
+        toFileCopier.executeIfNotRunning();
         int result = tempFileInputStream.read();
         while (result == EOF) {
             log.debug("EOF, waiting");
-            synchronized (copier) {
-                while (!copier.isReadyIOException() && result == EOF) {
-                    log.debug("Copier {} not yet ready", copier);
+            synchronized (toFileCopier) {
+                while (!toFileCopier.isReadyIOException() && result == EOF) {
+                    log.debug("Copier {} not yet ready", toFileCopier);
                     // copier is still busy, wait a second, and try again.
                     try {
-                        copier.wait(1000);
+                        toFileCopier.wait(1000);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         log.error(e.getMessage(), e);
@@ -493,11 +510,16 @@ public class FileCachingInputStream extends InputStream {
                     result = tempFileInputStream.read();
                     log.debug("Read {}", result);
                 }
-                if (copier.isReadyIOException() && result == EOF) {
+                if (toFileCopier.isReadyIOException() && result == EOF) {
                     // the copier did not return any new results
-                    // don't increase count but return now.
-                    log.debug("Copier is ready ({} bytes), no new results", copier.getCount());
-                    return EOF;
+                    result = tempFileInputStream.read(); // there may be some bytes written in between last statements
+                    if (result == EOF) {
+                        // don't increase count but return now.
+                        log.debug("Copier is ready ({} bytes), no new results", toFileCopier.getCount());
+                        return EOF;
+                    } else {
+                        log.info("");
+                    }
                 }
             }
         }
@@ -514,22 +536,22 @@ public class FileCachingInputStream extends InputStream {
      * See {@link InputStream#read(byte[], int, int)} This methods must behave exactly according to that.
      */
     private int readFromFile(byte[] b, int offset, int length) throws IOException {
-        copier.executeIfNotRunning();
-        if (copier.isReadyIOException() && count.get() == copier.getCount()) {
+        toFileCopier.executeIfNotRunning();
+        if (toFileCopier.isReadyIOException() && count.get() == toFileCopier.getCount()) {
             log.debug("Count reached {}", count);
             return EOF;
         }
         int result;
-        synchronized (copier) {
+        synchronized (toFileCopier) {
             result = tempFileInputStream.read(b, offset, length);
 
-            while (!copier.isReadyIOException() && result == EOF) {
-                log.debug("Copier {} {}  {} not yet ready", copier.getCount(), count.get(), result);
+            while (!toFileCopier.isReadyIOException() && result == EOF) {
+                log.debug("Copier {} {}  {} not yet ready", toFileCopier.getCount(), count.get(), result);
                 try {
-                    copier.wait(1000);
+                    toFileCopier.wait(1000);
                 } catch (InterruptedException e) {
                     log.warn("Interrupted {}", e.getMessage());
-                    copier.close();
+                    toFileCopier.close();
                     future.completeExceptionally(e);
                     close();
                     Thread.currentThread().interrupt();
@@ -546,7 +568,7 @@ public class FileCachingInputStream extends InputStream {
             if (result != EOF) {
                 count.addAndGet(result);
             } else {
-                log.debug("EOF {} {}", count.get(), copier.getCount());
+                log.debug("EOF {} {}", count.get(), toFileCopier.getCount());
             }
         }
         assert result != 0;
@@ -576,5 +598,52 @@ public class FileCachingInputStream extends InputStream {
             log.debug("{} closing {} {}", i, desc, closable);
             closable.close();
         }
+    }
+
+
+    @Slf4j
+    public static class Builder {
+
+        /**
+         * Calls {@link #path} but with an uri argument
+         */
+        public Builder tempDir(URI uri) {
+            return path(Paths.get(uri));
+        }
+
+        /**
+         * Calls {@link #path} but with an string argument
+         */
+        public Builder tempDir(String uri) {
+            try {
+                return tempDir(URI.create(uri));
+            } catch (IllegalArgumentException iae) {
+                log.debug("{}:{} Supposing it a file name", uri, iae.getMessage());
+                return path(Paths.get(uri));
+            }
+        }
+
+        public Builder tempFile(Path path) {
+            return tempPath(path);
+        }
+
+
+        public Builder tempFile(File file) {
+            return tempPath(file.toPath());
+        }
+
+        public Builder noProgressLogging() {
+            return progressLogging(false);
+        }
+
+    }
+
+
+    @AllArgsConstructor
+    @lombok.Builder
+    private static class InitialBufferResult {
+        final boolean complete;
+        final byte[] buffer;
+        final Path tempFile;
     }
 }
