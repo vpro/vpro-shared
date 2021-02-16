@@ -218,10 +218,13 @@ class CopierTest {
 
     @Test
     public void equalsParts() {
+        assertThat(Copier.equalsParts(3)).containsExactly(3);
         assertThat(Copier.equalsParts(100)).containsExactly(100);
         assertThat(Copier.equalsParts(9000)).containsExactly(4500, 4500);
         assertThat(Copier.equalsParts(9001)).containsExactly(4501, 4500);
+        assertThat(Copier.equalsParts(100000)).containsExactly(7693, 7693, 7693, 7693, 7692, 7692, 7692, 7692, 7692, 7692, 7692, 7692, 7692);
 
+        assertThat(Arrays.stream(Copier.equalsParts(100000)).sum()).isEqualTo(100000);
     }
 
 
