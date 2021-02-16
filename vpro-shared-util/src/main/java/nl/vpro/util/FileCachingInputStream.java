@@ -183,10 +183,10 @@ public class FileCachingInputStream extends InputStream {
                 this.future.completeExceptionally(e)
             )
             .callback(c -> {
-                log.info("callback for copier {} {}", c.getCount(), tempFileOutputStream);
+                log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
                 try {
                     closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
-                    log.info("{} {} {}", c.isReady(), this.tempFile, this.tempFile.toFile().length());
+                    log.debug("{} {} {}", c.isReady(), this.tempFile, this.tempFile.toFile().length());
                     consumer.accept(FileCachingInputStream.this);
                     log.debug("accepted {}", consumer);
                     this.future.complete(this);
@@ -196,7 +196,7 @@ public class FileCachingInputStream extends InputStream {
                 Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
             })
             .batch(batchSize)
-            .batchConsumer(c -> { if (c.isReady() || FileCachingInputStream.this.isReady()) {log.info("batch {} {}", FileCachingInputStream.this.toFileCopier, c.isReady(), new Exception());} consumer.accept(this); })
+            .batchConsumer(c -> consumer.accept(this))
             .build();
 
 
@@ -384,7 +384,7 @@ public class FileCachingInputStream extends InputStream {
                     throw new InterruptedIOException(interruptedException.getMessage());
                 }
             } else {
-                log.info("No copier to close");
+                log.debug("No copier to close");
             }
             if (this.tempFile != null && this.deleteTempFile) {
                 try {
@@ -517,8 +517,6 @@ public class FileCachingInputStream extends InputStream {
                         // don't increase count but return now.
                         log.debug("Copier is ready ({} bytes), no new results", toFileCopier.getCount());
                         return EOF;
-                    } else {
-                        log.info("");
                     }
                 }
             }

@@ -293,7 +293,7 @@ public class Copier implements Runnable, Closeable {
             }
             boolean result = future.cancel(true);
             if (! result) {
-                log.warn("Couldn't cancel {}", future);
+                log.debug("Couldn't cancel {}", future);
             }
             return result;
         }  else {
