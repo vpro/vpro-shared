@@ -24,6 +24,7 @@ import static nl.vpro.util.FileCachingInputStream.EOF;
  */
 @Slf4j
 public class Copier implements Runnable, Closeable {
+    static final int MAX_BUFFER = 8192;
 
     private volatile boolean ready;
     private volatile boolean readyAndCallbacked;
@@ -76,7 +77,7 @@ public class Copier implements Runnable, Closeable {
         this.input = input;
         this.expectedCount = expectedCount;
         this.output = output;
-        this.batch = batch == 0 ? 8192: batch;
+        this.batch = batch == 0 ? MAX_BUFFER: batch;
         this.callback = callback;
         this.batchConsumer = batchConsumer;
         this.errorHandler = errorHandler;
@@ -92,7 +93,7 @@ public class Copier implements Runnable, Closeable {
 
 
     public Copier(InputStream i, OutputStream o) {
-        this(i, o, 8192L);
+        this(i, o, MAX_BUFFER);
     }
 
     @Override
@@ -101,8 +102,7 @@ public class Copier implements Runnable, Closeable {
             if (batchConsumer == null || batch < 1) {
                 count.addAndGet(IOUtils.copyLarge(input, output));
             } else {
-                batchConsumer.accept(this);
-                copy();
+                copyWithBatchCallBacks();
             }
             output.flush();
         } catch (IOException ioe) {
@@ -112,6 +112,7 @@ public class Copier implements Runnable, Closeable {
             if (! CommandExecutor.isBrokenPipe(t)) {
                 log.warn("{}Connector {}\n{} {}", logPrefix, toString(), t.getClass().getName(), t.getMessage());
             }
+            log.warn(t.getMessage());
             exception = t;
         } finally {
             log.debug("finally");
@@ -123,21 +124,28 @@ public class Copier implements Runnable, Closeable {
     /**
      * We used to use {@link IOUtils#copyLarge(InputStream, OutputStream, long, long)}
      */
-    private void copy() throws IOException {
+    private void copyWithBatchCallBacks() throws IOException {
         final int[] equalParts = equalsParts();
         int part = 0;
-        while (true) {
+        boolean busy = true;
+        while (busy) {
+            int readInPart = 0;
             byte[] buffer = new byte[equalParts[part]];
             assert buffer.length > 0;
-            int read = input.read(buffer);
-            if (read == EOF) {
-                checkCount(count.get());
-                log.debug("breaking on {}", count.get());
-                break;
+            while (readInPart < buffer.length) {
+                int read = input.read(buffer, readInPart, buffer.length - readInPart);
+                if (read == EOF) {
+                    checkCount(count.get());
+                    log.debug("breaking on {}", count.get());
+                    busy = false;
+                    break;
+                }
+                readInPart += read;
             }
-            output.write(buffer, 0, read);
-            count.addAndGet(read);
-            if (++part == equalParts.length) {
+
+            output.write(buffer, 0, readInPart);
+            count.addAndGet(readInPart);
+            if (++part == equalParts.length) { // the required batch consumer size is now full
                 batchConsumer.accept(this);
                 notifyIfRequested();
                 part = 0;
@@ -145,21 +153,6 @@ public class Copier implements Runnable, Closeable {
         }
         log.debug("Copied {} from {} to {}", getCount(), input, output);
     }
-
-/*
-    private void copyWithIOUtils() throws IOException {
-        while(true) {
-            long result = IOUtils.copyLarge(input, output, 0, batch);
-            long currentCount = count.addAndGet(result);
-            batchConsumer.accept(this);
-            notifyIfRequested();
-            if (result < batch) {
-                checkCount(currentCount);
-                break;
-            }
-        }
-    }*/
-
 
     private void checkCount(long currentCount) {
         if (expectedCount != null) {
@@ -175,8 +168,12 @@ public class Copier implements Runnable, Closeable {
         return equalsParts(batch);
     }
 
+    /**
+     * Given a batch size, divide it up in equal parts smaller then 8k in size.
+     * @return An array of at least one element. The sum of all elements is the argument. All values are smaller then {@link #MAX_BUFFER}
+     */
     static int[] equalsParts(long batch) {
-        int parts = (int) (batch / 8192) + 1;
+        int parts = (int) (batch / MAX_BUFFER) + 1;
         int[] arr = new int[parts];
         long whole = batch;
         for (int i = 0; i < parts; i++) {
@@ -192,7 +189,6 @@ public class Copier implements Runnable, Closeable {
         synchronized (this) {
             ready = true;
         }
-
         handleError();
         callBack();
         synchronized(this) {
@@ -338,7 +334,7 @@ public class Copier implements Runnable, Closeable {
 
     private void callBack() {
         if (callback != null) {
-            log.debug("Calling back");
+            log.debug("Calling back, {}", this);
             callback.accept(this);
             log.debug("Called back");
         }
