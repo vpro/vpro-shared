@@ -50,9 +50,9 @@ class CopierTest {
                 .builder()
                 .input(in)
                 .batch(213)
-                .batchConsumer((c) -> {
-                    batches.add("" + c.getCount());
-                })
+                .batchConsumer((c) ->
+                    batches.add("" + c.getCount())
+                )
                 .notify(batches)
                 .output(out)
                 .build()) {
@@ -68,7 +68,7 @@ class CopierTest {
 
             assertThat(out.toByteArray()).hasSize(SIZE);
             assertCopierHappy(copier);
-            assertThat(batches).containsExactly("0", "213", "426", "639", "852", "1000");
+            assertThat(batches).containsExactly("213", "426", "639", "852", "1000");
         }
     }
 
@@ -210,7 +210,7 @@ class CopierTest {
                 }
             }
 
-            assertThat(batches).startsWith("0", "20");
+            assertThat(batches).startsWith("20", "40");
             assertThat(copier.isReady()).isTrue();
             assertThat(copier.cancelFutureIfNeeded()).isFalse();
         }
