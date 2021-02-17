@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -26,6 +27,9 @@ import static nl.vpro.util.CommandExecutor.isBrokenPipe;
  */
 public class CommandExecutorImpl implements CommandExecutor {
 
+    private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
+    private static final int DEFAULT_BATCH_SIZE = 8192;
+
     @Getter
     private final Supplier<String> binary;
 
@@ -33,18 +37,17 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final File workdir;
 
-    private long processTimeout = -1L;
-    private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
+    private final Duration processTimeout;
 
-    private SimpleLogger logger;
+    private final SimpleLogger logger;
 
-    private boolean useFileCache = false;
+    private final boolean useFileCache;
 
-    private int batchSize = 8192;
+    private final int batchSize;
 
-    private Function<CharSequence, String> wrapLogInfo = CharSequence::toString;
+    private final Function<CharSequence, String> wrapLogInfo;
 
-    private Boolean closeStreams = null;
+    private final Boolean closeStreams;
 
 
     public CommandExecutorImpl(String c) {
@@ -56,29 +59,25 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     public CommandExecutorImpl(String binary, File workdir) {
-        if (workdir != null && !workdir.exists()) {
-            throw new RuntimeException("Executable " + workdir.getAbsolutePath() + " does not exist.");
-        }
+        this.workdir = getWorkdir(workdir);
         this.binary = () -> binary;
-        this.workdir = workdir;
         this.commonArgs = null;
-        this.logger = getDefaultLogger(binary);
+        this.logger = getDefaultLogger(this.binary.get());
+        this.processTimeout = null;
+        this.wrapLogInfo = CharSequence::toString;
+        this.closeStreams = null;
+        this.batchSize = DEFAULT_BATCH_SIZE;
+        this.useFileCache = false;
     }
 
     public CommandExecutorImpl(File f, File workdir) {
+        this(f.getAbsolutePath(), workdir);
         if (!f.exists()) {
-            throw new RuntimeException("Executable " + f.getAbsolutePath() + " not found!");
+            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " not found!");
         }
         if (!f.canExecute()) {
-            throw new RuntimeException("Executable " + f.getAbsolutePath() + " is not executable!");
+            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " is not executable!");
         }
-        if (workdir != null && !workdir.exists()) {
-            throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
-        }
-        binary = f::getAbsolutePath;
-        this.workdir = workdir;
-        this.commonArgs = null;
-        this.logger = getDefaultLogger(binary.get());
     }
 
     @lombok.Builder(builderClassName = "Builder", buildMethodName = "_build")
@@ -90,25 +89,53 @@ public class CommandExecutorImpl implements CommandExecutor {
         Function<CharSequence, String> wrapLogInfo,
         List<String> commonArgs,
         boolean useFileCache,
-        int batchSize,
+        Integer batchSize,
         boolean optional,
-        Boolean closeStreams
+        Boolean closeStreams,
+        Duration processTimeout
         ) {
-         if (workdir != null && !workdir.exists()) {
-            throw new RuntimeException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
-        }
+        this.workdir = getWorkdir(workdir);
+        this.wrapLogInfo =  wrapLogInfo == null  ? CharSequence::toString : wrapLogInfo;
+        this.binary = getBinary(executables, optional);
+        this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
+        this.commonArgs = commonArgs;
+        this.useFileCache = useFileCache;
+        this.batchSize = batchSize == null ? DEFAULT_BATCH_SIZE : batchSize;
+        this.closeStreams = closeStreams;
+        this.processTimeout = processTimeout;
+
+    }
+
+    private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, Function<CharSequence, String> wrapLogInfo) {
+        SimpleLogger result;
         if (logger != null) {
-            this.logger = new Slf4jSimpleLogger(logger);
+            result = new Slf4jSimpleLogger(logger);
         } else {
-            this.logger = getDefaultLogger("");
+            result = getDefaultLogger(this.binary.get());
         }
+        if (simpleLogger != null) {
+            result = result.chain(simpleLogger);
+        }
+        if (wrapLogInfo != null) {
+            result = new SimpleLoggerWrapper(result) {
+                @Override
+                protected String wrapMessage(CharSequence message) {
+                    return wrapLogInfo.apply(message);
+
+                }
+            };
+        }
+        return result;
+    }
+
+    private Supplier<String> getBinary(List<File> executables, boolean optional) {
         Optional<File> f = getExecutable(executables);
         if (! f.isPresent()) {
             if (! optional) {
                 throw new RuntimeException("None of " + executables + " can be executed");
             } else {
-                this.logger.debug("None of {} can be executed", executables);
-                binary = new Supplier<String>() {
+                //log.debug("None of {} can be executed", executables);
+                return new Supplier<String>() {
                     @Override
                     public String get() {
                         return getExecutable(executables).map(File::getAbsolutePath).orElse(null);
@@ -120,35 +147,18 @@ public class CommandExecutorImpl implements CommandExecutor {
                 };
             }
         } else {
-            binary = () -> f.get().getAbsolutePath();
+            return () -> f.get().getAbsolutePath();
         }
-        this.workdir = workdir;
-        if (logger != null) {
-            this.logger = new Slf4jSimpleLogger(logger);
-        } else {
-            this.logger = getDefaultLogger(binary.get());
-        }
-        if (wrapLogInfo != null) {
-            this.logger = new SimpleLoggerWrapper(this.logger) {
-                @Override
-                protected String wrapMessage(CharSequence message) {
-                    return wrapLogInfo.apply(message);
-
-                }
-            };
-            this.wrapLogInfo = wrapLogInfo;
-
-        }
-        if (simpleLogger != null) {
-            this.logger = this.logger.chain(simpleLogger);
-
-        }
-        this.commonArgs = commonArgs;
-        this.useFileCache = useFileCache;
-        this.batchSize = batchSize;
-        this.closeStreams = closeStreams;
 
     }
+    private static File getWorkdir(File workdir) {
+        if (workdir != null && !workdir.exists()) {
+            throw new IllegalArgumentException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
+        }
+        return workdir;
+
+    }
+
 
     public static Optional<File> getExecutable(Collection<File> proposals) {
         return proposals.stream().filter((e) -> e.exists() && e.canExecute()).findFirst();
@@ -158,7 +168,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         return Arrays.stream(proposals).map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
     }
 
-      public static Optional<File> getExecutableFromStrings(Collection<String> proposals) {
+    public static Optional<File> getExecutableFromStrings(Collection<String> proposals) {
         return proposals.stream().map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
     }
 
@@ -249,8 +259,8 @@ public class CommandExecutorImpl implements CommandExecutor {
             parameters.consumer.accept(p);
 
             final ProcessTimeoutHandle handle;
-            if (processTimeout > 0L) {
-                handle = startProcessTimeoutMonitor(p, "" + command, processTimeout * 1000);
+            if (processTimeout != null) {
+                handle = startProcessTimeoutMonitor(p, "" + command, processTimeout);
             } else {
                 handle = null;
             }
@@ -310,10 +320,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
 
         }
-    }
-
-    public void setProcessTimeout(long processTimeout) {
-        this.processTimeout = processTimeout;
     }
 
     @Override
@@ -420,9 +426,10 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
 
-    private static ProcessTimeoutHandle startProcessTimeoutMonitor(Process process, String command, long timeout) {
+    private static ProcessTimeoutHandle startProcessTimeoutMonitor(
+        Process process, String command, Duration timeout) {
         ProcessTimeoutTask task = new ProcessTimeoutTask(process, command); // task fires after timeout and kills the process
-        PROCESS_MONITOR.schedule(task, timeout); // schedule the task to fire
+        PROCESS_MONITOR.schedule(task, timeout.toMillis()); // schedule the task to fire
 
         return new ProcessTimeoutHandle(task); // wrap the task so we can cancel when process finishes before timeout occurs
     }
@@ -430,7 +437,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     @Override
     public String toString() {
         return binary + (commonArgs == null ? "" : commonArgs.stream()
-            .map(s -> this.wrapLogInfo.apply(s))
+            .map(this.wrapLogInfo)
             .collect(Collectors.joining(" ")));
     }
 

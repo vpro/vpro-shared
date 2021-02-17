@@ -15,6 +15,7 @@ import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
@@ -37,19 +38,19 @@ public class CommandExecutorImplTest {
         }
         assertThat(FileCachingInputStream.openStreams.get()).isEqualTo(0);
     }
+
     @Test
     public void execute() {
         CommandExecutorImpl instance = new CommandExecutorImpl("/usr/bin/env");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         instance.execute(out, "echo", "hoi");
-        assertEquals("hoi\n", new String(out.toByteArray()));
-
+        assertEquals("hoi\n", out.toString());
         instance.execute("echo", "hoi");
     }
 
     @Test
     public void logger() {
-        SimpleLogger logger = new CommandExecutorImpl("/usr/bin/env").getLogger();
+        SimpleLogger logger = new CommandExecutorImpl(new File("/usr/bin/env")).getLogger();
         assertEquals(CommandExecutorImpl.class.getName() + ".env.bin.usr", logger.getName());
     }
     @Test
@@ -102,12 +103,17 @@ public class CommandExecutorImplTest {
             .workdir(workDir).build();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         instance.execute(out);
-        String actual = new String(out.toByteArray()).trim();
+        String actual = out.toString().trim();
         if (actual.startsWith("/private")) {
             actual = StringUtils.substringAfter(actual, "/private");
         }
         assertEquals(workDir.getAbsolutePath(), actual);
         log.info("Found workdir {}", actual);
+
+        assertThatThrownBy(() -> CommandExecutorImpl.builder().executablesPath("/bin/pwd")
+            .workdir(new File("/foobar")).build()).isInstanceOf(IllegalArgumentException.class);
+
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/bin/pwd"), new File("/foobar"))).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
