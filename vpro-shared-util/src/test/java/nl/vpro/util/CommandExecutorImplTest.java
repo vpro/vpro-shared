@@ -4,12 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.event.Level;
 
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
@@ -23,11 +27,16 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
  * @author Michiel Meeuwissen
  */
 @Slf4j
-@Timeout(value = 10, unit = TimeUnit.SECONDS)
+//@Timeout(value = 10, unit = TimeUnit.SECONDS)
 @Isolated
 @Execution(SAME_THREAD)
 public class CommandExecutorImplTest {
 
+
+    @BeforeEach
+    public void setup() {
+        FileCachingInputStream.openStreams.set(0);
+    }
 
     @AfterEach
     public void check() throws InterruptedException {
@@ -53,17 +62,24 @@ public class CommandExecutorImplTest {
         SimpleLogger logger = new CommandExecutorImpl(new File("/usr/bin/env")).getLogger();
         assertEquals(CommandExecutorImpl.class.getName() + ".env.bin.usr", logger.getName());
     }
-    @Test
-    public void lines() {
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false/*TODO, true*/})
+    public void lines(boolean useFileCache) {
         CommandExecutor find =
-            CommandExecutorImpl.builder()
-                .executablesPaths("/usr/bin/env")
-                .commonArg("find")
-                .optional(true)
-                .build();
-        find.lines(".")
-            .limit(20)
-            .forEach(log::info);
+                 CommandExecutorImpl.builder()
+                     .executablesPaths("/usr/bin/env")
+                     .commonArg("find", "-s")
+                     .useFileCache(useFileCache)
+                     .optional(true)
+                     .build();
+        assertThat(find.toString()).isEqualTo("/usr/bin/env find -s");
+        try (Stream<String> s = find.lines(".")
+            .limit(20)) {
+            s.forEach(log::info);
+        } ;
+
+
     }
 
 
@@ -115,6 +131,24 @@ public class CommandExecutorImplTest {
 
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/bin/pwd"), new File("/foobar"))).isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    public void timeout() {
+        StringBuilderSimpleLogger sl = StringBuilderSimpleLogger.builder()
+            .level(Level.ERROR)
+            .build();
+        CommandExecutorImpl instance = CommandExecutorImpl.builder()
+            .executablesPath("/usr/bin/env")
+            .simpleLogger(sl)
+            .processTimeout(Duration.ofMillis(1))
+            .build();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int result = instance.execute(out, "sleep", "10");
+        assertThat(result).isEqualTo(143);
+        assertThat(sl.get()).matches("ERROR Error 143 occurred while calling /usr/bin/env sleep 10");
+    }
+
+
 
     @Test
     public void builder() {

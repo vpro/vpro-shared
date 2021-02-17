@@ -116,13 +116,18 @@ public interface CommandExecutor {
     * @param callback will be called when ready.
     * @return A future producing the result code.
     */
-    default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, IntConsumer callback, String... args) {
+    default CompletableFuture<Integer> submit(
+        InputStream in,
+        OutputStream out,
+        OutputStream error,
+        IntConsumer callback,
+        String... args) {
         return submit(callback, Parameters.builder()
             .in(in)
             .out(out)
             .errors(error)
             .args(args)
-            .build());
+        );
 
     }
 
@@ -144,6 +149,8 @@ public interface CommandExecutor {
                     }
                 }
             }
+        }).whenComplete((i, t) -> {
+            System.out.println("");
         });
     }
 
@@ -194,7 +201,6 @@ public interface CommandExecutor {
             PipedOutputStream writer = new PipedOutputStream(reader);
             BufferedReader result = new BufferedReader(new InputStreamReader(reader));
 
-
             CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
                 try {
                     writer.flush();
@@ -209,7 +215,9 @@ public interface CommandExecutor {
                 }
                 getLogger().debug("Ready with {}", i);
             });
-            return result.lines();
+            return result.lines().onClose(() -> {
+                submit.cancel(true);
+            });
         } catch (IOException e) {
             getLogger().error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -219,7 +227,9 @@ public interface CommandExecutor {
 
 
     default Stream<String> lines(String... args) {
-        return lines(null, LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
+        return lines(null,
+            LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args
+        );
     }
 
     static boolean isBrokenPipe(Throwable ioe) {

@@ -172,6 +172,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         return proposals.stream().map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
     }
 
+
     public static class Builder {
 
         private final List<String> cargs = new ArrayList<>();
@@ -318,7 +319,8 @@ public class CommandExecutorImpl implements CommandExecutor {
                 throw new RuntimeException(e);
 
             }
-
+        } finally {
+            this.logger.debug("Ready");
         }
     }
 
@@ -436,7 +438,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     @Override
     public String toString() {
-        return binary + (commonArgs == null ? "" : commonArgs.stream()
+        return binary.get() + (commonArgs == null ? "" : " " + commonArgs.stream()
             .map(this.wrapLogInfo)
             .collect(Collectors.joining(" ")));
     }
