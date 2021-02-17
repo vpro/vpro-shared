@@ -11,8 +11,8 @@
   <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
 
   <properties>
-    <elasticsearch.version>7.10.1</elasticsearch.version>
-    <lucene.elasticsearch.version>8.7.0</lucene.elasticsearch.version>
+    <elasticsearch.version>${elasticsearch7.version}</elasticsearch.version>
+    <lucene.elasticsearch.version>${lucene.elasticsearch7.version}</lucene.elasticsearch.version>
   </properties>
 
   <dependencies>
