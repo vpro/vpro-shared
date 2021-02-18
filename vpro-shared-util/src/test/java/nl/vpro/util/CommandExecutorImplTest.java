@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.file.*;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,11 +28,10 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
  * @author Michiel Meeuwissen
  */
 @Slf4j
-//@Timeout(value = 10, unit = TimeUnit.SECONDS)
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 @Isolated
 @Execution(SAME_THREAD)
 public class CommandExecutorImplTest {
-
 
     @BeforeEach
     public void setup() {
@@ -64,7 +64,7 @@ public class CommandExecutorImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {false/*TODO, true*/})
+    @ValueSource(booleans = {false, true})
     public void lines(boolean useFileCache) {
         CommandExecutor find =
                  CommandExecutorImpl.builder()
@@ -77,9 +77,7 @@ public class CommandExecutorImplTest {
         try (Stream<String> s = find.lines(".")
             .limit(20)) {
             s.forEach(log::info);
-        } ;
-
-
+        }
     }
 
 
@@ -93,6 +91,7 @@ public class CommandExecutorImplTest {
                 .executablesPaths(tmpFile.getAbsolutePath())
                 .commonArg("find")
                 .simpleLogger(logger)
+                .wrapLogInfo(s -> "X:" + s)
                 .optional(true)
                 .build();
         find.lines(".")
@@ -101,7 +100,7 @@ public class CommandExecutorImplTest {
         ;
         // wait for whenComplete
         Thread.sleep(100);
-        assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR java.lang.IllegalStateException: No binary found");
+        assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR X:java.lang.IllegalStateException: No binary found");
 
         logger.getStringBuilder().setLength(0);
         Files.copy(Paths.get(new File("/usr/bin/env").toURI()), Paths.get(tmpFile.toURI()), StandardCopyOption.REPLACE_EXISTING);
@@ -145,7 +144,7 @@ public class CommandExecutorImplTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int result = instance.execute(out, "sleep", "10");
         assertThat(result).isEqualTo(143);
-        assertThat(sl.get()).matches("ERROR Error 143 occurred while calling /usr/bin/env sleep 10");
+        assertThat(sl.get()).matches("ERROR Exit code 143 for calling /usr/bin/env sleep 10");
     }
 
 
@@ -159,6 +158,14 @@ public class CommandExecutorImplTest {
             .optional(true)
             .build();
         assertThat(build.getBinary().toString()).isEqualTo("[a, b, c, d]");
+    }
 
+    @Test
+    public void invalidConstruction() throws IOException {
+        new File("/tmp/foobar").delete();
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/foobar"), null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/"), null)).isInstanceOf(IllegalArgumentException.class);
+        new File("/tmp/pietjepuk").createNewFile();
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/pietjepuk"), null)).isInstanceOf(IllegalArgumentException.class);
     }
 }

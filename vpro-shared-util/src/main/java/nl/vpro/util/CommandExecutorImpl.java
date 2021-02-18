@@ -11,11 +11,14 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
 import static nl.vpro.util.CommandExecutor.isBrokenPipe;
+import static org.meeuw.functional.Functions.ignoreArg1;
+import static org.meeuw.functional.Functions.withArg1;
 
 /**
  * Wrapper around ProcessorBuilder
@@ -29,6 +32,12 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
+    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
+        return exitCode == null ||
+            (exitCode == 0 // no error
+                || exitCode == 137 // killed
+            )  ? Level.DEBUG : Level.ERROR;
+    };
 
     @Getter
     private final Supplier<String> binary;
@@ -45,9 +54,11 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final int batchSize;
 
-    private final Function<CharSequence, String> wrapLogInfo;
+    private final BiFunction<Level, CharSequence, String> wrapLogInfo;
 
     private final Boolean closeStreams;
+
+    private final Function<Integer, Level> exitCodeLogLevel;
 
 
     public CommandExecutorImpl(String c) {
@@ -68,10 +79,11 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.commonArgs = null;
         this.logger = getDefaultLogger(this.binary.get());
         this.processTimeout = processTimeout;
-        this.wrapLogInfo = CharSequence::toString;
+        this.wrapLogInfo = ignoreArg1(CharSequence::toString);
         this.closeStreams = null;
         this.batchSize = DEFAULT_BATCH_SIZE;
         this.useFileCache = false;
+        this.exitCodeLogLevel = DEFAULT_EXIT_CODE_LEVEL;
     }
 
     public CommandExecutorImpl(File f, File workdir) {
@@ -79,8 +91,11 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (!f.exists()) {
             throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " not found!");
         }
-        if (!f.canExecute()) {
-            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " is not executable!");
+        if (f.isDirectory()) {
+            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " is a directory");
+        }
+        if (! f.canExecute()) {
+            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " is a directory");
         }
     }
 
@@ -90,16 +105,17 @@ public class CommandExecutorImpl implements CommandExecutor {
         List<File> executables,
         Logger logger,
         SimpleLogger simpleLogger,
-        Function<CharSequence, String> wrapLogInfo,
+        BiFunction<Level, CharSequence, String> biWrapLogInfo,
         List<String> commonArgs,
         boolean useFileCache,
         Integer batchSize,
         boolean optional,
         Boolean closeStreams,
-        Duration processTimeout
+        Duration processTimeout,
+        Function<Integer, Level> exitCodeLogLevel
         ) {
         this.workdir = getWorkdir(workdir);
-        this.wrapLogInfo =  wrapLogInfo == null  ? CharSequence::toString : wrapLogInfo;
+        this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
         this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
         this.commonArgs = commonArgs;
@@ -107,10 +123,11 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.batchSize = batchSize == null ? DEFAULT_BATCH_SIZE : batchSize;
         this.closeStreams = closeStreams;
         this.processTimeout = processTimeout;
+        this.exitCodeLogLevel = exitCodeLogLevel == null ? DEFAULT_EXIT_CODE_LEVEL : exitCodeLogLevel;
 
     }
 
-    private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, Function<CharSequence, String> wrapLogInfo) {
+    private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
         SimpleLogger result;
         if (logger != null) {
             result = new Slf4jSimpleLogger(logger);
@@ -123,8 +140,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (wrapLogInfo != null) {
             result = new SimpleLoggerWrapper(result) {
                 @Override
-                protected String wrapMessage(CharSequence message) {
-                    return wrapLogInfo.apply(message);
+                protected String wrapMessage(Level level, CharSequence message) {
+                    return wrapLogInfo.apply(level, message);
 
                 }
             };
@@ -169,11 +186,11 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     public static Optional<File> getExecutable(String... proposals) {
-        return Arrays.stream(proposals).map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
+        return Arrays.stream(proposals).map(File::new).filter((e) -> e.exists() && e.isFile() && e.canExecute()).findFirst();
     }
 
     public static Optional<File> getExecutableFromStrings(Collection<String> proposals) {
-        return proposals.stream().map(File::new).filter((e) -> e.exists() && e.canExecute()).findFirst();
+        return proposals.stream().map(File::new).filter((e) -> e.exists() && e.isFile() && e.canExecute()).findFirst();
     }
 
 
@@ -203,6 +220,13 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         public Builder executablesPath(String executable) {
             return executablesPaths(executable);
+        }
+
+        public Builder wrapLogInfo(Function<CharSequence, String> wrapLoginfo) {
+            return wrapLogInfo(ignoreArg1(wrapLoginfo));
+        }
+        public Builder wrapLogInfo(BiFunction<Level, CharSequence, String> wrapLoginfo) {
+            return biWrapLogInfo(wrapLoginfo);
         }
 
         public CommandExecutorImpl build() {
@@ -301,7 +325,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             errorCopier.waitForAndClose();
             int result = p.exitValue();
             if (result != 0) {
-                logger.error("Error {} occurred while calling {}", result, String.join(" ", command));
+                logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, String.join(" ", command));
             }
             if (parameters.out != null) {
                 parameters.out.flush();
@@ -443,7 +467,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     @Override
     public String toString() {
         return binary.get() + (commonArgs == null ? "" : " " + commonArgs.stream()
-            .map(this.wrapLogInfo)
+            .map(withArg1(this.wrapLogInfo, Level.INFO))
             .collect(Collectors.joining(" ")));
     }
 

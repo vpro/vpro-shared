@@ -19,7 +19,7 @@ public abstract class SimpleLoggerWrapper implements SimpleLogger {
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
-        wrapped.accept(level, wrapMessage(message), t);
+        wrapped.accept(level, wrapMessage(level, message), t);
     }
 
     @Override
@@ -31,5 +31,12 @@ public abstract class SimpleLoggerWrapper implements SimpleLogger {
         return wrapped.getName();
     }
 
-    protected abstract  String wrapMessage(CharSequence message);
+    protected String wrapMessage(CharSequence message) {
+        return message.toString();
+    }
+
+    protected String wrapMessage(Level level, CharSequence message) {
+        return wrapMessage(message);
+    }
+
 }

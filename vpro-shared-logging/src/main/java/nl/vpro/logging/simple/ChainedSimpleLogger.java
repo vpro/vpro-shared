@@ -31,7 +31,6 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void accept(Level level, CharSequence message) {
         for (SimpleLogger logger : list) {

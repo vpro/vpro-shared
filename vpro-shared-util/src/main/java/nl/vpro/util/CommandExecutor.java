@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -136,21 +137,18 @@ public interface CommandExecutor {
     }
 
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters parameters) {
+        final int[] result = {-1};
         return CompletableFuture.supplyAsync(() -> {
-            int result = -1;
-            try {
-                result = execute(parameters);
-                return result;
-            } finally {
-                if (callback != null) {
-                    synchronized (callback) {
-                        callback.accept(result);
-                        callback.notifyAll();
-                    }
+            result[0] = execute(parameters);
+            return result[0];
+        }).whenComplete((i, t) -> {
+            getLogger().debug("Calling back {}", callback);
+            if (callback != null) {
+                synchronized (callback) {
+                    callback.accept(result[0]);
+                    callback.notifyAll();
                 }
             }
-        }).whenComplete((i, t) -> {
-            System.out.println("");
         });
     }
 
@@ -210,13 +208,18 @@ public interface CommandExecutor {
 
             }, args);
             submit.whenComplete((i, t) -> {
-                if (t != null) {
-                    getLogger().error(t.getMessage());
+                if (t != null && !(t instanceof CancellationException)) {
+                    if (t.getMessage() != null) {
+                        getLogger().error(t.getMessage());
+                    } else {
+                        getLogger().error(t.getClass().getSimpleName());
+                    }
                 }
                 getLogger().debug("Ready with {}", i);
             });
             return result.lines().onClose(() -> {
                 submit.cancel(true);
+                CloseableIterator.closeQuietly(writer);
             });
         } catch (IOException e) {
             getLogger().error(e.getMessage(), e);
