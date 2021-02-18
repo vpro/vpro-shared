@@ -76,6 +76,10 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
                 public T next() {
                     return iterator.next();
                 }
+                @Override
+                public void remove() {
+                    iterator.remove();
+                }
             };
         }
     }
