@@ -43,6 +43,7 @@ class CloseableIteratorTest {
         Impl i = new Impl();
         CloseablePeekingIterator<String> peeking = CloseableIterator.peeking(i);
         assertThat(peeking.peek()).isEqualTo("a");
+        assertThatThrownBy(peeking::remove).isInstanceOf(IllegalStateException.class);
         assertThat(peeking.stream()).contains("a", "b", "c");
 
         assertThat(CloseableIterator.peeking(null)).isNull();
