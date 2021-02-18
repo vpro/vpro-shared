@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import java.util.Iterator;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -12,8 +14,8 @@ class CloseablePeekingIteratorImpl<T> implements  CloseablePeekingIterator<T> {
     private boolean hasPeeked;
     private T peekedElement;
 
-    public CloseablePeekingIteratorImpl(CloseableIterator<? extends T> iterator) {
-        this.iterator = iterator;
+    public CloseablePeekingIteratorImpl(Iterator<? extends T> iterator) {
+        this.iterator = CloseableIterator.of(iterator);
     }
 
     @Override

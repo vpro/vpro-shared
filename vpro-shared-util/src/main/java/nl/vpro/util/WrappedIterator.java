@@ -11,10 +11,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
 
-    protected final Iterator<T> wrapped;
+    protected final CloseableIterator<T> wrapped;
 
     public WrappedIterator(Iterator<T> wrapped) {
-        this.wrapped = wrapped;
+        this.wrapped = CloseableIterator.of(wrapped);
     }
 
     @Override
@@ -57,8 +57,6 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
 
     @Override
     public void close() throws Exception {
-        if (wrapped instanceof AutoCloseable) {
-            ((AutoCloseable) wrapped).close();
-        }
+        wrapped.close();
     }
 }

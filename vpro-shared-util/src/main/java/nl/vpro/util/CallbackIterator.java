@@ -13,13 +13,13 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class CallbackIterator<T> implements CountedIterator<T> {
 
-    private final Iterator<T> wrapped;
+    private final CloseableIterator<T> wrapped;
     private final Runnable callback;
     private Boolean hasNext;
 
     @lombok.Builder(builderClassName = "Builder")
     public CallbackIterator(Iterator<T> wrapped, Runnable callback) {
-        this.wrapped = wrapped;
+        this.wrapped = CloseableIterator.of(wrapped);
         this.callback = callback;
     }
 
@@ -70,5 +70,10 @@ public class CallbackIterator<T> implements CountedIterator<T> {
             return ((CountedIterator) wrapped).getCount();
         }
         return CountedIterator.super.getCount();
+    }
+
+    @Override
+    public void close() throws Exception {
+        wrapped.close();
     }
 }
