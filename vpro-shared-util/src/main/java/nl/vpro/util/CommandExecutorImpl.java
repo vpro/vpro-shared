@@ -59,11 +59,15 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     public CommandExecutorImpl(String binary, File workdir) {
+        this(binary, workdir, null);
+    }
+
+    public CommandExecutorImpl(String binary, File workdir, Duration processTimeout) {
         this.workdir = getWorkdir(workdir);
         this.binary = () -> binary;
         this.commonArgs = null;
         this.logger = getDefaultLogger(this.binary.get());
-        this.processTimeout = null;
+        this.processTimeout = processTimeout;
         this.wrapLogInfo = CharSequence::toString;
         this.closeStreams = null;
         this.batchSize = DEFAULT_BATCH_SIZE;
