@@ -8,7 +8,6 @@ Simple utilities with little or no dependencies themselves
 E.g. 
 - Collection related, like CountedIterator, ClosableIterator,  SkippingIterator, TransformingList, BatchedReceiver
 - Strings related, like TextUtil, HTMLStripper, Strings
-- Very basic interfaces: TriFunction, Pair
 - JMX related: `nl.vpro.jmx`
 - CommandExecutor to convientiently call external commands
 - ...
