@@ -206,7 +206,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
         return wrapped + "[" + offset + "," + (max < Long.MAX_VALUE ? max : "") + "]";
     }
 
-    public static <T> CountedMaxOffsetIterator.Builder<String> countedBuilder() {
+    public static <T> CountedMaxOffsetIterator.Builder<T> countedBuilder() {
         return CountedMaxOffsetIterator._countedBuilder();
     }
 }
