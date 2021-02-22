@@ -51,23 +51,18 @@ public class IntegerVersion extends Version<Integer> {
         @Override
         public IntegerVersion unmarshal(String v) {
             return StringUtils.isBlank(v) ? null : new IntegerVersion(v);
-
         }
 
         @Override
         public String marshal(IntegerVersion v) {
             return v == null ? null : v.toString();
-
         }
     }
-
-
 
     /**
      * Seems like a usefull method in general, but fow now only used to escape '.'....
      */
     protected static String escapeSpecialRegexChars(String str) {
-
         return SPECIAL_REGEX_CHARS.matcher(str).replaceAll("\\\\$0");
     }
 
