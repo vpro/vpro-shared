@@ -86,4 +86,5 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     public Long getCount() {
         return count;
     }
+
 }

@@ -59,4 +59,10 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
     public void close() throws Exception {
         wrapped.close();
     }
+
+
+    @Override
+    public String toString() {
+        return "Counted[" + wrapped  + "]";
+    }
 }

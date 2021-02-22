@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,11 +20,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @Slf4j
 public class MaxOffsetIterator<T> implements CloseableIterator<T> {
 
-
-    private final Iterator<T> wrapped;
+    private final CloseableIterator<T> wrapped;
 
     private final long offsetmax;
 
+    final long max;
+
+
+    @Getter
     private final long offset;
 
     private final boolean countNulls;
@@ -37,8 +41,6 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     private RuntimeException exception;
 
     private Runnable callback;
-
-
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, boolean countNulls) {
         this(wrapped, max, 0L, countNulls);
@@ -57,18 +59,20 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     }
 
     @lombok.Builder(builderClassName = "Builder")
-    private MaxOffsetIterator(
+    protected MaxOffsetIterator(
         @NonNull Iterator<T> wrapped,
         @Nullable Number max,
-        @Nullable Number offset, boolean countNulls,
+        @Nullable Number offset,
+        boolean countNulls,
         @Nullable @Singular  List<Runnable> callbacks,
         boolean autoClose) {
         //noinspection ConstantConditions
         if (wrapped == null) {
             throw new IllegalArgumentException("Cannot wrap null");
         }
-        this.wrapped = wrapped;
+        this.wrapped = CloseableIterator.of(wrapped);
         this.offset = offset == null ? 0L : offset.longValue();
+        this.max = max == null ? Long.MAX_VALUE : max.longValue();
         this.offsetmax = max == null ? Long.MAX_VALUE : max.longValue() + this.offset;
         this.countNulls = countNulls;
         this.callback = () -> {
@@ -112,6 +116,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
         };
         return this;
     }
+
     public MaxOffsetIterator<T> autoClose() {
         final Runnable prev = callback;
         callback = () -> {
@@ -120,12 +125,10 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
                     prev.run();
                 }
             } finally {
-                if (wrapped instanceof AutoCloseable) {
-                    try {
-                        ((AutoCloseable) wrapped).close();
-                    } catch(Exception e){
-                        log.error(e.getMessage(), e);
-                    }
+                try {
+                    wrapped.close();
+                } catch(Exception e){
+                    log.error(e.getMessage(), e);
                 }
             }
         };
@@ -195,8 +198,15 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
 
     @Override
     public void close() throws Exception {
-        if (wrapped instanceof AutoCloseable) {
-            ((AutoCloseable) wrapped).close();
-        }
+        wrapped.close();
+    }
+
+    @Override
+    public String toString() {
+        return wrapped + "[" + offset + "," + (max < Long.MAX_VALUE ? max : "") + "]";
+    }
+
+    public static <T> CountedMaxOffsetIterator.Builder<String> countedBuilder() {
+        return CountedMaxOffsetIterator._countedBuilder();
     }
 }

@@ -55,6 +55,15 @@ public class MaxOffsetIteratorTest {
     }
 
 
+    @Test
+    public void testToString() {
+        List<String> test = Arrays.asList("a", "b", "c", "d");
+        assertThat(new MaxOffsetIterator<>(test.iterator(), 2).toString()).matches("Closeable\\[.*]\\[0,2]");
+
+        assertThat(MaxOffsetIterator.<String>builder().wrapped(test.iterator()).offset(1).build().toString()).matches("Closeable\\[.*]\\[1,]");
+
+    }
+
 
 
 }
