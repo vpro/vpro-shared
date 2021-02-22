@@ -28,7 +28,7 @@ public class CallbackIteratorTest {
         verify(runnable).run();
         assertThat(i.hasNext()).isFalse();
 
-        assertThatThrownBy(i::getCount).isInstanceOf(UnsupportedOperationException.class);
+        assertThat(i.getCount()).isEqualTo(2);
         assertThat(i.getSize()).isNotPresent();
         assertThat(i.getTotalSize()).isNotPresent();
     }
