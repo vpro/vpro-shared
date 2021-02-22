@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * ISO/IEC 6937
@@ -22,6 +23,7 @@ public class ISO6937CharsetProvider extends CharsetProvider {
 
     private static final ISO6937CharsetProvider INSTANCE = new ISO6937CharsetProvider();
 
+    @NonNull
     public static Charset forName(String charset) {
 
         Charset result = INSTANCE.charsetForName(charset);

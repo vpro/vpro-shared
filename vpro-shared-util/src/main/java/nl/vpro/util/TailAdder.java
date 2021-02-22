@@ -24,7 +24,7 @@ public class TailAdder<T> implements CountedIterator<T> {
 
     private final Function<T, T>[] adder;
 
-    private final Iterator<T> wrapped;
+    private final CloseableIterator<T> wrapped;
 
     int wrapcount = 0;
     int addercount = 0;
@@ -39,7 +39,7 @@ public class TailAdder<T> implements CountedIterator<T> {
 
     @SafeVarargs
     private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, Function<T, T>... adder) {
-        this.wrapped = wrapped;
+        this.wrapped = CloseableIterator.of(wrapped);
         this.onlyIfEmpty = onlyIfEmpty;
         this.onlyIfNotEmpty = onlyIfNotEmpty;
         if (onlyIfEmpty && onlyIfNotEmpty) {
@@ -162,13 +162,15 @@ public class TailAdder<T> implements CountedIterator<T> {
         return Optional.empty();
     }
 
+    @Override
+    public Long getCount() {
+        return (long) wrapcount + addercount;
+    }
+
 
     @Override
     public void close() throws Exception {
-        if (wrapped instanceof AutoCloseable) {
-            ((AutoCloseable) wrapped).close();
-        }
-
+        wrapped.close();
     }
 
     @Override

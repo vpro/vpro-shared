@@ -13,8 +13,11 @@ public class TailAdderTest {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
         TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).adder((s) -> "c").build();
         assertEquals("a", adder.next());
+        assertEquals(1, adder.getCount());
         assertEquals("b", adder.next());
+        assertEquals(2, adder.getCount());
         assertEquals("c", adder.next());
+        assertEquals(3, adder.getCount());
         assertFalse(adder.hasNext());
     }
 

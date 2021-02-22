@@ -1,6 +1,8 @@
 package nl.vpro.util;
 
 
+import lombok.Getter;
+
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -16,6 +18,9 @@ public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T>
 
     private final Supplier<Iterator<T>> supplier;
     private Iterator<T> iterator;
+
+    @Getter
+    private Long count = 0L;
 
     @lombok.Builder(builderClassName = "Builder")
     public LazyIterator(Supplier<Iterator<T>> supplier) {
@@ -33,7 +38,9 @@ public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T>
 
     @Override
     public T next() {
-        return getSupplied().next();
+        T n = getSupplied().next();
+        count++;
+        return n;
     }
 
     private Iterator<T> getSupplied() {

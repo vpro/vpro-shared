@@ -1,10 +1,7 @@
 package nl.vpro.util;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -47,11 +44,9 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     Optional<Long> getSize();
 
     /**
-     * The current position.
+     * The current position. Will return {@code 1} after first successfull call to {@link #next()}. It will return {@code 0} before that.
      */
-    default Long getCount() {
-        throw new UnsupportedOperationException();
-    }
+    Long getCount();
 
     /**
      * If the iterator is in some way restricted you may also want to report a total size, representing the unrestricted size.
@@ -77,6 +72,11 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     @Override
     default void close() throws Exception {
 
+    }
+
+    @Override
+    default Stream<T> stream() {
+        return CloseableIterator.super.stream();
     }
 
     /**

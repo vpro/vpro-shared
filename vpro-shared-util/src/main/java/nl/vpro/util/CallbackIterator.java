@@ -16,6 +16,7 @@ public class CallbackIterator<T> implements CountedIterator<T> {
     private final CloseableIterator<T> wrapped;
     private final Runnable callback;
     private Boolean hasNext;
+    private long count;
 
     @lombok.Builder(builderClassName = "Builder")
     public CallbackIterator(Iterator<T> wrapped, Runnable callback) {
@@ -34,6 +35,7 @@ public class CallbackIterator<T> implements CountedIterator<T> {
         findNext();
         hasNext = null;
         T result = wrapped.next();
+        count++;
         findNext();
         return result;
     }
@@ -65,11 +67,9 @@ public class CallbackIterator<T> implements CountedIterator<T> {
     /**
      * The current position.
      */
+    @Override
     public Long getCount() {
-        if (wrapped instanceof CountedIterator) {
-            return ((CountedIterator) wrapped).getCount();
-        }
-        return CountedIterator.super.getCount();
+        return count;
     }
 
     @Override

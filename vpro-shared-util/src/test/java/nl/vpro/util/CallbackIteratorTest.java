@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
@@ -56,6 +57,17 @@ public class CallbackIteratorTest {
         assertThat(i.getTotalSize()).contains(2L);
     }
 
+
+    @Test
+    public void withoutCallback() {
+        CallbackIterator<String> i = CallbackIterator.<String>builder()
+            .wrapped(CountedIterator.of(Arrays.asList("A", "B")))
+            .build();
+        assertThat(i.getCount()).isEqualTo(0);
+        i.next();
+        i.next();
+        assertThatThrownBy(i::next).isInstanceOf(NoSuchElementException.class);
+    }
 
 
 }

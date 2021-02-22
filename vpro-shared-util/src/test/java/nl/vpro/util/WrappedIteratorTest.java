@@ -16,6 +16,8 @@ public class WrappedIteratorTest {
     public void test() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", null, "d"));
         WrappedIterator<String, String> wrapped = new WrappedIterator<String, String>(list.iterator()) {
+
+
             @Override
             public String next() {
                 return "{" + wrapped.next() + "}";

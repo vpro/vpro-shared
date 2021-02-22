@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.31
@@ -15,7 +17,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     private final Supplier<Long> size;
     private final Supplier<Long> totalSize;
 
-    private long count;
+    private long count = 0;
 
     public BasicWrappedIterator(Iterator<T> wrapped) {
         super(wrapped);
@@ -59,7 +61,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     }
 
     @Override
-    public Optional<Long> getSize() {
+    public @NonNull Optional<Long> getSize() {
         if (size != null) {
             return Optional.ofNullable(size.get());
         } else {
@@ -68,7 +70,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     }
 
     @Override
-    public Optional<Long> getTotalSize() {
+    public @NonNull Optional<Long> getTotalSize() {
         if (totalSize != null) {
             return Optional.ofNullable(totalSize.get());
         } else {
@@ -78,8 +80,9 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     @Override
     public T next() {
+        T n = wrapped.next();
         count++;
-        return wrapped.next();
+        return n;
     }
 
     @Override

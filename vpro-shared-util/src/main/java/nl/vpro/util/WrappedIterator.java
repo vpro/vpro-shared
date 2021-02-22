@@ -45,9 +45,17 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
 
     }
 
+    @Override
+    public Long getCount() {
+        if (wrapped instanceof CountedIterator) {
+            return ((CountedIterator) wrapped).getCount();
+        }
+        throw new UnsupportedOperationException();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Long> getTotalSize() {
+    public @NonNull Optional<Long> getTotalSize() {
         if (wrapped instanceof CountedIterator) {
             return ((CountedIterator) wrapped).getTotalSize();
         }

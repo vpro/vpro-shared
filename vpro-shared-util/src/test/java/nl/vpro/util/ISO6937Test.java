@@ -2,13 +2,14 @@ package nl.vpro.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.*;
 import java.util.Random;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static nl.vpro.util.ISO6937CharsetProvider.ISO6937;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -25,11 +26,17 @@ public class ISO6937Test {
     }
 
     @Test
-
     public void forName() {
         Charset iso6037 = Charset.forName("ISO-6937");
         assertNotNull(iso6037);
+        assertThat(ISO6937CharsetProvider.forName("ISO-6937")).isNotNull();
+        assertThatThrownBy(() -> ISO6937CharsetProvider.forName("foorbar")).isInstanceOf(UnsupportedCharsetException.class);
+
+        assertThat(iso6037.contains(StandardCharsets.UTF_8)).isFalse();
+        assertThat(iso6037.contains(ISO6937)).isTrue();
     }
+
+
 
     @Test
     public void conversion()  {
@@ -75,7 +82,7 @@ public class ISO6937Test {
         // now lets test whether the byte array actually is the expected string
         assertEquals(
             string.toString(),
-            new String(out.toByteArray(), "ISO-6937"));
+            out.toString("ISO-6937"));
 
         assertArrayEquals(string.toString().getBytes("ISO-6937"), out.toByteArray());
     }
@@ -90,7 +97,7 @@ public class ISO6937Test {
     public void allChars() {
         StringBuilder example = new StringBuilder(
             "AEIOUaeiou	ÀÈÌÒÙàèìòù\n" +
-                "ACEGILNORSUYZacegilnorsuyz	ÁĆÉÍĹŃÓŔŚÚÝŹáćéíĺńóŕśúýź\n" + // TODO I actually thing G actute, g actue should have been supported too?
+                "ACEGILNORSUYZacegilnorsuyz	ÁĆÉÍĹŃÓŔŚÚÝŹáćéíĺńóŕśúýź\n" + // TODO I actually think G acute, g acute should have been supported too?
                 "ACEGHIJOSUWYaceghijosuwy	ÂĈÊĜĤÎĴÔŜÛŴŶâĉêĝĥîĵôŝûŵŷ\n" +
                 "AINOUainou	ÃĨÑÕŨãĩñõũ\n" +
                 "AEIOUaeiou	ĀĒĪŌŪāēīōū\n" +
@@ -136,7 +143,7 @@ public class ISO6937Test {
 
         byte[] bytes = example.toString().getBytes(ISO6937);
         String rounded = new String(bytes, ISO6937);
-        Assertions.assertThat(rounded).isEqualTo(example.toString());
+        assertThat(rounded).isEqualTo(example.toString());
 
 
     }
