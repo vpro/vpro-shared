@@ -44,7 +44,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     Optional<Long> getSize();
 
     /**
-     * The current position. Will return {@code 1} after first successfull call to {@link #next()}. It will return {@code 0} before that.
+     * The current position. Will return {@code 1} after first successfull call to {@link #next()}, {@code 2} after the second one, and so on. It will return {@code 0} before the first call.
      */
     Long getCount();
 
