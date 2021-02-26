@@ -205,16 +205,23 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
     @Override
     public void setLocations(Resource @NonNull [] locations) {
+        // this may happen before log4j initialization
+        //Logger jul = Logger.getLogger(PropertiesUtil.class.getName());
 
+        //jul.log(Level.CONFIG, "Configuring with");
         System.out.println("Configuring with");
+
         for (Resource location : locations) {
             try {
                 if (location != null) {
                     File file = location.getFile();
                     System.out.println(location + " -> " + file + " (" + (file.canRead() ? "can be read" : "not readable") + ")");
+
+                    //jul.log(Level.CONFIG, location + " -> " + file + " (" + (file.canRead() ? "can be read" : "not readable") + ")");
                 }
             } catch (IOException ioe) {
                 System.out.println(location);
+                //jul.warning(location.toString() + ":" + ioe.getMessage());
             }
         }
         super.setLocations(locations);
