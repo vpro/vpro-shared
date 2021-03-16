@@ -69,6 +69,7 @@ public class StringInstantToJsonTimestamp {
                     log.debug("Natty din't match");
                 }
             } catch (NoClassDefFoundError classNotFoundException) {
+                warnedNatty  = true;
                 Slf4jHelper.log(log, warnedNatty ? Level.DEBUG : Level.WARN, "No natty?: " + classNotFoundException.getMessage());
             } catch (Throwable e) {
                 log.debug("Natty couldn't parse {}: {}", value, e.getMessage());
