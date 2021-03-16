@@ -620,6 +620,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             @Override
             public void onFailure(Exception exception) {
                 if (exception instanceof ResponseException) {
+                    future.completeExceptionally(exception);
                     ResponseException re = (ResponseException) exception;
                     Response response = re.getResponse();
                     try {
@@ -641,6 +642,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         rl.accept(error);
                     }
                 }
+
             }
         };
     }
@@ -778,7 +780,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @SafeVarargs
     @Deprecated
     public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
@@ -1081,7 +1082,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         updateNode.put(Fields.DOC_AS_UPSERT, false);
         return new BulkRequestEntry(actionLine, updateNode, this::unalias, mdcSupplier.get(), (on) -> {
             for (Consumer<ObjectNode> c : consumers) {
-                c.accept(on);
+                c.accept((ObjectNode) on.get(Fields.DOC));
             }
         });
     }
