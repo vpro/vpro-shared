@@ -37,6 +37,7 @@ import nl.vpro.util.TimeUtils;
 import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
+import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
@@ -56,20 +57,6 @@ import static nl.vpro.logging.Slf4jHelper.log;
 @Getter
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
-
-    @Deprecated public static final String SEARCH = Paths.SEARCH;
-    @Deprecated public static final String DELETE_BY_QUERY =  Paths.DELETE_BY_QUERY;
-    @Deprecated public static final String UPDATE_BY_QUERY = Paths.DELETE_BY_QUERY;
-    @Deprecated public static final String COUNT = Paths.COUNT;
-    @Deprecated public static final String SETTINGS = Paths.SETTINGS;
-    @Deprecated public static final String MAPPING= Paths.MAPPING;
-    @Deprecated public static final String BULK = Paths.BULK;
-
-
-    @Deprecated public static final String POST = Methods.POST;
-    @Deprecated public static final String GET = Methods.GET;
-    @Deprecated public static final String PUT = Methods.PUT;
-    @Deprecated public static final String METHOD_DELETE = Methods.METHOD_DELETE;
 
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
@@ -1595,7 +1582,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return createRequest(Methods.HEAD, su);
     }
     protected Request createPut(String su) {
-        return createRequest(Methods.PUT, su);
+        return createRequest(PUT, su);
     }
     protected Request createDelete(String su) {
         return createRequest(Methods.METHOD_DELETE, su);
