@@ -56,6 +56,11 @@ public class BulkRequestEntry {
         this.sourceConsumer = sourceConsumer;
     }
 
+    /**
+     * As this entry is about to be used, i.e. submitted to the ES-server. this method should be called.
+     *
+     * It marks {@link #isUsed()} to be true, and executes (it necessary) the {@link #getSourceConsumer()} on {@link #getSource()}
+     */
     public void use() {
         if (! used) {
             if (sourceConsumer != null) {
