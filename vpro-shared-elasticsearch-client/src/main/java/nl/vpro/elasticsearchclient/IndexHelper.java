@@ -618,6 +618,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     Response response = re.getResponse();
                     try {
                         ObjectNode result = read(log, response);
+                        if (result == null) {
+                            log.warn("No object node found from {}", response);
+                            result = Jackson2Mapper.getInstance().createObjectNode();
+                        }
                         for (Consumer<ObjectNode> rl : listeners) {
                             rl.accept(result);
                         }
@@ -1097,12 +1101,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
         updateNode.set(Fields.DOC, objectNode);
         updateNode.put(Fields.DOC_AS_UPSERT, false);
-        return new BulkRequestEntry(actionLine, updateNode, this::unalias, mdcSupplier.get(), (on) -> {
-            for (Consumer<ObjectNode> c : consumers) {
-                ObjectNode doc = (ObjectNode) on.get(Fields.DOC);
-                c.accept(doc);
-            }
-        });
+        return BulkRequestEntry.builder()
+            .action(actionLine)
+            .source(updateNode)
+            .unalias(this::unalias)
+            .mdc(mdcSupplier.get())
+            .sourceConsumer((on) -> {
+                for (Consumer<ObjectNode> c : consumers) {
+                    ObjectNode doc = (ObjectNode) on.get(Fields.DOC);
+                    c.accept(doc);
+                }}
+            ).build();
     }
 
     /**
