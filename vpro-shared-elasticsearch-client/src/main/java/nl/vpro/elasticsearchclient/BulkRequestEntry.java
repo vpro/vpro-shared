@@ -60,7 +60,7 @@ public class BulkRequestEntry {
         if (! used) {
             if (sourceConsumer != null) {
                 if (source == null) {
-                    log.warn("No source in {} for {}", action, id);
+                    log.warn("No source for action {} for id {}", action, id);
                 } else {
                     sourceConsumer.accept(source);
                 }
