@@ -569,8 +569,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
+     * @param path path to post to
+     * @param request json to post to that.
+     * @param listeners Listeners to process results (e.g. log errors or indexing)
+     */
     @SafeVarargs
-    public final CompletableFuture<ObjectNode> postAsync(String path, ObjectNode request, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> postAsync(@NonNull String path, @NonNull ObjectNode request, @NonNull Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         clientAsync((client) -> {
             log.debug("posting");
@@ -760,7 +766,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     @SafeVarargs
-    public final Future<ObjectNode> deleteAsync(BulkRequestEntry deleteRequest, Consumer<ObjectNode>... listeners) {
+    public final Future<ObjectNode> deleteAsync(
+        @NonNull BulkRequestEntry deleteRequest,
+        @NonNull Consumer<ObjectNode>... listeners) {
         return deleteAsync(deleteRequest.getAction().get(TYPE).textValue(), deleteRequest.getSource().get(ID).textValue(), listeners);
     }
 
@@ -769,7 +777,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      */
     @SafeVarargs
     @Deprecated
-    public final CompletableFuture<ObjectNode> deleteAsync(String type, String id, Consumer<ObjectNode>... listeners) {
+    public final CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync(createDelete( "/" + type + "/" + encode(id)),
@@ -1012,17 +1020,35 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final BulkRequestEntry indexRequest(String type, String id, Object o, Consumer<ObjectNode>... consumers) {
         return _indexRequest(type, id, null, o, consumers);
     }
+
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         return _indexRequest(DOC, id, null, o, consumers);
     }
-
-
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
     @SafeVarargs
     public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         return _updateRequest(id,  o, consumers);
     }
 
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param routing The routing to use
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
     @SafeVarargs
     public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
         BulkRequestEntry request =
@@ -1046,13 +1072,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             index.put(Fields.VERSION, version);
         }
 
-
         ObjectNode objectNode  = objectMapper.valueToTree(o);
-        return new BulkRequestEntry(actionLine, objectNode, this::unalias, mdcSupplier.get(), (on) -> {
-            for (Consumer<ObjectNode> c : consumers) {
-                c.accept(on);
-            }
-        });
+        return BulkRequestEntry.builder()
+            .action(actionLine)
+            .source(objectNode)
+            .unalias(this::unalias)
+            .mdc(mdcSupplier.get())
+            .sourceConsumer((on) -> {
+                for (Consumer<ObjectNode> c : consumers) {
+                    c.accept(on);
+                }
+            }).build();
     }
 
     @SafeVarargs
@@ -1069,7 +1099,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         updateNode.put(Fields.DOC_AS_UPSERT, false);
         return new BulkRequestEntry(actionLine, updateNode, this::unalias, mdcSupplier.get(), (on) -> {
             for (Consumer<ObjectNode> c : consumers) {
-                c.accept((ObjectNode) on.get(Fields.DOC));
+                ObjectNode doc = (ObjectNode) on.get(Fields.DOC);
+                c.accept(doc);
             }
         });
     }
@@ -1084,8 +1115,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         request.getAction().with(INDEX).put(Fields.PARENT, routing);
         return request;
     }
-
-
 
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
@@ -1104,7 +1133,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         request.getAction().with(DELETE)
             .put(ROUTING, routing);
         return request;
-
     }
 
     protected BulkRequestEntry _deleteRequest(String type, String id) {
@@ -1117,6 +1145,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         index.put(Fields.INDEX, getIndexName());
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
     }
+
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
@@ -1124,16 +1153,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public BulkRequestEntry deleteRequest(Enum<?> type, String id, String routing) {
         return deleteRequest(type.name(), id, routing);
     }
+
     /**
      * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
      */
     @Deprecated
     public  BulkRequestEntry deleteRequest(String type, String id, String routing) {
-         BulkRequestEntry request = deleteRequest(type, id);
+        BulkRequestEntry request = deleteRequest(type, id);
         request.getAction().with("delete").put(Fields.ROUTING, routing);
         return request;
     }
-
 
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
         if (request.isEmpty()) {
@@ -1160,10 +1189,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final CompletableFuture<ObjectNode> bulkAsync(
         Collection<BulkRequestEntry> request, Consumer<ObjectNode>... listeners) {
         return bulkAsync(log, writeJsonDir, client(), request, listeners);
-
     }
 
 
+    /**
+     *
+     * @param request Collection of {@link BulkRequestEntry}s
+     * @param listeners Listeners to process results (e.g. log errors or indexing)
+     */
     @SafeVarargs
     public static CompletableFuture<ObjectNode> bulkAsync(
         SimpleLogger log,
@@ -1596,8 +1629,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         clientFactory.close();
         clientFactory = null;
     }
-
-
 
     @Override
     public String toString() {
