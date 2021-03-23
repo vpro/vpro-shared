@@ -1,19 +1,21 @@
 package nl.vpro.jackson2;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
+import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -48,11 +50,12 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void testEmpty() throws IOException {
-       JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class);
-        assertThat(it.hasNext()).isFalse();
-        assertThat(it.hasNext()).isFalse();
-        assertThat(it.getCount()).isEqualTo(0);
-        assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
+        try (JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class)) {
+            assertThat(it.hasNext()).isFalse();
+            assertThat(it.hasNext()).isFalse();
+            assertThat(it.getCount()).isEqualTo(0);
+            assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
+        }
     }
 
     @Test
@@ -60,6 +63,7 @@ public class JsonArrayIteratorTest {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isTrue();
         it.next();
+        assertThat(it.peek()).isEqualTo(new Change());
         assertThat(it.getCount()).isEqualTo(2);
         assertThat(it.hasNext()).isTrue();
         it.next();
@@ -84,12 +88,15 @@ public class JsonArrayIteratorTest {
     }
 
 
+    @SuppressWarnings("FinalizeCalledExplicitly")
     @Test
     public void testZeroBytes() throws IOException {
+
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream(new byte[0]), Change.class);
 
         assertThat(it.hasNext()).isFalse();
         assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
+        it.finalize();
     }
 
     @Test
@@ -104,9 +111,63 @@ public class JsonArrayIteratorTest {
         verify(callback, times(1)).run();
     }
 
+    @Test
+    public void write() throws IOException, JSONException {
+        JsonArrayIterator<Change> it = JsonArrayIterator
+            .<Change>builder()
+            .inputStream(getClass().getResourceAsStream("/changes.json"))
+            .valueClass(Change.class)
+            .objectMapper(Jackson2Mapper.getInstance())
+            .skipNulls(false)
+            .build();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        it.write(out, (c) -> {
+            log.info("{}", c);
+        });
+        String expected = "{'array': " + IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8) + "}";
+        JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void writeArray() throws IOException, JSONException {
+        JsonArrayIterator<Change> it = JsonArrayIterator
+            .<Change>builder()
+            .inputStream(getClass().getResourceAsStream("/changes.json"))
+            .valueClass(Change.class)
+            .objectMapper(Jackson2Mapper.getInstance())
+            .logger(log)
+            .skipNulls(false)
+            .build();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        it.writeArray(out, (c) -> {
+            log.info("{}", c);
+        });
+        String expected = IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8);
+        JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void illegalConstruction() {
+        assertThatThrownBy(() -> {
+            JsonArrayIterator.builder().build();
+        }).isInstanceOf(IllegalArgumentException.class);
+
+        assertThatThrownBy(() -> {
+            JsonArrayIterator
+                .<Change>builder()
+                .inputStream(getClass().getResourceAsStream("/changes.json"))
+                .valueClass(Change.class)
+                .valueCreator((jp, on) -> null)
+                .build();
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
     @XmlAccessorType(XmlAccessType.FIELD)
     @Getter
     @Setter
+    @EqualsAndHashCode
     private static class Change {
 
         private String mid;

@@ -1,21 +1,18 @@
 package nl.vpro.jackson2;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.*;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.NonNull;
-
-
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -30,7 +27,8 @@ import nl.vpro.util.CountedIterator;
  * @since 1.0
  */
 @Slf4j
-public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
+public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
+    implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
 
     private final JsonParser jp;
 
@@ -59,16 +57,18 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
 
     private long count = 0;
 
+    private boolean skipNulls = true;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
         this(inputStream, clazz, null);
 
     }
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
-        this(inputStream, null, clazz, callback, null, null, null, null);
+        this(inputStream, null, clazz, callback, null, null, null, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null, null, null, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null, null, null, null);
     }
 
 
@@ -90,6 +90,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
      * @param objectMapper    Default the objectMapper {@link Jackson2Mapper#getLenientInstance()} will be used (in
      *                        conjuction with <code>valueClass</code>, but you may specify another one
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
+     * @param skipNulls
      * @throws IOException    If the json parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
      */
@@ -102,7 +103,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         @Nullable String sizeField,
         @Nullable String totalSizeField,
         @Nullable ObjectMapper objectMapper,
-        @Nullable Logger logger
+        @Nullable Logger logger,
+        @Nullable Boolean skipNulls
         ) throws IOException {
         if (inputStream == null) {
             throw new IllegalArgumentException("No inputStream given");
@@ -145,6 +147,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         this.totalSize = tmpTotalSize;
         jp.nextToken();
         this.callback = callback;
+        this.skipNulls = skipNulls == null || skipNulls;
     }
 
     private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
@@ -180,6 +183,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         next = null;
         needsFindNext = true;
         hasNext = null;
+        count += foundNulls;
+        foundNulls = 0;
         count++;
         return result;
     }
@@ -195,10 +200,16 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
             while(true) {
                 try {
                     TreeNode tree = jp.readValueAsTree();
-                    if (tree instanceof NullNode) {
-                        foundNulls++;
-                        continue;
+
+                    if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
+                        tree = null;
+                    } else {
+                        if (tree instanceof NullNode && skipNulls) {
+                            foundNulls++;
+                            continue;
+                        }
                     }
+
                     try {
                         if (tree == null) {
                             callback();
@@ -206,16 +217,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
                         } else {
                             if (foundNulls > 0) {
                                 logger.warn("Found {} nulls. Will be skipped", foundNulls);
-                                count += foundNulls;
                             }
 
                             next = valueCreator.apply(jp, tree);
                             hasNext = true;
                         }
-                        foundNulls = 0;
                         break;
                     } catch (ValueReadException jme) {
-                        count++;
+                        foundNulls++;
                         logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
                 } catch (IOException e) {
@@ -249,7 +258,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
         if (! callBackHasRun && callback != null) {
             logger.warn("Callback not run in finalize. Did you not close the iterator?");
             callback.run();
-
         }
     }
 
@@ -266,38 +274,74 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T> implements Clo
     /**
      * Write the entire stream to an output stream
      */
+    public void write(OutputStream out, final Consumer<T> logging) throws IOException {
+        write(this, out, logging == null ? null : (c) -> { logging.accept(c); return null;});
+    }
+
+    public void writeArray(OutputStream out, final Consumer<T> logging) throws IOException {
+        writeArray(this, out, logging == null ? null : (c) -> { logging.accept(c); return null;});
+    }
+
+
+    /**
+     * Write the entire stream to an output stream
+     * @deprecated Use {@link #write(OutputStream, Consumer)}
+     */
     public void write(OutputStream out, final Function<T, Void> logging) throws IOException {
         write(this, out, logging);
     }
 
-
-  /**
+    /**
      * Write the entire stream to an output stream
      */
-    public static <T> void write(CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
+    public static <T> void write(
+        CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
         try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
             jg.writeStartObject();
             jg.writeArrayFieldStart("array");
-            while (iterator.hasNext()) {
-                T change = null;
-                try {
-                    change = iterator.next();
-                    if (change != null) {
-                        jg.writeObject(change);
-                    } else {
-                        jg.writeNull();
-                    }
-                } catch (Exception e) {
-                    log.warn(e.getMessage());
-                    jg.writeObject(e.getMessage());
+            writeObjects(iterator, jg, logging);
+            jg.writeEndArray();
+            jg.writeEndObject();
+            jg.flush();
+        }
+    }
+
+    /**
+     * Write the entire stream to an output stream
+     */
+    public static <T> void writeArray(
+        CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
+        try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
+            jg.writeStartArray();
+            writeObjects(iterator, jg, logging);
+            jg.writeEndArray();
+            jg.flush();
+        }
+    }
+
+
+    /**
+     * Write the entire stream as an array to jsonGenerator
+     */
+    public static <T> void writeObjects(
+        CountedIterator<T> iterator, JsonGenerator jg, final Function<T, Void> logging) throws IOException {
+        while (iterator.hasNext()) {
+            T change;
+            try {
+                change = iterator.next();
+                if (change != null) {
+                    jg.writeObject(change);
+                } else {
+                    jg.writeNull();
                 }
                 if (logging != null) {
                     logging.apply(change);
                 }
+            } catch (Exception e) {
+                log.warn(e.getMessage());
+                jg.writeObject(e.getMessage());
             }
-            jg.writeEndArray();
-            jg.writeEndObject();
-            jg.flush();
+
         }
     }
 
