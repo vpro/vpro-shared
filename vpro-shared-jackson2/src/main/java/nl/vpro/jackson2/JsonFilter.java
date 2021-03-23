@@ -91,7 +91,7 @@ public class JsonFilter implements Callable<Void> {
                         generator.writeNumber(handleReplacements(stack, parser.getValueAsInt()));
                         break;
                     case VALUE_NUMBER_FLOAT:
-                        generator.writeNumber(handleReplacements(stack, parser.getValueAsInt()));
+                        generator.writeNumber(handleReplacements(stack, parser.getValueAsDouble()));
                         break;
                     case VALUE_TRUE:
                         generator.writeBoolean(true);
