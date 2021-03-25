@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
  * @author Michiel Meeuwissen
  * @since 0.53
  */
-@Disabled("Doest assert anything, just trying out")
+@Disabled("Doesnt assert anything, just trying out")
 @Slf4j
 public class ThreadPoolsTest {
 
