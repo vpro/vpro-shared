@@ -15,10 +15,12 @@ import javax.ws.rs.ext.ReaderInterceptorContext;
 @Slf4j
 public class HeaderInterceptor  implements ReaderInterceptor {
 
+    public static final HeaderInterceptor INSTANCE = new HeaderInterceptor();
 
-    static final ThreadLocal<MultivaluedMap<String, String>> HEADERS = ThreadLocal.withInitial(() -> null);
+    private static final ThreadLocal<MultivaluedMap<String, String>> HEADERS = ThreadLocal.withInitial(() -> null);
 
-    public HeaderInterceptor() {
+
+    private  HeaderInterceptor() {
     }
 
     @Override

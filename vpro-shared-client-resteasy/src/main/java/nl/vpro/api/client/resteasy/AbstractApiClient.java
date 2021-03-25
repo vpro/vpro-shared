@@ -737,7 +737,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new AcceptRequestFilter(accept));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
         builder.register(new CountFilter(log));
-        builder.register(new HeaderInterceptor());
+        builder.register(HeaderInterceptor.INSTANCE);
 
         BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
 
