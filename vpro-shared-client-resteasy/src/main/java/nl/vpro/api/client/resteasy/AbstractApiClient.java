@@ -388,39 +388,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         Integer maxConnectionsPerRoute,
         Duration connectionInPoolTTL,
         Duration validateAfterInactivity) {
-        SocketConfig socketConfig = SocketConfig.custom()
-            .setTcpNoDelay(true)
-            .setSoKeepAlive(true)
-            .setSoReuseAddress(true)
-            .build();
-
-        PoolingHttpClientConnectionManager connectionManager = null;
-        if (maxConnections == null) {
-            maxConnections = 0;
-        }
-        if (maxConnectionsPerRoute == null) {
-            maxConnectionsPerRoute = 0;
-        }
-        // Why is connectionInPoolTTL the criterion to check?
-        if (connectionInPoolTTL != null) {
-            connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
-            if (validateAfterInactivity != null) {
-                connectionManager.setValidateAfterInactivity((int) validateAfterInactivity.toMillis());
-            }
-
-            if (maxConnections > 0) {
-                connectionManager.setMaxTotal(maxConnections);
-            }
-            if (maxConnectionsPerRoute > 0) {
-                connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
-            }
-            connectionManager.setDefaultSocketConfig(socketConfig);
-
-
-            if (maxConnections > 1) {
-                watchIdleConnections(connectionManager);
-            }
-        }
 
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setExpectContinueEnabled(true)
@@ -428,7 +395,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             .setConnectionRequestTimeout(connectionRequestTimeout == null ? 0 : (int) connectionRequestTimeout.toMillis())
             .setConnectTimeout(connectTimeout == null ? 0 : (int) connectTimeout.toMillis())
             .setSocketTimeout(socketTimeout == null ? 0 : (int) socketTimeout.toMillis())
-
             .build();
 
         List<Header> defaultHeaders = new ArrayList<>();
@@ -448,9 +414,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             })
             .setKeepAliveStrategy(new MyConnectionKeepAliveStrategy());
 
-        if (connectionManager != null){
-            client.setConnectionManager(connectionManager);
-        }
+        setConnectionManager(client);
+
 
         if (trustAll){
             try {
@@ -462,6 +427,49 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         }
 
         return client.build();
+    }
+
+    private void setConnectionManager(HttpClientBuilder client) {
+         PoolingHttpClientConnectionManager connectionManager = null;
+        Integer maxConnections = this.maxConnections;
+        Integer maxConnectionsPerRoute = this.maxConnectionsPerRoute;
+        // Why is connectionInPoolTTL the criterion to check?
+        if (connectionInPoolTTL != null) {
+            connectionManager = new PoolingHttpClientConnectionManager(connectionInPoolTTL.toMillis(), TimeUnit.MILLISECONDS);
+            if (validateAfterInactivity != null) {
+                connectionManager.setValidateAfterInactivity((int) validateAfterInactivity.toMillis());
+            }
+            if (maxConnections == null) {
+                maxConnections = 0;
+            }
+            if (maxConnectionsPerRoute == null) {
+                maxConnectionsPerRoute = 0;
+            }
+
+
+            if (maxConnections > 0) {
+                connectionManager.setMaxTotal(maxConnections);
+            }
+            if (maxConnectionsPerRoute > 0) {
+                connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
+            }
+            SocketConfig socketConfig = SocketConfig.custom()
+                .setTcpNoDelay(true)
+                .setSoKeepAlive(true)
+                .setSoReuseAddress(true)
+                .build();
+
+            connectionManager.setDefaultSocketConfig(socketConfig);
+
+
+            if (maxConnections > 1) {
+                watchIdleConnections(connectionManager);
+            }
+        }
+        if (connectionManager != null){
+            client.setConnectionManager(connectionManager);
+        }
+
     }
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
@@ -540,6 +548,18 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
         if (!Objects.equals(this.connectionInPoolTTL, connectionInPoolTTL)) {
             this.connectionInPoolTTL = connectionInPoolTTL;
+            clientHttpEngine = null;
+            invalidate();
+        }
+    }
+
+    public Duration getValidateAfterInactivity() {
+        return validateAfterInactivity;
+    }
+
+    public void setValidateAfterInactivity(Duration validateAfterInactivity) {
+        if (!Objects.equals(this.validateAfterInactivity, validateAfterInactivity)) {
+            this.validateAfterInactivity = validateAfterInactivity;
             clientHttpEngine = null;
             invalidate();
         }
