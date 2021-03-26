@@ -3,6 +3,7 @@ package nl.vpro.rs.client;
 import lombok.Getter;
 
 import java.lang.reflect.*;
+import java.net.ConnectException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -97,8 +98,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
             l = log;
             t = pe;
-            error = true;
-
+            error = ! (cause instanceof ConnectException);
         } catch (Throwable e) {
             mes = new Message(null, e.getClass().getName() + " " + e.getMessage());
             t = e;
@@ -115,7 +115,6 @@ public class ErrorAspect<T, E> implements InvocationHandler {
                         .collect(joining("\n")),
                 mes);
         } else {
-
             l.info("For {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
