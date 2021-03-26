@@ -19,10 +19,22 @@ public interface AbstractApiClientMXBean {
     @Units("duration")
     String getConnectionRequestTimeout();
     void setConnectionRequestTimeout(String connectionRequestTimeout);
+
+    @Units("duration")
     String getConnectTimeout();
     void setConnectTimeout(String connectTimeout);
+
+    @Units("duration")
     String getSocketTimeout();
     void setSocketTimeout(String socketTimeout);
+
+    String getConnectionInPoolTTL();
+    void  setConnectionInPoolTTL(String connectionInPoolTTL);
+
+    String getValidateAfterInactivity();
+
+    void  setValidateAfterInactivity(String validateAfterInactivity);
+
     String getCounts();
     long getCount(String method);
     long getTotalCount();

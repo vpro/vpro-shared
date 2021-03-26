@@ -430,7 +430,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
     private void setConnectionManager(HttpClientBuilder client) {
-         PoolingHttpClientConnectionManager connectionManager = null;
+        PoolingHttpClientConnectionManager connectionManager = null;
         Integer maxConnections = this.maxConnections;
         Integer maxConnectionsPerRoute = this.maxConnectionsPerRoute;
         // Why is connectionInPoolTTL the criterion to check?
@@ -541,25 +541,31 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         }
     }
 
-    public Duration getConnectionInPoolTTL() {
-        return connectionInPoolTTL;
+    @Override
+    public String getConnectionInPoolTTL() {
+        return String.valueOf(connectionInPoolTTL);
     }
+    @Override
+    public void setConnectionInPoolTTL(String connectionInPoolTTLAsAstring) {
+        Duration parsed = TimeUtils.parseDuration(connectionInPoolTTLAsAstring).orElse(null);
 
-    public void setConnectionInPoolTTL(Duration connectionInPoolTTL) {
-        if (!Objects.equals(this.connectionInPoolTTL, connectionInPoolTTL)) {
-            this.connectionInPoolTTL = connectionInPoolTTL;
+        if (!Objects.equals(this.connectionInPoolTTL, parsed)) {
+            this.connectionInPoolTTL = parsed;
             clientHttpEngine = null;
             invalidate();
         }
     }
 
-    public Duration getValidateAfterInactivity() {
-        return validateAfterInactivity;
+    @Override
+    public String getValidateAfterInactivity() {
+        return String.valueOf(validateAfterInactivity);
     }
 
-    public void setValidateAfterInactivity(Duration validateAfterInactivity) {
-        if (!Objects.equals(this.validateAfterInactivity, validateAfterInactivity)) {
-            this.validateAfterInactivity = validateAfterInactivity;
+    @Override
+    public void setValidateAfterInactivity(String validateAfterInactivityAsString) {
+        Duration parsed = TimeUtils.parseDuration(validateAfterInactivityAsString).orElse(null);
+        if (!Objects.equals(this.validateAfterInactivity, parsed)) {
+            this.validateAfterInactivity = parsed;
             clientHttpEngine = null;
             invalidate();
         }
