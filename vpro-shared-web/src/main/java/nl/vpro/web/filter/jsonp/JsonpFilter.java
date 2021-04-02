@@ -12,6 +12,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nl.vpro.web.filter.RequestWrapper;
+
 /**
  * <p>Wraps a JSON response with padding and sets the response content type to application
  * /javascript. This filter is triggered when a callback parameter is present on the URL

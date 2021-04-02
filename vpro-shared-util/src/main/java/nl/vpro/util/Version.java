@@ -46,7 +46,7 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     public boolean isAfter(T... parts) {
-        return isAfter(new Version<T>(parts));
+        return isAfter(new Version<>(parts));
     }
 
     public boolean isAfter(Version<T> other) {
@@ -54,7 +54,7 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     public boolean isNotAfter(T... parts) {
-        return isNotAfter(new Version<T>(parts));
+        return isNotAfter(new Version<>(parts));
     }
 
     public boolean isNotAfter(Version<T> other) {
@@ -62,7 +62,7 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     public boolean isBefore(T... parts) {
-        return isBefore(new Version<T>(parts));
+        return isBefore(new Version<>(parts));
     }
 
     public boolean isBefore(Version<T> other) {
@@ -70,7 +70,7 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     public boolean isNotBefore(T... parts) {
-        return isNotBefore(new Version<T>(parts));
+        return isNotBefore(new Version<>(parts));
     }
 
     public boolean isNotBefore(Version<T> other) {

@@ -111,13 +111,13 @@ public class TransformingSortedSet<T, S> extends AbstractSet<T> implements Sorte
 
     @Override
     public SortedSet<S> newWrap() {
-        return new TreeSet<S>();
+        return new TreeSet<>();
 
     }
 
     @Override
     public SortedSet<T> newFiltered() {
-        return new TreeSet<T>();
+        return new TreeSet<>();
 
     }
 

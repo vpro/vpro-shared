@@ -2,21 +2,21 @@
  * Copyright (C) 2010 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.web.filter.jsonp;
+package nl.vpro.web.filter;
 
-import java.util.Enumeration;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-class RequestWrapper extends HttpServletRequestWrapper {
+public class RequestWrapper extends HttpServletRequestWrapper {
 
-    private final String accept;
+    private final List<String> accept;
 
     public RequestWrapper(HttpServletRequest request, String a) {
         super(request);
-        this.accept = a;
+        this.accept = Collections.list(new StringTokenizer(a)).stream().map(t -> (String) t).collect(Collectors.toList());
     }
     public RequestWrapper(HttpServletRequest request) {
         this(request, "application/json");
@@ -25,16 +25,15 @@ class RequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getHeader(String header) {
         if(header.equalsIgnoreCase("accept")) {
-            return accept;
+            return String.join(",", accept);
         }
         return super.getHeader(header);
     }
 
     @Override
-    public Enumeration getHeaders(String header) {
+    public Enumeration<String> getHeaders(String header) {
         if(header.equalsIgnoreCase("accept")) {
-            StringTokenizer helper = new StringTokenizer(accept);
-            return helper;
+            return Collections.enumeration(this.accept);
         }
         return super.getHeaders(header);
     }

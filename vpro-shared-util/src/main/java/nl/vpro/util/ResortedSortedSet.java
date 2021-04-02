@@ -31,7 +31,7 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
 
     public static <S extends Comparable<?>> ResortedSortedSet<S> of(
         Collection<S> wrapped) {
-        return new ResortedSortedSet<S>(wrapped, new TreeSet<>());
+        return new ResortedSortedSet<>(wrapped, new TreeSet<>());
     }
 
     public ResortedSortedSet(SortedSet<T> set, Collection<T> wrapped) {

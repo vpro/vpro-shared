@@ -17,7 +17,7 @@ public class CaseInsensitiveEnumParamConverter<T extends Enum<T>> implements Par
 
 
     public static <S extends Enum<S>> CaseInsensitiveEnumParamConverter getInstant(Class<S> enumClass) {
-        return new CaseInsensitiveEnumParamConverter<S>(enumClass);
+        return new CaseInsensitiveEnumParamConverter<>(enumClass);
     }
 
     private final Class<T> enumClass;

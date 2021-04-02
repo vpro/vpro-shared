@@ -79,13 +79,13 @@ public class TransformingList<T, S> extends AbstractList<T> implements Transform
 
     @Override
     public List<S> newWrap() {
-        return new ArrayList<S>();
+        return new ArrayList<>();
 
     }
 
     @Override
     public List<T> newFiltered() {
-        return new ArrayList<T>();
+        return new ArrayList<>();
 
     }
 

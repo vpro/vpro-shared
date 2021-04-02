@@ -27,7 +27,7 @@ public class CustomHSQLDialect extends HSQLDialect {
         typeContributions.contributeType(new UUIDType());
     }
 
-    public class UUIDType extends AbstractSingleColumnStandardBasicType<UUID> {
+    public static class UUIDType extends AbstractSingleColumnStandardBasicType<UUID> {
 
         public UUIDType() {
             super(VarcharTypeDescriptor.INSTANCE, UUIDTypeDescriptor.INSTANCE);

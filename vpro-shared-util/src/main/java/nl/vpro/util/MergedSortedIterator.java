@@ -33,7 +33,7 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
     }
 
     public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
-        return new MergedSortedIterator<T>(
+        return new MergedSortedIterator<>(
             () -> getSize(iterators),
             () -> getTotalSize(iterators),
             Iterators.mergeSorted(iterators, comparator));
@@ -43,7 +43,7 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
      * This doesn't usea  queue, so it is also useable with Hibernate.
      */
     public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
-        return new MergedSortedIterator<T>(() -> getSize(iterators), () -> getTotalSize(iterators), new SameThreadMergingIterator<T>(comparator, iterators));
+        return new MergedSortedIterator<>(() -> getSize(iterators), () -> getTotalSize(iterators), new SameThreadMergingIterator<>(comparator, iterators));
     }
 
     protected static <T> Long getSize(Iterable<CountedIterator<T>> iterators) {

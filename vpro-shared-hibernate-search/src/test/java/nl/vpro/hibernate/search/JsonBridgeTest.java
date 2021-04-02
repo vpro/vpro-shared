@@ -1,12 +1,14 @@
 package nl.vpro.hibernate.search;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import nl.vpro.test.util.jackson2.Jackson2TestUtil;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
  * @author Michiel Meeuwissen
@@ -54,29 +56,25 @@ public class JsonBridgeTest {
     public void testTooLargeArray() {
         /* Array with 1000 elements each 100 chars long, cannot serialize to JSON to store in Lucene, use shorter version */
         String[] array = new String[1000];
-        for (int i = 0; i < array.length; i++) {
-            array[i] = LONG_STRING;
-        }
+        Arrays.fill(array, LONG_STRING);
 
         JsonBridge bridge = new JsonBridge();
         String ret = bridge.objectToString(array);
         /* Result will be anywhere between MAX_LENGTH +/- LONG_STRING.length() characters */
-        Assert.assertTrue(ret.length() >= JsonBridge.MAX_LENGTH-LONG_STRING.length());
-        Assert.assertTrue(ret.length() <= JsonBridge.MAX_LENGTH+LONG_STRING.length());
+        assertTrue(ret.length() >= JsonBridge.MAX_LENGTH-LONG_STRING.length());
+        assertTrue(ret.length() <= JsonBridge.MAX_LENGTH+LONG_STRING.length());
     }
 
     @Test
     public void testOKArray100() {
         /* Array with 100 elements each 100 chars long, can serialize to JSON to store in Lucene */
         String[] array = new String[100];
-        for (int i = 0; i < array.length; i++) {
-            array[i] = LONG_STRING;
-        }
+        Arrays.fill(array, LONG_STRING);
 
         JsonBridge bridge = new JsonBridge();
         String ret = bridge.objectToString(array);
         /* Prefix '[' + 100 * ('"' + string length + '",') - last comma + ']' */
-        Assert.assertEquals(1 + array.length * (LONG_STRING.length() + 3) - 1 + 1, ret.length());
+        assertEquals(1 + array.length * (LONG_STRING.length() + 3) - 1 + 1, ret.length());
     }
 
     @Test
@@ -85,7 +83,7 @@ public class JsonBridgeTest {
         JsonBridge bridge = new JsonBridge();
         String ret = bridge.objectToString(new String[] { LONG_STRING });
         /* Prefix '["' + string length + '"]' */
-        Assert.assertEquals(1 + (LONG_STRING.length() + 2) + 1, ret.length());
+        assertEquals(1 + (LONG_STRING.length() + 2) + 1, ret.length());
     }
 
     @Test
@@ -98,7 +96,7 @@ public class JsonBridgeTest {
 
         JsonBridge bridge = new JsonBridge();
         String ret = bridge.objectToString(buf.toString());
-        Assert.assertEquals("{}", ret);
+        assertEquals("{}", ret);
     }
 
     @Test
@@ -111,6 +109,6 @@ public class JsonBridgeTest {
 
         JsonBridge bridge = new JsonBridge();
         String ret = bridge.objectToString(new String[] { buf.toString() });
-        Assert.assertEquals("[]", ret);
+        assertEquals("[]", ret);
     }
 }

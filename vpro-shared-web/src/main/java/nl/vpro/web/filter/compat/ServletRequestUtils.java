@@ -6,9 +6,9 @@ import javax.servlet.ServletRequest;
  * Stripped-down version of the ServletRequestUtils class in Spring Framework
  * 2.5, so this module doesn't depend on Spring 2.5 (www-main is still on Spring
  * 1.x).
- * 
+ *
  * @author nils
- * 
+ *
  */
 public abstract class ServletRequestUtils {
 
@@ -21,7 +21,7 @@ public abstract class ServletRequestUtils {
 	 * <p>
 	 * Accepts "true", "on", "yes" (any case) and "1" as values for true; treats
 	 * every other non-empty value as false (i.e. parses leniently).
-	 * 
+	 *
 	 * @param request
 	 *            current HTTP request
 	 * @param name
@@ -47,7 +47,7 @@ public abstract class ServletRequestUtils {
 	 * <p>
 	 * Accepts "true", "on", "yes" (any case) and "1" as values for true; treats
 	 * every other non-empty value as false (i.e. parses leniently).
-	 * 
+	 *
 	 * @param request
 	 *            current HTTP request
 	 * @param name
@@ -101,7 +101,7 @@ public abstract class ServletRequestUtils {
 
 		public boolean parseBoolean(String name, String parameter)
 				throws Exception {
-			return ((Boolean) parse(name, parameter)).booleanValue();
+			return (Boolean) parse(name, parameter);
 		}
 
 		public boolean[] parseBooleans(String name, String[] values)

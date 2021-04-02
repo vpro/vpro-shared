@@ -13,6 +13,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nl.vpro.web.filter.RequestWrapper;
+
 /**
  * Returns a JSON response containing a property with the requested resource as its content.
  * <p>
@@ -59,7 +61,6 @@ public class JsonTemplateFilter implements Filter {
                 final PrintWriter writer = response.getWriter();
                 writer.write("{ \"error\" : \"" + e.getMessage() + "\"}");
                 writer.close();
-                return;
             }
 
         } else {

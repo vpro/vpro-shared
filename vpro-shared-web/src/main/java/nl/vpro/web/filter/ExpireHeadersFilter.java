@@ -71,7 +71,7 @@ public class ExpireHeadersFilter implements Filter {
         String value = filterConfig.getInitParameter("ttl");
         if(value != null && value.length() > 0) {
             try {
-                ttl = Integer.valueOf(value);
+                ttl = Integer.parseInt(value);
             } catch(NumberFormatException n) {
                 ttl = DEFAULT_TTL;
             }
