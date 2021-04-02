@@ -28,7 +28,7 @@ public interface BasicObjectTest<E> {
      */
     @Property
     default void equalsIsReflexive(@ForAll(DATAPOINTS) E x) {
-        Assume.that(x != null);;
+        Assume.that(x != null);
         assertThat(x.equals(x)).isTrue();
     }
 

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
  */
 public class Jackson2TestUtilTest {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @XmlRootElement
     @XmlType
     @XmlAccessorType(XmlAccessType.FIELD)

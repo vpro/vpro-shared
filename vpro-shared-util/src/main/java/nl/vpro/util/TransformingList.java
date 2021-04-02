@@ -9,7 +9,7 @@ import java.util.function.Function;
  */
 public class TransformingList<T, S> extends AbstractList<T> implements TransformingCollection<T, S, List<T>, List<S>> {
 
-    private List<S> wrapped;
+    private final List<S> wrapped;
     private final List<Optional<T>> transformed;
     private final Function<S, T> transformer;
     private final Function<T, S> producer;

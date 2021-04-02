@@ -4,13 +4,10 @@
  */
 package nl.vpro.xml.bind;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 
@@ -43,5 +40,5 @@ public class DateToDuration extends XmlAdapter<Duration, Date> {
         duration.addTo(date);
         return date;
     }
-    
+
 }

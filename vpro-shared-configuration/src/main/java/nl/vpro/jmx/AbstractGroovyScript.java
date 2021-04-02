@@ -46,7 +46,7 @@ public abstract class AbstractGroovyScript {
 
         @Override
         public String toString() {
-            return String.valueOf(file) + " (" + count + " lines)";
+            return file + " (" + count + " lines)";
         }
     }
 

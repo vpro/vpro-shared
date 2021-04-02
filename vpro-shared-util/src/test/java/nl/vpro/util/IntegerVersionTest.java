@@ -10,7 +10,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Michiel Meeuwissen

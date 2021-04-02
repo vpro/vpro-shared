@@ -95,7 +95,7 @@ public class URIValidatorTest {
         A a2 = new A(null);
 
         assertThat(validator.validate(a1)).hasSize(1);
-        assertThat(validator.validate(a2)).isEmpty();;
+        assertThat(validator.validate(a2)).isEmpty();
 
         AAllowEmpty ae1 = new AAllowEmpty("");
         AAllowEmpty ae2 = new AAllowEmpty(null);

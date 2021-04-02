@@ -17,7 +17,7 @@ import nl.vpro.util.TimeUtils;
 @Provider
 public class InstantParamConverter implements ParamConverter<Instant> {
 
-    private static ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
+    private static final ZoneId ZONE_ID = ZoneId.of("Europe/Amsterdam");
 
     static InstantParamConverter INSTANCE = new InstantParamConverter();
     private static final Pattern NUMERIC = Pattern.compile("\\d+");

@@ -4,8 +4,6 @@
  */
 package nl.vpro.validation;
 
-import java.util.Collection;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 

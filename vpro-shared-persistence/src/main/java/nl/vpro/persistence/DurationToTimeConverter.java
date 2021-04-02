@@ -4,7 +4,6 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.sql.Time;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 /**
  * @author Michiel Meeuwissen

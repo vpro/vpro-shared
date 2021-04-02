@@ -100,7 +100,7 @@ class CloseableIteratorTest {
         public String next() {
             return wrapped.next();
         }
-    };
+    }
 
     private static class Impl2 implements  Iterator<String>, AutoCloseable {
         List<String> list = Arrays.asList("a", "b", "c");
@@ -120,5 +120,5 @@ class CloseableIteratorTest {
         public String next() {
             return wrapped.next();
         }
-    };
+    }
 }
