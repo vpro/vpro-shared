@@ -4,7 +4,10 @@ import net.jqwik.api.Assume;
 
 import org.hamcrest.Matcher;
 
-public class HamcrestSupport {
+/**
+ * @since 2.25
+ */
+public class HamcrestAssumptions {
 
 
     public static  <T> void assumeThat(T value, Matcher<T> matcher) {
