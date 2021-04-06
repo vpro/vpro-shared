@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class LocalDateXmlAdapterTest {
 
-    private LocalDateXmlAdapter instance = new LocalDateXmlAdapter();
+    private final LocalDateXmlAdapter instance = new LocalDateXmlAdapter();
 
     @Test
     public void testUnmarshalLocalDate() {

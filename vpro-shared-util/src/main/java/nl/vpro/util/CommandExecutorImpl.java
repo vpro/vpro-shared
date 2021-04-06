@@ -32,12 +32,11 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
-    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
-        return exitCode == null ||
+    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) ->
+        exitCode == null ||
             (exitCode == 0 // no error
                 || exitCode == 137 // killed
             )  ? Level.DEBUG : Level.ERROR;
-    };
 
     @Getter
     private final Supplier<String> binary;

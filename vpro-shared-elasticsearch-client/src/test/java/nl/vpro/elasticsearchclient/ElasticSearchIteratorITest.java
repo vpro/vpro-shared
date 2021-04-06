@@ -170,10 +170,7 @@ public class ElasticSearchIteratorITest {
             QueryBuilder.mustTerm(query, "childRef", "18Jnl1100");
 
 
-            i.forEachRemaining((node) -> {
-                log.info("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node);
-
-            });
+            i.forEachRemaining((node) -> log.info("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node));
         }
     }
 

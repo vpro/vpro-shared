@@ -21,8 +21,6 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
     @Property
     default void compareToNull(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);
-        assertThatThrownBy(() -> {
-            x.compareTo(null);
-        }).isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> x.compareTo(null)).isInstanceOf(NullPointerException.class);
     }
 }

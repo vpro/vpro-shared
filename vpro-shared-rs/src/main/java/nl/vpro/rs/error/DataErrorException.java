@@ -1,13 +1,14 @@
 package nl.vpro.rs.error;
 
+import lombok.Getter;
+
 /**
- * Date: 2-5-12
- * Time: 14:11
  *
  * @author Ernst Bunders
  */
 public class DataErrorException extends RuntimeException {
-    private DataError dataError;
+    @Getter
+    private final DataError dataError;
 
     public DataErrorException(DataError dataError) {
         super();
@@ -27,9 +28,5 @@ public class DataErrorException extends RuntimeException {
     public DataErrorException(Throwable throwable, DataError dataError) {
         super(throwable);
         this.dataError = dataError;
-    }
-
-    public DataError getDataError() {
-        return dataError;
     }
 }

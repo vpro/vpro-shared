@@ -5,8 +5,7 @@
 package nl.vpro.cors;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class CorsFilter implements Filter {
 
-    private List<String> methods = Arrays.asList("GET", "HEAD", "OPTIONS");
+    private static final List<String> METHODS = Collections.unmodifiableList(Arrays.asList("GET", "HEAD", "OPTIONS"));
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -36,7 +35,7 @@ public class CorsFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String origin = httpRequest.getHeader(CorsHeaders.ORIGIN);
         String method = httpRequest.getMethod();
-        if (StringUtils.isNotEmpty(origin) && methods.contains(method)) {
+        if (StringUtils.isNotEmpty(origin) && METHODS.contains(method)) {
             httpResponse.addHeader(CorsHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
             httpResponse.addHeader(CorsHeaders.ACCESS_CONTROL_ALLOW_METHODS, CorsHeaders.ACCESS_CONTROL_ALLOW_READ_METHODS_VALUE);
             httpResponse.addHeader(CorsHeaders.ACCESS_CONTROL_ALLOW_HEADERS, CorsHeaders.ACCESS_CONTROL_ALLOW_HEADERS_VALUE);

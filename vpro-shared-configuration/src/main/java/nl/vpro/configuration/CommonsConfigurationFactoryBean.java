@@ -72,8 +72,8 @@ public class CommonsConfigurationFactoryBean implements InitializingBean, Factor
 
         configuration = new CompositeConfiguration();
 
-        for (int i = 0; i < configurations.length; i++) {
-            configuration.addConfiguration(configurations[i]);
+        for (Configuration value : configurations) {
+            configuration.addConfiguration(value);
         }
     }
 

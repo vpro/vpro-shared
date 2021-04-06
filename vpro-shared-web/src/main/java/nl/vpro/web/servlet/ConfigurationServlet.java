@@ -109,7 +109,7 @@ public class ConfigurationServlet extends HttpServlet {
         Map<String, Object> props = getProperties(req);
 
         if(getLastModified(req) == -1) {
-            resp.setDateHeader("Expires", System.currentTimeMillis() + Integer.parseInt((String)props.get("MaxAge")) * 1000);
+            resp.setDateHeader("Expires", System.currentTimeMillis() + Integer.parseInt((String)props.get("MaxAge")) * 1000L);
         } else {
             resp.setHeader("Cache-Control", "max-age=" + props.get("MaxAge") + ", must-revalidate, public");
         }

@@ -217,6 +217,7 @@ public class ObjectLocker {
             this.reason = reason;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
