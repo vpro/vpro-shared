@@ -13,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 
 
 /**
+ * Basic tests on {@link Object#equals(Object)}, {@link Object#hashCode()} and {@link Object#toString()}, which must probably be valid for _any_ override of those.
+ *
  * @author Michiel Meeuwissen
  * @since 2.22
  */
@@ -107,6 +109,10 @@ public interface BasicObjectTest<E> {
         assertThat(pair.getFirst().hashCode()).isEqualTo(pair.getSecond().hashCode());
     }
 
+
+    /**
+     * toString of an object may be anything, but it may not throw exceptions.
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Property
     default void toString(@ForAll(DATAPOINTS) E object) {
