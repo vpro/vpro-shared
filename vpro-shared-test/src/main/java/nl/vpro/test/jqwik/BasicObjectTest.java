@@ -26,6 +26,7 @@ public interface BasicObjectTest<E> {
     /**
      * For any non-null reference value x, x.equals(x) should return true
      */
+    @SuppressWarnings("EqualsWithItself")
     @Property
     default void equalsIsReflexive(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);
@@ -74,6 +75,7 @@ public interface BasicObjectTest<E> {
      * For any non-null reference value x, x.equals(null); should
      * return false.
      */
+    @SuppressWarnings("ConstantConditions")
     @Property
     default void equalsReturnFalseOnNull(@ForAll(DATAPOINTS) E x) {
         Assume.that(x != null);
@@ -119,15 +121,14 @@ public interface BasicObjectTest<E> {
     @Provide
     default Arbitrary<? extends Pair<E, E>> equalDatapoints() {
         List<Pair<E, E>> pairs = new ArrayList<>();
-        datapoints().forEachValue(x -> {
+        datapoints().forEachValue(x ->
             datapoints().forEachValue(y -> {
                 if (x != null) {
                     if (x.equals(y)) {
                         pairs.add(Pair.of(x, y));
                     }
                 }
-            });
-        });
+        }));
         return Arbitraries.of(pairs);
     }
 
