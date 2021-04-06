@@ -15,8 +15,8 @@ import nl.vpro.jackson2.Jackson2Mapper;
  * @since 2.0
  */
 @Provider
-@Consumes({"application/*+json", "text/json"})
-@Produces({"application/*+json", "text/json"})
+@Consumes({"application/json", "application/*+json", "text/json"})
+@Produces({"application/json", "application/*+json", "text/json"})
 public class JacksonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper mapper;

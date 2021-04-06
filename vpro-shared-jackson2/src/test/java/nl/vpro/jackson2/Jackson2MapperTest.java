@@ -1,6 +1,7 @@
 package nl.vpro.jackson2;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import javax.xml.bind.annotation.*;
@@ -35,10 +36,14 @@ public class Jackson2MapperTest {
 
     @Test
     public void read() throws IOException {
-        A a = Jackson2Mapper.getInstance().readValue("/* leading comments */\n{'integer': 2 /* ignore comments */, 'optional': 3}", A.class);
+        String example = "/* leading comments */\n{'integer': 2 /* ignore comments */, 'optional': 3}";
+        A a = Jackson2Mapper.getInstance().readValue(example, A.class);
         assertThat(a.integer).isEqualTo(2);
         assertThat(a.optional).isPresent();
         assertThat(a.optional.get()).isEqualTo(3);
+
+        Jackson2Mapper.getLenientInstance().readerFor(A.class).readValue(example.getBytes(StandardCharsets.UTF_8));
+
 
     }
 
