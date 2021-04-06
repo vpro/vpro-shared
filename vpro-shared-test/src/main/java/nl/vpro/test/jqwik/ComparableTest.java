@@ -2,6 +2,7 @@ package nl.vpro.test.jqwik;
 
 import net.jqwik.api.*;
 
+import static java.lang.Integer.signum;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -29,10 +30,10 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
      * The implementor must ensure sgn(x.compareTo(y)) == -sgn(y.compareTo(x)) for all x and y.
      */
     @Property
-    default void compareTo(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
+    default void compareToIsAntiCommutative(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
         Assume.that(x != null);
         Assume.that(y != null);
-        assertThat(Integer.signum(x.compareTo(y))).isEqualTo(-1 * Integer.signum(y.compareTo(x)));
+        assertThat(signum(x.compareTo(y))).isEqualTo(-1 * signum(y.compareTo(x)));
 
     }
     /**
