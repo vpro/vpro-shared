@@ -14,6 +14,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest<E> {
 
+    /**
+     * This test whether compareTo {@link Comparable#compareTo(Object)} returns 0 iff if two object are equal.
+     * TODO: This is not an absolute requirement, in some cases you may want to compareTo to zero even if two objects are not exactly equal.
+     *
+     */
     @Property
     default void  equalsConsistentWithComparable(@ForAll(EQUAL_DATAPOINTS) Pair<E, E> pair) {
         Assume.that(pair.getFirst() != null);
