@@ -28,8 +28,7 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
 
     @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
     @Property
-    default void compareToNull(@ForAll(DATAPOINTS) E x) {
-        Assume.that(x != null);
+    default void compareToNull(@ForAll(NONNULL_DATAPOINTS) E x) {
         assertThatThrownBy(() -> x.compareTo(null)).isInstanceOf(NullPointerException.class);
     }
 
@@ -37,9 +36,7 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
      * The implementor must ensure sgn(x.compareTo(y)) == -sgn(y.compareTo(x)) for all x and y.
      */
     @Property
-    default void compareToIsAntiCommutative(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
-        Assume.that(x != null);
-        Assume.that(y != null);
+    default void compareToIsAntiCommutative(@ForAll(NONNULL_DATAPOINTS) E x, @ForAll(NONNULL_DATAPOINTS) E y) {
         assertThat(signum(x.compareTo(y))).isEqualTo(-1 * signum(y.compareTo(x)));
 
     }
@@ -48,12 +45,10 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
      */
     @Property(maxDiscardRatio = 1000)
     default void compareToIsTransitiveBigger(
-        @ForAll(DATAPOINTS) E x,
-        @ForAll(DATAPOINTS) E y,
-        @ForAll(DATAPOINTS) E z) {
-        Assume.that(x != null);
-        Assume.that(y != null);
-        Assume.that(z != null);
+        @ForAll(NONNULL_DATAPOINTS) E x,
+        @ForAll(NONNULL_DATAPOINTS) E y,
+        @ForAll(NONNULL_DATAPOINTS) E z) {
+
         Assume.that(x.compareTo(y) > 0);
         Assume.that(y.compareTo(z) > 0);
 
@@ -61,12 +56,10 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
     }
     @Property(maxDiscardRatio = 1000)
     default void compareToIsTransitiveSmaller(
-        @ForAll(DATAPOINTS) E x,
-        @ForAll(DATAPOINTS) E y,
-        @ForAll(DATAPOINTS) E z) {
-          Assume.that(x != null);
-          Assume.that(y != null);
-          Assume.that(z != null);
+        @ForAll(NONNULL_DATAPOINTS) E x,
+        @ForAll(NONNULL_DATAPOINTS) E y,
+        @ForAll(NONNULL_DATAPOINTS) E z) {
+
           Assume.that(x.compareTo(y) < 0);
           Assume.that(y.compareTo(z) < 0);
 
@@ -75,12 +68,10 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
 
     @Property(maxDiscardRatio = 1000)
     default void compareToIsTransitiveEquals(
-        @ForAll(DATAPOINTS) E x,
-        @ForAll(DATAPOINTS) E y,
-        @ForAll(DATAPOINTS) E z) {
-        Assume.that(x != null);
-        Assume.that(y != null);
-        Assume.that(z != null);
+        @ForAll(NONNULL_DATAPOINTS) E x,
+        @ForAll(NONNULL_DATAPOINTS) E y,
+        @ForAll(NONNULL_DATAPOINTS) E z) {
+
         Assume.that(x.compareTo(y) == 0);
         Assume.that(y.compareTo(z) == 0);
 

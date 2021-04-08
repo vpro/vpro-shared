@@ -3,8 +3,7 @@ package nl.vpro.test.jqwik;
 
 import net.jqwik.api.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import nl.vpro.util.Pair;
 
@@ -22,6 +21,9 @@ public interface BasicObjectTest<E> {
 
     String DATAPOINTS = "datapoints";
 
+    String NONNULL_DATAPOINTS = "nonNullDatapoints";
+
+
     String EQUAL_DATAPOINTS = "equalDatapoints";
 
 
@@ -30,8 +32,7 @@ public interface BasicObjectTest<E> {
      */
     @SuppressWarnings("EqualsWithItself")
     @Property
-    default void equalsIsReflexive(@ForAll(DATAPOINTS) E x) {
-        Assume.that(x != null);
+    default void equalsIsReflexive(@ForAll(NONNULL_DATAPOINTS) E x) {
         assertThat(x.equals(x)).isTrue();
     }
 
@@ -40,9 +41,7 @@ public interface BasicObjectTest<E> {
      * should return true if and only if y.equals(x) returns true.
      */
     @Property
-    default void equalsIsSymmetric(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
-        Assume.that(x != null);
-        Assume.that(y != null);
+    default void equalsIsSymmetric(@ForAll(NONNULL_DATAPOINTS) E x, @ForAll(NONNULL_DATAPOINTS) E y) {
         assertThat(x.equals(y)).isEqualTo(y.equals(x));
     }
 
@@ -64,8 +63,7 @@ public interface BasicObjectTest<E> {
      * the objects is modified.
      */
     @Property
-    default void equalsIsConsistent(@ForAll(DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
-        Assume.that(x != null);
+    default void equalsIsConsistent(@ForAll(NONNULL_DATAPOINTS) E x, @ForAll(DATAPOINTS) E y) {
         boolean alwaysTheSame = x.equals(y);
 
         for (int i = 0; i < 30; i++) {
@@ -79,8 +77,7 @@ public interface BasicObjectTest<E> {
      */
     @SuppressWarnings("ConstantConditions")
     @Property
-    default void equalsReturnFalseOnNull(@ForAll(DATAPOINTS) E x) {
-        Assume.that(x != null);
+    default void equalsReturnFalseOnNull(@ForAll(NONNULL_DATAPOINTS) E x) {
         assertThat(x.equals(null)).isFalse();
     }
 
@@ -90,8 +87,7 @@ public interface BasicObjectTest<E> {
      * integer.
      */
     @Property
-    default void hashCodeIsSelfConsistent(@ForAll(DATAPOINTS) E x) {
-        Assume.that(x != null);
+    default void hashCodeIsSelfConsistent(@ForAll(NONNULL_DATAPOINTS) E x) {
         int alwaysTheSame = x.hashCode();
 
         for (int i = 0; i < 30; i++) {
@@ -115,7 +111,7 @@ public interface BasicObjectTest<E> {
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Property
-    default void toString(@ForAll(DATAPOINTS) E object) {
+    default void toString(@ForAll(NONNULL_DATAPOINTS) E object) {
         Assume.that(object != null);
         assertThatNoException().isThrownBy(object::toString);
     }
@@ -136,6 +132,11 @@ public interface BasicObjectTest<E> {
                 }
         }));
         return Arbitraries.of(pairs);
+    }
+
+     @Provide
+    default Arbitrary<? extends  E> nonNullDatapoints() {
+        return datapoints().filter(Objects::nonNull);
     }
 
 }
