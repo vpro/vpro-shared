@@ -23,9 +23,7 @@ public interface BasicObjectTest<E> {
 
     String NONNULL_DATAPOINTS = "nonNullDatapoints";
 
-
     String EQUAL_DATAPOINTS = "equalDatapoints";
-
 
     /**
      * For any non-null reference value x, x.equals(x) should return true
@@ -112,7 +110,6 @@ public interface BasicObjectTest<E> {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Property
     default void toString(@ForAll(NONNULL_DATAPOINTS) E object) {
-        Assume.that(object != null);
         assertThatNoException().isThrownBy(object::toString);
     }
 

@@ -21,8 +21,6 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
      */
     @Property
     default void  equalsConsistentWithComparable(@ForAll(EQUAL_DATAPOINTS) Pair<E, E> pair) {
-        Assume.that(pair.getFirst() != null);
-        Assume.that(pair.getSecond() != null);
         assertThat(pair.getFirst().compareTo(pair.getSecond())).isEqualTo(0);
     }
 
