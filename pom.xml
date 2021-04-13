@@ -488,12 +488,6 @@
       </dependency>
 
       <dependency>
-        <groupId>ext.newrelic</groupId>
-        <artifactId>newrelic-plugin</artifactId>
-        <version>2.0.1.VPRO</version>
-      </dependency>
-
-      <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${jackson2.version}</version>
