@@ -1,5 +1,9 @@
-*.iml
 .idea
-target
 */target
+target
+
 */*.iml
+*.iml
+
+# I use  to do mvn dependency:tree > dep
+**/dep
