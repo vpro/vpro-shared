@@ -7,8 +7,8 @@
 
   <context:annotation-config/>
 
-  <bean class="nl.vpro.monitoring.config.MonitoringConfig"/>
+  <import resource="classpath:META-INF/vpro/properties.xml" />
 
-  <bean class="nl.vpro.monitoring.config.MonitoringEndpoints"/>
+  <bean class="nl.vpro.monitoring.config.MonitoringConfig"/>
 
 </beans>
