@@ -23,7 +23,7 @@ class CopierTest {
     private static final int SIZE = 1000;
 
     @Test
-    public void basic() throws InterruptedException, IOException {
+    void basic() throws InterruptedException, IOException {
         try (
             InputStream in = randomStream();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -41,7 +41,7 @@ class CopierTest {
 
 
     @Test
-    public void basicConsuming() throws InterruptedException, IOException {
+    void basicConsuming() throws InterruptedException, IOException {
         final List<String> batches = new ArrayList<>();
         try (
             InputStream in = randomStream();
@@ -58,7 +58,6 @@ class CopierTest {
                 .build()) {
 
             copier.execute();
-
             synchronized (batches) {
                 while(!copier.isReady()) {
                     batches.wait();
@@ -75,7 +74,7 @@ class CopierTest {
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @Test
-    public void ioExceptional(TestInfo info) throws InterruptedException {
+    void ioExceptional(TestInfo info) throws InterruptedException {
         InputStream in = randomStream((count) ->  {
             if  (count >= SIZE / 2) {
                 throw new IOException("foo bar");
@@ -112,7 +111,7 @@ class CopierTest {
 
 
     @Test
-    public void runtimeExceptional() throws InterruptedException {
+    void runtimeExceptional() throws InterruptedException {
         InputStream in = randomStream((count) ->  {
             if  (count == 500) {
                 throw new RuntimeException("foo bar");
@@ -130,9 +129,9 @@ class CopierTest {
             .callback((c) ->
                 callback.add(c.toString())
             )
-            .errorHandler((c, e) -> {
-                exceptionHolder[0] = e;
-            })
+            .errorHandler((c, e) ->
+                exceptionHolder[0] = e
+            )
             .build()) {
 
             copier.waitFor();
@@ -150,7 +149,7 @@ class CopierTest {
     }
 
     @Test
-    public void errorHandlerError() throws InterruptedException {
+    void errorHandlerError() throws InterruptedException {
         InputStream in = randomStream((count) ->  {
             if  (count == 500) {
                 throw new RuntimeException("foo bar");
@@ -178,7 +177,7 @@ class CopierTest {
     }
 
     @Test
-    public void interrupt() throws InterruptedException, IOException {
+    void interrupt() throws InterruptedException, IOException {
         final List<String> batches = new CopyOnWriteArrayList<>();
         try (
             InputStream in = randomStream();
@@ -217,7 +216,7 @@ class CopierTest {
     }
 
     @Test
-    public void equalsParts() {
+    void equalsParts() {
         assertThat(Copier.equalsParts(3)).containsExactly(3);
         assertThat(Copier.equalsParts(100)).containsExactly(100);
         assertThat(Copier.equalsParts(9000)).containsExactly(4500, 4500);
@@ -232,8 +231,8 @@ class CopierTest {
         assertThat(copier.getCount()).isEqualTo(SIZE);
         assertThat(copier.isReadyIOException()).isTrue();
         assertThat(copier.getException()).isNotPresent();
+        copier.close();
         assertThat(copier.cancelFutureIfNeeded()).isFalse(); // should be done
-
     }
 
     private  InputStream randomStream() {
