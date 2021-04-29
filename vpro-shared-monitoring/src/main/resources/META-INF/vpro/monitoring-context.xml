@@ -7,8 +7,6 @@
 
   <context:annotation-config/>
 
-  <import resource="classpath:META-INF/vpro/properties.xml" />
-
   <bean class="nl.vpro.monitoring.config.MonitoringConfig"/>
 
 </beans>
