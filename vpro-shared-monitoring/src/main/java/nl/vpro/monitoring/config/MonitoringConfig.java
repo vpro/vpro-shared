@@ -20,25 +20,27 @@ import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+ 
 import org.springframework.context.annotation.*;
+ 
 
 @Configuration
 @ComponentScan(basePackages = "nl.vpro.monitoring.config")
 public class MonitoringConfig {
 
+    @Autowired(required = false)
+    public MonitoringProperties properties = new MonitoringProperties();
+
     @Autowired
-    public MonitoringProperties properties;
+    private ApplicationContext applicationContext;
 
 
     // TODO: optional or not this requires SessionFactory, DataSource etc in class loader, which may not be sensible for the application
     @Bean
-    public PrometheusMeterRegistry globalMeterRegistry(
-        Optional<DataSource> dataSource,
-        Optional<SessionFactory> sessionFactory,
-        Optional<Ehcache> ehCache,
-        Optional<Manager> manager
-    ) {
+    @SuppressWarnings("unchecked")
+    public PrometheusMeterRegistry globalMeterRegistry() {
         final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
 
         if (properties.getCommonTags() != null) {
@@ -47,6 +49,7 @@ public class MonitoringConfig {
         if (properties.isMeterClassloader()) {
             new ClassLoaderMetrics().bindTo(registry);
         }
+        final Optional<Ehcache> ehCache = (Optional<Ehcache>) getEhCache();
         if (properties.isMeterEhCache2() && ehCache.isPresent()) {
             new EhCache2Metrics(ehCache.get(), Tags.empty()).bindTo(registry);
         }
@@ -62,12 +65,14 @@ public class MonitoringConfig {
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
+        final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
         if (properties.isMeterHibernate() && sessionFactory.isPresent()) {
             new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
         }
         if (properties.isMeterHibernateQuery() && sessionFactory.isPresent()) {
             new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
         }
+        final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
         if (properties.isMeterPostgres() && dataSource.isPresent()) {
             if (properties.getPostgresDatabaseName() != null) {
                 new PostgreSQLDatabaseMetrics(dataSource.get(), properties.getPostgresDatabaseName()).bindTo(registry);
@@ -78,6 +83,7 @@ public class MonitoringConfig {
         if (properties.isMeterProcessor()) {
             new ProcessorMetrics().bindTo(registry);
         }
+        final Optional<Manager> manager = (Optional<Manager>) getManager();
         if (properties.isMeterTomcat() && manager.isPresent()) {
             new TomcatMetrics(manager.get(), Tags.empty()).bindTo(registry);
         }
@@ -90,5 +96,65 @@ public class MonitoringConfig {
             }
         }
         return registry;
+    }
+
+    // Without a datasourc arg instead of the wildcard, applicartion startup will fail
+    // when this class is not available
+    private Optional<?> getDataSource() {
+        return classForName("javax.sql.DataSource")
+            .flatMap(c -> {
+                try {
+                    return getBean(c);
+                } catch (BeansException e) {
+                    return Optional.empty();
+                }
+            });
+    }
+
+    private Optional<?> getSessionFactory() {
+        return classForName("org.hibernate.SessionFactory")
+            .flatMap(c -> {
+                try {
+                    return getBean(c);
+                } catch (BeansException e) {
+                    return Optional.empty();
+                }
+            });
+    }
+
+    private Optional<?> getEhCache() {
+        return classForName("net.sf.ehcache.Ehcache")
+            .flatMap(c -> {
+                try {
+                    return getBean(c);
+                } catch (BeansException e) {
+                    return Optional.empty();
+                }
+            });
+    }
+
+    private Optional<?> getManager() {
+        return classForName("org.apache.catalina.Manager")
+            .flatMap(c -> {
+                try {
+                    return getBean(c);
+                } catch (BeansException e) {
+                    return Optional.empty();
+                }
+            });
+    }
+
+    private Optional<Class<?>> classForName(String name) {
+        try {
+            final Class<?> aClass = Class.forName(name, true, this.getClass().getClassLoader());
+            return Optional.of(aClass);
+        } catch (ClassNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<?> getBean(Class<?> clazz) {
+        return Optional.ofNullable(applicationContext)
+            .map(ac -> ac.getBean(clazz));
     }
 }
