@@ -16,29 +16,26 @@ import net.sf.ehcache.Ehcache;
 import java.io.File;
 import java.util.Optional;
 
-import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.*;
-
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = "nl.vpro.monitoring.config")
 public class MonitoringConfig {
 
-    public final MonitoringProperties properties;
+    @Autowired(required = false)
+    public MonitoringProperties properties = new MonitoringProperties();
 
-    private final ApplicationContext applicationContext;
-
-    @Inject
-    public MonitoringConfig(ApplicationContext applicationContext, MonitoringProperties properties) {
-        this.applicationContext = applicationContext;
-        this.properties = properties == null ?  new MonitoringProperties() : properties;
-    }
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Bean
     @SuppressWarnings("unchecked")
