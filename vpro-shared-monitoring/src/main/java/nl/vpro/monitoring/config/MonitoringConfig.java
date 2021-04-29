@@ -30,6 +30,8 @@ public class MonitoringConfig {
     @Autowired
     public MonitoringProperties properties;
 
+
+    // TODO: optional or not this requires SessionFactory, DataSource etc in class loader, which may not be sensible for the application
     @Bean
     public PrometheusMeterRegistry globalMeterRegistry(
         Optional<DataSource> dataSource,
