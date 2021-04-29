@@ -16,46 +16,46 @@ public class MonitoringProperties {
     @Value("${monitoring.tags:#{null}}")
     private List<String> commonTags;
 
-    @Value("${monitoring.classloader.enabled:false}")
+    @Value("${monitoring.classloader.enabled:true}")
     private boolean meterClassloader;
 
-    @Value("${monitoring.ehcache2.enabled:false}")
+    @Value("${monitoring.ehcache2.enabled:true}")
     private boolean meterEhCache2;
 
-    @Value("${monitoring.jvm.heap.enabled:false}")
+    @Value("${monitoring.jvm.heap.enabled:true}")
     private boolean meterJvmHeap;
 
-    @Value("${monitoring.jvm.gc.enabled:false}")
+    @Value("${monitoring.jvm.gc.enabled:true}")
     private boolean meterJvmGc;
 
-    @Value("${monitoring.jvm.memory.enabled:false}")
+    @Value("${monitoring.jvm.memory.enabled:true}")
     private boolean meterJvmMemory;
 
-    @Value("${monitoring.jvm.thread.enabled:false}")
+    @Value("${monitoring.jvm.thread.enabled:true}")
     private boolean meterJvmThread;
 
-    @Value("${monitoring.hibernate.enabled:false}")
+    @Value("${monitoring.hibernate.enabled:true}")
     private boolean meterHibernate;
 
     @Value("${monitoring.hibernate.name:hibernate}")
     private String meterHibernateName;
 
-    @Value("${monitoring.hibernate.query.enabled:false}")
+    @Value("${monitoring.hibernate.query.enabled:true}")
     private boolean meterHibernateQuery;
 
-    @Value("${monitoring.postgres.enabled:false}")
+    @Value("${monitoring.postgres.enabled:true}")
     private boolean meterPostgres;
 
     @Value("${monitoring.postgres.database.name:#{null}}")
     private String postgresDatabaseName;
 
-    @Value("${monitoring.processor.enabled:false}")
+    @Value("${monitoring.processor.enabled:true}")
     private boolean meterProcessor;
 
-    @Value("${monitoring.tomcat.enabled:false}")
+    @Value("${monitoring.tomcat.enabled:true}")
     private boolean meterTomcat;
 
-    @Value("${monitoring.uptime.enabled:false}")
+    @Value("${monitoring.uptime.enabled:true}")
     private boolean meterUptime;
 
     @Value("${monitoring.volumes:#{null}}")
