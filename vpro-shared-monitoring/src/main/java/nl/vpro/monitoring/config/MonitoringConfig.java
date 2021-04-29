@@ -16,12 +16,12 @@ import net.sf.ehcache.Ehcache;
 import java.io.File;
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 
@@ -30,14 +30,16 @@ import org.springframework.context.annotation.*;
 @ComponentScan(basePackages = "nl.vpro.monitoring.config")
 public class MonitoringConfig {
 
-    @Autowired(required = false)
-    public MonitoringProperties properties = new MonitoringProperties();
+    public final MonitoringProperties properties;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
+    @Inject
+    public MonitoringConfig(ApplicationContext applicationContext, MonitoringProperties properties) {
+        this.applicationContext = applicationContext;
+        this.properties = properties == null ?  new MonitoringProperties() : properties;
+    }
 
-    // TODO: optional or not this requires SessionFactory, DataSource etc in class loader, which may not be sensible for the application
     @Bean
     @SuppressWarnings("unchecked")
     public PrometheusMeterRegistry globalMeterRegistry() {
