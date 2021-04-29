@@ -4,6 +4,8 @@ target
 
 */*.iml
 *.iml
+*/.jqwik-database
 
 # I use  to do mvn dependency:tree > dep
 **/dep
+
