@@ -5,10 +5,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -20,19 +17,17 @@ import org.springframework.web.context.WebApplicationContext;
 import nl.vpro.monitoring.domain.Health;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration("/manage-servlet.xml")
-class HealthControllerTest {
+class PromethuisControllerTest {
 
     @Autowired
-    private HealthController healthController;
+    private PrometheusMeterRegistry meterRegistry;
 
     @Autowired
     private WebApplicationContext wac;
@@ -42,6 +37,7 @@ class HealthControllerTest {
     @BeforeEach
     public void setup() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        meterRegistry.counter("test").increment();
     }
 
     @Test
@@ -56,25 +52,14 @@ class HealthControllerTest {
 
     @Test
     void statusReady() throws Exception {
-        healthController.onApplicationEvent((ContextRefreshedEvent) null);
-
         mockMvc.perform(
-            get("/health")
-                .accept(APPLICATION_JSON_VALUE)
+            get("/prometheus")
+                .accept("text/plain")
         ).andExpect(status().is(200))
-            .andExpect(jsonPath("$.status", is(200)))
-            .andExpect(jsonPath("$.message", is("Application ready")));
-    }
-
-    @Test
-    void statusStopping() throws Exception {
-        healthController.onApplicationEvent((ContextStoppedEvent) null);
-
-        mockMvc.perform(
-            get("/health")
-                .accept(APPLICATION_JSON_VALUE)
-        ).andExpect(status().is(503))
-            .andExpect(jsonPath("$.status", is(503)))
-            .andExpect(jsonPath("$.message", is("Application shutdown")));
+            .andExpect(content().contentType("text/plain; version=0.0.4; charset=utf-8"))
+            .andExpect(content().string(
+                "# HELP test_total  \n" +
+                    "# TYPE test_total counter\n" +
+                    "test_total 1.0\n"));
     }
 }
