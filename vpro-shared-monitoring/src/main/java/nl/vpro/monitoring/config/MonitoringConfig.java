@@ -14,7 +14,6 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import net.sf.ehcache.Ehcache;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Optional;
 
 import javax.sql.DataSource;
@@ -23,12 +22,6 @@ import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.monitoring.web.HealthController;
-import nl.vpro.monitoring.web.PrometheusController;
 
 @Configuration
 @ComponentScan(basePackages = "nl.vpro.monitoring.config")
