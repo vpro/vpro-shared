@@ -22,10 +22,9 @@ import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+ 
+import org.springframework.context.annotation.*;
+ 
 
 @Configuration
 @ComponentScan(basePackages = "nl.vpro.monitoring.config")
@@ -37,6 +36,8 @@ public class MonitoringConfig {
     @Autowired
     private ApplicationContext applicationContext;
 
+
+    // TODO: optional or not this requires SessionFactory, DataSource etc in class loader, which may not be sensible for the application
     @Bean
     @SuppressWarnings("unchecked")
     public PrometheusMeterRegistry globalMeterRegistry() {

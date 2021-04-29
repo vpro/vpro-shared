@@ -279,7 +279,7 @@ public class Copier implements Runnable, Closeable {
 
     /**
      * If running, cancel the job
-     * @return {@code false} if the future is not running, or not yet running {@code true} if there was a future to cancel
+     * @return {@code false} if the future is not running, or not yet running. {@code true} if there was a future to cancel, and it succeeded
      */
     boolean cancelFutureIfNeeded() {
         if (future != null) {
