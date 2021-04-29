@@ -100,50 +100,26 @@ public class MonitoringConfig {
         return registry;
     }
 
-    // Without a datasourc arg instead of the wildcard, applicartion startup will fail
-    // when this class is not available
+    // With a datasource argument instead of the generic wildcard, application startup
+    // will fail when this DataSource class is not available
     private Optional<?> getDataSource() {
         return classForName("javax.sql.DataSource")
-            .flatMap(c -> {
-                try {
-                    return getBean(c);
-                } catch (BeansException e) {
-                    return Optional.empty();
-                }
-            });
+            .flatMap(this::getBean);
     }
 
     private Optional<?> getSessionFactory() {
         return classForName("org.hibernate.SessionFactory")
-            .flatMap(c -> {
-                try {
-                    return getBean(c);
-                } catch (BeansException e) {
-                    return Optional.empty();
-                }
-            });
+            .flatMap(this::getBean);
     }
 
     private Optional<?> getEhCache() {
         return classForName("net.sf.ehcache.Ehcache")
-            .flatMap(c -> {
-                try {
-                    return getBean(c);
-                } catch (BeansException e) {
-                    return Optional.empty();
-                }
-            });
+            .flatMap(this::getBean);
     }
 
     private Optional<?> getManager() {
         return classForName("org.apache.catalina.Manager")
-            .flatMap(c -> {
-                try {
-                    return getBean(c);
-                } catch (BeansException e) {
-                    return Optional.empty();
-                }
-            });
+            .flatMap(this::getBean);
     }
 
     private Optional<Class<?>> classForName(String name) {
@@ -157,6 +133,12 @@ public class MonitoringConfig {
 
     private Optional<?> getBean(Class<?> clazz) {
         return Optional.ofNullable(applicationContext)
-            .map(ac -> ac.getBean(clazz));
+            .map(ac -> {
+                try {
+                    return ac.getBean(clazz);
+                } catch (BeansException e) {
+                    return null;
+                }
+            });
     }
 }
