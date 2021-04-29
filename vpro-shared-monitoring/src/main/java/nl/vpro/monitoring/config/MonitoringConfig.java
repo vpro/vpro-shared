@@ -22,9 +22,9 @@ import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
- 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
- 
+
 
 @Configuration
 @ComponentScan(basePackages = "nl.vpro.monitoring.config")
