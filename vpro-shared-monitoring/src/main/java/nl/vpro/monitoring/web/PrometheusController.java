@@ -32,12 +32,9 @@ public class PrometheusController {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
 
-        Writer writer = response.getWriter();
-        try {
+        try (Writer writer = response.getWriter()) {
             registry.scrape(writer);
             writer.flush();
-        } finally {
-            writer.close();
         }
     }
 
