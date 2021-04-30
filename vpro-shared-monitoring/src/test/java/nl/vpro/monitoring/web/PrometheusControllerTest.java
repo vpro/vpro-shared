@@ -2,6 +2,7 @@ package nl.vpro.monitoring.web;
 
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-@ContextConfiguration("/manage-servlet.xml")
-class PromethuisControllerTest {
+@ContextConfiguration(value = "/manage-servlet.xml")
+class PrometheusControllerTest {
 
     @Autowired
     private PrometheusMeterRegistry meterRegistry;
@@ -57,9 +58,9 @@ class PromethuisControllerTest {
                 .accept("text/plain")
         ).andExpect(status().is(200))
             .andExpect(content().contentType("text/plain; version=0.0.4; charset=utf-8"))
-            .andExpect(content().string(
+            .andExpect(content().string(Matchers.containsString(
                 "# HELP test_total  \n" +
                     "# TYPE test_total counter\n" +
-                    "test_total 1.0\n"));
+                    "test_total 1.0\n")));
     }
 }
