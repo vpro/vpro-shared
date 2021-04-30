@@ -76,7 +76,7 @@ public class MonitoringConfig {
             if (properties.getPostgresDatabaseName() != null) {
                 new PostgreSQLDatabaseMetrics(dataSource.get(), properties.getPostgresDatabaseName()).bindTo(registry);
             } else {
-                throw new MetricsConfigurationException("For metering posgres one should provide an existing database name");
+                throw new MetricsConfigurationException("For metering postgres one should provide an existing database name");
             }
         }
         if (properties.isMeterProcessor()) {
