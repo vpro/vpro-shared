@@ -9,6 +9,8 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
 public class PrometheusController {
+    private static final Logger LOG = LoggerFactory.getLogger(PrometheusController.class);
 
     private final PrometheusMeterRegistry registry;
 
@@ -26,8 +29,8 @@ public class PrometheusController {
     }
 
     @GetMapping
-    public void metrics(final HttpServletRequest request, final HttpServletResponse response)
-        throws IOException {
+    public void metrics(final HttpServletResponse response) throws IOException {
+        LOG.debug("Scraping Propmetheus metrics");
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
