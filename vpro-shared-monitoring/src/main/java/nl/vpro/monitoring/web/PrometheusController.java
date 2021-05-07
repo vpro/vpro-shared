@@ -30,7 +30,7 @@ public class PrometheusController {
 
     @GetMapping
     public void metrics(final HttpServletResponse response) throws IOException {
-        LOG.debug("Scraping Propmetheus metrics");
+        LOG.debug("Scraping Prometheus metrics");
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
