@@ -58,33 +58,12 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
      */
     @SuppressWarnings("unchecked")
     static <T> CloseableIterator<T> of(final Iterator<T> iterator) {
-         if (iterator instanceof CloseableIterator) {
+        if (iterator instanceof CloseableIterator) {
             return (CloseableIterator) iterator;
+        } else if (iterator instanceof PeekingIterator) {
+            return new WrappedPeekingCloseableIterator<>((PeekingIterator<T>) iterator);
         } else {
-            return  new CloseableIterator<T>() {
-                @Override
-                public void close() throws Exception {
-                    if (iterator instanceof AutoCloseable) {
-                        ((AutoCloseable) iterator).close();
-                    }
-                }
-                @Override
-                public boolean hasNext() {
-                    return iterator.hasNext();
-                }
-                @Override
-                public T next() {
-                    return iterator.next();
-                }
-                @Override
-                public void remove() {
-                    iterator.remove();
-                }
-                @Override
-                public String toString() {
-                    return "Closeable[" + iterator + "]";
-                }
-            };
+            return new WrappedCloseableIterator<>(iterator);
         }
     }
 
@@ -112,6 +91,47 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
         return new CloseablePeekingIteratorImpl<>(this);
     }
 
+    class WrappedCloseableIterator<S> implements CloseableIterator<S> {
+        protected final Iterator<S> iterator;
 
+        protected WrappedCloseableIterator(Iterator<S> iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public void close() throws Exception {
+            if (iterator instanceof AutoCloseable) {
+                ((AutoCloseable) iterator).close();
+            }
+        }
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+        @Override
+        public S next() {
+            return iterator.next();
+        }
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
+        @Override
+        public String toString() {
+            return "Closeable[" + iterator + "]";
+        }
+    }
+
+    class WrappedPeekingCloseableIterator<S> extends WrappedCloseableIterator<S> implements PeekingIterator<S> {
+
+        protected WrappedPeekingCloseableIterator(PeekingIterator<S> iterator) {
+            super(iterator);
+        }
+
+        @Override
+        public S peek() {
+            return ((PeekingIterator<S>) iterator).peek();
+        }
+    }
 
 }
