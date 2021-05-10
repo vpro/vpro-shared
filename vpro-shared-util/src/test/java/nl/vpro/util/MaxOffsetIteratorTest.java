@@ -1,13 +1,13 @@
 package nl.vpro.util;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class MaxOffsetIteratorTest {
 
@@ -63,6 +63,28 @@ public class MaxOffsetIteratorTest {
         assertThat(MaxOffsetIterator.<String>builder().wrapped(test.iterator()).offset(1).build().toString()).matches("Closeable\\[.*]\\[1,]");
 
     }
+
+    @Test
+    public void peeking() {
+        List<String> list = Arrays.asList("a", "b", "c", "d");
+        PeekingIterator<String> i = Iterators.peekingIterator(list.iterator());
+        assertThat(i.peek()).isEqualTo("a");
+
+        MaxOffsetIterator<String> mo = MaxOffsetIterator
+            .<String>builder()
+            .wrapped(i)
+            .max(2)
+            .offset(1)
+            .build();
+        assertThat(mo.peek()).isEqualTo("b");
+        assertThat(mo.peekingWrapped().hasNext()).isTrue();
+
+        assertThat(mo.next()).isEqualTo("b");
+        assertThat(mo.next()).isEqualTo("c");
+        assertThatThrownBy(mo::peek).isInstanceOf(NoSuchElementException.class);
+        assertThat(mo.peekingWrapped().peek()).isEqualTo("d");
+    }
+
 
 
 

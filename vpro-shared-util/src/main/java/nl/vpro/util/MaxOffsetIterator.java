@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import com.google.common.collect.PeekingIterator;
 
 /**
  * An iterator implementing offset and max, for another iterator.
@@ -18,9 +18,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @since 3.1
  */
 @Slf4j
-public class MaxOffsetIterator<T> implements CloseableIterator<T> {
+public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
 
-    private final CloseableIterator<T> wrapped;
+    protected final CloseableIterator<T> wrapped;
+
+    protected PeekingIterator<T> peekingWrapped;
 
     private final long offsetmax;
 
@@ -36,7 +38,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
 
     private Boolean hasNext = null;
 
-    private T next;
+    protected T next;
 
     private RuntimeException exception;
 
@@ -141,6 +143,17 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     }
 
     @Override
+    public T peek() {
+        if (!findNext()) {
+            throw new NoSuchElementException();
+        }
+        if (exception != null) {
+            throw exception;
+        }
+        return next;
+    }
+
+    @Override
     public T next() {
         if (!findNext()) {
             throw new NoSuchElementException();
@@ -153,7 +166,7 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     }
 
     protected boolean findNext() {
-        if(hasNext == null) {
+        if (hasNext == null) {
             hasNext = false;
 
             while(count < offset && wrapped.hasNext()) {
@@ -204,6 +217,17 @@ public class MaxOffsetIterator<T> implements CloseableIterator<T> {
     @Override
     public String toString() {
         return wrapped + "[" + offset + "," + (max < Long.MAX_VALUE ? max : "") + "]";
+    }
+
+    /**
+     * Access to the (peeking) wrapped iterator.
+     * This may be used to look 'beyond' max, to check what would have been the next one.
+     */
+    public PeekingIterator<T> peekingWrapped() {
+        if (peekingWrapped == null) {
+            peekingWrapped = wrapped.peeking();
+        }
+        return peekingWrapped;
     }
 
     public static <T> CountedMaxOffsetIterator.Builder<T> countedBuilder() {
