@@ -24,7 +24,10 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
 
     protected PeekingIterator<T> peekingWrapped;
 
-    private final long offsetmax;
+    /**
+     * The maximal value of count. I.e. offset + max;
+     */
+    protected final long offsetmax;
 
     final long max;
 
@@ -34,7 +37,10 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
 
     private final boolean countNulls;
 
-    private long count = 0;
+    /**
+     * The count of the next element. First value will be the supplied value of offset.
+     */
+    protected long count = 0;
 
     private Boolean hasNext = null;
 
