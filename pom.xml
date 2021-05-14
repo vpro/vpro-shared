@@ -254,6 +254,7 @@
     <mockito.version>3.9.0</mockito.version>
     <assertj.version>3.19.0</assertj.version>
     <resteasy.version>4.6.0.Final</resteasy.version>
+    <bytebuddy.version>1.11.0</bytebuddy.version>
     <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.14.1</log4j2.version>
@@ -562,6 +563,16 @@
         <version>20190722</version>
       </dependency>
       -->
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>${bytebuddy.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy-agent</artifactId>
+        <version>${bytebuddy.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.apache.wss4j</groupId>
         <artifactId>wss4j-ws-security-dom</artifactId>
