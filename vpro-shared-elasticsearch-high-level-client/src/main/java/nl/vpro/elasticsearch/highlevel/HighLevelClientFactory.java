@@ -34,15 +34,9 @@ public class HighLevelClientFactory  implements ESClientFactory  {
         return highLevelClient(null);
     }
 
-    public RestHighLevelClient highLevelClient(String logName){
+    public synchronized RestHighLevelClient highLevelClient(String logName){
         if (client == null) {
-            synchronized (this) {
-                if (client == null) {
-                    client = constructClient(logName);
-                } else {
-                    log.debug("Construction client on behalf of {} not needed (already happend in other thread)", logName);
-                }
-            }
+            client = constructClient(logName);
         }
         return client;
     }
