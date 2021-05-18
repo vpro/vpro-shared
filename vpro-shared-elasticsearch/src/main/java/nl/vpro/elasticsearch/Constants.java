@@ -62,7 +62,7 @@ public class Constants {
     public static final String DOC       = "_doc";
 
     public static class Paths {
-        public static String SCROLL = "/_search/scroll";
+        public static final String SCROLL = "/_search/scroll";
         public static final String SEARCH = "/_search";
         public static final String DELETE_BY_QUERY = "/_delete_by_query";
         public static final String UPDATE_BY_QUERY = "/_update_by_query";
