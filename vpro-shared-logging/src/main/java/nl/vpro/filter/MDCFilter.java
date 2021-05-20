@@ -24,17 +24,13 @@ import static nl.vpro.mdc.MDCConstants.*;
 @Slf4j
 public class  MDCFilter implements Filter {
 
-
     boolean clear = false;
-
 
     @Override
     public void init(FilterConfig filterConfig) {
         if (filterConfig.getInitParameter("clear") != null) {
             clear = Boolean.parseBoolean(filterConfig.getInitParameter("clear"));
         }
-
-
     }
 
     @Override
@@ -49,7 +45,7 @@ public class  MDCFilter implements Filter {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null) {
                     MDC.put(USER_NAME, auth.getName());
-            }
+                }
             } catch (Exception e) {
                 log.debug(e.getMessage());
             }
