@@ -13,6 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class MonitoringProperties {
 
+    @Value("${monitoring.user}")
+    private String user;
+
+    @Value("${monitoring.password}")
+    private String password;
+
     @Value("${monitoring.tags:#{null}}")
     private List<String> commonTags;
 
