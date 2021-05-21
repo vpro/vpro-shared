@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import static nl.vpro.util.locker.ObjectLocker.withKeyLock;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Michiel Meeuwissen
  */
 @Slf4j
+@Execution(ExecutionMode.SAME_THREAD)
 public class ObjectLockerTest {
 
 
@@ -100,6 +103,7 @@ public class ObjectLockerTest {
      */
     @EqualsAndHashCode
     static class Key implements Serializable {
+        private static final long serialVersionUID = -1689250631089355976L;
         private final String v;
 
         Key(String value) {
@@ -171,17 +175,30 @@ public class ObjectLockerTest {
     }
 
     @Test
-    public void twoDifferentLocks() {
+    public void twoDifferentLocksAndTestLockerAdmin() {
         ObjectLocker.stricltyOne = false;
-
+        ObjectLockerAdmin.JMX_INSTANCE.resetMaxValues();
+        int before = ObjectLockerAdmin.JMX_INSTANCE.getLockCount();
+        final List<String> listenedEvents = new CopyOnWriteArrayList<>();
+        ObjectLocker.Listener listener = (type, holder, duration) -> listenedEvents.add(type + ":" + holder.key);
         final List<String> events = new CopyOnWriteArrayList<>();
+        ObjectLocker.listen(listener);
         withKeyLock(new Key("keya"), "test2", () -> {
             events.add("a1");
+            assertThat(ObjectLockerAdmin.JMX_INSTANCE.getCurrentCount()).isEqualTo(1);
             withKeyLock(new Key("keyb"), "nested", () -> {
                 events.add("b2");
+                assertThat(ObjectLockerAdmin.JMX_INSTANCE.getCurrentCount()).isEqualTo(2);
+
             });
         });
         assertThat(events).containsExactly("a1", "b2");
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getCurrentCount()).isEqualTo(0);
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLockCount()).isEqualTo(before + 2);
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getMaxDepth()).isEqualTo(1);
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getMaxConcurrency()).isEqualTo(0);
+
+        assertThat(listenedEvents).containsExactly("LOCK:keya", "LOCK:keyb", "UNLOCK:keyb", "UNLOCK:keya");
 
 
     }
