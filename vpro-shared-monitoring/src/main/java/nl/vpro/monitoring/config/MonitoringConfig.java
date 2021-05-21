@@ -1,5 +1,6 @@
 package nl.vpro.monitoring.config;
 
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
@@ -25,6 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import nl.vpro.util.locker.ObjectLocker;
+import nl.vpro.util.locker.ObjectLockerAdmin;
+
+import static nl.vpro.util.locker.ObjectLocker.Listener.Type.LOCK;
 
 @Configuration
 public class MonitoringConfig {
@@ -92,6 +98,40 @@ public class MonitoringConfig {
                 new DiskSpaceMetrics(new File(folder)).bindTo(registry);
             }
         }
+        if (properties.isMeterLocks()) {
+            ObjectLocker.listen((type, holder, duration) -> {
+                if (holder.lock.getHoldCount() == 1 && type == LOCK) {
+                    Object key = holder.key;
+                    String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
+                    registry.counter("locks.event", "type", keyType).increment();
+                }
+            });
+            Gauge.builder("locks.count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
+                .description("The current number of locked objects")
+                .register(registry);
+
+            Gauge.builder("locks.total_count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getLockCount)
+                .description("The total number of locked objects untill now")
+                .register(registry);
+
+            Gauge.builder("locks.average_acquiretime", () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue())
+                .description("The average time in ms to acquire a lock")
+                .register(registry);
+
+            Gauge.builder("locks.max_concurrency", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+                .description("The maximum number threads waiting for the same object")
+                .register(registry);
+
+            Gauge.builder("locks.current_max_concurrency", () -> ObjectLocker.getLockedObjects().values().stream().mapToInt(l -> l.lock.getHoldCount()).max().orElse(0))
+                .description("The maximum number threads waiting for the same object")
+                .register(registry);
+
+            Gauge.builder("locks.maxDepth", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+                .description("The maximum number of locked objects in the same thread")
+                .register(registry);
+
+        }
+
         return registry;
     }
 

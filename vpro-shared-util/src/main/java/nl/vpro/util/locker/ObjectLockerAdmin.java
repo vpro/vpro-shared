@@ -1,15 +1,19 @@
 package nl.vpro.util.locker;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+
+import org.meeuw.math.statistics.StatisticalLong;
+import org.meeuw.math.windowed.WindowedEventRate;
+import org.meeuw.math.windowed.WindowedStatisticalLong;
 
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.TimeUtils;
@@ -18,6 +22,7 @@ import nl.vpro.util.TimeUtils;
  * @author Michiel Meeuwissen
  * @since 5.8
  */
+@Slf4j
 public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
 
 
@@ -32,25 +37,66 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
         }
     }
 
-   private ObjectLockerAdmin() {
 
+    @Getter
+    final WindowedStatisticalLong averageLockAcquireTime = WindowedStatisticalLong.builder()
+        .mode(StatisticalLong.Mode.DURATION)
+        .window(Duration.ofMinutes(60))
+        .bucketCount(60)
+        .build();
+
+    @Getter
+    final WindowedEventRate lockRate = WindowedEventRate.builder()
+        .window(Duration.ofMinutes(10))
+        .bucketCount(60)
+        .build();
+
+
+   private ObjectLockerAdmin() {
+       ObjectLocker.listen((type, holder, duration) -> {
+           switch(type) {
+               case LOCK:
+                   maxDepth = Math.max(maxDepth, holder.lock.getHoldCount());
+
+                   if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
+                       log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), holder.key);
+                       maxConcurrency = Math.max(holder.lock.getQueueLength(), maxConcurrency);
+                   }
+                   if (holder.lock.getHoldCount() == 1) {
+                       lockCount.computeIfAbsent(holder.reason, s -> new AtomicInteger()).incrementAndGet();
+                       currentCount.computeIfAbsent(holder.reason, s -> new AtomicInteger()).incrementAndGet();
+                       lockRate.newEvent();
+                       averageLockAcquireTime.accept(duration.toMillis());
+                   }
+                   break;
+               case UNLOCK:
+                   currentCount.computeIfAbsent(holder.reason, s -> new AtomicInteger()).decrementAndGet();
+
+           }
+       });
     }
 
     /**
-     * Number of locks per 'reason'.
+     * Total number of locks per 'reason'. Never decreases
      */
-    Map<String, AtomicInteger> lockCount = new HashMap<>();
+    private final Map<String, AtomicInteger> lockCount = new HashMap<>();
 
     /**
-     * Count per 'reason'.
+     * Current count per 'reason'.
      */
     Map<String, AtomicInteger> currentCount = new HashMap<>();
 
     @Getter
-    int maxConcurrency = 0;
+    private int maxConcurrency = 0;
 
     @Getter
-    int maxDepth = 0;
+    private int maxDepth = 0;
+
+    @Override
+    public void resetMaxValues() {
+        maxConcurrency = 0;
+        maxDepth = 0;
+    }
 
     @Override
     public Set<String> getLocks() {

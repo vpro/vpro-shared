@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -18,8 +17,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
-
-import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 
 /**
  * @author Michiel Meeuwissen
@@ -42,10 +39,49 @@ public class ObjectLocker {
     static Duration maxLockAcquireTime = Duration.ofMinutes(10);
     static Duration minWaitTime  = Duration.ofSeconds(5);
 
+
+    private static final List<Listener> LISTENERS = new CopyOnWriteArrayList<>();
+
+    public static void listen(Listener listener){
+        LISTENERS.add(listener);
+    }
+
+    public static void unlisten(Listener listener){
+        LISTENERS.remove(listener);
+    }
+
+
+    @FunctionalInterface
+    public interface Listener extends EventListener {
+        enum Type {
+            LOCK,
+            UNLOCK
+        }
+
+        void event(Type type, LockHolder<?> holder, Duration duration);
+
+        default void lock(LockHolder<?> lock, Duration duration) {
+            event(Type.LOCK, lock, duration);
+        }
+
+        default void unlock(LockHolder<?> lock, Duration duration) {
+            event(Type.UNLOCK, lock, duration);
+        }
+    }
+
+    public interface DefinesType {
+        Object getType();
+    }
+
     /**
      * Map key -> ReentrantLock
      */
     static final Map<Serializable, LockHolder<Serializable>> LOCKED_OBJECTS    = new ConcurrentHashMap<>();
+
+
+    public static Map<Serializable, LockHolder<Serializable>> getLockedObjects() {
+        return Collections.unmodifiableMap(LOCKED_OBJECTS);
+    }
 
     public static <T> T withKeyLock(
         Serializable id,
@@ -109,7 +145,6 @@ public class ObjectLocker {
             holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable));
             if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
                 log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
-                JMX_INSTANCE.maxConcurrency = Math.max(holder.lock.getQueueLength(), JMX_INSTANCE.maxConcurrency);
                 alreadyWaiting = true;
             }
         }
@@ -123,13 +158,15 @@ public class ObjectLocker {
             log.debug("Released and continuing {}", key);
         }
 
-        JMX_INSTANCE.maxDepth = Math.max(JMX_INSTANCE.maxDepth, holder.lock.getHoldCount());
         log.trace("{} holdcount {}", Thread.currentThread().hashCode(), holder.lock.getHoldCount());
+        Duration acquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
         if (holder.lock.getHoldCount() == 1) {
-            JMX_INSTANCE.lockCount.computeIfAbsent(reason, s -> new AtomicInteger(0)).incrementAndGet();
-            JMX_INSTANCE.currentCount.computeIfAbsent(reason, s -> new AtomicInteger()).incrementAndGet();
-            Duration aquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
-            log.debug("Acquired lock for {}  ({}) in {}", key, reason, aquireTime);
+            log.debug("Acquired lock for {}  ({}) in {}", key, reason, acquireTime);
+        }
+
+
+        for(Listener listener : LISTENERS) {
+            listener.lock(holder, acquireTime);
         }
         return holder;
     }
@@ -183,8 +220,11 @@ public class ObjectLocker {
                     log.trace("Removed {}", key);
                     locks.remove(key);
                 }
-                JMX_INSTANCE.currentCount.computeIfAbsent(reason, s -> new AtomicInteger()).decrementAndGet();
                 Duration duration = Duration.ofNanos(System.nanoTime() - nanoStart);
+                for (Listener listener : LISTENERS) {
+                    listener.unlock(lock, duration);
+                }
+
                 Slf4jHelper.log(log, duration.compareTo(Duration.ofSeconds(30))> 0 ? Level.WARN :  Level.DEBUG,
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }

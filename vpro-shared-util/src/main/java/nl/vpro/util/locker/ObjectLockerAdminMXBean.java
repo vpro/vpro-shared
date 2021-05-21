@@ -23,11 +23,12 @@ public interface ObjectLockerAdminMXBean {
     @Description("The current number of locks. Should be a low number, most of the time zero.")
     int getCurrentCount();
 
-    @Description("The total number of acquired locks per reason. So this grows continuously.")
+    @Description("The total number of acquired locks per reason.")
     Map<String, Integer> getCurrentCounts();
 
     @Description("The maximum concurrency level reached since the start of the application. I.e. the number of threads trying to acces the same lock simultaneously")
     int getMaxConcurrency();
+
 
 
     @Description("The maximum depth reach. I.e. the maximum number of 'nested' code locking the same mid.")
@@ -37,6 +38,7 @@ public interface ObjectLockerAdminMXBean {
 
     void setMaxLockAcquireTime(String duration);
 
+    void resetMaxValues();
 
     boolean isMonitor();
 
