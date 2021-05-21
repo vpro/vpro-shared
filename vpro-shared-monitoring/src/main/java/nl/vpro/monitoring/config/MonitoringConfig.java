@@ -1,5 +1,6 @@
 package nl.vpro.monitoring.config;
 
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
@@ -25,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import nl.vpro.util.locker.ObjectLockerAdmin;
 
 @Configuration
 public class MonitoringConfig {
@@ -92,6 +95,15 @@ public class MonitoringConfig {
                 new DiskSpaceMetrics(new File(folder)).bindTo(registry);
             }
         }
+        if (properties.isMeterLocks()) {
+            Gauge.builder("locks.currentCount", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
+                .description("The current number of locked objects")
+                .register(registry);
+            Gauge.builder("locks.maxConcurrency", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+                .description("The maximum number of locked objects")
+                .register(registry);
+        }
+
         return registry;
     }
 
