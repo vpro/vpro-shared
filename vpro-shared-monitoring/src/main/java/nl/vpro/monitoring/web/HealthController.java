@@ -1,7 +1,7 @@
 package nl.vpro.monitoring.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.MediaType;
@@ -13,8 +13,8 @@ import nl.vpro.monitoring.domain.Health;
 @Lazy(false)
 @RestController
 @RequestMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
+@Slf4j
 public class HealthController {
-    private static final Logger LOG = LoggerFactory.getLogger(HealthController.class);
 
     private Status status = Status.STARTING;
 
@@ -30,7 +30,7 @@ public class HealthController {
 
     @GetMapping
     public ResponseEntity<Health> health() {
-        LOG.debug("Polling health endpoint");
+        log.debug("Polling health endpoint");
         return ResponseEntity.status(status.code).body(Health.builder().status(status.code).message(status.message).build());
     }
 

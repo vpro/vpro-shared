@@ -1,27 +1,11 @@
 package nl.vpro.monitoring.config;
 
-import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
-import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
-import io.micrometer.core.instrument.binder.jpa.HibernateMetrics;
-import io.micrometer.core.instrument.binder.jpa.HibernateQueryMetrics;
-import io.micrometer.core.instrument.binder.jvm.*;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
-import io.micrometer.core.instrument.binder.system.UptimeMetrics;
-import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
-import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import net.sf.ehcache.Ehcache;
 
-import java.io.File;
 import java.util.Collections;
 
-import javax.sql.DataSource;
-
-import org.apache.catalina.Manager;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
