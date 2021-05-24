@@ -34,7 +34,7 @@ public class ObjectLocker {
     static final ThreadLocal<List<LockHolder<? extends Serializable>>> HOLDS = ThreadLocal.withInitial(ArrayList::new);
 
 
-    static boolean stricltyOne;
+    static boolean strictlyOne;
     static boolean monitor;
     static Duration maxLockAcquireTime = Duration.ofMinutes(10);
     static Duration minWaitTime  = Duration.ofSeconds(5);
@@ -74,7 +74,7 @@ public class ObjectLocker {
     }
 
     /**
-     * Map key -> ReentrantLock
+     * Map key -> LockHolder
      */
     static final Map<Serializable, LockHolder<Serializable>> LOCKED_OBJECTS    = new ConcurrentHashMap<>();
 
@@ -195,7 +195,7 @@ public class ObjectLocker {
         if (! currentLocks.isEmpty()) {
             Optional<LockHolder<? extends Serializable>> compatibleLocks = currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
             if (compatibleLocks.isPresent()) {
-                if (stricltyOne) {
+                if (strictlyOne) {
                     throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), compatibleLocks.get().summarize(), key));
                 } else {
                     log.warn("Getting a lock on a different key! {} + {}", compatibleLocks.get().summarize(), key);

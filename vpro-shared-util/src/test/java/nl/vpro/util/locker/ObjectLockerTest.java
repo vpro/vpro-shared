@@ -25,13 +25,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Execution(ExecutionMode.SAME_THREAD)
 public class ObjectLockerTest {
 
-
     @BeforeEach
     public void setup() {
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofSeconds(10).toString());
         ObjectLocker.minWaitTime = Duration.ofSeconds(5);
         ObjectLocker.maxLockAcquireTime = Duration.ofSeconds(60);
-        ObjectLocker.stricltyOne  = false;
+        ObjectLocker.strictlyOne = false;
     }
 
 
@@ -176,7 +175,7 @@ public class ObjectLockerTest {
 
     @Test
     public void twoDifferentLocksAndTestLockerAdmin() {
-        ObjectLocker.stricltyOne = false;
+        ObjectLocker.strictlyOne = false;
         ObjectLockerAdmin.JMX_INSTANCE.resetMaxValues();
         int before = ObjectLockerAdmin.JMX_INSTANCE.getLockCount();
         final List<String> listenedEvents = new CopyOnWriteArrayList<>();
@@ -199,13 +198,14 @@ public class ObjectLockerTest {
         assertThat(ObjectLockerAdmin.JMX_INSTANCE.getMaxConcurrency()).isEqualTo(0);
 
         assertThat(listenedEvents).containsExactly("LOCK:keya", "LOCK:keyb", "UNLOCK:keyb", "UNLOCK:keya");
-
+        ObjectLocker.unlisten(listener);
+        assertThat(ObjectLocker.getLockedObjects()).isEmpty();
 
     }
 
     @Test
     public void twoDifferentLocksStrictly() {
-        ObjectLocker.stricltyOne = true;
+        ObjectLocker.strictlyOne = true;
         assertThatThrownBy(() -> {
             final List<String> events = new CopyOnWriteArrayList<>();
             withKeyLock(new Key("keya"), "test2", () -> {

@@ -150,11 +150,11 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
 
     @Override
     public boolean isStrictlyOne() {
-        return ObjectLocker.stricltyOne;
+        return ObjectLocker.strictlyOne;
     }
 
     @Override
     public void setStrictlyOne(boolean strictlyOne) {
-        ObjectLocker.stricltyOne = strictlyOne;
+        ObjectLocker.strictlyOne = strictlyOne;
     }
 }
