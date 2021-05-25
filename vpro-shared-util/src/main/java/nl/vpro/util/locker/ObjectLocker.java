@@ -42,10 +42,17 @@ public class ObjectLocker {
 
     private static final List<Listener> LISTENERS = new CopyOnWriteArrayList<>();
 
+
+    /**
+     * You can register {@link Listener}s for lock events, for logging or other reporting purposes
+     */
     public static void listen(Listener listener){
         LISTENERS.add(listener);
     }
 
+    /**
+     * The reverse of {@link #listen(Listener)}
+     */
     public static void unlisten(Listener listener){
         LISTENERS.remove(listener);
     }
@@ -58,6 +65,12 @@ public class ObjectLocker {
             UNLOCK
         }
 
+        /**
+         * Called for lock event
+         * @param type What happens to the lock (lock, or unlock)
+         * @param holder The relevant {@link LockHolder}
+         * @param duration How long it took to obtain/release this lock
+         */
         void event(Type type, LockHolder<?> holder, Duration duration);
 
         default void lock(LockHolder<?> lock, Duration duration) {
@@ -241,7 +254,12 @@ public class ObjectLocker {
     }
 
 
-     public static class LockHolder<K> {
+    /**
+     *  Most importantly this is a wrapper around {@link ReentrantLock}, but it stores some extra meta information, like the original key, and initialization time.
+     *
+     *  It can also store the exception if that happened during the hold of the lock.
+     */
+    public static class LockHolder<K> {
         public final K key;
         public final ReentrantLock lock;
         final Exception cause;
