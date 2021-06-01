@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,21 +77,21 @@ public class FileCachingInputStream extends InputStream {
     @lombok.Builder(builderClassName = "Builder")
     @SneakyThrows(IOException.class)
     private FileCachingInputStream(
-        final InputStream input,
-        final Long expectedCount,
-        final Path path,
-        final String filePrefix,
+        @NonNull final InputStream input,
+        @Nullable final Long expectedCount,
+        @Nullable final Path path,
+        @Nullable final String filePrefix,
         final long batchSize,
-        final Consumer<FileCachingInputStream> batchConsumer,
-        Integer outputBuffer,
-        final Logger logger,
-        Integer initialBuffer,
-        final Boolean startImmediately,
-        final Boolean downloadFirst,
-        final Boolean progressLogging,
-        final Integer progressLoggingBatch,
-        final Path tempPath,
-        final Boolean deleteTempFile
+        @Nullable final Consumer<FileCachingInputStream> batchConsumer,
+        @Nullable Integer outputBuffer,
+        @Nullable final Logger logger,
+        @Nullable Integer initialBuffer,
+        @Nullable final Boolean startImmediately,
+        @Nullable final Boolean downloadFirst,
+        @Nullable final Boolean progressLogging,
+        @Nullable final Integer progressLoggingBatch,
+        @Nullable final Path tempPath,
+        @Nullable final Boolean deleteTempFile
     ) {
         super();
         this.log = logger == null ? LoggerFactory.getLogger(FileCachingInputStream.class) : logger;
@@ -158,7 +159,7 @@ public class FileCachingInputStream extends InputStream {
      *   in a separate thread
      */
     private Copier createToFileCopier(
-        final InputStream input,
+        @NonNull final InputStream input,
         final int offset,
         final OutputStream tempFileOutputStream,
         final Long expectedCount,
@@ -237,7 +238,7 @@ public class FileCachingInputStream extends InputStream {
             return consumer;
     }
 
-    private Path createTempFile(Path path, Path tempPath, String filePrefix) throws IOException {
+    private Path createTempFile(@Nullable Path path, @Nullable Path tempPath, @Nullable String filePrefix) throws IOException {
         // if arriving here, a temp file will be needed
         if (path != null) {
             if (tempPath != null) {
@@ -258,7 +259,7 @@ public class FileCachingInputStream extends InputStream {
         return  tempFile;
 
     }
-    private OutputStream createTempFileOutputStream(Integer outputBuffer) throws IOException {
+    private OutputStream createTempFileOutputStream(@Nullable Integer outputBuffer) throws IOException {
         if (outputBuffer == null) {
             outputBuffer = DEFAULT_FILE_BUFFER_SIZE;
         }
@@ -605,14 +606,17 @@ public class FileCachingInputStream extends InputStream {
         /**
          * Calls {@link #path} but with an uri argument
          */
-        public Builder tempDir(URI uri) {
-            return path(Paths.get(uri));
+        public Builder tempDir(@Nullable URI uri) {
+            return path(uri == null ? null : Paths.get(uri));
         }
 
         /**
          * Calls {@link #path} but with an string argument
          */
-        public Builder tempDir(String uri) {
+        public Builder tempDir(@Nullable String uri) {
+            if (uri == null) {
+                return tempDir((URI) null);
+            }
             try {
                 return tempDir(URI.create(uri));
             } catch (IllegalArgumentException iae) {
@@ -621,12 +625,11 @@ public class FileCachingInputStream extends InputStream {
             }
         }
 
-        public Builder tempFile(Path path) {
+        public Builder tempFile(@Nullable Path path) {
             return tempPath(path);
         }
 
-
-        public Builder tempFile(File file) {
+        public Builder tempFile(@Nullable File file) {
             return tempPath(file == null ? null : file.toPath());
         }
 

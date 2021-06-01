@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -12,6 +11,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static nl.vpro.util.FileCachingInputStream.EOF;
 
@@ -63,16 +64,16 @@ public class Copier implements Runnable, Closeable {
      */
     @lombok.Builder(builderClassName = "Builder")
     private Copier(
-        InputStream input,
-        Long expectedCount,
-        OutputStream output,
+        @NonNull InputStream input,
+        @Nullable Long expectedCount,
+        @NonNull OutputStream output,
         long batch,
-        Consumer<Copier> batchConsumer,
-        Consumer<Copier> callback,
-        BiConsumer<Copier, Throwable> errorHandler,
+        @Nullable Consumer<Copier> batchConsumer,
+        @Nullable Consumer<Copier> callback,
+        @Nullable BiConsumer<Copier, Throwable> errorHandler,
         int offset,
-        String name,
-        Object notify
+        @Nullable String name,
+        @Nullable Object notify
         ) {
         this.input = input;
         this.expectedCount = expectedCount;
@@ -87,12 +88,12 @@ public class Copier implements Runnable, Closeable {
         this.notify = notify;
     }
 
-    public Copier(InputStream i, OutputStream o, long batch) {
+    public Copier(@NonNull InputStream i, @NonNull OutputStream o, long batch) {
         this(i, null, o, batch, null, null, null,  0, null, null);
     }
 
 
-    public Copier(InputStream i, OutputStream o) {
+    public Copier(@NonNull InputStream i, @NonNull OutputStream o) {
         this(i, o, MAX_BUFFER);
     }
 
