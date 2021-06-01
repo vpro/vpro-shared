@@ -627,7 +627,7 @@ public class FileCachingInputStream extends InputStream {
 
 
         public Builder tempFile(File file) {
-            return tempPath(file.toPath());
+            return tempPath(file == null ? null : file.toPath());
         }
 
         public Builder noProgressLogging() {
