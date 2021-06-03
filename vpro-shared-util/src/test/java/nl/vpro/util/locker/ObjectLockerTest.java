@@ -6,7 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.List;
+import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.*;
 
 import org.junit.jupiter.api.*;
@@ -28,9 +29,8 @@ public class ObjectLockerTest {
     @BeforeEach
     public void setup() {
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofSeconds(10).toString());
+        ObjectLockerAdmin.JMX_INSTANCE.setStrictlyOne(false);
         ObjectLocker.minWaitTime = Duration.ofSeconds(5);
-        ObjectLocker.maxLockAcquireTime = Duration.ofSeconds(60);
-        ObjectLocker.strictlyOne = false;
     }
 
 
@@ -176,7 +176,7 @@ public class ObjectLockerTest {
     @Test
     public void twoDifferentLocksAndTestLockerAdmin() {
         ObjectLocker.strictlyOne = false;
-        ObjectLockerAdmin.JMX_INSTANCE.resetMaxValues();
+        ObjectLockerAdmin.JMX_INSTANCE.reset();
         int before = ObjectLockerAdmin.JMX_INSTANCE.getLockCount();
         final List<String> listenedEvents = new CopyOnWriteArrayList<>();
         ObjectLocker.Listener listener = (type, holder, duration) -> listenedEvents.add(type + ":" + holder.key);
@@ -193,9 +193,12 @@ public class ObjectLockerTest {
         });
         assertThat(events).containsExactly("a1", "b2");
         assertThat(ObjectLockerAdmin.JMX_INSTANCE.getCurrentCount()).isEqualTo(0);
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getCurrentCounts()).containsOnly(new SimpleEntry<>("nested", 0), new SimpleEntry<>("test2", 0));
         assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLockCount()).isEqualTo(before + 2);
+        assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLockCounts()).containsOnly(new SimpleEntry<>("nested", 1), new SimpleEntry<>("test2", 1));
         assertThat(ObjectLockerAdmin.JMX_INSTANCE.getMaxDepth()).isEqualTo(1);
         assertThat(ObjectLockerAdmin.JMX_INSTANCE.getMaxConcurrency()).isEqualTo(0);
+        assertThat(Duration.parse(ObjectLockerAdmin.JMX_INSTANCE.getMaxLockAcquireTime())).isEqualTo(Duration.ofSeconds(10));
 
         assertThat(listenedEvents).containsExactly("LOCK:keya", "LOCK:keyb", "UNLOCK:keyb", "UNLOCK:keya");
         ObjectLocker.unlisten(listener);
@@ -205,7 +208,7 @@ public class ObjectLockerTest {
 
     @Test
     public void twoDifferentLocksStrictly() {
-        ObjectLocker.strictlyOne = true;
+        ObjectLockerAdmin.JMX_INSTANCE.setStrictlyOne(true);
         assertThatThrownBy(() -> {
             final List<String> events = new CopyOnWriteArrayList<>();
             withKeyLock(new Key("keya"), "test2", () -> {

@@ -99,8 +99,17 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     }
 
     @Override
+    public void reset() {
+        resetMaxValues();
+        lockCount.clear();
+        currentCount.clear();
+    }
+
+
+    @Override
     public Set<String> getLocks() {
-        return ObjectLocker.LOCKED_OBJECTS.values().stream().map(ObjectLocker.LockHolder::summarize).collect(Collectors.toSet());
+        return Collections.unmodifiableSet(ObjectLocker.LOCKED_OBJECTS.values().stream()
+            .map(ObjectLocker.LockHolder::summarize).collect(Collectors.toSet()));
     }
 
     @Override
@@ -110,8 +119,8 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
 
     @Override
     public Map<String, Integer> getLockCounts() {
-        return lockCount.entrySet().stream().collect(
-            Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue()));
+        return Collections.unmodifiableMap(lockCount.entrySet().stream().collect(
+            Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
     }
 
     @Override
@@ -121,8 +130,8 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
 
     @Override
     public Map<String, Integer> getCurrentCounts() {
-        return currentCount.entrySet().stream().collect(
-            Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue()));
+        return Collections.unmodifiableMap(currentCount.entrySet().stream().collect(
+            Collectors.toMap(Map.Entry::getKey, e -> e.getValue().intValue())));
     }
 
     @Override

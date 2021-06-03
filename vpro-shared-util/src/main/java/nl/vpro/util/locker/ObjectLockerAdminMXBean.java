@@ -30,7 +30,6 @@ public interface ObjectLockerAdminMXBean {
     int getMaxConcurrency();
 
 
-
     @Description("The maximum depth reach. I.e. the maximum number of 'nested' code locking the same mid.")
     int getMaxDepth();
 
@@ -39,6 +38,8 @@ public interface ObjectLockerAdminMXBean {
     void setMaxLockAcquireTime(String duration);
 
     void resetMaxValues();
+
+    void reset();
 
     boolean isMonitor();
 
