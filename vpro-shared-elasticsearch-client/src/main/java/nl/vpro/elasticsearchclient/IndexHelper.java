@@ -63,7 +63,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private Supplier<String> settings;
     private List<String> aliases;
     private ESClientFactory clientFactory;
-    private final Map<String, Supplier<String>> mappings = new HashMap<>();
+    private Supplier<String> mapping;
     private ObjectMapper objectMapper;
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
@@ -72,35 +72,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     public static class Builder {
-        private final Map<String, Supplier<String>> mappings = new HashMap<>();
 
         public Builder log(Logger log){
             this.simpleLogger(SimpleLogger.slfj4(log));
             return this;
         }
 
-        @Deprecated
-        public Builder mapping(String type, Supplier<String> mapping) {
-            this.mappings.put(type, mapping);
-            return this;
-        }
-        public Builder mapping(Supplier<String> mapping) {
-            this.mappings.put(DOC, mapping);
-            return this;
-        }
-
-        @Deprecated
-        public Builder mappingResource(String type, String mapping) {
-            return mapping(type, () -> resourceToString(mapping));
-        }
-
         public Builder mappingResource(String mapping) {
             return mapping(() -> resourceToString(mapping));
-        }
-        @Deprecated
-        public Builder mappings(Map<String, Supplier<String>> mappings) {
-            this.mappings.putAll(mappings);
-            return this;
         }
 
         public Builder settingsResource(final String resource) {
@@ -113,7 +92,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-
     @lombok.Builder(builderClassName = "Builder")
     private IndexHelper(
         SimpleLogger simpleLogger,
@@ -121,7 +99,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         ElasticSearchIndex elasticSearchIndex,
         Supplier<String> indexNameSupplier,
         Supplier<String> settings,
-        Map<String, Supplier<String>> mappings,
+        Supplier<String> mapping,
         File writeJsonDir,
         ObjectMapper objectMapper,
         List<String> aliases,
@@ -135,7 +113,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             if (settings == null) {
                 settings = () -> resourceToString(elasticSearchIndex.getSettingsResource());
             }
-            this.mappings.putAll(elasticSearchIndex.mappingsAsMap());
+            this.mapping = elasticSearchIndex.mapping();
             if (aliases == null || aliases.isEmpty()) {
                 aliases = new ArrayList<>(elasticSearchIndex.getAliases());
                 if (! aliases.contains(elasticSearchIndex.getIndexName())) {
@@ -148,36 +126,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
-        if (mappings != null) {
-            this.mappings.putAll(mappings);
-        }
         this.writeJsonDir = writeJsonDir;
         this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
         this.countAfterCreate = countAfterCreate;
         this.mdcSupplier = mdcSupplier == null ? MDC::getCopyOfContextMap : mdcSupplier;
-    }
-
-
-    @Deprecated
-    public static IndexHelper of(Logger log, ESClientFactory client, String indexName, String objectType) {
-        return IndexHelper.builder()
-            .log(log)
-            .client(client)
-            .indexName(indexName)
-            .settingsResource("es/setting.json")
-            .mappingResource(objectType, String.format("es/%s.json", objectType))
-            .build();
-    }
-
-    @Deprecated
-    public static IndexHelper of(Logger log, ESClientFactory client, Supplier<String> indexName, String objectType) {
-        return IndexHelper.builder().log(log)
-            .client(client)
-            .indexNameSupplier(indexName)
-            .settingsResource("es/setting.json")
-            .mappingResource(objectType, String.format("es/%s.json", objectType))
-            .build();
     }
 
     public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
@@ -195,10 +148,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             .elasticSearchIndex(index)
             ;
     }
-    public IndexHelper mapping(String type, Supplier<String> mapping) {
-        mappings.put(type, mapping);
-        return this;
-    }
+
 
     @Override
     public RestClient client() {
@@ -274,22 +224,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             ObjectNode index = settings.with("settings").with("index");
             index.put("number_of_replicas", createIndex.getNumberOfReplicas());
         }
-        if (mappings.isEmpty() && createIndex.isRequireMappings()) {
+        if (mapping == null) {
             throw new IllegalStateException("No mappings provided in " + this);
         }
 
-        if (mappings.size() == 1 && mappings.containsKey(DOC)) {
-            JsonNode node  =  Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
-            request.set("mappings", node);
-        } else {
-            ObjectNode mappingNode = request.with("mappings");
-            for (Map.Entry<String, Supplier<String>> e : mappings.entrySet()) {
-                mappingNode.set(e.getKey(), Jackson2Mapper.getInstance().readTree(e.getValue().get()));
-            }
-        }
+        JsonNode node  =  Jackson2Mapper.getInstance().readTree(mapping.get());
+        request.set("mappings", node);
         HttpEntity entity = entity(request);
 
-        log.info("Creating index {} with mappings {}: {}", indexName, mappings.keySet(), request.toString());
+        log.info("Creating index {} with mapping {}: {}", indexName, mapping, request.toString());
         Request req = new Request(PUT, "/" + indexName);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
@@ -344,12 +287,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     @SneakyThrows
     public final void reputMappings(Consumer<ObjectNode>... consumers) {
-        ObjectNode request;
-        if (mappings.size() == 1 && mappings.containsKey(DOC)) {
-            request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mappings.get(DOC).get());
-        } else {
-            throw new IllegalStateException();
-        }
+        ObjectNode request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mapping.get());
         for(Consumer<ObjectNode> consumer: consumers) {
             consumer.accept(request);
         }
@@ -412,7 +350,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 if (node.has(Fields.ROUTING)) {
                     bulk.add(deleteRequestWithRouting(node.get(Fields.ID).asText(), node.get(Fields.ROUTING).asText()));
                 } else {
-                    bulk.add(deleteRequest(node.get(Fields.TYPE).asText(), node.get(Fields.ID).asText()));
+                    bulk.add(deleteRequest(node.get(Fields.ID).asText()));
                 }
             }
         }
@@ -507,29 +445,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return post(getIndexName() + Paths.UPDATE_BY_QUERY, request);
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public ObjectNode search(ObjectNode request, Enum<?>... types) {
-        return search(request, Arrays.stream(types).map(Enum::name).toArray(String[]::new));
-    }
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public ObjectNode search(ObjectNode request, String... types) {
-        String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
-        StringBuilder path =  new StringBuilder((indexName == null ? "" : indexName));
-        String typeString = String.join(",", types);
-        if (typeString.length() > 0) {
-            path.append("/").append(typeString);
-        } else {
-            //path.append("/_doc");
-        }
-        path.append(Paths.SEARCH);
-        return post(path.toString(), request);
-    }
 
     @SafeVarargs
     public final Future<ObjectNode> searchAsync(ObjectNode request, Consumer<ObjectNode>... listeners) {
@@ -662,21 +577,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public ObjectNode index(String type, String id, Object o) {
-        return post(_indexPath(type, id, null), objectMapper.valueToTree(o));
-    }
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public ObjectNode index(String type, String id, Object o, String parent) {
-        return post(_indexPath(type, id, parent), objectMapper.valueToTree(o));
-    }
-
     public ObjectNode index(BulkRequestEntry indexRequest) {
         return post(
             _indexPath(
@@ -688,35 +588,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         );
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @SafeVarargs
-    @Deprecated
-    public final CompletableFuture<ObjectNode> indexAsync(String type, String id, Object o, Consumer<ObjectNode>... listeners) {
-        return postAsync(getIndexName() + "/" + type + "/" + encode(id), objectMapper.valueToTree(o), listeners);
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @SafeVarargs
-    @Deprecated
-    public final Future<ObjectNode> indexAsync(String type, String id, Object o, String parent, Consumer<ObjectNode>... listeners) {
-        return postAsync(_indexPath(type, id, parent), objectMapper.valueToTree(o), listeners);
-    }
 
     protected String indexPath(String id) {
         return _indexPath(DOC, id, null);
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    protected String indexPath(@NonNull String type, @Nullable String id, @Nullable  String parent) {
-        return _indexPath(type, id, parent);
-    }
 
     protected String _indexPath(String type, @Nullable String id, @Nullable String parent) {
         String path = getIndexName() + "/" + type + (id == null ? "" : ("/" + encode(id)));
@@ -726,46 +602,20 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return path;
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public ObjectNode delete(String type, String id) {
-        return _delete(type, id);
-    }
+
 
     public ObjectNode delete(String id) {
         return _delete(DOC, id);
     }
 
 
-    public ObjectNode _delete(String type, String id) {
+    private ObjectNode _delete(String type, String id) {
         try {
             client().performRequest(createDelete("/" + type + "/" + encode(id)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
         return null;
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public ObjectNode delete(String[] types, String id) {
-        Collection<BulkRequestEntry> bulkRequest = new ArrayList<>();
-        for (String type : types) {
-            bulkRequest.add(deleteRequest(type, id));
-        }
-        ObjectNode bulkResponse = bulk(bulkRequest);
-        ObjectNode delete = null;
-        for (JsonNode jsonNode : bulkResponse.withArray("items")) {
-            delete = jsonNode.with(DELETE);
-            if (delete.get("found").booleanValue()) {
-                break;
-            }
-        }
-        return delete;
     }
 
 
@@ -776,34 +626,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return deleteAsync(deleteRequest.getAction().get(TYPE).textValue(), deleteRequest.getSource().get(ID).textValue(), listeners);
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
+
     @SafeVarargs
-    @Deprecated
-    public final CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
+    private final CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync(createDelete( "/" + type + "/" + encode(id)),
             listen(log, "delete " + type + "/" + id, future, listeners)
         );
         return future;
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public Optional<JsonNode> get(Enum<?> type, String id) {
-        return _get(type.name(), id, null);
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public  Optional<JsonNode> get(String type, String id){
-        return _get(type, id, null);
     }
 
     public  Optional<JsonNode> get(String id){
@@ -898,26 +729,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public Optional<JsonNode> get(Collection<String> type, String id) {
-        return get(type, id, (jn) -> jn);
-    }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public <T> Optional<T> get(Collection<String> type, String id, Function<JsonNode, T> adapter) {
-        return _get(type, id, adapter);
-    }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    public <T> Optional<T> _get(Collection<String> type, String id, Function<JsonNode, T> adapter) {
+
+    private <T> Optional<T> _get(Collection<String> type, String id, Function<JsonNode, T> adapter) {
         ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
         ArrayNode array = body.withArray("docs");
         for (String t : type) {
@@ -941,32 +756,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public Optional<JsonNode> getWithEnums(Collection<Enum<?>> type, String id) {
-        return get(type.stream().map(Enum::name).collect(Collectors.toList()), id);
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public Optional<JsonNode> getSource(String type, String id) {
-        return get(type, id).map(jn -> jn.get(Fields.SOURCE));
-    }
     public Optional<JsonNode> getSource(String id) {
         return get(id).map(jn -> jn.get(Fields.SOURCE));
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public Optional<JsonNode> getSource(Enum<?> type, String id) {
-        return get(type, id).map(jn -> jn.get(Fields.SOURCE));
-    }
 
     /**
      * Reads a response to json, logging to {@link #log}
@@ -1016,14 +809,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @SafeVarargs
-    @Deprecated
-    public final BulkRequestEntry indexRequest(String type, String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(type, id, null, o, consumers);
-    }
+
 
     /**
      * Creates a {@link BulkRequestEntry} for indexing an object with given id.
@@ -1114,24 +900,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             ).build();
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public BulkRequestEntry indexRequest(String type, String id, Object o, String routing) {
-        BulkRequestEntry request = indexRequest(type, id, o);
-        request.getAction().with(INDEX).put(Fields.ROUTING, routing);
-        request.getAction().with(INDEX).put(Fields.PARENT, routing);
-        return request;
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public BulkRequestEntry deleteRequest(String type, String id) {
-        return _deleteRequest(type, id);
-    }
 
     public BulkRequestEntry deleteRequest(String id) {
         return _deleteRequest(DOC, id);
@@ -1155,23 +923,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
     }
 
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public BulkRequestEntry deleteRequest(Enum<?> type, String id, String routing) {
-        return deleteRequest(type.name(), id, routing);
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public  BulkRequestEntry deleteRequest(String type, String id, String routing) {
-        BulkRequestEntry request = deleteRequest(type, id);
-        request.getAction().with("delete").put(Fields.ROUTING, routing);
-        return request;
-    }
 
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
         if (request.isEmpty()) {
@@ -1244,8 +995,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     static protected String saveToString(JsonNode jsonNode) {
         String value = jsonNode.toString();
-        String replaced = value.replaceAll("\\p{Cc}", "");
-        return replaced;
+        return value.replaceAll("\\p{Cc}", "");
 
     }
 
@@ -1261,37 +1011,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Response response = client.performRequest(get);
         JsonNode result = read(response);
         return result.get("count").longValue();
-    }
-
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public long count(String... types) {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-        request.put("size", 0);
-        ObjectNode response = search(request, types);
-        log.info("Found {}", response);
-        JsonNode jsonNode = response.get("hits").get("total");
-        if (jsonNode.has("value")) {
-            // es 7
-            return jsonNode.get("value").longValue();
-        } else {
-            // es 5
-            return jsonNode.longValue();
-        }
-    }
-
-    /**
-     * @deprecated Types are deprecated in elasticsearch, and will disappear in 8.
-     */
-    @Deprecated
-    public long count(Enum<?>... types) {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-        request.put("size", 0);
-        ObjectNode response = search(request, types);
-        return response.get("hits").get("total").longValue();
     }
 
 

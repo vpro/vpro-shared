@@ -2,8 +2,6 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
-
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
@@ -37,12 +35,6 @@ public class IndexHelper2ITest {
 
 
     @Test
-    public void mget() {
-        log.info("{}", helper.get(Arrays.asList("program", "group"), "RBX_KRO_2439590"));
-    }
-
-
-    @Test
     public void mget2() {
         log.info("{}", helper.mgetWithRouting(
                 new IndexHelper.RoutedId("AUTO_WEKKERWAKKER/1104/RBX_MAX_13070966/episodeRef", "AUTO_WEKKERWAKKER"),
@@ -54,7 +46,7 @@ public class IndexHelper2ITest {
 
     @Test
     public void mget404() {
-        log.info("{}", helper.get(Arrays.asList("program", "group"), "BESTAATNIET"));
+        log.info("{}", helper.get("BESTAATNIET"));
     }
 
 }
