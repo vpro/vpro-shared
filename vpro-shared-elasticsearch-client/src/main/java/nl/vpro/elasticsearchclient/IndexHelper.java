@@ -63,7 +63,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private Supplier<String> settings;
     private List<String> aliases;
     private ESClientFactory clientFactory;
-    private Supplier<String> mapping;
+    private final Supplier<String> mapping;
     private ObjectMapper objectMapper;
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
@@ -113,7 +113,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             if (settings == null) {
                 settings = () -> resourceToString(elasticSearchIndex.getSettingsResource());
             }
-            this.mapping = elasticSearchIndex.mapping();
+            if (mapping == null) {
+                mapping = elasticSearchIndex.mapping();
+            }
             if (aliases == null || aliases.isEmpty()) {
                 aliases = new ArrayList<>(elasticSearchIndex.getAliases());
                 if (! aliases.contains(elasticSearchIndex.getIndexName())) {
@@ -131,6 +133,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
         this.countAfterCreate = countAfterCreate;
         this.mdcSupplier = mdcSupplier == null ? MDC::getCopyOfContextMap : mdcSupplier;
+        this.mapping = mapping;
     }
 
     public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
