@@ -43,7 +43,7 @@ import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
 
 /**
- * Some tools to automaticly create indices and put mappings and stuff.
+ * Some tools to automatically create indices and put mappings and stuff.
  *
  * It is associated with one index and one cluster, and constains the methods to create/delete/update the index settings themselves.
  *
@@ -563,21 +563,38 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public ObjectNode index(String id, Object o) {
-        if (o instanceof byte[]) {
-            return postEntity(indexPath(id), entity((byte[]) o));
-        } else {
-            return post(indexPath(id), objectMapper.valueToTree(o));
-        }
+        return index(id, o, (node) -> {});
+    }
+
+    public ObjectNode index(String id, byte[] o) {
+        HttpEntity entity = entity(o);
+        return postEntity(indexPath(id), entity(o));
+    }
+
+    public ObjectNode index(String id, Object o, Consumer<ObjectNode> sourceConsumer) {
+        ObjectNode jsonNode = objectMapper.valueToTree(o);
+        sourceConsumer.accept(jsonNode);
+        return post(indexPath(id), jsonNode);
+    }
+
+
+    /**
+     */
+    public ObjectNode indexWithRouting(String id, byte[] o, String routing) {
+        return postEntity(indexPath(id), entity(o), req -> req.addParameter(ROUTING, routing));
     }
 
     /**
      */
     public ObjectNode indexWithRouting(String id, Object o, String routing) {
-        if (o instanceof byte[]) {
-            return postEntity(indexPath(id), entity((byte[]) o), req -> req.addParameter(ROUTING, routing));
-        } else {
-            return post(indexPath(id), objectMapper.valueToTree(o), req -> req.addParameter(ROUTING, routing));
-        }
+        return indexWithRouting(id, o, routing, (node) -> {});
+    }
+    /**
+     */
+    public ObjectNode indexWithRouting(String id, Object o, String routing, Consumer<ObjectNode> sourceConsumer) {
+        ObjectNode jsonNode = objectMapper.valueToTree(o);
+        sourceConsumer.accept(jsonNode);
+        return post(indexPath(id), jsonNode, req -> req.addParameter(ROUTING, routing));
     }
 
     public ObjectNode index(BulkRequestEntry indexRequest) {
