@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -37,22 +40,40 @@ public class BulkRequestEntry {
     public BulkRequestEntry(
         ObjectNode action,
         ObjectNode source,
-        UnaryOperator<String> unalias,
+        @NonNull UnaryOperator<String> unalias,
+        Map<String, String> mdc, Consumer<ObjectNode> consumer) {
+        this(action, source,  unalias, null,  mdc, consumer);
+    }
+
+      public BulkRequestEntry(
+        ObjectNode action,
+        ObjectNode source,
+        @NonNull UnaryOperator<String> unalias,
         Map<String, String> mdc) {
-        this(action, source, unalias, mdc, null);
+        this(action, source,  unalias,  mdc, null);
+    }
+
+    protected BulkRequestEntry(
+        BulkRequestEntry bulkRequestEntry) {
+        this(bulkRequestEntry.getAction(), bulkRequestEntry.getSource(), null, bulkRequestEntry.getId(), bulkRequestEntry.getMdc(), bulkRequestEntry.getSourceConsumer());
+        this.used = false;
     }
 
     @lombok.Builder
-    BulkRequestEntry(
+    private BulkRequestEntry(
         ObjectNode action,
         ObjectNode source,
-        UnaryOperator<String> unalias,
+        @Nullable UnaryOperator<String> unalias,
+        @Nullable String id,
         Map<String, String> mdc,
         Consumer<ObjectNode> sourceConsumer) {
         this.action = action;
         this.source = source;
         this.mdc = mdc;
-        this.id = idFromActionNode(action, unalias);
+        this.id = unalias == null ? id : idFromActionNode(action, unalias);
+        if (this.id == null) {
+            throw new IllegalArgumentException("No id");
+        }
         this.sourceConsumer = sourceConsumer;
     }
 
@@ -80,7 +101,7 @@ public class BulkRequestEntry {
         return idFromActionNode(action, s -> s);
     }
 
-    public static String idFromActionNode(ObjectNode action, UnaryOperator<String> unalias) {
+    public static String idFromActionNode(@NonNull ObjectNode action, @NonNull UnaryOperator<String> unalias) {
         StringBuilder builder = new StringBuilder();
         JsonNode idNode;
         if (action.has(INDEX)) {
