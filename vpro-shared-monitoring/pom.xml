@@ -61,7 +61,7 @@
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
+      <artifactId>hibernate-micrometer</artifactId>
       <optional>true</optional>
     </dependency>
     <dependency>
