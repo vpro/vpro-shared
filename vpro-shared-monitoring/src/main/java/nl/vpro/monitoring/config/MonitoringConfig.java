@@ -4,8 +4,6 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
-import io.micrometer.core.instrument.binder.jpa.HibernateMetrics;
-import io.micrometer.core.instrument.binder.jpa.HibernateQueryMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
@@ -21,6 +19,8 @@ import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
+import org.hibernate.stat.HibernateMetrics;
+import org.hibernate.stat.HibernateQueryMetrics;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -111,7 +111,7 @@ public class MonitoringConfig {
                 .register(registry);
 
             Gauge.builder("locks.total_count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getLockCount)
-                .description("The total number of locked objects untill now")
+                .description("The total number of locked objects until now")
                 .register(registry);
 
             Gauge.builder("locks.average_acquiretime", () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue())
