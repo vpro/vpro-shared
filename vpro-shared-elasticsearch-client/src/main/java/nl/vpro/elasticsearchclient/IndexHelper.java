@@ -38,7 +38,7 @@ import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Methods.*;
-import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToString;
+import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToJson;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
 
@@ -60,10 +60,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
-    private Supplier<String> settings;
+    private Supplier<JsonNode> settings;
     private List<String> aliases;
     private ESClientFactory clientFactory;
-    private final Supplier<String> mapping;
+    private final Supplier<JsonNode> mapping;
     private ObjectMapper objectMapper;
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
@@ -79,11 +79,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
 
         public Builder mappingResource(String mapping) {
-            return mapping(() -> resourceToString(mapping));
+            return mapping(() -> resourceToJson(mapping));
         }
 
         public Builder settingsResource(final String resource) {
-            return settings(() -> resourceToString(resource)
+            return settings(() -> resourceToJson(resource)
             );
         }
 
@@ -98,8 +98,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull ESClientFactory client,
         ElasticSearchIndex elasticSearchIndex,
         Supplier<String> indexNameSupplier,
-        Supplier<String> settings,
-        Supplier<String> mapping,
+        Supplier<JsonNode> settings,
+        Supplier<JsonNode> mapping,
         File writeJsonDir,
         ObjectMapper objectMapper,
         List<String> aliases,
@@ -111,7 +111,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 indexNameSupplier = elasticSearchIndex::getIndexName;
             }
             if (settings == null) {
-                settings = () -> resourceToString(elasticSearchIndex.getSettingsResource());
+                settings = () -> resourceToJson(elasticSearchIndex.getSettingsResource());
             }
             if (mapping == null) {
                 mapping = elasticSearchIndex.mapping();
@@ -215,7 +215,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
         }
 
-        ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
+        ObjectNode  settings = request.set("settings", this.settings.get());
         if (createIndex.isForReindex()){
             forReindex(settings);
         }
@@ -231,7 +231,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             throw new IllegalStateException("No mappings provided in " + this);
         }
 
-        JsonNode node  =  Jackson2Mapper.getInstance().readTree(mapping.get());
+        JsonNode node  =  createIndex.getMappingsProcessor().apply(mapping.get());
         request.set("mappings", node);
         HttpEntity entity = entity(request);
 
@@ -261,7 +261,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SneakyThrows
     public final void reputSettings(Consumer<ObjectNode>... postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-        ObjectNode  settings = request.set("settings", Jackson2Mapper.getInstance().readTree(this.settings.get()));
+        ObjectNode  settings = request.set("settings", this.settings.get());
         ObjectNode index = settings.with("settings").with("index");
         if (!index.has("refresh_interval")) {
             index.put("refresh_interval", "30s");
@@ -290,7 +290,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     @SneakyThrows
     public final void reputMappings(Consumer<ObjectNode>... consumers) {
-        ObjectNode request = (ObjectNode) Jackson2Mapper.getInstance().readTree(mapping.get());
+        ObjectNode request = (ObjectNode) mapping.get();
+        elasticSearchIndex.getMappingsProcessor().accept(request);
+
         for(Consumer<ObjectNode> consumer: consumers) {
             consumer.accept(request);
         }

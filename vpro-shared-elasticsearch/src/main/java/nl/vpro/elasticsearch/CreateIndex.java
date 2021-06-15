@@ -1,5 +1,16 @@
 package nl.vpro.elasticsearch;
 
+import lombok.With;
+
+import java.util.function.UnaryOperator;
+
+import javax.validation.constraints.Null;
+
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Options for creating indices
  * @author Michiel Meeuwissen
@@ -32,6 +43,10 @@ public class CreateIndex {
 
     private final boolean requireMappings;
 
+    @With
+    @NonNull
+    private final UnaryOperator<JsonNode> mappingsProcessor;
+
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
     public static final CreateIndex FOR_TEST = CreateIndex.builder()
@@ -46,11 +61,12 @@ public class CreateIndex {
     private  CreateIndex(
         boolean useNumberPostfix,
         boolean forReindex,
-        Runnable callBack,
-        Boolean createAliases,
-        Integer shards,
-        Integer numberOfReplicas,
-        Boolean requireMappings) {
+        @Nullable Runnable callBack,
+        @Nullable Boolean createAliases,
+        @Nullable Integer shards,
+        @Nullable Integer numberOfReplicas,
+        @Null Boolean requireMappings,
+        @Nullable UnaryOperator<JsonNode> mappingsProcessor) {
         this.useNumberPostfix = useNumberPostfix;
         this.forReindex = forReindex;
         this.callBack = callBack;
@@ -58,5 +74,6 @@ public class CreateIndex {
         this.shards = shards;
         this.numberOfReplicas = numberOfReplicas;
         this.requireMappings = requireMappings == null || requireMappings;
+        this.mappingsProcessor = mappingsProcessor == null ? (jn) -> jn : mappingsProcessor;
     }
 }

@@ -1,12 +1,20 @@
 package nl.vpro.elasticsearch;
 
 
+import lombok.SneakyThrows;
+import lombok.With;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Supplier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.*;
 
 import org.apache.commons.io.IOUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import nl.vpro.jackson2.Jackson2Mapper;
 
 
 /**
@@ -20,12 +28,14 @@ public class ElasticSearchIndex {
     private final String mappingResource;
     private final String settingsResource;
     private final List<String> aliases;
+    @With
+    private final Consumer<JsonNode> mappingsProcessor;
 
     protected ElasticSearchIndex(
         String indexName,
         String mappingResource,
         String... aliases) {
-        this(indexName, "/es7/setting/" + indexName + ".json", mappingResource, Arrays.asList(aliases));
+        this(indexName, "/es7/setting/" + indexName + ".json", mappingResource, Arrays.asList(aliases), null);
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -33,20 +43,26 @@ public class ElasticSearchIndex {
         String indexName,
         String settingsResource,
         String mappingResource,
-        @lombok.Singular  List<String> aliases) {
+        @lombok.Singular  List<String> aliases,
+        Consumer<JsonNode> mappingsProcessor) {
         this.indexName = indexName;
         this.settingsResource = settingsResource;
         this.mappingResource = mappingResource;
         this.aliases = aliases;
+        this.mappingsProcessor = mappingsProcessor == null ? (jn) -> {} : mappingsProcessor;
     }
 
 
-    public Supplier<String> settings() {
-        return () -> resourceToString(settingsResource);
+    public Supplier<JsonNode> settings() {
+        return () -> resourceToJson(settingsResource);
     }
 
-    public Supplier<String> mapping() {
-        return () -> resourceToString(mappingResource);
+    public Supplier<JsonNode> mapping() {
+        return () -> resourceToJson(mappingResource);
+    }
+
+    public ElasticSearchIndex withoutExperimental() {
+        return this;
     }
 
 
@@ -80,6 +96,12 @@ public class ElasticSearchIndex {
             throw new IllegalStateException(e);
         }
     }
+
+    @SneakyThrows
+    public static JsonNode resourceToJson(String name) {
+        return Jackson2Mapper.getInstance().readTree(resourceToString(name));
+    }
+
 
     public static class Builder {
 
