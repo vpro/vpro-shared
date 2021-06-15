@@ -112,9 +112,12 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                         return;
                     }
                     future.complete(client);
-                    if (l.isInfoEnabled()) {
+                    if (foundClusterName == null) {
+                        l.info("No cluster name found");
+                    } else {
                         l.info("Connected to cluster '{}'", foundClusterName);
                     }
+
                 });
             return future;
         } else {
