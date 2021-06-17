@@ -1,12 +1,9 @@
 package nl.vpro.elasticsearch;
 
-import lombok.With;
-
-import java.util.function.UnaryOperator;
+import java.util.function.Consumer;
 
 import javax.validation.constraints.Null;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,9 +40,7 @@ public class CreateIndex {
 
     private final boolean requireMappings;
 
-    @With
-    @NonNull
-    private final UnaryOperator<JsonNode> mappingsProcessor;
+    private final Consumer<JsonNode> mappingsProcessor;
 
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
@@ -66,7 +61,7 @@ public class CreateIndex {
         @Nullable Integer shards,
         @Nullable Integer numberOfReplicas,
         @Null Boolean requireMappings,
-        @Nullable UnaryOperator<JsonNode> mappingsProcessor) {
+        @Nullable Consumer<JsonNode> mappingsProcessor) {
         this.useNumberPostfix = useNumberPostfix;
         this.forReindex = forReindex;
         this.callBack = callBack;
@@ -74,6 +69,6 @@ public class CreateIndex {
         this.shards = shards;
         this.numberOfReplicas = numberOfReplicas;
         this.requireMappings = requireMappings == null || requireMappings;
-        this.mappingsProcessor = mappingsProcessor == null ? (jn) -> jn : mappingsProcessor;
+        this.mappingsProcessor = mappingsProcessor == null ? (jn) -> {}  : mappingsProcessor;
     }
 }

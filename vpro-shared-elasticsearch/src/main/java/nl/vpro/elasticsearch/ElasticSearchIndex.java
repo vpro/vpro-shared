@@ -25,8 +25,8 @@ import nl.vpro.jackson2.Jackson2Mapper;
 public class ElasticSearchIndex {
 
     private final String indexName;
-    private final String mappingResource;
     private final String settingsResource;
+    private final String mappingResource;
     private final List<String> aliases;
     @With
     private final Consumer<JsonNode> mappingsProcessor;

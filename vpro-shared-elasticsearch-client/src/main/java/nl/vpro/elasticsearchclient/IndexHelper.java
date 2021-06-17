@@ -5,6 +5,7 @@ import lombok.*;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
@@ -192,7 +193,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     /**
-     * Creates the asssociated index if it does not yet exists
+     * Creates the new associated index
      * @param createIndex options for doing that
      */
     @Override
@@ -204,7 +205,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
         String supplied = indexNameSupplier.get();
 
-        String indexName = createIndex.isUseNumberPostfix() ? supplied + "-0" :  supplied;
+        String indexName;
+        if (createIndex.isUseNumberPostfix()) {
+            int number = firstNewNumber();
+            indexName = supplied + "-" + number;
+        } else {
+            indexName = supplied;
+
+        }
 
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
 
@@ -230,9 +238,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (mapping == null) {
             throw new IllegalStateException("No mappings provided in " + this);
         }
-
-        JsonNode node  =  createIndex.getMappingsProcessor().apply(mapping.get());
-        request.set("mappings", node);
+        JsonNode mappingJson = mapping.get();
+        createIndex.getMappingsProcessor().accept(mappingJson);
+        request.set("mappings", mappingJson);
         HttpEntity entity = entity(request);
 
         log.info("Creating index {} with mapping {}: {}", indexName, mapping, request.toString());
@@ -247,6 +255,30 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             log.warn("Could not create index {}", getIndexName());
         }
 
+    }
+
+    public final List<String> getIndices() throws IOException {
+        Request req = new Request(GET, "/_cat/indices/" + getIndexName() + "-*");
+
+        Response response = client().performRequest(req);
+        List<String> result = new ArrayList<>();
+        for (String line : IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()).split("\\n")) {
+            String[] split = line.split("\\s+");
+            result.add(split[2]);
+        }
+        return result;
+    }
+
+    public int firstNewNumber() throws IOException {
+        int number = 0;
+        for (String existing : getIndices()) {
+            String[] split = existing.split("-", 2);
+            int existingNumber = Integer.parseInt(split[1]);
+            if (existingNumber >= number) {
+                number = existingNumber + 1;
+            }
+        }
+        return number;
     }
 
 
@@ -269,6 +301,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         // remove stuff that cannot be updated
         index.remove("analysis");
         index.remove("number_of_shards");
+        index.remove("sort.order");
+        index.remove("sort.field");
+
 
         // allow to caller to modify it further
         for (Consumer<ObjectNode> consumer : postProcessSettings) {
