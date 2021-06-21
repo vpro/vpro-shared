@@ -524,37 +524,33 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     @Override
-    public void close()  {
+    public synchronized void close()  {
         if (objectName != null) {
             ThreadPools.backgroundExecutor.schedule(() -> MBeans.unregister(objectName), 2, TimeUnit.MINUTES);
         }
         if (scrollId != null) {
+            HttpEntity responseEntity = null;
             try {
                 Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + scrollId);
-
-                HttpEntity responseEntity = null;
-                try {
-                    Response res = client.performRequest(delete);
-                    responseEntity = res.getEntity();
-                    if (res.getStatusLine().getStatusCode() == 200) {
-                        log.debug("Deleted {} {}", scrollId, res);
-                        SCROLL_IDS.remove(scrollId);
-                    } else {
-                        log.warn("Something wrong deleting scroll id {} {}", scrollId, res);
-                    }
-                    scrollId = null;
-                } finally {
-                    EntityUtils.consumeQuietly(responseEntity);
+                Response res = client.performRequest(delete);
+                responseEntity = res.getEntity();
+                if (res.getStatusLine().getStatusCode() == 200) {
+                    log.debug("Deleted {} {}", scrollId, res);
+                    SCROLL_IDS.remove(scrollId);
+                } else {
+                    log.warn("Something wrong deleting scroll id {} {}", scrollId, res);
                 }
+                scrollId = null;
             } catch (ResponseException re) {
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
                 } else {
                     log.warn(re.getMessage());
                 }
-                EntityUtils.consumeQuietly(re.getResponse().getEntity());
             } catch (Exception e) {
                 log.warn(e.getMessage());
+            } finally {
+                EntityUtils.consumeQuietly(responseEntity);
             }
         } else {
             log.debug("no need to close");

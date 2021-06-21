@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
+import nl.vpro.util.MaxOffsetIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -154,6 +155,32 @@ public class ElasticSearchIteratorITest {
             });
             assertThat(count.get()).isEqualTo(numberOfObjects);
         }
+    }
+
+    @Test
+    public void maxed() throws Exception {
+        AtomicLong count = new AtomicLong(0);
+
+        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
+            .sourcesBuilder(client)
+            .jsonRequests(false)
+            .build()
+        ) {
+            i.setJsonRequests(true);
+
+            ObjectNode search = i.prepareSearch(index);
+            //ObjectNode query = search.with("query");
+            try (MaxOffsetIterator<JsonNode> j = MaxOffsetIterator.<JsonNode>builder()
+                .wrapped(i)
+                .max(2)
+                .build()) {
+
+                j.forEachRemaining((node) -> {
+                    count.incrementAndGet();
+                });
+            }
+        }
+        assertThat(count.get()).isEqualTo(2);
     }
 
     @Test
