@@ -13,7 +13,8 @@ import nl.vpro.xml.util.XmlUtils;
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456
  * Use like so
- * <pre>{@code
+ * <pre>
+ * {@code
  * @XmlAttribute
  * @XmlJavaTypeAdapter(InstantXmlAdapter.class)
  * @XmlSchemaType(name = "dateTime")
