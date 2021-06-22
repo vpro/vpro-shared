@@ -42,7 +42,7 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
      */
     protected long count = 0;
 
-    private Boolean hasNext = null;
+    protected Boolean hasNext = null;
 
     protected T next;
 
