@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
@@ -574,7 +575,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     try {
                         ObjectNode result = read(log, response);
                         if (result == null) {
-                            log.warn("No object node found from {}", response);
+                            log.warn("{} No object node found from {}", requestDescription, response);
                             result = Jackson2Mapper.getInstance().createObjectNode();
                         }
                         for (Consumer<ObjectNode> rl : listeners) {
@@ -852,8 +853,23 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return null;
         }
     }
+
     public static ObjectNode read(SimpleLogger log, Response response) {
-        return read(log, response, ObjectNode.class);
+        if (response.getHeader("content-type").startsWith(ContentType.APPLICATION_JSON.getMimeType())) {
+            return read(log, response, ObjectNode.class);
+        } else {
+            ObjectNode n = Jackson2Mapper.getInstance().createObjectNode();
+            try {
+                n.put("error", true);
+                n.put("body", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
+                n.put("statusCode", response.getStatusLine().getStatusCode());
+                n.put("statusLine", response.getStatusLine().toString());
+                n.put("requestLine", response.getRequestLine().toString());
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+            return n;
+        }
     }
 
 
@@ -1065,38 +1081,47 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SneakyThrows
     protected long count(RestClient client) {
         Request get = createGet(Paths.COUNT);
-        Response response = client.performRequest(get);
-        JsonNode result = read(response);
-        return result.get("count").longValue();
+        return parseCount(client.performRequest(get));
     }
 
 
     public void countAsync(final Consumer<Long> consumer) {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
-        request.put("size", 0);
-        searchAsync(request, (entity) ->  {
-            JsonNode hits = entity.get(HITS);
-            if (hits != null) {
-                long count = hits.get("total").longValue();
+        Request get = createGet(Paths.COUNT);
+        client().performRequestAsync(get, new ResponseListener() {
+            @Override
+            public void onSuccess(Response response) {
+                long count = parseCount(response);
                 consumer.accept(count);
-            } else {
-                log.warn("{}", entity);
-                consumer.accept(null);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.warn("For count on {}", this, e);
             }
         });
     }
 
-    public  JsonNode getActualSettings() throws IOException {
+    protected long parseCount(Response response) {
+            JsonNode result = read(response);
+            return result.get("count").longValue();
+        }
+
+    public  Optional<JsonNode> getActualSettings() throws IOException {
         Request get = createGet(Paths.SETTINGS);
         Response response = client()
             .performRequest(get);
-        JsonNode result = read(response);
-        return result.fields().next().getValue().get("settings").get(INDEX);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            JsonNode result = read(response);
+            return Optional.of(result.fields().next().getValue().get("settings").get(INDEX));
+        } else {
+            log.warn("For {} -> {}", get, response);
+            return Optional.empty();
+        }
     }
 
     @SneakyThrows
     public Duration getRefreshInterval()  {
-        JsonNode refreshInterval = getActualSettings().get("refresh_interval");
+        JsonNode refreshInterval = getActualSettings().map(jn -> jn.get("refresh_interval")).orElse(null);
         if (refreshInterval == null) {
             return Duration.ofSeconds(30);
         } else {
