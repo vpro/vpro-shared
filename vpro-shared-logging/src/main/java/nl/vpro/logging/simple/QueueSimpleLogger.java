@@ -2,6 +2,7 @@ package nl.vpro.logging.simple;
 
 import lombok.Getter;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Queue;
@@ -26,10 +27,8 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
         this.queue = queue;
     }
 
-    /**
-     * Creates a straight forward instance for a {@link Queue}
-     */
-    public static QueueSimpleLogger<Event> of(Queue<Event> q) {
+
+    public static QueueSimpleLogger<Event> of(Queue<Event> q, Clock clock) {
         return new QueueSimpleLogger<Event>(q) {
             @Override
             protected Event createEvent(Level level, CharSequence message, Throwable t) {
@@ -37,9 +36,17 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
                     .level(level)
                     .message(message)
                     .throwable(t)
+                    .timeStamp(clock.instant())
                     .build();
             }
         };
+    }
+
+    /**
+     * Creates a straight forward instance for a {@link Queue}
+     */
+    public static QueueSimpleLogger<Event> of(Queue<Event> q) {
+        return of(q, Clock.systemUTC());
     }
 
     @Override
@@ -71,7 +78,7 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
      */
     @Getter
     public static class Event {
-        private final Instant timeStamp = Instant.now();
+        private final Instant timeStamp;
         private final Level level;
         private final CharSequence message;
         private final Throwable throwable;
@@ -79,11 +86,12 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
         private final int levelInt;
 
         @lombok.Builder
-        protected Event(Level level, CharSequence message, Throwable throwable) {
+        protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
             this.level = level;
             this.message = message;
             this.throwable = throwable;
             this.levelInt = level.toInt();
+            this.timeStamp = timeStamp == null ? Instant.now() : timeStamp;
         }
 
         @Override
