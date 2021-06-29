@@ -2,6 +2,7 @@ package nl.vpro.logging.simple;
 
 import lombok.Getter;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Queue;
 
@@ -70,6 +71,7 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
      */
     @Getter
     public static class Event {
+        private final Instant timeStamp = Instant.now();
         private final Level level;
         private final CharSequence message;
         private final Throwable throwable;
@@ -82,6 +84,11 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
             this.message = message;
             this.throwable = throwable;
             this.levelInt = level.toInt();
+        }
+
+        @Override
+        public String toString() {
+            return timeStamp + ":" + level + ":" + message;
         }
     }
 }

@@ -43,6 +43,7 @@ import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToJson;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
+import static nl.vpro.logging.simple.SimpleLogger.slfj4;
 
 /**
  * Some tools to automatically create indices and put mappings and stuff.
@@ -76,7 +77,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static class Builder {
 
         public Builder log(Logger log){
-            this.simpleLogger(SimpleLogger.slfj4(log));
+            this.simpleLogger(slfj4(log));
             return this;
         }
 
@@ -126,7 +127,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             this.elasticSearchIndex = elasticSearchIndex;
         }
-        this.log = simpleLogger == null ? SimpleLogger.slfj4(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
+        this.log = simpleLogger == null ? slfj4(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
@@ -526,7 +527,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
      * @param path path to post to
      * @param request json to post to that.
      * @param listeners Listeners to process results (e.g. log errors or indexing)
@@ -1198,21 +1198,32 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return  future;
     }
 
+    public Consumer<ObjectNode> indexLogger() {
+        return indexLogger(log, () -> "");
+    }
 
     public Consumer<ObjectNode> indexLogger(Logger logger) {
         return indexLogger(logger, () -> "");
     }
 
     public Consumer<ObjectNode> indexLogger(Logger logger, Supplier<String> prefix) {
+        return indexLogger(slfj4(logger), prefix);
+    }
+
+    public Consumer<ObjectNode> indexLogger(SimpleLogger logger, Supplier<String> prefix) {
         return jsonNode -> {
             String index = jsonNode.get(Fields.INDEX).textValue();
             String type = jsonNode.get(Fields.TYPE).textValue();
             String id = jsonNode.get(Fields.ID).textValue();
             Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
-            if (logger.isInfoEnabled()) {
-                logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
+            if (jsonNode.hasNonNull(Fields.ERROR)) {
+                logger.error("{}{}/{}/{}/{}: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), jsonNode);
+            } else {
+                if (logger.isInfoEnabled()) {
+                    logger.info("{}{}/{}/{}/{} version: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), version);
+                }
+                logger.debug("{}{}", prefix.get(), jsonNode);
             }
-            logger.debug("{}{}", prefix.get(), jsonNode);
         };
     }
 
@@ -1223,6 +1234,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     public Consumer<ObjectNode> deleteLogger(Logger logger, Supplier<String> prefix) {
+        return deleteLogger(slfj4(logger), prefix);
+    }
+
+    public Consumer<ObjectNode> deleteLogger(SimpleLogger logger, Supplier<String> prefix) {
         return jsonNode -> {
             boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
             String index = jsonNode.get(Fields.INDEX).textValue();
@@ -1245,7 +1260,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
+    public Consumer<ObjectNode> bulkLogger() {
+        return bulkLogger(log, log, log);
+    }
+
     public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog, Logger updateLog) {
+        return bulkLogger(slfj4(indexLog), slfj4(deleteLog), slfj4(updateLog));
+    }
+
+
+    public Consumer<ObjectNode> bulkLogger(SimpleLogger indexLog, SimpleLogger deleteLog, SimpleLogger updateLog) {
         StringBuilder logPrefix = new StringBuilder();
         Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
         Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
@@ -1260,6 +1284,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             n -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
         );
     }
+
     public static Consumer<ObjectNode> consumeBulkResult(
             ObjIntConsumer<Integer> each,
             Consumer<ObjectNode> deletes,

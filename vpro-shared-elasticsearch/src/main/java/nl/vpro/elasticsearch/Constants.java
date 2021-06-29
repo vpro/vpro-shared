@@ -14,6 +14,8 @@ public class Constants {
         public static final String SOURCE  = "_source";
         public static final String VERSION  = "_version";
         public static final String SCORE = "_score";
+        public static final String ERROR = "error";
+
 
         public static final String DOC  = "doc";
         public static final String DOC_AS_UPSERT  = "doc_as_upsert";

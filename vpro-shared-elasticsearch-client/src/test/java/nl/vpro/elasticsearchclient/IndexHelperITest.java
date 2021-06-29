@@ -4,20 +4,25 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
+import org.slf4j.event.Level;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.logging.simple.QueueSimpleLogger;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
@@ -29,15 +34,19 @@ public class IndexHelperITest {
 
     RestClient client;
     IndexHelper helper;
+
+    final Queue<QueueSimpleLogger.Event> events = new ArrayDeque<>();
+    final QueueSimpleLogger<QueueSimpleLogger.Event> simpleLogger = QueueSimpleLogger.of(events);
+
     @BeforeEach
     public void setup() {
-
+        events.clear();
         client = RestClient.builder(
             new HttpHost("localhost", 9200, "http"))
             .build();
 
         helper = IndexHelper.builder()
-            .log(log)
+            .simpleLogger(simpleLogger)
             .client(new SimpleESClientFactory(client, () -> "simple"))
             .settingsResource("/setting.json")
             .mappingResource("/test.json")
@@ -103,6 +112,39 @@ public class IndexHelperITest {
     @Test
     public void unalias() {
         log.info("{}", helper.unalias("apipagequeries"));
+    }
+
+    @Test
+    public void indexWrong() {
+        assertThatThrownBy(() -> {
+            TestObject test = new TestObject();
+            test.setId("id");
+            test.setTitle("wrong");
+            ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(test);
+            jsonNode.put("unrecognizedField", "foobar");
+            helper.index(test.getId(), jsonNode);
+        }).isInstanceOf(RuntimeException.class);
+        List<QueueSimpleLogger.Event> warnings  = events.stream().filter(e -> e.getLevelInt() > Level.INFO.toInt()).collect(Collectors.toList());
+        assertThat(warnings).hasSize(1);
+        log.info("{}", warnings);
+    }
+
+
+    @Test
+    public void bulkWrong() {
+        TestObject test = new TestObject();
+        test.setId("id");
+        test.setTitle("wrong");
+        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(test);
+        jsonNode.put("unrecognizedField", "foobar");
+        BulkRequestEntry bulkRequestEntry = helper.indexRequest(test.getId(), jsonNode);
+        ObjectNode result = helper.bulk(Arrays.asList(bulkRequestEntry));
+        helper.bulkLogger().accept(result);
+        log.info("{}", result);
+
+        List<QueueSimpleLogger.Event> warnings  = events.stream().filter(e -> e.getLevelInt() > Level.INFO.toInt()).collect(Collectors.toList());
+        assertThat(warnings).hasSize(1);
+        log.info("{}", warnings);
     }
 
 }
