@@ -243,15 +243,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.1.16.RELEASE</spring.version>
-    <spring-security.version>5.4.4</spring-security.version>
-    <!-- seems to break CAS login:
-     <spring.version>5.2.0.RELEASE</spring.version>
-     <spring-security.version>5.2.0.RELEASE</spring-security.version>
-    -->
-    <jackson2.version>2.10.5.20201202</jackson2.version>    <!-- equals to poms-parent -->
+    <spring.version>5.3.8</spring.version>
+    <spring-security.version>5.5.1</spring-security.version>
+    <jackson2.version>2.12.3</jackson2.version>    <!-- equals to poms-parent -->
     <junit.version>5.7.1</junit.version>
-    <mockito.version>3.11.1</mockito.version>
+    <mockito.version>3.11.2</mockito.version>
     <assertj.version>3.20.2</assertj.version>
     <resteasy.version>4.6.1.Final</resteasy.version>
     <bytebuddy.version>1.11.5</bytebuddy.version>
@@ -259,8 +255,8 @@
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.14.1</log4j2.version>
     <guava.version>30.1.1-jre</guava.version>
-    <javassist.version>3.26.0-GA</javassist.version>
-    <wss4j.version>2.2.3</wss4j.version>
+    <javassist.version>3.28.0-GA</javassist.version>
+    <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.8.2</xmlunit.version>
 
     <httpcomponents.version>4.5.13</httpcomponents.version>
@@ -461,7 +457,7 @@
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
-        <version>3.1.0</version>
+        <version>4.0.1</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -649,7 +645,7 @@
       <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
-        <version>3.27.0-GA</version>
+        <version>${javassist.version}</version>
       </dependency>
       <dependency>
         <groupId>com.sun.xml.bind</groupId>
