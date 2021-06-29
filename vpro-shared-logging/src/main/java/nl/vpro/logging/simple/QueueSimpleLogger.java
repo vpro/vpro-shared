@@ -91,12 +91,12 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
             this.message = message;
             this.throwable = throwable;
             this.levelInt = level.toInt();
-            this.timeStamp = timeStamp == null ? Instant.now() : timeStamp;
+            this.timeStamp = timeStamp;
         }
 
         @Override
         public String toString() {
-            return timeStamp + ":" + level + ":" + message;
+            return (timeStamp == null ? "" : (timeStamp + ":")) + level + ":" + message;
         }
     }
 }
