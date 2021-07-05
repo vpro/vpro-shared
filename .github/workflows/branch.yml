@@ -23,6 +23,8 @@ jobs:
         email: 'digitaal-techniek@vpro.nl'
         token: '${{ secrets.GITHUB_TOKEN  }}'
     - name: Release branch with Maven
-      run: mvn --batch-mode release:branch
+      run: |
+         RELEASE_VERSION=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed -r 's/-SNAPSHOT/.0-SNAPSHOT/'`
+         mvn --batch-mode -DreleaseVersion=${RELEASE_VERSION} release:branch
 
 
