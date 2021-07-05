@@ -5,8 +5,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/*-SNAPSHOT'
+    if: startsWith(github.ref, 'refs/heads/REL-')
     steps:
+    - name : echo
+      run : echo {{ $github.ref }}
     - uses: actions/checkout@v2
     - name: Cache local Maven repository
       uses: actions/cache@v2
