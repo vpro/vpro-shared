@@ -42,8 +42,8 @@
     <url>https://github.com/vpro/vpro-shared/actions</url>
   </ciManagement>
   <scm>
-    <connection>https://github.com/vpro/vpro-shared.git</connection>
-    <developerConnection>https://github.com/vpro/vpro-shared.git</developerConnection>
+    <connection>scm:git:https://github.com/vpro/vpro-shared.git</connection>
+    <developerConnection>scm:git:https://github.com/vpro/vpro-shared.git</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
     <tag>HEAD</tag>
   </scm>
