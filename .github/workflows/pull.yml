@@ -21,11 +21,4 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn -fae -DskipITs=false -Dinteg.cluster.name=docker-elasticsearch -B  package
-    - name: Publish to codecov
-      run: bash <(curl -s https://codecov.io/bash)
-      continue-on-error: true
-    - name: Publish Test Report
-      uses: scacap/action-surefire-report@v1
-      if: always()
-      with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+

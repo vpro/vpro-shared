@@ -42,6 +42,14 @@ jobs:
       with:
         gpg-private-key: ${{ secrets.OSSRH_GPG_SECRET_KEY }}
         passphrase: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          maven-
+      if: always()
     - name: Build with Maven
       run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -Pdeploy,sonatype deploy  -Dgpg.skip=false
     - name: Publish to codecov
