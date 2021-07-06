@@ -15,7 +15,6 @@ jobs:
         key: maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           maven-
-      if: always()
     - uses: oleksiyrudenko/gha-git-credentials@v2.1
       with:
         global: true
