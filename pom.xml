@@ -3,7 +3,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>5.28.1-SNAPSHOT</version>
+  <version>2.28.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -76,6 +76,7 @@
     <module>vpro-shared-guice</module>
     <module>vpro-shared-i18n</module>
     <module>vpro-shared-bom</module>
+
 
     <!--
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
