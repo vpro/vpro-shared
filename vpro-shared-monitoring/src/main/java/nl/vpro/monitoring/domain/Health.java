@@ -1,11 +1,22 @@
 package nl.vpro.monitoring.domain;
 
-import lombok.Builder;
 import lombok.Data;
 
+import java.time.Duration;
+import java.time.Instant;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Data
-@Builder
+@lombok.Builder
 public class Health {
-    private int status;
-    private String message;
+    private final int status;
+    private final String message;
+    private final Instant startTime;
+
+
+    @JsonProperty
+    public Duration getUptime() {
+        return Duration.between(startTime, Instant.now());
+    }
 }

@@ -2,6 +2,9 @@ package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.MediaType;
@@ -17,21 +20,34 @@ import nl.vpro.monitoring.domain.Health;
 public class HealthController {
 
     private Status status = Status.STARTING;
+    @MonotonicNonNull
+    private Instant ready  = null;
 
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent refreshedEvent) {
         status = Status.READY;
+        ready = Instant.now();
+        log.info("Status {} at {}", status, ready);
     }
 
     @EventListener
     public void onApplicationEvent(ContextStoppedEvent stoppedEvent) {
         status = Status.STOPPING;
+        log.info("Status {} at {}", status, Instant.now());
     }
 
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        return ResponseEntity.status(status.code).body(Health.builder().status(status.code).message(status.message).build());
+        return ResponseEntity
+            .status(status.code)
+            .body(
+                Health.builder()
+                    .status(status.code)
+                    .message(status.message)
+                    .startTime(ready)
+                    .build()
+            );
     }
 
     private enum Status {
@@ -39,8 +55,8 @@ public class HealthController {
         READY(200, "Application ready"),
         STOPPING(503, "Application shutdown");
 
-        int code;
-        String message;
+        final int code;
+        final String message;
 
         Status(int code, String message) {
             this.code = code;
