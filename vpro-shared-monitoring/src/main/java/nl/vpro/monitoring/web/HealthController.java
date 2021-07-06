@@ -2,7 +2,7 @@ package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Instant;
+import java.time.*;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.context.annotation.Lazy;
@@ -23,10 +23,12 @@ public class HealthController {
     @MonotonicNonNull
     private Instant ready  = null;
 
+    Clock clock = Clock.systemDefaultZone();
+
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent refreshedEvent) {
         status = Status.READY;
-        ready = Instant.now();
+        ready = clock.instant();
         log.info("Status {} at {}", status, ready);
     }
 
@@ -45,7 +47,8 @@ public class HealthController {
                 Health.builder()
                     .status(status.code)
                     .message(status.message)
-                    .startTime(ready)
+                    .startTime(ready == null ? null : ready.toString())
+                    .upTime(ready == null ? null : Duration.between(ready, clock.instant()).toString())
                     .build()
             );
     }

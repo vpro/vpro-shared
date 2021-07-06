@@ -1,11 +1,12 @@
 package nl.vpro.monitoring.web;
 
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.meeuw.math.TestClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
@@ -39,8 +40,12 @@ class HealthControllerTest {
 
     private MockMvc mockMvc;
 
+    private final TestClock clock = new TestClock(ZoneId.of("UT"), Instant.parse("2021-07-06T00:00:00.000Z"));
+
+
     @BeforeEach
     public void setup() {
+        this.healthController.clock = clock;
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
@@ -57,12 +62,14 @@ class HealthControllerTest {
     @Test
     void statusReady() throws Exception {
         healthController.onApplicationEvent((ContextRefreshedEvent) null);
-
+        clock.tick(50);
         mockMvc.perform(
             get("/health")
                 .accept(APPLICATION_JSON_VALUE)
         ).andExpect(status().is(200))
             .andExpect(jsonPath("$.status", is(200)))
+            .andExpect(jsonPath("$.startTime", is("2021-07-06T00:00:00Z")))
+            .andExpect(jsonPath("$.upTime", is("PT0.05S")))
             .andExpect(jsonPath("$.message", is("Application ready")));
     }
 
