@@ -1,16 +1,9 @@
 package nl.vpro.util;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
+import java.nio.*;
+import java.nio.charset.*;
 import java.nio.charset.spi.CharsetProvider;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -696,7 +689,7 @@ public class ISO6937CharsetProvider extends CharsetProvider {
                     return CoderResult.OVERFLOW;
                 }
                 byteBuffer.put(array);
-                charBuffer.position(charBuffer.length());
+                ((Buffer) charBuffer).position(charBuffer.length());
             }
             return CoderResult.UNDERFLOW;
         }
