@@ -190,7 +190,7 @@ public class ObjectLocker {
         Duration maxWait = minWaitTime.multipliedBy(8);
         while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
             Duration duration = Duration.ofNanos(System.nanoTime() - start);
-            log.info("Couldn't  acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
+            log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
             if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
                 log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
                 break;
