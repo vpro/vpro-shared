@@ -14,8 +14,7 @@ import nl.vpro.test.util.jaxb.JAXBTestUtil;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.vpro.i18n.Locales.FLEMISH;
 import static nl.vpro.i18n.Locales.NETHERLANDISH;
-import static nl.vpro.i18n.LocalizedString.builderOf;
-import static nl.vpro.i18n.LocalizedString.of;
+import static nl.vpro.i18n.LocalizedString.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -26,13 +25,13 @@ public class LocalizedStringTest {
 
     public static class A {
         @XmlElement
-        LocalizedString string;
+        LocalizedString.Impl string;
     }
 
     @Test
     public void xml() {
         A a = new A();
-        a.string = of("bla", Locales.DUTCH);
+        a.string = impl("bla", Locales.DUTCH);
         JAXBTestUtil.roundTripAndSimilar(a, "<local:a xmlns:local=\"uri:local\">\n" +
             "    <string xml:lang=\"nl\">bla</string>\n" +
             "</local:a>");
@@ -41,7 +40,7 @@ public class LocalizedStringTest {
     @Test
     public void json() {
         A a = new A();
-        a.string = of("bla", NETHERLANDISH);
+        a.string = impl("bla", NETHERLANDISH);
         Jackson2TestUtil.roundTripAndSimilar(a, "{\n" +
             "  \"string\" : {\n" +
             "    \"value\" : \"bla\",\n" +
