@@ -66,7 +66,7 @@ public class LocalizedString implements CharSequence, Serializable { //implement
     }
 
     @lombok.Builder(toBuilder = true)
-    private LocalizedString(
+    protected LocalizedString(
         Locale locale,
         @NonNull String value,
         String charsetName) {
