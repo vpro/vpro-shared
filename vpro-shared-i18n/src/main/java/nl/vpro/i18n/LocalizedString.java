@@ -83,7 +83,7 @@ public class LocalizedString implements CharSequence, Serializable { //implement
         this.charsetName = copy.charsetName;
     }
 
-    public static String get(Locale locale, Iterable<LocalizedString> strings) {
+    public static String get(Locale locale, Iterable<? extends LocalizedString> strings) {
         LocalizedString candidate = null;
         if (strings != null) {
             int score = -1;
