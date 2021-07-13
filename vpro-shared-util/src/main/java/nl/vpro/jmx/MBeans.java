@@ -218,15 +218,21 @@ public class MBeans {
      * @return a {@link StringBuilderSimpleLogger} representing multiple lines actually a {@link StringBuilderSimpleLogger}
      */
     public static StringSupplierSimpleLogger multiLine(Logger log, String message, Object... args) {
+        return multiLine(Level.INFO, log, message, args);
+    }
+
+    public static StringSupplierSimpleLogger multiLine(Level level, Logger log, String message, Object... args) {
 
         StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
             .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
+            .level(level)
             .chain(Slf4jSimpleLogger.of(log));
         if (message != null) {
             string.info(message, args);
         }
         return string;
     }
+
 
     /**
      * @param log Logger instance to log too
