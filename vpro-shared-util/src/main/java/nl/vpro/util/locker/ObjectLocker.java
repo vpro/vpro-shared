@@ -311,7 +311,7 @@ public class ObjectLocker {
 
 
     private static String summarize(Thread t, Exception e) {
-        return t.toString() + ":" + summarizeStackTrace(e);
+        return t.getName() + ":" + summarizeStackTrace(e);
     }
 
     private static String summarize() {
