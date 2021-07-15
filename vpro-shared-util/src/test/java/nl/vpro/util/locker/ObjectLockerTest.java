@@ -31,6 +31,7 @@ public class ObjectLockerTest {
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofSeconds(10).toString());
         ObjectLockerAdmin.JMX_INSTANCE.setStrictlyOne(false);
         ObjectLocker.minWaitTime = Duration.ofSeconds(5);
+        ObjectLocker.monitor = false;
     }
 
 
@@ -122,15 +123,10 @@ public class ObjectLockerTest {
         ObjectLocker.monitor = true;
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofMillis(20).toString());
         ObjectLocker.minWaitTime = Duration.ofMillis(5);
-        try {
-            List<String> events = basicLockTest();
+        List<String> events = basicLockTest();
 
-            // the lock took too long (over 20 ms in this), continued without lock
-            assertThat(events).containsExactly("a1", "b1", "a2");
-
-        } finally {
-            ObjectLocker.monitor = false;
-        }
+        // the lock took too long (over 20 ms in this), continued without lock
+        assertThat(events).containsExactly("a1", "b1", "a2");
     }
 
     private List<String> basicLockTest() throws ExecutionException, InterruptedException {

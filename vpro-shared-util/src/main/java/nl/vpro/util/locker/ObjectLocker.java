@@ -119,7 +119,7 @@ public class ObjectLocker {
      * @param reason A description for the reason of locking, which can be used in logging or exceptions
      * @param locks The map to hold the locks
      * @param comparable this determines whether two given keys are 'comparable'. If they are comparable, but different, and occuring at the same time, than this means
-     *                   that some code is locking different thing s at the same time, which may be a cause of dead locks. If they are difference but also not comparable, then
+     *                   that some code is locking different things at the same time, which may be a cause of dead locks. If they are difference but also not comparable, then
      *                   this remains unknown. We may e.g. be locking on a certain crid and on a mid. They are different, but it is not sure that they are actually about two different objects.
      */
 
@@ -129,7 +129,7 @@ public class ObjectLocker {
         @NonNull String reason,
         @NonNull Callable<T> callable,
         @NonNull Map<K, LockHolder<K>> locks,
-        BiPredicate<Serializable, K> comparable
+        @NonNull BiPredicate<Serializable, K> comparable
     ) {
         if (key == null) {
             log.warn("Calling with null key: {}", reason);
@@ -148,10 +148,10 @@ public class ObjectLocker {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static  <K extends Serializable> LockHolder<K> acquireLock(
         long nanoStart,
-        K key,
-        @NonNull String reason,
+        final  K key,
+        final @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
-        BiPredicate<Serializable, K> comparable) throws InterruptedException {
+        final @NonNull BiPredicate<Serializable, K> comparable) throws InterruptedException {
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
@@ -202,7 +202,8 @@ public class ObjectLocker {
         }
     }
 
-    private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason, BiPredicate<Serializable, K> comparable) {
+    private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason,
+                                                                       @NonNull BiPredicate<Serializable, K> comparable) {
         log.trace("New lock for {}", key);
         List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
         if (! currentLocks.isEmpty()) {
