@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -29,9 +30,15 @@ public class ObjectLocker {
     }
 
     /**
-     * The lock the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
+     * The lock(s) the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
      */
     static final ThreadLocal<List<LockHolder<? extends Serializable>>> HOLDS = ThreadLocal.withInitial(ArrayList::new);
+
+    /**
+     * All object that are currently locked.
+     * Map key -> LockHolder
+     */
+    static final Map<Serializable, LockHolder<Serializable>> LOCKED_OBJECTS    = new ConcurrentHashMap<>();
 
 
     static boolean strictlyOne;
@@ -86,11 +93,6 @@ public class ObjectLocker {
         Object getType();
     }
 
-    /**
-     * Map key -> LockHolder
-     */
-    static final Map<Serializable, LockHolder<Serializable>> LOCKED_OBJECTS    = new ConcurrentHashMap<>();
-
 
     public static Map<Serializable, LockHolder<Serializable>> getLockedObjects() {
         return Collections.unmodifiableMap(LOCKED_OBJECTS);
@@ -125,18 +127,18 @@ public class ObjectLocker {
 
     @SneakyThrows
     public static <T, K extends Serializable> T withObjectLock(
-        K key,
-        @NonNull String reason,
-        @NonNull Callable<T> callable,
-        @NonNull Map<K, LockHolder<K>> locks,
-        @NonNull BiPredicate<Serializable, K> comparable
+        @Nullable final K key,
+        @NonNull final String reason,
+        @NonNull final Callable<T> callable,
+        @NonNull final Map<K, LockHolder<K>> locks,
+        @NonNull final BiPredicate<Serializable, K> comparable
     ) {
         if (key == null) {
             log.warn("Calling with null key: {}", reason);
             return callable.call();
         }
-        long nanoStart = System.nanoTime();
-        LockHolder<K> lock = acquireLock(nanoStart, key, reason, locks, comparable);
+        final long nanoStart = System.nanoTime();
+        final LockHolder<K> lock = acquireLock(nanoStart, key, reason, locks, comparable);
         try {
             return callable.call();
         } finally {
@@ -202,12 +204,14 @@ public class ObjectLocker {
         }
     }
 
-    private static <K extends Serializable>  LockHolder<K> computeLock(K key, String reason,
-                                                                       @NonNull BiPredicate<Serializable, K> comparable) {
+    private static <K extends Serializable>  LockHolder<K> computeLock(
+        @NonNull final K key,
+        @NonNull final  String reason,
+        @NonNull final BiPredicate<Serializable, K> comparable) {
         log.trace("New lock for {}", key);
         List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
         if (! currentLocks.isEmpty()) {
-            Optional<LockHolder<? extends Serializable>> compatibleLocks = currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
+            final Optional<LockHolder<? extends Serializable>> compatibleLocks = currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
             if (compatibleLocks.isPresent()) {
                 if (strictlyOne) {
                     throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), compatibleLocks.get().summarize(), key));
@@ -216,7 +220,6 @@ public class ObjectLocker {
                 }
             } else {
                 log.debug("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
-
             }
         }
         LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
@@ -227,7 +230,12 @@ public class ObjectLocker {
 
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static  <K extends Serializable> void releaseLock(long nanoStart, K key, @NonNull  String reason, final @NonNull Map<K, LockHolder<K>> locks, @NonNull LockHolder<K> lock) {
+    private static  <K extends Serializable> void releaseLock(
+        final long nanoStart,
+        final @NonNull K key,
+        final @NonNull  String reason,
+        final @NonNull Map<K, LockHolder<K>> locks,
+        final @NonNull LockHolder<K> lock) {
         synchronized (locks) {
             if (lock.lock.getHoldCount() == 1) {
                 if (!lock.lock.hasQueuedThreads()) {
@@ -242,12 +250,12 @@ public class ObjectLocker {
                 Slf4jHelper.log(log, duration.compareTo(Duration.ofSeconds(30))> 0 ? Level.WARN :  Level.DEBUG,
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
-            HOLDS.get().remove(lock);
             if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
+                HOLDS.get().remove(lock);
                 lock.lock.unlock();
             } else {
                 // can happen if 'continuing without lock'
-                log.warn("Current lock {} not hold by current thread but by {}", lock, lock.thread.getName());
+                log.warn("Current lock {} not hold by current thread {} but by {}", lock, Thread.currentThread().getName(), lock.thread.getName());
             }
 
             locks.notifyAll();
@@ -256,7 +264,7 @@ public class ObjectLocker {
 
 
     /**
-     *  Most importantly this is a wrapper around {@link ReentrantLock}, but it stores some extra meta information, like the original key, and initialization time.
+     *  Most importantly this is a wrapper around {@link ReentrantLock}, but it stores some extra meta information, like the original key, thread, and initialization time.
      *
      *  It can also store the exception if that happened during the hold of the lock.
      */
@@ -276,13 +284,13 @@ public class ObjectLocker {
             this.reason = reason;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("rawtypes")
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            LockHolder<K> holder = (LockHolder) o;
+            LockHolder<?> holder = (LockHolder) o;
 
             return key.equals(holder.key);
         }

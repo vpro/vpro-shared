@@ -38,13 +38,14 @@ public class ObjectLockerTest {
     @AfterEach
     public void checkEmpty() {
         assertThat(ObjectLocker.HOLDS.get()).isEmpty();
+        assertThat(ObjectLocker.LOCKED_OBJECTS).isEmpty();
         assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLocks()).isEmpty();
     }
 
     @Test
     public void withLock() throws InterruptedException, ExecutionException {
         final List<String> events = new CopyOnWriteArrayList<>();
-        ForkJoinTask<?> submitA = ForkJoinPool.commonPool().submit(() -> {
+        ForkJoinTask<?> submitA = submit(() -> {
             withKeyLock("key", "test1", () -> {
                 events.add("a1");
                 assertThat(ObjectLockerAdmin.JMX_INSTANCE.getLocks().stream().map(s -> s.substring(0, 4))).containsExactly("key:");
@@ -75,7 +76,7 @@ public class ObjectLockerTest {
     @Test
     public void withNullLock() throws InterruptedException, ExecutionException {
         final List<String> events = new CopyOnWriteArrayList<>();
-        ForkJoinTask<?> submitA = ForkJoinPool.commonPool().submit(() -> {
+        ForkJoinTask<?> submitA = submit(() -> {
             withKeyLock(null, "test1", () -> {
                 events.add("a1");
                 synchronized (events) {
@@ -123,16 +124,11 @@ public class ObjectLockerTest {
         ObjectLocker.monitor = true;
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofMillis(20).toString());
         ObjectLocker.minWaitTime = Duration.ofMillis(5);
-        List<String> events = basicLockTest();
 
-        // the lock took too long (over 20 ms in this), continued without lock
-        assertThat(events).containsExactly("a1", "b1", "a2");
-    }
-
-    private List<String> basicLockTest() throws ExecutionException, InterruptedException {
         final List<String> events = new CopyOnWriteArrayList<>();
 
-        ForkJoinTask<?> submitA = ForkJoinPool.commonPool().submit(() -> {
+        // one thread doing something for key 'key'
+        ForkJoinTask<?> submitA = submit(() -> {
             withKeyLock(new Key("key"), "test1", () -> {
                 events.add("a1");
                 synchronized (events) {
@@ -142,16 +138,24 @@ public class ObjectLockerTest {
                 events.add("a2");
             });
         });
+        // wait until at least one event is received.
         synchronized (events) {
             while (events.isEmpty()) {
                 events.wait(10);
             }
         }
+        // Then in this (other) thread, also do something with the key
+        // it should wait.
         withKeyLock(new Key("key"), "test2", () -> {
             events.add("b1");
         });
+        withKeyLock(new Key("anotherkey"), "test3", () -> {
+
+        });
+        // so events should contain 'a1', 'a2', 'b1'
         submitA.get();
-        return events;
+        // the lock took too long (over 20 ms in this), continued without lock
+        assertThat(events).containsExactly("a1", "b1", "a2");
     }
 
 
@@ -223,5 +227,12 @@ public class ObjectLockerTest {
         Thread.sleep(duration);
     }
 
+    static  ForkJoinTask<?>  submit(Runnable runnable) {
+        return ForkJoinPool.commonPool().submit(() -> {
+            runnable.run();
+            log.info("Ready with thread {}", Thread.currentThread().getName());
+            assertThat(ObjectLocker.HOLDS.get()).isEmpty();
+        });
+    }
 
 }
