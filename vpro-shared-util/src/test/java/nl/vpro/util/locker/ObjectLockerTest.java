@@ -152,7 +152,7 @@ public class ObjectLockerTest {
         withKeyLock(new Key("anotherkey"), "test3", () -> {
 
         });
-        // so events should contain 'a1', 'a2', 'b1'
+        // so events should contain 'a1', 'b1', 'a2'
         submitA.get();
         // the lock took too long (over 20 ms in this), continued without lock
         assertThat(events).containsExactly("a1", "b1", "a2");
