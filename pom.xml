@@ -245,8 +245,9 @@
     <skipITs>true</skipITs>
 
     <spring.version>5.3.8</spring.version>
-    <spring-security.version>5.5.1</spring-security.version>
-    <jackson2.version>2.12.3</jackson2.version>    <!-- equals to poms-parent -->
+    <spring-security.version>5.5.2</spring-security.version>
+    <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
+
     <junit.version>5.7.1</junit.version>
     <mockito.version>3.11.2</mockito.version>
     <assertj.version>3.20.2</assertj.version>
