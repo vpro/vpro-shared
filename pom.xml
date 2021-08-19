@@ -275,7 +275,7 @@
     <swagger.version>1.5.22</swagger.version>
     <lombok.version>1.18.20</lombok.version>
 
-    <elasticsearch7.version>7.13.2</elasticsearch7.version>
+    <elasticsearch7.version>7.14.0</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.7.0</lucene.elasticsearch7.version>
   </properties>
 
