@@ -279,7 +279,7 @@
     <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
 
     <!-- elasticsearch client version must be < 7.14 -->
-    <elasticsearch.version>7.13.4</elasticsearch.version>
+    <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
   </properties>

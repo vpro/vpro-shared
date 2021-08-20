@@ -18,7 +18,7 @@ import org.apache.lucene.search.TotalHits;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.*;
-import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.meeuw.math.windowed.WindowedEventRate;
