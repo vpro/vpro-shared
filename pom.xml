@@ -277,8 +277,11 @@
     <swagger.version>1.5.22</swagger.version>
     <lombok.version>1.18.20</lombok.version>
 
-    <elasticsearch7.version>7.13.2</elasticsearch7.version>
-    <lucene.elasticsearch7.version>8.7.0</lucene.elasticsearch7.version>
+    <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
+
+    <!-- elasticsearch client version must be < 7.14 -->
+    <elasticsearch.version>7.13.4</elasticsearch.version>
+    <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
   </properties>
 
   <dependencyManagement>
