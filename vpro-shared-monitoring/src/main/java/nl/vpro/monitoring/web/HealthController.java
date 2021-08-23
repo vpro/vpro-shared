@@ -20,20 +20,38 @@ import nl.vpro.monitoring.domain.Health;
 public class HealthController {
 
     private Status status = Status.STARTING;
+
     @MonotonicNonNull
     private Instant ready  = null;
 
     Clock clock = Clock.systemDefaultZone();
 
+    /**
+     * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
+     */
     @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent refreshedEvent) {
-        status = Status.READY;
-        ready = clock.instant();
-        log.info("Status {} at {}", status, ready);
+    public void onApplicationStartedEvent(ContextStartedEvent startedEvent) {
+        markReady();
+        log.info("Status {} {} at {}", startedEvent, status, ready);
     }
 
     @EventListener
-    public void onApplicationEvent(ContextStoppedEvent stoppedEvent) {
+    public void onApplicationRefreshedEvent(ContextRefreshedEvent refreshedEventEvent) {
+        if (status != Status.READY) {
+            markReady();
+            log.info("Status {} at {}", status, ready);
+        } else {
+            log.debug("Ready already ({})", refreshedEventEvent);
+        }
+    }
+
+    protected void markReady() {
+        status = Status.READY;
+        ready = clock.instant();
+    }
+
+    @EventListener
+    public void onApplicationStoppedEvent(ContextStoppedEvent stoppedEvent) {
         status = Status.STOPPING;
         log.info("Status {} at {}", status, Instant.now());
     }

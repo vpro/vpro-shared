@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.meeuw.math.TestClock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -61,7 +59,7 @@ class HealthControllerTest {
 
     @Test
     void statusReady() throws Exception {
-        healthController.onApplicationEvent((ContextRefreshedEvent) null);
+        healthController.onApplicationStartedEvent(null);
         clock.tick(50);
         mockMvc.perform(
             get("/health")
@@ -75,7 +73,7 @@ class HealthControllerTest {
 
     @Test
     void statusStopping() throws Exception {
-        healthController.onApplicationEvent((ContextStoppedEvent) null);
+        healthController.onApplicationStoppedEvent(null);
 
         mockMvc.perform(
             get("/health")
