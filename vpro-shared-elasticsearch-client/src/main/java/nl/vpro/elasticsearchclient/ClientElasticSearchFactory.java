@@ -189,6 +189,9 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                 if (! s.startsWith("http:") && ! s.startsWith("https:") && ! s.contains(":")) {
                     s = s + ":" + defaultPort;
                 }
+                if (s.endsWith("/")) {
+                    s = s.substring(0, s.length() - 1);
+                }
                 return s;
             })
             .map(HttpHost::create)
