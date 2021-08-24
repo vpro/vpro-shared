@@ -14,6 +14,7 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NByteArrayEntity;
@@ -265,8 +266,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Response response = client().performRequest(req);
         List<String> result = new ArrayList<>();
         for (String line : IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset()).split("\\n")) {
-            String[] split = line.split("\\s+");
-            result.add(split[2]);
+            if (StringUtils.isNotBlank(line)) {
+                String[] split = line.split("\\s+");
+                result.add(split[2]);
+            }
         }
         return result;
     }
