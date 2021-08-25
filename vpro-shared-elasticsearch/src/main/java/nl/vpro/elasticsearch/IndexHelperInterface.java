@@ -31,14 +31,11 @@ public interface IndexHelperInterface<C> {
     }
 
     default boolean  createIndex(boolean onlyIfNotExists, CreateIndex createIndex) {
-        if (!onlyIfNotExists) {
-            createIndex(createIndex);
-            return true;
-        } else if (! checkIndex()) {
-            createIndex(createIndex);
-            return true;
+        if (onlyIfNotExists) {
+            return createIndexIfNotExists(createIndex);
         } else {
-            return false;
+            createIndex(createIndex);
+            return true;
         }
     }
 
