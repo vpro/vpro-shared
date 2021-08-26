@@ -42,10 +42,15 @@ public class MonitoringConfig {
     private ApplicationContext applicationContext;
 
     @Bean
-    @SuppressWarnings("unchecked")
+
     public PrometheusMeterRegistry globalMeterRegistry() {
         final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        start(registry);
+        return registry;
+    }
 
+    @SuppressWarnings("unchecked")
+    protected void start(PrometheusMeterRegistry registry) {
         if (properties.getCommonTags() != null) {
             registry.config().commonTags(properties.getCommonTags().toArray(new String[0]));
         }
@@ -131,8 +136,6 @@ public class MonitoringConfig {
                 .register(registry);
 
         }
-
-        return registry;
     }
 
     // With a datasource argument instead of the generic wildcard, application startup
