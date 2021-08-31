@@ -57,6 +57,11 @@ public class MonitoringConfig {
         if (properties.isMeterClassloader()) {
             new ClassLoaderMetrics().bindTo(registry);
         }
+
+        if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
+            new io.micrometer.core.instrument.binder.logging.Log4j2Metrics().bindTo(registry);
+        }
+
         final Optional<Ehcache> ehCache = (Optional<Ehcache>) getEhCache();
         if (properties.isMeterEhCache2() && ehCache.isPresent()) {
             new EhCache2Metrics(ehCache.get(), Tags.empty()).bindTo(registry);
