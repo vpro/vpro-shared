@@ -6,9 +6,7 @@ import io.swagger.jaxrs.listing.BaseApiListingResource;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 
@@ -21,7 +19,6 @@ import javax.ws.rs.core.*;
  * @author Michiel Meeuwissen
  * @since 1.60
  */
-
 @Path("/swagger")
 public class SwaggerListingResource extends BaseApiListingResource {
 
@@ -36,6 +33,9 @@ public class SwaggerListingResource extends BaseApiListingResource {
         @Context ServletConfig sc,
         @Context HttpHeaders headers,
         @Context UriInfo uriInfo) {
-        return getListingJsonResponse(app, context, sc, headers, uriInfo);
+
+        Response response = getListingJsonResponse(app, context, sc, headers, uriInfo);
+        response.getHeaders().putSingle("Cache-Control", "public, max-age=901");
+        return response;
     }
 }
