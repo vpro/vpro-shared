@@ -4,5 +4,7 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
-  <bean class="nl.vpro.swagger.SwaggerListingResource" />
+  <bean class="nl.vpro.swagger.SwaggerListingResource">
+    <constructor-arg value="${swagger.maxAge}" />
+  </bean>
 </beans>

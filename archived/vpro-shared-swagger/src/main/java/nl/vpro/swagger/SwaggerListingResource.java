@@ -4,6 +4,8 @@ package nl.vpro.swagger;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.jaxrs.listing.BaseApiListingResource;
 
+import java.time.Duration;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
@@ -25,6 +27,15 @@ public class SwaggerListingResource extends BaseApiListingResource {
     @Context
     ServletContext context;
 
+    Duration maxAge = Duration.ofMinutes(15);
+
+    public SwaggerListingResource() {
+
+    }
+    public SwaggerListingResource(Duration maxAge) {
+        this.maxAge = maxAge;
+    }
+
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "The swagger definition in JSON", hidden = true)
@@ -35,7 +46,7 @@ public class SwaggerListingResource extends BaseApiListingResource {
         @Context UriInfo uriInfo) {
 
         Response response = getListingJsonResponse(app, context, sc, headers, uriInfo);
-        response.getHeaders().putSingle("Cache-Control", "public, max-age=901");
+        response.getHeaders().putSingle("Cache-Control", "public, max-age="  + (maxAge.toMillis() / 1000));
         return response;
     }
 }
