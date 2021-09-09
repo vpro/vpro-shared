@@ -29,7 +29,17 @@ public class ElasticSearchIndex {
     private final String mappingResource;
     private final List<String> aliases;
 
-    private static final Consumer<JsonNode> NOP_MAPPER = (jn) -> {};
+    public static final Consumer<JsonNode> NOP_MAPPER = new Consumer<JsonNode>() {
+        @Override
+        public void accept(JsonNode jsonNode) {
+
+        }
+        @Override
+        public String toString() {
+            return "NOP";
+        }
+
+    };
 
     @With
     @NonNull

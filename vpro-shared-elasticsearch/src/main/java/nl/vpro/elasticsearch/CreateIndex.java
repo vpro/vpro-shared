@@ -40,8 +40,6 @@ public class CreateIndex {
 
     private final boolean requireMappings;
 
-    private final Consumer<JsonNode> mappingsProcessor;
-
     public static final CreateIndex DEFAULT = CreateIndex.builder().build();
 
     public static final CreateIndex FOR_TEST = CreateIndex.builder()
@@ -69,6 +67,5 @@ public class CreateIndex {
         this.shards = shards;
         this.numberOfReplicas = numberOfReplicas;
         this.requireMappings = requireMappings == null || requireMappings;
-        this.mappingsProcessor = mappingsProcessor == null ? (jn) -> {}  : mappingsProcessor;
     }
 }
