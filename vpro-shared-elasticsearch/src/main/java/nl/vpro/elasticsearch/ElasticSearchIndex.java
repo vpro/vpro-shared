@@ -1,8 +1,7 @@
 package nl.vpro.elasticsearch;
 
 
-import lombok.SneakyThrows;
-import lombok.With;
+import lombok.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.function.*;
 
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -28,7 +28,11 @@ public class ElasticSearchIndex {
     private final String settingsResource;
     private final String mappingResource;
     private final List<String> aliases;
+
+    private static final Consumer<JsonNode> NOP_MAPPER = (jn) -> {};
+
     @With
+    @NonNull
     private final Consumer<JsonNode> mappingsProcessor;
 
     protected ElasticSearchIndex(
@@ -49,7 +53,7 @@ public class ElasticSearchIndex {
         this.settingsResource = settingsResource;
         this.mappingResource = mappingResource;
         this.aliases = aliases;
-        this.mappingsProcessor = mappingsProcessor == null ? (jn) -> {} : mappingsProcessor;
+        this.mappingsProcessor = mappingsProcessor == null ? NOP_MAPPER: mappingsProcessor;
     }
 
 
@@ -65,6 +69,12 @@ public class ElasticSearchIndex {
         return this;
     }
 
+    /**
+     * Registers a mapping processor while leaving the existing one intact.
+     */
+    public ElasticSearchIndex thenWithMappingsProcessor(Consumer<JsonNode> mappingsProcessor) {
+        return withMappingsProcessor(this.mappingsProcessor.andThen(mappingsProcessor));
+    }
 
     @Override
     public boolean equals(Object o) {
