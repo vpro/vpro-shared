@@ -1,5 +1,6 @@
 package nl.vpro.elasticsearch.highlevel;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
@@ -8,20 +9,20 @@ import javax.inject.Inject;
 
 import org.elasticsearch.client.*;
 
-import nl.vpro.elasticsearchclient.ESClientBuilderFactory;
-import nl.vpro.elasticsearchclient.ESClientFactory;
+import nl.vpro.elasticsearchclient.*;
 
 /**
  */
 @Slf4j
 public class HighLevelClientFactory  implements ESClientFactory  {
 
-    private final ESClientBuilderFactory lowLevelFactory;
+    @Getter
+    private final ClientElasticSearchFactory lowLevelFactory;
 
     private RestHighLevelClient client = null;
 
     @Inject
-    public HighLevelClientFactory(ESClientBuilderFactory lowLevelFactory) {
+    public HighLevelClientFactory(ClientElasticSearchFactory lowLevelFactory) {
         this.lowLevelFactory = lowLevelFactory;
     }
 

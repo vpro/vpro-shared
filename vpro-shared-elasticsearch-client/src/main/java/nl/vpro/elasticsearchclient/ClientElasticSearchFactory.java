@@ -171,7 +171,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         this.hosts = hosts;
     }
 
-    protected HttpHost[] getHttpHosts() {
+    public HttpHost[] getHttpHosts() {
         return hosts;
     }
 
