@@ -242,8 +242,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             throw new IllegalStateException("No mappings provided in " + this);
         }
         JsonNode mappingJson = mapping.get();
-        Consumer<JsonNode> mappingsProcessor = elasticSearchIndex.getMappingsProcessor();
-        mappingsProcessor.accept(mappingJson);
+        if (elasticSearchIndex != null) {
+            Consumer<JsonNode> mappingsProcessor = elasticSearchIndex.getMappingsProcessor();
+            mappingsProcessor.accept(mappingJson);
+        }
         request.set("mappings", mappingJson);
         HttpEntity entity = entity(request);
 
