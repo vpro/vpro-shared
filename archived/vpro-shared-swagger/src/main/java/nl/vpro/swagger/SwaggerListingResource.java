@@ -11,6 +11,8 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 
 /**
  * The provided implementations by swagger don't work or give in log:
@@ -30,10 +32,10 @@ public class SwaggerListingResource extends BaseApiListingResource {
     Duration maxAge = Duration.ofMinutes(15);
 
     public SwaggerListingResource() {
-
     }
-    public SwaggerListingResource(Duration maxAge) {
-        this.maxAge = maxAge;
+
+    public SwaggerListingResource(@Nullable Duration maxAge) {
+        this.maxAge = maxAge == null ? this.maxAge : maxAge;
     }
 
     @GET

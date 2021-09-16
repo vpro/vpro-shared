@@ -5,6 +5,6 @@
 
   <bean class="nl.vpro.swagger.SwaggerApplication"/>
   <bean class="nl.vpro.swagger.SwaggerListingResource">
-    <constructor-arg value="${swagger.maxAge:1H}" />
+    <constructor-arg value="${swagger.maxAge:#{null}}" />
   </bean>
 </beans>
