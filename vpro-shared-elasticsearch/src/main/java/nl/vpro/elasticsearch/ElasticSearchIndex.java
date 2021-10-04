@@ -1,20 +1,23 @@
 package nl.vpro.elasticsearch;
 
 
-import lombok.*;
+import lombok.SneakyThrows;
+import lombok.With;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.*;
 
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
+
+import static nl.vpro.elasticsearch.Constants.Mappings.PROPERTIES;
 
 
 /**
@@ -29,21 +32,37 @@ public class ElasticSearchIndex {
     private final String mappingResource;
     private final List<String> aliases;
 
-    public static final Consumer<JsonNode> NOP_MAPPER = new Consumer<JsonNode>() {
+    public static final BiConsumer<Distribution, ObjectNode> DEFAULT_MAPPER = new BiConsumer<Distribution, ObjectNode>() {
         @Override
-        public void accept(JsonNode jsonNode) {
-
+        public void accept(Distribution distribution, ObjectNode jsonNode) {
+            ObjectNode properties =  jsonNode.with(PROPERTIES);
+            List<Consumer<ObjectNode>> runnable = new ArrayList<>();
+            properties.fieldNames().forEachRemaining(f -> {
+                String[] split = f.split("\\|", 2);
+                if (split.length == 2) {
+                    runnable.add(p -> {
+                        JsonNode copy = p.get(f);
+                        Distribution forDistro = Distribution.valueOf(split[1].toUpperCase());
+                        p.remove(f);
+                        if (forDistro == distribution) {
+                            p.set(split[0], copy);
+                        }
+                    });
+                }
+            });
+            runnable.forEach(c -> c.accept(properties));
         }
+
         @Override
         public String toString() {
-            return "NOP";
+            return "DEFAULT";
         }
 
     };
 
     @With
     @NonNull
-    private final Consumer<JsonNode> mappingsProcessor;
+    private final BiConsumer<Distribution, ObjectNode>  mappingsProcessor;
 
     protected ElasticSearchIndex(
         String indexName,
@@ -58,21 +77,21 @@ public class ElasticSearchIndex {
         String settingsResource,
         String mappingResource,
         @lombok.Singular  List<String> aliases,
-        Consumer<JsonNode> mappingsProcessor) {
+        BiConsumer<Distribution, ObjectNode> mappingsProcessor) {
         this.indexName = indexName;
         this.settingsResource = settingsResource;
         this.mappingResource = mappingResource;
         this.aliases = aliases;
-        this.mappingsProcessor = mappingsProcessor == null ? NOP_MAPPER: mappingsProcessor;
+        this.mappingsProcessor = mappingsProcessor == null ? DEFAULT_MAPPER: DEFAULT_MAPPER.andThen(mappingsProcessor);
     }
 
 
-    public Supplier<JsonNode> settings() {
-        return () -> resourceToJson(settingsResource);
+    public Supplier<ObjectNode> settings() {
+        return () -> resourceToObjectNode(settingsResource);
     }
 
-    public Supplier<JsonNode> mapping() {
-        return () -> resourceToJson(mappingResource);
+    public Supplier<ObjectNode> mapping() {
+        return () -> resourceToObjectNode(mappingResource);
     }
 
     public ElasticSearchIndex withoutExperimental() {
@@ -82,9 +101,10 @@ public class ElasticSearchIndex {
     /**
      * Registers a mapping processor while leaving the existing one intact.
      */
-    public ElasticSearchIndex thenWithMappingsProcessor(Consumer<JsonNode> mappingsProcessor) {
+    public ElasticSearchIndex thenWithMappingsProcessor(BiConsumer<Distribution, JsonNode> mappingsProcessor) {
         return withMappingsProcessor(this.mappingsProcessor.andThen(mappingsProcessor));
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -120,6 +140,10 @@ public class ElasticSearchIndex {
     @SneakyThrows
     public static JsonNode resourceToJson(String name) {
         return Jackson2Mapper.getInstance().readTree(resourceToString(name));
+    }
+
+    public static ObjectNode resourceToObjectNode(String name) {
+        return (ObjectNode) resourceToJson(name);
     }
 
 

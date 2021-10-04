@@ -41,7 +41,7 @@ import nl.vpro.util.Version;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Methods.*;
-import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToJson;
+import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToObjectNode;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
 import static nl.vpro.logging.simple.SimpleLogger.slfj4;
@@ -49,7 +49,7 @@ import static nl.vpro.logging.simple.SimpleLogger.slfj4;
 /**
  * Some tools to automatically create indices and put mappings and stuff.
  *
- * It is associated with one index and one cluster, and constains the methods to create/delete/update the index settings themselves.
+ * It is associated with one index and one cluster, and contains the methods to create/delete/update the index settings themselves.
  *
  * Also it contains utilities to perform some common get/post-operations (like indexing/deleting a node), createing bulk requests, and executing them,
  * where the index name than can be implicit.
@@ -64,15 +64,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
-    private Supplier<JsonNode> settings;
+    private Supplier<ObjectNode> settings;
     private List<String> aliases;
     private ESClientFactory clientFactory;
-    private final Supplier<JsonNode> mapping;
+    private final Supplier<ObjectNode> mapping;
     private ObjectMapper objectMapper;
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
     private boolean countAfterCreate = false;
     private final Supplier<Map<String, String>> mdcSupplier;
+
+    CompletableFuture<Info> info = null;
 
 
     public static class Builder {
@@ -83,11 +85,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
 
         public Builder mappingResource(String mapping) {
-            return mapping(() -> resourceToJson(mapping));
+            return mapping(() -> resourceToObjectNode(mapping));
         }
 
         public Builder settingsResource(final String resource) {
-            return settings(() -> resourceToJson(resource)
+            return settings(() -> resourceToObjectNode(resource)
             );
         }
 
@@ -102,20 +104,24 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull ESClientFactory client,
         ElasticSearchIndex elasticSearchIndex,
         Supplier<String> indexNameSupplier,
-        Supplier<JsonNode> settings,
-        Supplier<JsonNode> mapping,
+        Supplier<ObjectNode> settings,
+        Supplier<ObjectNode> mapping,
         File writeJsonDir,
         ObjectMapper objectMapper,
         List<String> aliases,
         boolean countAfterCreate,
-        Supplier<Map<String, String>> mdcSupplier
+        Supplier<Map<String, String>> mdcSupplier,
+        @Nullable Distribution distribution
         ) {
         if (elasticSearchIndex != null) {
             if (indexNameSupplier == null) {
                 indexNameSupplier = elasticSearchIndex::getIndexName;
             }
             if (settings == null) {
-                settings = () -> resourceToJson(elasticSearchIndex.getSettingsResource());
+                settings = () -> resourceToObjectNode(elasticSearchIndex.getSettingsResource());
+            }
+            if (distribution == null) {
+                distribution = Distribution.ELASTICSEARCH;
             }
             if (mapping == null) {
                 mapping = elasticSearchIndex.mapping();
@@ -241,10 +247,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (mapping == null) {
             throw new IllegalStateException("No mappings provided in " + this);
         }
-        JsonNode mappingJson = mapping.get();
+        ObjectNode mappingJson = mapping.get();
         if (elasticSearchIndex != null) {
-            Consumer<JsonNode> mappingsProcessor = elasticSearchIndex.getMappingsProcessor();
-            mappingsProcessor.accept(mappingJson);
+            BiConsumer<Distribution, ObjectNode> mappingsProcessor = elasticSearchIndex.getMappingsProcessor();
+            mappingsProcessor.accept(getInfo().get().getDistribution(), mappingJson);
         }
         request.set("mappings", mappingJson);
         HttpEntity entity = entity(request);
@@ -333,8 +339,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     @SneakyThrows
     public final void reputMappings(Consumer<ObjectNode>... consumers) {
-        ObjectNode request = (ObjectNode) mapping.get();
-        elasticSearchIndex.getMappingsProcessor().accept(request);
+        ObjectNode request = mapping.get();
+        Distribution distribution = getInfo().get().getDistribution();
+        elasticSearchIndex.getMappingsProcessor().accept(distribution, request);
 
         for(Consumer<ObjectNode> consumer: consumers) {
             consumer.accept(request);
@@ -361,7 +368,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     /**
-     * Checks wether the associated index exists
+     * Checks whether the associated index exists
      */
     @Override
     public boolean checkIndex() {
@@ -1156,34 +1163,40 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-    @SafeVarargs
-    public final CompletableFuture<String> getClusterNameAsync(Consumer<String>... callBacks) {
-        final RestClient client = client();
-        return getClusterName(log, client, callBacks);
-
+    public final CompletableFuture<String> getClusterNameAsync() {
+        return getInfo().thenApply(Info::getClusterName);
     }
 
     @SafeVarargs
     public static CompletableFuture<String> getClusterName(SimpleLogger log, RestClient client, final Consumer<String>... callBacks) {
-        final CompletableFuture<String> future = new CompletableFuture<>();
-        client.performRequestAsync(new Request(GET, "/_cat/health"), new ResponseListener() {
+        return getInfo(log, client).thenApply(Info::getClusterName);
+    }
+
+    public CompletableFuture<Info> getInfo() {
+        if (info == null) {
+            info = getInfo(log, client());
+        }
+        return info;
+    }
+
+    public static synchronized CompletableFuture<Info> getInfo(SimpleLogger log, RestClient client) {
+        final CompletableFuture<Info> future = new CompletableFuture<>();
+        client.performRequestAsync(new Request(GET, "/"), new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 try (InputStream inputStream = response.getEntity().getContent()) {
-                    IOUtils.copy(inputStream, out);
-                    String[] content = out.toString("UTF-8").split("\\s+");
-                    log.info("Found {}", Arrays.asList(content));
-                    String clusterName = content[2];
-                    try {
-                        for (Consumer<String> callBack : callBacks) {
-                            callBack.accept(clusterName);
-                        }
-                    } catch (Exception e) {
-                        future.completeExceptionally(e);
-                        return;
-                    }
-                    future.complete(clusterName);
+                    JsonNode jsonNode = Jackson2Mapper.getLenientInstance().readTree(inputStream);
+                    String clusterName = jsonNode.get("cluster_name").textValue();
+                    String name = jsonNode.get("name").textValue();
+                    JsonNode version = jsonNode.with("version");
+                    Distribution distribution = Distribution.valueOf(version.get("distribution").textValue().toUpperCase());
+                    Info info = Info.builder()
+                        .clusterName(clusterName)
+                        .name(name)
+                        .distribution(distribution)
+                        .build();
+                    future.complete(info);
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
                     future.completeExceptionally(e);
@@ -1195,13 +1208,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 if (exception instanceof ConnectException) {
                     log.info(exception.getMessage());
                 } else {
-                    log.error("Error getting clustername from {}: {}", client, exception.getMessage(), exception);
+                    log.error("Error getting info from {}: {}", client, exception.getMessage(), exception);
                 }
                 future.completeExceptionally(exception);
             }
 
         });
-        return  future;
+        return future;
     }
 
     public Consumer<ObjectNode> indexLogger() {

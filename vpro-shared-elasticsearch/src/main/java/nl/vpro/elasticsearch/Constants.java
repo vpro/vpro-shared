@@ -82,5 +82,9 @@ public class Constants {
         public static final String HEAD = "HEAD";
     }
 
+    public static class Mappings {
+        public static final String PROPERTIES = "properties";
+
+    }
 
 }

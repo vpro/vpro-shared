@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.security.*;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -15,18 +16,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.conn.ssl.*;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.ssl.SSLContexts;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.slf4j.LoggerFactory;
 
+import nl.vpro.elasticsearch.WrongCluster;
 import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.util.TimeUtils;
@@ -53,6 +58,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     private RestClientBuilder clientBuilder;
     private RestClient client;
     private boolean registerMBean = true;
+    private boolean ignoreSSL = false;
+
     private List<RestClientBuilder.HttpClientConfigCallback> clientConfigCallbacks;
 
     private final Map<String, CompletableFuture<RestClient>> clients = new ConcurrentHashMap<>();
@@ -89,7 +96,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
             logName = "NULL";
         }
         final SimpleLogger l = SimpleLogger.slfj4(LoggerFactory.getLogger(logName));
-        CompletableFuture<RestClient> future = clients.computeIfAbsent(logName, (ln) -> {
+        final CompletableFuture<RestClient> future = clients.computeIfAbsent(logName, (ln) -> {
             CompletableFuture<RestClient> result = createAndCheckClient(l);
             result.thenAccept(callback);
             return result;
@@ -108,7 +115,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                     }
                     if (clusterName != null && !clusterName.equals(foundClusterName)) {
                         future.completeExceptionally(
-                            new IllegalStateException(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
+                            new WrongCluster(Arrays.toString(hosts) + ": Connected to wrong cluster ('" + foundClusterName + "' != '" + clusterName + "')"));
                         return;
                     }
                     future.complete(client);
@@ -137,6 +144,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                         clientConfigCallbacks.forEach(a -> a.customizeHttpClient(hacb));
                     }
                     setupAuthorizationIfNecessary().customizeHttpClient(hacb);
+                    ignoreSSL().customizeHttpClient(hacb);
                     return hacb;
                 })
                 .setRequestConfigCallback(
@@ -177,8 +185,8 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
 
     @Override
     public void setHosts(String hosts) {
-        Pattern pattern = Pattern.compile("\\((.*)\\):(\\d+)");
-        Matcher matcher = pattern.matcher(hosts);
+        final Pattern pattern = Pattern.compile("\\((.*)\\):(\\d+)");
+        final Matcher matcher = pattern.matcher(hosts);
 
         final String toSplit = matcher.matches() ? matcher.group(1) : hosts;
         final int defaultPort = matcher.matches() ? Integer.parseInt(matcher.group(2)) : 9200;
@@ -269,6 +277,26 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
                     new UsernamePasswordCredentials(basicUser, basicPassword));
 
                 httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
+            }
+            return httpClientBuilder;
+        };
+    }
+
+    protected RestClientBuilder.HttpClientConfigCallback  ignoreSSL() {
+        return httpClientBuilder ->  {
+            if (ignoreSSL) {
+                try {
+                    SSLContext sslcontext = SSLContexts
+                        .custom()
+                        .loadTrustMaterial(TrustAllStrategy.INSTANCE)
+                        .build();
+                    SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
+                        sslcontext, NoopHostnameVerifier.INSTANCE);
+                    httpClientBuilder.setSSLHostnameVerifier((s, sslSession) -> true);
+                    httpClientBuilder.setSSLContext(sslcontext);
+                } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+                    e.printStackTrace();
+                }
             }
             return httpClientBuilder;
         };

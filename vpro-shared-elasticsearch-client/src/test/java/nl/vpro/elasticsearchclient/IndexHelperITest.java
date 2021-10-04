@@ -77,8 +77,10 @@ public class IndexHelperITest {
 
 
     @Test
-    public void getClusterName() {
+    public void getClusterName() throws ExecutionException, InterruptedException {
         log.info("clustername: {}", helper.getClusterName());
+        log.info("distribution: {}", helper.getInfo().get().getDistribution());
+
     }
 
     @Test

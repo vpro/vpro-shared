@@ -31,7 +31,7 @@ public interface AsyncESClientFactory extends ESClientFactory {
             if (e.getCause() instanceof ConnectException) {
                 invalidate();
             }
-            throw Lombok.sneakyThrow(e);
+            throw Lombok.sneakyThrow(e.getCause());
         }
     }
 

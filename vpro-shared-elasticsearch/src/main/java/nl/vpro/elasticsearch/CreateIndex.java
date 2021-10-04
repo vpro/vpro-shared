@@ -1,12 +1,8 @@
 package nl.vpro.elasticsearch;
 
-import java.util.function.Consumer;
-
 import javax.validation.constraints.Null;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Options for creating indices
@@ -58,8 +54,7 @@ public class CreateIndex {
         @Nullable Boolean createAliases,
         @Nullable Integer shards,
         @Nullable Integer numberOfReplicas,
-        @Null Boolean requireMappings,
-        @Nullable Consumer<JsonNode> mappingsProcessor) {
+        @Null Boolean requireMappings) {
         this.useNumberPostfix = useNumberPostfix;
         this.forReindex = forReindex;
         this.callBack = callBack;
