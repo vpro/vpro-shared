@@ -36,8 +36,7 @@ import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.Version;
+import nl.vpro.util.*;
 
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Methods.*;
@@ -1186,16 +1185,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 try (InputStream inputStream = response.getEntity().getContent()) {
-                    JsonNode jsonNode = Jackson2Mapper.getLenientInstance().readTree(inputStream);
+                    ObjectNode jsonNode = (ObjectNode) Jackson2Mapper.getLenientInstance().readTree(inputStream);
                     String clusterName = jsonNode.get("cluster_name").textValue();
                     String name = jsonNode.get("name").textValue();
                     JsonNode version = jsonNode.with("version");
-                    Distribution distribution = Distribution.valueOf(version.get("distribution").textValue().toUpperCase());
+                    Distribution distribution = version.has("distribution") ? Distribution.valueOf(version.get("distribution").textValue().toUpperCase()): Distribution.ELASTICSEARCH;
                     Info info = Info.builder()
                         .clusterName(clusterName)
                         .name(name)
                         .distribution(distribution)
+                        .version(version.has("number") ? IntegerVersion.parseIntegers(version.get("number").textValue()) :  null)
+                        .luceneVersion(version.has("lucene_version") ? IntegerVersion.parseIntegers(version.get("lucene_version").textValue()) :  null)
                         .build();
+                    log.info("Connected with {} -> {}", jsonNode, info);
                     future.complete(info);
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);

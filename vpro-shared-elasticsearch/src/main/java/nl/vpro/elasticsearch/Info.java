@@ -1,15 +1,18 @@
 package nl.vpro.elasticsearch;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
+
+import nl.vpro.util.IntegerVersion;
 
 @AllArgsConstructor
 @lombok.Builder
-@Getter
+@Data
 public class Info {
 
     private final String name;
     private final String clusterName;
     private final Distribution distribution;
+    private final IntegerVersion version;
+    private final IntegerVersion luceneVersion;
 
 }

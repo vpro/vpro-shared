@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.simple.QueueSimpleLogger;
+import nl.vpro.logging.simple.SimpleLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,7 +37,7 @@ public class IndexHelperITest {
     IndexHelper helper;
 
     final Queue<QueueSimpleLogger.Event> events = new ArrayDeque<>();
-    final QueueSimpleLogger<QueueSimpleLogger.Event> simpleLogger = QueueSimpleLogger.of(events);
+    final SimpleLogger simpleLogger = QueueSimpleLogger.of(events).chain(SimpleLogger.slfj4(log));
 
     @BeforeEach
     public void setup() {
@@ -80,6 +81,9 @@ public class IndexHelperITest {
     public void getClusterName() throws ExecutionException, InterruptedException {
         log.info("clustername: {}", helper.getClusterName());
         log.info("distribution: {}", helper.getInfo().get().getDistribution());
+
+        log.info("info: {}", helper.getInfo().get());
+
 
     }
 
