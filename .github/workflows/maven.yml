@@ -1,8 +1,9 @@
+---
 name: build
 
 on:
   push:
-    branches: [ master, "REL-*" ]
+    branches: [master, main, "REL-*"]
 
   workflow_dispatch:
     inputs:
@@ -19,41 +20,45 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-       MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
-    - uses: getong/elasticsearch-action@v1.2
-      with:
-        elasticsearch version: '7.9.0'
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: 8
-    - name: Create settings.xml
-      uses: s4u/maven-settings-action@v2
-      with:
-        servers: '[{"id": "vpro-ossrh", "username": "vpro", "password": "${{secrets.SONATYPE_PASSWORD}}"}]'
-    - name: Import GPG key
-      uses: crazy-max/ghaction-import-gpg@v3
-      with:
-        gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
-        passphrase: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
-    - name: Cache local Maven repository
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          maven-
-      if: always()
-    - name: Build with Maven
-      run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -Pdeploy,sonatype deploy  -Dgpg.skip=false
-    - name: Publish to codecov
-      run: bash <(curl -s https://codecov.io/bash)
-      continue-on-error: true
-    - name: Publish Test Report
-      uses: scacap/action-surefire-report@v1
-      if: always()
-      with:
+      - name: Cancel previous Action
+        uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          access_token: ${{ github.token }}
+      - uses: getong/elasticsearch-action@v1.2
+        with:
+          elasticsearch version: '7.9.0'
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 8
+      - name: Create settings.xml
+        uses: s4u/maven-settings-action@v2
+        with:
+          servers: '[{"id": "vpro-ossrh", "username": "vpro", "password": "${{secrets.SONATYPE_PASSWORD}}"}]'
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+          passphrase: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-
+        if: always()
+      - name: Build with Maven
+        run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -Pdeploy,sonatype deploy  -Dgpg.skip=false
+      - name: Publish to codecov
+        run: bash <(curl -s https://codecov.io/bash)
+        continue-on-error: true
+      - name: Publish Test Report
+        uses: scacap/action-surefire-report@v1
+        if: always()
+        with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
