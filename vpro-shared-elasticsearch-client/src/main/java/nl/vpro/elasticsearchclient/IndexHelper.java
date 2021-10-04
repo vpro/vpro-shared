@@ -72,6 +72,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private ElasticSearchIndex elasticSearchIndex;
     private boolean countAfterCreate = false;
     private final Supplier<Map<String, String>> mdcSupplier;
+    private final Distribution distribution;
 
     CompletableFuture<Info> info = null;
 
@@ -119,9 +120,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             if (settings == null) {
                 settings = () -> resourceToObjectNode(elasticSearchIndex.getSettingsResource());
             }
-            if (distribution == null) {
-                distribution = Distribution.ELASTICSEARCH;
-            }
             if (mapping == null) {
                 mapping = elasticSearchIndex.mapping();
             }
@@ -142,6 +140,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
         this.countAfterCreate = countAfterCreate;
         this.mdcSupplier = mdcSupplier == null ? MDC::getCopyOfContextMap : mdcSupplier;
+        this.distribution = distribution;
         this.mapping = mapping;
     }
 
@@ -1173,7 +1172,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public CompletableFuture<Info> getInfo() {
         if (info == null) {
-            info = getInfo(log, client());
+            info = getInfo(log, client()).thenApply(
+                i -> {
+                    if (IndexHelper.this.distribution != null && i.getDistribution() != IndexHelper.this.distribution) {
+                        log.warn("Determined distribution {} is not equal equal to explicitly configured one {} (Taking the explicit one)", i.getDistribution(), this.distribution);
+                        return i.withDistribution(this.distribution);
+                    }
+                    return i;
+                }
+            );
+
         }
         return info;
     }

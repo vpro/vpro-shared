@@ -11,6 +11,7 @@ public class Info {
 
     private final String name;
     private final String clusterName;
+    @With
     private final Distribution distribution;
     private final String buildFlavor;
     private final IntegerVersion version;
