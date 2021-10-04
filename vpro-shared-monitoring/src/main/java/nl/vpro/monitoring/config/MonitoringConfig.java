@@ -41,8 +41,7 @@ public class MonitoringConfig {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Bean
-
+    @Bean("meterRegistry")
     public PrometheusMeterRegistry globalMeterRegistry() {
         final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         start(registry);
