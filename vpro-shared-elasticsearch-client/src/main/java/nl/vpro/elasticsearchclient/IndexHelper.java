@@ -1195,6 +1195,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         .clusterName(clusterName)
                         .name(name)
                         .distribution(distribution)
+                        .buildFlavor(buildFlavor)
                         .version(version.has("number") ? IntegerVersion.parseIntegers(version.get("number").textValue()) :  null)
                         .luceneVersion(version.has("lucene_version") ? IntegerVersion.parseIntegers(version.get("lucene_version").textValue()) :  null)
                         .build();
