@@ -1189,7 +1189,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     String clusterName = jsonNode.get("cluster_name").textValue();
                     String name = jsonNode.get("name").textValue();
                     JsonNode version = jsonNode.with("version");
-                    Distribution distribution = version.has("distribution") ? Distribution.valueOf(version.get("distribution").textValue().toUpperCase()): Distribution.ELASTICSEARCH;
+                    String buildFlavor = version.has("build_flavor") ? version.get("build_flavor").textValue() : "default";
+                    Distribution distribution = version.has("distribution") ? Distribution.valueOf(version.get("distribution").textValue().toUpperCase()): "default".equals(buildFlavor) ? Distribution.ELASTICSEARCH : Distribution.OPENSEARCH;
                     Info info = Info.builder()
                         .clusterName(clusterName)
                         .name(name)
