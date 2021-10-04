@@ -283,7 +283,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.7.3</micrometer.version>
+    <micrometer.version>1.7.4</micrometer.version>
   </properties>
 
   <dependencyManagement>
@@ -679,6 +679,11 @@
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
         <version>1.5.4</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+        <version>${micrometer.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
