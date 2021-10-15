@@ -7,6 +7,8 @@ package nl.vpro.jackson2;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import org.slf4j.event.Level;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +20,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
+import nl.vpro.logging.Slf4jHelper;
+
 /**
  * @author Rico
  * @author Michiel Meeuwissen
@@ -26,6 +30,8 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 public class Jackson2Mapper extends ObjectMapper {
 
     private static boolean loggedAboutAvro = false;
+    private static boolean loggedAboutFallback = false;
+
 
     public static final Jackson2Mapper INSTANCE = new Jackson2Mapper("instance");
     public static final Jackson2Mapper LENIENT = new Jackson2Mapper("lenient");
@@ -155,7 +161,8 @@ public class Jackson2Mapper extends ObjectMapper {
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
         } catch (NoClassDefFoundError noClassDefFoundError) {
-            log.warn(noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
+            Slf4jHelper.log(log,  loggedAboutFallback ? Level.DEBUG : Level.WARN, noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
+            loggedAboutFallback = true;
 
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
             //noinspection deprecation
