@@ -155,7 +155,7 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
         try {
-            // this should nbe needed, but if I don't do this, reseasty still doesn't allow comments
+            // this should nbe needed, but if I don't do this, resteasy still doesn't allow comments
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
 
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
