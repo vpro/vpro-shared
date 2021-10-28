@@ -1,20 +1,20 @@
 package nl.vpro.web.servlet;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.time.DateUtils;
+
+import java.io.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.function.Function;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * @author Michiel Meeuwissen
@@ -25,9 +25,11 @@ public abstract class AbstractSchemaController<M extends Function<String, File>>
 
     protected M mappings;
 
-    protected File getFileForNamespace(String namespace) {
+    protected File getFileForNamespace(@NonNull String namespace) {
         return mappings.apply(namespace);
     }
+
+
 
     protected void el(XMLStreamWriter w, String name, String chars) throws XMLStreamException {
         w.writeStartElement(name);
