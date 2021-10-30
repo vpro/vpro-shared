@@ -47,7 +47,7 @@ public class IterableJson {
         }
     }
 
-    private static final Set<Class> simpleTypes = new HashSet<>(Arrays.asList(String.class, Character.class, Boolean.class, Integer.class, Float.class, Long.class, Double.class));
+    private static final Set<Class<?>> simpleTypes = new HashSet<>(Arrays.asList(String.class, Character.class, Boolean.class, Integer.class, Float.class, Long.class, Double.class));
     public static abstract class Deserializer<T> extends JsonDeserializer<Iterable<T>> {
 
         private final Function<List<T>, Iterable<T>> creator;
