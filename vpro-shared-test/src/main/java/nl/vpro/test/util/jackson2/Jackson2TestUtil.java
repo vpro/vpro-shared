@@ -102,14 +102,23 @@ public class Jackson2TestUtil {
         return roundTripAndSimilar(MAPPER, input, expected);
     }
 
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, boolean remarshall)  {
+        return roundTripAndSimilar(mapper, input, expected,
+            mapper.getTypeFactory().constructType(input.getClass()), remarshall);
+    }
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected)  {
-        return roundTripAndSimilar(mapper, input, expected,
-            mapper.getTypeFactory().constructType(input.getClass()));
+        return roundTripAndSimilar(mapper, input, expected, true);
     }
+
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, boolean remarshall) throws Exception {
+        return roundTripAndSimilar(mapper, input, expected,
+            mapper.getTypeFactory().constructType(input.getClass()), remarshall);
+    }
+
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected) throws Exception {
-        return roundTripAndSimilar(mapper, input, expected,
-            mapper.getTypeFactory().constructType(input.getClass()));
+        return roundTripAndSimilar(mapper, input, expected, true);
     }
+
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, InputStream  expected) throws Exception {
         StringWriter write = new StringWriter();
         IOUtils.copy(expected, write, "UTF-8");
@@ -146,12 +155,12 @@ public class Jackson2TestUtil {
     }
 
 
-    protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference) {
-        return roundTripAndSimilar(MAPPER, input, expected, typeReference);
+    protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference, boolean remarshal) {
+        return roundTripAndSimilar(MAPPER, input, expected, typeReference, remarshal);
     }
 
     @SneakyThrows
-    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference) {
+    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference, boolean remarshall) {
         StringWriter originalWriter = new StringWriter();
         mapper.writeValue(originalWriter, input);
         String marshalled = originalWriter.toString();
@@ -159,18 +168,20 @@ public class Jackson2TestUtil {
         log.debug("Comparing {} with expected {}", marshalled, expected);
         assertJsonEquals(expected, marshalled);
         T unmarshalled =  mapper.readValue(marshalled, typeReference);
-        StringWriter remarshal = new StringWriter();
-        mapper.writeValue(remarshal, unmarshalled);
-        String remarshalled  = remarshal.toString();
-        log.debug("Comparing {} with expected {}", remarshalled, expected);
+        if (remarshall) {
+            StringWriter remarshal = new StringWriter();
+            mapper.writeValue(remarshal, unmarshalled);
+            String remarshalled = remarshal.toString();
+            log.debug("Comparing {} with expected {}", remarshalled, expected);
 
-        assertJsonEquals("REMARSHALLED", expected, remarshalled);
+            assertJsonEquals("REMARSHALLED", expected, remarshalled);
+        }
         return unmarshalled;
 
     }
 
-     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, JavaType typeReference) throws Exception {
-         return roundTripAndSimilar(mapper, input, mapper.writeValueAsString(expected), typeReference);
+     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, JavaType typeReference, boolean remarshall) throws Exception {
+         return roundTripAndSimilar(mapper, input, mapper.writeValueAsString(expected), typeReference, remarshall);
     }
 
     /**
@@ -181,7 +192,7 @@ public class Jackson2TestUtil {
         JavaType type = Jackson2Mapper.getInstance().getTypeFactory()
             .constructParametricType(TestClass.class, input.getClass());
 
-        TestClass<T> result = roundTripAndSimilar(embed, "{\"value\": " + expected + "}", type);
+        TestClass<T> result = roundTripAndSimilar(embed, "{\"value\": " + expected + "}", type, true);
 
         return result.value;
     }
@@ -211,6 +222,8 @@ public class Jackson2TestUtil {
         A rounded;
         private final ObjectMapper mapper;
 
+        private boolean checkRemarshal = true;
+
         protected JsonObjectAssert(A actual) {
             super(actual, JsonObjectAssert.class);
             this.mapper = MAPPER;
@@ -234,7 +247,6 @@ public class Jackson2TestUtil {
         }
 
 
-        @SuppressWarnings("ResultOfMethodCallIgnored")
         protected static <A> A read(ObjectMapper mapper, Class<A> actual, String string) {
             try {
                 return mapper.readValue(string, actual);
@@ -244,21 +256,26 @@ public class Jackson2TestUtil {
             }
         }
 
-        @SuppressWarnings({"ResultOfMethodCallIgnored", "CatchMayIgnoreException"})
+        @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
             try {
-                rounded = roundTripAndSimilar(mapper, actual, expected);
+                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal);
             } catch (Exception e) {
                 Fail.fail(e.getMessage(), e);
             }
             return myself;
         }
 
+        public JsonObjectAssert<S, A> withoutRemarshalling() {
+            JsonObjectAssert<S,A> copy = new JsonObjectAssert<>(mapper, actual);
+            copy.checkRemarshal = false;
+            return copy;
+        }
 
-        @SuppressWarnings({"ResultOfMethodCallIgnored", "CatchMayIgnoreException"})
+        @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(JsonNode expected) {
             try {
-                rounded = roundTripAndSimilar(mapper, actual, expected);
+                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal);
             } catch (Exception e) {
                 Fail.fail(e.getMessage(), e);
             }
@@ -293,7 +310,11 @@ public class Jackson2TestUtil {
 
         public JsonStringAssert isSimilarToResource(String resource) {
             try {
-                String expected = IOUtils.toString(getClass().getResourceAsStream(resource), StandardCharsets.UTF_8);
+                InputStream resourceAsStream = getClass().getResourceAsStream(resource);
+                if (resourceAsStream == null) {
+                    throw new IllegalArgumentException("No such resource " + resource);
+                }
+                String expected = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
                 return isSimilarTo(expected);
             } catch (IOException ioe) {
                 throw new RuntimeException(ioe);

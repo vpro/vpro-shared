@@ -89,4 +89,5 @@ public class Jackson2MapperTest {
         assertThat(Jackson2Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2}");
 
     }
+
 }

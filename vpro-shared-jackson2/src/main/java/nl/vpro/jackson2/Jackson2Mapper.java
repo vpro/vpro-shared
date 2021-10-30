@@ -16,6 +16,8 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.ser.PropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
@@ -32,6 +34,8 @@ public class Jackson2Mapper extends ObjectMapper {
     private static boolean loggedAboutAvro = false;
     private static boolean loggedAboutFallback = false;
 
+    private static final SimpleFilterProvider FILTER_PROVIDER = new SimpleFilterProvider();
+
 
     public static final Jackson2Mapper INSTANCE = new Jackson2Mapper("instance");
     public static final Jackson2Mapper LENIENT = new Jackson2Mapper("lenient");
@@ -44,6 +48,7 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper BACKWARDS_PUBLISHER = new Jackson2Mapper("backwards_publisher");
 
     private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
+
 
 
     static {
@@ -139,6 +144,8 @@ public class Jackson2Mapper extends ObjectMapper {
 
 
     public static void configureMapper(ObjectMapper mapper) {
+        mapper.setFilterProvider(FILTER_PROVIDER);
+
          AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
             new JacksonAnnotationIntrospector(),
             new JaxbAnnotationIntrospector(mapper.getTypeFactory()
@@ -197,6 +204,11 @@ public class Jackson2Mapper extends ObjectMapper {
             log.error(e.getMessage(), e);
             loggedAboutAvro = true;
         }
+    }
+
+    public static void addFilter(String key, PropertyFilter filter) {
+        FILTER_PROVIDER.addFilter(key, filter);
+        log.info("Installed filter {} -> {}", key, filter);
     }
 
     @Override
