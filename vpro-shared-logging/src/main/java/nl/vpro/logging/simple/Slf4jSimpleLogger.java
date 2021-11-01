@@ -16,8 +16,15 @@ public class Slf4jSimpleLogger implements SimpleLogger {
 
     private final Logger logger;
 
+    private final Level threshold;
+
     public Slf4jSimpleLogger(Logger logger) {
+        this(logger, Level.TRACE);
+    }
+
+    protected Slf4jSimpleLogger(Logger logger, Level threshold) {
         this.logger = logger;
+        this.threshold = threshold;
     }
 
     public Slf4jSimpleLogger(Class<?> clazz) {
@@ -33,7 +40,7 @@ public class Slf4jSimpleLogger implements SimpleLogger {
 
     @Override
     public boolean isEnabled(Level level) {
-        return Slf4jHelper.isEnabled(logger, level);
+        return level.toInt() >= threshold.toInt() && Slf4jHelper.isEnabled(logger, level);
     }
 
     @Override
@@ -44,7 +51,13 @@ public class Slf4jSimpleLogger implements SimpleLogger {
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
-        Slf4jHelper.log(logger, level, message == null ? null : message.toString(), t);
+        if (isEnabled(level)) {
+            Slf4jHelper.log(logger, level, message == null ? null : message.toString(), t);
+        }
+    }
+
+    public Slf4jSimpleLogger withThreshold(Level level) {
+        return new Slf4jSimpleLogger(logger, level);
     }
 
 

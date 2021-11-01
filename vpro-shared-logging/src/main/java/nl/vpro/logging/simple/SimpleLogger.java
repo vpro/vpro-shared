@@ -59,7 +59,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         }
     }
 
-    static SimpleLogger slfj4(Logger log) {
+    static Slf4jSimpleLogger slfj4(Logger log) {
         return new Slf4jSimpleLogger(log);
     }
 
