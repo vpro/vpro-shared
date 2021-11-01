@@ -13,13 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import static nl.vpro.util.TimeUtils.parseDuration;
 
 /**
- * Make sure that all pages will expire in 5 minutes.
- * <p/>
- * Cache-Control: max-age=300
- * Expires: currenttime + 300 seconds.
- * <p/>
- * For more information about these headers I refer to:
- * http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+ * <p>A filter that can add expire and cache controll headers to responses if there are missing. (default to 5 minutes)</p>
+
+ * <p>For more information about these headers:
+ * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html</p>
  *
  * @author Rob Vermeulen (VPRO)
  */
@@ -41,9 +38,7 @@ public class ExpireHeadersFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
         this.filterConfig = filterConfig;
-        if(System.getProperty("development") != null) {
-            development = "true".equals(System.getProperty("development"));
-        }
+        development = "true".equals(System.getProperty("development"));
 
         log.debug("Using ExpireHeadersFilter");
         this.ttl = getTTL();
