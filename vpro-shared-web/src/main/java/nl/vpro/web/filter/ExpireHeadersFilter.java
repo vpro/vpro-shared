@@ -1,12 +1,14 @@
 package nl.vpro.web.filter;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
+import java.time.Duration;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static nl.vpro.util.TimeUtils.parseDuration;
 
 /**
  * Make sure that all pages will expire in 5 minutes.
@@ -19,32 +21,28 @@ import org.slf4j.LoggerFactory;
  *
  * @author Rob Vermeulen (VPRO)
  */
+@Slf4j
 public class ExpireHeadersFilter implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(ExpireHeadersFilter.class);
 
-    private static final int DEFAULT_TTL = 300;
+    private static final Duration DEFAULT_TTL = Duration.ofMinutes(5);
 
     private FilterConfig filterConfig = null;
 
     private boolean development = false;
-    private int ttl = DEFAULT_TTL;
+    private Duration ttl = DEFAULT_TTL;
     private String cacheControl;
 
 
     @Override
     public void init(FilterConfig filterConfig) {
         this.filterConfig = filterConfig;
-
         if(System.getProperty("development") != null) {
             development = "true".equals(System.getProperty("development"));
         }
 
-        if(log.isDebugEnabled()) {
-            log.debug("Using ExpireHeadersFilter");
-        }
+        log.debug("Using ExpireHeadersFilter");
         this.ttl = getTTL();
-
-        this.cacheControl = "public, max-age=" + ttl + ", must-revalidate";
+        this.cacheControl = "public, max-age=" + (ttl.toMillis()  / 1000) + ", must-revalidate";
     }
 
     @Override
@@ -52,7 +50,7 @@ public class ExpireHeadersFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse)res;
         if(!development) {
             // Set the expire header
-            response.setDateHeader("Expires", System.currentTimeMillis() + ttl);
+            response.setDateHeader("Expires", System.currentTimeMillis() + ttl.toMillis());
             // Set the max-age header.
             response.setHeader("Cache-Control", "public, max-age=" + cacheControl);
         } else {
@@ -66,15 +64,12 @@ public class ExpireHeadersFilter implements Filter {
     public void destroy() {
     }
 
-    private int getTTL() {
-        int ttl = DEFAULT_TTL;
+    private Duration getTTL() {
+        Duration ttl = DEFAULT_TTL;
         String value = filterConfig.getInitParameter("ttl");
         if(value != null && value.length() > 0) {
-            try {
-                ttl = Integer.parseInt(value);
-            } catch(NumberFormatException n) {
-                ttl = DEFAULT_TTL;
-            }
+            ttl = parseDuration(value).orElse(DEFAULT_TTL);
+
         }
         return ttl;
     }
