@@ -56,10 +56,14 @@ public class ExpireHeadersFilter implements Filter {
         if(!development) {
             if (!response.containsHeader(HEADER_EXPIRES)) {
                 response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + ttl.toMillis());
+            } else {
+                log.debug("Response already has expires header");
             }
             if (! response.containsHeader(HEADER_CACHE_CONTROL)) {
                 // Set the max-age header.
                 response.setHeader(HEADER_CACHE_CONTROL, cacheControl);
+            } else {
+                log.debug("Response already has cache control header");
             }
         } else {
             response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
