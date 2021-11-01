@@ -1,7 +1,5 @@
 package nl.vpro.web.filter;
 
-import javax.servlet.http.HttpUtils;
-
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -23,26 +21,22 @@ import static nl.vpro.util.TimeUtils.parseDuration;
 @Slf4j
 public class ExpireHeadersFilter implements Filter {
 
-    public static final String HEADER_EXPIRES = "Expires";
+    public static final String HEADER_EXPIRES       = "Expires";
     public static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
     private static final Duration DEFAULT_TTL = Duration.ofMinutes(5);
 
-    private FilterConfig filterConfig;
-
     private boolean development = false;
-    private Duration ttl = DEFAULT_TTL;
+    private long ttlInMillis;
     private String cacheControl;
 
 
     @Override
     public void init(FilterConfig filterConfig) {
-        this.filterConfig = filterConfig;
         development = "true".equals(System.getProperty("development"));
-
         log.debug("Using ExpireHeadersFilter");
-        this.ttl = getTTL();
-        this.cacheControl = "public, max-age=" + (ttl.toMillis()  / 1000) + ", must-revalidate";
+        this.ttlInMillis = parseDuration(filterConfig.getInitParameter("ttl")).orElse(DEFAULT_TTL).toMillis();
+        this.cacheControl = "public, max-age=" + (this.ttlInMillis / 1000) + ", must-revalidate";
     }
 
     @Override
@@ -50,7 +44,7 @@ public class ExpireHeadersFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse)res;
         if(!development) {
             if (!response.containsHeader(HEADER_EXPIRES)) {
-                response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + ttl.toMillis());
+                response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + ttlInMillis);
             } else {
                 log.debug("Response already has expires header");
             }
@@ -67,17 +61,5 @@ public class ExpireHeadersFilter implements Filter {
         chain.doFilter(req, res);
     }
 
-    @Override
-    public void destroy() {
-    }
 
-    private Duration getTTL() {
-        Duration ttl = DEFAULT_TTL;
-        String value = filterConfig.getInitParameter("ttl");
-        if(value != null && value.length() > 0) {
-            ttl = parseDuration(value).orElse(DEFAULT_TTL);
-
-        }
-        return ttl;
-    }
 }
