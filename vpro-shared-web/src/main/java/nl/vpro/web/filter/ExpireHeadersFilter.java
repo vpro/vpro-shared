@@ -1,5 +1,7 @@
 package nl.vpro.web.filter;
 
+import javax.servlet.http.HttpUtils;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -24,9 +26,12 @@ import static nl.vpro.util.TimeUtils.parseDuration;
 @Slf4j
 public class ExpireHeadersFilter implements Filter {
 
+    public static final String HEADER_EXPIRES = "Expires";
+    public static final String HEADER_CACHE_CONTROL = "Cache-Control";
+
     private static final Duration DEFAULT_TTL = Duration.ofMinutes(5);
 
-    private FilterConfig filterConfig = null;
+    private FilterConfig filterConfig;
 
     private boolean development = false;
     private Duration ttl = DEFAULT_TTL;
@@ -49,12 +54,15 @@ public class ExpireHeadersFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse)res;
         if(!development) {
-            // Set the expire header
-            response.setDateHeader("Expires", System.currentTimeMillis() + ttl.toMillis());
-            // Set the max-age header.
-            response.setHeader("Cache-Control", "public, max-age=" + cacheControl);
+            if (!response.containsHeader(HEADER_EXPIRES)) {
+                response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + ttl.toMillis());
+            }
+            if (! response.containsHeader(HEADER_CACHE_CONTROL)) {
+                // Set the max-age header.
+                response.setHeader(HEADER_CACHE_CONTROL, cacheControl);
+            }
         } else {
-            response.setHeader("Cache-Control", "no-cache");
+            response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
         }
 
         chain.doFilter(req, res);
