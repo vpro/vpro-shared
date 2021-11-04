@@ -1,7 +1,7 @@
 package nl.vpro.jackson2.rs;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
+import javax.annotation.Priority;
+import javax.ws.rs.*;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
@@ -17,6 +17,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 @Provider
 @Consumes({"application/json", "application/*+json", "text/json"})
 @Produces({"application/json", "application/*+json", "text/json"})
+@Priority(Priorities.USER)
 public class JacksonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper mapper;

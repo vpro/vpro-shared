@@ -7,12 +7,10 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.Provider;
+import javax.annotation.Priority;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.ext.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -32,7 +30,9 @@ import nl.vpro.jackson2.Jackson2Mapper;
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 @Slf4j
+@Priority(Priorities.USER - 1) // It must be a bit higher than default, so that i goes before JacksonContextResolver
 public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
+
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
