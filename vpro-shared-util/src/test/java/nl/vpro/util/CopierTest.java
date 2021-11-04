@@ -76,7 +76,11 @@ class CopierTest {
     @Test
     void ioExceptional(TestInfo info) throws InterruptedException {
         InputStream in = randomStream((count) ->  {
-            if  (count >= SIZE / 2) {
+            if (count % 10 ==0) {
+                log.info("" + count);
+            }
+            if (count >= SIZE / 2) {
+                log.info("Causing exception now at " + count);
                 throw new IOException("foo bar");
             }
         });
@@ -92,15 +96,19 @@ class CopierTest {
             .name(info.getDisplayName())
             .build();
 
-        copier.executeIfNotRunning();
+        if (copier.executeIfNotRunning()) {
+            log.info("Started copier");
+        } else {
+            log.info("Copier was running already");
+        }
 
         synchronized (notifiable) {
             while(!copier.isReady()) {
                 notifiable.wait();
-                log.info("X");
+                log.info("Waited");
             }
         }
-
+        log.info("Ready");
         //assertThat(copier.getCount()).isEqualTo(500);
         assertThat(copier.isReady()).isTrue();
         assertThatThrownBy(copier::isReadyIOException).isInstanceOf(IOException.class)

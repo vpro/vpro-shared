@@ -260,9 +260,12 @@ public class Copier implements Runnable, Closeable {
         return this;
     }
 
-    public void executeIfNotRunning() {
+    public boolean executeIfNotRunning() {
         if (future == null) {
             execute();
+            return true;
+        } else {
+            return false;
         }
     }
 
