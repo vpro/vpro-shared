@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.7
  */
-public class JsonIdAdderReaderTest {
+public class JsonIdAdderBodyReaderTest {
 
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,

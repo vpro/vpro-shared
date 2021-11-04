@@ -14,6 +14,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
@@ -22,7 +24,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.vpro.jackson2.Jackson2Mapper;
 
 /**
- * Sometimes resteasy will not unmarshal an json because there is no type information, but the prototype actually specifies it fully. The message body reader will deal with that, by adding the id implicetely (if it is missing) before the actual unmarshal.
+ * Sometimes resteasy will not unmarshal an json because there is no type information, but the prototype actually specifies it fully. The message body reader will deal with that, by adding the id implicitly (if it is missing) before the actual unmarshal.
  *
  * @author Michiel Meeuwissen
  * @since 2.7
@@ -32,16 +34,14 @@ import nl.vpro.jackson2.Jackson2Mapper;
 @Slf4j
 public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
 
-
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE);
-
     }
 
     @Override
     public Object readFrom(
-        Class<Object> type,
+        final @NonNull Class<Object> type,
         Type genericType,
         Annotation[] annotations,
         MediaType mediaType,
@@ -57,7 +57,7 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
                 String propertyName = typeDeserializer.getPropertyName();
                 String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();
                 if (! objectNode.has(propertyName)) {
-                    log.debug("Implicetely setting {} = {} for {}", propertyName, propertyValue, javaType);
+                    log.debug("Implicitly setting {} = {} for {}", propertyName, propertyValue, javaType);
                     objectNode.put(propertyName, propertyValue);
                 }
             }
