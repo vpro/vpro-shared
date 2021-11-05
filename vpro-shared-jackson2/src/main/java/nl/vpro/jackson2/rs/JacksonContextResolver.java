@@ -2,6 +2,7 @@ package nl.vpro.jackson2.rs;
 
 import javax.annotation.Priority;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
@@ -15,10 +16,12 @@ import nl.vpro.jackson2.Jackson2Mapper;
  * @since 2.0
  */
 @Provider
-@Consumes({"application/json", "application/*+json", "text/json"})
-@Produces({"application/json", "application/*+json", "text/json"})
-@Priority(Priorities.USER)
+@Consumes({MediaType.APPLICATION_JSON, "application/*+json", "text/json"})
+@Produces({MediaType.APPLICATION_JSON, "application/*+json", "text/json"})
+@Priority(JacksonContextResolver.PRIORITY)
 public class JacksonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
+
+    static final int PRIORITY = Priorities.USER;
 
     private final ObjectMapper mapper;
 
