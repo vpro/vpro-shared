@@ -12,8 +12,6 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import nl.vpro.jackson2.Jackson2Mapper;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +53,7 @@ public class JsonIdAdderBodyReaderTest {
     final JsonIdAdderBodyReader idAdderInterceptor = new JsonIdAdderBodyReader();
     {
         idAdderInterceptor.providers = Mockito.mock(Providers.class);
-        when(idAdderInterceptor.providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE)).thenReturn(type -> Jackson2Mapper.getLenientInstance());
+        when(idAdderInterceptor.providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE)).thenReturn(new JacksonContextResolver());
     }
 
     @Test

@@ -58,11 +58,11 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         final JavaType javaType = mapper.getTypeFactory().constructType(genericType);
         final JsonNode jsonNode = mapper.readTree(entityStream);
         if (jsonNode instanceof ObjectNode) {
-            ObjectNode objectNode = (ObjectNode) jsonNode;
-            TypeDeserializer typeDeserializer = mapper.getDeserializationConfig().findTypeDeserializer(javaType);
+            final ObjectNode objectNode = (ObjectNode) jsonNode;
+            final TypeDeserializer typeDeserializer = mapper.getDeserializationConfig().findTypeDeserializer(javaType);
             if (typeDeserializer != null) {
-                String propertyName = typeDeserializer.getPropertyName();
-                String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();
+                final String propertyName = typeDeserializer.getPropertyName();
+                final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();
                 if (! objectNode.has(propertyName)) {
                     log.debug("Implicitly setting {} = {} for {}", propertyName, propertyValue, javaType);
                     objectNode.put(propertyName, propertyValue);
