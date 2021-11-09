@@ -4,14 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.Providers;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import nl.vpro.jackson2.Jackson2Mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Michiel Meeuwissen
@@ -48,7 +52,11 @@ public class JsonIdAdderBodyReaderTest {
     public static class C {
 
     }
-    JsonIdAdderBodyReader idAdderInterceptor = new JsonIdAdderBodyReader();
+    final JsonIdAdderBodyReader idAdderInterceptor = new JsonIdAdderBodyReader();
+    {
+        idAdderInterceptor.providers = Mockito.mock(Providers.class);
+        when(idAdderInterceptor.providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE)).thenReturn(type -> Jackson2Mapper.getLenientInstance());
+    }
 
     @Test
     public void testA() throws IOException {
