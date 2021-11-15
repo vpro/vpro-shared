@@ -1,7 +1,5 @@
 package nl.vpro.elasticsearch;
 
-import javax.validation.constraints.Null;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -54,7 +52,7 @@ public class CreateIndex {
         @Nullable Boolean createAliases,
         @Nullable Integer shards,
         @Nullable Integer numberOfReplicas,
-        @Null Boolean requireMappings) {
+        @Nullable Boolean requireMappings) {
         this.useNumberPostfix = useNumberPostfix;
         this.forReindex = forReindex;
         this.callBack = callBack;
