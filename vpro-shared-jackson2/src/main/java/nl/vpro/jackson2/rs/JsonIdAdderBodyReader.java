@@ -50,7 +50,7 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         MediaType mediaType,
         MultivaluedMap<String, String> httpHeaders,
         InputStream entityStream) throws WebApplicationException, IOException {
-        ObjectMapper mapper = providers.getContextResolver(ObjectMapper.class,  MediaType.APPLICATION_JSON_TYPE).getContext(type);
+        ObjectMapper mapper =  providers == null ? null : providers.getContextResolver(ObjectMapper.class,  MediaType.APPLICATION_JSON_TYPE).getContext(type);
         if (mapper == null) {
             log.info("No mapper found in {}", providers);
             mapper = Jackson2Mapper.getLenientInstance();
