@@ -13,22 +13,22 @@ public class HttpServletRequestUtils {
     }
 
     public static StringBuilder getContextURL(HttpServletRequest req) {
-		StringBuilder url = getBaseURL(req);
+        StringBuilder url = getBaseURL(req);
         url.append(req.getContextPath());
-		return url;
-	}
+        return url;
+    }
 
     public static StringBuilder getBaseURL(ServletRequest req) {
-		String scheme = req.getScheme();
-		String server = req.getServerName();
-		int port = req.getServerPort();
+        String scheme = req.getScheme();
+        String server = req.getServerName();
+        int port = req.getServerPort();
 
-		StringBuilder url = new StringBuilder(scheme).append("://").append(server);
-		if (port > 0 && (("http".equalsIgnoreCase(scheme) && port != 80) ||
-				("https".equalsIgnoreCase(scheme) && port != 443))) {
-			url.append(':').append(port);
-		}
+        StringBuilder url = new StringBuilder(scheme).append("://").append(server);
+        if (port > 0 && (("http".equalsIgnoreCase(scheme) && port != 80) ||
+                ("https".equalsIgnoreCase(scheme) && port != 443))) {
+            url.append(':').append(port);
+        }
 
-		return url;
-	}
+        return url;
+    }
 }
