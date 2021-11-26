@@ -12,6 +12,7 @@ import javax.servlet.http.*;
 import javax.ws.rs.core.MediaType;
 
 import nl.vpro.jackson2.JsonFilter;
+import nl.vpro.web.HttpServletRequestUtils;
 
 /**
  * This filter can be used to fill in 'api.basePath' using the request, so you don't have to configure it any more.
@@ -66,14 +67,10 @@ public class SwaggerFilter implements Filter {
         }
 
         String host = req.getServerName() + ":" + serverPort;
-        StringBuilder newValue =  new StringBuilder(scheme);
-		newValue.append("://")
-			.append(req.getServerName());
-		if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
-			newValue.append(':').append(serverPort);
-		}
+        StringBuilder newValue = HttpServletRequestUtils.getContextURL(req);
 
-		newValue.append(req.getContextPath()).append("/api");
+		newValue.append("/api");
+
         JsonFilter.Replacement<String> replacementBasePath =
 				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
 
