@@ -72,7 +72,7 @@ public class SwaggerFilter implements Filter {
 		newValue.append("/api");
 
         JsonFilter.Replacement<String> replacementBasePath =
-				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
+				new JsonFilter.Replacement<>("basePath", newValue.toString());
 
         JsonFilter.Replacement<String> replacementHost =
 				new JsonFilter.Replacement<>("host", "${api.host}", host);
