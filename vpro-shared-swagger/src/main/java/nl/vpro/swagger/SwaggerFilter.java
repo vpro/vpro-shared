@@ -3,7 +3,7 @@ package nl.vpro.swagger;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -64,16 +64,22 @@ public class SwaggerFilter implements Filter {
                 case "https": serverPort = 443; break;
             }
         }
-        StringBuilder newValue = new StringBuilder(scheme);
+
+        String host = req.getServerName() + ":" + serverPort;
+        StringBuilder newValue =  new StringBuilder(scheme);
 		newValue.append("://")
 			.append(req.getServerName());
 		if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
 			newValue.append(':').append(serverPort);
 		}
+
 		newValue.append(req.getContextPath()).append("/api");
-        JsonFilter.Replacement<String> replacement =
+        JsonFilter.Replacement<String> replacementBasePath =
 				new JsonFilter.Replacement<>("basePath", "${api.basePath}", newValue.toString());
-        List<JsonFilter.Replacement<?>> replacements = Collections.singletonList(replacement);
+
+        JsonFilter.Replacement<String> replacementHost =
+				new JsonFilter.Replacement<>("host", "${api.host}", host);
+        List<JsonFilter.Replacement<?>> replacements = Arrays.asList(replacementBasePath, replacementHost);
         final ServletOutputStream servletOutputStream = response.getOutputStream();
         final OutputStream out = transform(servletOutputStream, replacements);
         HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {

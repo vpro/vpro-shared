@@ -66,9 +66,8 @@
     <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
-    <!-- migrate to swagger3
     <module>vpro-shared-swagger</module>
-    -->
+
     <module>vpro-shared-test</module>
     <module>vpro-shared-util</module>
     <module>vpro-shared-validation</module>
