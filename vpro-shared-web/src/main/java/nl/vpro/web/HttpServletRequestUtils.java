@@ -3,17 +3,22 @@ package nl.vpro.web;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @since 2.29
+ */
 public class HttpServletRequestUtils {
 
+    private HttpServletRequestUtils() {
+        // utility class
+    }
 
-
-    public StringBuilder getContextURL(HttpServletRequest req) {
+    public static StringBuilder getContextURL(HttpServletRequest req) {
 		StringBuilder url = getBaseURL(req);
         url.append(req.getContextPath());
 		return url;
 	}
 
-    public StringBuilder getBaseURL(ServletRequest req) {
+    public static StringBuilder getBaseURL(ServletRequest req) {
 		String scheme = req.getScheme();
 		String server = req.getServerName();
 		int port = req.getServerPort();
