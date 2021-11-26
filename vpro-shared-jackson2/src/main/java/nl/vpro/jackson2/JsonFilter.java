@@ -1,17 +1,13 @@
 package nl.vpro.jackson2;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.concurrent.Callable;
+import lombok.ToString;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.function.Predicate;
+
+import com.fasterxml.jackson.core.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -43,7 +39,7 @@ public class JsonFilter implements Callable<Void> {
         String fieldName = stack.poll();
         for (Replacement<?> replacement : replacements) {
             if (replacement.key.equals(fieldName)) {
-                if (replacement.value.equals(value)) {
+                if (replacement.test(value)) {
                     return (T) replacement.newValue;
                 }
             }
@@ -111,16 +107,35 @@ public class JsonFilter implements Callable<Void> {
             return null;
         }
     }
-    public static class Replacement<T> {
+
+    @ToString
+    public static class Replacement<T> implements Predicate<Object> {
         private final String key;
-        private final T value;
         private final T newValue;
+
+        private final Predicate<Object> wrapped;
 
         public Replacement(String key, T value, T newValue) {
             this.key = key;
-            this.value = value;
+            this.wrapped = (currentValue) -> Objects.equals(value, currentValue);
             this.newValue = newValue;
         }
+        public Replacement(String key, T newValue) {
+            this.key = key;
+            this.newValue = newValue;
+            this.wrapped = (currentValue) -> true;
+        }
+        @lombok.Builder
+        private Replacement(String key, T newValue, Predicate<Object> predicate) {
+            this.key = key;
+            this.newValue = newValue;
+            this.wrapped = predicate;
+        }
 
+
+        @Override
+        public boolean test(Object currentValue) {
+            return wrapped.test(currentValue);
+        }
     }
 }
