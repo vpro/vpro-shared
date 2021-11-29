@@ -18,14 +18,14 @@ public class SwaggerFilterTest {
         SwaggerFilter filter = new SwaggerFilter();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        PathMatcher matcher = filter.getPathMatcher("/v3/api", "rs.poms.omroep.nl:443");
+        PathMatcher matcher = filter.getPathMatcher("/v3/api", "rs.poms.omroep.nl:443", "/v3");
         try (OutputStream out = filter.transform(outputStream, matcher)) {
             out.write(input.getBytes());
         }
         Jackson2TestUtil.assertThatJson(outputStream.toString()).isSimilarTo("{\n" +
             "  \"apiVersion\" : \"3.0\",\n" +
             "  \"swaggerVersion\" : \"1.2\",\n" +
-            "  \"basePath\" : \"/v3/api\n" +
+            "  \"basePath\" : \"/v3/api\"\n" +
             "}");
 
 
