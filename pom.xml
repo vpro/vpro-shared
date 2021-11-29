@@ -719,6 +719,11 @@
       <version>3.19.0</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.meeuw</groupId>
+      <artifactId>mihxil-json-grep</artifactId>
+      <version>0.10-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
 

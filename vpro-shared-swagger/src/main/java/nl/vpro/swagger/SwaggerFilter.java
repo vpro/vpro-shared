@@ -2,16 +2,16 @@ package nl.vpro.swagger;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.ws.rs.core.MediaType;
 
-import nl.vpro.jackson2.JsonFilter;
+import org.meeuw.json.grep.Sed;
+import org.meeuw.json.grep.matching.*;
+
 import nl.vpro.web.HttpServletRequestUtils;
 
 /**
@@ -22,7 +22,6 @@ import nl.vpro.web.HttpServletRequestUtils;
 @Slf4j
 public class SwaggerFilter implements Filter {
 
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
     @Override
     public void init(FilterConfig filterConfig) {
@@ -30,7 +29,9 @@ public class SwaggerFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(
+        ServletRequest request,
+        ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
 
         if (! req.getPathInfo().endsWith(".json")) {
@@ -55,30 +56,12 @@ public class SwaggerFilter implements Filter {
                 }
             }
         }
-        String scheme = req.getHeader("X-Forwarded-Proto");
-        long serverPort = req.getServerPort();
-        if (scheme == null) {
-            scheme = req.getScheme();
-        } else {
-            switch(scheme) {
-                case "http": serverPort = 80; break;
-                case "https": serverPort = 443; break;
-            }
-        }
 
-        String host = req.getServerName() + ":" + serverPort;
-        StringBuilder newValue = HttpServletRequestUtils.getContextURL(req);
 
-		newValue.append("/api");
+        PathMatcher matcher = getPathMatcher(req);
 
-        JsonFilter.Replacement<String> replacementBasePath =
-				new JsonFilter.Replacement<>("basePath", newValue.toString());
-
-        JsonFilter.Replacement<String> replacementHost =
-				new JsonFilter.Replacement<>("host", "${api.host}", host);
-        List<JsonFilter.Replacement<?>> replacements = Arrays.asList(replacementBasePath, replacementHost);
         final ServletOutputStream servletOutputStream = response.getOutputStream();
-        final OutputStream out = transform(servletOutputStream, replacements);
+        final OutputStream out = transform(servletOutputStream, matcher);
         HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
             @Override
             public ServletOutputStream getOutputStream() {
@@ -118,35 +101,29 @@ public class SwaggerFilter implements Filter {
 
     }
 
-    @Override
-    public void destroy() {
-        EXECUTOR_SERVICE.shutdownNow();
 
+    PathMatcher getPathMatcher(HttpServletRequest req) {
+        long serverPort = HttpServletRequestUtils.getPort(req);
+        String host = req.getServerName() + ":" + serverPort;
+        String basePath = req.getContextPath() + "/api";
+        return getPathMatcher(basePath, host);
     }
 
-    public OutputStream transform(OutputStream from, List<nl.vpro.jackson2.JsonFilter.Replacement<?>> replacements) throws IOException {
-        PipedInputStream in = new PipedInputStream();
-        final Future<?>[] future = new Future[1];
-        PipedOutputStream out = new PipedOutputStream(in) {
-            @Override
-            public void close() throws IOException {
-                super.close();
-                try {
-                    future[0].get();
-                } catch (ExecutionException e) {
-                    throw new IOException(e);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException(e);
+    PathMatcher getPathMatcher(String basePath, String host) {
+        return new PathMatcherOrChain(
+            new PathMatcherAndChain(
+                new SinglePathMatcher(new PreciseMatch("basePath")),
+                new ScalarEqualsMatcher("${api.basePath}", basePath)
+            ),
+            new PathMatcherAndChain(
+                new SinglePathMatcher(new PreciseMatch("host")),
+                new ScalarEqualsMatcher("${api.host}", host)
+            )
+        );
+    }
 
-                }
-            }
-        };
-
-        JsonFilter filter = new JsonFilter(in, from, replacements);
-
-        future[0] = EXECUTOR_SERVICE.submit(filter);
-        return out;
+    public OutputStream transform(OutputStream to, PathMatcher pathMatcher) throws IOException {
+        return Sed.transform(to, pathMatcher);
     }
 
 

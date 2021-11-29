@@ -31,4 +31,19 @@ public class HttpServletRequestUtils {
 
         return url;
     }
+
+    public static int getPort(HttpServletRequest req) {
+        String scheme = req.getHeader("X-Forwarded-Proto");
+        int serverPort = req.getServerPort();
+        if (scheme == null) {
+            scheme = req.getScheme();
+        }
+        switch(scheme) {
+            case "http": serverPort = 80; break;
+            case "https": serverPort = 443; break;
+        }
+
+        return serverPort;
+
+    }
 }
