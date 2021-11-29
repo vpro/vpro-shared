@@ -19,6 +19,7 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 import javax.cache.Cache;
@@ -36,31 +37,22 @@ import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.jmx.CountAspect;
-import nl.vpro.jmx.Counter;
-import nl.vpro.jmx.MBeans;
+import nl.vpro.jmx.*;
 import nl.vpro.rs.client.*;
-import nl.vpro.util.LeaveDefaultsProxyHandler;
-import nl.vpro.util.ThreadPools;
-import nl.vpro.util.TimeUtils;
-import nl.vpro.util.XTrustProvider;
+import nl.vpro.util.*;
 
 /**
  * @author Roelof Jan Koekoek
@@ -124,7 +116,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     protected final String userAgent;
 
-
     @Deprecated
     protected AbstractApiClient(
         String baseUrl,
@@ -171,7 +162,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             mbeanName,
             classLoader,
             userAgent,
-            registerMBean);
+            registerMBean,
+            false);
     }
 
     protected AbstractApiClient(
@@ -196,7 +188,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         String mbeanName,
         ClassLoader classLoader,
         String userAgent,
-        Boolean registerMBean
+        Boolean registerMBean,
+        boolean eager
         ) {
 
         this.connectionRequestTimeout = connectionRequestTimeout;
@@ -226,6 +219,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         this.registerMBean = registerMBean == null || this.registerMBean;
         if (this.registerMBean) {
             registerBean();
+        }
+        if (eager) {
+            services().forEach(s -> {
+                log.info("Created {}", s);
+            });
         }
     }
 
@@ -308,16 +306,37 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     @Override
     public final String test(String arg) {
-        StringBuilder builder = new StringBuilder();
-        appendTestResult(builder, arg);
-        return builder.toString();
-
+        // otherwise ProxyBuilder may be called in classloader of JMX, resulting in:
+        // class not found org.jboss.resteasy.client.jaxrs.internal.proxy.ProxyBuilderImpl
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            if (!Objects.equals(originalContextClassLoader, classLoader)) {
+                Thread.currentThread().setContextClassLoader(classLoader);
+            } else {
+                originalContextClassLoader = null;
+            }
+            StringBuilder builder = new StringBuilder();
+            appendTestResult(builder, arg);
+            return builder.toString();
+        } finally {
+            if (originalContextClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(originalContextClassLoader);
+            }
+        }
     }
+
+
+    protected abstract Stream<Supplier<?>> services();
+
 
     protected void appendTestResult(StringBuilder builder, String arg) {
         builder.append(this).append("\n");
         builder.append("initialized at: ").append(getInitializationInstant());
         builder.append("\n");
+        services().forEach(s -> {
+            Object service = s.get();
+            builder.append(service.getClass().getSimpleName()).append(":").append(service).append("\n");
+        });
     }
 
     public MediaType getAccept() {
