@@ -149,7 +149,29 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         String userAgent,
         Boolean registerMBean
     ) {
-        this(baseUrl, connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, connectionInPoolTTL, null, countWindow, bucketCount, warnThreshold, acceptableLanguages, accept, contentType, trustAll, objectMapper, mbeanName, classLoader, userAgent, registerMBean);
+        this(
+            baseUrl,
+            connectionRequestTimeout,
+            connectTimeout,
+            socketTimeout,
+            maxConnections,
+            maxConnectionsPerRoute,
+            maxConnectionsNoTimeout,
+            maxConnectionsPerRouteNoTimeout,
+            connectionInPoolTTL,
+            null,
+            countWindow,
+            bucketCount,
+            warnThreshold,
+            acceptableLanguages,
+            accept,
+            contentType,
+            trustAll,
+            objectMapper,
+            mbeanName,
+            classLoader,
+            userAgent,
+            registerMBean);
     }
 
     protected AbstractApiClient(
