@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.cache.Cache;
 import javax.management.MalformedObjectNameException;
@@ -115,6 +116,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected ClassLoader classLoader;
 
     protected final String userAgent;
+
+    protected boolean eager;
 
     @Deprecated
     protected AbstractApiClient(
@@ -220,10 +223,27 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         if (this.registerMBean) {
             registerBean();
         }
+        this.eager = eager;
+
+    }
+
+    @PostConstruct
+    public void postConstruct() {
         if (eager) {
             services().forEach(s -> {
-                log.info("Created {}", s);
+                log.info("Created {}", toString(s.get()));
             });
+            eager = false;
+        }
+    }
+
+    protected String toString(Object service) {
+        Class<?> clazz = service.getClass();
+        Class<?>[] interfaces = clazz.getInterfaces();
+        if (interfaces.length == 1) {
+            return this + ":" + interfaces[0].getSimpleName();
+        } else {
+            return this + ":" + service;
         }
     }
 
@@ -335,7 +355,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.append("\n");
         services().forEach(s -> {
             Object service = s.get();
-            builder.append(service.getClass().getSimpleName()).append(":").append(service).append("\n");
+            builder.append(toString(service));
         });
     }
 
