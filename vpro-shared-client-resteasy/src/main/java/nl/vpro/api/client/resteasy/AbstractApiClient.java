@@ -356,7 +356,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.append("\n");
         services().forEach(s -> {
             Object service = s.get();
-            builder.append(toString(service));
+            builder.append(toString(service)).append("\n");
         });
     }
 
