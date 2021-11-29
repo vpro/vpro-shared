@@ -241,7 +241,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         Class<?> clazz = service.getClass();
         Class<?>[] interfaces = clazz.getInterfaces();
         if (interfaces.length == 1) {
-            return this + ":" + interfaces[0].getSimpleName();
+            Description description = interfaces[0].getAnnotation(Description.class);
+            return this + ":" + interfaces[0].getSimpleName() + (description == null ? "" : ":" + description.value());
         } else {
             return this + ":" + service;
         }
