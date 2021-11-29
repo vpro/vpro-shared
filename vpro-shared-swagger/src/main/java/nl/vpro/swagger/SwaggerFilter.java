@@ -104,8 +104,7 @@ public class SwaggerFilter implements Filter {
 
 
     PathMatcher getPathMatcher(HttpServletRequest req) {
-        long serverPort = HttpServletRequestUtils.getPort(req);
-        String host = req.getServerName() + ":" + serverPort;
+        String host = req.getServerName() + HttpServletRequestUtils.getPortPostFixIfNeeded(req);
         String basePath = req.getContextPath() + "/api";
         return getPathMatcher(basePath, host, req.getContextPath());
     }
