@@ -689,6 +689,11 @@
         <artifactId>micrometer-registry-prometheus</artifactId>
         <version>${micrometer.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.meeuw</groupId>
+        <artifactId>mihxil-json-grep</artifactId>
+        <version>0.10</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -718,11 +723,6 @@
       <artifactId>checker-qual</artifactId>
       <version>3.19.0</version>
       <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.meeuw</groupId>
-      <artifactId>mihxil-json-grep</artifactId>
-      <version>0.10-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

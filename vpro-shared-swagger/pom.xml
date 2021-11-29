@@ -60,5 +60,9 @@
       <artifactId>vpro-shared-test</artifactId>
       <scope>test</scope>
     </dependency>
+     <dependency>
+       <groupId>org.meeuw</groupId>
+       <artifactId>mihxil-json-grep</artifactId>
+     </dependency>
   </dependencies>
 </project>
