@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.StringEscapeUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 
 /**
  * See https://jira.vpro.nl/browse/MSE-1372
@@ -21,8 +21,6 @@ import org.jsoup.safety.Whitelist;
  * @since 1.5
  */
 public class TextUtil {
-
-    Whitelist whitelist = Whitelist.none().addTags("\n");
 
     /**
      * Reusable pattern for matching text against illegal characters
@@ -97,7 +95,7 @@ public class TextUtil {
             return null;
         }
 
-        return Jsoup.clean(input, Whitelist.none());
+        return Jsoup.clean(input, Safelist.none());
 
     }
 
