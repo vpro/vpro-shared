@@ -63,15 +63,15 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new Slf4jSimpleLogger(log);
     }
 
-    static SimpleLogger nop() {
+    static NOPLogger nop() {
         return new NOPLogger();
     }
 
-    static SimpleLogger jul(java.util.logging.Logger log) {
+    static JULSimpleLogger jul(java.util.logging.Logger log) {
         return new JULSimpleLogger(log);
     }
 
-    static SimpleLogger log4j(org.apache.log4j.Logger  log) {
+    static Log4jSimpleLogger log4j(org.apache.log4j.Logger  log) {
         return new Log4jSimpleLogger(log);
     }
 
