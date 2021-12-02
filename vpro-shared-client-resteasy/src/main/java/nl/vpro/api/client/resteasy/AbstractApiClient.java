@@ -240,7 +240,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected String toString(Object service) {
         Class<?> clazz = service.getClass();
         Class<?>[] interfaces = clazz.getInterfaces();
-        if (interfaces.length == 1) {
+        if (interfaces.length >= 1) {
             Description description = interfaces[0].getAnnotation(Description.class);
             return this + ":" + interfaces[0].getSimpleName() + (description == null ? "" : ":" + description.value());
         } else {
