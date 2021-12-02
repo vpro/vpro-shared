@@ -43,8 +43,8 @@
     <url>https://github.com/vpro/vpro-shared/actions</url>
   </ciManagement>
   <scm>
-    <connection>scm:git:https://github.com/vpro/vpro-shared.git</connection>
-    <developerConnection>scm:git:https://github.com/vpro/vpro-shared.git</developerConnection>
+    <connection>scm:git:${project.scm.url}</connection>
+    <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
     <tag>HEAD</tag>
   </scm>
@@ -243,15 +243,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.3.12</spring.version>
-    <spring-security.version>5.5.3</spring-security.version>
+    <spring.version>5.3.13</spring.version>
+    <spring-security.version>5.6.0</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
-    <junit.version>5.8.1</junit.version>
+    <junit.version>5.8.2</junit.version>
     <mockito.version>4.1.0</mockito.version>
     <assertj.version>3.21.0</assertj.version>
     <resteasy.version>4.7.3.Final</resteasy.version>
-    <bytebuddy.version>1.12.1</bytebuddy.version>
+    <bytebuddy.version>1.12.2</bytebuddy.version>
     <slf4j.version>1.7.27</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.14.1</log4j2.version>
@@ -282,7 +282,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.7.5</micrometer.version>
+    <micrometer.version>1.8.0</micrometer.version>
   </properties>
 
   <dependencyManagement>
@@ -682,12 +682,17 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.5.6</version>
+        <version>1.6.0</version>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-registry-prometheus</artifactId>
         <version>${micrometer.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.meeuw</groupId>
+        <artifactId>mihxil-json-grep</artifactId>
+        <version>0.10</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -4,6 +4,10 @@ import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ThrowableInformation;
 
+
+/**
+ * This makes sure everything is on one line, so it can be more easily harvested by kibana.
+ */
 @Deprecated
 public class Log4j1LinePatternLayout extends PatternLayout {
 

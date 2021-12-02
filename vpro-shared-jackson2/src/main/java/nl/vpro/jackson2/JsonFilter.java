@@ -12,7 +12,9 @@ import com.fasterxml.jackson.core.*;
 /**
  * @author Michiel Meeuwissen
  * @since 0.21
+ *
  */
+@Deprecated
 public class JsonFilter implements Callable<Void> {
     static JsonFactory factory = new JsonFactory();
 

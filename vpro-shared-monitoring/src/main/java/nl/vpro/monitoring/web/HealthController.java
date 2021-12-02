@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
 
+import javax.inject.Inject;
+
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 
 import nl.vpro.monitoring.domain.Health;
 
@@ -26,28 +29,34 @@ public class HealthController {
 
     Clock clock = Clock.systemDefaultZone();
 
+    @Inject
+    WebApplicationContext webApplicationContext;
+
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
      */
     @EventListener
     public void onApplicationStartedEvent(ContextStartedEvent startedEvent) {
-        markReady();
-        log.info("Status {} {} at {}", startedEvent, status, ready);
+        markReady(startedEvent);
     }
 
     @EventListener
     public void onApplicationRefreshedEvent(ContextRefreshedEvent refreshedEventEvent) {
-        if (status != Status.READY) {
-            markReady();
-            log.info("Status {} at {}", status, ready);
-        } else {
-            log.debug("Ready already ({})", refreshedEventEvent);
-        }
+        markReady(refreshedEventEvent);
     }
 
-    protected void markReady() {
-        status = Status.READY;
-        ready = clock.instant();
+    protected boolean markReady(ApplicationContextEvent event) {
+        if (status != Status.READY) {
+            status = Status.READY;
+            ready = clock.instant();
+            log.info("Status {} at {} ({}) for {}", status, ready, event, webApplicationContext.getApplicationName());
+            return true;
+        } else {
+            log.debug("Ready already ({})", event);
+            return false;
+
+        }
+
     }
 
     @EventListener
