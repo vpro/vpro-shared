@@ -29,7 +29,9 @@ import static nl.vpro.i18n.Locales.score;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlTransient
 @Slf4j
-public class LocalizedString implements CharSequence, Serializable { //implements javax.xml.registry.infomodel.LocalizedString {
+public class LocalizedString implements CharSequence, Serializable {
+
+    private static final long serialVersionUID = 6128871258866551736L; //implements javax.xml.registry.infomodel.LocalizedString {
 
     public static LocalizedString of(String value, Locale locale) {
         if (value == null) {
@@ -182,6 +184,8 @@ public class LocalizedString implements CharSequence, Serializable { //implement
 
     @XmlRootElement(name = "localizedString")
     public static class Impl extends LocalizedString {
+
+        private static final long serialVersionUID = -6556571754244929512L;
 
         public Impl() {
 
