@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.annotation.*;
@@ -21,7 +22,7 @@ import com.neovisionaries.i18n.LanguageCode;
 import static nl.vpro.i18n.Locales.score;
 
 /**
- * Basicly wraps a string together with the {@link Locale} describing in what language it is.
+ * Basically wraps a string together with the {@link Locale} describing in what language it is.
  *
  * @author Michiel Meeuwissen
  * @since 3.2
@@ -134,7 +135,7 @@ public class LocalizedString implements CharSequence, Serializable {
 
         if (!locale.equals(that.locale)) return false;
         if (!value.equals(that.value)) return false;
-        return charsetName != null ? charsetName.equals(that.charsetName) : that.charsetName == null;
+        return Objects.equals(charsetName, that.charsetName);
     }
 
     @Override
