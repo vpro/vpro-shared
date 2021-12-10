@@ -17,8 +17,10 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     env:
       MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
@@ -53,7 +55,7 @@ jobs:
             maven-
         if: always()
       - name: Build with Maven
-        run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -Pdeploy,sonatype deploy  -Dgpg.skip=false
+        run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype deploy"  -Dgpg.skip=false
       - name: Publish to codecov
         uses: codecov/codecov-action@v2
         continue-on-error: true
