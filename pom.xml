@@ -699,6 +699,11 @@
         <artifactId>mihxil-json-grep</artifactId>
         <version>0.10</version>
       </dependency>
+      <dependency>
+        <groupId>net.sf.ehcache</groupId>
+        <artifactId>ehcache</artifactId>
+        <version>2.10.9.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
