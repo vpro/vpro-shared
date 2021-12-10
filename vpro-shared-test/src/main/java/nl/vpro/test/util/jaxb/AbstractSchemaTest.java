@@ -88,7 +88,7 @@ public abstract class AbstractSchemaTest {
     }
 
     private  static  File getFile(File dir, final String namespace) {
-        String filename = namespace.replaceAll("/", "_");
+        String filename = namespace.replaceAll("[/:]", "_");
         if (StringUtils.isEmpty(namespace)) {
             filename = "absentnamespace";
         }
