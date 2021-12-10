@@ -16,7 +16,6 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, Object> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean isValid(Object value, ConstraintValidatorContext constraintValidatorContext) {
         if(value == null) {
             return true;

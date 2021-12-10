@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Roelof Jan Koekoek
  */
 public class NoHtmlValidatorTest {
-    private NoHtmlValidator validator = new NoHtmlValidator();
+    private final NoHtmlValidator validator = new NoHtmlValidator();
 
     @Test
     public void testIsValid() {
