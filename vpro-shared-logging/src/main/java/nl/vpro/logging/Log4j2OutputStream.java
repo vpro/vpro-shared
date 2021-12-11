@@ -52,6 +52,16 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
         };
     }
 
+    public static Log4j2OutputStream warn(final Logger log, boolean skipEmptyLines, final Integer max) {
+        return new Log4j2OutputStream(skipEmptyLines, max) {
+            @Override
+            void log(String line) {
+                log.warn(line);
+            }
+        };
+    }
+
+
     public static Log4j2OutputStream error(Logger log) {
         return error(log, false);
     }
@@ -81,6 +91,10 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
 
     Log4j2OutputStream(boolean skipEmptyLines) {
         super(skipEmptyLines, null);
+    }
+
+    Log4j2OutputStream(boolean skipEmptyLines, Integer max) {
+        super(skipEmptyLines, max);
     }
 
 }
