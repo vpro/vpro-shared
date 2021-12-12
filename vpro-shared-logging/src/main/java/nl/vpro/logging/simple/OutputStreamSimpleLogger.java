@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.function.Function;
 
 import org.slf4j.event.Level;
@@ -18,6 +19,8 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
     @Getter
     private final OutputStream outputStream;
 
+    private final Charset charset;
+
     long size = 0L;
 
     boolean autoFlush = false;
@@ -28,15 +31,17 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
         Level level,
         Long maxLength,
         Function<Level, String> prefix,
-        boolean autoFlush
+        boolean autoFlush,
+        Charset charset
     ) {
         super(level, maxLength, prefix);
         this.outputStream = output == null ? new ByteArrayOutputStream() : output;
         this.autoFlush = autoFlush;
+        this.charset = charset == null ? Charset.defaultCharset() : charset;
     }
 
      public OutputStreamSimpleLogger() {
-        this(null, null, null, null, false);
+        this(null, null, null, null, false, Charset.defaultCharset());
     }
 
 
@@ -50,7 +55,7 @@ public class OutputStreamSimpleLogger extends AbstractStringBuilderSimpleLogger 
     @Override
     @SneakyThrows
     void append(CharSequence m) {
-        byte[] s = m.toString().getBytes();
+        byte[] s = m.toString().getBytes(charset);
         size += s.length;
         outputStream.write(s);
     }
