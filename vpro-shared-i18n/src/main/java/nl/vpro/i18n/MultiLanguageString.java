@@ -15,6 +15,10 @@ import static nl.vpro.i18n.Locales.DUTCH;
 
 /**
  * Represent multiple strings for different locales.
+ *
+ * This is a simple way to internationalize a string, completely in code.
+ *
+ *
  * @author Michiel Meeuwissen
  * @since 0.47
  */
@@ -31,6 +35,10 @@ public class MultiLanguageString implements CharSequence {
     private Object[] slf4jArgs;
 
     private Object[] args;
+
+    private String bundleName;
+
+    private String key;
 
 
     public static Builder.In in(Locale locale) {
@@ -74,7 +82,12 @@ public class MultiLanguageString implements CharSequence {
             result = strings.get(locale);
         }
         if (result == null) {
-            result = strings.get(defaultLocale);
+            if (bundleName != null) {
+                ResourceBundle bundle = ResourceBundle.getBundle(bundleName, locale);
+                result = bundle.getString(key);
+            } else {
+                result = strings.get(defaultLocale);
+            }
         }
         if (args != null && result != null) {
             MessageFormat ft = new MessageFormat(result);
@@ -125,7 +138,6 @@ public class MultiLanguageString implements CharSequence {
             return this;
         }
 
-
         public Builder slf4jArgs(Object... args) {
             created.slf4jArgs = args;
             return this;
@@ -140,8 +152,16 @@ public class MultiLanguageString implements CharSequence {
             created.strings.put(DUTCH, text);
             return this;
         }
+
         public Builder en(String text) {
             created.strings.put(ENGLISH, text);
+            return this;
+        }
+
+        public Builder bundle(String bundleName, String key) {
+            created.bundleName = bundleName;
+            created.key = key;
+            ResourceBundle.getBundle(bundleName);
             return this;
         }
 

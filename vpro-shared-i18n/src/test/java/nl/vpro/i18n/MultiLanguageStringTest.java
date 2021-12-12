@@ -111,4 +111,17 @@ public class MultiLanguageStringTest {
         assertThat(string.get(new Locale("en", "US"))).isEqualTo("b 1 a A");
     }
 
+    @Test
+    public void withBundle() throws Exception {
+        try (AutoCloseable autoCloseable = Locales.with(new Locale("eo"))) {
+            MultiLanguageString string = MultiLanguageString.builder()
+                .nl("a {0} b {1}")
+                .en("b {1} a {0}")
+                .bundle("nl.vpro.i18n.test.MultiLanguageStringTest", "a")
+                .args("A", 1)
+                .build();
+            assertThat(string.toString()).isEqualTo("esperanto A");
+        }
+    }
+
 }
