@@ -89,14 +89,16 @@ public class MultiLanguageString implements CharSequence {
                 result = strings.get(defaultLocale);
             }
         }
-        if (args != null && result != null) {
-            MessageFormat ft = new MessageFormat(result);
-            ft.setLocale(locale);
-            result = ft.format(args);
-        }
-        if (slf4jArgs != null && result != null) {
-            FormattingTuple ft = MessageFormatter.arrayFormat(result, slf4jArgs);
-            result = ft.getMessage();
+        if (result != null) {
+            if (args != null) {
+                MessageFormat ft = new MessageFormat(result);
+                ft.setLocale(locale);
+                result = ft.format(args);
+            }
+            if (slf4jArgs != null) {
+                FormattingTuple ft = MessageFormatter.arrayFormat(result, slf4jArgs);
+                result = ft.getMessage();
+            }
         }
         return LocalizedString.of(result, locale);
 
