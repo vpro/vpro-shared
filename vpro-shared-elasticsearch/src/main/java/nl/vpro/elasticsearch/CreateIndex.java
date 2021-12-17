@@ -34,7 +34,10 @@ public class CreateIndex {
 
     private final boolean requireMappings;
 
-    public static final CreateIndex DEFAULT = CreateIndex.builder().build();
+    public static final CreateIndex DEFAULT = CreateIndex.builder()
+        .createAliases(true)
+        .useNumberPostfix(true)
+        .build();
 
     public static final CreateIndex FOR_TEST = CreateIndex.builder()
         .createAliases(false)
