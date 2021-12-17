@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -65,7 +66,7 @@ public class Ssh {
             remote_host_private_key_file.getAbsolutePath(), localFrom.getAbsolutePath(), remote_host_user + "@" + remote_host_name + ":" + remotePath);
 
         if (result != 0) {
-            throw new SshException("Not succeeded upload from " + localFrom + " to  " + remote_host_name + ":" + remotePath);
+            throw new SshException(result, "Not succeeded upload from " + localFrom + " to  " + remote_host_name + ":" + remotePath);
         }
     }
 
@@ -79,13 +80,26 @@ public class Ssh {
                 remote_host_user + "@" + remote_host_name + ":" + remotePath,
                 localTo.getAbsolutePath());
         if (result != 0) {
-            throw new SshException("Not succeeded download from " + remote_host_name + ":" + remotePath + " to  " + localTo);
+            throw new SshException(result, "Not succeeded download from " + remote_host_name + ":" + remotePath + " to  " + localTo);
         }
     }
 
+    @Getter
     public static class SshException extends RuntimeException  {
+        private static final long serialVersionUID = -1961506805996420257L;
+
+        private final int exitCode;
+
+        public SshException(int exitCode, String message) {
+            super(message + " (exitcode: " + exitCode + ")");
+            this.exitCode = exitCode;
+        }
+
+
+        @Deprecated
         public SshException(String message) {
             super(message);
+            this.exitCode = -1;
         }
     }
 
