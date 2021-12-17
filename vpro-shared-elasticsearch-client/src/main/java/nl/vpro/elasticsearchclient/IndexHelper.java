@@ -226,7 +226,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.with("aliases");
             for (String alias : this.aliases) {
-                aliases.with(alias);
+                if (! Objects.equals(alias, indexName)) {
+                    aliases.with(alias);
+                }
             }
         }
 
