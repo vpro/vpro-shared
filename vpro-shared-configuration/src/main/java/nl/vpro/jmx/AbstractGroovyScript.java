@@ -8,7 +8,6 @@ import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 import org.springframework.context.ApplicationContext;
 
 import nl.vpro.logging.simple.*;
