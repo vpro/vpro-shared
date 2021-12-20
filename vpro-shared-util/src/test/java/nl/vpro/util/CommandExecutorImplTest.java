@@ -14,10 +14,8 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.event.Level;
 
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+import nl.vpro.logging.simple.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
