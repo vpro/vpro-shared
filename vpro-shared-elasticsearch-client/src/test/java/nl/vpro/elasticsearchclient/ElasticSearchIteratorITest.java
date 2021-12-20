@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
+import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.util.MaxOffsetIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +60,8 @@ public class ElasticSearchIteratorITest {
             .build();
         log.info("Version: {}", helper.getVersionNumber());
 
-        helper.createIndexIfNotExists();
+        helper.createIndexIfNotExists(CreateIndex.FOR_TEST);
+        index = helper.getIndexName();
         for (int i = 0; i < numberOfObjects; i++) {
             A a = new A("bla " + i, i);
             helper.index(a.id, a);
