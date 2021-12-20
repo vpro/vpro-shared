@@ -5,11 +5,11 @@ package nl.vpro.logging.simple;
  */
 public enum Level {
 
-    TRACE(0),
-    DEBUG(10),
-    INFO(20),
+    ERROR(40),
     WARN(30),
-    ERROR(40)
+    INFO(20),
+    DEBUG(10),
+    TRACE(0)
     ;
     private final int intValue;
     Level(int intValue) {
