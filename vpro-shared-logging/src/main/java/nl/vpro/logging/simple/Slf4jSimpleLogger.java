@@ -33,6 +33,13 @@ public class Slf4jSimpleLogger implements SimpleLogger {
     public static SimpleLogger of(Logger logger) {
         return new Slf4jSimpleLogger(logger);
     }
+
+    /**
+     * Like {@link #of(Logger)}, but with this name it's nicer of static imports
+     */
+    public static SimpleLogger slf4j(Logger logger) {
+        return of(logger);
+    }
     public static SimpleLogger of(String category) {
         return of(LoggerFactory.getLogger(category));
     }
