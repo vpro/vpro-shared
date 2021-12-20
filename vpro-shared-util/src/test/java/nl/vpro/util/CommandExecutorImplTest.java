@@ -81,10 +81,10 @@ public class CommandExecutorImplTest {
 
     @Test
     public void optional() throws IOException, InterruptedException {
-        File tmpFile = File.createTempFile("env", "test");
+        final File tmpFile = File.createTempFile("env", "test");
         tmpFile.deleteOnExit();
-        StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
-        CommandExecutor find =
+        final StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
+        final CommandExecutor find =
             CommandExecutorImpl.builder()
                 .executablesPaths(tmpFile.getAbsolutePath())
                 .commonArg("find")

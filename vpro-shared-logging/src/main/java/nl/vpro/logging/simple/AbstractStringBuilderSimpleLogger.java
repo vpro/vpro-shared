@@ -19,17 +19,19 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
 
     @Getter
     final long maxLength;
+
     @Getter
     protected long count = 0;
+
     @Getter
     boolean truncated = false;
 
-    private Level level = Level.INFO;
+    private final Level level;
 
     final private Function<Level, String> prefix;
 
     protected  AbstractStringBuilderSimpleLogger(
-        Level level,
+        final Level level,
         Long maxLength,
         Function<Level, String> prefix) {
         this.maxLength = maxLength == null ? 10000L : maxLength;
@@ -43,7 +45,7 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
 
     @Override
     public synchronized void accept(Level level, CharSequence message, Throwable t) {
-        if (level.compareTo(this.level) < 0) {
+        if (level.toInt() < this.level.toInt()) {
             return;
         }
         if (needsNewLine()) {
@@ -82,8 +84,6 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
     public String toString() {
         return "string buffer with " + count + " lines";
     }
-
-
 
     abstract void truncateIfNecessary();
 }
