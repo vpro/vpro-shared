@@ -325,6 +325,12 @@
         <version>${log4j2.version}</version>
       </dependency>
       <dependency>
+        <!-- used for asynchronous logging in log4j2 -->
+        <groupId>com.lmax</groupId>
+        <artifactId>disruptor</artifactId>
+        <version>3.4.4</version>
+      </dependency>
+      <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
         <version>${hibernate.version}</version>
