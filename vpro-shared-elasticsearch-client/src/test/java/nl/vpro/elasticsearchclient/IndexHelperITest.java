@@ -22,6 +22,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.simple.QueueSimpleLogger;
 import nl.vpro.logging.simple.SimpleLogger;
 
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -37,7 +38,7 @@ public class IndexHelperITest {
     IndexHelper helper;
 
     final Queue<QueueSimpleLogger.Event> events = new ArrayDeque<>();
-    final SimpleLogger simpleLogger = QueueSimpleLogger.of(events).chain(SimpleLogger.slfj4(log));
+    final SimpleLogger simpleLogger = QueueSimpleLogger.of(events).chain(slf4j(log));
 
     @BeforeEach
     public void setup() {

@@ -17,7 +17,7 @@ public class CreateIndex {
 
     /**
      * Configure the index for 'reindex', this is normally desired for new indices which are to be filled with existing data
-     * Update times are infinite, no replicas
+     * Update times are infinite, no replicas.
      */
     private final boolean forReindex;
 
@@ -26,6 +26,9 @@ public class CreateIndex {
      */
     private final Runnable  callBack;
 
+    /**
+     * If the {@link ElasticSearchIndex} has aliases, create them too.
+     */
     private final boolean createAliases;
 
     private final Integer shards;
@@ -34,11 +37,15 @@ public class CreateIndex {
 
     private final boolean requireMappings;
 
+
     public static final CreateIndex DEFAULT = CreateIndex.builder()
         .createAliases(true)
         .useNumberPostfix(true)
         .build();
 
+    /**
+     * For test cases
+     */
     public static final CreateIndex FOR_TEST = CreateIndex.builder()
         .createAliases(false)
         .useNumberPostfix(false)

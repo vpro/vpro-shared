@@ -36,6 +36,7 @@ import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.util.*;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -210,15 +211,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (getIndexName().isEmpty()){
             throw new IllegalStateException("No index name configured");
         }
-        String supplied = indexNameSupplier.get();
+        final String supplied = indexNameSupplier.get();
 
-        String indexName;
+        final String indexName;
         if (createIndex.isUseNumberPostfix()) {
             int number = firstNewNumber();
             indexName = supplied + "-" + number;
         } else {
             indexName = supplied;
-
         }
 
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
@@ -226,7 +226,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.with("aliases");
             for (String alias : this.aliases) {
-                if (! Objects.equals(alias, indexName)) {
+                if (! Objects.equals(alias, indexName) && ! Objects.equals(alias, supplied)) {
                     aliases.with(alias);
                 }
             }
@@ -262,9 +262,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
         if (response.get("acknowledged").booleanValue()) {
-            log.info("Created index {}", getIndexName());
+            String setIndexName = getIndexName();
+            if (! Objects.equals(setIndexName, indexName)) {
+                setIndexName(indexName);
+                log.info("Created index {} (postfixed from {})", getIndexName(), setIndexName);
+            } else {
+                log.info("Created index {}", getIndexName());
+            }
         } else {
-            log.warn("Could not create index {}", getIndexName());
+            log.warn("Could not create index {}", indexName);
         }
 
     }
@@ -386,7 +392,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public void deleteIndex()  {
         try {
-            Response delete = client().performRequest(createDelete(""));
+            Response delete = client().performRequest(createDelete(null));
 
             log.info("{}", delete);
             EntityUtils.consumeQuietly(delete.getEntity());
@@ -456,6 +462,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     private Supplier<Map<String, String>> unaliasing;
+
     public String unalias(String alias) {
         if (unaliasing == null) {
             if (clientFactory == null) {
@@ -482,15 +489,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
         }
         return unaliasing.get().getOrDefault(alias, alias);
-
     }
-
 
     public ObjectNode search(ObjectNode request) {
         String indexName = indexNameSupplier == null ? null : indexNameSupplier.get();
         return post((indexName == null ? "" : indexName) + Paths.SEARCH, request);
     }
-
 
     public ObjectNode deleteByQuery(ObjectNode request) {
         return post(getIndexName() + Paths.DELETE_BY_QUERY, request);
@@ -538,7 +542,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return new NByteArrayEntity(json, ContentType.APPLICATION_JSON);
     }
 
-
     /**
      * @param path path to post to
      * @param request json to post to that.
@@ -557,7 +560,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return future;
     }
 
-    public static Optional<BulkRequestEntry> find(Collection<BulkRequestEntry> jobs, final ObjectNode responseItem) {
+    public static Optional<BulkRequestEntry> find(
+        @NonNull final Collection<BulkRequestEntry> jobs,
+        @NonNull final ObjectNode responseItem) {
         return jobs.stream().filter(
             item -> BulkRequestEntry.idFromActionNode(responseItem).equals(item.getId())
         ).findFirst();
@@ -1019,10 +1024,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 req.setEntity(bulkEntity(request));
 
                 writeJson(log, writeJsonDir, request);
-                ObjectNode result = read(
+                return  read(
                     client().performRequest(req)
                 );
-                return result;
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
                 return null;
@@ -1240,7 +1244,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public Consumer<ObjectNode> indexLogger(Logger logger, Supplier<String> prefix) {
-        return indexLogger(slfj4(logger), prefix);
+        return indexLogger(Slf4jSimpleLogger.of(logger), prefix);
     }
 
     public Consumer<ObjectNode> indexLogger(SimpleLogger logger, Supplier<String> prefix) {
@@ -1260,17 +1264,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         };
     }
 
-
-    public Consumer<ObjectNode> deleteLogger(Logger logger) {
+    public Consumer<ObjectNode> deleteLogger(@NonNull Logger logger) {
         return deleteLogger(logger, () -> "");
     }
 
-
-    public Consumer<ObjectNode> deleteLogger(Logger logger, Supplier<String> prefix) {
+    public Consumer<ObjectNode> deleteLogger(@NonNull Logger logger, @NonNull Supplier<String> prefix) {
         return deleteLogger(slfj4(logger), prefix);
     }
 
-    public Consumer<ObjectNode> deleteLogger(SimpleLogger logger, Supplier<String> prefix) {
+    public Consumer<ObjectNode> deleteLogger(@NonNull SimpleLogger logger, @NonNull Supplier<String> prefix) {
         return jsonNode -> {
             boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
             String index = jsonNode.get(Fields.INDEX).textValue();
@@ -1297,15 +1299,22 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return bulkLogger(log, log, log);
     }
 
-    public Consumer<ObjectNode> bulkLogger(Logger indexLog, Logger deleteLog, Logger updateLog) {
+    public Consumer<ObjectNode> bulkLogger(
+        @NonNull Logger indexLog,
+        @NonNull Logger deleteLog,
+        @NonNull Logger updateLog) {
         return bulkLogger(slfj4(indexLog), slfj4(deleteLog), slfj4(updateLog));
     }
 
 
-    public Consumer<ObjectNode> bulkLogger(SimpleLogger indexLog, SimpleLogger deleteLog, SimpleLogger updateLog) {
-        StringBuilder logPrefix = new StringBuilder();
-        Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
-        Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
+    public Consumer<ObjectNode> bulkLogger(
+        @NonNull SimpleLogger indexLog,
+        @NonNull SimpleLogger deleteLog,
+        @NonNull SimpleLogger updateLog) {
+        final StringBuilder logPrefix = new StringBuilder();
+        final Consumer<ObjectNode> indexLogger = indexLogger(indexLog, logPrefix::toString);
+        final Consumer<ObjectNode> deleteLogger = deleteLogger(deleteLog, logPrefix::toString);
+        final Consumer<ObjectNode> updateLogger = indexLogger(updateLog, logPrefix::toString);
 
         return consumeBulkResult((i, total) -> {
                 logPrefix.setLength(0);
@@ -1313,7 +1322,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             },
             deleteLogger,
             indexLogger,
-            indexLogger,
+            updateLogger,
             n -> log.warn("{}Unrecognized bulk response {}", logPrefix, n)
         );
     }
@@ -1325,7 +1334,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             Consumer<ObjectNode> updates,
             Consumer<JsonNode> unrecognized) {
         return jsonNode -> {
-            ArrayNode items = jsonNode.withArray("items");
+            final ArrayNode items = jsonNode.withArray("items");
             int i = 0;
             int total = items.size();
             for (JsonNode n : items) {
@@ -1333,7 +1342,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 ObjectNode on = (ObjectNode) n;
                 boolean recognized = false;
                 if (on.has(DELETE)) {
-
                     deletes.accept(on.with(DELETE));
                     recognized = true;
                 }
@@ -1353,15 +1361,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     }
 
-    public Consumer<ObjectNode> bulkLogger(Logger logger) {
+    public Consumer<ObjectNode> bulkLogger(@NonNull Logger logger) {
         return bulkLogger(logger, () -> Level.INFO, () ->  Level.INFO);
     }
 
-    public Consumer<ObjectNode> bulkLogger(Logger logger, Supplier<Level> singleLevel, Supplier<Level> combinedLevel) {
+    public Consumer<ObjectNode> bulkLogger(@NonNull Logger logger, @NonNull Supplier<Level> singleLevel, @NonNull Supplier<Level> combinedLevel) {
         return bulkLogger(logger, singleLevel, combinedLevel, true);
     }
 
-    public Consumer<ObjectNode> bulkLogger(Logger logger, Supplier<Level> singleLevel, Supplier<Level> combinedLevel, boolean singleVerbose) {
+    public Consumer<ObjectNode> bulkLogger(
+        @NonNull Logger logger,
+        @NonNull Supplier<Level> singleLevel,
+        @NonNull Supplier<Level> combinedLevel,
+        boolean singleVerbose) {
         return jsonNode -> {
             final ArrayNode items = jsonNode.withArray("items");
             String index = null;
@@ -1373,7 +1385,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     log(logger, singleLevel.get(), "{}", on);
                 }
                 if (on.has(DELETE)) {
-                    ObjectNode delete = on.with(DELETE);
+                    final ObjectNode delete = on.with(DELETE);
                     index = delete.get(Fields.INDEX).textValue();
                     String type = delete.get(Fields.TYPE).textValue();
                     String id = delete.get(Fields.ID).textValue();
@@ -1428,7 +1440,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         };
     }
 
-    static  String handleResponse(JsonNode indexResponse, String type, String id) {
+    static  String handleResponse(@NonNull JsonNode indexResponse, @NonNull String type, @NonNull String id) {
         int status = -1;
         if (indexResponse.has("status")) {
             status = indexResponse.get("status").intValue();
@@ -1447,7 +1459,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return logEntry.toString();
     }
 
-    static private String logEntry(String type, String id, String result){
+    static private String logEntry(@NonNull String type, @NonNull String id, @NonNull String result){
         if (DOC.equals(type)) {
             return id + ":" + result;
         } else {
@@ -1455,7 +1467,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    public void setWriteJsonDir(File file) {
+    public void setWriteJsonDir(@Nullable File file) {
         if (file != null) {
             if (! file.exists()) {
                 if (file.mkdirs()) {
@@ -1468,28 +1480,31 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.writeJsonDir = file;
     }
 
-    protected Request createRequest(String method, String su) {
-        if (su == null) {
-            su = "";
+    protected Request createRequest(@NonNull String method, @Nullable String operation) {
+        if (operation == null) {
+            operation = "";
         }
-        return new Request(method, "/" + getIndexName() + su);
+        if (StringUtils.isNotEmpty(operation)) {
+            assert operation.startsWith("/");
+        }
+        return new Request(method, "/" + getIndexName() + operation);
     }
 
-    protected Request createGet(String su) {
-        return createRequest(GET, su);
+    protected Request createGet(@Nullable String operation) {
+        return createRequest(GET, operation);
     }
 
-    protected Request createHead(String su) {
-        return createRequest(Methods.HEAD, su);
-    }
-    protected Request createPut(String su) {
-        return createRequest(PUT, su);
-    }
-    protected Request createDelete(String su) {
-        return createRequest(Methods.METHOD_DELETE, su);
+    protected Request createHead(@Nullable String operation) {
+        return createRequest(HEAD, operation);
     }
 
+    protected Request createPut(@Nullable String operation) {
+        return createRequest(PUT, operation);
+    }
 
+    protected Request createDelete(@Nullable String operation) {
+        return createRequest(Methods.METHOD_DELETE, operation);
+    }
 
     @Override
     public void close() throws Exception {

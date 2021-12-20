@@ -8,6 +8,9 @@
     </layout>
   </appender>
 
+  <logger name="org.elasticsearch.client.RestClient">
+    <level value="ERROR" />
+  </logger>
   <root>
     <level value="INFO"/>
     <appender-ref ref="console"/>
