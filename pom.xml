@@ -247,12 +247,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.3.13</spring.version>
+    <spring.version>5.3.14</spring.version>
     <spring-security.version>5.6.0</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.8.2</junit.version>
-    <mockito.version>4.1.0</mockito.version>
+    <mockito.version>4.2.0</mockito.version>
     <assertj.version>3.21.0</assertj.version>
     <resteasy.version>4.7.4.Final</resteasy.version>
     <bytebuddy.version>1.12.3</bytebuddy.version>
@@ -262,7 +262,7 @@
     <guava.version>31.0.1-jre</guava.version>
     <javassist.version>3.28.0-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.8.3</xmlunit.version>
+    <xmlunit.version>2.8.4</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
 
     <httpcomponents.version>4.5.13</httpcomponents.version>
@@ -687,7 +687,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.2</version>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
@@ -731,7 +731,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.19.0</version>
+      <version>3.21.0</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
