@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.slf4j.event.Level;
 
 import nl.vpro.logging.simple.*;
 

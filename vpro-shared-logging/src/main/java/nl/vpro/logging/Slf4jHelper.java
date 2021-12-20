@@ -17,6 +17,12 @@ public class Slf4jHelper {
     private Slf4jHelper() {
     }
 
+
+
+    public static void log(Logger logger, nl.vpro.logging.simple.Level level, String txt) {
+        log(logger, Level.valueOf(level.name()), txt);
+    }
+
     /**
      * Log at the specified level. If the "logger" is null, nothing is logged.
      * If the "level" is null, nothing is logged. If the "txt" is null,
@@ -43,6 +49,11 @@ public class Slf4jHelper {
                 break;
             }
         }
+    }
+
+
+    public static void log(Logger logger, nl.vpro.logging.simple.Level level, String format, Object... argArray) {
+        log(logger, Level.valueOf(level.name()), format, argArray);
     }
 
     /**
@@ -77,6 +88,12 @@ public class Slf4jHelper {
     public static void debugOrInfo(Logger logger, boolean info, String format, Object... argArray) {
         log(logger, info ? Level.INFO : Level.DEBUG, format, argArray);
     }
+
+
+    public static void log(Logger logger, nl.vpro.logging.simple.Level level, String txt, Throwable throwable) {
+        log(logger, Level.valueOf(level.name()), txt, throwable);
+    }
+
 
     /**
      * Log at the specified level, with a Throwable on top. If the "logger" is null,

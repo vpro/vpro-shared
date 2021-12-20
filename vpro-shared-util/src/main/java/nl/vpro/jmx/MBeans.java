@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 import com.google.common.util.concurrent.Futures;
 

@@ -11,7 +11,6 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
@@ -139,7 +138,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         if (wrapLogInfo != null) {
             result = new SimpleLoggerWrapper(result) {
                 @Override
-                protected String wrapMessage(Level level, CharSequence message) {
+                protected String wrapMessage(nl.vpro.logging.simple.Level level, CharSequence message) {
                     return wrapLogInfo.apply(level, message);
 
                 }

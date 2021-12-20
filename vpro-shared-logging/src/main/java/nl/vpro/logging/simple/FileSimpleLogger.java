@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.time.Instant;
-import java.util.logging.Level;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -51,13 +50,13 @@ public class FileSimpleLogger implements SimpleLogger {
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
-        if (level.intValue() < this.level.intValue()) {
+        if (level.toInt() < this.level.toInt()) {
             return;
         }
         try(FileWriter writer = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(writer);
             PrintWriter out = new PrintWriter(bw))  {
-            out.println(Instant.now() + "\t" + level.getName() + "\t" + message);
+            out.println(Instant.now() + "\t" + level.name() + "\t" + message);
             if (t != null) {
                 String stackTrace = ExceptionUtils.getStackTrace(t);
                 out.println(stackTrace);
