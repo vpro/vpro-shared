@@ -3,8 +3,6 @@ package nl.vpro.logging.simple;
 import java.io.PrintStream;
 import java.time.Instant;
 
-import org.slf4j.event.Level;
-
 /**
  * Simply logs everything to stdout/stderr
  *
@@ -13,7 +11,7 @@ import org.slf4j.event.Level;
  */
 public class ConsoleLogger implements SimpleLogger {
 
-    private Level stderrLevel = Level.WARN;
+    private final Level stderrLevel = Level.WARN;
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {

@@ -4,7 +4,6 @@ import lombok.Getter;
 
 import java.util.function.Function;
 
-import org.slf4j.event.Level;
 
 /**
  * Simply logs everything to a StringBuilder. It also works as a tail (to avoid excessive memory useage if lots is logged)

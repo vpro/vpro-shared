@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.event.Level;
 
 /**
  * Simply logs everything to a StringBuilder. It also works as a tail (to avoid excessive memory useage if lots is logged)
@@ -44,7 +43,7 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
 
     @Override
     public synchronized void accept(Level level, CharSequence message, Throwable t) {
-        if (level.toInt() < this.level.toInt()) {
+        if (level.compareTo(this.level) < 0) {
             return;
         }
         if (needsNewLine()) {

@@ -2,7 +2,6 @@ package nl.vpro.logging.simple;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
 
@@ -40,7 +39,7 @@ public class Slf4jSimpleLogger implements SimpleLogger {
 
     @Override
     public boolean isEnabled(Level level) {
-        return level.toInt() >= threshold.toInt() && Slf4jHelper.isEnabled(logger, level);
+        return level.toInt() >= threshold.toInt() && Slf4jHelper.isEnabled(logger, org.slf4j.event.Level.valueOf(level.name()));
     }
 
     @Override
@@ -52,7 +51,9 @@ public class Slf4jSimpleLogger implements SimpleLogger {
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
         if (isEnabled(level)) {
-            Slf4jHelper.log(logger, level, message == null ? null : message.toString(), t);
+            Slf4jHelper.log(logger,
+                org.slf4j.event.Level.valueOf(level.name()),
+                message == null ? null : message.toString(), t);
         }
     }
 
@@ -65,4 +66,14 @@ public class Slf4jSimpleLogger implements SimpleLogger {
     public String toString() {
         return "slf4j:" + logger.getName();
     }
+
+    public static SimpleLogger chain(SimpleLogger start, Logger... logger) {
+        SimpleLogger[] array = new SimpleLogger[logger.length + 1];
+        array[0] = start;
+        for (int i = 1; i <= logger.length; i++) {
+            array[i] = new Slf4jSimpleLogger(logger[i - 1]);
+        }
+        return new ChainedSimpleLogger(array);
+    }
+
 }

@@ -2,7 +2,6 @@ package nl.vpro.logging.simple;
 
 
 import org.apache.logging.log4j.Logger;
-import org.slf4j.event.Level;
 
 /**
  *  SimpleLogger that wraps log4j2's {@link Logger}.
@@ -45,5 +44,7 @@ public class Log4j2SimpleLogger implements SimpleLogger {
                 return org.apache.logging.log4j.Level.ERROR;
         }
     }
+
+
 
 }

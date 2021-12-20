@@ -4,7 +4,6 @@ import java.util.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import org.slf4j.event.Level;
 
 /**
  * Wraps all log events to zero or more other instances of {@link SimpleLogger}

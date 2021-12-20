@@ -2,7 +2,6 @@ package nl.vpro.logging.simple;
 
 import java.util.logging.Logger;
 
-import org.slf4j.event.Level;
 
 /**
  * SimpleLogger that wraps a java.util.logger.

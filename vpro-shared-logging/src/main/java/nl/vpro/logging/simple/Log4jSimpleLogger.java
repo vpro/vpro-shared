@@ -2,7 +2,6 @@ package nl.vpro.logging.simple;
 
 
 import org.apache.log4j.Logger;
-import org.slf4j.event.Level;
 
 /**
  *  SimpleLogger that wraps {@link org.apache.log4j.Logger}

@@ -1,7 +1,5 @@
 package nl.vpro.logging.simple;
 
-import org.slf4j.event.Level;
-
 /**
  * @author Michiel Meeuwissen
  * @since 1.77

@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.function.Function;
 
-import org.slf4j.event.Level;
 
 /**
  * @author Michiel Meeuwissen

@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.time.Instant;
+import java.util.logging.Level;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.event.Level;
 
 /**
  * Simply logs everything to a File.
@@ -51,13 +51,13 @@ public class FileSimpleLogger implements SimpleLogger {
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
-        if (level.toInt() < this.level.toInt()) {
+        if (level.intValue() < this.level.intValue()) {
             return;
         }
         try(FileWriter writer = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(writer);
             PrintWriter out = new PrintWriter(bw))  {
-            out.println(Instant.now() + "\t" + level.name() + "\t" + message);
+            out.println(Instant.now() + "\t" + level.getName() + "\t" + message);
             if (t != null) {
                 String stackTrace = ExceptionUtils.getStackTrace(t);
                 out.println(stackTrace);

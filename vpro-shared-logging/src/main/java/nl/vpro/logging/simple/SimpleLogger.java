@@ -4,7 +4,6 @@ import java.util.function.BiConsumer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -59,6 +58,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         }
     }
 
+    @Deprecated
     static Slf4jSimpleLogger slfj4(Logger log) {
         return new Slf4jSimpleLogger(log);
     }
@@ -178,13 +178,9 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
 
+    @Deprecated
     default SimpleLogger chain(Logger... logger) {
-        SimpleLogger[] array = new SimpleLogger[logger.length + 1];
-        array[0] = this;
-        for (int i = 1; i <= logger.length; i++) {
-            array[i] = SimpleLogger.slfj4(logger[i - 1]);
-        }
-        return new ChainedSimpleLogger(array);
+        return Slf4jSimpleLogger.chain(this, logger);
     }
 
 }

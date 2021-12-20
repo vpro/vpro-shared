@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Queue;
 
 import org.slf4j.MDC;
-import org.slf4j.event.Level;
 
 /**
  * A {@link SimpleLogger} that adds every log event to a {@link Queue} of {@link Event}'s (or possibly extensions thereof)
