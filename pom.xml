@@ -46,7 +46,7 @@
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>HEAD</tag>
+    <tag>REL-2.29-SNAPSHOT</tag>
   </scm>
 
 
