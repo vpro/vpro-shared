@@ -19,22 +19,26 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <!-- besides log4j api itself, support logging
     via slf4j and jul api's -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
+      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-jul</artifactId>
+      <scope>runtime</scope>
     </dependency>
 
     <!-- support for asynchronous logging in log4j -->
     <dependency>
       <groupId>com.lmax</groupId>
       <artifactId>disruptor</artifactId>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>
