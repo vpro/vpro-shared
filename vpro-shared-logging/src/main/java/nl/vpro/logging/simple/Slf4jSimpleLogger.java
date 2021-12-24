@@ -30,17 +30,17 @@ public class Slf4jSimpleLogger implements SimpleLogger {
         this(LoggerFactory.getLogger(clazz));
     }
 
-    public static SimpleLogger of(Logger logger) {
+    public static Slf4jSimpleLogger of(Logger logger) {
         return new Slf4jSimpleLogger(logger);
     }
 
     /**
      * Like {@link #of(Logger)}, but with this name it's nicer of static imports
      */
-    public static SimpleLogger slf4j(Logger logger) {
+    public static Slf4jSimpleLogger slf4j(Logger logger) {
         return of(logger);
     }
-    public static SimpleLogger of(String category) {
+    public static Slf4jSimpleLogger of(String category) {
         return of(LoggerFactory.getLogger(category));
     }
 
