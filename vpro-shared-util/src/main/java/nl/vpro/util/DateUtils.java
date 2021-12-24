@@ -4,16 +4,16 @@
  */
 package nl.vpro.util;
 
+import java.time.Duration;
 import java.time.*;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.*;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.*;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import com.google.common.collect.Range;
 
 /**
  * @author Roelof Jan Koekoek
@@ -122,6 +122,10 @@ public class DateUtils {
             return false;
         }
         return instant1.isAfter(instant2);
+    }
+
+    public static Range<LocalDateTime> toLocalDateTimeRange(@NonNull Range<Instant> instantRange, @NonNull ZoneId zonedId) {
+        return Ranges.convert(instantRange, i -> i.atZone(zonedId).toLocalDateTime());
     }
 
 }
