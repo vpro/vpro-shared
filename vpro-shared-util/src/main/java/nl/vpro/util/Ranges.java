@@ -14,7 +14,7 @@ public class Ranges {
      * in which case unbounded ranges are created
      * @since 2.29.1
      */
-    public static <C extends Comparable<C>> Range<C> closedOpen(@Nullable C start, @Nullable C stop) {
+    public static <C extends Comparable<?>> Range<C> closedOpen(@Nullable C start, @Nullable C stop) {
         if(start == null) {
             if (stop == null) {
                 return Range.all();
@@ -31,8 +31,7 @@ public class Ranges {
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    public static <C extends Comparable, D extends Comparable> Range<D> convert(Range<C> in, Function<C, D> convertor) {
+    public static <C extends Comparable<?>, D extends Comparable<?>> Range<D> convert(Range<C> in, Function<C, D> convertor) {
         if (in.hasLowerBound()) {
             if (in.hasUpperBound()) {
                 return Range.range(convertor.apply(in.lowerEndpoint()), in.lowerBoundType(), convertor.apply(in.upperEndpoint()), in.upperBoundType());
