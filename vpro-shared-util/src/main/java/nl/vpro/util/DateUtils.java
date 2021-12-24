@@ -117,6 +117,12 @@ public class DateUtils {
         return date == null ? null : date.atZone(zoneId).toInstant();
     }
 
+
+    @Nullable
+    public static LocalDateTime toLocalDateTime(@Nullable Instant date, ZoneId zoneId) {
+        return date == null ? null : date.atZone(zoneId).toLocalDateTime();
+    }
+
     public static boolean isAfter(Instant instant1, Instant instant2) {
         if (instant1 == null || instant2 == null) {
             return false;
