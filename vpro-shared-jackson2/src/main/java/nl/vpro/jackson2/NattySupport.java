@@ -22,7 +22,7 @@ class NattySupport {
     static Optional<Instant> parseDate(String value) {
         List<DateGroup> groups = PARSER.parse(value);
         if (groups.size() == 1) {
-            return Optional.of(DateUtils.toInstant(groups.get(0).getDates().get(0)));
+            return Optional.ofNullable(DateUtils.toInstant(groups.get(0).getDates().get(0)));
         }
         return Optional.empty();
     }
