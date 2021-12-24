@@ -4,9 +4,12 @@
  */
 package nl.vpro.util;
 
+import java.time.*;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+
+import com.google.common.collect.Range;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,10 +51,7 @@ public class DateUtilsTest {
         assertThat(DateUtils.maximalIsNull(MAX_VALUE)).isNull();
         assertThat(DateUtils.maximalIsNull(MIN_VALUE)).isEqualTo(MIN_VALUE);
         assertThat(DateUtils.maximalIsNull(new Date(100))).isEqualTo(new Date(100));
-
     }
-
-
 
     @Test
     public void testNullIsMinimal() {
@@ -62,6 +62,12 @@ public class DateUtilsTest {
         assertThat(DateUtils.minimalIsNull(MAX_VALUE)).isEqualTo(MAX_VALUE);
         assertThat(DateUtils.minimalIsNull(MIN_VALUE)).isNull();
         assertThat(DateUtils.minimalIsNull(new Date(100))).isEqualTo(new Date(100));
+    }
 
+    @Test
+    public void convert() {
+        Range<Instant> instantRange = Ranges.closedOpen(Instant.parse("2021-12-24T12:00:00Z"), Instant.parse("2021-12-26T12:00:00Z"));
+        Range<LocalDateTime> converted = DateUtils.toLocalDateTimeRange(instantRange, ZoneId.of("Europe/Amsterdam"));
+        assertThat(converted.toString()).isEqualTo("[2021-12-24T13:00..2021-12-26T13:00)");
     }
 }
