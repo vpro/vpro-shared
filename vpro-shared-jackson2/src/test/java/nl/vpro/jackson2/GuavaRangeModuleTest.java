@@ -13,11 +13,12 @@ import com.google.common.collect.Range;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GuavaRangeTest {
+class GuavaRangeModuleTest {
 
     ObjectMapper mapper = new ObjectMapper();
     {
         mapper.registerModule(new DateModule());
+        mapper.registerModule(new GuavaRangeModule());
     }
 
 
@@ -25,11 +26,11 @@ class GuavaRangeTest {
         Range<Integer> range;
     }
     static class WithIntegerRange {
-        @JsonSerialize(using = GuavaRange.Serializer.class) Range<Integer> range;
+        @JsonSerialize(using = GuavaRangeModule.Serializer.class) Range<Integer> range;
     }
 
     static class WithInstantRange {
-        @JsonSerialize(using = GuavaRange.Serializer.class)
+        @JsonSerialize(using = GuavaRangeModule.Serializer.class)
         Range<Instant> range;
     }
 
@@ -39,6 +40,7 @@ class GuavaRangeTest {
         Assertions.assertThatThrownBy(() -> {
             WithoutSerializer a = new WithoutSerializer();
             a.range = Range.closedOpen(1, 2);
+            mapper.writeValueAsString(a);
         }).isInstanceOf(InvalidDefinitionException.class);
 
     }

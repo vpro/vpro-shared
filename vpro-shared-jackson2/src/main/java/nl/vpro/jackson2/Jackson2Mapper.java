@@ -204,6 +204,15 @@ public class Jackson2Mapper extends ObjectMapper {
             log.error(e.getMessage(), e);
             loggedAboutAvro = true;
         }
+
+        try {
+            Class<?> guava = Class.forName("nl.vpro.jackson2.GuavaRangeModule");
+            mapper.registerModule((com.fasterxml.jackson.databind.Module) guava.newInstance());
+        } catch (ClassNotFoundException ncdfe) {
+            log.debug(ncdfe.getMessage());
+        } catch (IllegalAccessException | InstantiationException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public static void addFilter(String key, PropertyFilter filter) {
