@@ -8,6 +8,10 @@ import com.google.common.collect.Range;
 
 public class Ranges {
 
+    private Ranges() {
+
+    }
+
 
     /**
      * Creates on {@link Range#openClosed(Comparable, Comparable)} range, but the arguments can be {@code null}
@@ -31,10 +35,22 @@ public class Ranges {
         }
     }
 
-    public static <C extends Comparable<?>, D extends Comparable<?>> Range<D> convert(Range<C> in, Function<C, D> convertor) {
+    public static <C extends Comparable<? super C>, D extends Comparable<? super D>> Range<D> convert(Range<C> in, Function<C, D> convertor) {
         if (in.hasLowerBound()) {
             if (in.hasUpperBound()) {
-                return Range.range(convertor.apply(in.lowerEndpoint()), in.lowerBoundType(), convertor.apply(in.upperEndpoint()), in.upperBoundType());
+                D lower = convertor.apply(in.lowerEndpoint());
+                D upper = convertor.apply(in.upperEndpoint());
+                if (lower.compareTo(upper) > 0) {
+                      return Range.range(
+                          upper, in.upperBoundType(),
+                          lower, in.lowerBoundType()
+                    );
+                } else {
+                    return Range.range(
+                        lower, in.lowerBoundType(),
+                        upper, in.upperBoundType()
+                    );
+                }
             } else {
                 return Range.downTo(convertor.apply(in.lowerEndpoint()), in.lowerBoundType());
             }

@@ -70,7 +70,8 @@ class GuavaRangeModuleTest {
             Instant.parse("2021-12-25T10:00:00Z")
         );
 
-        assertThat(mapper.writeValueAsString(a)).isEqualTo("{\"range\":{\"lowerEndpoint\":1640340000000,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":1640426400000,\"upperBoundType\":\"OPEN\"}}");
+        assertThat(mapper.writeValueAsString(a)).isEqualTo(
+            "{\"range\":{\"lowerEndpoint\":1640340000000,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":1640426400000,\"upperBoundType\":\"OPEN\"}}");
 
     }
 
