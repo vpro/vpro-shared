@@ -6,8 +6,7 @@ package nl.vpro.validation;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.util.Arrays;
 
 import javax.validation.ConstraintValidator;
@@ -16,7 +15,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
-public class URIValidator implements ConstraintValidator<URI, String> {
+public class URIValidator implements ConstraintValidator<URI, Object> {
 
     URI annotation;
 
@@ -26,58 +25,63 @@ public class URIValidator implements ConstraintValidator<URI, String> {
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(Object value, ConstraintValidatorContext constraintValidatorContext) {
         if(value == null) {
             return true;
         }
+
+        if (value instanceof CharSequence) {
+            return validateCharSequence((CharSequence) value);
+        }
+        if (value instanceof java.net.URI) {
+            return validateURI((java.net.URI) value);
+        }
+        if (value instanceof URL) {
+            return validateURL((URL) value);
+        }
+        log.debug("Type unrecognized");
+        return false;
+
+    }
+
+
+
+    boolean validateURL(URL url) {
+        if (annotation.mustHaveScheme()) {
+            if (StringUtils.isEmpty(url.getProtocol())) {
+                log.debug("Scheme empty");
+                return false;
+            }
+        }
+        if (annotation.schemes().length > 0) {
+            if (! Arrays.asList(annotation.schemes()).contains(url.getProtocol())) {
+                log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
+                return false;
+                        }
+        }
+        if (annotation.minHostParts() > 0) {
+            if (url.getHost() == null || url.getHost().split("\\.").length < annotation.minHostParts()) {
+                log.debug("Too few host parts");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean validateCharSequence(CharSequence value) {
         if (StringUtils.isEmpty(value) && annotation.allowEmptyString()) {
             return true;
         }
 
         try {
-            java.net.URI uri = new java.net.URI(value);
-            if (annotation.mustHaveScheme()) {
-                if (StringUtils.isEmpty(uri.getScheme())) {
-                    log.debug("Scheme empty");
-                    return false;
-                }
-            }
-            if (annotation.schemes().length > 0) {
-                if (!Arrays.asList(annotation.schemes()).contains(uri.getScheme())) {
-                    log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
-                    return false;
-                }
-            }
-            if (annotation.minHostParts() > 0) {
-                if (uri.getHost() == null || uri.getHost().split("\\.").length < annotation.minHostParts()) {
-                    log.debug("Too few host parts");
-                    return false;
-                }
-            }
+            java.net.URI uri = new java.net.URI(value.toString());
+            return validateURI(uri);
         } catch(URISyntaxException e) {
             log.debug("{}:{}",  value, e.getMessage());
             if (this.annotation.lenient()) {
                 try {
-                    java.net.URL url = new java.net.URL(value);
-                    if (annotation.mustHaveScheme()) {
-                        if (StringUtils.isEmpty(url.getProtocol())) {
-                            log.debug("Scheme empty");
-                            return false;
-                        }
-                    }
-                    if (annotation.schemes().length > 0) {
-                        if (! Arrays.asList(annotation.schemes()).contains(url.getProtocol())) {
-                            log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
-                            return false;
-                        }
-                    }
-                    if (annotation.minHostParts() > 0) {
-                        if (url.getHost() == null || url.getHost().split("\\.").length < annotation.minHostParts()) {
-                            log.debug("Too few host parts");
-                            return false;
-                        }
-                    }
-                    return true;
+                    java.net.URL url = new java.net.URL(value.toString());
+                    return validateURL(url);
                 } catch (MalformedURLException e1) {
                     log.debug("{}:{}",  value, e.getMessage());
                     return false;
@@ -86,7 +90,27 @@ public class URIValidator implements ConstraintValidator<URI, String> {
                 return false;
             }
         }
+    }
 
+    boolean validateURI(java.net.URI uri) {
+        if (annotation.mustHaveScheme()) {
+            if (StringUtils.isEmpty(uri.getScheme())) {
+                log.debug("Scheme empty");
+                return false;
+            }
+        }
+        if (annotation.schemes().length > 0) {
+            if (!Arrays.asList(annotation.schemes()).contains(uri.getScheme())) {
+                log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
+                return false;
+            }
+        }
+        if (annotation.minHostParts() > 0) {
+            if (uri.getHost() == null || uri.getHost().split("\\.").length < annotation.minHostParts()) {
+                log.debug("Too few host parts");
+                return false;
+            }
+        }
         return true;
     }
 }
