@@ -10,12 +10,19 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * A displayable has a {@link #getDisplayName()} method, to display the object as a single string (in dutch) to the user.
+ * A displayable has a {@link #getDisplayName()} method, to display the object as a single string (in {@link Locales#getDefault()}) to the user.
+ *
+ * This interface contains only default methods, which call each other.
+ * Implementations must override at least one, either {@link #getDisplayName()} if no localization is necessary or {@link #getDisplayName(Locale)} if it is.
+ *
  * @author Roelof Jan Koekoek
  * @since 2.30
  */
 public interface Displayable {
 
+    /**
+     * Returns the display value in the default locale.
+     */
     default String getDisplayName() {
         return getDisplayName(Locales.getDefault()).getValue();
     }
