@@ -46,7 +46,7 @@
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>REL-2.29</tag>
+    <tag>HEAD</tag>
   </scm>
 
 
@@ -248,15 +248,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.3.14</spring.version>
+    <spring.version>5.3.15</spring.version>
     <spring-security.version>5.6.1</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.8.2</junit.version>
     <mockito.version>4.2.0</mockito.version>
-    <assertj.version>3.21.0</assertj.version>
-    <resteasy.version>4.7.4.Final</resteasy.version>
-    <bytebuddy.version>1.12.3</bytebuddy.version>
+    <assertj.version>3.22.0</assertj.version>
+    <resteasy.version>4.7.5.Final</resteasy.version>
+    <bytebuddy.version>1.12.7</bytebuddy.version>
     <slf4j.version>1.7.32</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.17.1</log4j2.version>
@@ -267,7 +267,7 @@
     <hamcrest.version>2.2</hamcrest.version>
 
     <httpcomponents.version>4.5.13</httpcomponents.version>
-    <httpcomponentscore.version>4.4.14</httpcomponentscore.version>
+    <httpcomponentscore.version>4.4.15</httpcomponentscore.version>
 
     <hibernate.version>5.4.27.Final</hibernate.version>
     <hibernate.search.version>5.11.9.Final</hibernate.search.version>
@@ -288,7 +288,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.8.1</micrometer.version>
+    <micrometer.version>1.8.2</micrometer.version>
   </properties>
 
   <dependencyManagement>
