@@ -8,10 +8,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.apache.commons.text.StringEscapeUtils;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.*;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
 
 /**
@@ -31,7 +31,7 @@ public class TextUtil {
      * Checks if given text input complies to POMS standard.
      * @see #ILLEGAL_PATTERN for a rough check
      */
-    public static boolean isValid(String input) {
+    public static boolean isValid(@NonNull String input) {
         Matcher matcher = ILLEGAL_PATTERN.matcher(input);
         if(!matcher.find()) {
             return true;
@@ -39,7 +39,8 @@ public class TextUtil {
         return Objects.equals(normalizeWhiteSpace(input), normalizeWhiteSpace(sanitize(input)));
     }
 
-    public static String normalizeWhiteSpace(String input) {
+    @PolyNull
+    public static String normalizeWhiteSpace(@PolyNull String input) {
         if (input == null) {
             return null;
         }
@@ -50,18 +51,21 @@ public class TextUtil {
      * Replaces all line separators with a single white space character. The line separator character (\u2028) is
      * forbidden in most modern browsers. These browsers won't render any text containing this character.
      */
-    public static String replaceLineBreaks(String input) {
+    @PolyNull
+    public static String replaceLineBreaks(@PolyNull String input) {
         return input != null ? input.replace('\u2028', ' ') : null;
     }
 
     /**
      * Replaces all non breaking space characters (\u00A0) with a normal white space character.
      */
-    public static String replaceNonBreakingSpace(String input) {
+    @PolyNull
+    public static String replaceNonBreakingSpace(@PolyNull String input) {
         return input != null ? input.replace('\u00A0', ' ') : null;
     }
 
-    public static String replaceOdd(String input) {
+    @PolyNull
+    public static String replaceOdd(@PolyNull String input) {
         if (input == null) {
             return null;
         }
@@ -76,35 +80,47 @@ public class TextUtil {
     /**
      * Replaces all non breaking space characters (\u00A0) with a normal white space character.
      */
-    public static String replaceHtmlEscapedNonBreakingSpace(String input) {
+    @PolyNull
+    public static String replaceHtmlEscapedNonBreakingSpace(@PolyNull String input) {
         return input != null ? input.replace("&nbsp;", " ") : null;
     }
 
     /**
      * Un-escapes all html escape characters. For example: Replaces "&amp;amp;" with "&amp;".
      */
-    public static String unescapeHtml(String input) {
-        return input != null ? StringEscapeUtils.unescapeHtml4(input.replace("&nbsp;", " ")) : null;
+    @PolyNull
+    public static String unescapeHtml(@PolyNull String input) {
+        return input != null ? StringEscapeUtils.unescapeHtml4(
+            input.replace("&nbsp;", " ")
+        ) : null;
     }
 
     /**
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
      */
-    public static String stripHtml(String input) {
+    @PolyNull
+    public static String stripHtml(@PolyNull String input) {
         if (input == null) {
             return null;
         }
 
-        return Jsoup.clean(input, Safelist.none());
-
+        Document jsoupDoc = Jsoup.parse(input);
+        Document.OutputSettings outputSettings = new Document.OutputSettings();
+        outputSettings.prettyPrint(false);
+        jsoupDoc.outputSettings(outputSettings);
+        jsoupDoc.select("br").before(" ");
+        jsoupDoc.select("p").before(" ");
+        String str = jsoupDoc.html();
+        String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
+        return strWithNewLines.replaceAll(" +", " ").trim();
     }
 
     /**
      * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
      * might lead to problems for end users.
      */
-    @Nullable
-    public static String sanitize(@Nullable String input) {
+    @PolyNull
+    public static String sanitize(@PolyNull String input) {
         if (input == null) {
             return null;
         }
@@ -118,7 +134,28 @@ public class TextUtil {
 
     }
 
-    private static String _sanitize(String input) {
+    /**
+     * @since 2.30
+     */
+    @PolyNull
+    public static String unhtml(@PolyNull String input) {
+        if (input == null) {
+            return null;
+        }
+        Document jsoupDoc = Jsoup.parse(input);
+        Document.OutputSettings outputSettings = new Document.OutputSettings();
+        outputSettings.prettyPrint(false);
+        jsoupDoc.outputSettings(outputSettings);
+        jsoupDoc.select("br").before("\\n");
+        jsoupDoc.select("p").before("\\n\\n");
+        String str = jsoupDoc.html().replaceAll("\\\\n", "\n");
+        String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
+        return strWithNewLines.trim();
+    }
+
+
+    @PolyNull
+    private static String _sanitize(@PolyNull String input) {
         return unescapeHtml(
             stripHtml(
                 replaceOdd(
@@ -185,10 +222,10 @@ public class TextUtil {
                 return i;
             }
 
-
         }
         return -1;
     }
+
     public static String truncate(String text, int max, boolean ellipses) {
         if (text == null) {
             return null;
