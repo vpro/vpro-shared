@@ -226,7 +226,8 @@ public class TextUtil {
         return -1;
     }
 
-    public static String truncate(String text, int max, boolean ellipses) {
+    @PolyNull
+    public static String truncate(@PolyNull String text, int max, boolean ellipses) {
         if (text == null) {
             return null;
         }
@@ -261,7 +262,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'stroke through' (using unicode control characters)
      * @since 2.11
      */
-    public static String strikeThrough(CharSequence s) {
+    @PolyNull
+    public static String strikeThrough(@PolyNull CharSequence s) {
         return controlEach(s, '\u0336');
     }
 
@@ -269,7 +271,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'underlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String underLine(CharSequence s) {
+    @PolyNull
+    public static String underLine(@PolyNull CharSequence s) {
         return controlEach(s, '\u0332');
     }
 
@@ -277,7 +280,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'double underlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String underLineDouble(CharSequence s) {
+    @PolyNull
+    public static String underLineDouble(@PolyNull CharSequence s) {
         return controlEach(s, '\u0333');
     }
 
@@ -285,7 +289,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'overlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String overLine(CharSequence s) {
+    @PolyNull
+    public static String overLine(@PolyNull CharSequence s) {
         return controlEach(s, '\u0305');
     }
 
@@ -293,7 +298,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'double overlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String overLineDouble(CharSequence s) {
+    @PolyNull
+    public static String overLineDouble(@PolyNull CharSequence s) {
         return controlEach(s, '\u033f');
     }
 
@@ -301,14 +307,16 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'diaeresised under' (using unicode control characters)
      * @since 2.11
      */
-    public static String underDiaeresis(CharSequence s) {
+    @PolyNull
+    public static String underDiaeresis(@PolyNull CharSequence s) {
         return controlEach(s, '\u0324');
     }
 
     /**
      * @since 2.11
      */
-    public static String controlEach(CharSequence s, Character control) {
+    @PolyNull
+    public static String controlEach(@PolyNull CharSequence s, @NonNull Character control) {
         if (s == null) {
             return null;
         }
