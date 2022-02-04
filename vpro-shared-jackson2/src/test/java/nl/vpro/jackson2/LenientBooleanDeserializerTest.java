@@ -19,6 +19,10 @@ public class LenientBooleanDeserializerTest {
     public static class A {
         @JsonDeserialize(using = LenientBooleanDeserializer.class)
         Boolean bool;
+
+        @JsonDeserialize(using = LenientBooleanDeserializer.class)
+        boolean b;
+
     }
     ObjectMapper mapper = new ObjectMapper();
 
@@ -39,6 +43,9 @@ public class LenientBooleanDeserializerTest {
     public void deserializeNull() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         assertThat(mapper.readValue("{\"bool\": null}", A.class).bool).isNull();
+        assertThat(mapper.readValue("{\"bool\": null}", A.class).b).isFalse();
+        assertThat(mapper.readValue("{\"b\": \"x\"}", A.class).b).isFalse();
+
 
 
 
