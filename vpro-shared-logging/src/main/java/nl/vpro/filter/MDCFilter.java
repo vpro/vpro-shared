@@ -58,6 +58,12 @@ public class  MDCFilter implements Filter {
             }
             MDC.put(REMOTE_ADDR, ipAddress);
 
+            final String userAgent = request.getHeader("User-Agent");
+            if (userAgent != null) {
+                MDC.put(USER_AGENT, userAgent);
+            }
+
+
             chain.doFilter(req, res);
         } finally {
             // access logging...
