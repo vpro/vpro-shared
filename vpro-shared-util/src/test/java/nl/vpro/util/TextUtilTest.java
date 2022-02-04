@@ -7,7 +7,7 @@ package nl.vpro.util;
 import java.util.Locale;
 
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -175,68 +175,81 @@ public class TextUtilTest {
     @Test
     public void testTruncateShort() {
         assertThat(TextUtil.truncate("Bla bla. Bloe bloe", 3)).isEqualTo("Bla");
-
     }
 
     @Test
     public void testTruncateShort2() {
         assertThat(TextUtil.truncate("Bla bla. Bloe bloe", 5)).isEqualTo("Bla");
-
     }
 
 
     @Test
     public void testTruncateShortWithEllipses() {
         assertThat(TextUtil.truncate("Bla bla. Bloe bloe", 5, true)).isEqualTo("Bla...");
-
     }
 
 
     @Test
     public void testSanitizeIframe() {
-        assertThat(Jsoup.clean("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>", Whitelist.none()))
+        assertThat(Jsoup.clean("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>", Safelist.none()))
             .isEqualTo("&lt;a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\"&gt;I Will Survive by Fists Of Time&lt;/a&gt;");
 
-        assertThat(TextUtil.sanitize("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
-        assertThat(TextUtil.sanitize("<iframe style=\"border: 0; width: 100%; height: 42px;\" src=\"https://bandcamp.com/EmbeddedPlayer/album=2972369232/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/\" seamless><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
+        assertThat(sanitize("<iframe><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
+        assertThat(sanitize("<iframe style=\"border: 0; width: 100%; height: 42px;\" src=\"https://bandcamp.com/EmbeddedPlayer/album=2972369232/size=small/bgcol=ffffff/linkcol=0687f5/transparent=true/\" seamless><a href=\"http://fistsoftime.bandcamp.com/album/i-will-survive\">I Will Survive by Fists Of Time</a></iframe>")).isEqualTo("I Will Survive by Fists Of Time");
     }
 
     @Test
     public void testSaniziteOddchars() {
-        assertThat(TextUtil.sanitize("a\bc")).isEqualTo("a c");
-        assertThat(TextUtil.sanitize("a\b\u0007c")).isEqualTo("a c");
+        assertThat(sanitize("a\bc")).isEqualTo("a c");
+        assertThat(sanitize("a\b\u0007c")).isEqualTo("a c");
 
 
         // this was an actual occurence:
-        assertThat(TextUtil.sanitize("Zanger Van Boven is er duidelijk over: “Je kan deze cd zien als een retrospectief van toen tot nu.” \bZo staan er nieuwe nummers op het album die enkele weken voor de opnamesessies zijn geschreven, maar ook oude nummers die al meegaan sinds dat de band enkele jaren geleden haar eerste album uitbracht. In sommige nummers zijn de inspiratiebronnen van de band goed te herkennen. Zo doet de gitaar in ‘Voor Het Fatsoen’ denken aan \u0007‘Norwegian Wood’ (The Beatles) \ben verraadt het connecties met de Engelse beatmuziek uit de jaren 60. ‘Zo is het Maar Net’ heeft iets van ‘Another Brick In The Wall’ (Pink Floyd) en laat zien dat de band zich ook heeft laten vormen door de psychedelische rock uit de jaren 70. \u0007Zo is de cd niet alleen een kijkje in de keuken van de band zelf, maar is het ook een greep uit 60 jaar popmuziek."))
+        assertThat(sanitize("Zanger Van Boven is er duidelijk over: “Je kan deze cd zien als een retrospectief van toen tot nu.” \bZo staan er nieuwe nummers op het album die enkele weken voor de opnamesessies zijn geschreven, maar ook oude nummers die al meegaan sinds dat de band enkele jaren geleden haar eerste album uitbracht. In sommige nummers zijn de inspiratiebronnen van de band goed te herkennen. Zo doet de gitaar in ‘Voor Het Fatsoen’ denken aan \u0007‘Norwegian Wood’ (The Beatles) \ben verraadt het connecties met de Engelse beatmuziek uit de jaren 60. ‘Zo is het Maar Net’ heeft iets van ‘Another Brick In The Wall’ (Pink Floyd) en laat zien dat de band zich ook heeft laten vormen door de psychedelische rock uit de jaren 70. \u0007Zo is de cd niet alleen een kijkje in de keuken van de band zelf, maar is het ook een greep uit 60 jaar popmuziek."))
             .isEqualTo("Zanger Van Boven is er duidelijk over: “Je kan deze cd zien als een retrospectief van toen tot nu.” Zo staan er nieuwe nummers op het album die enkele weken voor de opnamesessies zijn geschreven, maar ook oude nummers die al meegaan sinds dat de band enkele jaren geleden haar eerste album uitbracht. In sommige nummers zijn de inspiratiebronnen van de band goed te herkennen. Zo doet de gitaar in ‘Voor Het Fatsoen’ denken aan ‘Norwegian Wood’ (The Beatles) en verraadt het connecties met de Engelse beatmuziek uit de jaren 60. ‘Zo is het Maar Net’ heeft iets van ‘Another Brick In The Wall’ (Pink Floyd) en laat zien dat de band zich ook heeft laten vormen door de psychedelische rock uit de jaren 70. Zo is de cd niet alleen een kijkje in de keuken van de band zelf, maar is het ook een greep uit 60 jaar popmuziek.");
 
-        assertThat(TextUtil.sanitize("‘Ik hoop dat mensen na mijn film de liefde bedrijven’\u0000.")).isEqualTo("‘Ik hoop dat mensen na mijn film de liefde bedrijven’ .");
+        assertThat(sanitize("‘Ik hoop dat mensen na mijn film de liefde bedrijven’\u0000.")).isEqualTo("‘Ik hoop dat mensen na mijn film de liefde bedrijven’ .");
+    }
+
+    @Test
+    public void testSanitizeTouchingPs() {
+        assertThat(sanitize("<p>foo</p><p>bar</b>")).isEqualTo("foo bar");
     }
 
     @Test
     public void strikeThrough() {
         assertThat(TextUtil.strikeThrough("foo bar 123")).isEqualTo("f̶o̶o̶ ̶b̶a̶r̶ ̶1̶2̶3̶");
     }
+
     @Test
     public void underLine() {
         assertThat(TextUtil.underLine("foo bar 123")).isEqualTo("f̲o̲o̲ ̲b̲a̲r̲ ̲1̲2̲3̲");
     }
+
     @Test
     public void underLineDouble() {
         assertThat(TextUtil.underLineDouble("foo bar 123")).isEqualTo("f̳o̳o̳ ̳b̳a̳r̳ ̳1̳2̳3̳");
     }
+
     @Test
     public void overLine() {
         assertThat(TextUtil.overLine("foo bar 123")).isEqualTo("f̅o̅o̅ ̅b̅a̅r̅ ̅1̅2̅3̅");
     }
+
     @Test
     public void overLineDouble() {
         assertThat(TextUtil.overLineDouble("foo bar 123")).isEqualTo("f̿o̿o̿ ̿b̿a̿r̿ ̿1̿2̿3̿");
     }
+
     @Test
     public void underDiaeresis() {
         assertThat(TextUtil.underDiaeresis("foo bar 123")).isEqualTo("f̤o̤o̤ ̤b̤a̤r̤ ̤1̤2̤3̤");
+    }
+
+    @Test
+    public void insertNewlines() {
+        String example = "<p>Hokus pokus<p>foobar</p><p>Simsalabim</p><p>foo<br>bar</p>";
+        assertThat(TextUtil.unhtml(example)).isEqualTo("Hokus pokus\n\nfoobar\n\nSimsalabim\n\nfoo\nbar");
     }
 }
 
