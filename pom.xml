@@ -253,7 +253,7 @@
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.8.2</junit.version>
-    <mockito.version>4.2.0</mockito.version>
+    <mockito.version>4.3.1</mockito.version>
     <assertj.version>3.22.0</assertj.version>
     <resteasy.version>4.7.5.Final</resteasy.version>
     <bytebuddy.version>1.12.7</bytebuddy.version>
@@ -263,7 +263,7 @@
     <guava.version>31.0.1-jre</guava.version>
     <javassist.version>3.28.0-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.8.4</xmlunit.version>
+    <xmlunit.version>2.9.0</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
 
     <httpcomponents.version>4.5.13</httpcomponents.version>
@@ -459,7 +459,7 @@
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path-assert</artifactId>
-        <version>2.6.0</version>
+        <version>2.7.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -738,7 +738,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.21.1</version>
+      <version>3.21.2</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
