@@ -78,7 +78,6 @@ public class TimeUtilsTest {
 
         assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
 
-        assertThat(TimeUtils.parseDuration("P2Y2M10DT0H0M0.000S")).contains(Duration.ofDays(800));
 
         assertThatThrownBy(() -> TimeUtils.parseDuration("can'tbeparsed"))
             .isExactlyInstanceOf(DateTimeParseException.class)
@@ -102,7 +101,10 @@ public class TimeUtilsTest {
         assertThat(TimeUtils.parseTemporalAmount("1M").get()).isEqualTo(Duration.ofMinutes(1));
         assertThat(TimeUtils.parseTemporalAmount("PT1M").get()).isEqualTo(Duration.ofMinutes(1));
         assertThat(TimeUtils.parseTemporalAmount("T1M").get()).isEqualTo(Duration.ofMinutes(1));
-
+    }
+    @Test
+    public void parseYears() {
+        assertThat(TimeUtils.parseDuration("P2Y2M10DT0H0M0.000S")).contains(Duration.ofDays(800));
     }
 
     @Test
