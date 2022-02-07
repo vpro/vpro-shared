@@ -3,6 +3,7 @@ package nl.vpro.xml.bind;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
+import nl.vpro.util.BindingUtils;
 import nl.vpro.util.TimeUtils;
 
 /**
@@ -40,7 +42,7 @@ public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, 
             }
 
             try {
-                return TimeUtils.parseDuration(string).orElseGet(() -> {
+                return TimeUtils.parseDuration(string, Instant.EPOCH.atZone(BindingUtils.DEFAULT_ZONE)).orElseGet(() -> {
                     log.warn("Could not parse '" + string + "'");
                     return null;
                 });

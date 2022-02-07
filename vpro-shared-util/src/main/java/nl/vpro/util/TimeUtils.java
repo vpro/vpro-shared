@@ -98,7 +98,10 @@ public class TimeUtils {
      * @see #parseDuration(CharSequence)
      */
     public static Optional<Duration> parseDuration(CharSequence d) {
-        return parseDuration(null, d, Instant.EPOCH.atZone(ZONE_ID));
+        return parseDuration(d, Instant.EPOCH.atZone(ZONE_ID));
+    }
+    public static Optional<Duration> parseDuration(CharSequence d, ZonedDateTime at) {
+        return parseDuration(null, d, at);
     }
 
 
