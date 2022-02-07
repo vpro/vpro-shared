@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DurationXmlAdapterTest {
 
+
     DurationXmlAdapter adapter = new DurationXmlAdapter();
 
     @Test
@@ -23,6 +24,13 @@ public class DurationXmlAdapterTest {
     @Test
     public void adaptLong() {
         assertThat(adapter.marshal(Duration.ofDays(30).plus(Duration.ofHours(4))).toString()).isEqualTo("P0Y0M30DT4H0M0.000S");
+    }
+
+    @Test
+    public void veryLong() {
+        javax.xml.datatype.Duration xmlDuration = DurationXmlAdapter.DATATYPE_FACTORY.newDuration(Duration.ofDays(800).toMillis());
+        Duration d = adapter.unmarshal(xmlDuration);
+        assertThat(d).isEqualTo(Duration.ofDays(800));
     }
 
 }

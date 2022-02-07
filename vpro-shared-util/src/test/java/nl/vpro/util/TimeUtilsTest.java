@@ -78,6 +78,8 @@ public class TimeUtilsTest {
 
         assertThat(TimeUtils.parseDuration("").orElse(null)).isNull();
 
+        assertThat(TimeUtils.parseDuration("P2Y2M10DT0H0M0.000S")).contains(Duration.ofDays(800));
+
         assertThatThrownBy(() -> TimeUtils.parseDuration("can'tbeparsed"))
             .isExactlyInstanceOf(DateTimeParseException.class)
             .hasMessage("can'tbeparsed:Text cannot be parsed to a Duration")
