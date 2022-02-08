@@ -98,12 +98,17 @@ public class TimeUtils {
      * @see #parseDuration(CharSequence)
      */
     public static Optional<Duration> parseDuration(CharSequence d) {
-        return parseDuration(null, d);
+        return parseDuration(d, Instant.EPOCH.atZone(ZONE_ID));
+    }
+    public static Optional<Duration> parseDuration(CharSequence d, ZonedDateTime at) {
+        return parseDuration(null, d, at);
     }
 
-    private static final Pattern WEEKS = Pattern.compile("^P(\\d+)W$");
 
-    private static Optional<Duration> parseDuration(DateTimeParseException original, CharSequence d) {
+    private static final Pattern WEEKS = Pattern.compile("^P(\\d+)W$");
+    private static final Pattern COMPLETE_FORMAT = Pattern.compile("^(P(?:\\d+Y)?(?:\\d+M)?(?:\\d+D)?)(T(?:\\d+H)?(?:\\d+M)?(?:[\\d.]+S)?)$");
+
+    private static Optional<Duration> parseDuration(DateTimeParseException original, CharSequence d, ZonedDateTime at) {
         if (StringUtils.isBlank(d)) {
             return Optional.empty();
         }
@@ -126,7 +131,7 @@ public class TimeUtils {
 
             String ds = d.toString().replaceAll("\\s*", "");
             if (ds.length() < d.length()) {
-                return parseDuration(dtp, ds);
+                return parseDuration(dtp, ds, at);
             }
 
             try {
@@ -135,10 +140,17 @@ public class TimeUtils {
                 // ignore
             }
             if (!ds.startsWith("P")) {
-                return parseDuration(dtp, "P" + ds);
-            } else if (!ds.startsWith("PT")){
-                // so it did start with P, just not with PT, and it couldn't be parsed
-                return parseDuration(dtp, "PT" + ds.substring(1));
+                return parseDuration(dtp, "P" + ds, at);
+            } else {
+                Matcher completeMatcher = COMPLETE_FORMAT.matcher(ds);
+                if (completeMatcher.matches()) {
+                    Period p = Period.parse(completeMatcher.group(1));
+                    Duration time = Duration.parse("P" + completeMatcher.group(2));
+                    return Optional.of(Duration.between(at, at.plus(p).plus(time)));
+                } else if (!ds.startsWith("PT")){
+                    // so it did start with P, just not with PT, and it couldn't be parsed
+                    return parseDuration(dtp, "PT" + ds.substring(1), at);
+                }
             }
 
             throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
@@ -157,7 +169,7 @@ public class TimeUtils {
         try {
             return Optional.of(Period.parse(d));
         } catch (DateTimeParseException dte) {
-            return parseDuration(dte, d);
+            return parseDuration(dte, d, Instant.EPOCH.atZone(ZONE_ID));
         }
 
     }
