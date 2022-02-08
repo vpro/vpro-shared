@@ -1,10 +1,10 @@
 package nl.vpro.util;
 
 import java.util.Arrays;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.*;
 
 /**
  * A version is basicly a string existing of a number of parts.
@@ -31,9 +31,17 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
      *
      * In that way something like '5.12-SNAPSHOT' will simply be equivalent to '5.12'.
      */
-    public static IntegerVersion parseIntegers(String string) {
+    @PolyNull
+    public static IntegerVersion parseIntegers(@PolyNull String string) {
+        if (string == null) {
+            return null;
+        }
         String[] parts = string.split("-", 2);
         return new IntegerVersion(parts[0]);
+    }
+
+    public static Optional<IntegerVersion> parseIntegersOptional(@Nullable String string) {
+        return Optional.ofNullable(parseIntegers(string));
     }
 
 
