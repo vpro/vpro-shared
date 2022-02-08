@@ -41,7 +41,11 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
     }
 
     public static Optional<IntegerVersion> parseIntegersOptional(@Nullable String string) {
-        return Optional.ofNullable(parseIntegers(string));
+        try {
+            return Optional.ofNullable(parseIntegers(string));
+        } catch(Exception e) {
+            return Optional.empty();
+        }
     }
 
 
