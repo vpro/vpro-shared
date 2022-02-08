@@ -247,9 +247,19 @@ public class TextUtilTest {
     }
 
     @Test
-    public void insertNewlines() {
-        String example = "<p>Hokus pokus<p>foobar</p><p>Simsalabim</p><p>foo<br>bar</p>";
-        assertThat(TextUtil.unhtml(example)).isEqualTo("Hokus pokus\n\nfoobar\n\nSimsalabim\n\nfoo\nbar");
+    public void unhtml() {
+        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><p>asdf</p><p>adsfasdf</p><p>asdfsdf!asdf</p>";
+        assertThat(TextUtil.unhtml(example)).isEqualTo("Hokus pòkus\n" +
+            "\n" +
+            "bla  asdfasdf\n" +
+            "\n" +
+            "Simsalabim\n" +
+            "\n" +
+            "asdf\n" +
+            "\n" +
+            "adsfasdf\n" +
+            "\n" +
+            "asdfsdf!asdf");
     }
 }
 

@@ -36,7 +36,10 @@ public class TextUtil {
         if(!matcher.find()) {
             return true;
         }
-        return Objects.equals(normalizeWhiteSpace(input), normalizeWhiteSpace(sanitize(input)));
+        return Objects.equals(
+            normalizeWhiteSpace(input),
+            normalizeWhiteSpace(sanitize(input))
+        );
     }
 
     @PolyNull
@@ -148,9 +151,10 @@ public class TextUtil {
         jsoupDoc.outputSettings(outputSettings);
         jsoupDoc.select("br").before("\\n");
         jsoupDoc.select("p").before("\\n\\n");
+        jsoupDoc.select("li").before("\\n-");
         String str = jsoupDoc.html().replaceAll("\\\\n", "\n");
         String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
-        return strWithNewLines.trim();
+        return unescapeHtml(strWithNewLines.trim());
     }
 
 
