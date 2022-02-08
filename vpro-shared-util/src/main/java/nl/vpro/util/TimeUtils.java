@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author Michiel Meeuwissen
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 public class TimeUtils {
 
     public static final ZoneId ZONE_ID =  ZoneId.of("Europe/Amsterdam");
+    public static final ZonedDateTime LOCAL_EPOCH = Instant.EPOCH.atZone(ZONE_ID);
 
 
     public static Optional<ZonedDateTime> parseZoned(CharSequence parse) {
@@ -98,7 +100,7 @@ public class TimeUtils {
      * @see #parseDuration(CharSequence)
      */
     public static Optional<Duration> parseDuration(CharSequence d) {
-        return parseDuration(d, Instant.EPOCH.atZone(ZONE_ID));
+        return parseDuration(d, null);
     }
     public static Optional<Duration> parseDuration(CharSequence d, ZonedDateTime at) {
         return parseDuration(null, d, at);
@@ -108,7 +110,7 @@ public class TimeUtils {
     private static final Pattern WEEKS = Pattern.compile("^P(\\d+)W$");
     private static final Pattern COMPLETE_FORMAT = Pattern.compile("^(P(?:\\d+Y)?(?:\\d+M)?(?:\\d+D)?)(T(?:\\d+H)?(?:\\d+M)?(?:[\\d.]+S)?)$");
 
-    private static Optional<Duration> parseDuration(DateTimeParseException original, CharSequence d, ZonedDateTime at) {
+    private static Optional<Duration> parseDuration(DateTimeParseException original, CharSequence d, @Nullable ZonedDateTime at) {
         if (StringUtils.isBlank(d)) {
             return Optional.empty();
         }
@@ -146,6 +148,10 @@ public class TimeUtils {
                 if (completeMatcher.matches()) {
                     Period p = Period.parse(completeMatcher.group(1));
                     Duration time = Duration.parse("P" + completeMatcher.group(2));
+                    if (at == null) {
+                        log.debug("Implicitly using {} for duration evaluation", LOCAL_EPOCH);
+                        at = LOCAL_EPOCH;
+                    }
                     return Optional.of(Duration.between(at, at.plus(p).plus(time)));
                 } else if (!ds.startsWith("PT")){
                     // so it did start with P, just not with PT, and it couldn't be parsed
