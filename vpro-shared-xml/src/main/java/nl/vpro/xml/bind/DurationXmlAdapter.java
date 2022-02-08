@@ -2,7 +2,7 @@ package nl.vpro.xml.bind;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
+import java.time.*;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
@@ -21,8 +21,6 @@ import nl.vpro.util.TimeUtils;
  */
 @Slf4j
 public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, Duration> {
-
-
     static final DatatypeFactory DATATYPE_FACTORY;
     static {
         try {
@@ -56,7 +54,10 @@ public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, 
 
     @Override
     public javax.xml.datatype.Duration marshal(Duration value) {
-        return value != null ? (value.toDays() < 30 ? marshalDayTime(value.toMillis()) : marshal(value.toMillis())) : null;
+        if (value == null) {
+            return null;
+        }
+        return value.toDays()  < 30 ? marshalDayTime(value.toMillis()) : marshal(value.toMillis());
     }
 
     protected javax.xml.datatype.Duration marshalDayTime(long time)  {
