@@ -19,7 +19,7 @@ import org.springframework.core.convert.converter.Converter;
  *    <li><pre>1..3</pre></li>
  *    <li><pre>1-3, 5, 6</pre></li>
  *</ul>
- * I.e. it recognizes explicitely stated values, ranges (by either a hyphen or by double dots), and combinations of those.
+ * I.e. it recognizes explicitly stated values, ranges (by either a hyphen or by double dots), and combinations of those.
  *
  * @author Michiel Meeuwissen
  * @since 1.78
