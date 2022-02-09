@@ -108,6 +108,7 @@ public class TextUtil {
 
     /**
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
+     *
      * @see #unhtml(String)  for multiline interpretation
      * @param input a piece of HTML or text containing some HTML markup
      * @return One line representing only the textual content of the input
@@ -150,7 +151,10 @@ public class TextUtil {
         String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
         return unescapeHtml(
             strWithNewLines.trim()
-        );
+        )
+            .replaceAll(" +", " ")
+            .replaceAll("\u00a0+", "\u00a0")
+            .replaceAll("\n{3,}", "\n\n");
     }
 
     /**

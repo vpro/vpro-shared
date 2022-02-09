@@ -248,18 +248,24 @@ public class TextUtilTest {
 
     @Test
     public void unhtml() {
-        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><p>asdf</p><p>adsfasdf</p><p>asdfsdf!asdf</p>";
+        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><ol><li>1</li><li>2</li></ol><p>adsfasdf</p><p /><p>asdfsdf!asdf</p>";
         assertThat(TextUtil.unhtml(example)).isEqualTo("Hokus pòkus\n" +
             "\n" +
-            "bla  asdfasdf\n" +
+            "bla  asdfasdf\n" +
             "\n" +
             "Simsalabim\n" +
-            "\n" +
-            "asdf\n" +
+            "-1\n" +
+            "-2\n" +
             "\n" +
             "adsfasdf\n" +
             "\n" +
             "asdfsdf!asdf");
+    }
+
+    @Test
+    public void stripHtml() {
+        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><p>asdf</p><p>adsfasdf</p><p>asdfsdf!asdf</p>";
+        assertThat(TextUtil.stripHtml(example)).isEqualTo("Hokus pòkus bla&nbsp; asdfasdf Simsalabim asdf adsfasdf asdfsdf!asdf");
     }
 }
 
