@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.stream.Stream;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.checkerframework.checker.nullness.qual.*;
 import org.jsoup.Jsoup;
@@ -42,6 +44,9 @@ public class TextUtil {
         );
     }
 
+    /**
+     * Replaces any occurrences of 1 of more white space characters by one space.
+     */
     @PolyNull
     public static String normalizeWhiteSpace(@PolyNull String input) {
         if (input == null) {
@@ -67,6 +72,9 @@ public class TextUtil {
         return input != null ? input.replace('\u00A0', ' ') : null;
     }
 
+    /**
+     * Replaces 'odd' characters with a normal white space character.
+     */
     @PolyNull
     public static String replaceOdd(@PolyNull String input) {
         if (input == null) {
@@ -81,7 +89,7 @@ public class TextUtil {
     }
 
     /**
-     * Replaces all non breaking space characters (\u00A0) with a normal white space character.
+     * Replaces all non breaking space entities(&nbsp;) with a normal white space character.
      */
     @PolyNull
     public static String replaceHtmlEscapedNonBreakingSpace(@PolyNull String input) {
@@ -89,17 +97,20 @@ public class TextUtil {
     }
 
     /**
-     * Un-escapes all html escape characters. For example: Replaces "&amp;amp;" with "&amp;".
+     * Un-escapes all html escape entities. For example: Replaces "&amp;amp;" with "&amp;".
      */
     @PolyNull
     public static String unescapeHtml(@PolyNull String input) {
         return input != null ? StringEscapeUtils.unescapeHtml4(
-            input.replace("&nbsp;", " ")
+            input.replace("&nbsp;", "\u00a0")
         ) : null;
     }
 
     /**
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
+     * @see #unhtml(String)  for multiline interpretation
+     * @param input a piece of HTML or text containing some HTML markup
+     * @return One line representing only the textual content of the input
      */
     @PolyNull
     public static String stripHtml(@PolyNull String input) {
@@ -118,26 +129,9 @@ public class TextUtil {
         return strWithNewLines.replaceAll(" +", " ").trim();
     }
 
-    /**
-     * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
-     * might lead to problems for end users.
-     */
-    @PolyNull
-    public static String sanitize(@PolyNull String input) {
-        if (input == null) {
-            return null;
-        }
-        // recursive, because sometimes a sanitize operation results new html (see nl.vpro.util.TextUtilTest.testSanitizeIframe())
-        String sanitized = _sanitize(input);
-        while (! Objects.equals(sanitized, input)) {
-            input = sanitized;
-            sanitized = _sanitize(input);
-        }
-        return sanitized;
-
-    }
-
-    /**
+     /**
+     * @param input A piece of HTML
+     * @return A piece of plain text, currently only supporting breaks, paragraphs, and lists
      * @since 2.30
      */
     @PolyNull
@@ -154,8 +148,32 @@ public class TextUtil {
         jsoupDoc.select("li").before("\\n-");
         String str = jsoupDoc.html().replaceAll("\\\\n", "\n");
         String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
-        return unescapeHtml(strWithNewLines.trim());
+        return unescapeHtml(
+            strWithNewLines.trim()
+        );
     }
+
+    /**
+     * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
+     * might lead to problems for end users.
+     *
+     * @return A single line of text
+     */
+    @PolyNull
+    public static String sanitize(@PolyNull String input) {
+        if (input == null) {
+            return null;
+        }
+        // recursive, because sometimes a sanitize operation results new html (see nl.vpro.util.TextUtilTest.testSanitizeIframe())
+        String sanitized = _sanitize(input);
+        while (! Objects.equals(sanitized, input)) {
+            input = sanitized;
+            sanitized = _sanitize(input);
+        }
+        return sanitized;
+
+    }
+
 
 
     @PolyNull
@@ -184,6 +202,9 @@ public class TextUtil {
         return Pattern.compile("(?i)^(" + particle + ")\\b.+");
     }
 
+    /**
+     * Returns the 'lexicographic' presentation of a title. This means that articles are stripped and moved to the end of the string. Currently only supported for dutch.
+     */
     public static String getLexico(String title, Locale locale) {
         // Deze code staat ook als javascript in media-server/src/main/webapp/vpro/media/1.0/util/format.js
         if ("nl".equals(locale.getLanguage())) {
@@ -206,16 +227,15 @@ public class TextUtil {
         }
     }
 
+    /**
+     * Selects first non null of the paramters.
+     */
     public static String select(String... options) {
-        for(String option : options) {
-            if(option != null) {
-                return option;
-            }
-        }
-        return null;
+        return Stream.of(options).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static String truncate(String text, int max) {
+    @PolyNull
+    public static String truncate(@PolyNull String text, int max) {
         return truncate(text, max, false);
     }
 
