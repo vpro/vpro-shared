@@ -7,9 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.*;
 
 /**
- * A version is basicly a string existing of a number of parts.
+ * A version is basically a string existing of a number of parts.
  *
- * This base class leaves open how these parts should look like, but we supply an extension where it are integers.
+ * This base class leaves open how these parts should look like, but we supply an extension where they are integers.
  *
  * The point it that these things can now be compared in the logical way, such that e.g. 5.12.0 > 5.2.0
  *
