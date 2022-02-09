@@ -133,6 +133,12 @@ public class TextUtilTest {
     }
 
     @Test
+    public void testSanitizeMSE_5216() {
+        String result = sanitize("<p>foo</p><p>bar</p>");
+        assertThat(result).isEqualTo("foo bar"); // Hmm. Doesn't fail. The description of MSE-5216 is not quite accurate.
+    }
+
+    @Test
     public void testLexico() {
         assertThat(TextUtil.getLexico("Het grote huis", new Locale("nl", "NL"))).isEqualTo("Grote huis, het");
     }
