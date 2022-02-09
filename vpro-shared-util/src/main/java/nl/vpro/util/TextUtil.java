@@ -29,6 +29,10 @@ public class TextUtil {
      */
     public static final Pattern ILLEGAL_PATTERN = Pattern.compile("<.*>|&#\\d{2,4};|&[\\w]{2,8};|\\u2028");
 
+    private TextUtil() {
+        // utility class
+    }
+
     /**
      * Checks if given text input complies to POMS standard.
      * @see #ILLEGAL_PATTERN for a rough check
