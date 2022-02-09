@@ -130,9 +130,10 @@ public class TextUtil {
         return strWithNewLines.replaceAll(" +", " ").trim();
     }
 
-     /**
+    /**
      * @param input A piece of HTML
-     * @return A piece of plain text, currently only supporting breaks, paragraphs, and lists
+     * @return A piece of plain text, currently only supporting breaks, paragraphs, and lists. Empty paragraphs
+     *         and multiple linebreaks are removed.
      * @since 2.30
      */
     @PolyNull
@@ -195,13 +196,13 @@ public class TextUtil {
 
 
     private static final Set<Pattern> DUTCH_PARTICLES =
-        new HashSet<>(
+        Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList(
                 getPattern("de"),
                 getPattern("het"),
                 getPattern("een")
                 /*, "'t", "'n" ?*/
-            ));
+            )));
     private static Pattern getPattern(String particle) {
         return Pattern.compile("(?i)^(" + particle + ")\\b.+");
     }
@@ -209,7 +210,11 @@ public class TextUtil {
     /**
      * Returns the 'lexicographic' presentation of a title. This means that articles are stripped and moved to the end of the string. Currently only supported for dutch.
      */
-    public static String getLexico(String title, Locale locale) {
+    @PolyNull
+    public static String getLexico(@PolyNull String title, Locale locale) {
+        if (title == null) {
+            return null;
+        }
         // Deze code staat ook als javascript in media-server/src/main/webapp/vpro/media/1.0/util/format.js
         if ("nl".equals(locale.getLanguage())) {
             for (Pattern particle : DUTCH_PARTICLES) {
@@ -232,8 +237,10 @@ public class TextUtil {
     }
 
     /**
-     * Selects first non null of the paramters.
+     * Selects first non null of the parameters.
+     * @deprecated  Can easily be achieved with stream filter {@link Objects#nonNull(Object)}
      */
+    @Deprecated
     public static String select(String... options) {
         return Stream.of(options).filter(Objects::nonNull).findFirst().orElse(null);
     }
