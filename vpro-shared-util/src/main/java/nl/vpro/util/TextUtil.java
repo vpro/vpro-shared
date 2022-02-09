@@ -124,6 +124,7 @@ public class TextUtil {
         outputSettings.prettyPrint(false);
         jsoupDoc.outputSettings(outputSettings);
         jsoupDoc.select("br").before(" ");
+        jsoupDoc.select("li").before(" ");
         jsoupDoc.select("p").before(" ");
         String str = jsoupDoc.html();
         String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);

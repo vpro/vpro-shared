@@ -145,6 +145,9 @@ public class TextUtilTest {
     public void testSanitizeMSE_5216() {
         String result = sanitize("<p>foo</p><p>bar</p>");
         assertThat(result).isEqualTo("foo bar"); // Hmm. Doesn't fail. The description of MSE-5216 is not quite accurate.
+        String example = "<p>Hokus pokus</p><p>bla  <em>asdfasdf afsfd</em></p><p>Simsalabim</p><ol><li>één</li><li><strong>twee</strong></li><li>drie</li><li>vier</li></ol><ul><li>bol</li><li>kubus</li><li>kegel</li></ul><p>nog <u>een vijf</u></p><p>verdrietjes 123456789</p>";
+        String result2 = sanitize(example);
+        assertThat(result2).isEqualTo("Hokus pokus bla asdfasdf afsfd Simsalabim één twee drie vier bol kubus kegel nog een vijf verdrietjes 123456789");
     }
 
     @Test
