@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A {@link Version} based on integers, basicly representing a string with a number of integers separated by a dot.
+ * A {@link Version} based on integers, basically representing a string with a number of integers separated by a dot.
  * @author Michiel Meeuwissen
  * @since 2.3
  */
@@ -22,6 +22,7 @@ public class IntegerVersion extends Version<Integer> {
     public IntegerVersion(String s) {
         this(_parseIntegers(s));
     }
+
     public IntegerVersion(Integer... parts) {
         super(parts);
     }
