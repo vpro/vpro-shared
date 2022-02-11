@@ -40,7 +40,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     @Getter
     private final Supplier<String> binary;
 
-    private final List<String> commonArgs;
+    private final List<Supplier<String>> commonArgs;
 
     private final File workdir;
 
@@ -104,7 +104,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         Logger logger,
         SimpleLogger simpleLogger,
         BiFunction<Level, CharSequence, String> biWrapLogInfo,
-        List<String> commonArgs,
+        List<Object> commonArgs,
         boolean useFileCache,
         Integer batchSize,
         boolean optional,
@@ -116,13 +116,21 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
         this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
-        this.commonArgs = commonArgs;
+        this.commonArgs = commonArgs.stream().map(this::toString).collect(Collectors.toList());
         this.useFileCache = useFileCache;
         this.batchSize = batchSize == null ? DEFAULT_BATCH_SIZE : batchSize;
         this.closeStreams = closeStreams;
         this.processTimeout = processTimeout;
         this.exitCodeLogLevel = exitCodeLogLevel == null ? DEFAULT_EXIT_CODE_LEVEL : exitCodeLogLevel;
 
+    }
+
+    private Supplier<String> toString(Object o) {
+        if (o instanceof Supplier) {
+            return () -> toString(((Supplier<?>) o).get()).get();
+        } else {
+            return () -> o == null ? null : String.valueOf(o);
+        }
     }
 
     private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
@@ -194,10 +202,10 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     public static class Builder {
 
-        private final List<String> cargs = new ArrayList<>();
+        private final List<Object> cargs = new ArrayList<>();
         private final List<File>   execs = new ArrayList<>();
 
-        public Builder commonArg(String... args) {
+        public Builder commonArg(Object... args) {
             cargs.addAll(Arrays.asList(args));
             return this;
         }
@@ -278,7 +286,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         Process p;
         try {
             if (commonArgs != null) {
-                command.addAll(commonArgs);
+                command.addAll(commonArgs.stream().map(Supplier::get).collect(Collectors.toList()));
             }
             Collections.addAll(command, parameters.args);
             logger.info(toString(command));
@@ -464,9 +472,11 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     @Override
     public String toString() {
-        return binary.get() + (commonArgs == null ? "" : " " + commonArgs.stream()
-            .map(withArg1(this.wrapLogInfo, Level.INFO))
-            .collect(Collectors.joining(" ")));
+        return binary.get() + (commonArgs == null ? "" : " " +
+            commonArgs.stream()
+                .map(Supplier::get)
+                .map(withArg1(this.wrapLogInfo, Level.INFO))
+                .collect(Collectors.joining(" ")));
     }
 
 
