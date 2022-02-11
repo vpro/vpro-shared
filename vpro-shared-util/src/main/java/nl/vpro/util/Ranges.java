@@ -35,6 +35,29 @@ public class Ranges {
         }
     }
 
+
+    /**
+     * Creates on {@link Range#closed(Comparable, Comparable)} range, but the arguments can be {@code null}
+     * in which case unbounded ranges are created
+     * @since 2.29.3
+     */
+    public static <C extends Comparable<?>> Range<C> closedClosed(@Nullable C start, @Nullable C stop) {
+        if(start == null) {
+            if (stop == null) {
+                return Range.all();
+            } else {
+                return Range.atMost(stop);
+            }
+        } else if (stop == null) {
+            return Range.atLeast(start);
+        } else {
+            return Range.closed(
+                start,
+                stop
+            );
+        }
+    }
+
     public static <C extends Comparable<? super C>, D extends Comparable<? super D>> Range<D> convert(Range<C> in, Function<C, D> convertor) {
         if (in.hasLowerBound()) {
             if (in.hasUpperBound()) {

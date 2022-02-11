@@ -2,8 +2,7 @@ package nl.vpro.util;
 
 import org.junit.jupiter.api.Test;
 
-import static nl.vpro.util.Ranges.closedOpen;
-import static nl.vpro.util.Ranges.convert;
+import static nl.vpro.util.Ranges.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -66,6 +65,23 @@ class RangesTest {
         assertThat(convert(closedOpen(Double.NEGATIVE_INFINITY, 2.0d), d -> d * -1).toString()).isEqualTo("(-2.0..Infinity]");
         assertThat(convert(closedOpen(new A(1), new A(2)), A::neg).toString()).isEqualTo("(-2..-1]");
         assertThat(convert(closedOpen((Integer) null, null), i -> i).toString()).isEqualTo("(-∞..+∞)");
+    }
+
+    @Test
+    void testClosedClosed() {
+        assertThatThrownBy(() ->
+            closedClosed(2, 1)
+        ).isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(convert(closedClosed(1, 2), i -> i + 1).toString()).isEqualTo("[2..3]");
+        assertThat(convert(closedClosed(1, null), i -> i * 3).toString()).isEqualTo("[3..+∞)");
+
+        assertThat(convert(closedClosed(null, new A(2)), A::neg).toString()).isEqualTo("(-∞..-2]"); // TODO: we would probably expect (-2..+∞), but that would be hard to do genericly.
+
+        // this would work:
+        assertThat(convert(closedClosed(Double.NEGATIVE_INFINITY, 2.0d), d -> d * -1).toString()).isEqualTo("[-2.0..Infinity]");
+        assertThat(convert(closedClosed(new A(1), new A(2)), A::neg).toString()).isEqualTo("[-2..-1]");
+        assertThat(convert(closedClosed((Integer) null, null), i -> i).toString()).isEqualTo("(-∞..+∞)");
     }
 
 
