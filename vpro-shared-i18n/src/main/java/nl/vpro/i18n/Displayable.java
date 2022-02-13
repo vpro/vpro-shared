@@ -7,6 +7,9 @@ package nl.vpro.i18n;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -20,8 +23,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public interface Displayable {
 
+    Displayable NULL = new Displayable() {
+        @Override
+        public String getDisplayName() {
+            return null;
+        }
+    };
+
+    @NonNull
+    static Displayable of(@Nullable Displayable d) {
+        return d == null ? NULL : d;
+    }
+
     /**
      * Returns the display value in the default locale.
+     *
      */
     default String getDisplayName() {
         return getDisplayName(Locales.getDefault()).getValue();
@@ -40,7 +56,7 @@ public interface Displayable {
      * Returns the plural of the display name, if implemented. Otherwise {@link Optional#empty()}
      * @since 5.11
      */
-
+    @NonNull
     default Optional<LocalizedString> getPluralDisplayName(Locale locale) {
         return Optional.empty();
     }
