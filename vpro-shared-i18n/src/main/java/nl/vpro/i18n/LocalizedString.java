@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.neovisionaries.i18n.LanguageCode;
@@ -34,7 +35,8 @@ public class LocalizedString implements CharSequence, Serializable {
 
     private static final long serialVersionUID = 6128871258866551736L; //implements javax.xml.registry.infomodel.LocalizedString {
 
-    public static LocalizedString of(String value, Locale locale) {
+    @PolyNull
+    public static LocalizedString of(@PolyNull String value, Locale locale) {
         if (value == null) {
             return null;
         } else {
