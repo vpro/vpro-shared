@@ -70,16 +70,11 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
-     <dependency>
-       <groupId>com.sun.xml.bind</groupId>
-       <artifactId>jaxb-impl</artifactId>
-       <scope>test</scope>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <scope>test</scope>
     </dependency>
-     <dependency>
-       <groupId>com.sun.xml.bind</groupId>
-       <artifactId>jaxb-core</artifactId>
-       <scope>test</scope>
-     </dependency>
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
