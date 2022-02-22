@@ -3,9 +3,8 @@ package nl.vpro.rs.transfer;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.*;
 
 import com.google.common.base.MoreObjects;
 
@@ -30,9 +29,9 @@ public class ErrorResponse {
     public ErrorResponse() {
     }
 
-    public ErrorResponse(String message, Integer status) {
+    public ErrorResponse(String message, Response.Status status) {
         this.message = message;
-        this.status = status;
+        this.status = status.getStatusCode();
     }
 
     @Override
