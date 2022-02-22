@@ -16,6 +16,6 @@ public class ReaderExceptionMapper extends ApiErrorMapper implements ExceptionMa
 
     @Override
     public Response toResponse(ReaderException exception) {
-        return createResponse("Something went wrong unmarshalling the data. reason: " + exception.getMessage(), 500);
+        return createResponse("Something went wrong unmarshalling the data. reason: " + exception.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

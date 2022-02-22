@@ -13,14 +13,15 @@ import nl.vpro.rs.transfer.ErrorResponse;
  * @author Ernst Bunders
  */
 public abstract class ApiErrorMapper {
-    protected Response createResponse(String message, int status) {
+
+    protected Response createResponse(String message, Response.Status status) {
         return Response
             .status(status)
             .entity(new ErrorResponse(message, status))
             .build();
     }
 
-    protected Response createResponse(DataError error, int status, String message) {
+    protected Response createResponse(DataError error, Response.Status status, String message) {
         ErrorResponse errorResponse = new ErrorResponse(error.getDescription(), status);
         errorResponse.setDataError(error);
         if (StringUtils.isNotBlank(message)) {

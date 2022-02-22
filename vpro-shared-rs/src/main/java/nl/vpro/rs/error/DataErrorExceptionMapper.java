@@ -5,9 +5,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
- * Date: 2-5-12
- * Time: 14:23
- *
  * @author Ernst Bunders
  */
 @Provider
@@ -15,6 +12,6 @@ public class DataErrorExceptionMapper extends ApiErrorMapper implements Exceptio
 
     @Override
     public Response toResponse(DataErrorException exception) {
-        return createResponse(exception.getDataError(), 500, exception.getMessage());
+        return createResponse(exception.getDataError(), Response.Status.INTERNAL_SERVER_ERROR, exception.getMessage());
     }
 }

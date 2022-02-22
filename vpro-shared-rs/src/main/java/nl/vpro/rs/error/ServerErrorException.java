@@ -1,9 +1,6 @@
 package nl.vpro.rs.error;
 
 /**
- * Date: 20-4-12
- * Time: 8:36
- *
  * @author Ernst Bunders
  */
 public class ServerErrorException extends RuntimeException {
