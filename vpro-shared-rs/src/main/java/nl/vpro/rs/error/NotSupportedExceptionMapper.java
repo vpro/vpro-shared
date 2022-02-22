@@ -13,7 +13,7 @@ import javax.ws.rs.ext.Provider;
 public class NotSupportedExceptionMapper extends ApiErrorMapper implements ExceptionMapper<NotSupportedException> {
     @Override
     public Response toResponse(NotSupportedException exception) {
-        return createResponse(exception.getMessage(), 415);
+        return createResponse(exception.getMessage(), Response.Status.UNSUPPORTED_MEDIA_TYPE);
 
     }
 }

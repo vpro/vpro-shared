@@ -4,6 +4,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+
 /**
  * @author Ernst Bunders
  */
@@ -12,6 +13,6 @@ public class NotFoundExceptionMapper extends ApiErrorMapper implements Exception
 
     @Override
     public Response toResponse(NotFoundException exception) {
-        return createResponse(exception.getMessage(), 404);
+        return createResponse(exception.getMessage(), javax.ws.rs.core.Response.Status.NOT_FOUND);
     }
 }

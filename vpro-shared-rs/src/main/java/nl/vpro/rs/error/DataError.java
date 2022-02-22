@@ -18,7 +18,7 @@ public enum DataError {
     INVALIDDATA(1, "The request contains invalid data that could not be parsed"),
     NOID(2, "You can not update a document with no id"),
     DELETED(3, "You can not update a document that has been deleted before."),
-    EXPIRED(4, "You can not update an exired version of the document"),
+    EXPIRED(4, "You can not update an expired version of the document"),
     ILLEGALSTATE(5, "The data contains a field value that should not be there");
 
     @XmlAttribute(name = "code")
