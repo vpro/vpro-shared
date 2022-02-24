@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 
@@ -104,7 +105,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         Logger logger,
         SimpleLogger simpleLogger,
         BiFunction<Level, CharSequence, String> biWrapLogInfo,
-        List<Object> commonArgs,
+        List<String> commonArgs,
+        List<Object> commonArgsSuppliers,
         boolean useFileCache,
         Integer batchSize,
         boolean optional,
@@ -116,7 +118,12 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
         this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
-        this.commonArgs = commonArgs.stream().map(this::toString).collect(Collectors.toList());
+        this.commonArgs = Stream.concat(
+                commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream(),
+                commonArgs == null ? Stream.empty() : commonArgs.stream()
+            )
+            .map(this::toString)
+            .collect(Collectors.toList());
         this.useFileCache = useFileCache;
         this.batchSize = batchSize == null ? DEFAULT_BATCH_SIZE : batchSize;
         this.closeStreams = closeStreams;
@@ -205,10 +212,17 @@ public class CommandExecutorImpl implements CommandExecutor {
         private final List<Object> cargs = new ArrayList<>();
         private final List<File>   execs = new ArrayList<>();
 
-        public Builder commonArg(Object... args) {
+        public Builder commonArg(String... args) {
             cargs.addAll(Arrays.asList(args));
             return this;
         }
+
+        public final Builder commonArg(Object... args) {
+            cargs.addAll(Arrays.asList(args));
+            return this;
+        }
+
+
         public Builder executable(File... args) {
             execs.addAll(Arrays.asList(args));
             return this;
@@ -236,11 +250,11 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
 
         public CommandExecutorImpl build() {
-            if (commonArgs != null) {
-                commonArgs = new ArrayList<>(commonArgs);
-                commonArgs.addAll(cargs);
+            if (commonArgsSuppliers != null){
+                commonArgsSuppliers = new ArrayList<>(commonArgsSuppliers);
+                commonArgsSuppliers.addAll(cargs);
             } else {
-                commonArgs(cargs);
+                commonArgsSuppliers(cargs);
             }
             if (executables != null) {
                 executables = new ArrayList<>(executables);
