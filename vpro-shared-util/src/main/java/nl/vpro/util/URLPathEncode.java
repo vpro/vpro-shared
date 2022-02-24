@@ -1,5 +1,8 @@
 package nl.vpro.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -11,18 +14,26 @@ public class URLPathEncode {
 
     /**
      * Escapes every character of the input string for the path part of an URL.
+     *
+     * This differs from {@link URLEncoder#encode(String, String)} that it will leave more charachters untouched (see {@link #isSafe(char)}, and that space will be replaced by +;
      */
     public static String encode(String input) {
+        return encode(input, true);
+    }
+
+    public static String encode(String input, boolean spaceIsPlus) {
         StringBuilder resultStr = new StringBuilder();
         for (char ch : input.toCharArray()) {
-            if (ch == ' ') {
+            if (ch == ' ' && spaceIsPlus) {
                 resultStr.append('+');
             } else if (isSafe(ch)) {
                 resultStr.append(ch);
             } else {
-                resultStr.append('%');
-                resultStr.append(toHex(ch / 16));
-                resultStr.append(toHex(ch % 16));
+                try {
+                    resultStr.append(URLEncoder.encode("" + ch, StandardCharsets.UTF_8.name()));
+                } catch (UnsupportedEncodingException ignored) {
+
+                }
             }
         }
         return resultStr.toString();
@@ -31,6 +42,7 @@ public class URLPathEncode {
     /**
      * Escapes every character of the input string for the path part of an URL, but only after splitting it by /.
      * Afterwards join with '/' again. This avoids that the / itself is escaped too, and this function can be used to escape all the constituents of a path seperately.
+     *
      */
     public static String encodePath(String input) {
         return Arrays.stream(
@@ -39,9 +51,6 @@ public class URLPathEncode {
             .collect(Collectors.joining("/"));
     }
 
-    private static char toHex(int ch) {
-        return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
-    }
 
     private static boolean isSafe(char ch) {
         return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || // ALPHA
