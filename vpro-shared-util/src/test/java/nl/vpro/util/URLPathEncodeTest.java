@@ -4,7 +4,7 @@ package nl.vpro.util;
 import lombok.ToString;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
@@ -43,6 +43,7 @@ public class URLPathEncodeTest {
     public void encodePathWe(Case c) {
         assertThat(URLPathEncode.encode(c.in)).isEqualTo(c.encodedVariant);
         assertThat(URLPathEncode.encodePath(c.in)).isEqualTo(c.pathEncodedVariant);
+        assertThat(URLPathEncode.encodePath(c.in, false)).isEqualTo(c.pathEncoded);
     }
 
     @ParameterizedTest
@@ -56,6 +57,12 @@ public class URLPathEncodeTest {
     public void encodePathHttpClient(Case c) throws URIException {
         assertThat(URIUtil.encodePath(c.in)).isEqualTo(c.pathEncoded);
         assertThat(URIUtil.encode(c.in, null)).isEqualTo(c.encoded);
+    }
+
+    @ParameterizedTest
+    @MethodSource("cases")
+    public void encodePathUri(Case c) throws URISyntaxException {
+        assertThat(new URI(null, null, c.in, null).toASCIIString()).isEqualTo(c.pathEncoded);
     }
 
     @Test
