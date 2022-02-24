@@ -1,7 +1,18 @@
 package nl.vpro.util;
 
 
+import lombok.ToString;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
+
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,6 +21,43 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since ...
  */
 public class URLPathEncodeTest {
+
+
+    public static Stream<Case> cases() {
+        return Stream.of(
+            new Case("a",   "a",  "a"),
+            new Case("foo bar",   "foo+bar", "foo%20bar", "foo+bar"),
+            new Case("ë", "%C3%AB", "%C3%AB", "%C3%AB"),
+            new Case("test/bla", "test%2Fbla", "test/bla", "test/bla"),
+            new Case("test/bla/1234/jcr:node/@vpro/ /ĥ/", "test%2Fbla%2F1234%2Fjcr%3Anode%2F%40vpro%2F+%2F%C4%A5%2F",
+                "test%2Fbla%2F1234%2Fjcr:node%2F@vpro%2F+%2F%C4%A5%2F",
+                "test/bla/1234/jcr:node/@vpro/%20/%C4%A5/",
+                "test/bla/1234/jcr:node/@vpro/+/%C4%A5/"
+            )
+        );
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("cases")
+    public void encodePathWe(Case c) {
+        assertThat(URLPathEncode.encode(c.in)).isEqualTo(c.encodedVariant);
+        assertThat(URLPathEncode.encodePath(c.in)).isEqualTo(c.pathEncodedVariant);
+    }
+
+    @ParameterizedTest
+    @MethodSource("cases")
+    public void encodePathUrlEncoder(Case c) throws UnsupportedEncodingException {
+        assertThat(URLEncoder.encode(c.in, StandardCharsets.UTF_8.name())).isEqualTo(c.encoded);
+    }
+
+    @ParameterizedTest
+    @MethodSource("cases")
+    public void encodePathHttpClient(Case c) throws URIException {
+        assertThat(URIUtil.encodePath(c.in)).isEqualTo(c.pathEncoded);
+        assertThat(URIUtil.encode(c.in, null)).isEqualTo(c.encoded);
+    }
+
     @Test
     public void encode() {
 
@@ -21,9 +69,34 @@ public class URLPathEncodeTest {
 
     @Test
     public void encodePath() {
-        assertThat(URLPathEncode.encodePath("test/bla/1234/jcr:node/@vpro/ /ĥ/")).isEqualToIgnoringCase("test/bla/1234/jcr:node/@vpro/+/%I5/");
+        assertThat(URLPathEncode.encodePath("test/bla/1234/jcr:node/@vpro/ /ĥ/")).isEqualToIgnoringCase("test/bla/1234/jcr:node/@vpro/+/%C4%A5/");
 
         assertThat(URLPathEncode.encodePath("s1400</s3000>")).isEqualTo("s1400%3C/s3000%3E");
+    }
+
+    @ToString
+    static class Case {
+        final String in;
+        final String encoded;
+        final String encodedVariant;
+        final String pathEncoded;
+        final String pathEncodedVariant;
+
+        Case(String in, String encoded, String pathEncoded) {
+            this(in, encoded, encoded, pathEncoded, pathEncoded);
+        }
+
+        Case(String in, String encoded, String pathEncoded, String pathEncodedVariant) {
+            this(in, encoded, encoded, pathEncoded, pathEncodedVariant);
+        }
+
+        Case(String in, String encoded, String encodedVariant, String pathEncoded, String pathEncodedVariant) {
+            this.in = in;
+            this.encoded = encoded;
+            this.encodedVariant = encodedVariant;
+            this.pathEncoded = pathEncoded;
+            this.pathEncodedVariant = pathEncodedVariant;
+        }
     }
 
 }
