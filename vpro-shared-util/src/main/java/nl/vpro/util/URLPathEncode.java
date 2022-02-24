@@ -24,8 +24,12 @@ public class URLPathEncode {
     public static String encode(String input, boolean spaceIsPlus) {
         StringBuilder resultStr = new StringBuilder();
         for (char ch : input.toCharArray()) {
-            if (ch == ' ' && spaceIsPlus) {
-                resultStr.append('+');
+            if (ch == ' ') {
+                if (spaceIsPlus) {
+                    resultStr.append('+');
+                } else {
+                    resultStr.append("%20");
+                }
             } else if (isSafe(ch)) {
                 resultStr.append(ch);
             } else {
@@ -45,9 +49,13 @@ public class URLPathEncode {
      *
      */
     public static String encodePath(String input) {
+        return encodePath(input, true);
+    }
+
+    public static String encodePath(String input, boolean spaceIsPlus) {
         return Arrays.stream(
             input.split("/", -1))
-            .map(URLPathEncode::encode)
+            .map(s -> encode(s, spaceIsPlus))
             .collect(Collectors.joining("/"));
     }
 
