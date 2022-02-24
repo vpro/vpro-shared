@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -41,6 +42,14 @@ public class URLPathEncode {
             }
         }
         return resultStr.toString();
+    }
+
+    public static String decode(String s) {
+        try {
+            return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ignored) {
+            return s;
+        }
     }
 
     /**

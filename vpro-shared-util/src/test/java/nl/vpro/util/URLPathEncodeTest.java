@@ -26,7 +26,7 @@ public class URLPathEncodeTest {
     public static Stream<Case> cases() {
         return Stream.of(
             new Case("a",   "a",  "a"),
-            new Case("foo bar",   "foo+bar", "foo%20bar", "foo+bar"),
+            new Case("foo bar",   "foo+bar", "foo+bar", "foo%20bar", "foo+bar"),
             new Case("ë", "%C3%AB", "%C3%AB", "%C3%AB"),
             new Case("test/bla", "test%2Fbla", "test/bla", "test/bla"),
             new Case("test/bla/1234/jcr:node/@vpro/ /ĥ/", "test%2Fbla%2F1234%2Fjcr%3Anode%2F%40vpro%2F+%2F%C4%A5%2F",
@@ -40,7 +40,7 @@ public class URLPathEncodeTest {
 
     @ParameterizedTest
     @MethodSource("cases")
-    public void encodePathWe(Case c) {
+    public void encodePath(Case c) {
         assertThat(URLPathEncode.encode(c.in)).isEqualTo(c.encodedVariant);
         assertThat(URLPathEncode.encodePath(c.in)).isEqualTo(c.pathEncodedVariant);
         assertThat(URLPathEncode.encodePath(c.in, false)).isEqualTo(c.pathEncoded);
@@ -65,6 +65,24 @@ public class URLPathEncodeTest {
         assertThat(new URI(null, null, c.in, null).toASCIIString()).isEqualTo(c.pathEncoded);
     }
 
+    @ParameterizedTest
+    @MethodSource("cases")
+    public void decode(Case c) {
+        assertThat(URLPathEncode.decode(c.encoded)).isEqualTo(c.in);
+        assertThat(URLPathEncode.decode(c.encodedVariant)).isEqualTo(c.in);
+        assertThat(URLPathEncode.decode(c.pathEncoded)).isEqualTo(c.in);
+        assertThat(URLPathEncode.decode(c.pathEncodedVariant)).isEqualTo(c.in);
+    }
+
+     @ParameterizedTest
+    @MethodSource("cases")
+    public void decodeHttpClient(Case c) throws URIException {
+        assertThat(URIUtil.decode(c.encoded)).isEqualTo(c.in);
+        assertThat(URIUtil.decode(c.encodedVariant)).isEqualTo(c.in);
+        assertThat(URIUtil.decode(c.pathEncoded)).isEqualTo(c.in);
+        assertThat(URIUtil.decode(c.pathEncodedVariant)).isEqualTo(c.in);
+    }
+
     @Test
     public void encode() {
 
@@ -84,10 +102,18 @@ public class URLPathEncodeTest {
     @ToString
     static class Case {
         final String in;
-        final String encoded;
+        final String encoded;                 // httpclient's URIUtil#encode does this
+
+         /**
+         * The variant has + for space, and doesn't esacpe a few other charachters like semicolon
+         */
         final String encodedVariant;
-        final String pathEncoded;
-        final String pathEncodedVariant;
+        final String pathEncoded;             // httpclient's URIUtil#encodePath does this, URLPathEncode#encodePath(c.in, false)
+
+        /**
+         * The variant has + for space, and
+         */
+        final String pathEncodedVariant;      // URLPathEncode#encodePath(c.in)
 
         Case(String in, String encoded, String pathEncoded) {
             this(in, encoded, encoded, pathEncoded, pathEncoded);
