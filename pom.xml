@@ -273,7 +273,7 @@
     <hibernate.search.version>5.11.9.Final</hibernate.search.version>
 
     <validation.api.version>2.0.1.Final</validation.api.version>
-    <hibernate.validator.version>6.1.5.Final</hibernate.validator.version>
+    <hibernate.validator.version>6.2.2.Final</hibernate.validator.version>
 
     <ektorp.version>1.5.0</ektorp.version>
     <!--
@@ -734,7 +734,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.21.2</version>
+      <version>3.21.3</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
