@@ -55,7 +55,7 @@ public final class XTrustProvider extends java.security.Provider {
     public XTrustProvider() {
         super(NAME, VERSION, INFO);
 
-        AccessController.doPrivileged((PrivilegedAction) () -> {
+        AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
             put("TrustManagerFactory." + TrustManagerFactoryImpl.getAlgorithm(), TrustManagerFactoryImpl.class.getName());
             return null;
         });

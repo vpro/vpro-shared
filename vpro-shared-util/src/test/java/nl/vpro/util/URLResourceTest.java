@@ -70,29 +70,29 @@ public class URLResourceTest {
 
         assertThat(broadcasters.get()).isNotEmpty();
         assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
 
         broadcasters.get();
 
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(1, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
 
         broadcasters.setMinAge(Duration.ofMillis(1));
         Thread.sleep(2);
         broadcasters.expire();
         log.info("{}", broadcasters.get().size());
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(1, broadcasters.getNotModifiedCount());
-        assertEquals(1, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
 
         broadcasters.setMinAge(Duration.ofMinutes(5));
 
         broadcasters.get();
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(1, broadcasters.getNotModifiedCount());
-        assertEquals(2, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(2);
 
         System.out.println(broadcasters.get());
         Thread.sleep(2000L);
@@ -116,19 +116,19 @@ public class URLResourceTest {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create("classpath:/broadcasters.properties"));
         broadcasters.setMinAge(Duration.ofMillis(100));
         assertTrue(broadcasters.get().size() > 0);
-        assertEquals(0, broadcasters.getNotCheckedCount());
-        assertEquals(1, broadcasters.getCheckedCount());
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+        assertThat(broadcasters.getCheckedCount()).isEqualTo(1);
 
         broadcasters.get();
-        assertEquals(1, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
         Thread.sleep(150);
         broadcasters.get();
-        assertEquals(2, broadcasters.getCheckedCount());
-        assertEquals(0, broadcasters.getChangesCount());
-        assertEquals(1, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getCheckedCount()).isEqualTo(2);
+        assertThat(broadcasters.getChangesCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
         broadcasters.get();
-        assertEquals(0, broadcasters.getChangesCount());
-        assertEquals(2, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(2);
 
     }
 
@@ -137,9 +137,9 @@ public class URLResourceTest {
     public void broadcastersFromClassPathMap() {
         URLResource<Map<String, String>> broadcasters = URLResource.map(URI.create("classpath:/broadcasters.properties"));
         assertTrue(broadcasters.get().size() > 0);
-        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         broadcasters.get();
-        assertEquals(1, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class URLResourceTest {
         when(connection.getResponseCode()).thenReturn(503, 200, 500, 200);
         when(connection.getInputStream()).thenAnswer(invocation -> new ByteArrayInputStream("VPRO=VPRO".getBytes()));
 
-        URLResource<Properties> broadcasters = new URLResource<Properties>(URI.create("http://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
+        URLResource<Properties> broadcasters = new URLResource<Properties>(URI.create("https://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
             @Override
             public URLConnection openConnection() {
                 return connection;
@@ -158,47 +158,44 @@ public class URLResourceTest {
 
 
         assertThat(broadcasters.get()).hasSize(0);
-        assertEquals(0, broadcasters.getChangesCount());
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
-        assertEquals(1, broadcasters.getErrorCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+        assertThat(broadcasters.getErrorCount()).isEqualTo(1);
         Properties props = broadcasters.get();
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
-        assertEquals(1, broadcasters.getErrorCount());
-        assertEquals(1, props.size());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+        assertThat(broadcasters.getErrorCount()).isEqualTo(1);
+        assertThat((long) props.size()).isEqualTo(1);
         props = broadcasters.get();
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
-        assertEquals(2, broadcasters.getErrorCount());
-        assertEquals(1, props.size());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+        assertThat(broadcasters.getErrorCount()).isEqualTo(2);
+        assertThat((long) props.size()).isEqualTo(1);
         props = broadcasters.get();
-        assertEquals(2, broadcasters.getChangesCount());
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
-        assertEquals(2, broadcasters.getErrorCount());
-        assertEquals(1, props.size());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(2);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+        assertThat(broadcasters.getErrorCount()).isEqualTo(2);
+        assertThat((long) props.size()).isEqualTo(1);
     }
 
     @Test
     @Disabled
     public void broadcastersReal() {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create("http://localhost:8071/broadcasters/"));
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create("https://poms-test.omroep.nl/broadcasters/"));
         broadcasters.setMinAge(Duration.ZERO);
         assertTrue(broadcasters.get().size() > 0);
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(0, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         broadcasters.get();
-        assertEquals(1, broadcasters.getChangesCount());
-        assertEquals(1, broadcasters.getNotModifiedCount());
-        assertEquals(0, broadcasters.getNotCheckedCount());
+        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         System.out.println(broadcasters.get());
     }
 
-    private void assertEquals(int i, long changesCount) {
-        assertThat(changesCount).isEqualTo(i);
-    }
 }
