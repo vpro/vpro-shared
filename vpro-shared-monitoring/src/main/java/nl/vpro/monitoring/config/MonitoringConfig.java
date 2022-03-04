@@ -5,11 +5,13 @@ import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
+import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Ehcache;
 
 import java.io.File;
@@ -33,6 +35,7 @@ import nl.vpro.util.locker.ObjectLockerAdmin;
 import static nl.vpro.util.locker.ObjectLocker.Listener.Type.LOCK;
 
 @Configuration
+@Slf4j
 public class MonitoringConfig {
 
     @Autowired(required = false)
@@ -77,20 +80,46 @@ public class MonitoringConfig {
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
-        final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
-        if (properties.isMeterHibernate() && sessionFactory.isPresent()) {
-            new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
-        }
-        if (properties.isMeterHibernateQuery() && sessionFactory.isPresent()) {
-            new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
-        }
-        final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
-        if (properties.isMeterPostgres() && dataSource.isPresent()) {
-            if (properties.getPostgresDatabaseName() != null) {
-                new PostgreSQLDatabaseMetrics(dataSource.get(), properties.getPostgresDatabaseName()).bindTo(registry);
-            } else {
-                throw new MetricsConfigurationException("For metering postgres one should provide an existing database name");
+        try {
+            if (properties.isMeterHibernate()) {
+
+                final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+                if (sessionFactory.isPresent()) {
+                    new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+
+                } else {
+                    log.error("No session factory to monitor");
+                }
             }
+        } catch(java.lang.NoClassDefFoundError noClassDefFoundError) {
+            log.warn("No hibernate metrics: {}", noClassDefFoundError.getMessage());
+        }
+        try {
+            if (properties.isMeterHibernateQuery()) {
+                final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+
+                if (sessionFactory.isPresent()) {
+                    new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+                } else {
+                    log.error("No session factory to monitor");
+                }
+            }
+        } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
+            log.warn("No hibernate query metrics. Missing class {}", noClassDefFoundError.getMessage());
+        }
+        try {
+            if (properties.isMeterPostgres()) {
+                final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
+                if (dataSource.isPresent()) {
+                    if (properties.getPostgresDatabaseName() != null) {
+                        new PostgreSQLDatabaseMetrics(dataSource.get(), properties.getPostgresDatabaseName()).bindTo(registry);
+                    } else {
+                        log.error("For metering postgres one should provide an existing database name");
+                    }
+                }
+            }
+        } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
+            log.warn("No hibernate postgresql metrics. Missing class {}", noClassDefFoundError.getMessage());
         }
         if (properties.isMeterProcessor()) {
             new ProcessorMetrics().bindTo(registry);
