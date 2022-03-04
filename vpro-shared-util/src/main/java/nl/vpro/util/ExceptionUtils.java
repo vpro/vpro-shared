@@ -4,8 +4,7 @@ import lombok.Lombok;
 import lombok.SneakyThrows;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -68,6 +67,19 @@ public class ExceptionUtils {
 
         void acceptWithException(T e);
 
-}
+    }
+
+
+    @FunctionalInterface
+    public interface ThrowingFunction<A, R, E extends Exception> extends Function<A, R> {
+
+        @Override
+        @SneakyThrows
+        default R apply(A a) {
+            return applyWithException(a);
+        }
+
+        R applyWithException(A a) throws E;
+    }
 
 }
