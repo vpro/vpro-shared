@@ -92,7 +92,7 @@ public class MonitoringConfig {
                 }
             }
         } catch(java.lang.NoClassDefFoundError noClassDefFoundError) {
-            log.warn("No hibernate metrics: {}", noClassDefFoundError.getMessage());
+            log.warn("No hibernate metrics: Missing class {}", noClassDefFoundError.getMessage());
         }
         try {
             if (properties.isMeterHibernateQuery()) {
