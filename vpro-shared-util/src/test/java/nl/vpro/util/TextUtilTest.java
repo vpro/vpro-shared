@@ -4,15 +4,20 @@
  */
 package nl.vpro.util;
 
-import java.util.Locale;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.stream.Stream;
 
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static nl.vpro.util.TextUtil.isValid;
-import static nl.vpro.util.TextUtil.sanitize;
+import static nl.vpro.util.TextUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -23,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TextUtilTest {
 
     private static final String MSE_2589 = "Uit een grondige analyse in het British Medical Journal van duizenden Amerikaanse auto-ongelukken waarbij een of beide bestuurders omkwamen, blijkt dat te zware bestuurders meer kans hebben om bij zo'n crash het leven te laten dan mensen met een normaal gewicht. Bij mannen loopt het risico evenredig op met de body mass index (BMI). Een ernstig obese man (BMI > 40) heeft bijna twee keer zo veel risico op een fatale afloop als iemand met een normale BMI (tussen 18,5 en 25).  Anderzijds, heel magere mannen (BMI < 18,5) blijken net zo kwetsbaar als de ernstig obesen. Bij vrouwelijke bestuurders is het beeld iets anders. Magere vrouwen zijn net zo crashbestendig als vrouwen met een normaal gewicht, maar daarna loopt ook bij hen het overlijdensrisico op met de BMI. Er is echter weinig verschil in overlijdensrisico tussen ernstig obese (BMI > 40) en 'gewoon' obese (35 <  BMI  < 40) vrouwen: beide categorieën overlijden twee keer zo vaak als slanke vrouwen. Als je simpelweg zou turven hoeveel dikke/normale/magere mensen omkomen bij auto-ongelukken, is er een scala aan confounders (letterlijk: 'verwarrers') die tot valse resultaten kan leiden. Misschien rijden dikke mensen minder vaak zelf, en is de passagiersplaats gevaarlijker dan de bestuurdersplaats. Misschien rijden dikke mensen in kleinere, kwetsbaarder auto's. Misschien doen dikke mensen vaker hun gordel niet om, of zitten ze vaker te bellen of te eten achter het stuur. Misschien rijden ze slordiger of roekelozer. Epidemiologen Thomas Rice en Motao Zhu bekeken daarom alleen ongelukken tussen twee auto's van hetzelfde type en ongeveer dezelfde grootte, en matchten deze paren bestuurders ook nog qua gebruik van de autogordel. Verder zijn twee auto's die met elkaar botsen, automatisch gematched op eigenschappen als de tijd van de dag, de drukte op de weg, de weersomstandigheden en de hevigheid van de botsing. Als je ook één-auto-crashes meeneemt, zijn dat allemaal potentiele confounders. Bijvoorbeeld: als dikke mensen gemiddeld harder zouden rijden dan slanke, dan rijden ze zichzelf vaker dood. Uiteindelijk hielden Rice en Zhu een kleine 3500 autobotsingen over met bijna 7000 paarsgewijs gematchte bestuurders, waaruit het verband tussen BMI en overlijdensrisico volgde. De grote vraag is natuurlijk: hoe komt dat? De onderzoekers speculeren, dat dikke mensen door hun vetlaag rond de heup niet goed vast te snoeren zijn in de heupgordel. Daardoor vliegen ze bij een botsing eerst een stuk naar voren, voordat de heupbotten gestuit worden door de gordel, en dat zou de geïncasseerde klap vergroten. Andere onderzoekers hebben dit effect zelfs getest door auto's te laten crashen in het laboratorium met dikke of slanke lijken op de bestuurdersplaats. Maar waarom dit tot een hogere sterftekans zou leiden blijft de vraag.  Een andere verklaring, net zo speculatief, is dat dikke mensen gemiddeld een zwakkere gezondheid hebben, en dus eerder het loodje leggen als de klap van een auto-botsing daar bovenop komt. Een simpele fysische verklaring die de onderzoekers buiten beschouwing laten, zou je het olifant-effect kunnen noemen. Een auto-botsing is vergelijkbaar met van een zekere hoogte verticaal op de grond vallen. De hoge piekvertraging (in een fractie van een seconde van 30 of 50 km/u naar 0) is in wezen wat de schade aanricht.  Een kat of hond kan probleemloos van anderhalve meter hoog op een stenen vloer springen, maar een olifant die hetzelfde probeert, breekt minstens een paar botten en overleeft het misschien niet eens.  Je kunt je ook zelf het verschil voorstellen tussen enerzijds, van anderhalve meter hoogte van een muurtje springen, en hetzelfde doen met 25 kilo aan halterschijven om je middel.  Hoe meer kilo's je meetorst, hoe harder de klap van een hoge piekvertraging aankomt. Dat geldt zeker als een bestuurder de gordel niet om heeft en door het auto-interieur tot stilstand wordt gebracht bij een botsing. Driver obesity and the risk of fatal injury during traffic collisions, T.Rice, M. Zhu, British Medical journal, 21 januari 2013";
+
+
 
     @Test
     public void testPatternOnTag() {
@@ -130,6 +137,15 @@ public class TextUtilTest {
     public void testSanitizeMSE_2589() {
         String result = sanitize(MSE_2589);
         assertThat(result.replaceAll("\\s", "")).isEqualTo(MSE_2589.replaceAll("\\s", ""));
+    }
+
+    @Test
+    public void testSanitizeMSE_5216() {
+        String result = sanitize("<p>foo</p><p>bar</p>");
+        assertThat(result).isEqualTo("foo bar"); // Hmm. Doesn't fail. The description of MSE-5216 is not quite accurate.
+        String example = "<p>Hokus pokus</p><p>bla  <em>asdfasdf afsfd</em></p><p>Simsalabim</p><ol><li>één</li><li><strong>twee</strong></li><li>drie</li><li>vier</li></ol><ul><li>bol</li><li>kubus</li><li>kegel</li></ul><p>nog <u>een vijf</u></p><p>verdrietjes 123456789</p>";
+        String result2 = sanitize(example);
+        assertThat(result2).isEqualTo("Hokus pokus bla asdfasdf afsfd Simsalabim één twee drie vier bol kubus kegel nog een vijf verdrietjes 123456789");
     }
 
     @Test
@@ -248,18 +264,101 @@ public class TextUtilTest {
 
     @Test
     public void unhtml() {
-        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><p>asdf</p><p>adsfasdf</p><p>asdfsdf!asdf</p>";
+        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><ol><li>1</li><li>2</li></ol><p>adsfasdf</p><p /><p>asdfsdf!asdf</p>";
         assertThat(TextUtil.unhtml(example)).isEqualTo("Hokus pòkus\n" +
             "\n" +
-            "bla  asdfasdf\n" +
+            "bla  asdfasdf\n" +
             "\n" +
             "Simsalabim\n" +
-            "\n" +
-            "asdf\n" +
+            "-1\n" +
+            "-2\n" +
             "\n" +
             "adsfasdf\n" +
             "\n" +
             "asdfsdf!asdf");
     }
+
+    @Test
+    public void withLSEPAndNBSP() {
+        String example = "nbsp:\u00a0line separator:\u2028foobar";
+        String unhtmled = TextUtil.unhtml(example);
+        assertThat(isValid(unhtmled)).isTrue();
+        assertThat(normalizeWhiteSpace(unhtmled)).isEqualTo(normalizeWhiteSpace(sanitize(unhtmled)));
+    }
+
+
+    @Test
+    public void withLSEP() {
+        String example = "<p>Dit jaar is alweer de achtste editie van <em>An Evening of Today,</em> een showcase voor jonge nieuwe-muziekensembles en componisten. De avond biedt een zeer divers beeld van de muziek van nu. De verbeelding staat centraal: in eerdere edities verrasten de componisten met ongebruikelijke opstellingen, ballonnen, tafeltennis, video, nieuwe speeltechnieken, gerafelde nachtclubsferen, elektronica, nepnieuws, een rockband en 'visuele muziek' zonder geluid.</p><p><br></p><p><strong>An Evening of Today</strong></p><p>Chongliang Yu - Digital Doppelgänger\n" +
+            "</p><p><em>Not the center: Cèlia Tort Pujol, Leonie Strecker, Myrthe Bokelmann, Roma Gavryliuk</em></p><p>Creating ‘on the spot’\n" +
+            "</p><p><em>Ensemble Resilience: Paolo Gorini (piano & Seaboard (MIDI-controller)), Marco Danesi (klarinet), Natalie Kulina (viool), Tomek Szczepaniak (Mater (hybride percussie-instrument) en Chimes tree (percussie-instrument)), Gerardo Gozzi (live compositie), Rubens Askenar (live compositie)</em></p><p>David Ko 너랑나 — You and Me Song</p><p><em>Frieda Gustavs (zang), Lautaro Hochman, Julek Warszawski, Siebren Smink (gitaar samples)</em></p><p>David Ko 너랑나 —  Psalm Song</p><p><em>Pietro Elia Barcellona (contrabas), Michele Mazzini (basklarinet), Kavid Do (keyboard)</em></p><p>Apollonio Maiello - Typing…\n" +
+            "</p><p><em>Katherine Weber (sopraan), Juho Myllylä (blokfluit & elektrisch gitaar), Hessel Moeselaar (altviool & MIDI-pedals), \u2028Francisco Martí Hernández (piano)</em></p><p>Alberto Granados - Earwash\n" +
+            "</p><p><em>Jesse Debille, Noemi Calzavara, Alberto Granados Reguilón, Irene Comesaña Aguilar (productie & artistiek regisseur)</em></p><p>Rechtstreeks vanuit Muziekgebouw aan 't IJ, Amsterdam</p>";
+
+        String unhtmled = TextUtil.unhtml(example);
+        assertThat(isValid(unhtmled)).isTrue();
+        assertThat(normalizeWhiteSpace(unhtmled)).isEqualTo(normalizeWhiteSpace(sanitize(unhtmled)));
+
+        assertThat(unhtmled).isEqualTo("Dit jaar is alweer de achtste editie van An Evening of Today, een showcase voor jonge nieuwe-muziekensembles en componisten. De avond biedt een zeer divers beeld van de muziek van nu. De verbeelding staat centraal: in eerdere edities verrasten de componisten met ongebruikelijke opstellingen, ballonnen, tafeltennis, video, nieuwe speeltechnieken, gerafelde nachtclubsferen, elektronica, nepnieuws, een rockband en 'visuele muziek' zonder geluid.\n" +
+            "\n" +
+            "An Evening of Today\n" +
+            "\n" +
+            "Chongliang Yu - Digital Doppelgänger\n" +
+            "\n" +
+            "Not the center: Cèlia Tort Pujol, Leonie Strecker, Myrthe Bokelmann, Roma Gavryliuk\n" +
+            "\n" +
+            "Creating ‘on the spot’\n" +
+            "\n" +
+            "Ensemble Resilience: Paolo Gorini (piano & Seaboard (MIDI-controller)), Marco Danesi (klarinet), Natalie Kulina (viool), Tomek Szczepaniak (Mater (hybride percussie-instrument) en Chimes tree (percussie-instrument)), Gerardo Gozzi (live compositie), Rubens Askenar (live compositie)\n" +
+            "\n" +
+            "David Ko 너랑나 — You and Me Song\n" +
+            "\n" +
+            "Frieda Gustavs (zang), Lautaro Hochman, Julek Warszawski, Siebren Smink (gitaar samples)\n" +
+            "\n" +
+            "David Ko 너랑나 —  Psalm Song\n" +
+            "\n" +
+            "Pietro Elia Barcellona (contrabas), Michele Mazzini (basklarinet), Kavid Do (keyboard)\n" +
+            "\n" +
+            "Apollonio Maiello - Typing…\n" +
+            "\n" +
+            "Katherine Weber (sopraan), Juho Myllylä (blokfluit & elektrisch gitaar), Hessel Moeselaar (altviool & MIDI-pedals), \n" +
+            "Francisco Martí Hernández (piano)\n" +
+            "\n" +
+            "Alberto Granados - Earwash\n" +
+            "\n" +
+            "Jesse Debille, Noemi Calzavara, Alberto Granados Reguilón, Irene Comesaña Aguilar (productie & artistiek regisseur)\n" +
+            "\n" +
+            "Rechtstreeks vanuit Muziekgebouw aan 't IJ, Amsterdam");
+    }
+
+    @Test
+    public void stripHtml() {
+        String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><p>asdf</p><p>adsfasdf</p><p>asdfsdf!asdf</p>";
+        assertThat(TextUtil.stripHtml(example)).isEqualTo("Hokus pòkus bla&nbsp; asdfasdf Simsalabim asdf adsfasdf asdfsdf!asdf");
+    }
+
+    @ParameterizedTest
+    @MethodSource("polyNullMethods")
+    public void polynull(Method m) throws InvocationTargetException, IllegalAccessException {
+        Object[] parameters = new Object[m.getParameterCount()];
+        for (int i = 0 ; i < m.getParameterCount(); i++) {
+            if (boolean.class.equals(m.getParameterTypes()[i])) {
+                parameters[i] = Boolean.FALSE;
+            }
+            if (int.class.equals(m.getParameterTypes()[i])) {
+                parameters[i] = 10;
+            }
+        }
+        Object invoke = m.invoke(null, parameters);
+        assertThat(invoke).isNull();
+    }
+
+    public static Stream<Arguments> polyNullMethods() {
+         return Arrays.stream(TextUtil.class.getDeclaredMethods())
+             .filter(m -> Modifier.isStatic(m.getModifiers()) && Modifier.isPublic(m.getModifiers()))
+             .filter(m -> m.getAnnotatedReturnType().getAnnotation(PolyNull.class) != null)
+             .map(Arguments::of);
+    }
+
 }
 
