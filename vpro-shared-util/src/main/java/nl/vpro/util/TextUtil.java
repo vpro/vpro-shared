@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.stream.Stream;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.checkerframework.checker.nullness.qual.*;
 import org.jsoup.Jsoup;
@@ -27,6 +29,10 @@ public class TextUtil {
      */
     public static final Pattern ILLEGAL_PATTERN = Pattern.compile("<.*>|&#\\d{2,4};|&[\\w]{2,8};|\\u2028");
 
+    private TextUtil() {
+        // utility class
+    }
+
     /**
      * Checks if given text input complies to POMS standard.
      * @see #ILLEGAL_PATTERN for a rough check
@@ -42,12 +48,28 @@ public class TextUtil {
         );
     }
 
+    /**
+     * Replaces any occurrences of 1 of more white space characters by one space.
+     */
     @PolyNull
     public static String normalizeWhiteSpace(@PolyNull String input) {
         if (input == null) {
             return null;
         }
-        return input.trim().replaceAll("\\s+", " ");
+
+        return input.trim().replaceAll("[\\s\u00a0]+", " ");
+    }
+
+    @PolyNull
+    public static String normalizeWhiteSpacePreserveNewlines(@PolyNull String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.trim()
+            .replaceAll("\\r{3,}", "\n\n")
+            // space, line tabulation, tab, formfeed,cariage return
+            .replaceAll("[ \\t\\x0B\\f]+", " ")
+            ;
     }
 
     /**
@@ -67,6 +89,9 @@ public class TextUtil {
         return input != null ? input.replace('\u00A0', ' ') : null;
     }
 
+    /**
+     * Replaces 'odd' characters with a normal white space character.
+     */
     @PolyNull
     public static String replaceOdd(@PolyNull String input) {
         if (input == null) {
@@ -76,12 +101,11 @@ public class TextUtil {
 
         return replaceLineBreaks(
             replaceNonBreakingSpace(input)
-
         );
     }
 
     /**
-     * Replaces all non breaking space characters (\u00A0) with a normal white space character.
+     * Replaces all non breaking space entities(&nbsp;) with a normal white space character.
      */
     @PolyNull
     public static String replaceHtmlEscapedNonBreakingSpace(@PolyNull String input) {
@@ -89,17 +113,21 @@ public class TextUtil {
     }
 
     /**
-     * Un-escapes all html escape characters. For example: Replaces "&amp;amp;" with "&amp;".
+     * Un-escapes all html escape entities. For example: Replaces "&amp;amp;" with "&amp;".
      */
     @PolyNull
     public static String unescapeHtml(@PolyNull String input) {
         return input != null ? StringEscapeUtils.unescapeHtml4(
-            input.replace("&nbsp;", " ")
+            input.replace("&nbsp;", "\u00a0")
         ) : null;
     }
 
     /**
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
+     *
+     * @see #unhtml(String)  for multiline interpretation
+     * @param input a piece of HTML or text containing some HTML markup
+     * @return One line representing only the textual content of the input
      */
     @PolyNull
     public static String stripHtml(@PolyNull String input) {
@@ -112,6 +140,7 @@ public class TextUtil {
         outputSettings.prettyPrint(false);
         jsoupDoc.outputSettings(outputSettings);
         jsoupDoc.select("br").before(" ");
+        jsoupDoc.select("li").before(" ");
         jsoupDoc.select("p").before(" ");
         String str = jsoupDoc.html();
         String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
@@ -119,25 +148,9 @@ public class TextUtil {
     }
 
     /**
-     * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
-     * might lead to problems for end users.
-     */
-    @PolyNull
-    public static String sanitize(@PolyNull String input) {
-        if (input == null) {
-            return null;
-        }
-        // recursive, because sometimes a sanitize operation results new html (see nl.vpro.util.TextUtilTest.testSanitizeIframe())
-        String sanitized = _sanitize(input);
-        while (! Objects.equals(sanitized, input)) {
-            input = sanitized;
-            sanitized = _sanitize(input);
-        }
-        return sanitized;
-
-    }
-
-    /**
+     * @param input A piece of HTML
+     * @return A piece of plain text, currently only supporting breaks, paragraphs, and lists. Empty paragraphs
+     *         and multiple linebreaks are removed.
      * @since 2.30
      */
     @PolyNull
@@ -154,8 +167,36 @@ public class TextUtil {
         jsoupDoc.select("li").before("\\n-");
         String str = jsoupDoc.html().replaceAll("\\\\n", "\n");
         String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
-        return unescapeHtml(strWithNewLines.trim());
+        return unescapeHtml(
+            strWithNewLines.trim()
+        )
+            .replaceAll(" +", " ")
+            .replaceAll("\u00a0+", "\u00a0") // no break space
+            .replaceAll("\u2028", "\n") // line seperator
+            .replaceAll("\n{3,}", "\n\n");
     }
+
+    /**
+     * Aggressively removes all tags and escaped HTML characters from the given input and replaces some characters that
+     * might lead to problems for end users.
+     *
+     * @return A single line of text
+     */
+    @PolyNull
+    public static String sanitize(@PolyNull String input) {
+        if (input == null) {
+            return null;
+        }
+        // recursive, because sometimes a sanitize operation results new html (see nl.vpro.util.TextUtilTest.testSanitizeIframe())
+        String sanitized = _sanitize(input);
+        while (! Objects.equals(sanitized, input)) {
+            input = sanitized;
+            sanitized = _sanitize(input);
+        }
+        return sanitized;
+
+    }
+
 
 
     @PolyNull
@@ -173,18 +214,25 @@ public class TextUtil {
 
 
     private static final Set<Pattern> DUTCH_PARTICLES =
-        new HashSet<>(
+        Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList(
                 getPattern("de"),
                 getPattern("het"),
                 getPattern("een")
                 /*, "'t", "'n" ?*/
-            ));
+            )));
     private static Pattern getPattern(String particle) {
         return Pattern.compile("(?i)^(" + particle + ")\\b.+");
     }
 
-    public static String getLexico(String title, Locale locale) {
+    /**
+     * Returns the 'lexicographic' presentation of a title. This means that articles are stripped and moved to the end of the string. Currently only supported for dutch.
+     */
+    @PolyNull
+    public static String getLexico(@PolyNull String title, Locale locale) {
+        if (title == null) {
+            return null;
+        }
         // Deze code staat ook als javascript in media-server/src/main/webapp/vpro/media/1.0/util/format.js
         if ("nl".equals(locale.getLanguage())) {
             for (Pattern particle : DUTCH_PARTICLES) {
@@ -206,16 +254,17 @@ public class TextUtil {
         }
     }
 
+    /**
+     * Selects first non null of the parameters.
+     * @deprecated  Can easily be achieved with stream filter {@link Objects#nonNull(Object)}
+     */
+    @Deprecated
     public static String select(String... options) {
-        for(String option : options) {
-            if(option != null) {
-                return option;
-            }
-        }
-        return null;
+        return Stream.of(options).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
-    public static String truncate(String text, int max) {
+    @PolyNull
+    public static String truncate(@PolyNull String text, int max) {
         return truncate(text, max, false);
     }
 
@@ -230,7 +279,8 @@ public class TextUtil {
         return -1;
     }
 
-    public static String truncate(String text, int max, boolean ellipses) {
+    @PolyNull
+    public static String truncate(@PolyNull String text, int max, boolean ellipses) {
         if (text == null) {
             return null;
         }
@@ -265,7 +315,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'stroke through' (using unicode control characters)
      * @since 2.11
      */
-    public static String strikeThrough(CharSequence s) {
+    @PolyNull
+    public static String strikeThrough(@PolyNull CharSequence s) {
         return controlEach(s, '\u0336');
     }
 
@@ -273,7 +324,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'underlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String underLine(CharSequence s) {
+    @PolyNull
+    public static String underLine(@PolyNull CharSequence s) {
         return controlEach(s, '\u0332');
     }
 
@@ -281,7 +333,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'double underlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String underLineDouble(CharSequence s) {
+    @PolyNull
+    public static String underLineDouble(@PolyNull CharSequence s) {
         return controlEach(s, '\u0333');
     }
 
@@ -289,7 +342,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'overlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String overLine(CharSequence s) {
+    @PolyNull
+    public static String overLine(@PolyNull CharSequence s) {
         return controlEach(s, '\u0305');
     }
 
@@ -297,7 +351,8 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'double overlined' (using unicode control characters)
      * @since 2.11
      */
-    public static String overLineDouble(CharSequence s) {
+    @PolyNull
+    public static String overLineDouble(@PolyNull CharSequence s) {
         return controlEach(s, '\u033f');
     }
 
@@ -305,14 +360,16 @@ public class TextUtil {
      * Gives a representation of the string which is completely 'diaeresised under' (using unicode control characters)
      * @since 2.11
      */
-    public static String underDiaeresis(CharSequence s) {
+    @PolyNull
+    public static String underDiaeresis(@PolyNull CharSequence s) {
         return controlEach(s, '\u0324');
     }
 
     /**
      * @since 2.11
      */
-    public static String controlEach(CharSequence s, Character control) {
+    @PolyNull
+    public static String controlEach(@PolyNull CharSequence s, @NonNull Character control) {
         if (s == null) {
             return null;
         }
