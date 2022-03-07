@@ -5,8 +5,7 @@
 package nl.vpro.util;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -18,8 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static nl.vpro.util.TextUtil.isValid;
-import static nl.vpro.util.TextUtil.sanitize;
+import static nl.vpro.util.TextUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -278,6 +276,59 @@ public class TextUtilTest {
             "adsfasdf\n" +
             "\n" +
             "asdfsdf!asdf");
+    }
+
+    @Test
+    public void withLSEPAndNBSP() {
+        String example = "nbsp:\u00a0line separator:\u2028foobar";
+        String unhtmled = TextUtil.unhtml(example);
+        assertThat(isValid(unhtmled)).isTrue();
+        assertThat(normalizeWhiteSpace(unhtmled)).isEqualTo(normalizeWhiteSpace(sanitize(unhtmled)));
+    }
+
+
+    @Test
+    public void withLSEP() {
+        String example = "<p>Dit jaar is alweer de achtste editie van <em>An Evening of Today,</em> een showcase voor jonge nieuwe-muziekensembles en componisten. De avond biedt een zeer divers beeld van de muziek van nu. De verbeelding staat centraal: in eerdere edities verrasten de componisten met ongebruikelijke opstellingen, ballonnen, tafeltennis, video, nieuwe speeltechnieken, gerafelde nachtclubsferen, elektronica, nepnieuws, een rockband en 'visuele muziek' zonder geluid.</p><p><br></p><p><strong>An Evening of Today</strong></p><p>Chongliang Yu - Digital Doppelgänger\n" +
+            "</p><p><em>Not the center: Cèlia Tort Pujol, Leonie Strecker, Myrthe Bokelmann, Roma Gavryliuk</em></p><p>Creating ‘on the spot’\n" +
+            "</p><p><em>Ensemble Resilience: Paolo Gorini (piano & Seaboard (MIDI-controller)), Marco Danesi (klarinet), Natalie Kulina (viool), Tomek Szczepaniak (Mater (hybride percussie-instrument) en Chimes tree (percussie-instrument)), Gerardo Gozzi (live compositie), Rubens Askenar (live compositie)</em></p><p>David Ko 너랑나 — You and Me Song</p><p><em>Frieda Gustavs (zang), Lautaro Hochman, Julek Warszawski, Siebren Smink (gitaar samples)</em></p><p>David Ko 너랑나 —  Psalm Song</p><p><em>Pietro Elia Barcellona (contrabas), Michele Mazzini (basklarinet), Kavid Do (keyboard)</em></p><p>Apollonio Maiello - Typing…\n" +
+            "</p><p><em>Katherine Weber (sopraan), Juho Myllylä (blokfluit & elektrisch gitaar), Hessel Moeselaar (altviool & MIDI-pedals), \u2028Francisco Martí Hernández (piano)</em></p><p>Alberto Granados - Earwash\n" +
+            "</p><p><em>Jesse Debille, Noemi Calzavara, Alberto Granados Reguilón, Irene Comesaña Aguilar (productie & artistiek regisseur)</em></p><p>Rechtstreeks vanuit Muziekgebouw aan 't IJ, Amsterdam</p>";
+
+        String unhtmled = TextUtil.unhtml(example);
+        assertThat(isValid(unhtmled)).isTrue();
+        assertThat(normalizeWhiteSpace(unhtmled)).isEqualTo(normalizeWhiteSpace(sanitize(unhtmled)));
+
+        assertThat(unhtmled).isEqualTo("Dit jaar is alweer de achtste editie van An Evening of Today, een showcase voor jonge nieuwe-muziekensembles en componisten. De avond biedt een zeer divers beeld van de muziek van nu. De verbeelding staat centraal: in eerdere edities verrasten de componisten met ongebruikelijke opstellingen, ballonnen, tafeltennis, video, nieuwe speeltechnieken, gerafelde nachtclubsferen, elektronica, nepnieuws, een rockband en 'visuele muziek' zonder geluid.\n" +
+            "\n" +
+            "An Evening of Today\n" +
+            "\n" +
+            "Chongliang Yu - Digital Doppelgänger\n" +
+            "\n" +
+            "Not the center: Cèlia Tort Pujol, Leonie Strecker, Myrthe Bokelmann, Roma Gavryliuk\n" +
+            "\n" +
+            "Creating ‘on the spot’\n" +
+            "\n" +
+            "Ensemble Resilience: Paolo Gorini (piano & Seaboard (MIDI-controller)), Marco Danesi (klarinet), Natalie Kulina (viool), Tomek Szczepaniak (Mater (hybride percussie-instrument) en Chimes tree (percussie-instrument)), Gerardo Gozzi (live compositie), Rubens Askenar (live compositie)\n" +
+            "\n" +
+            "David Ko 너랑나 — You and Me Song\n" +
+            "\n" +
+            "Frieda Gustavs (zang), Lautaro Hochman, Julek Warszawski, Siebren Smink (gitaar samples)\n" +
+            "\n" +
+            "David Ko 너랑나 —  Psalm Song\n" +
+            "\n" +
+            "Pietro Elia Barcellona (contrabas), Michele Mazzini (basklarinet), Kavid Do (keyboard)\n" +
+            "\n" +
+            "Apollonio Maiello - Typing…\n" +
+            "\n" +
+            "Katherine Weber (sopraan), Juho Myllylä (blokfluit & elektrisch gitaar), Hessel Moeselaar (altviool & MIDI-pedals), \n" +
+            "Francisco Martí Hernández (piano)\n" +
+            "\n" +
+            "Alberto Granados - Earwash\n" +
+            "\n" +
+            "Jesse Debille, Noemi Calzavara, Alberto Granados Reguilón, Irene Comesaña Aguilar (productie & artistiek regisseur)\n" +
+            "\n" +
+            "Rechtstreeks vanuit Muziekgebouw aan 't IJ, Amsterdam");
     }
 
     @Test

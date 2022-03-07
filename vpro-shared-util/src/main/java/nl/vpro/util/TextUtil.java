@@ -56,7 +56,20 @@ public class TextUtil {
         if (input == null) {
             return null;
         }
-        return input.trim().replaceAll("\\s+", " ");
+
+        return input.trim().replaceAll("[\\s\u00a0]+", " ");
+    }
+
+    @PolyNull
+    public static String normalizeWhiteSpacePreserveNewlines(@PolyNull String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.trim()
+            .replaceAll("\\r{3,}", "\n\n")
+            // space, line tabulation, tab, formfeed,cariage return
+            .replaceAll("[ \\t\\x0B\\f]+", " ")
+            ;
     }
 
     /**
@@ -88,7 +101,6 @@ public class TextUtil {
 
         return replaceLineBreaks(
             replaceNonBreakingSpace(input)
-
         );
     }
 
@@ -159,7 +171,8 @@ public class TextUtil {
             strWithNewLines.trim()
         )
             .replaceAll(" +", " ")
-            .replaceAll("\u00a0+", "\u00a0")
+            .replaceAll("\u00a0+", "\u00a0") // no break space
+            .replaceAll("\u2028", "\n") // line seperator
             .replaceAll("\n{3,}", "\n\n");
     }
 
