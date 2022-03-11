@@ -28,8 +28,7 @@ jobs:
     steps:
       - name: Cancel previous Action
         uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ github.token }}
+        if: github.ref == 'refs/heads/main'
       - uses: getong/elasticsearch-action@v1.2
         with:
           elasticsearch version: '7.9.0'
