@@ -101,6 +101,10 @@ public class URLResource<T> {
     @Getter
     private Duration readTimeout = Duration.ofMillis(5000);
 
+    @Setter
+    @Getter
+    private String accept;
+
 
     @SafeVarargs
     public URLResource(URI url, Function<InputStream, T> reader, T empty, Consumer<T>... callbacks) {
@@ -222,11 +226,15 @@ public class URLResource<T> {
                 log.debug("last try at {} was pretty long ago (> {}), simply do a normal request", lastTry, maxAge);
             }
         }
+        if (accept != null) {
+            connection.setRequestProperty("Accept", accept);
+        }
         if (httpUrl) {
             HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
             httpURLConnection.setConnectTimeout((int) connectTimeout.toMillis());
             httpURLConnection.setReadTimeout((int) readTimeout.toMillis());
             httpURLConnection.setInstanceFollowRedirects(true);
+
 
             try {
                 code = httpURLConnection.getResponseCode();
@@ -335,10 +343,7 @@ public class URLResource<T> {
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
                 log.warn("{}:{}: (caching until {})", code, url, expires);
-
-
         }
-
     }
 
 
