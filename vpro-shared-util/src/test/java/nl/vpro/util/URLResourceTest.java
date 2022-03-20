@@ -1,8 +1,6 @@
 package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.lanwen.wiremock.ext.WiremockResolver;
-import ru.lanwen.wiremock.ext.WiremockUriResolver;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,11 +10,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static nl.vpro.util.URLResource.PROPERTIES;
@@ -31,28 +29,25 @@ import static org.mockito.Mockito.when;
  * @since 0.37
  */
 @Slf4j
-@ExtendWith({
-    WiremockResolver.class,
-    WiremockUriResolver.class
-})
+@WireMockTest
 public class URLResourceTest {
 
     @BeforeEach
-    public  void init(@WiremockResolver.Wiremock WireMockServer server) throws IOException {
-        server.stubFor(get(urlEqualTo("/broadcasters"))
+    public  void init() throws IOException {
+        stubFor(get(urlEqualTo("/broadcasters"))
             .willReturn(
                 aResponse()
                     .withBody(IOUtils.resourceToByteArray("/broadcasters.properties"))
                     .withHeader("Cache-Control", "public, max-age: 3600")
                     .withHeader("Last-Modified", "Wed, 24 Apr 2019 05:55:21 GMT")
             ));
-        server.stubFor(get(urlEqualTo("/broadcasters"))
+        stubFor(get(urlEqualTo("/broadcasters"))
             .withHeader("If-Modified-Since", equalTo("Wed, 24 Apr 2019 05:55:21 GMT"))
             .willReturn(
                 aResponse()
                     .withStatus(HttpStatus.SC_NOT_MODIFIED)
                 ));
-        server.stubFor(get(urlEqualTo("/redirect"))
+        stubFor(get(urlEqualTo("/redirect"))
             .willReturn(
                 aResponse()
                     .withHeader("Location", "/broadcasters")
@@ -63,10 +58,10 @@ public class URLResourceTest {
 
 
     @Test
-    public void broadcasters(@WiremockUriResolver.WiremockUri String uri) throws InterruptedException {
+    public void broadcasters(WireMockRuntimeInfo info) throws InterruptedException {
 
         URLResource<Properties> broadcasters =
-            URLResource.properties(URI.create(uri + "/broadcasters"));
+            URLResource.properties(URI.create(info.getHttpBaseUrl() + "/broadcasters"));
 
         assertThat(broadcasters.get()).isNotEmpty();
         assertThat(broadcasters.getChangesCount()).isEqualTo(1);
@@ -103,8 +98,8 @@ public class URLResourceTest {
     }
 
     @Test
-    public void broadcastersRedirect(@WiremockUriResolver.WiremockUri String uri) {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create(uri + "/redirect"));
+    public void broadcastersRedirect(WireMockRuntimeInfo runtimeInfo) {
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create(runtimeInfo.getHttpBaseUrl() + "/redirect"));
 
         assertTrue(broadcasters.get().size() > 0);
 
