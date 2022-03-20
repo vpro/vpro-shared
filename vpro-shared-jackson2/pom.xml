@@ -85,5 +85,10 @@
       <artifactId>guava</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
