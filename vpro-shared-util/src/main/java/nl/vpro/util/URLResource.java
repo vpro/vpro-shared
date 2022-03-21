@@ -175,11 +175,11 @@ public class URLResource<T> {
     }
 
     void getCachedResource(String resource) {
-        InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resource);
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resource);
         if (resourceAsStream == null) {
             throw new IllegalArgumentException("No resource " + resource);
         }
-        T newResult = reader.apply(resourceAsStream);
+        final T newResult = reader.apply(resourceAsStream);
         if (newResult != null) {
             lastLoad = Instant.now();
             lastTry = lastLoad;
@@ -213,7 +213,7 @@ public class URLResource<T> {
             log.debug("Not loading {} as it is not yet expired", url);
             return;
         }
-        boolean httpUrl = connection instanceof HttpURLConnection;
+        final boolean httpUrl = connection instanceof HttpURLConnection;
         code = -1;
         boolean checkIfModified = false;
         if (httpUrl && lastModified != null) {
@@ -234,7 +234,6 @@ public class URLResource<T> {
             httpURLConnection.setConnectTimeout((int) connectTimeout.toMillis());
             httpURLConnection.setReadTimeout((int) readTimeout.toMillis());
             httpURLConnection.setInstanceFollowRedirects(true);
-
 
             try {
                 code = httpURLConnection.getResponseCode();
@@ -264,13 +263,13 @@ public class URLResource<T> {
             case SC_OK:
                 okCount++;
                 log.debug("Loaded {}", url);
-                InputStream stream = connection.getInputStream();
-                Instant prevMod = lastModified;
+                final InputStream stream = connection.getInputStream();
+                final Instant prevMod = lastModified;
                 lastModified = Instant.ofEpochMilli(connection.getHeaderFieldDate("Last-Modified", System.currentTimeMillis()));
                 if (connection.getHeaderField("Expires") != null) {
                     expires = Instant.ofEpochMilli(connection.getHeaderFieldDate("Expires", System.currentTimeMillis()));
                 }
-                String cacheControl = connection.getHeaderField("Cache-Control");
+                final String cacheControl = connection.getHeaderField("Cache-Control");
                 if (cacheControl != null) {
                     String[] split = cacheControl.split("\\s*,\\s*");
                     for (String s : split) {
@@ -289,12 +288,12 @@ public class URLResource<T> {
                         }
                     }
                 }
-                Instant maxExpires = Instant.now().plus(maxAge);
+                final Instant maxExpires = Instant.now().plus(maxAge);
                 if (expires != null && expires.isAfter(maxExpires)) {
                     log.info("Found expiry {} for {} truncated to {}", expires, url, maxExpires);
                     expires = maxExpires;
                 }
-                T newResult = reader.apply(stream);
+                final T newResult = reader.apply(stream);
                 if (newResult != null) {
                     if (result == null) {
                         log.info("Loaded {} -> {}", url, lastModified);
@@ -326,7 +325,7 @@ public class URLResource<T> {
             case SC_FOUND:
             case SC_MOVED_PERMANENTLY:
                 if (redirectCount < 10) {
-                    URI redirectTo = URI.create(connection.getHeaderField("Location"));
+                    final URI redirectTo = URI.create(connection.getHeaderField("Location"));
                     log.info("{} is redirecting to {}", url, redirectTo);
                     if (code == SC_MOVED_PERMANENTLY) {
                         url = redirectTo;
@@ -347,11 +346,9 @@ public class URLResource<T> {
     }
 
 
-
     void expire() {
         expires = null;
     }
-
 
     public URLResource<T> setMaxAge(Duration maxAge) {
         this.maxAge = maxAge;
@@ -367,7 +364,6 @@ public class URLResource<T> {
         this.errorCache = errorCache;
         return this;
     }
-
 
 
     @SafeVarargs
@@ -424,8 +420,7 @@ public class URLResource<T> {
     };
 
     public static final Function<InputStream, Map<String, String>> MAP = inputStream -> {
-
-        Properties props = new LinkedProperties();
+        final Properties props = new LinkedProperties();
         try {
             props.load(inputStream);
         } catch (IOException e) {
