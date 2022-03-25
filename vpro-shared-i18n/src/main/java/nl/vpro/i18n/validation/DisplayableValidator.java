@@ -9,10 +9,10 @@ import javax.validation.ConstraintValidatorContext;
 
 import nl.vpro.i18n.Displayable;
 
-public class DisplayValidator implements ConstraintValidator<Display, Displayable> {
+public class DisplayableValidator implements ConstraintValidator<MustDisplay, Displayable> {
 
     @Override
-    public void initialize(Display constraintAnnotation) {
+    public void initialize(MustDisplay constraintAnnotation) {
     }
 
     @Override

@@ -6,9 +6,9 @@ import nl.vpro.i18n.Displayable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DisplayValidatorTest {
+class MustDisplayValidatorTest {
 
-    private final DisplayValidator validator = new DisplayValidator();
+    private final DisplayableValidator validator = new DisplayableValidator();
 
     enum TestEnum implements Displayable {
         a,
