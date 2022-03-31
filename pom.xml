@@ -248,7 +248,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.3.15</spring.version>
+    <spring.version>5.3.18</spring.version>
     <spring-security.version>5.6.1</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
