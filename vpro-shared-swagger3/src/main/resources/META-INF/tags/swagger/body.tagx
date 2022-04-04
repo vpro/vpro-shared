@@ -3,7 +3,7 @@
 		xmlns:swagger="https://www.vpro.nl/shared/tags/swagger"
     version="2.0"
     >
-	<jsp:directive.tag body-content="tagdependent" />
+	<jsp:directive.tag body-content="scriptless" />
 	<jsp:directive.attribute name="url"
                              rtexprvalue="true"
                              type="java.lang.String" description="swagger json to load" required="false" />

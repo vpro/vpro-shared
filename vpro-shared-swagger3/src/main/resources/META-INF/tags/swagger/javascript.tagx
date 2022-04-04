@@ -23,19 +23,19 @@
 
 		window.onload = function() {
 			window.ui = SwaggerUIBundle({
-    url: "${swaggerjson}",
-    dom_id: '#swagger-ui',
-    deepLinking: false,
-    presets: [
-			SwaggerUIBundle.presets.apis
-			//SwaggerUIStandalonePreset
-		],
+				url: "${swaggerjson}",
+				dom_id: '#swagger-ui',
+				deepLinking: false,
+				presets: [
+					SwaggerUIBundle.presets.apis
+					//SwaggerUIStandalonePreset
+				],
 
-    plugins: [
-			//SwaggerUIBundle.plugins.DownloadUrl
-    ],
-    layout: "BaseLayout"
-  });
+				plugins: [
+					//SwaggerUIBundle.plugins.DownloadUrl
+				],
+				layout: "BaseLayout"
+			});
 
 };]]></script>
 
