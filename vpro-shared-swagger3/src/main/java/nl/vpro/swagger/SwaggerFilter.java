@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.regex.Pattern;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -105,22 +104,14 @@ public class SwaggerFilter implements Filter {
     PathMatcher getPathMatcher(HttpServletRequest req) {
         String host = req.getServerName() + HttpServletRequestUtils.getPortPostFixIfNeeded(req);
         String basePath = req.getContextPath() + "/api";
-        return getPathMatcher(basePath, host, req.getContextPath());
+        return getPathMatcher(basePath, host);
     }
 
-    PathMatcher getPathMatcher(String basePath, String host, String context) {
+    PathMatcher getPathMatcher(String basePath, String host) {
         return new PathMatcherOrChain(
             new PathMatcherAndChain(
-                new SinglePathMatcher(new PreciseMatch("basePath")),
+                new SinglePathMatcher(new PreciseMatch("servers"), new ArrayEntryMatch(), new PreciseMatch("url")),
                 new ScalarEqualsMatcher("${api.basePath}", basePath)
-            ),
-            new PathMatcherAndChain(
-                new SinglePathMatcher(new PreciseMatch("basePath")),
-                new ScalarRegexpMatcher(Pattern.compile("[/]?(.*)\\$\\{CONTEXT}(.*)"), "$1" + context +"$2")
-            ),
-            new PathMatcherAndChain(
-                new SinglePathMatcher(new PreciseMatch("host")),
-                new ScalarEqualsMatcher("${api.host}", host)
             )
         );
     }

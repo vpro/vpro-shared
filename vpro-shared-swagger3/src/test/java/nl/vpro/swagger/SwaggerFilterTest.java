@@ -11,22 +11,36 @@ public class SwaggerFilterTest {
 
     @Test
     public void testFilter() throws IOException {
-        String input = "{apiVersion: \"3.0\",\n" +
-            "swaggerVersion: \"1.2\",\n" +
-            "basePath: \"${api.basePath}\"}";
+        String input = "{" +
+            "  \"openapi\": \"3.0.1\",\n" +
+            "  \"externalDocs\": {\n" +
+            "    \"description\": \"NPO Frontend API WIKI\",\n" +
+            "    \"url\": \"https://wiki.publiekeomroep.nl/display/npoapi/\"\n" +
+            "  },\n" +
+            "  \"servers\": [\n" +
+            "    {\n" +
+            "      \"url\": \"${api.basePath}\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
 
         SwaggerFilter filter = new SwaggerFilter();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        PathMatcher matcher = filter.getPathMatcher("/v3/api", "rs.poms.omroep.nl:443", "/v3");
+        PathMatcher matcher = filter.getPathMatcher("/v3/api", "rs.poms.omroep.nl");
         try (OutputStream out = filter.transform(outputStream, matcher)) {
             out.write(input.getBytes());
         }
         Jackson2TestUtil.assertThatJson(outputStream.toString()).isSimilarTo("{\n" +
-            "  \"apiVersion\" : \"3.0\",\n" +
-            "  \"swaggerVersion\" : \"1.2\",\n" +
-            "  \"basePath\" : \"/v3/api\"\n" +
-            "}");
+            "    \"openapi\" : \"3.0.1\",\n" +
+            "    \"externalDocs\" : {\n" +
+            "      \"description\" : \"NPO Frontend API WIKI\",\n" +
+            "      \"url\" : \"https://wiki.publiekeomroep.nl/display/npoapi/\"\n" +
+            "    },\n" +
+            "    \"servers\" : [ {\n" +
+            "      \"url\" : \"/v3/api\"\n" +
+            "    } ]\n" +
+            "  }");
 
 
 
