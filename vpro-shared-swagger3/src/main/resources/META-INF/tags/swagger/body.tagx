@@ -1,0 +1,22 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+		xmlns:swagger="https://www.vpro.nl/shared/tags/swagger"
+    version="2.0"
+    >
+	<jsp:directive.tag body-content="tagdependent" />
+	<jsp:directive.attribute name="url"
+                             rtexprvalue="true"
+                             type="java.lang.String" description="swagger json to load" required="false" />
+	<swagger:swaggerbase />
+	<body>
+		<jsp:doBody />
+
+		<div id="swagger-ui">
+
+		</div>
+
+		bla bla
+		<swagger:javascript url="${url}"/>
+  </body>
+
+</jsp:root>

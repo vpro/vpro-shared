@@ -1,0 +1,46 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    version="2.0"
+    >
+    <jsp:directive.tag
+            description="This includes the javascript for the swagger index" />
+    <jsp:directive.attribute name="url"
+                             rtexprvalue="true"
+                             type="java.lang.String" description="swagger json to load" required="false" />
+
+
+    <jsp:scriptlet>
+        if (url == null || url.length() == 0) {
+            url = "/api/swagger.json";
+        }
+        if (url.startsWith("/")) {
+            url = request.getServletContext().getContextPath() + url;
+        }
+        request.setAttribute("swaggerjson", url);
+    </jsp:scriptlet>
+
+    <script type="text/javascript"><![CDATA[
+
+		window.onload = function() {
+  //<editor-fold desc="Changeable Configuration Block">
+
+  // the following lines will be replaced by docker/configurator, when it runs in a docker-container
+  window.ui = SwaggerUIBundle({
+    url: "${swaggerjson}",
+    dom_id: '#swagger-ui',
+    deepLinking: true,
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset
+    ],
+    plugins: [
+			//SwaggerUIBundle.plugins.DownloadUrl
+    ],
+    layout: "StandaloneLayout"
+  });
+
+  //</editor-fold>
+};]]></script>
+
+
+</jsp:root>

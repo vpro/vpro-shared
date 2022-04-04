@@ -1,0 +1,5 @@
+= Swagger utilities
+
+This contains a few utility methods to deal with swagger.
+
+It has a dependency on a webjars for swagger frontend itself, and supplies a simply taglib to wire that into the actual HTML.

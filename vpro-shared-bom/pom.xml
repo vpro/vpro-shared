@@ -163,6 +163,12 @@
         <version>${project.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-swagger3</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
 
       <!-- not maintained any more -->
       <dependency>
