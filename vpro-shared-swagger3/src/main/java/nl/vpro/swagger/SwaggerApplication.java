@@ -4,21 +4,13 @@
  */
 package nl.vpro.swagger;
 
-import io.swagger.v3.core.util.PrimitiveType;
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-
-import com.google.common.collect.ImmutableMap;
 
 
 /**
@@ -32,18 +24,6 @@ import com.google.common.collect.ImmutableMap;
 @ApplicationPath("")
 public class SwaggerApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
-    static {
-        //XTrustProvider.install();
-        // swagger sucks a lot.
-        //https://github.com/swagger-api/swagger-core/issues/1444
-        setExternalTypes(ImmutableMap.<Class<?>, PrimitiveType>builder()
-            .put(Duration.class, PrimitiveType.STRING)
-            .put(Instant.class, PrimitiveType.DATE_TIME)
-            .put(LocalDateTime.class, PrimitiveType.DATE_TIME)
-            .put(LocalDate.class, PrimitiveType.DATE)
-            .build());
-    }
-
 
     @Override
     public Set<Class<?>> getClasses() {
@@ -58,9 +38,7 @@ public class SwaggerApplication extends Application {
 
     @PostConstruct
     public void init() {
-        OpenApiResource openApiResource = new OpenApiResource();
-        inject(openApiResource);
-
+        //inject();
     }
 
     /**
@@ -74,22 +52,6 @@ public class SwaggerApplication extends Application {
         singletons.addAll(Arrays.asList(services));
     }
 
-    private static void setExternalTypes(Map<Class<?>, PrimitiveType> externalTypes) {
-        // ugly hack until swagger supports adding external classes as primitive types
-        try {
-            Field externalTypesField = PrimitiveType.class.getDeclaredField("EXTERNAL_CLASSES");
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
 
-            modifiersField.setAccessible(true);
-            externalTypesField.setAccessible(true);
-            modifiersField.set(externalTypesField, externalTypesField.getModifiers() & ~Modifier.FINAL);
-
-            Map<String, PrimitiveType> externalTypesInternal = externalTypes.entrySet().stream()
-                    .collect(Collectors.toMap(e -> e.getKey().getName(), Map.Entry::getValue));
-            externalTypesField.set(null, externalTypesInternal);
-        } catch (NoSuchFieldException|IllegalAccessException e) {
-            log.warn("Couldn't set external types", e);
-        }
-    }
 
 }

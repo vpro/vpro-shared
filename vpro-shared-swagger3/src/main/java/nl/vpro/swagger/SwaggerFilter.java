@@ -58,7 +58,6 @@ public class SwaggerFilter implements Filter {
             }
         }
 
-
         PathMatcher matcher = getPathMatcher(req);
 
         final ServletOutputStream servletOutputStream = response.getOutputStream();

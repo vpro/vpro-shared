@@ -11,7 +11,7 @@
 
     <jsp:scriptlet>
         if (url == null || url.length() == 0) {
-            url = "/api/swagger.json";
+            url = "/api/openapi.json";
         }
         if (url.startsWith("/")) {
             url = request.getServletContext().getContextPath() + url;
@@ -22,24 +22,21 @@
     <script type="text/javascript"><![CDATA[
 
 		window.onload = function() {
-  //<editor-fold desc="Changeable Configuration Block">
-
-  // the following lines will be replaced by docker/configurator, when it runs in a docker-container
-  window.ui = SwaggerUIBundle({
+			window.ui = SwaggerUIBundle({
     url: "${swaggerjson}",
     dom_id: '#swagger-ui',
-    deepLinking: true,
+    deepLinking: false,
     presets: [
-      SwaggerUIBundle.presets.apis,
-      SwaggerUIStandalonePreset
-    ],
+			SwaggerUIBundle.presets.apis
+			//SwaggerUIStandalonePreset
+		],
+
     plugins: [
 			//SwaggerUIBundle.plugins.DownloadUrl
     ],
-    layout: "StandaloneLayout"
+    layout: "BaseLayout"
   });
 
-  //</editor-fold>
 };]]></script>
 
 

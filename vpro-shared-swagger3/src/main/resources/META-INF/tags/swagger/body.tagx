@@ -12,10 +12,9 @@
 		<jsp:doBody />
 
 		<div id="swagger-ui">
-
+			<jsp:text> </jsp:text>
 		</div>
 
-		bla bla
 		<swagger:javascript url="${url}"/>
   </body>
 
