@@ -206,7 +206,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
         private final List<File>   execs = new ArrayList<>();
 
-        public Builder commonArgs(Collection<String> args) {
+        public Builder commonArgs(List<String> args) {
             for (String s : args) {
                 commonArgsSupplier(s);
             }
