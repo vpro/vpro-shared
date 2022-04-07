@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.file.*;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -165,5 +168,24 @@ public class CommandExecutorImplTest {
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/"), null)).isInstanceOf(IllegalArgumentException.class);
         new File("/tmp/pietjepuk").createNewFile();
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/pietjepuk"), null)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+
+
+    @Test
+    public void commonArgsSupplier() {
+        AtomicLong i = new AtomicLong(0);
+        CommandExecutor test =
+                 CommandExecutorImpl.builder()
+                     .executablesPaths("/usr/bin/env")
+                     .commonArgsSupplier((Supplier<String>) () -> String.valueOf(i.get()))
+                     .commonArg("a")
+                     .commonArg(() -> "b")
+                     .commonArg(() -> i)
+                     .commonArgs(Arrays.asList("c", "d"))
+                     .build();
+        i.set(100);
+        assertThat(test.toString()).isEqualTo("/usr/bin/env 100 a b 100 c d");
+
     }
 }

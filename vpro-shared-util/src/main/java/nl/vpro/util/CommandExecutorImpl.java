@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -105,8 +104,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         Logger logger,
         SimpleLogger simpleLogger,
         BiFunction<Level, CharSequence, String> biWrapLogInfo,
-        List<String> commonArgs,
-        List<Object> commonArgsSuppliers,
+        @Singular List<Object> commonArgsSuppliers,
         boolean useFileCache,
         Integer batchSize,
         boolean optional,
@@ -118,10 +116,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
         this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
-        this.commonArgs = Stream.concat(
-                commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream(),
-                commonArgs == null ? Stream.empty() : commonArgs.stream()
-            )
+        this.commonArgs = (commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream())
             .map(this::toString)
             .collect(Collectors.toList());
         this.useFileCache = useFileCache;
@@ -209,16 +204,27 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     public static class Builder {
 
-        private final List<Object> cargs = new ArrayList<>();
         private final List<File>   execs = new ArrayList<>();
 
-        public Builder commonArg(String... args) {
-            cargs.addAll(Arrays.asList(args));
+        public Builder commonArgs(Collection<String> args) {
+            for (String s : args) {
+                commonArgsSupplier(s);
+            }
             return this;
         }
 
-        public final Builder commonArg(Object... args) {
-            cargs.addAll(Arrays.asList(args));
+        public Builder commonArg(String... args) {
+            for (String s : args) {
+                commonArgsSupplier(s);
+            }
+            return this;
+        }
+
+        @SafeVarargs
+        public final Builder commonArg(Supplier<Object>... args) {
+            for (Supplier<Object> s : args) {
+                commonArgsSupplier(s);
+            }
             return this;
         }
 
@@ -250,12 +256,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
 
         public CommandExecutorImpl build() {
-            if (commonArgsSuppliers != null){
-                commonArgsSuppliers = new ArrayList<>(commonArgsSuppliers);
-                commonArgsSuppliers.addAll(cargs);
-            } else {
-                commonArgsSuppliers(cargs);
-            }
             if (executables != null) {
                 executables = new ArrayList<>(executables);
                 executables.addAll(execs);
