@@ -180,12 +180,14 @@ public class CommandExecutorImplTest {
                      .executablesPaths("/usr/bin/env")
                      .commonArgsSupplier((Supplier<String>) () -> String.valueOf(i.get()))
                      .commonArg("a")
+                     .commonArgs(Arrays.asList("a1", "a2"))
                      .commonArg(() -> "b")
                      .commonArg(() -> i)
                      .commonArgs(Arrays.asList("c", "d"))
+                     .optional(true)
                      .build();
         i.set(100);
-        assertThat(test.toString()).isEqualTo("/usr/bin/env 100 a b 100 c d");
+        assertThat(test.toString()).isEqualTo("/usr/bin/env 100 a a1 a2 b 100 c d");
 
     }
 }
