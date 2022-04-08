@@ -31,11 +31,17 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
-    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) ->
-        exitCode == null ||
-            (exitCode == 0 // no error
-                || exitCode == 137 // killed
-            )  ? Level.DEBUG : Level.ERROR;
+    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
+        if (exitCode == null) exitCode = -1;
+        switch(exitCode) {
+            case 0:
+                return Level.DEBUG;
+            case 137:
+                return Level.WARN;
+            default:
+                return Level.ERROR;
+        }
+    };
 
     @Getter
     private final Supplier<String> binary;
@@ -313,32 +319,64 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            final Copier inputCopier = parameters.in != null ? copyThread("input copier", parameters.in, p.getOutputStream(), (e) -> {}) : null;
+            final Copier inputCopier = parameters.in != null ?
+                copyThread(
+                    "input -> process input copier",
+                    parameters.in,
+                    p.getOutputStream(),
+                    (c) -> {
+                        closeSilently(p.getOutputStream());
+                    },
+                    (e) -> {},
+                    p
+                ) : null;
 
             final Copier copier;
             if (parameters.out != null) {
-                InputStream commandOutput = p.getInputStream();
+                InputStream commandOutput;
                 if (useFileCache) {
                     commandOutput = FileCachingInputStream
                         .builder()
-                        .input(commandOutput)
+                        .input(p.getInputStream())
                         .noProgressLogging()
                         .build();
+                } else {
+                    commandOutput = p.getInputStream();
                 }
-                copier = copyThread("command output", commandOutput, parameters.out,
+                copier = copyThread("process output parameters out copier",
+                    commandOutput,
+                    parameters.out,
+                    (c) -> {
+                        closeSilently(commandOutput);
+                    },
                     (e) -> {
-                    Process process = p.destroyForcibly();
-                    logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
-                });
+                        Process process = p.destroyForcibly();
+                        logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
+                    }, p);
             } else {
                 copier = null;
             }
 
-            Copier errorCopier = copyThread("error copier", p.getErrorStream(), parameters.errors, (e) -> {});
+            Copier errorCopier = copyThread(
+                "error copier",
+                p.getErrorStream(),
+                parameters.errors,
+                (c) -> {
+                    closeSilently(p.getErrorStream());
+                },
+                (e) -> {},
+                p
+            );
             if (inputCopier != null) {
-                inputCopier.waitForAndClose();
+                if (needsClose(p.getInputStream())) {
+                    inputCopier.waitForAndClose();
+                } else {
+                    inputCopier.waitFor();
+                }
             }
+
             p.waitFor();
+
             if (copier != null) {
                 copier.waitForAndClose();
             }
@@ -393,13 +431,22 @@ public class CommandExecutorImpl implements CommandExecutor {
         return Slf4jSimpleLogger.of(category.toString());
     }
 
-    Copier copyThread(String name, InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
+    Copier copyThread(
+        String name,
+        InputStream in,
+        OutputStream out,
+        Consumer<Copier> callBack,
+        Consumer<Throwable> errorHandler,
+        Process process) {
         Copier copier = Copier.builder()
             .name(name)
             .input(in)
             .output(out)
-            .callback((c) -> closeIf(in, out))
-            .errorHandler((c, t) -> errorHandler.accept(t))
+            .callback(callBack)
+            .errorHandler((c, t) ->
+                errorHandler.accept(t)
+            )
+            .notify(process)
             .batch(batchSize)
             .build();
         copier.execute();
@@ -412,15 +459,27 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         return closeable != System.out && closeable != System.in && closeable != System.err;
     }
-    private void closeIf(Closeable... closeables) {
+
+    private boolean closeIf(Closeable... closeables) {
+        boolean value = false;
         for (Closeable closeable : closeables) {
             if (needsClose(closeable)) {
-                try {
-                    closeable.close();
-                } catch (IOException ioe) {
-                    logger.warn(ioe.getClass().getName() + ":" + ioe.getMessage());
-                }
+                value = closeSilently(closeable);
+            } else {
+                logger.debug("Not closing {}", closeables);
             }
+        }
+        return value;
+    }
+
+    private boolean closeSilently(Closeable closeable) {
+        try {
+            logger.debug("Closing {}", closeable);
+            closeable.close();
+            return true;
+        } catch (IOException ioe) {
+            logger.warn(ioe.getClass().getName() + ":" + ioe.getMessage());
+            return false;
         }
     }
 
