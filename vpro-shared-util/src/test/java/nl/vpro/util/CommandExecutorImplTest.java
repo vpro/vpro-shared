@@ -198,7 +198,7 @@ public class CommandExecutorImplTest {
         CommandExecutor cat =
             CommandExecutorImpl.builder()
                 .executablesPaths("/bin/cat")
-                .logger(log)
+                .simpleLogger(Slf4jSimpleLogger.of(log))
                 .useFileCache(useFile)
                 .closeStreams(false)
                 .batchSize(2)
