@@ -111,7 +111,7 @@ public class Copier implements Runnable, Closeable {
             log.debug(ioe.getMessage());
         } catch (Exception t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
-                log.warn("{}Connector {}\n{} {}", logPrefix, toString(), t.getClass().getName(), t.getMessage());
+                log.warn("{}Connector {}\n{} {}", logPrefix, this, t.getClass().getName(), t.getMessage());
             }
             log.warn(t.getMessage());
             exception = t;
@@ -170,7 +170,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     /**
-     * Given a batch size, divide it up in equal parts smaller then 8k in size.
+     * Given a batch size, divide it up in equal parts smaller than 8k in size.
      * @return An array of at least one element. The sum of all elements is the argument. All values are smaller then {@link #MAX_BUFFER}
      */
     static int[] equalsParts(long batch) {
