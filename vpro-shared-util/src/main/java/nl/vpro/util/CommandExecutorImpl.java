@@ -142,15 +142,17 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
-        SimpleLogger result;
+        SimpleLogger result = null;
         if (logger != null) {
             result = new Slf4jSimpleLogger(logger);
-        } else {
-            result = getDefaultLogger(this.binary.get());
         }
         if (simpleLogger != null) {
-            result = result.chain(simpleLogger);
+            result = result == null ? simpleLogger : result.chain(simpleLogger);
         }
+        if (result == null) {
+            result = getDefaultLogger(this.binary.get());
+        }
+
         if (wrapLogInfo != null) {
             result = new SimpleLoggerWrapper(result) {
                 @Override
