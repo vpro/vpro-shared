@@ -186,7 +186,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     private void afterRun() {
-        log.info("Ready  {}", name);
+        log.debug("Ready  {}", name);
         synchronized (this) {
             ready = true;
         }
