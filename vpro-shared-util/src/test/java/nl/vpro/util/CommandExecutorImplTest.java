@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.zip.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -18,8 +19,10 @@ import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -188,6 +191,57 @@ public class CommandExecutorImplTest {
                      .build();
         i.set(100);
         assertThat(test.toString()).isEqualTo("/usr/bin/env 100 a a1 a2 b 100 c d");
+    }
+
+
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    public void noCloseStreams(boolean useFile) {
+        CommandExecutor cat =
+            CommandExecutorImpl.builder()
+                .executablesPaths("/bin/cat")
+                .logger(log)
+                .useFileCache(useFile)
+                .closeStreams(false)
+                .batchSize(2)
+                .build();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (ZipInputStream input = new ZipInputStream(new ByteArrayInputStream(getZip()))
+        ) {
+            while(true) {
+                ZipEntry e = input.getNextEntry();
+                if (e == null) {
+                    break;
+                }
+                log.info(e.getName());
+                OutputStream err = LoggerOutputStream.error(log, true);
+                cat.execute(input, output, err);
+            }
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+        }
+        assertThat(output.toString()).isEqualTo("aabb");
+        log.info("Ready");
+    }
+
+    byte[] getZip() throws IOException {
+         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (
+            ZipOutputStream zip = new ZipOutputStream(bytes);) {
+
+            ZipEntry a = new ZipEntry("a");
+            a.setComment("first entry");
+            zip.putNextEntry(a);
+            zip.write("aa".getBytes(UTF_8));
+            zip.closeEntry();
+            ZipEntry b = new ZipEntry("b");
+            b.setComment("second entry");
+            zip.putNextEntry(b);
+            zip.write("bb".getBytes(UTF_8));
+            zip.closeEntry();
+        }
+        return bytes.toByteArray();
 
     }
 }

@@ -116,7 +116,7 @@ public class Copier implements Runnable, Closeable {
             log.warn(t.getMessage());
             exception = t;
         } finally {
-            log.debug("finally");
+            log.debug("finally" + name);
             afterRun();
 
         }
@@ -186,7 +186,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     private void afterRun() {
-        log.debug("Ready");
+        log.info("Ready  {}", name);
         synchronized (this) {
             ready = true;
         }
@@ -346,6 +346,6 @@ public class Copier implements Runnable, Closeable {
 
     @Override
     public String toString() {
-        return logPrefix + super.toString();
+        return getClass().getSimpleName() + " " + logPrefix + " (" + getCount()  + " copied)";
     }
 }
