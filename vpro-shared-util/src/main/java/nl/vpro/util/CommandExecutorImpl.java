@@ -228,6 +228,13 @@ public class CommandExecutorImpl implements CommandExecutor {
             return this;
         }
 
+        public Builder commonArg(Object... args) {
+            for (Object s : args) {
+                commonArgsSupplier(s);
+            }
+            return this;
+        }
+
         @SafeVarargs
         public final Builder commonArg(Supplier<Object>... args) {
             for (Supplier<Object> s : args) {
