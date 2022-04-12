@@ -7,9 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -19,13 +17,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import nl.vpro.jmx.MBeans;
+
 /**
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
  * @author Michiel Meeuwissen
  * @since 0.37
  */
 @Slf4j
-public class URLResource<T> {
+public class URLResource<T> implements URLResourceMBean {
 
     @SafeVarargs
     public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {
@@ -112,6 +112,8 @@ public class URLResource<T> {
         this.empty = empty;
         this.reader = reader;
         this.callbacks = callbacks;
+
+        MBeans.registerBean(this, "URLResource,url=" + url);
     }
 
     @SafeVarargs
@@ -330,7 +332,10 @@ public class URLResource<T> {
                     if (code == SC_MOVED_PERMANENTLY) {
                         url = redirectTo;
                     }
-                    getCachedResource(redirectTo.toURL().openConnection(), redirectCount + 1);
+                    getCachedResource(
+                        redirectTo.toURL().openConnection(),
+                        redirectCount + 1
+                    );
                 }
                 break;
             default:
@@ -344,9 +349,8 @@ public class URLResource<T> {
                 log.warn("{}:{}: (caching until {})", code, url, expires);
         }
     }
-
-
-    void expire() {
+    @Override
+    public void expire() {
         expires = null;
     }
 
