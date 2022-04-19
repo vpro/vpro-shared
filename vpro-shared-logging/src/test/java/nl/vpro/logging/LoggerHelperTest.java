@@ -5,8 +5,16 @@
 package nl.vpro.logging;
 
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.WriterAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +29,22 @@ public class LoggerHelperTest {
     public void trace() {
         final StringWriter writer = new StringWriter();
 
-        org.apache.log4j.Logger rootLogger = LogManager.getRootLogger();
-        rootLogger.removeAllAppenders();
-        rootLogger.addAppender(new WriterAppender(new SimpleLayout(), writer));
+
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+
+        LoggerConfig rootLogger = config.getRootLogger();
+        WriterAppender appender = WriterAppender.createAppender(new AbstractStringLayout(StandardCharsets.UTF_8) {
+            @Override
+            public String toSerializable(LogEvent event) {
+                return event.getLevel() + " " + event.getMessage().getFormattedMessage();
+            }
+        }, null, writer, "test", true, false);
+        appender.start();
+        rootLogger.addAppender(appender, Level.TRACE, null);
         rootLogger.setLevel(Level.TRACE);
+
+        ctx.updateLoggers();
 
         LoggerHelper helper = new LoggerHelper(log);
         helper.trace("message {}", "argument");
