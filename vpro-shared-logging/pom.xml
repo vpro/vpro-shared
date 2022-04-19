@@ -73,5 +73,11 @@
       <artifactId>spring-security-core</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.meeuw.math</groupId>
+      <artifactId>mihxil-math</artifactId>
+      <version>0.7.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
