@@ -16,6 +16,8 @@ import org.slf4j.ext.LoggerWrapper;
 public final class LoggerHelper extends LoggerWrapper {
 
     private final Clock clock;
+
+
     public LoggerHelper(Logger logger, Clock clock) {
         super(logger, logger.getName());
         this.clock = clock;
@@ -31,7 +33,13 @@ public final class LoggerHelper extends LoggerWrapper {
 
      public static void trace(Clock clock, Logger logger, String message, Object... args) {
         if (logger.isTraceEnabled()) {
-            logger.trace(String.format("%1$tT.%1$tL - %2$s", clock.millis(), message), args);
+            logger.trace(
+                String.format(
+                    "%1$tT.%1$tL - %2$s",
+                    clock.instant().atZone(clock.getZone()), message
+                ),
+                args
+            );
         }
     }
 

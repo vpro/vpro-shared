@@ -48,16 +48,16 @@ public class LoggerHelperTest {
 
         ctx.updateLoggers();
 
-        TestClock clock = new TestClock(ZoneId.of("Europe/Amsterdam"), Instant.parse("2022-04-19T19:00:00Z"));
+        TestClock clock = new TestClock(ZoneId.of("UTC"), Instant.parse("2022-04-19T19:00:00Z"));
         LoggerHelper helper = new LoggerHelper(log, clock);
         helper.trace("message {}", "argument");
 
-        assertThat(writer.toString()).isEqualTo("TRACE 21:00:00.000 - message argument\n");
+        assertThat(writer.toString()).isEqualTo("TRACE 19:00:00.000 - message argument\n");
 
         clock.tick(Duration.ofSeconds(100));
         LoggerHelper.trace(clock, log, "message {}", "argument2");
-        assertThat(writer.toString()).isEqualTo("TRACE 21:00:00.000 - message argument\n" +
-            "TRACE 21:01:40.000 - message argument2\n");
+        assertThat(writer.toString()).isEqualTo("TRACE 19:00:00.000 - message argument\n" +
+            "TRACE 19:01:40.000 - message argument2\n");
         rootLogger.removeAppender("test");
     }
 }
