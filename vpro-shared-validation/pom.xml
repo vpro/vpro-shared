@@ -41,11 +41,13 @@
       <groupId>jakarta.el</groupId>
       <artifactId>jakarta.el-api</artifactId>
       <scope>test</scope>
+      <version>3.0.3</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>jakarta.el</artifactId>
       <scope>test</scope>
+      <version>3.0.4</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml</groupId>
