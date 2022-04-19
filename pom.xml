@@ -97,9 +97,21 @@
 
   </modules>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-jul</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   <build>
     <defaultGoal>install</defaultGoal>
-    <plugins>
+        <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
@@ -238,6 +250,7 @@
       </plugins>
     </pluginManagement>
 
+
   </build>
 
 
@@ -246,8 +259,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.3.18</spring.version>
-    <spring-security.version>5.6.2</spring-security.version>
+    <spring.version>5.3.19</spring.version>
+    <spring-security.version>5.6.3</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.8.2</junit.version>
@@ -406,12 +419,6 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-ext</artifactId>
         <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
