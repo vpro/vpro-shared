@@ -6,6 +6,7 @@ package nl.vpro.logging;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.*;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.junit.jupiter.api.Test;
+import org.meeuw.math.TestClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,7 @@ public class LoggerHelperTest {
         WriterAppender appender = WriterAppender.createAppender(new AbstractStringLayout(StandardCharsets.UTF_8) {
             @Override
             public String toSerializable(LogEvent event) {
-                return event.getLevel() + " " + event.getMessage().getFormattedMessage();
+                return event.getLevel() + " " + event.getMessage().getFormattedMessage() + "\n";
             }
         }, null, writer, "test", true, false);
         appender.start();
@@ -46,13 +48,16 @@ public class LoggerHelperTest {
 
         ctx.updateLoggers();
 
-        LoggerHelper helper = new LoggerHelper(log);
+        TestClock clock = new TestClock(ZoneId.of("Europe/Amsterdam"), Instant.parse("2022-04-19T19:00:00Z"));
+        LoggerHelper helper = new LoggerHelper(log, clock);
         helper.trace("message {}", "argument");
 
-        assertThat("123:bbb - ").matches("^[0-9]{3}:[b]{3} \\- $");
-        assertThat(writer.toString()).matches("^TRACE \\- [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3} \\- message argument\\n$");
+        assertThat(writer.toString()).isEqualTo("TRACE 21:00:00.000 - message argument\n");
 
-        LoggerHelper.trace(log, "message {}", "argument");
-        assertThat(writer.toString()).matches("^TRACE \\- [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3} \\- message argument\\nTRACE \\- [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3} \\- message argument\\n$");
+        clock.tick(Duration.ofSeconds(100));
+        LoggerHelper.trace(clock, log, "message {}", "argument2");
+        assertThat(writer.toString()).isEqualTo("TRACE 21:00:00.000 - message argument\n" +
+            "TRACE 21:01:40.000 - message argument2\n");
+        rootLogger.removeAppender("test");
     }
 }
