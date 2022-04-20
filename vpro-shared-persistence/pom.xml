@@ -14,16 +14,10 @@
   </properties>
   <dependencies>
     <dependency>
-      <!-- contains javax.persistence -->
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>2.2.3</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.sun.mail</groupId>
-          <artifactId>javax.mail</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>

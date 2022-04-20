@@ -10,7 +10,7 @@
   <artifactId>vpro-shared-rs-client</artifactId>
 
   <description>
-    Utilities related  to javax.ws.rs.client
+    Utilities related  to jakarta.ws.rs.client
 
   </description>
   <dependencies>
@@ -27,8 +27,8 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
