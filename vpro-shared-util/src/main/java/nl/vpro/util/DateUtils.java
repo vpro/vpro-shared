@@ -10,8 +10,7 @@ import java.util.*;
 
 import javax.xml.datatype.*;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.*;
 
 import com.google.common.collect.Range;
 
@@ -53,11 +52,13 @@ public class DateUtils {
         return first.before(second) ? smallest ? first : second : smallest ? second : first;
     }
 
-    public static Date nullIsMinimal(Date date) {
+    @NonNull
+    public static Date nullIsMinimal(@Nullable Date date) {
         return date == null ? MIN_VALUE : date;
     }
 
-    public static Date nullIsMaximal(Date date) {
+    @NonNull
+    public static Date nullIsMaximal(@Nullable Date date) {
         return date == null ? MAX_VALUE : date;
     }
 
@@ -67,63 +68,63 @@ public class DateUtils {
     }
 
     @Nullable
-    public static Date maximalIsNull(Date date) {
+    public static Date maximalIsNull(@Nullable Date date) {
         return MAX_VALUE.equals(date) ? null : date;
     }
 
-    @Nullable
-    public static Instant toInstant(@Nullable Date date) {
+    @PolyNull
+    public static Instant toInstant(@PolyNull Date date) {
         if (date instanceof java.sql.Date || date instanceof  java.sql.Time) {
             date = new Date(date.getTime());
         }
         return date == null ? null : date.toInstant();
     }
 
-    @Nullable
-    public static Date toDate (@Nullable Instant date) {
+    @PolyNull
+    public static Date toDate (@PolyNull Instant date) {
         return date == null ? null : Date.from(date);
     }
-    @Nullable
-    public static Date toDate(@Nullable ZonedDateTime date) {
+    @PolyNull
+    public static Date toDate(@PolyNull ZonedDateTime date) {
         return date == null ? null : Date.from(date.toInstant());
     }
-    @Nullable
-    public static Instant toInstant(@Nullable ZonedDateTime date) {
+    @PolyNull
+    public static Instant toInstant(@PolyNull ZonedDateTime date) {
         return date == null ? null : date.toInstant();
     }
 
-    @Nullable
-    public static Long toLong(@Nullable Instant instant) {
+    @PolyNull
+    public static Long toLong(@PolyNull Instant instant) {
         return instant == null ? null : instant.toEpochMilli();
     }
 
-    @Nullable
-    public static Long toLong(@Nullable Date date) {
+    @PolyNull
+    public static Long toLong(@PolyNull Date date) {
         return date == null ? null : date.getTime();
     }
 
-    @Nullable
-    public static Date toDate(@Nullable Duration duration) {
+    @PolyNull
+    public static Date toDate(@PolyNull Duration duration) {
         return duration == null ? null : new Date(duration.toMillis());
     }
 
-    @Nullable
-    public static Date toDate(@Nullable LocalDateTime date, ZoneId zoneId) {
+    @PolyNull
+    public static Date toDate(@PolyNull LocalDateTime date, ZoneId zoneId) {
         return date == null ? null : Date.from(date.atZone(zoneId).toInstant());
     }
 
-    @Nullable
-    public static Instant toInstant(@Nullable LocalDateTime date, ZoneId zoneId) {
+    @PolyNull
+    public static Instant toInstant(@PolyNull LocalDateTime date, ZoneId zoneId) {
         return date == null ? null : date.atZone(zoneId).toInstant();
     }
 
 
-    @Nullable
-    public static LocalDateTime toLocalDateTime(@Nullable Instant date, ZoneId zoneId) {
+    @PolyNull
+    public static LocalDateTime toLocalDateTime(@PolyNull Instant date, ZoneId zoneId) {
         return date == null ? null : date.atZone(zoneId).toLocalDateTime();
     }
 
-    public static boolean isAfter(Instant instant1, Instant instant2) {
+    public static boolean isAfter(@Nullable Instant instant1, @Nullable Instant instant2) {
         if (instant1 == null || instant2 == null) {
             return false;
         }
