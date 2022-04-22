@@ -22,10 +22,6 @@
       <artifactId>slf4j-ext</artifactId>
       <optional>true</optional>
     </dependency>
-   <!-- <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jul-to-slf4j</artifactId>
-    </dependency>-->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -34,12 +30,6 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
     </dependency>
- <!--   <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <optional>true</optional>
-      <version>${slf4j.version}</version>
-    </dependency>-->
     <dependency>
       <groupId>com.google.flogger</groupId>
       <artifactId>flogger</artifactId>
