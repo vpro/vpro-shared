@@ -249,7 +249,7 @@
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.8.2</junit.version>
-    <mockito.version>4.5.0</mockito.version>
+    <mockito.version>4.5.1</mockito.version>
     <assertj.version>3.22.0</assertj.version>
     <resteasy.version>4.7.6.Final</resteasy.version>
     <bytebuddy.version>1.12.8</bytebuddy.version>
@@ -284,7 +284,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.8.2</micrometer.version>
+    <micrometer.version>1.8.5</micrometer.version>
   </properties>
 
   <dependencyManagement>
