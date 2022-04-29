@@ -295,7 +295,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * Write the entire stream to an output stream
      */
     public static <T> void write(
-        CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
+        final CountedIterator<T> iterator,
+        final OutputStream out,
+        final Function<T, Void> logging) throws IOException {
         try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
             jg.writeStartObject();
             jg.writeArrayFieldStart("array");
@@ -310,7 +312,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * Write the entire stream to an output stream
      */
     public static <T> void writeArray(
-        CountedIterator<T> iterator, OutputStream out, final Function<T, Void> logging) throws IOException {
+        final CountedIterator<T> iterator,
+        final OutputStream out, final Function<T, Void> logging) throws IOException {
         try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
             jg.writeStartArray();
             writeObjects(iterator, jg, logging);
@@ -324,7 +327,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * Write the entire stream as an array to jsonGenerator
      */
     public static <T> void writeObjects(
-        CountedIterator<T> iterator, JsonGenerator jg, final Function<T, Void> logging) throws IOException {
+        final CountedIterator<T> iterator,
+        final JsonGenerator jg,
+        final Function<T, Void> logging) throws IOException {
         while (iterator.hasNext()) {
             T change;
             try {
@@ -338,7 +343,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     logging.apply(change);
                 }
             } catch (Exception e) {
-                log.warn(e.getMessage());
+                log.warn(e.getClass().getCanonicalName() + " " + e.getMessage());
                 jg.writeObject(e.getMessage());
             }
 
