@@ -21,7 +21,7 @@ public class Log4j1LinePatternLayout extends PatternLayout {
         final ThrowableInformation throwableInformation = event.getThrowableInformation();
 
         if (throwableInformation != null) {
-            StringBuilder sb = new StringBuilder(event.getRenderedMessage());
+            StringBuilder sb = new StringBuilder(event.getRenderedMessage() != null ? event.getRenderedMessage() : "");
             sb.append("\n");
 
             if (throwableInformation.getThrowable() != null) {
