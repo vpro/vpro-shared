@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.annotation.PreDestroy;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -165,5 +166,10 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public void setStrictlyOne(boolean strictlyOne) {
         ObjectLocker.strictlyOne = strictlyOne;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        lockRate.close();
     }
 }

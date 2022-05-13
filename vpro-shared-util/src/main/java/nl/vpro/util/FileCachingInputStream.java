@@ -147,7 +147,7 @@ public class FileCachingInputStream extends InputStream {
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
             Thread.currentThread().interrupt();
-            throw  new RuntimeException(e);
+            throw new RuntimeException(e);
         } catch (ExecutionException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);

@@ -100,6 +100,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     @Getter
     private final WindowedEventRate rate;
 
+    private final boolean closeRate;
+
     private final ObjectName objectName;
 
     @Getter
@@ -154,6 +156,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
                 .bucketCount(5)
                 .bucketDuration(Duration.ofMinutes(1))
                 .build() : rateMeasurerer;
+
+        this.closeRate = rateMeasurerer == null;
 
         this.routing = routingIds == null ? null : routingIds.toArray(new String[0]);
         this.requestOptions = requestOptions == null ? RequestOptions.DEFAULT : requestOptions;
@@ -380,6 +384,9 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     public void close()  {
         if (objectName != null) {
             ThreadPools.backgroundExecutor.schedule(() -> MBeans.unregister(objectName), 2, TimeUnit.MINUTES);
+        }
+        if (closeRate) {
+            rate.close();
         }
         if (scrollId != null) {
             try {

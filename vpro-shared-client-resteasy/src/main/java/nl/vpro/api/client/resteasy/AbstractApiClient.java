@@ -419,7 +419,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
 
     /**
-     * Checks wether supplier has null, if so produces it while locking, so it happens only once
+     * Checks whether supplier has null, if so produces it while locking, so it happens only once
      */
     protected <T> T produceIfNull(Supplier<T> supplier, Supplier<T> producer) {
         T t = supplier.get();

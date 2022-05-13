@@ -164,6 +164,28 @@ public class JsonArrayIteratorTest {
         }).isInstanceOf(IllegalArgumentException.class);
     }
 
+
+    @Test
+    public void interrupt() throws IOException {
+        JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
+            .inputStream(new InputStream() {
+                @Override
+                public int read() throws IOException {
+                    return 0;
+                }
+            })
+            .valueClass(Simple.class)
+            .build();
+    }
+
+
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @Getter
+    @Setter
+    private static class Simple {
+        private String value;
+    }
+
     @XmlAccessorType(XmlAccessType.FIELD)
     @Getter
     @Setter

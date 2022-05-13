@@ -112,6 +112,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     @Getter
     private final  WindowedEventRate rate;
 
+    private final boolean closeRate;
+
     private final ObjectName objectName;
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
@@ -171,6 +173,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 .bucketCount(5)
                 .bucketDuration(Duration.ofMinutes(1))
                 .build() : rateMeasurerer;
+        this.closeRate = rateMeasurerer == null;
 
         this.routing = routingIds;
     }
@@ -527,6 +530,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     public synchronized void close()  {
         if (objectName != null) {
             ThreadPools.backgroundExecutor.schedule(() -> MBeans.unregister(objectName), 2, TimeUnit.MINUTES);
+        }
+        if (closeRate) {
+            rate.close();
         }
         if (scrollId != null) {
             HttpEntity responseEntity = null;
