@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 
 /**
@@ -17,7 +16,7 @@ import com.fasterxml.jackson.databind.*;
 public class BackwardsCompatibleJsonEnum {
 
 
-    public static class Serializer extends JsonSerializer<Enum> {
+    public static class Serializer extends JsonSerializer<Enum<?>> {
 
         @Override
         public void serialize(Enum value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
@@ -37,7 +36,7 @@ public class BackwardsCompatibleJsonEnum {
         }
 
         @Override
-        public T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public T deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
             try {
                 return Enum.valueOf(enumClass, jp.getValueAsString());
             } catch(IllegalArgumentException iae) {
