@@ -51,7 +51,7 @@ public class MBeans {
             return Futures.immediateFuture("Not running");
         }
         future.cancel();
-        // should not be needed, because happening in finally, but if the called code does reuse to shut down propery, then simply abandon it.
+        // should not be needed, because happening in finally, but if the called code does refuse to shut down properly, then simply abandon it.
         ScheduledFuture<String> schedule = ThreadPools.backgroundExecutor.schedule(() -> {
                 LockValue abandoned = locks.remove(key);
                 if (abandoned != null) {
