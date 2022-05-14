@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class ThreadPools {
 
     private ThreadPools() {
-        // this class has no intances
+        // this class has no instances
     }
 
     private static final ThreadGroup THREAD_GROUP = new ThreadGroup(ThreadPools.class.getName());
@@ -39,22 +39,24 @@ public final class ThreadPools {
 
     /**
      * An executor service used for 'copy' threads. Mainly in {@link Copier}, but it can be used for similar processes.
+     *
+     * These may be quite long-lived thread, performing simple jobs like copying streams.
      */
     public static final ThreadPoolExecutor copyExecutor =
         new ThreadPoolExecutor(0, 2000, 60, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
             ThreadPools.createThreadFactory(
-                "nl.vpro-util-Copier",
+                "nl.vpro.util.threadpools-Copier",
                 false,
                 Thread.NORM_PRIORITY));
 
     /**
-     * A scheduled executor service with _fixed pool size_, so should be used to schedule short lived background tasks only.
+     * A scheduled executor service with <em>fixed pool size</em>, so should be used to schedule short-lived background tasks only.
      */
     public static final ScheduledExecutorService backgroundExecutor =
         Executors.newScheduledThreadPool(5,
             ThreadPools.createThreadFactory(
-                "nl.vpro-util-Background",
+                "nl.vpro.util.threadpools-Background",
                 true,
                 Thread.MIN_PRIORITY));
 
