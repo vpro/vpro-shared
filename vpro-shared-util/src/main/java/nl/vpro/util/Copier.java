@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.AccessLevel;
-import lombok.Getter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -12,6 +11,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static nl.vpro.util.FileCachingInputStream.EOF;
 
@@ -63,16 +64,16 @@ public class Copier implements Runnable, Closeable {
      */
     @lombok.Builder(builderClassName = "Builder")
     private Copier(
-        InputStream input,
-        Long expectedCount,
-        OutputStream output,
+        @NonNull InputStream input,
+        @Nullable Long expectedCount,
+        @NonNull OutputStream output,
         long batch,
-        Consumer<Copier> batchConsumer,
-        Consumer<Copier> callback,
-        BiConsumer<Copier, Throwable> errorHandler,
+        @Nullable Consumer<Copier> batchConsumer,
+        @Nullable Consumer<Copier> callback,
+        @Nullable BiConsumer<Copier, Throwable> errorHandler,
         int offset,
-        String name,
-        Object notify
+        @Nullable String name,
+        @Nullable Object notify
         ) {
         this.input = input;
         this.expectedCount = expectedCount;
@@ -87,12 +88,12 @@ public class Copier implements Runnable, Closeable {
         this.notify = notify;
     }
 
-    public Copier(InputStream i, OutputStream o, long batch) {
+    public Copier(@NonNull InputStream i, @NonNull OutputStream o, long batch) {
         this(i, null, o, batch, null, null, null,  0, null, null);
     }
 
 
-    public Copier(InputStream i, OutputStream o) {
+    public Copier(@NonNull InputStream i, @NonNull OutputStream o) {
         this(i, o, MAX_BUFFER);
     }
 
@@ -107,15 +108,15 @@ public class Copier implements Runnable, Closeable {
             output.flush();
         } catch (IOException ioe) {
             exception = ioe;
-            log.debug(ioe.getMessage());
+            log.debug(ioe.getClass().getName() + " " + ioe.getMessage(), ioe);
         } catch (Exception t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
-                log.warn("{}Connector {}\n{} {}", logPrefix, toString(), t.getClass().getName(), t.getMessage());
+                log.warn("{}Connector {}\n{} {}", logPrefix, this, t.getClass().getName(), t.getMessage());
             }
             log.warn(t.getMessage());
             exception = t;
         } finally {
-            log.debug("finally");
+            log.debug("finally" + name);
             afterRun();
 
         }
@@ -169,7 +170,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     /**
-     * Given a batch size, divide it up in equal parts smaller then 8k in size.
+     * Given a batch size, divide it up in equal parts smaller than 8k in size.
      * @return An array of at least one element. The sum of all elements is the argument. All values are smaller then {@link #MAX_BUFFER}
      */
     static int[] equalsParts(long batch) {
@@ -185,7 +186,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     private void afterRun() {
-        log.debug("Ready");
+        log.debug("Ready  {}", name);
         synchronized (this) {
             ready = true;
         }
@@ -259,9 +260,12 @@ public class Copier implements Runnable, Closeable {
         return this;
     }
 
-    public void executeIfNotRunning() {
+    public boolean executeIfNotRunning() {
         if (future == null) {
             execute();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -273,13 +277,14 @@ public class Copier implements Runnable, Closeable {
         if (cancelFutureIfNeeded()) {
             log.debug("Cancelled {}", future);
         }
+        log.debug("closing {}", input);
         input.close();
-        log.debug("closed");
+
     }
 
     /**
      * If running, cancel the job
-     * @return {@code false} if the future is not running, or not yet running {@code true} if there was a future to cancel
+     * @return {@code false} if the future is not running, or not yet running. {@code true} if there was a future to cancel, and it succeeded
      */
     boolean cancelFutureIfNeeded() {
         if (future != null) {
@@ -342,6 +347,6 @@ public class Copier implements Runnable, Closeable {
 
     @Override
     public String toString() {
-        return logPrefix + super.toString();
+        return getClass().getSimpleName() + " " + logPrefix + " (" + getCount()  + " copied)";
     }
 }
