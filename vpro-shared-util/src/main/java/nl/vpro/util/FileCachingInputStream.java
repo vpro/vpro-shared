@@ -70,8 +70,9 @@ public class FileCachingInputStream extends InputStream {
      * @param path Directory for temporary files
      * @param tempPath Path to temporary file to use
      * @param logger The logger to which possible logging will happen. Defaults to the logger of the {@link FileCachingInputStream} class itself
-     * @param progressLogging Wether progress logging must be done (every batch)
-     * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explictely false)
+     * @param downloadFirst If true, then the entire inputstream will be consumed first (defaults to false)
+     * @param progressLogging Whether progress logging must be done (every batch)
+     * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explicitly false)
      * @param deleteTempFile Whether the intermediate temporary file must be deleted immediately on closing of this stream
      */
     @lombok.Builder(builderClassName = "Builder")
@@ -155,7 +156,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     /**
-     *   copier is responsible for copying the remaining of the stream to the file
+     *   Copier is responsible for copying the remaining of the stream to the file
      *   in a separate thread
      */
     private Copier createToFileCopier(
@@ -166,6 +167,7 @@ public class FileCachingInputStream extends InputStream {
         final Consumer<FileCachingInputStream> consumer,
         final long batchSize,
         final Boolean progressLogging) throws ExecutionException, InterruptedException {
+
         final boolean effectiveProgressLogging;
         if (progressLogging == null) {
             effectiveProgressLogging = ! this.deleteTempFile;
