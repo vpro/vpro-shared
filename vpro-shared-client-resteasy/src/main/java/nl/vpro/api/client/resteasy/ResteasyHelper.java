@@ -6,10 +6,8 @@ import javax.ws.rs.client.ClientRequestFilter;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpAsyncClient4Engine;
 import org.slf4j.Logger;
 
 /**
@@ -81,11 +79,12 @@ public class ResteasyHelper {
 
         }
     }
-
+    /*
+    // we may want to support async clients?
 
     public static ClientHttpEngine createApacheHttpClient(CloseableHttpAsyncClient closeableHttpClient, boolean closeHttpClient) {
         return new ApacheHttpAsyncClient4Engine(closeableHttpClient, closeHttpClient);
-    }
+    }*/
 }
 
 
