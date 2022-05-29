@@ -39,6 +39,11 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <optional>true</optional>
@@ -92,6 +97,11 @@
       <artifactId>commons-httpclient</artifactId>
       <scope>test</scope>
       <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>

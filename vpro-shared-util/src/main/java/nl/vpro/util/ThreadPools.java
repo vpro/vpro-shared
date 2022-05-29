@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -10,6 +12,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @author Michiel Meeuwissen
  * @since 1.5
  */
+@Slf4j
 public final class ThreadPools {
 
     private ThreadPools() {
@@ -74,6 +77,7 @@ public final class ThreadPools {
 
 
 	public static void shutdown() {
+        log.info("Shutting down thread pools");
         copyExecutor.shutdown();
         startUpExecutor.shutdown();
         backgroundExecutor.shutdown();

@@ -18,10 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class ThreadPoolsTest {
 
-    @AfterAll
-    public static void shutdown() {
-        ThreadPools.shutdown();
-    }
+
 
     @Test
     @Disabled
