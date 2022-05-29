@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,6 +49,7 @@ public class JsonArrayIteratorTest {
         assertThat(it.hasNext()).isFalse();
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test
     public void testEmpty() throws IOException {
         try (JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class)) {
@@ -77,14 +79,18 @@ public class JsonArrayIteratorTest {
     @Test
     public void testIncompleteJson() throws IOException {
         InputStream input = getClass().getResourceAsStream("/incomplete_changes.json");
-        JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
+        assert input != null;
+        try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
             .inputStream(input)
             .valueClass(Change.class)
-            .build();
+            .build()) {
 
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> { while (it.hasNext()) it.next(); });
-        assertThat(it.hasNext()).isFalse();
-        assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
+            assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> {
+                while (it.hasNext()) it.next();
+            });
+            assertThat(it.hasNext()).isFalse();
+            assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
+        }
     }
 
 
@@ -157,7 +163,7 @@ public class JsonArrayIteratorTest {
         assertThatThrownBy(() -> {
             JsonArrayIterator
                 .<Change>builder()
-                .inputStream(getClass().getResourceAsStream("/changes.json"))
+                .inputStream(requireNonNull(getClass().getResourceAsStream("/changes.json")))
                 .valueClass(Change.class)
                 .valueCreator((jp, on) -> null)
                 .build();
@@ -167,17 +173,35 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void interrupt() throws IOException {
+        byte[] bytes = "[{},{},{},{},{},{}]".getBytes(StandardCharsets.UTF_8);
+        final String[] callback = new String[1];
         JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
             .inputStream(new InputStream() {
+                int i = 0;
                 @Override
                 public int read() throws IOException {
-                    return 0;
+                    if (i == 6) {
+                        throw new InterruptedIOException();
+                    }
+                    if (i < bytes.length) {
+                        return bytes[i++];
+                    } else {
+                        return -1;
+                    }
                 }
+            })
+            .callback(() -> {
+                callback[0] = "called";
             })
             .valueClass(Simple.class)
             .build();
+        log.info("{}", i.next());
+        log.info("{}", i.next());
+        assertThatThrownBy(() -> {
+            i.next();
+        }).isInstanceOf(RuntimeException.class);
+        assertThat(callback[0]).isEqualTo("called");
     }
-
 
     @XmlAccessorType(XmlAccessType.FIELD)
     @Getter
@@ -185,6 +209,8 @@ public class JsonArrayIteratorTest {
     private static class Simple {
         private String value;
     }
+
+
 
     @XmlAccessorType(XmlAccessType.FIELD)
     @Getter
