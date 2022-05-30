@@ -301,7 +301,7 @@ public class FileCachingInputStream extends InputStream {
             if (tempPath != null) {
                 // there is no need for the file., but since an explitely file was
                 // configured write it to that file anyways
-                try (OutputStream out = Files.newOutputStream(tempPath)) {
+                try (final OutputStream out = Files.newOutputStream(tempPath)) {
                     IOUtils.copy(new ByteArrayInputStream(builder.buffer), out);
                 }
                 builder.tempFile(tempPath);
@@ -394,7 +394,7 @@ public class FileCachingInputStream extends InputStream {
                     log.debug("Deleting {}", tempFile);
                     Files.deleteIfExists(tempFile);
                 } catch (IOException ioException) {
-                    log.debug(ioException.getMessage());
+                    log.debug(ioException.getClass().getName() + ": " + ioException.getMessage());
                 }
             }
         } else {
