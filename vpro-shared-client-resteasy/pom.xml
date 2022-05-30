@@ -48,6 +48,14 @@
       <groupId>javax.cache</groupId>
       <artifactId>cache-api</artifactId>
     </dependency>
+   <!--
+   we may want to so support async clients?
+   <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpasyncclient</artifactId>
+      <version>4.1.4</version>
+      <optional>true</optional>
+    </dependency>-->
   </dependencies>
   <build>
     <plugins>
