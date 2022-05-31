@@ -70,6 +70,7 @@ public class FileCachingInputStream extends InputStream {
      * @param path Directory for temporary files
      * @param tempPath Path to temporary file to use
      * @param logger The logger to which possible logging will happen. Defaults to the logger of the {@link FileCachingInputStream} class itself
+     * @param downloadFirst
      * @param progressLogging Wether progress logging must be done (every batch)
      * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explictely false)
      * @param deleteTempFile Whether the intermediate temporary file must be deleted immediately on closing of this stream
@@ -155,7 +156,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     /**
-     *   copier is responsible for copying the remaining of the stream to the file
+     *   Copier is responsible for copying the remaining of the stream to the file
      *   in a separate thread
      */
     private Copier createToFileCopier(
@@ -166,6 +167,7 @@ public class FileCachingInputStream extends InputStream {
         final Consumer<FileCachingInputStream> consumer,
         final long batchSize,
         final Boolean progressLogging) throws ExecutionException, InterruptedException {
+
         final boolean effectiveProgressLogging;
         if (progressLogging == null) {
             effectiveProgressLogging = ! this.deleteTempFile;
@@ -378,14 +380,14 @@ public class FileCachingInputStream extends InputStream {
 
             if (toFileCopier != null) {
                 // if somewhy closed when copier is not ready yet, it can be interrupted, because we will not be using it any more.
-                log.debug("Closing copier");
+                log.debug("Closing to file copier");
                 try {
                     toFileCopier.waitForAndClose();
                 } catch (InterruptedException interruptedException) {
                     throw new InterruptedIOException(interruptedException.getMessage());
                 }
             } else {
-                log.debug("No copier to close");
+                log.debug("No file copier to close");
             }
             if (this.tempFile != null && this.deleteTempFile) {
                 try {
@@ -412,7 +414,6 @@ public class FileCachingInputStream extends InputStream {
 
     /**
      * Wait until the copier thread read at least the number of bytes given.
-     *
      */
     public synchronized long waitForBytesRead(int atLeast) throws InterruptedException {
         if (toFileCopier != null) {
@@ -489,7 +490,7 @@ public class FileCachingInputStream extends InputStream {
 
     /**
      *
-     * See  {@link InputStream#read()} This methods must behave exactly according to that.
+     * See  {@link InputStream#read()} This method must behave exactly according to that.
      */
     private int readFromFile() throws IOException {
         toFileCopier.executeIfNotRunning();
@@ -549,7 +550,7 @@ public class FileCachingInputStream extends InputStream {
                 try {
                     toFileCopier.wait(1000);
                 } catch (InterruptedException e) {
-                    log.warn("Interrupted {}. Closing {}", e.getMessage(), toFileCopier);
+                    log.warn("Interrupted {}", e.getMessage());
                     toFileCopier.close();
                     future.completeExceptionally(e);
                     close();
