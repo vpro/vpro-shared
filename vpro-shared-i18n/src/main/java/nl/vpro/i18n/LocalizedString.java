@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.annotation.*;
@@ -179,9 +180,14 @@ public class LocalizedString implements CharSequence, Serializable {
                 return new Locale(language, split[1].toUpperCase(), split[2]);
         }
     }
-    public static class Builder {
+    public static class Builder implements Supplier<CharSequence> {
         public Builder charset(Charset charset) {
             return charsetName(charset.name());
+        }
+
+        @Override
+        public CharSequence get() {
+            return build();
         }
     }
 
