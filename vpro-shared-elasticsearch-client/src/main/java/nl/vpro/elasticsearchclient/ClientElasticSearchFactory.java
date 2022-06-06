@@ -36,6 +36,8 @@ import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.util.TimeUtils;
 
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
+
 
 /**
  * @author Michiel Meeuwissen
@@ -95,7 +97,7 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         if (logName == null) {
             logName = "NULL";
         }
-        final SimpleLogger l = SimpleLogger.slfj4(LoggerFactory.getLogger(logName));
+        final SimpleLogger l = slf4j(LoggerFactory.getLogger(logName));
         final CompletableFuture<RestClient> future = clients.computeIfAbsent(logName, (ln) -> {
             CompletableFuture<RestClient> result = createAndCheckClient(l);
             result.thenAccept(callback);

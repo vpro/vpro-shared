@@ -44,7 +44,7 @@ import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToObjectNode;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
-import static nl.vpro.logging.simple.SimpleLogger.slfj4;
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
  * Some tools to automatically create indices and put mappings and stuff.
@@ -81,7 +81,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static class Builder {
 
         public Builder log(Logger log){
-            this.simpleLogger(slfj4(log));
+            this.simpleLogger(slf4j(log));
             return this;
         }
 
@@ -132,7 +132,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             this.elasticSearchIndex = elasticSearchIndex;
         }
-        this.log = simpleLogger == null ? slfj4(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
+        this.log = simpleLogger == null ? slf4j(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
@@ -1269,7 +1269,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public Consumer<ObjectNode> deleteLogger(@NonNull Logger logger, @NonNull Supplier<String> prefix) {
-        return deleteLogger(slfj4(logger), prefix);
+        return deleteLogger(slf4j(logger), prefix);
     }
 
     public Consumer<ObjectNode> deleteLogger(@NonNull SimpleLogger logger, @NonNull Supplier<String> prefix) {
@@ -1303,7 +1303,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull Logger indexLog,
         @NonNull Logger deleteLog,
         @NonNull Logger updateLog) {
-        return bulkLogger(slfj4(indexLog), slfj4(deleteLog), slfj4(updateLog));
+        return bulkLogger(slf4j(indexLog), slf4j(deleteLog), slf4j(updateLog));
     }
 
 

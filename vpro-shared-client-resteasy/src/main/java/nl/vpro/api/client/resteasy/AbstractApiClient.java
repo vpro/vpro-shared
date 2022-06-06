@@ -47,6 +47,7 @@ import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -487,7 +488,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 log.error(e.getMessage(), e);
             }
         }
-
         return client.build();
     }
 
@@ -536,7 +536,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, validateAfterInactivity), false);
+            clientHttpEngine = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, validateAfterInactivity), false);
 
         }
         return clientHttpEngine;
@@ -544,7 +544,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null, validateAfterInactivity), false);
+            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null, validateAfterInactivity), false);
         }
         return clientHttpEngineNoTimeout;
     }
