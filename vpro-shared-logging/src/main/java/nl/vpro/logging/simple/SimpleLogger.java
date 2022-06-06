@@ -1,6 +1,7 @@
 package nl.vpro.logging.simple;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -71,6 +72,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new JULSimpleLogger(log);
     }
 
+    @Deprecated
     static Log4jSimpleLogger log4j(org.apache.log4j.Logger  log) {
         return new Log4jSimpleLogger(log);
     }
@@ -103,29 +105,49 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         log(Level.TRACE, message);
     }
 
+    default void trace(Supplier<CharSequence> message) {
+        trace(message.get());
+    }
+
     default void debug(CharSequence message) {
         log(Level.DEBUG, message);
+    }
+
+    default void debug(Supplier<CharSequence> message) {
+        debug(message.get());
     }
 
     default void info(CharSequence message) {
         log(Level.INFO, message);
     }
 
+    default void info(Supplier<CharSequence> message) {
+        info(message.get());
+    }
+
     default void warn(CharSequence message) {
         log(Level.WARN, message);
+    }
+
+    default void warn(Supplier<CharSequence> message) {
+        warn(message.get());
     }
 
     default void error(CharSequence message) {
         log(Level.ERROR, message);
     }
 
+    default void error(Supplier<CharSequence> message) {
+        error(message.get());
+    }
+
     default void log(Level level, CharSequence message) {
         accept(level, message);
     }
 
-    default void log(Level level, String format, Object... arg) {
+    default void log(Level level, CharSequence format, Object... arg) {
         if (isEnabled(level)) {
-            FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
+            FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), arg);
             String message = ft.getMessage();
             if (ft.getArgArray().length == arg.length) {
                 accept(level, message, null);

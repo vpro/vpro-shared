@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.function.Supplier;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.helpers.FormattingTuple;
@@ -23,7 +24,6 @@ import static nl.vpro.i18n.Locales.DUTCH;
  * @since 0.47
  */
 public class MultiLanguageString implements CharSequence {
-
 
     private final Map<Locale, String> strings = new HashMap<>();
 
@@ -132,7 +132,7 @@ public class MultiLanguageString implements CharSequence {
         return s;
     }
 
-    public static class Builder {
+    public static class Builder implements Supplier<CharSequence> {
         MultiLanguageString created = new MultiLanguageString();
 
         public Builder defaultLocale(Locale locale) {
@@ -177,6 +177,12 @@ public class MultiLanguageString implements CharSequence {
         public MultiLanguageString build() {
             return created;
         }
+
+        @Override
+        public CharSequence get() {
+            return build();
+        }
+
         public class In {
             private final Locale locale;
 

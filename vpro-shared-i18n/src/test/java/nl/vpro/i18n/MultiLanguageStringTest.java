@@ -4,6 +4,9 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+
+import static nl.vpro.i18n.MultiLanguageString.en;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -15,9 +18,7 @@ public class MultiLanguageStringTest {
 
     @Test
     public void test() {
-
-        MultiLanguageString string = MultiLanguageString
-            .en("Hello")
+        MultiLanguageString string = en("Hello")
             .nl("Hoi")
             .in("eo").is("Saluton")
             .defaultLocale(new Locale("nl"))
@@ -40,8 +41,7 @@ public class MultiLanguageStringTest {
 
     @Test
     public void testWithoutDefault() {
-        MultiLanguageString string = MultiLanguageString
-            .en("Hello")
+        MultiLanguageString string = en("Hello")
             .nl("Hoi")
             .in("eo").is("Saluton")
             .build();
@@ -122,6 +122,17 @@ public class MultiLanguageStringTest {
                 .build();
             assertThat(string.toString()).isEqualTo("esperanto A");
         }
+    }
+
+    @Test
+    public void log() {
+        StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
+            .builder()
+            .maxLength(4L)
+            .build();
+
+        logger.info(en("foo bar").nl("pietje puk"));
+        assertThat(logger.get()).isEqualTo("INFO foo bar");
     }
 
 }
