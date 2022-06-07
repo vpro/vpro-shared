@@ -126,13 +126,16 @@ public class MultiLanguageStringTest {
 
     @Test
     public void log() {
-        StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
-            .builder()
-            .maxLength(4L)
-            .build();
+        try (Locales.RestoreDefaultLocale ignore1 = Locales.with(Locale.US)) {
 
-        logger.info(en("foo bar").nl("pietje puk"));
-        assertThat(logger.get()).isEqualTo("INFO foo bar");
+            StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
+                .builder()
+                .maxLength(4L)
+                .build();
+
+            logger.info(en("foo bar").nl("pietje puk"));
+            assertThat(logger.get()).isEqualTo("INFO foo bar");
+        }
     }
 
 }
