@@ -127,7 +127,11 @@ public class FileCachingInputStream extends InputStream {
 
             OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
 
-            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(progressLogging, batchConsumer,progressLoggingBatch);
+            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(
+                progressLogging,
+                batchConsumer,
+                progressLoggingBatch
+            );
 
             this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile));
             incStreams(tempFileInputStream);
@@ -222,22 +226,24 @@ public class FileCachingInputStream extends InputStream {
     private Consumer<FileCachingInputStream> assembleEffectiveConsumer(
         final Boolean progressLogging,
         final Consumer<FileCachingInputStream> batchConsumer,
-        Integer progressLoggingBatch) {
-           final Consumer<FileCachingInputStream> consumer;
-            if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
-                final AtomicLong batchCount = new AtomicLong(0);
-                consumer = t -> {
-                    if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
-                        log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
-                    }
-                    if (batchConsumer != null) {
-                        batchConsumer.accept(t);
-                    }
-                };
-            } else {
-                consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
-            }
-            return consumer;
+        final Integer progressLoggingBatch) {
+        final Consumer<FileCachingInputStream> consumer;
+        if ((progressLogging == null || progressLogging || progressLoggingBatch != null) &&
+            !(progressLogging != null && ! progressLogging)) {
+            final AtomicLong batchCount = new AtomicLong(0);
+            consumer = t -> {
+                if (progressLoggingBatch == null ||
+                    batchCount.incrementAndGet() % progressLoggingBatch == 0) {
+                    log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
+                }
+                if (batchConsumer != null) {
+                    batchConsumer.accept(t);
+                }
+            };
+        } else {
+            consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
+        }
+        return consumer;
     }
 
     private Path createTempFile(@Nullable Path path, @Nullable Path tempPath, @Nullable String filePrefix) throws IOException {
