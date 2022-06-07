@@ -17,6 +17,7 @@ import com.google.common.collect.PeekingIterator;
  * @author Michiel Meeuwissen
  * @since 3.1
  */
+@SuppressWarnings("UnusedReturnValue")
 @Slf4j
 public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
 
