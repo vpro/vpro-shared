@@ -41,7 +41,8 @@ public class ExtendedElasticSearchIterator<T> extends ElasticSearchIterator<T> {
         Boolean requestVersion,
         String beanName,
         WindowedEventRate rateMeasurerer,
-        List<String> routingIds
+        List<String> routingIds,
+        Boolean warnSortNotOnDoc
     ) {
         super(
             client.getLowLevelClient(),
@@ -54,7 +55,8 @@ public class ExtendedElasticSearchIterator<T> extends ElasticSearchIterator<T> {
             requestVersion,
             beanName,
             rateMeasurerer,
-            routingIds);
+            routingIds,
+            warnSortNotOnDoc);
     }
 
 
