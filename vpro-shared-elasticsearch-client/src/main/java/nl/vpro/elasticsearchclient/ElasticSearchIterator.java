@@ -30,6 +30,8 @@ import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jmx.MBeans;
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.Level;
 import nl.vpro.util.ThreadPools;
 import nl.vpro.util.Version;
 
@@ -116,8 +118,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private final ObjectName objectName;
 
+    private final boolean warnSortNotOnDoc;
+
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null, true);
     }
 
 
@@ -134,7 +138,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         Boolean requestVersion,
         String beanName,
         WindowedEventRate rateMeasurerer,
-        List<String> routingIds
+        List<String> routingIds,
+        Boolean warnSortNotOnDoc
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
@@ -176,6 +181,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.closeRate = rateMeasurerer == null;
 
         this.routing = routingIds;
+        this.warnSortNotOnDoc = warnSortNotOnDoc == null ? true : warnSortNotOnDoc;
     }
 
 
@@ -409,7 +415,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     checkedOrder = Long.MAX_VALUE;
                     ArrayNode sort = request.withArray(SORT);
                     if (!DOC.equals(sort.get(0).textValue())) {
-                        log.warn("Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
+                        Slf4jHelper.log(log, warnSortNotOnDoc ? Level.WARN : Level.DEBUG, "Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
                     }
                 }
 
