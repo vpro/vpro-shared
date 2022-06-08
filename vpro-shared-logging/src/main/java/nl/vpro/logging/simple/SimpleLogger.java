@@ -145,8 +145,11 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         accept(level, message);
     }
 
-    default void log(Level level, CharSequence format, Object... arg) {
+    default void log(Level level, @Nullable CharSequence format, Object... arg) {
         if (isEnabled(level)) {
+            if (format == null) {
+                format = "null";
+            }
             FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), arg);
             String message = ft.getMessage();
             if (ft.getArgArray().length == arg.length) {
