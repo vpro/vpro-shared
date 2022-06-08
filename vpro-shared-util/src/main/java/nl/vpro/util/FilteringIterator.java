@@ -228,7 +228,6 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         public KeepAlive(long count, Function<Long, Boolean> callback) {
             this.count = count;
             this.callback = callback;
-
         }
     }
 }
