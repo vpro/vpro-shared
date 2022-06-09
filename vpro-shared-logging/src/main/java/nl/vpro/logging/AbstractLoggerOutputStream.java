@@ -6,13 +6,12 @@ import lombok.Setter;
 import java.io.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 /**
- * Wraps a {@link Logger} in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
+ * Wraps some logger in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
  * @author Michiel Meeuwissen
  */
-abstract class AbstractLoggerOutputStream extends OutputStream {
+public abstract class AbstractLoggerOutputStream extends OutputStream {
 
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     private final boolean skipEmptyLines;
@@ -25,12 +24,12 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
     @Setter
     protected Integer max;
 
-    AbstractLoggerOutputStream(boolean skipEmptyLines, Integer max) {
+    protected AbstractLoggerOutputStream(boolean skipEmptyLines, Integer max) {
         this.skipEmptyLines = skipEmptyLines;
         this.max = max;
     }
 
-    abstract void log(String line);
+    protected abstract void log(String line);
 
     @Override
     public void write(int b) {

@@ -25,7 +25,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream info(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 log.info(line);
             }
         };
@@ -38,7 +38,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream info(final Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 log.info(line);
             }
         };
@@ -49,7 +49,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream log(final Logger log, Function<String, Level> level) {
         return new LoggerOutputStream(false) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 Level l = level.apply(line);
                 if (l != null) {
                     Slf4jHelper.log(log, l, line);
@@ -66,7 +66,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream info(final SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            final void log(String line) {
+			protected final void log(String line) {
                 log.info(line);
             }
         };
@@ -79,7 +79,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream error(SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            final void log(String line) {
+			protected final void log(String line) {
                 log.error(line);
             }
         };
@@ -93,7 +93,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream error(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            final void log(String line) {
+			protected final void log(String line) {
                 log.severe(line);
             }
         };
@@ -107,7 +107,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream error(final Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 log.error(line);
             }
         };
@@ -128,7 +128,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream warn(final Logger log, boolean skipEmptyLines, final Integer max) {
         return new LoggerOutputStream(skipEmptyLines, max) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
 
                 log.warn(line);
             }
@@ -138,7 +138,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream warn(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 log.warning(line);
             }
         };
@@ -157,7 +157,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream debug(final Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 log.debug(line);
             }
         };
@@ -166,7 +166,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream debug(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+			protected void log(String line) {
                 log.fine(line);
             }
         };

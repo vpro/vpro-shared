@@ -202,11 +202,11 @@ public interface CommandExecutor {
      */
     default Stream<String> lines(InputStream in, OutputStream errors, String... args) {
         try {
-            PipedInputStream reader = new PipedInputStream();
-            PipedOutputStream writer = new PipedOutputStream(reader);
-            BufferedReader result = new BufferedReader(new InputStreamReader(reader));
+            final PipedInputStream reader = new PipedInputStream();
+            final PipedOutputStream writer = new PipedOutputStream(reader);
+            final BufferedReader result = new BufferedReader(new InputStreamReader(reader));
 
-            CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
+            final CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
                 try {
                     writer.flush();
                     writer.close();
