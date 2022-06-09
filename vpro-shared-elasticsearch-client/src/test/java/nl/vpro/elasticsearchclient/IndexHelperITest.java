@@ -19,8 +19,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.logging.simple.QueueSimpleLogger;
-import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.*;
 
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +36,7 @@ public class IndexHelperITest {
     RestClient client;
     IndexHelper helper;
 
-    final Queue<QueueSimpleLogger.Event> events = new ArrayDeque<>();
+    final Queue<Event> events = new ArrayDeque<>();
     final SimpleLogger simpleLogger = QueueSimpleLogger.of(events).chain(slf4j(log));
 
     @BeforeEach
@@ -131,7 +130,7 @@ public class IndexHelperITest {
             jsonNode.put("unrecognizedField", "foobar");
             helper.index(test.getId(), jsonNode);
         }).isInstanceOf(RuntimeException.class);
-        List<QueueSimpleLogger.Event> warnings  = events.stream().filter(e -> e.getLevelInt() > Level.INFO.toInt()).collect(Collectors.toList());
+        List<Event> warnings  = events.stream().filter(e -> e.getLevelInt() > Level.INFO.toInt()).collect(Collectors.toList());
         assertThat(warnings).hasSize(1);
         log.info("{}", warnings);
     }
@@ -149,7 +148,7 @@ public class IndexHelperITest {
         helper.bulkLogger().accept(result);
         log.info("{}", result);
 
-        List<QueueSimpleLogger.Event> warnings  = events.stream().filter(e -> e.getLevelInt() > Level.INFO.toInt()).collect(Collectors.toList());
+        List<Event> warnings  = events.stream().filter(e -> e.getLevelInt() > Level.INFO.toInt()).collect(Collectors.toList());
         assertThat(warnings).hasSize(1);
         log.info("{}", warnings);
     }
