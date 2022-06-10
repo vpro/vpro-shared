@@ -142,8 +142,8 @@ public interface CommandExecutor {
             result[0] = execute(parameters);
             return result[0];
         }).whenComplete((i, t) -> {
-            getLogger().debug("Calling back {}", callback);
             if (callback != null) {
+                getLogger().debug("Calling back {}", callback);
                 synchronized (callback) {
                     callback.accept(result[0]);
                     callback.notifyAll();
@@ -151,6 +151,13 @@ public interface CommandExecutor {
             }
         });
     }
+    default CompletableFuture<Integer> submit(Parameters parameters) {
+        return submit((i) -> {}, parameters);
+    }
+    default CompletableFuture<Integer> submit(Parameters.Builder parameters) {
+        return submit((i) -> {}, parameters.build());
+    }
+
 
     default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
         return submit(in, out, error, null, args);
@@ -195,11 +202,11 @@ public interface CommandExecutor {
      */
     default Stream<String> lines(InputStream in, OutputStream errors, String... args) {
         try {
-            PipedInputStream reader = new PipedInputStream();
-            PipedOutputStream writer = new PipedOutputStream(reader);
-            BufferedReader result = new BufferedReader(new InputStreamReader(reader));
+            final PipedInputStream reader = new PipedInputStream();
+            final PipedOutputStream writer = new PipedOutputStream(reader);
+            final BufferedReader result = new BufferedReader(new InputStreamReader(reader));
 
-            CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
+            final CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
                 try {
                     writer.flush();
                     writer.close();
@@ -227,7 +234,6 @@ public interface CommandExecutor {
 
         }
     }
-
 
     default Stream<String> lines(String... args) {
         return lines(null,
@@ -264,6 +270,10 @@ public interface CommandExecutor {
         }
     }
 
+    static Parameters.Builder parameters() {
+        return Parameters.builder();
+    }
+
     /**
      * The parameters of {@link #submit(IntConsumer, Parameters)}.
      */
@@ -286,6 +296,7 @@ public interface CommandExecutor {
             this.consumer = consumer == null ? (p) -> {} : consumer;
             this.args = listArgs == null ? new String[0] : listArgs.toArray(new String[0]);
         }
+
         public static class Builder {
 
             public Builder args(String... args) {
@@ -301,15 +312,13 @@ public interface CommandExecutor {
 
             public CompletableFuture<Integer> submit(IntConsumer exitCode, CommandExecutor executor) {
                 return executor.submit(exitCode, this);
-
             }
             public CompletableFuture<Integer> submit(CommandExecutor executor) {
                 return submit((exitCode) -> {}, executor);
-
             }
+
             public int execute(CommandExecutor executor) {
                 return executor.execute(this);
-
             }
 
         }

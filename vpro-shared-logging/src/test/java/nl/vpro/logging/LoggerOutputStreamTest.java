@@ -22,7 +22,7 @@ public class LoggerOutputStreamTest {
         final StringBuilder buf = new StringBuilder();
         LoggerOutputStream instance = new LoggerOutputStream(false) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 buf.append(line).append("\n");
             }
         };

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
- * Simply logs everything to a StringBuilder. It also works as a tail (to avoid excessive memory useage if lots is logged)
+ * Simply logs everything to a StringBuilder. It also works as a tail (to avoid excessive memory usage if lots is logged)
  * If more than {@link #getMaxLength()} lines are logged, the string will be prefixed by {@link #TRUNK} and the earliest lines are removed.
  * @author Michiel Meeuwissen
  * @since 1.79
@@ -67,6 +67,7 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
             append(stackTrace);
         }
         truncateIfNecessary();
+        notifyAll();
     }
 
     protected boolean needsNewLine() {
