@@ -1,6 +1,7 @@
 package nl.vpro.logging.simple;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Queue;
 
 /**
@@ -21,10 +22,10 @@ public abstract class QueueSimpleLogger<E extends Event> extends EventSimpleLogg
         this.queue = queue;
     }
 
-    public static QueueSimpleLogger<Event> of(Queue<Event> q, Clock clock) {
-        return new QueueSimpleLogger<Event>(q) {
+    public static QueueSimpleLogger<nl.vpro.logging.simple.Event> of(Queue<nl.vpro.logging.simple.Event> q, Clock clock) {
+        return new QueueSimpleLogger<nl.vpro.logging.simple.Event>(q) {
             @Override
-            protected Event createEvent(Level level, CharSequence message, Throwable t) {
+            protected nl.vpro.logging.simple.Event createEvent(Level level, CharSequence message, Throwable t) {
                 return createEvent(level, message, t, clock);
             }
         };
@@ -33,7 +34,7 @@ public abstract class QueueSimpleLogger<E extends Event> extends EventSimpleLogg
     /**
      * Creates a straight forward instance for a {@link Queue}
      */
-    public static QueueSimpleLogger<Event> of(Queue<Event> q) {
+    public static QueueSimpleLogger<nl.vpro.logging.simple.Event> of(Queue<nl.vpro.logging.simple.Event> q) {
         return of(q, Clock.systemUTC());
     }
 
@@ -43,4 +44,13 @@ public abstract class QueueSimpleLogger<E extends Event> extends EventSimpleLogg
         return "queue:" + queue;
     }
 
+    /**
+     * @deprecated Just use {@link nl.vpro.logging.simple.Event}
+     */
+    @Deprecated
+    public static class Event  extends nl.vpro.logging.simple.Event {
+        protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
+            super(level, message, throwable, timeStamp);
+        }
+    }
 }
