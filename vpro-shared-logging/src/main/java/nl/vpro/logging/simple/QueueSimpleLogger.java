@@ -60,9 +60,15 @@ public abstract class QueueSimpleLogger<E extends nl.vpro.logging.simple.Event> 
      */
     @Deprecated
     public static class Event  extends nl.vpro.logging.simple.Event {
+
         @lombok.Builder
         protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
             super(level, message, throwable, timeStamp);
         }
+
+        public static class Builder extends nl.vpro.logging.simple.Event.Builder {
+
+        }
+
     }
 }
