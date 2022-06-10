@@ -150,12 +150,12 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             if (format == null) {
                 format = "null";
             }
-            FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), arg);
-            String message = ft.getMessage();
+            final FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), arg);
+            final String message = ft.getMessage();
             if (ft.getArgArray().length == arg.length) {
                 accept(level, message, null);
             } else if (arg.length >= 1){
-                Object t = arg[arg.length - 1];
+                final Object t = arg[arg.length - 1];
                 if (t instanceof Throwable) {
                     accept(level, message, (Throwable) t);
                 } else {
