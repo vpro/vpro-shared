@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -254,7 +255,7 @@ public class CommandExecutorImplTest {
                 .optional(true)
                 .build();
         final List<CharSequence> events = new ArrayList<>();
-        find.submit(CommandExecutor.parameters()
+        CompletableFuture<Integer> submit = find.submit(CommandExecutor.parameters()
             .arg(".")
             .outputConsumer(e -> {
                 synchronized (events) {
@@ -266,9 +267,9 @@ public class CommandExecutorImplTest {
         synchronized (events) {
             while (events.size() < 3) {
                 events.wait();
-                log.info("{}", events.get(events.size() -1));
+                log.info("{} {}", events.size(), events.get(events.size() -1));
             }
         }
-        assertThat(events).hasSize(3);
+        assertThat(events.size()).isGreaterThanOrEqualTo(3);
     }
 }

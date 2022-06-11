@@ -18,4 +18,7 @@ public class Log4j2Helper {
         logger.log(info ? Level.INFO : Level.DEBUG, format, argArray);
     }
 
+    public static void log(Logger log, nl.vpro.logging.simple.Level level, CharSequence message) {
+        log.log(Level.valueOf(level.name()), message);
+    }
 }

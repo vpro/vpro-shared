@@ -137,6 +137,9 @@ public interface CommandExecutor {
         return submit(callback, parameters.build());
     }
 
+    /**
+     *
+     */
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters parameters) {
         final int[] result = {-1};
         return CompletableFuture.supplyAsync(() -> {
@@ -158,6 +161,13 @@ public interface CommandExecutor {
     default CompletableFuture<Integer> submit(Parameters.Builder parameters) {
         return submit((i) -> {}, parameters.build());
     }
+
+    default CompletableFuture<Integer> submit(Consumer<Parameters.Builder> parameters) {
+        Parameters.Builder builder = parameters();
+        parameters.accept(builder);
+        return submit(builder);
+    }
+
 
 
     default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
@@ -278,6 +288,7 @@ public interface CommandExecutor {
     /**
      * The parameters of {@link #submit(IntConsumer, Parameters)}, in other words,  an object representing the one time parameters of a call to a {@link CommandExecutor}.
      */
+    @Getter
     class Parameters {
         /**
          * InputStream (optional)
@@ -285,34 +296,33 @@ public interface CommandExecutor {
         final InputStream in;
         final OutputStream out;
         final OutputStream errors;
-        final Consumer<Process> consumer;
+        /**
+         * As soon as the {@link Process} is created  this is called.
+         *
+         * This can be used to store the PID or so.
+         */
+        final Consumer<Process> onProcessCreation;
+
+        /**
+         * (Extra) arguments for the external command
+         */
         final String[] args;
 
+        /**
+         * @param onProcessCreation bla bla
+         */
         @lombok.Builder(builderClassName = "Builder")
         public Parameters(
             InputStream in,
             OutputStream out,
             OutputStream errors,
-            Consumer<Process> consumer,
-            @Singular List<String> listArgs,
-            Consumer<Event> outputConsumer) {
-            if (outputConsumer != null) {
-                if (out != null && errors != null) {
-                    throw new IllegalArgumentException();
-                }
-                EventSimpleLogger<Event> eventLogger = EventSimpleLogger.of(outputConsumer);
-                if (out == null) {
-                    out = SimpleLoggerOutputStream.info(eventLogger, true);
-                }
-                if (errors == null) {
-                    errors = SimpleLoggerOutputStream.error(eventLogger, true);
-                }
-            }
+            Consumer<Process> onProcessCreation,
+            @Singular List<String> listArgs) {
             this.in = in;
             this.out = out;
             this.errors = errors == null ?
                 LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true) : errors;
-            this.consumer = consumer == null ? (p) -> {} : consumer;
+            this.onProcessCreation = onProcessCreation == null ? (p) -> {} : onProcessCreation;
             this.args = listArgs == null ? new String[0] : listArgs.toArray(new String[0]);
         }
 
@@ -332,14 +342,40 @@ public interface CommandExecutor {
             public CompletableFuture<Integer> submit(IntConsumer exitCode, CommandExecutor executor) {
                 return executor.submit(exitCode, this);
             }
+
             public CompletableFuture<Integer> submit(CommandExecutor executor) {
-                return submit((exitCode) -> {}, executor);
+                return submit((exitCode) -> {
+                }, executor);
             }
 
             public int execute(CommandExecutor executor) {
                 return executor.execute(this);
             }
 
+            /**
+             * Sets up input and errors stream (unless they are set already) so they can be
+             * used {@link Consumer}'s of {@link Event}s.
+             */
+            public Builder outputConsumer(Consumer<Event> outputConsumer) {
+                if (outputConsumer != null) {
+                    if (out != null && errors != null) {
+                        throw new IllegalArgumentException();
+                    }
+                    EventSimpleLogger<Event> eventLogger = EventSimpleLogger.of(outputConsumer);
+                    if (out == null) {
+                        out = SimpleLoggerOutputStream.info(eventLogger, true);
+                    }
+                    if (errors == null) {
+                        errors = SimpleLoggerOutputStream.error(eventLogger, true);
+                    }
+                }
+                return this;
+            }
+
+            @Deprecated
+            public Builder consumer(Consumer<Process> consumer) {
+                return onProcessCreation(consumer);
+            }
         }
     }
 }
