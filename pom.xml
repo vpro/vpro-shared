@@ -230,9 +230,9 @@
         </executions>
         <configuration>
           <sourcepath>
-                ${project.build.directory}/generated-sources/delombok;
-                ${project.build.directory}/generated-sources/apt
-              </sourcepath>
+            ${project.build.directory}/generated-sources/delombok;
+            ${project.build.directory}/generated-sources/apt
+          </sourcepath>
         </configuration>
       </plugin>
     </plugins>

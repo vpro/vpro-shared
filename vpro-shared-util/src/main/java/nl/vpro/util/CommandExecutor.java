@@ -296,11 +296,7 @@ public interface CommandExecutor {
         final InputStream in;
         final OutputStream out;
         final OutputStream errors;
-        /**
-         * As soon as the {@link Process} is created  this is called.
-         *
-         * This can be used to store the PID or so.
-         */
+
         final Consumer<Process> onProcessCreation;
 
         /**
@@ -309,10 +305,12 @@ public interface CommandExecutor {
         final String[] args;
 
         /**
-         * @param onProcessCreation bla bla
+         * @param in The input stream for the external command
+         * @param out The input stream for the external command
+         * @param onProcessCreation  As soon as the {@link Process} is created  this is called.
          */
         @lombok.Builder(builderClassName = "Builder")
-        public Parameters(
+        private Parameters(
             InputStream in,
             OutputStream out,
             OutputStream errors,
@@ -353,8 +351,17 @@ public interface CommandExecutor {
             }
 
             /**
+             * <p>
              * Sets up input and errors stream (unless they are set already) so they can be
-             * used {@link Consumer}'s of {@link Event}s.
+             * used via a {@link Consumer} of {@link Event}s.
+             * </p>
+             * <p>
+             * Lines on stdin are fed to the consumer as Events on level {@link Level#INFO}
+             * </p>
+             * <p>
+             * Lines on stderr are fed to the consumer as Events on level {@link Level#ERROR}
+             * </p>
+             * <p>Empty lines are ignored.</p>
              */
             public Builder outputConsumer(Consumer<Event> outputConsumer) {
                 if (outputConsumer != null) {
@@ -372,6 +379,9 @@ public interface CommandExecutor {
                 return this;
             }
 
+            /**
+             * @deprecated Use {@link #onProcessCreation(Consumer)}
+             */
             @Deprecated
             public Builder consumer(Consumer<Process> consumer) {
                 return onProcessCreation(consumer);
