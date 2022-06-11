@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.file.*;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
@@ -243,5 +243,32 @@ public class CommandExecutorImplTest {
         }
         return bytes.toByteArray();
 
+    }
+
+    @Test
+    public void events() throws InterruptedException {
+        CommandExecutor find =
+            CommandExecutorImpl.builder()
+                .executablesPaths("/usr/bin/env")
+                .commonArg("find", "-s")
+                .optional(true)
+                .build();
+        final List<CharSequence> events = new ArrayList<>();
+        find.submit(CommandExecutor.parameters()
+            .arg(".")
+            .outputConsumer(e -> {
+                synchronized (events) {
+                    events.add(e.getMessage());
+                    events.notifyAll();
+                }
+            }));
+
+        synchronized (events) {
+            while (events.size() < 3) {
+                events.wait();
+                log.info("{}", events.get(events.size() -1));
+            }
+        }
+        assertThat(events).hasSize(3);
     }
 }

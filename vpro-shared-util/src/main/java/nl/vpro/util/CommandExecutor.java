@@ -18,7 +18,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
-import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.*;
 
 /**
  * Executor for external commands.
@@ -131,6 +131,7 @@ public interface CommandExecutor {
         );
 
     }
+
 
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters.Builder parameters) {
         return submit(callback, parameters.build());
@@ -275,7 +276,7 @@ public interface CommandExecutor {
     }
 
     /**
-     * The parameters of {@link #submit(IntConsumer, Parameters)}.
+     * The parameters of {@link #submit(IntConsumer, Parameters)}, in other words,  an object representing the one time parameters of a call to a {@link CommandExecutor}.
      */
     class Parameters {
         /**
@@ -288,7 +289,25 @@ public interface CommandExecutor {
         final String[] args;
 
         @lombok.Builder(builderClassName = "Builder")
-        public Parameters(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, @Singular List<String> listArgs) {
+        public Parameters(
+            InputStream in,
+            OutputStream out,
+            OutputStream errors,
+            Consumer<Process> consumer,
+            @Singular List<String> listArgs,
+            Consumer<Event> outputConsumer) {
+            if (outputConsumer != null) {
+                if (out != null && errors != null) {
+                    throw new IllegalArgumentException();
+                }
+                EventSimpleLogger<Event> eventLogger = EventSimpleLogger.of(outputConsumer);
+                if (out == null) {
+                    out = SimpleLoggerOutputStream.info(eventLogger, true);
+                }
+                if (errors == null) {
+                    errors = SimpleLoggerOutputStream.error(eventLogger, true);
+                }
+            }
             this.in = in;
             this.out = out;
             this.errors = errors == null ?
