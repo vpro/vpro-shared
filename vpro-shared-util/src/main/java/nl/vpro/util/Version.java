@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.*;
  *
  * This base class leaves open how these parts should look like, but we supply an extension where they are integers.
  *
- * The point it that these things can now be compared in the logical way, such that e.g. 5.12.0 > 5.2.0
+ * The point is that these things can now be compared in the logical way, such that e.g. 5.12.0 > 5.2.0
  *
  * @author Michiel Meeuwissen
  * @since 2.2

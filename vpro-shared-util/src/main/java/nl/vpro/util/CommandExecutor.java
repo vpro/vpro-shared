@@ -24,14 +24,14 @@ import nl.vpro.logging.simple.*;
  * Executor for external commands.
  *
  * Three types of methods:
- *<ul>
+ *<ol>
  * <li>{@link #execute(InputStream, OutputStream, OutputStream, String...)} To synchronously execute and return exit code.</li>
- * <li>{@link #submit(java.io.InputStream, java.io.OutputStream, java.io.OutputStream, java.util.function.IntConsumer, java.lang.String...) For asynchronous execution</li>
- * </ul>
- * These  two also have versions with a {@link Parameters} argument, so you can use builder pattern to fill in parameters.
- *<ul>
+ * <li>{@link #submit(java.io.InputStream, java.io.OutputStream, java.io.OutputStream, java.util.function.IntConsumer, java.lang.String...)} For asynchronous execution</li>
+ * </ol>
+ * These  two also have versions with a {@link Parameters} (or {@link Parameters.Builder} or {@code Consumer<Parameters.Builder>}) argument, so you can use the builder pattern to fill in parameters.
+ *<ol start='3'>
  * <li>{@link #lines(InputStream, OutputStream, String...)} For synchronous execution and returing the output as a stream of strings.</li>
- *</ul>
+ *</ol>
  * @author Michiel Meeuwissen
  * @since 1.6
  */
