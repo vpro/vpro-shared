@@ -7,8 +7,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import nl.vpro.jmx.MBeans.UpdatableString;
 import nl.vpro.logging.simple.*;
@@ -77,6 +79,7 @@ public class MBeansTest {
 
 
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void cancel() throws InterruptedException, ExecutionException {
         returnString("KEY", multiLine(log, "Filling media queues cancel"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
@@ -102,6 +105,7 @@ public class MBeansTest {
 
     @SuppressWarnings("InfiniteLoopStatement")
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void abandon() throws InterruptedException, ExecutionException {
         final boolean[] started = new boolean[1];
         final List<String> interrupted = new ArrayList<>();
