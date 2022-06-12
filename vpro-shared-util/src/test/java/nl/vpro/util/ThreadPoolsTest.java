@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.53
  */
+@Isolated
 @Slf4j
 public class ThreadPoolsTest {
 
