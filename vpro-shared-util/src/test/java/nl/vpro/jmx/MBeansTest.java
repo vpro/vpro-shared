@@ -4,12 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
 
+import nl.vpro.jmx.MBeans.UpdatableString;
 import nl.vpro.logging.simple.*;
 
+import static nl.vpro.jmx.MBeans.multiLine;
+import static nl.vpro.jmx.MBeans.returnString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -17,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
-@SuppressWarnings({"Duplicates", "deprecation"})
+@SuppressWarnings({"Duplicates", "deprecation", "BusyWait"})
 @Slf4j
 public class MBeansTest {
 
@@ -25,9 +30,9 @@ public class MBeansTest {
     public void testWithUpdateableString() {
         log.info("Start");
 
-        MBeans.UpdatableString string = new MBeans.UpdatableString(log, "test");
+        UpdatableString string = new UpdatableString(log, "test");
 
-        assertThat(MBeans.returnString(
+        assertThat(returnString(
             string,
             Duration.ofMillis(1500),
             () -> {
@@ -52,7 +57,7 @@ public class MBeansTest {
             .prefix((l) -> "")
             .chain(Slf4jSimpleLogger.of(log));
 
-        assertThat(MBeans.returnString(
+        assertThat(returnString(
             string,
             Duration.ofMillis(100),
             () -> {
@@ -73,7 +78,7 @@ public class MBeansTest {
 
     @Test
     public void cancel() throws InterruptedException, ExecutionException {
-        MBeans.returnString("KEY", MBeans.multiLine(log, "Filling media queues"),  Duration.ofMillis(100), (l) -> {
+        returnString("KEY", multiLine(log, "Filling media queues cancel"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
             while(true) {
                 try {
@@ -95,23 +100,38 @@ public class MBeansTest {
 
 
 
+    @SuppressWarnings("InfiniteLoopStatement")
     @Test
     public void abandon() throws InterruptedException, ExecutionException {
-        MBeans.returnString("KEY", MBeans.multiLine(log, "Filling media queues"),  Duration.ofMillis(100), (l) -> {
+        final boolean[] started = new boolean[1];
+        final List<String> interrupted = new ArrayList<>();
+        String r = returnString("KEY", multiLine(log, "Filling media queues abandon"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
 
             while(true) {
                 try {
                     Thread.sleep(400);
                 } catch (InterruptedException e) {
-                    log.debug(e.getMessage());
+                    log.debug(e.getClass().getName() + ":" + e.getMessage());
+                    interrupted.add(e.getMessage());
+                }
+                synchronized (started) {
+                    started[0] = true;
+                    started.notifyAll();
                 }
                 // ignoring interrupt, simply proceed
                 l.info(count++ + " " + Instant.now());
             }
         });
+        log.info(r);
+        synchronized (started) {
+            while (!started[0]) {
+                started.wait();
+            }
+        }
         assertThat(MBeans.cancel("KEY").get()).containsIgnoringCase("abandon");
         assertThat(MBeans.locks).isEmpty();
+        assertThat(interrupted.get(0)).contains("sleep interrupted");
     }
 
 
