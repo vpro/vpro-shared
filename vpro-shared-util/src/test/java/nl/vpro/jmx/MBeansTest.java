@@ -133,7 +133,8 @@ public class MBeansTest {
                 started.wait();
             }
         }
-        assertThat(MBeans.cancel("KEY").get()).containsIgnoringCase("abandon");
+        assertThat(MBeans.cancel("KEY").get())
+            .containsIgnoringCase("Abandoned");
         assertThat(MBeans.locks).isEmpty();
         assertThat(interrupted.get(0)).contains("sleep interrupted");
     }
