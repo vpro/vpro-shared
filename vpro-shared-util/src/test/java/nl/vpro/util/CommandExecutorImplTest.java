@@ -74,11 +74,11 @@ public class CommandExecutorImplTest {
         CommandExecutor find =
                  CommandExecutorImpl.builder()
                      .executablesPaths("/usr/bin/env")
-                     .commonArg("find", "-s")
+                     .commonArg("find")
                      .useFileCache(useFileCache)
                      .optional(true)
                      .build();
-        assertThat(find.toString()).isEqualTo("/usr/bin/env find -s");
+        assertThat(find.toString()).isEqualTo("/usr/bin/env find");
         try (Stream<String> s = find.lines(".")
             .limit(20)) {
             s.forEach(log::info);
@@ -251,7 +251,7 @@ public class CommandExecutorImplTest {
         CommandExecutor find =
             CommandExecutorImpl.builder()
                 .executablesPaths("/usr/bin/env")
-                .commonArg("find", "-s")
+                .commonArg("find")
                 .optional(true)
                 .build();
         final List<CharSequence> events = new ArrayList<>();
