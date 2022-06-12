@@ -256,7 +256,7 @@ public class CommandExecutorImplTest {
                 .build();
         final List<CharSequence> events = new ArrayList<>();
         CompletableFuture<Integer> submit = find.submit(CommandExecutor.parameters()
-            .arg(".")
+            .arg("/")
             .outputConsumer(e -> {
                 synchronized (events) {
                     events.add(e.getMessage());
