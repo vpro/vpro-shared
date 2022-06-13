@@ -17,13 +17,18 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.meeuw.math.TestClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
-
+// logging configuration is reused by other tests, so run this isolated.
+@Isolated
+@Execution(SAME_THREAD)
 public class LoggerHelperTest {
     private static final Logger log = LoggerFactory.getLogger(LoggerHelperTest.class);
 
@@ -44,20 +49,26 @@ public class LoggerHelperTest {
         }, null, writer, "test", true, false);
         appender.start();
         rootLogger.addAppender(appender, Level.TRACE, null);
-        rootLogger.setLevel(Level.TRACE);
+        Level prev = rootLogger.getLevel();
+        try {
+            rootLogger.setLevel(Level.TRACE);
 
-        ctx.updateLoggers();
+            ctx.updateLoggers();
 
-        TestClock clock = new TestClock(ZoneId.of("UTC"), Instant.parse("2022-04-19T19:00:00Z"));
-        LoggerHelper helper = new LoggerHelper(log, clock);
-        helper.trace("message {}", "argument");
+            TestClock clock = new TestClock(ZoneId.of("UTC"), Instant.parse("2022-04-19T19:00:00Z"));
+            LoggerHelper helper = new LoggerHelper(log, clock);
+            helper.trace("message {}", "argument");
 
-        assertThat(writer.toString()).isEqualTo("TRACE 19:00:00.000 - message argument\n");
+            assertThat(writer.toString()).isEqualTo("TRACE 19:00:00.000 - message argument\n");
 
-        clock.tick(Duration.ofSeconds(100));
-        LoggerHelper.trace(clock, log, "message {}", "argument2");
-        assertThat(writer.toString()).isEqualTo("TRACE 19:00:00.000 - message argument\n" +
-            "TRACE 19:01:40.000 - message argument2\n");
-        rootLogger.removeAppender("test");
+            clock.tick(Duration.ofSeconds(100));
+            LoggerHelper.trace(clock, log, "message {}", "argument2");
+            assertThat(writer.toString()).isEqualTo("TRACE 19:00:00.000 - message argument\n" +
+                "TRACE 19:01:40.000 - message argument2\n");
+            rootLogger.removeAppender("test");
+        } finally {
+            rootLogger.setLevel(prev);
+        }
+
     }
 }

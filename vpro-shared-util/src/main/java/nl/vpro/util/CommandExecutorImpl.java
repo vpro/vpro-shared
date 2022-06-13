@@ -303,16 +303,16 @@ public class CommandExecutorImpl implements CommandExecutor {
     public int execute(Parameters parameters) {
 
         final List<String> command = new ArrayList<>();
-        String b = binary.get();
+        final String b = binary.get();
         if (b == null) {
             throw new IllegalStateException("No binary found");
         }
         command.add(binary.get());
-        ProcessBuilder pb = new ProcessBuilder(command);
+        final ProcessBuilder pb = new ProcessBuilder(command);
         if (workdir != null) {
             pb.directory(workdir);
         }
-        Process p;
+        final Process p;
         try {
             if (commonArgs != null) {
                 command.addAll(commonArgs.stream().map(Supplier::get).collect(Collectors.toList()));
@@ -320,7 +320,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             Collections.addAll(command, parameters.args);
             logger.info(toString(command));
             p = pb.start();
-            parameters.consumer.accept(p);
+            parameters.onProcessCreation.accept(p);
 
             final ProcessTimeoutHandle handle;
             if (processTimeout != null) {
@@ -333,9 +333,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                     "input -> process input copier",
                     parameters.in,
                     p.getOutputStream(),
-                    (c) -> {
-                        closeSilently(p.getOutputStream());
-                    },
+                    (c) -> closeSilently(p.getOutputStream()),
                     (e) -> {},
                     p
                 ) : null;
@@ -355,9 +353,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 copier = copyThread("process output parameters out copier",
                     commandOutput,
                     parameters.out,
-                    (c) -> {
-                        closeSilently(commandOutput);
-                    },
+                    (c) -> closeSilently(commandOutput),
                     (e) -> {
                         Process process = p.destroyForcibly();
                         logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
@@ -366,13 +362,11 @@ public class CommandExecutorImpl implements CommandExecutor {
                 copier = null;
             }
 
-            Copier errorCopier = copyThread(
+            final Copier errorCopier = copyThread(
                 "error copier",
                 p.getErrorStream(),
                 parameters.errors,
-                (c) -> {
-                    closeSilently(p.getErrorStream());
-                },
+                (c) -> closeSilently(p.getErrorStream()),
                 (e) -> {},
                 p
             );
@@ -475,7 +469,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (needsClose(closeable)) {
                 value = closeSilently(closeable);
             } else {
-                logger.debug("Not closing {}", closeables);
+                logger.debug("Not closing {}", closeable);
             }
         }
         return value;

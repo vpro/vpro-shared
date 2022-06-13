@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.53
  */
+@Isolated
 @Slf4j
 public class ThreadPoolsTest {
 
@@ -85,7 +87,8 @@ public class ThreadPoolsTest {
 
         long duration = System.currentTimeMillis() - start;
 
-        assertThat(duration).isCloseTo(500L, Percentage.withPercentage(50));
+        assertThat(duration)
+            .isCloseTo(500L, Percentage.withPercentage(50));
         log.info("pool size: {}", ThreadPools.copyExecutor.getPoolSize());
 
     }

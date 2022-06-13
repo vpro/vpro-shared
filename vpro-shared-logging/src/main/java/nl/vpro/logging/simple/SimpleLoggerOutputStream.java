@@ -53,4 +53,18 @@ public abstract class SimpleLoggerOutputStream extends AbstractLoggerOutputStrea
         };
     }
 
+
+    public static SimpleLoggerOutputStream error(SimpleLogger log) {
+        return error(log, false);
+    }
+
+    public static SimpleLoggerOutputStream error(SimpleLogger log, boolean skipEmptyLines) {
+        return new SimpleLoggerOutputStream(skipEmptyLines) {
+            @Override
+            protected void log(String line) {
+                log.error(line);
+            }
+        };
+    }
+
 }

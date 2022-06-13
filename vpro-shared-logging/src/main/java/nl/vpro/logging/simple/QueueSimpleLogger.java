@@ -1,6 +1,7 @@
 package nl.vpro.logging.simple;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Queue;
 
 /**
@@ -12,16 +13,16 @@ import java.util.Queue;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public abstract class QueueSimpleLogger<E extends Event> extends EventSimpleLogger<E> {
+public abstract class QueueSimpleLogger<E extends nl.vpro.logging.simple.Event> extends EventSimpleLogger<E> {
 
-    private final Queue<E> queue;
+    private final Queue<? super E> queue;
 
-    protected QueueSimpleLogger(Queue<E> queue) {
+    protected QueueSimpleLogger(Queue<? super E> queue) {
         super(queue::add);
         this.queue = queue;
     }
 
-    public static QueueSimpleLogger<Event> of(Queue<Event> q, Clock clock) {
+    public static QueueSimpleLogger<Event> of(Queue<? super Event> q, Clock clock) {
         return new QueueSimpleLogger<Event>(q) {
             @Override
             protected Event createEvent(Level level, CharSequence message, Throwable t) {
@@ -33,7 +34,7 @@ public abstract class QueueSimpleLogger<E extends Event> extends EventSimpleLogg
     /**
      * Creates a straight forward instance for a {@link Queue}
      */
-    public static QueueSimpleLogger<Event> of(Queue<Event> q) {
+    public static QueueSimpleLogger<Event> of(Queue<? super Event> q) {
         return of(q, Clock.systemUTC());
     }
 
@@ -43,4 +44,31 @@ public abstract class QueueSimpleLogger<E extends Event> extends EventSimpleLogg
         return "queue:" + queue;
     }
 
+
+    @Override
+    @Deprecated
+    protected Event createEvent(Level level, CharSequence message, Throwable t, Clock clock) {
+        return  Event.builder()
+            .level(level)
+            .message(message)
+            .throwable(t)
+            .timeStamp(clock.instant())
+            .build();
+    }
+    /**
+     * @deprecated Just use {@link nl.vpro.logging.simple.Event}
+     */
+    @Deprecated
+    public static class Event  extends nl.vpro.logging.simple.Event {
+
+        @lombok.Builder
+        protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
+            super(level, message, throwable, timeStamp);
+        }
+
+        public static class Builder extends nl.vpro.logging.simple.Event.Builder {
+
+        }
+
+    }
 }

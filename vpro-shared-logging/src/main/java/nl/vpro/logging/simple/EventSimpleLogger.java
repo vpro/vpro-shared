@@ -16,9 +16,9 @@ import java.util.function.Consumer;
  */
 public abstract class EventSimpleLogger<E extends Event> implements SimpleLogger {
 
-    private final Consumer<E> consumer;
+    private final Consumer<? super E> consumer;
 
-    protected EventSimpleLogger(Consumer<E> consumer) {
+    protected EventSimpleLogger(Consumer<? super  E> consumer) {
         this.consumer = consumer;
     }
 
