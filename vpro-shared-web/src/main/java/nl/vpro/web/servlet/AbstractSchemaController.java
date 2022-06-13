@@ -28,8 +28,8 @@ public abstract class AbstractSchemaController<M extends BiFunction<String, Sche
 
     protected M mappings;
 
-    protected File getFileForNamespace(@NonNull String namespace) {
-        return mappings.apply(namespace, SchemaType.XSD);
+    protected File getFileForNamespace(@NonNull String namespace, SchemaType type) {
+        return mappings.apply(namespace, type);
     }
 
     protected void el(XMLStreamWriter w, String name, String chars) throws XMLStreamException {
@@ -73,7 +73,7 @@ public abstract class AbstractSchemaController<M extends BiFunction<String, Sche
             final HttpServletRequest request,
             final HttpServletResponse response,
             final String namespace) throws IOException {
-        File file = getFileForNamespace(namespace);
+        File file = getFileForNamespace(namespace, SchemaType.XSD);
         serveXml(file, request, response);
     }
 
@@ -82,7 +82,7 @@ public abstract class AbstractSchemaController<M extends BiFunction<String, Sche
             final HttpServletRequest request,
             final HttpServletResponse response,
             final String namespace) throws IOException {
-        File file = getFileForNamespace(namespace);
+        File file = getFileForNamespace(namespace, SchemaType.JSON_SCHEMA);
         serveJsonSchema(file, request, response);
     }
 
