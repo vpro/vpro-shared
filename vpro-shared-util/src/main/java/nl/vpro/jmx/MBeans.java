@@ -126,6 +126,17 @@ public class MBeans {
     }
 
 
+
+    /**
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with a duration {@link #DEFAULT_DURATION}
+     */
+    public static String returnString(
+        @NonNull String key,
+        @NonNull StringSupplierSimpleLogger description,
+        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
+        return returnString(key, description, DEFAULT_DURATION, logger);
+    }
+
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
@@ -150,7 +161,6 @@ public class MBeans {
         @NonNull Consumer<StringSupplierSimpleLogger> logger) {
         return returnString(multiLine(log), logger);
     }
-
 
 
     @Deprecated
