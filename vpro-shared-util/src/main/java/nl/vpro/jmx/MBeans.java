@@ -128,7 +128,7 @@ public class MBeans {
 
 
     /**
-     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with a duration {@link #DEFAULT_DURATION}
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}, with a duration {@link #DEFAULT_DURATION}
      */
     public static String returnString(
         @NonNull String key,
