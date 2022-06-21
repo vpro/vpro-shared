@@ -88,7 +88,7 @@ public class MonitoringConfig {
                     new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
 
                 } else {
-                    log.error("No session factory to monitor");
+                    log.warn("No session factory to monitor");
                 }
             }
         } catch(java.lang.NoClassDefFoundError noClassDefFoundError) {
@@ -101,7 +101,7 @@ public class MonitoringConfig {
                 if (sessionFactory.isPresent()) {
                     new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
                 } else {
-                    log.error("No session factory to monitor");
+                    log.warn("No session factory to monitor");
                 }
             }
         } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
