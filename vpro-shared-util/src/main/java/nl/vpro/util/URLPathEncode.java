@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.PolyNull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 1.64.1
@@ -14,15 +16,25 @@ import java.util.stream.Collectors;
 public class URLPathEncode {
 
     /**
-     * Escapes every character of the input string for the path part of an URL.
+     * Escapes every character of the input string for the path part of a URL.
      *
-     * This differs from {@link URLEncoder#encode(String, String)} that it will leave more charachters untouched (see {@link #isSafe(char)}, and that space will be replaced by +;
+     * This differs from {@link URLEncoder#encode(String, String)} that it will leave more characters untouched (see {@link #isSafe(char)}, and that space will be replaced by +;
      */
-    public static String encode(String input) {
+    @PolyNull
+    public static String encode(@PolyNull String input) {
         return encode(input, true);
     }
 
-    public static String encode(String input, boolean spaceIsPlus) {
+    /**
+     * Escapes every character of the input string for the path part of a URL.
+     *
+     * @see #encode(String)
+     */
+    @PolyNull
+    public static String encode(@PolyNull String input, boolean spaceIsPlus) {
+        if (input == null) {
+            return null;
+        }
         StringBuilder resultStr = new StringBuilder();
         for (char ch : input.toCharArray()) {
             if (ch == ' ') {
@@ -44,7 +56,11 @@ public class URLPathEncode {
         return resultStr.toString();
     }
 
-    public static String decode(String s) {
+    @PolyNull
+    public static String decode(@PolyNull String s) {
+        if (s == null) {
+            return null;
+        }
         try {
             return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException ignored) {
@@ -54,27 +70,30 @@ public class URLPathEncode {
 
     /**
      * Escapes every character of the input string for the path part of an URL, but only after splitting it by /.
-     * Afterwards join with '/' again. This avoids that the / itself is escaped too, and this function can be used to escape all the constituents of a path seperately.
+     * Afterwards join with '/' again. This avoids that the / itself is escaped too, and this function can be used to escape all the constituents of a path separately.
      *
      */
-    public static String encodePath(String input) {
+    @PolyNull
+    public static String encodePath(@PolyNull String input) {
         return encodePath(input, true);
     }
 
-    public static String encodePath(String input, boolean spaceIsPlus) {
+    @PolyNull
+    public static String encodePath(@PolyNull String input, boolean spaceIsPlus) {
+        if (input == null) {
+            return null;
+        }
         return Arrays.stream(
             input.split("/", -1))
             .map(s -> encode(s, spaceIsPlus))
             .collect(Collectors.joining("/"));
     }
 
-
     private static boolean isSafe(char ch) {
         return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || // ALPHA
             (ch >= '0' && ch <= '9') || // DIGIT
             ch == '-' || ch == '.'  || ch == '_' || ch ==  '~'  || // unreserved
             ch == ':' || ch == '@'; // pchar
-
     }
 
 }
