@@ -5,9 +5,9 @@ import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
+import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
 import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
-import io.micrometer.core.instrument.binder.system.UptimeMetrics;
+import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -15,8 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Ehcache;
 
 import java.io.File;
-import java.util.Optional;
+import java.util.*;
 
+import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
@@ -44,11 +45,25 @@ public class MonitoringConfig {
     @Autowired
     private ApplicationContext applicationContext;
 
+    private final List<AutoCloseable> closables = new ArrayList<>();
+
     @Bean("globalMeterRegistry")
     public PrometheusMeterRegistry globalMeterRegistry() {
         final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         start(registry);
         return registry;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        for (AutoCloseable c : closables) {
+            try {
+                c.close();
+                log.info("Closed {}", c);
+            } catch (Exception e) {
+                log.warn("{}: {}", c, e.getMessage());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -61,7 +76,9 @@ public class MonitoringConfig {
         }
 
         if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
-            new io.micrometer.core.instrument.binder.logging.Log4j2Metrics().bindTo(registry);
+            Log4j2Metrics metrics = new io.micrometer.core.instrument.binder.logging.Log4j2Metrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
 
         final Optional<Ehcache> ehCache = (Optional<Ehcache>) getEhCache();
@@ -69,10 +86,14 @@ public class MonitoringConfig {
             new EhCache2Metrics(ehCache.get(), Tags.empty()).bindTo(registry);
         }
         if (properties.isMeterJvmHeap()) {
-            new JvmHeapPressureMetrics().bindTo(registry);
+            JvmHeapPressureMetrics metrics = new JvmHeapPressureMetrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (properties.isMeterJvmGc()) {
-            new JvmGcMetrics().bindTo(registry);
+            JvmGcMetrics metrics = new JvmGcMetrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (properties.isMeterJvmMemory()) {
             new JvmMemoryMetrics().bindTo(registry);
@@ -126,7 +147,9 @@ public class MonitoringConfig {
         }
         final Optional<Manager> manager = (Optional<Manager>) getManager();
         if (properties.isMeterTomcat() && manager.isPresent()) {
-            new TomcatMetrics(manager.get(), Tags.empty()).bindTo(registry);
+            TomcatMetrics metrics = new TomcatMetrics(manager.get(), Tags.empty());
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (properties.isMeterUptime()) {
             new UptimeMetrics().bindTo(registry);
