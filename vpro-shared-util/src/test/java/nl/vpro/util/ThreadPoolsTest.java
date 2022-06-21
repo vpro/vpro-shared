@@ -58,7 +58,6 @@ public class ThreadPoolsTest {
             }
         );
 
-        System.out.println("");
         f1.get();
         f2.get();
 
@@ -88,7 +87,7 @@ public class ThreadPoolsTest {
         long duration = System.currentTimeMillis() - start;
 
         assertThat(duration)
-            .isCloseTo(500L, Percentage.withPercentage(50));
+            .isCloseTo(500L, Percentage.withPercentage(150));
         log.info("pool size: {}", ThreadPools.copyExecutor.getPoolSize());
 
     }
