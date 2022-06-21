@@ -101,32 +101,37 @@ public class MonitoringConfig {
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
-        try {
-            if (properties.isMeterHibernate()) {
+        if (classForName("org.hibernate.SessionFactory").isPresent()) {
 
-                final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
-                if (sessionFactory.isPresent()) {
-                    new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+            try {
+                if (properties.isMeterHibernate()) {
 
-                } else {
-                    log.warn("No session factory to monitor (hibernate)");
+                    final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+                    if (sessionFactory.isPresent()) {
+                        new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+
+                    } else {
+                        log.warn("No session factory to monitor (hibernate)");
+                    }
                 }
+            } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
+                log.warn("No hibernate metrics: Missing class {}", noClassDefFoundError.getMessage());
             }
-        } catch(java.lang.NoClassDefFoundError noClassDefFoundError) {
-            log.warn("No hibernate metrics: Missing class {}", noClassDefFoundError.getMessage());
-        }
-        try {
-            if (properties.isMeterHibernateQuery()) {
-                final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+            try {
+                if (properties.isMeterHibernateQuery()) {
+                    final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
-                if (sessionFactory.isPresent()) {
-                    new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
-                } else {
-                    log.warn("No session factory to monitor (hibernate query)");
+                    if (sessionFactory.isPresent()) {
+                        new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+                    } else {
+                        log.warn("No session factory to monitor (hibernate query)");
+                    }
                 }
+            } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
+                log.warn("No hibernate query metrics. Missing class {}", noClassDefFoundError.getMessage());
             }
-        } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
-            log.warn("No hibernate query metrics. Missing class {}", noClassDefFoundError.getMessage());
+        } else {
+            log.debug("No org.hibernate.SessionFactory");
         }
         try {
             if (properties.isMeterPostgres()) {
