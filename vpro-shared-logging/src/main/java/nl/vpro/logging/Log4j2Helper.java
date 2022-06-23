@@ -20,8 +20,8 @@ public class Log4j2Helper {
         logger.log(info ? Level.INFO : Level.DEBUG, format, argArray);
     }
 
-    public static void log(Logger log, nl.vpro.logging.simple.Level level, String format, Object... argArray) {
-        log.log(Level.valueOf(level.name()), format, argArray);
+    public static void log(Logger log, nl.vpro.logging.simple.Level level, CharSequence format, Object... argArray) {
+        log.log(Level.valueOf(level.name()), format.toString(), argArray);
     }
 
     public static void log(Logger log, Duration duration, Duration durationInfo, String format, Object... argArray) {
