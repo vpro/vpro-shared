@@ -238,7 +238,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
 
-    <spring.version>5.3.20</spring.version>
+    <spring.version>5.3.21</spring.version>
     <spring-security.version>5.7.1</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
@@ -246,7 +246,7 @@
     <mockito.version>4.6.1</mockito.version>
     <assertj.version>3.23.1</assertj.version>
     <resteasy.version>4.7.6.Final</resteasy.version>
-    <bytebuddy.version>1.12.10</bytebuddy.version>
+    <bytebuddy.version>1.12.11</bytebuddy.version>
     <slf4j.version>1.7.32</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
     <log4j2.version>2.17.2</log4j2.version>
@@ -278,7 +278,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.9.0</micrometer.version>
+    <micrometer.version>1.9.1</micrometer.version>
   </properties>
 
   <dependencyManagement>
