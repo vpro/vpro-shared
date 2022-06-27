@@ -7,6 +7,7 @@ import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
@@ -57,7 +58,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
  * @author Michiel Meeuwissen
  * @since 0.24
  */
-@SuppressWarnings("UnusedReturnValue")
+@SuppressWarnings({"UnusedReturnValue", "unused", "resource"})
 @Getter
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
@@ -681,13 +682,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     public ObjectNode delete(String id) {
-        return _delete(DOC, id);
-    }
-
-
-    private ObjectNode _delete(String type, String id) {
         try {
-            client().performRequest(createDelete("/" + type + "/" + encode(id)));
+            client().performRequest(createDelete("/" + DOC + "/" + encode(id)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -714,7 +710,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  Optional<JsonNode> get(String id){
-        return _get(DOC, id, null);
+        return _get(id, null);
     }
 
     public  List<@NonNull Optional<JsonNode>> mget(String... ids){
@@ -771,17 +767,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  Optional<JsonNode> getWithRouting(String id, String routing){
-        return _get(DOC, id, routing);
+        return _get(id, routing);
     }
 
     public  Optional<JsonNode> getWithRouting(RoutedId id){
-        return _get(DOC, id.id, id.routing);
+        return _get(id.id, id.routing);
     }
 
 
-    protected Optional<JsonNode> _get(String type, String id, String routing) {
+    protected Optional<JsonNode> _get(String id, String routing) {
         try {
-            Request get = createGet("/" + type + "/" + encode(id));
+            Request get = createGet("/" + DOC + "/" + encode(id));
             if (routing != null){
                 get.addParameter("routing", routing);
             }
@@ -910,7 +906,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      */
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(DOC, id, null, o, consumers);
+        return _indexRequest(id, null, o, consumers);
     }
     /**
      * Creates a {@link BulkRequestEntry} for indexing an object with given id.
@@ -933,7 +929,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
         BulkRequestEntry request =
-            _indexRequest(DOC, id, null, o, consumers);
+            _indexRequest(id, null, o, consumers);
         request.getAction()
             .with(INDEX)
             .put(ROUTING, routing);
@@ -941,12 +937,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @SafeVarargs
-    private final BulkRequestEntry _indexRequest(String type, String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
+    private final BulkRequestEntry _indexRequest(String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
-        if (! DOC.equals(type)) {
-            index.put(Fields.TYPE, type);
-        }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
         if (version != null) { // somewhy, this is not supported
@@ -993,22 +986,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     public BulkRequestEntry deleteRequest(String id) {
-        return _deleteRequest(DOC, id);
+        return _deleteRequest(id);
     }
 
     public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
-        BulkRequestEntry request  = _deleteRequest(DOC, id);
+        BulkRequestEntry request  = _deleteRequest(id);
         request.getAction().with(DELETE)
             .put(ROUTING, routing);
         return request;
     }
 
-    protected BulkRequestEntry _deleteRequest(String type, String id) {
+    protected BulkRequestEntry _deleteRequest(String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with(DELETE);
-        if (! DOC.equals(type)) {
-            index.put(Fields.TYPE, type);
-        }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
@@ -1541,7 +1531,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             File file = new File(writeJsonDir, id.replace(
                 File.separator, "_"
             ) + ".json");
-            try (OutputStream out = new FileOutputStream(file)) {
+            try (OutputStream out = Files.newOutputStream(file.toPath())) {
                 Jackson2Mapper.getPrettyInstance().writeValue(out, jsonNode);
                 log.info("Wrote {}", file);
             } catch (IOException e) {
