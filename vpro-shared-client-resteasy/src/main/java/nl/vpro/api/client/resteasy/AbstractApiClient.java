@@ -208,6 +208,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         this.maxConnectionsNoTimeout = maxConnectionsNoTimeout == null ? 3 : maxConnectionsNoTimeout;
         this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout == null ? 3 : maxConnectionsPerRouteNoTimeout;
+        if ((maxConnections != null || maxConnectionsPerRoute != null) && connectionInPoolTTL == null) {
+            connectionInPoolTTL = Duration.ofMinutes(5);
+            log.info("Connection in pool ttl defaulted to {}", connectionInPoolTTL);
+        }
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.validateAfterInactivity = validateAfterInactivity;
         setBaseUrl(baseUrl);
@@ -461,7 +465,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             .setSocketTimeout(socketTimeout == null ? 0 : (int) socketTimeout.toMillis())
             .build();
 
-        List<Header> defaultHeaders = new ArrayList<>();
+        final List<Header> defaultHeaders = new ArrayList<>();
         defaultHeaders.add(new BasicHeader("Keep-Alive", "timeout=1000, max=500"));
 
         HttpClientBuilder client = HttpClients.custom()
@@ -524,10 +528,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
             connectionManager.setDefaultSocketConfig(socketConfig);
 
-
             if (maxConnections > 1) {
                 watchIdleConnections(connectionManager);
             }
+        } else {
+            log.info("No TTL configured");
         }
         if (connectionManager != null){
             client.setConnectionManager(connectionManager);
@@ -814,17 +819,20 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new CountFilter(log));
         builder.register(HeaderInterceptor.INSTANCE);
 
-        BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
+
 
         if (this.resteasyBrowserCache != null) {
+            BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
             browserCacheFeature.setCache(this.resteasyBrowserCache);
-        }
-        builder.register(browserCacheFeature);
-        if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
-            this.resteasyBrowserCache = browserCacheFeature.getCache();
-            log.info("Set browser cache to {}", this.resteasyBrowserCache);
+            builder.register(browserCacheFeature);
+            if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
+                this.resteasyBrowserCache = browserCacheFeature.getCache();
+                log.info("Set browser cache to {}", this.resteasyBrowserCache);
+            } else {
+                log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+            }
         } else {
-            log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+            log.info("No browser cache set");
         }
         return builder;
     }
