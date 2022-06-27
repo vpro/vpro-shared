@@ -82,11 +82,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration connectTimeout;
     protected Duration socketTimeout;
 
+    @Getter
     protected Integer maxConnections;
+    @Getter
     protected Integer maxConnectionsPerRoute;
+    @Getter
     protected Integer maxConnectionsNoTimeout;
+    @Getter
     protected Integer maxConnectionsPerRouteNoTimeout;
-
 
     protected Duration connectionInPoolTTL;
     protected Duration validateAfterInactivity;
@@ -95,8 +98,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration countWindow = Duration.ofHours(24);
     protected Integer bucketCount = 24;
 
+    @Getter
     protected Duration warnThreshold = Duration.ofMillis(100);
 
+    @Getter
     protected List<Locale> acceptableLanguages = new ArrayList<>();
 
     protected MediaType accept;
@@ -446,11 +451,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private CloseableHttpClient getHttpClient(
         Duration connectionRequestTimeout,
         Duration connectTimeout,
-        Duration socketTimeout,
-        Integer maxConnections,
-        Integer maxConnectionsPerRoute,
-        Duration connectionInPoolTTL,
-        Duration validateAfterInactivity) {
+        Duration socketTimeout) {
 
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setExpectContinueEnabled(true)
@@ -536,7 +537,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, validateAfterInactivity), false);
+            clientHttpEngine = ApacheHttpClientEngine.create(
+                getHttpClient(
+                    connectionRequestTimeout,
+                    connectTimeout,
+                    socketTimeout
+                ),
+                false
+            );
 
         }
         return clientHttpEngine;
@@ -544,16 +552,17 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null, validateAfterInactivity), false);
+            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(
+                getHttpClient(
+                    connectionRequestTimeout,
+                    connectTimeout,
+                    null
+                ),
+                false);
         }
         return clientHttpEngineNoTimeout;
     }
 
-
-    @Override
-    public Integer getMaxConnections() {
-        return maxConnections;
-    }
 
     @Override
     public void setMaxConnections(Integer maxConnections) {
@@ -561,11 +570,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             this.maxConnections = maxConnections;
             invalidate();
         }
-    }
-
-    @Override
-    public Integer getMaxConnectionsPerRoute() {
-        return maxConnectionsPerRoute;
     }
 
     @Override
@@ -578,21 +582,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
 
     @Override
-    public Integer getMaxConnectionsNoTimeout() {
-        return maxConnectionsNoTimeout;
-    }
-
-    @Override
     public void setMaxConnectionsNoTimeout(Integer maxConnectionsNoTimeout) {
         if (! Objects.equals(this.maxConnectionsNoTimeout, maxConnectionsNoTimeout)) {
             this.maxConnectionsNoTimeout = maxConnectionsNoTimeout;
             invalidate();
         }
-    }
-
-    @Override
-    public Integer getMaxConnectionsPerRouteNoTimeout() {
-        return maxConnectionsPerRouteNoTimeout;
     }
 
     @Override
@@ -674,19 +668,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         setWarnThreshold(TimeUtils.parseDuration(warnThreshold).orElse(Duration.ofMillis(100)));
     }
 
-    public Duration getWarnThreshold() {
-        return warnThreshold;
-    }
 
     public void setWarnThreshold(Duration warnThreshold) {
         if (! Objects.equals(warnThreshold, this.warnThreshold)) {
             this.warnThreshold = warnThreshold;
             invalidate();
         }
-    }
-
-    public List<Locale> getAcceptableLanguages() {
-        return acceptableLanguages;
     }
 
     public void setAcceptableLanguages(List<Locale> acceptableLanguages) {
