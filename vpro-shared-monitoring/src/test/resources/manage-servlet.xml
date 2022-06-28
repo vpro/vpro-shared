@@ -9,6 +9,6 @@
 
   <bean class="nl.vpro.monitoring.config.MonitoringConfig"/>
 
-  <bean class="nl.vpro.monitoring.config.MonitoringEndpoints"/>
+  <bean class="nl.vpro.monitoring.endpoints.MonitoringEndpoints"/>
 
 </beans>
