@@ -1,4 +1,4 @@
-package nl.vpro.monitoring.config;
+package nl.vpro.monitoring.endpoints;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -9,10 +9,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import nl.vpro.monitoring.config.MonitoringProperties;
+
 @Configuration
 @EnableWebSecurity
-@Order(1)
-public class MonitoringWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@Order(-1)
+public class MonitoringWebSecurityConfiguration extends WebSecurityConfigurerAdapter { // deprecated damn.
 
     private final MonitoringProperties properties;
 
@@ -39,8 +41,8 @@ public class MonitoringWebSecurityConfiguration extends WebSecurityConfigurerAda
             .   sessionCreationPolicy(SessionCreationPolicy.NEVER)
             .and()
             .authorizeRequests()
-            .   antMatchers("/manage/health").permitAll()
-            .   antMatchers("/manage/**").hasRole("MANAGER")
+            .   antMatchers("/manage/**").permitAll()
+            //.   antMatchers("/manage/**").hasRole("MANAGER")
             .and()
             .httpBasic()
             .   realmName("management")

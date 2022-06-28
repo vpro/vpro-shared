@@ -1,4 +1,4 @@
-package nl.vpro.monitoring.config;
+package nl.vpro.monitoring.endpoints;
 
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 
@@ -16,16 +16,17 @@ import nl.vpro.monitoring.web.PrometheusController;
 @Configuration
 public class MonitoringEndpoints {
 
-    @Bean
-    public HealthController healthController() {
-        return new HealthController();
-    }
 
     @Bean
     public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
         final RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
         adapter.setMessageConverters(Collections.singletonList(new MappingJackson2HttpMessageConverter(Jackson2Mapper.getLenientInstance())));
         return adapter;
+    }
+
+    @Bean
+    public HealthController healthController() {
+        return new HealthController();
     }
 
     @Bean
