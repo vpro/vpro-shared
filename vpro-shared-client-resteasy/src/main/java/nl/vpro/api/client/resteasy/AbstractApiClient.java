@@ -819,8 +819,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new CountFilter(log));
         builder.register(HeaderInterceptor.INSTANCE);
 
-
-
         if (this.resteasyBrowserCache != null) {
             BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
             browserCacheFeature.setCache(this.resteasyBrowserCache);
@@ -832,7 +830,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
             }
         } else {
-            log.info("No browser cache set");
+            log.debug("No browser cache set");
         }
         return builder;
     }
