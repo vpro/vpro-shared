@@ -115,11 +115,12 @@ public class ErrorAspect<T, E> implements InvocationHandler {
                         .collect(joining("\n")),
                 mes);
         } else {
-            l.info("For {}{}(\n{}\n) {}",
+            l.debug("For {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
                 args == null ? "(no args)" :
                     Arrays.stream(args)
+                        .filter(Objects::nonNull)
                         .map(ErrorAspect.this::valueToString)
                         .collect(joining("\n")),
                 mes);
