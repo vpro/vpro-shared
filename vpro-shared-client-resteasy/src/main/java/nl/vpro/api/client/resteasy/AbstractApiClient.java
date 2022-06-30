@@ -917,6 +917,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         return resteasyBrowserCache;
     }
 
+    public void clearBrowserCache() {
+        if (resteasyBrowserCache != null) {
+            resteasyBrowserCache.clear();
+        }
+    }
+
     public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
