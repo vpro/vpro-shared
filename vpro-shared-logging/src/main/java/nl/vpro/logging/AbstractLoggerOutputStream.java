@@ -1,9 +1,10 @@
 package nl.vpro.logging;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,6 +24,10 @@ public abstract class AbstractLoggerOutputStream extends OutputStream {
     @Getter
     @Setter
     protected Integer max;
+
+    @Getter
+    @Setter
+    protected Charset charset = StandardCharsets.UTF_8;
 
     protected AbstractLoggerOutputStream(boolean skipEmptyLines, Integer max) {
         this.skipEmptyLines = skipEmptyLines;
@@ -59,8 +64,9 @@ public abstract class AbstractLoggerOutputStream extends OutputStream {
         log(true);
     }
 
+    @SneakyThrows
     private void log(boolean skipEmpty) {
-        final String line = buffer.toString();
+        final String line = buffer.toString(charset.name());
         try {
             if (!skipEmpty || StringUtils.isNotBlank(line)) {
                 count++;
