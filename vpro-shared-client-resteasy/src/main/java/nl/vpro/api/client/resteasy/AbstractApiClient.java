@@ -110,6 +110,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     private BrowserCache resteasyBrowserCache;
 
+    protected boolean browserCache = true;
+
     private Instant initializationInstant = Instant.now();
 
     protected String mbeanName = null;
@@ -124,6 +126,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected final String userAgent;
 
     protected boolean eager;
+
+
 
     @Deprecated
     protected AbstractApiClient(
@@ -819,20 +823,22 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new CountFilter(log));
         builder.register(HeaderInterceptor.INSTANCE);
 
-        BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
-        if (this.resteasyBrowserCache != null) {
-            browserCacheFeature.setCache(this.resteasyBrowserCache);
-            builder.register(browserCacheFeature);
-            if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
-                this.resteasyBrowserCache = browserCacheFeature.getCache();
-                log.info("Set browser cache to {}", this.resteasyBrowserCache);
+        if (this.browserCache) {
+            BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
+            if (this.resteasyBrowserCache != null) {
+                browserCacheFeature.setCache(this.resteasyBrowserCache);
+                builder.register(browserCacheFeature);
+                if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
+                    this.resteasyBrowserCache = browserCacheFeature.getCache();
+                    log.info("Set browser cache to {}", this.resteasyBrowserCache);
+                } else {
+                    log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+                }
             } else {
-                log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+                builder.register(browserCacheFeature);
+                this.resteasyBrowserCache = browserCacheFeature.getCache();
+                log.debug("No browser cache set. Using default {}", browserCacheFeature.getCache());
             }
-        } else {
-            builder.register(browserCacheFeature);
-            this.resteasyBrowserCache = browserCacheFeature.getCache();
-            log.debug("No browser cache set. Using default {}", browserCacheFeature.getCache());
         }
         return builder;
     }
@@ -935,6 +941,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     public void setBrowserCache(BrowserCache browserCache) {
         if (! Objects.equals(browserCache, this.resteasyBrowserCache)) {
             this.resteasyBrowserCache = browserCache;
+            this.browserCache = this.resteasyBrowserCache != null;
+            invalidate();
+        }
+    }
+
+    public void setBrowserCache(boolean browserCache) {
+        if (browserCache != this.browserCache) {
+            this.browserCache = browserCache;
             invalidate();
         }
     }
