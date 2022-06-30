@@ -810,7 +810,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         return builder;
     }
 
-     protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
+    protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
         ResteasyClientBuilder builder = ResteasyHelper.clientBuilder()
             .httpEngine(engine);
         builder.register(new JacksonContextResolver(objectMapper));
@@ -819,8 +819,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new CountFilter(log));
         builder.register(HeaderInterceptor.INSTANCE);
 
+        BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
         if (this.resteasyBrowserCache != null) {
-            BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
             browserCacheFeature.setCache(this.resteasyBrowserCache);
             builder.register(browserCacheFeature);
             if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
@@ -830,7 +830,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
             }
         } else {
-            log.debug("No browser cache set");
+            builder.register(browserCacheFeature);
+            this.resteasyBrowserCache = browserCacheFeature.getCache();
+            log.debug("No browser cache set. Using default {}", browserCacheFeature.getCache());
         }
         return builder;
     }
@@ -923,6 +925,9 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         }
     }
 
+    /**
+     * Default the client is backed by a {@link org.jboss.resteasy.client.jaxrs.cache.LightweightBrowserCache}, you may replace it by {@link JavaxBrowserCache}, backed with a more generic {@link Cache}, so that the client can hitch on your preferred caching framework.
+     */
     public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
