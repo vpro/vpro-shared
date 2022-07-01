@@ -101,6 +101,7 @@ public class MonitoringConfig {
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
+
         if (classForName("org.hibernate.SessionFactory").isPresent()) {
 
             try {
@@ -161,7 +162,12 @@ public class MonitoringConfig {
         }
         if (properties.getMeterVolumes() != null) {
             for (String folder : properties.getMeterVolumes()) {
-                new DiskSpaceMetrics(new File(folder)).bindTo(registry);
+                File dir = new File(folder);
+                if (dir.exists()) {
+                    new DiskSpaceMetrics(dir).bindTo(registry);
+                } else {
+                    log.info("Not metring {}, because it does not exist", dir);
+                }
             }
         }
         if (properties.isMeterLocks()) {
