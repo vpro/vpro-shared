@@ -239,17 +239,17 @@
     <skipITs>true</skipITs>
 
     <spring.version>5.3.21</spring.version>
-    <spring-security.version>5.7.1</spring-security.version>
+    <spring-security.version>5.7.2</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.9.0-M1</junit.version>
     <mockito.version>4.6.1</mockito.version>
     <assertj.version>3.23.1</assertj.version>
     <resteasy.version>4.7.6.Final</resteasy.version>
-    <bytebuddy.version>1.12.11</bytebuddy.version>
+    <bytebuddy.version>1.12.12</bytebuddy.version>
     <slf4j.version>1.7.32</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
-    <log4j2.version>2.17.2</log4j2.version>
+    <log4j2.version>2.18.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
     <javassist.version>3.28.0-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
@@ -642,7 +642,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>4.0.2</version>
+        <version>4.0.3</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
@@ -712,7 +712,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.22.1</version>
+      <version>3.22.2</version>
       <optional>true</optional>
     </dependency>
       <dependency>
