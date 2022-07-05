@@ -58,9 +58,9 @@ public class ErrorAspect<T, E> implements InvocationHandler {
 
     protected Object invoke(Object proxy, Method method, Object[] args, int retryCount) throws Throwable {
 
-        Throwable t;
-        Message mes;
-        Logger l;
+        final Throwable t;
+        final Message mes;
+        final Logger l;
         boolean error;
         try {
             try {
