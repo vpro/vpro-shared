@@ -107,9 +107,12 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             l = log;
             t = pe;
             if (cause instanceof SocketException && "Connection or outbound has closed".equals(cause.getMessage()) && retryCount < 10) {
-                log.warn("{}. Retrying {}: {}", cause.getMessage(), retryCount, method.getDeclaringClass().getSimpleName() + "#" + method.getName());
+                String name = method.getDeclaringClass().getSimpleName() + "#" + method.getName();
+                log.warn("{}. Retrying {}: {}", cause.getMessage(), retryCount, name);
                 Thread.sleep((int) Math.max(1000, Math.pow(2, retryCount) * 100));
-                return invoke(proxy, method, args, retryCount + 1);
+                Object result = invoke(proxy, method, args, retryCount + 1);
+                log.info("Retry {}: {} successful ", retryCount, name);
+                return result;
             }
             error = ! (cause instanceof ConnectException);
         } catch (Throwable e) {
