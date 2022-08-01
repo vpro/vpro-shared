@@ -11,6 +11,8 @@ import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+
+
 import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Ehcache;
 
@@ -76,7 +78,7 @@ public class MonitoringConfig {
         }
 
         if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
-            Log4j2Metrics metrics = new io.micrometer.core.instrument.binder.logging.Log4j2Metrics();
+            Log4j2Metrics metrics = new Log4j2Metrics();
             metrics.bindTo(registry);
             closables.add(metrics);
         }
