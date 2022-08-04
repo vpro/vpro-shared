@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.annotation.Annotation;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 
@@ -13,7 +12,6 @@ import org.jboss.resteasy.spi.DecoratorProcessor;
 
 import nl.vpro.rs.XmlFragment;
 
-@Provider
 @Slf4j
 public class JaxbFragmentDecorator implements DecoratorProcessor<Marshaller, XmlFragment>
  {
