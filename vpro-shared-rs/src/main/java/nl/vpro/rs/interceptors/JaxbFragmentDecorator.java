@@ -11,14 +11,14 @@ import javax.xml.bind.PropertyException;
 
 import org.jboss.resteasy.spi.DecoratorProcessor;
 
-import nl.vpro.rs.Fragment;
+import nl.vpro.rs.XmlFragment;
 
 @Provider
 @Slf4j
-public class JaxbFragmentDecorator implements DecoratorProcessor<Marshaller, Fragment>
+public class JaxbFragmentDecorator implements DecoratorProcessor<Marshaller, XmlFragment>
  {
     @Override
-    public Marshaller decorate(Marshaller target, Fragment annotation,
+    public Marshaller decorate(Marshaller target, XmlFragment annotation,
                                Class type, Annotation[] annotations, MediaType mediaType)
     {
         try {

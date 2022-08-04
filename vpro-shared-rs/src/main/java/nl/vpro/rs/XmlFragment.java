@@ -5,5 +5,5 @@ package nl.vpro.rs;
  * the {@code <?xml } prefix.
  * @since 2.33.0
  */
-public @interface Fragment {
+public @interface XmlFragment {
 }
