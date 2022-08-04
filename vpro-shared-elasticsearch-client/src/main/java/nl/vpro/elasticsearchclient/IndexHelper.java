@@ -1094,7 +1094,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public void countAsync(final Consumer<Long> consumer) {
         Request get = createGet(Paths.COUNT);
-        client().performRequestAsync(get, new ResponseListener() {
+        clientAsync(c -> c.performRequestAsync(get, new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 long count = parseCount(response);
@@ -1105,13 +1105,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             public void onFailure(Exception e) {
                 log.warn("For count on {}", this, e);
             }
-        });
+        }));
     }
 
     protected long parseCount(Response response) {
-            JsonNode result = read(response);
-            return result.get("count").longValue();
-        }
+        JsonNode result = read(response);
+        return result.get("count").longValue();
+    }
 
     public  Optional<JsonNode> getActualSettings() throws IOException {
         Request get = createGet(Paths.SETTINGS);
