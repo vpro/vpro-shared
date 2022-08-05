@@ -22,6 +22,9 @@ public class Log4j2SimpleLogger implements SimpleLogger {
     public static Log4j2SimpleLogger log4j2(Logger logger) {
         return of(logger);
     }
+
+
+
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
         log.log(toLevel(level), message, t);

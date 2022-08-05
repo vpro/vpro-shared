@@ -5,6 +5,7 @@ import java.time.Duration;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Michiel Meeuwissen
@@ -26,6 +27,10 @@ public class Log4j2Helper {
 
     public static void log(Logger log, Duration duration, Duration durationInfo, String format, Object... argArray) {
         log.log(getLevel(duration, durationInfo.dividedBy(2), durationInfo, durationInfo.multipliedBy(2), durationInfo.multipliedBy(3)), format, argArray);
+    }
+
+    public static org.slf4j.Logger slf4j(Logger logger) {
+        return LoggerFactory.getLogger(logger.getName());
     }
 
     private  static Level getLevel(Duration duration, Duration durationDebug, Duration durationInfo, Duration durationWarn, Duration durationError) {
