@@ -5,7 +5,10 @@ import java.time.Duration;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MessageFormatter;
 
 /**
  * @author Michiel Meeuwissen
@@ -33,6 +36,23 @@ public class Log4j2Helper {
         return LoggerFactory.getLogger(logger.getName());
     }
 
+
+    public static String returnAndWarn(@NonNull Logger logger, @NonNull String format, Object... arg) {
+        FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
+        String message = ft.getMessage();
+        logger.warn(message);
+        return message;
+    }
+
+
+    public static String returnAndInfo(@NonNull Logger logger, @NonNull String format, Object... arg) {
+        FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
+        String message = ft.getMessage();
+        logger.info(message);
+        return message;
+    }
+
+
     private  static Level getLevel(Duration duration, Duration durationDebug, Duration durationInfo, Duration durationWarn, Duration durationError) {
         if (duration.compareTo(durationDebug) < 0 ) {
             return Level.TRACE;
@@ -46,4 +66,7 @@ public class Log4j2Helper {
             return Level.ERROR;
         }
     }
+
+
+
 }
