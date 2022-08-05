@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import nl.vpro.jackson2.DateModule;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.monitoring.web.HealthController;
 import nl.vpro.monitoring.web.PrometheusController;
@@ -20,7 +23,15 @@ public class MonitoringEndpoints {
     @Bean
     public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
         final RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
-        adapter.setMessageConverters(Collections.singletonList(new MappingJackson2HttpMessageConverter(Jackson2Mapper.getLenientInstance())));
+        adapter.setMessageConverters(
+            Collections.singletonList(new MappingJackson2HttpMessageConverter(
+                Jackson2Mapper.create("monitoring", m -> !(m instanceof DateModule), om -> {
+                    om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                    om.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
+
+                })
+            )));
+
         return adapter;
     }
 

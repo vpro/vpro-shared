@@ -81,8 +81,8 @@ public class HealthController {
                 Health.builder()
                     .status(effectiveStatus.code)
                     .message(effectiveStatus.message)
-                    .startTime(ready == null ? null : ready.toString())
-                    .upTime(ready == null ? null : Duration.between(ready, clock.instant()).toString())
+                    .startTime(ready == null ? null : ready)
+                    .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
                     .prometheusCallDuration(prometheusController != null ? prometheusController.getDuration().getWindowValue().durationValue() : null)
                     .build()
             );

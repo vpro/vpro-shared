@@ -103,6 +103,6 @@ class HealthControllerTest {
         ).andExpect(status().is(503))
             .andExpect(jsonPath("$.status", is(503)))
             .andExpect(jsonPath("$.message", is("Application is unhealthy")))
-            .andExpect(jsonPath("$.prometheusCallDuration", is(20000)));
+            .andExpect(jsonPath("$.prometheusCallDuration", is("PT20S")));
     }
 }

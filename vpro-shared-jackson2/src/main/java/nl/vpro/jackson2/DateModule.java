@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 
 /**
- * Work around for http://jira.codehaus.org/browse/JACKSON-920
+ * Work around for <a href="http://jira.codehaus.org/browse/JACKSON-920">JACKSON-920</a>
  * @author Michiel Meeuwissen
  * @since 0.21
  */
