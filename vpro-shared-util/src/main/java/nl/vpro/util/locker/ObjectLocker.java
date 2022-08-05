@@ -332,7 +332,6 @@ public class ObjectLocker {
             Stream.of(ex.getStackTrace())
                 .filter(e -> e.getClassName().startsWith("nl.vpro"))
                 .filter(e -> ! e.getClassName().startsWith("nl.vpro.spring"))
-                .filter(e -> ! e.getClassName().startsWith("nl.vpro.services"))
                 .filter(e -> e.getFileName() != null && ! e.getFileName().contains("generated"))
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n   <-"));
