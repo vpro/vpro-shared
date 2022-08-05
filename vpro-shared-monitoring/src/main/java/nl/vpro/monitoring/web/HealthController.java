@@ -29,8 +29,13 @@ public class HealthController {
 
     Clock clock = Clock.systemDefaultZone();
 
+    Duration unhealthyThreshold = Duration.ofSeconds(10);
+
     @Inject
     WebApplicationContext webApplicationContext;
+
+    @Inject
+    PrometheusController prometheusController;
 
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
@@ -68,14 +73,17 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
+        Status effectiveStatus = prometheusController != null && prometheusController.getDuration().getWindowValue().durationValue().compareTo(unhealthyThreshold) > 0 ? Status.UNHEALTHY : this.status;
+
         return ResponseEntity
-            .status(status.code)
+            .status(effectiveStatus.code)
             .body(
                 Health.builder()
-                    .status(status.code)
-                    .message(status.message)
+                    .status(effectiveStatus.code)
+                    .message(effectiveStatus.message)
                     .startTime(ready == null ? null : ready.toString())
                     .upTime(ready == null ? null : Duration.between(ready, clock.instant()).toString())
+                    .prometheusCallDuration(prometheusController != null ? prometheusController.getDuration().getWindowValue().durationValue() : null)
                     .build()
             );
     }
@@ -83,7 +91,9 @@ public class HealthController {
     private enum Status {
         STARTING(503, "Application starting"),
         READY(200, "Application ready"),
-        STOPPING(503, "Application shutdown");
+        STOPPING(503, "Application shutdown"),
+        UNHEALTHY(503, "Application is unhealthy")
+        ;
 
         final int code;
         final String message;
