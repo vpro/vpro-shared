@@ -28,6 +28,12 @@ public class Log4j2Helper {
         log.log(Level.valueOf(level.name()), format.toString(), argArray);
     }
 
+
+    public static void log(Logger log, org.slf4j.event.Level level, CharSequence format, Object... argArray) {
+        log.log(Level.valueOf(level.name()), format.toString(), argArray);
+    }
+
+
     public static void log(Logger log, Duration duration, Duration durationInfo, String format, Object... argArray) {
         log.log(getLevel(duration, durationInfo.dividedBy(2), durationInfo, durationInfo.multipliedBy(2), durationInfo.multipliedBy(3)), format, argArray);
     }
