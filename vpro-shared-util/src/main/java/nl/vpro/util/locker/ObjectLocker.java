@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,9 +26,15 @@ import nl.vpro.logging.Slf4jHelper;
 @Slf4j
 public class ObjectLocker {
 
+    public static Predicate<StackTraceElement> summaryPredicate =
+        e -> e.getClassName().startsWith("nl.vpro") &&
+            !e.getClassName().startsWith("nl.vpro.spring") &&
+            e.getFileName() != null && !e.getFileName().contains("generated");
+
     private ObjectLocker() {
         // private constructor to avoid all instantiation
     }
+
 
     /**
      * The lock(s) the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
@@ -330,9 +337,7 @@ public class ObjectLocker {
     private static String summarizeStackTrace(Exception ex) {
         return "\n" +
             Stream.of(ex.getStackTrace())
-                .filter(e -> e.getClassName().startsWith("nl.vpro"))
-                .filter(e -> ! e.getClassName().startsWith("nl.vpro.spring"))
-                .filter(e -> e.getFileName() != null && ! e.getFileName().contains("generated"))
+                .filter(summaryPredicate)
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n   <-"));
     }
