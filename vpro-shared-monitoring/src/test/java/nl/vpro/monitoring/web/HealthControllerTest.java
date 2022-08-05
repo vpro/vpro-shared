@@ -1,7 +1,9 @@
 package nl.vpro.monitoring.web;
 
-import java.time.Instant;
-import java.time.ZoneId;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+
+import java.time.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,12 @@ class HealthControllerTest {
     @BeforeEach
     public void setup() {
         this.healthController.clock = clock;
+        this.healthController.prometheusController = new PrometheusController(new PrometheusMeterRegistry(new PrometheusConfig() {
+            @Override
+            public String get(String s) {
+                return null;
+            }
+        }));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
@@ -81,5 +89,20 @@ class HealthControllerTest {
         ).andExpect(status().is(503))
             .andExpect(jsonPath("$.status", is(503)))
             .andExpect(jsonPath("$.message", is("Application shutdown")));
+    }
+
+    @Test
+    void statusUnhealthy() throws Exception {
+
+        healthController.prometheusController.getDuration().accept(
+            Duration.ofSeconds(20));
+
+        mockMvc.perform(
+            get("/health")
+                .accept(APPLICATION_JSON_VALUE)
+        ).andExpect(status().is(503))
+            .andExpect(jsonPath("$.status", is(503)))
+            .andExpect(jsonPath("$.message", is("Application is unhealthy")))
+            .andExpect(jsonPath("$.prometheusCallDuration", is("PT20S")));
     }
 }

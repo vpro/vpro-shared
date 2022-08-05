@@ -16,8 +16,6 @@ public class DateToJsonTimestamp {
     private DateToJsonTimestamp() {}
 
     public static class Serializer extends JsonSerializer<Date> {
-
-
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
@@ -34,6 +32,7 @@ public class DateToJsonTimestamp {
     public static class Deserializer extends StdDeserializer<Date> {
 
         public static final Deserializer INSTANCE = new Deserializer(Date.class);
+        private static final long serialVersionUID = -7053202522314720853L;
 
         protected Deserializer(Class<?> vc) {
             super(vc);
