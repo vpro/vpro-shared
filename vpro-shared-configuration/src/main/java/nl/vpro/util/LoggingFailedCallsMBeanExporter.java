@@ -2,12 +2,12 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.RequiredModelMBean;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.SpringModelMBean;
 
@@ -30,11 +30,11 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
             return new SpringModelMBean() {
                 @NonNull
                 @Override
-                public Object invoke(String opName, @NonNull Object[] opArgs, @NonNull String[] sig) throws MBeanException, ReflectionException {
+                public Object invoke(@NonNull String opName, @NonNull Object @NonNull [] opArgs, @NonNull String @NonNull [] sig) throws MBeanException, ReflectionException {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | Error | RuntimeException e) {
-                        log.error(e.getMessage(), e);
+                        log.warn(e.getMessage(), e);
                         throw e;
                     }
                 }
@@ -46,7 +46,7 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | RuntimeException | Error e) {
-                        log.error(e.getMessage(), e);
+                        log.warn(e.getMessage(), e);
                         throw e;
                     }
                 }
