@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.management.MBeanException;
@@ -11,6 +13,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.SpringModelMBean;
 
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.Level;
+
 /**
  * Exceptions from spring managed mbeans are silently swallowed. They are thrown to the clients (like visualvm), but they more often then not don't know how to gracefully show them
  * (e.g. I think it is required that the exception is serializable then).
@@ -19,6 +24,10 @@ import org.springframework.jmx.export.SpringModelMBean;
  */
 @Slf4j
 public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
+
+    @Setter
+    @Getter
+    private Level level = Level.WARN;
 
     @NonNull
     @Override
@@ -34,7 +43,7 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | Error | RuntimeException e) {
-                        log.warn(e.getMessage(), e);
+                        Slf4jHelper.log(log, level, e.getMessage(), e);
                         throw e;
                     }
                 }
@@ -46,7 +55,7 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | RuntimeException | Error e) {
-                        log.warn(e.getMessage(), e);
+                        Slf4jHelper.log(log, level, e.getMessage(), e);
                         throw e;
                     }
                 }
