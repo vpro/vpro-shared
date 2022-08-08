@@ -52,7 +52,8 @@ public class MBeans {
         }
         future.cancel();
         // should not be needed, because happening in finally, but if the called code does refuse to shut down properly, then simply abandon it.
-        ScheduledFuture<String> schedule = ThreadPools.backgroundExecutor.schedule(() -> {
+
+        return ThreadPools.backgroundExecutor.schedule(() -> {
                 final LockValue abandoned = locks.remove(key);
                 if (abandoned != null) {
                     log.warn("abandoned {}", abandoned);
@@ -63,7 +64,6 @@ public class MBeans {
             2,
             TimeUnit.SECONDS
         );
-        return schedule;
     }
 
 
