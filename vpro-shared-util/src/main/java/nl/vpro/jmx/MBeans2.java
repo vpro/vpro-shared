@@ -34,9 +34,12 @@ public class MBeans2 {
      * @param args The arguments of the first line
      * @return a {@link StringBuilderSimpleLogger} representing multiple lines actually a {@link StringBuilderSimpleLogger}
      */
-    public static StringSupplierSimpleLogger multiLine(Logger log, String message, Object... args) {
+    public static StringSupplierSimpleLogger multiLine(
+        Logger log,
+        String message,
+        Object... args) {
         StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
-            .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
+            .prefix(l -> l.compareTo(Level.WARN) > 0 ? "" : l.name() + " ")
             .chain(Log4j2SimpleLogger.of(log));
         if (message != null) {
             string.info(message, args);

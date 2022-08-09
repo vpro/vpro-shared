@@ -8,7 +8,7 @@ import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
 /**
- *  https://stackoverflow.com/questions/2621701/setting-log-level-of-message-at-runtime-in-slf4j
+ *  <a href="https://stackoverflow.com/questions/2621701/setting-log-level-of-message-at-runtime-in-slf4j">See stackoverflow</a>
  * @author Michiel Meeuwissen
  * @since 1.77
  */
@@ -125,7 +125,7 @@ public class Slf4jHelper {
         }
     }
 
-    public static boolean isEnabled(@NonNull Logger logger,  @NonNull  Level level) {
+    public static boolean isEnabled(@NonNull Logger logger, @NonNull Level level) {
         switch (level) {
             case TRACE:
                 return logger.isTraceEnabled();
@@ -157,6 +157,5 @@ public class Slf4jHelper {
         logger.info(message);
         return message;
     }
-
 
 }
