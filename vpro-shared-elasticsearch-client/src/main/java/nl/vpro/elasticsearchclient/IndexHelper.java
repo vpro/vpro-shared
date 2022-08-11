@@ -126,7 +126,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 mapping = elasticSearchIndex.mapping();
             }
             if (aliases == null || aliases.isEmpty()) {
+                // no explicit aliases, use those as specified by index
                 aliases = new ArrayList<>(elasticSearchIndex.getAliases());
+                // also add the index name itself if that is missing, which is implicit.
                 if (! aliases.contains(elasticSearchIndex.getIndexName())) {
                     aliases.add(elasticSearchIndex.getIndexName());
                 }
@@ -227,9 +229,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.with("aliases");
             for (String alias : this.aliases) {
-                if (! Objects.equals(alias, indexName) && ! Objects.equals(alias, supplied)) {
-                    aliases.with(alias);
+                if (alias.equals(indexName)) {
+                    continue;
                 }
+                if (alias.equals(supplied)) {
+                    if (aliasExists(alias)) {
+                        log.info("Not making alias {} because it exists already");
+                        continue;
+                    }
+                }
+                aliases.with(alias);
             }
         }
 
@@ -467,7 +476,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public String unalias(String alias) {
         if (unaliasing == null) {
             if (clientFactory == null) {
-                log.warn("No client factory, can't implicitely unalias");
+                log.warn("No client factory, can't implicitly unalias");
                 unaliasing = HashMap::new;
             } else {
                 unaliasing = Suppliers.memoizeWithExpiration(() -> {
@@ -490,6 +499,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
         }
         return unaliasing.get().getOrDefault(alias, alias);
+    }
+
+    public boolean aliasExists(String alias) throws IOException {
+        Request request = new Request(HEAD, "/_alias/" + alias);
+        Response response = client().performRequest(request);
+        return response.getStatusLine().getStatusCode() == 200;
     }
 
     public ObjectNode search(ObjectNode request) {
@@ -670,7 +685,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return _indexPath(DOC, id, null);
     }
 
-
     protected String _indexPath(String type, @Nullable String id, @Nullable String parent) {
         String path = getIndexName() + "/" + type + (id == null ? "" : ("/" + encode(id)));
         if (parent != null) {
@@ -678,7 +692,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
         return path;
     }
-
 
 
     public ObjectNode delete(String id) {
