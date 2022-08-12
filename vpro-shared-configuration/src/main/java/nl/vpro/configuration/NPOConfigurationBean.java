@@ -1,32 +1,31 @@
 package nl.vpro.configuration;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Properties;
+
+import javax.servlet.ServletContext;
+
 import org.apache.commons.configuration2.AbstractConfiguration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.ServletContextAware;
 
-import javax.servlet.ServletContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.Iterator;
-import java.util.Properties;
-
 /**
  * At NPO a bit odd way to set up applications is used. This makes it aware of that.
  *
- * It can be configured with just config file name, and it will then resolve it automaticly in in the config directory of the
+ * It can be configured with just config file name, and it will then resolve it automatically in the config directory of the
  * application server /e/as/<server>/conf
  *
  * This simplifies configuration and elimates the need for several settings.
  *
  * @author Michiel Meeuwissen
- * @deprecated We will not host that way any more
+ * @deprecated We will not host that way anymore
  */
 @Slf4j
 @Deprecated
