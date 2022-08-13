@@ -243,7 +243,7 @@
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.9.0</junit.version>
-    <mockito.version>4.6.1</mockito.version>
+    <mockito.version>4.7.0</mockito.version>
     <assertj.version>3.23.1</assertj.version>
     <resteasy.version>4.7.7.Final</resteasy.version>
     <bytebuddy.version>1.12.13</bytebuddy.version>
