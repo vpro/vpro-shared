@@ -108,10 +108,13 @@ public class MonitoringConfig {
 
             try {
                 if (properties.isMeterHibernate()) {
-
                     final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
                     if (sessionFactory.isPresent()) {
-                        new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+                        new HibernateMetrics(
+                            sessionFactory.get(),
+                            properties.getMeterHibernateName(),
+                            Tags.empty()
+                        ).bindTo(registry);
 
                     } else {
                         log.warn("No session factory to monitor (hibernate)");
