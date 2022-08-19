@@ -2,6 +2,7 @@ package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.management.ManagementFactory;
 import java.time.*;
 
 import javax.inject.Inject;
@@ -36,6 +37,8 @@ public class HealthController {
 
     @Inject
     PrometheusController prometheusController;
+
+    private boolean threadsDumped = false;
 
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
@@ -73,7 +76,20 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        Status effectiveStatus = prometheusController != null && prometheusController.getDuration().getWindowValue().durationValue().compareTo(unhealthyThreshold) > 0 ? Status.UNHEALTHY : this.status;
+        boolean prometheusDown = prometheusController != null && prometheusController.getDuration().getWindowValue().durationValue().compareTo(unhealthyThreshold) > 0;
+        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
+        if (prometheusDown) {
+            if (! threadsDumped) {
+                new Thread(null, () -> {
+                    log.info("Dumping threads for later analysis");
+                    ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+
+                }, "Dumping threads").start();
+                threadsDumped = true;
+            }
+        } else {
+            threadsDumped = false;
+        }
 
         return ResponseEntity
             .status(effectiveStatus.code)

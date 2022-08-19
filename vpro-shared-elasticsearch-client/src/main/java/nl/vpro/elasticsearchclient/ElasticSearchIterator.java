@@ -459,7 +459,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 i = 0;
                 hasNext = hits.get(HITS).size() > 0;
             } catch(ResponseException re) {
-                log.warn(re.getMessage());
+                log.warn("nextBatch:" + re.getClass().getName() + ":" + re.getMessage());
                 hits = null;
                 hasNext = false;
             } catch (IOException ioe) {
@@ -557,10 +557,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
                 } else {
-                    log.warn(re.getMessage());
+                    log.warn("close:" + re.getClass().getName() + ":" + re.getMessage());
                 }
             } catch (Exception e) {
-                log.warn(e.getMessage());
+                log.warn("close: " + e.getClass().getName() + ": " + e.getMessage());
             } finally {
                 EntityUtils.consumeQuietly(responseEntity);
             }

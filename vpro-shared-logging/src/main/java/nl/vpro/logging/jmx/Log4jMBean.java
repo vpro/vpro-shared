@@ -15,6 +15,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
         log=true,
         logFile="jmx.log"
 )
+@Deprecated
 public class Log4jMBean {
 
     @ManagedOperation(description="Get current level for category")
