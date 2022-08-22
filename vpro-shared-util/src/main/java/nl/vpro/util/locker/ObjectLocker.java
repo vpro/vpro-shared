@@ -69,7 +69,7 @@ public class ObjectLocker {
     /**
      * The reverse of {@link #listen(Listener)}
      */
-    public static void unlisten(Listener listener){
+    public static void unListen(Listener listener){
         LISTENERS.remove(listener);
     }
 
@@ -187,7 +187,6 @@ public class ObjectLocker {
         if (holder.lock.getHoldCount() == 1) {
             log.debug("Acquired lock for {}  ({}) in {}", key, reason, acquireTime);
         }
-
 
         for(Listener listener : LISTENERS) {
             listener.lock(holder, acquireTime);

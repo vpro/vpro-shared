@@ -201,7 +201,7 @@ public class ObjectLockerTest {
         assertThat(Duration.parse(ObjectLockerAdmin.JMX_INSTANCE.getMaxLockAcquireTime())).isEqualTo(Duration.ofSeconds(10));
 
         assertThat(listenedEvents).containsExactly("LOCK:keya", "LOCK:keyb", "UNLOCK:keyb", "UNLOCK:keya");
-        ObjectLocker.unlisten(listener);
+        ObjectLocker.unListen(listener);
         assertThat(ObjectLocker.getLockedObjects()).isEmpty();
 
     }
