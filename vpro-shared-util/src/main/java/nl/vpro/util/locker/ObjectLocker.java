@@ -219,7 +219,8 @@ public class ObjectLocker {
         log.trace("New lock for {}", key);
         List<LockHolder<? extends Serializable>> currentLocks = HOLDS.get();
         if (! currentLocks.isEmpty()) {
-            final Optional<LockHolder<? extends Serializable>> compatibleLocks = currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
+            final Optional<LockHolder<? extends Serializable>> compatibleLocks =
+                currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
             if (compatibleLocks.isPresent()) {
                 if (strictlyOne) {
                     throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), compatibleLocks.get().summarize(), key));

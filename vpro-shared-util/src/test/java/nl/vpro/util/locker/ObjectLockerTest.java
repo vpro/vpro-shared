@@ -100,7 +100,7 @@ public class ObjectLockerTest {
     }
 
     /**
-     * Try locking on something different than a String too..
+     * Try locking on something different from a String too.
      */
     @EqualsAndHashCode
     static class Key implements Serializable {
@@ -156,6 +156,8 @@ public class ObjectLockerTest {
         submitA.get();
         // the lock took too long (over 20 ms in this), continued without lock
         assertThat(events).containsExactly("a1", "b1", "a2");
+        log.info("Average duration {}", ObjectLockerAdmin.JMX_INSTANCE.getAverageLockDuration().getWindowValue());
+        log.info("Average acquire duration {}", ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue());
     }
 
 
