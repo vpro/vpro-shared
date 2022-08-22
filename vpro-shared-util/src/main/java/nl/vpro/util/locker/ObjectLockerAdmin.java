@@ -26,7 +26,6 @@ import nl.vpro.util.TimeUtils;
 @Slf4j
 public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
 
-
     public static final ObjectLockerAdmin JMX_INSTANCE    = new ObjectLockerAdmin();
 
 
@@ -110,7 +109,8 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public Set<String> getLocks() {
         return Collections.unmodifiableSet(ObjectLocker.LOCKED_OBJECTS.values().stream()
-            .map(ObjectLocker.LockHolder::summarize).collect(Collectors.toSet()));
+            .map(ObjectLocker.LockHolder::summarize)
+            .collect(Collectors.toSet()));
     }
 
     @Override

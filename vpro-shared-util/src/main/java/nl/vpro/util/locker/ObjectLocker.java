@@ -37,7 +37,7 @@ public class ObjectLocker {
 
 
     /**
-     * The lock(s) the current thread is holding. It would be suspicious (and a possible cause of dead lock) if that is more than one.
+     * The lock(s) the current thread is holding. It would be suspicious (and a possible cause of deadlock) if that is more than one.
      */
     static final ThreadLocal<List<LockHolder<? extends Serializable>>> HOLDS = ThreadLocal.withInitial(ArrayList::new);
 
@@ -50,7 +50,9 @@ public class ObjectLocker {
 
     static boolean strictlyOne;
     static boolean monitor;
+
     static Duration maxLockAcquireTime = Duration.ofMinutes(10);
+
     static Duration minWaitTime  = Duration.ofSeconds(5);
 
 
@@ -194,9 +196,9 @@ public class ObjectLocker {
     }
 
     private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) throws InterruptedException {
-        long start = System.nanoTime();
+        final long start = System.nanoTime();
         Duration wait =  minWaitTime;
-        Duration maxWait = minWaitTime.multipliedBy(8);
+        final Duration maxWait = minWaitTime.multipliedBy(8);
         while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
             Duration duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
@@ -272,7 +274,7 @@ public class ObjectLocker {
 
     /**
      *  Most importantly this is a wrapper around {@link ReentrantLock}, but it stores some extra meta information, like the original key, thread, and initialization time.
-     *
+     * <p>
      *  It can also store the exception if that happened during the hold of the lock.
      */
     public static class LockHolder<K> {
