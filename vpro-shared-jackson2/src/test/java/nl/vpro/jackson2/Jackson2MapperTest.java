@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.*;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,13 +90,6 @@ public class Jackson2MapperTest {
         assertThat(Jackson2Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2}");
     }
 
-    @Test
-    public void unmodifiable() {
-        Jackson2Mapper mapper = Jackson2Mapper.getInstance();
-        log.info("{}", mapper.getSerializationConfig().getActiveView());
-        SerializationConfig serializationConfig = mapper.getSerializationConfig().withView(Views.Javascript.class);
-        mapper.setConfig(serializationConfig);
-        log.info("{}", mapper.getSerializationConfig().getActiveView());
-    }
+
 
 }
