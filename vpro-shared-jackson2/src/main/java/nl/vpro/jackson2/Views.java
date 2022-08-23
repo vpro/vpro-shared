@@ -37,6 +37,7 @@ public class Views {
      *
      * @since 2.33
      */
+    @Beta
     public interface ModelAndNormal extends Model, Normal  {
     }
 
