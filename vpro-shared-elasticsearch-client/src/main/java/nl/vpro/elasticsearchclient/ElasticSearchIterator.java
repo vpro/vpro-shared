@@ -118,7 +118,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private final ObjectName objectName;
 
-    private final boolean warnSortNotOnDoc;
+    @Getter
+    @Setter
+    private boolean warnSortNotOnDoc;
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
         this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null, true);
