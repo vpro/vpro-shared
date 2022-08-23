@@ -1,6 +1,6 @@
 package nl.vpro.util.locker;
 
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -9,8 +9,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,6 +53,8 @@ public class ObjectLocker {
     static Duration maxLockAcquireTime = Duration.ofMinutes(10);
 
     static Duration minWaitTime  = Duration.ofSeconds(5);
+
+    static Duration defaultWarnTime  = Duration.ofSeconds(30);
 
 
     private static final List<Listener> LISTENERS = new CopyOnWriteArrayList<>();
@@ -103,7 +104,7 @@ public class ObjectLocker {
     }
 
 
-    public static Map<Serializable, LockHolder<Serializable>> getLockedObjects() {
+    public static Map<Serializable, LockHolder<? extends Serializable>> getLockedObjects() {
         return Collections.unmodifiableMap(LOCKED_OBJECTS);
     }
 
@@ -112,6 +113,21 @@ public class ObjectLocker {
         @NonNull String reason,
         @NonNull Callable<T> callable) {
         return withObjectLock(id, reason, callable, ObjectLocker.LOCKED_OBJECTS, (o1, o2) -> Objects.equals(o1.getClass(), o2.getClass()));
+    }
+
+    public static <T> T withKeyLock(
+        Serializable id,
+        @NonNull String reason,
+        @NonNull Consumer<LockHolder<Serializable>> consumer,
+        @NonNull Callable<T> callable) {
+        return withObjectLock(
+            id,
+            reason,
+            consumer,
+            callable,
+            ObjectLocker.LOCKED_OBJECTS,
+            (o1, o2) -> Objects.equals(o1.getClass(), o2.getClass())
+        );
     }
 
     public static <T> T withKeyLock(
@@ -129,15 +145,24 @@ public class ObjectLocker {
      * @param key The key to lock on
      * @param reason A description for the reason of locking, which can be used in logging or exceptions
      * @param locks The map to hold the locks
-     * @param comparable this determines whether two given keys are 'comparable'. If they are comparable, but different, and occuring at the same time, than this means
-     *                   that some code is locking different things at the same time, which may be a cause of dead locks. If they are difference but also not comparable, then
+     * @param comparable this determines whether two given keys are 'comparable'. If they are comparable, but different, and occurring at the same time, than this means
+     *                   that some code is locking different things at the same time, which may be a cause of deadlocks. If they are difference but also not comparable, then
      *                   this remains unknown. We may e.g. be locking on a certain crid and on a mid. They are different, but it is not sure that they are actually about two different objects.
      */
+    public static <T, K extends Serializable> T withObjectLock(
+        @Nullable final K key,
+        @NonNull final String reason,
+        @NonNull final Callable<T> callable,
+        @NonNull final Map<K, LockHolder<K>> locks,
+        @NonNull final BiPredicate<Serializable, K> comparable) {
+        return withObjectLock(key, reason, (c) -> {}, callable, locks, comparable);
+    }
 
     @SneakyThrows
     public static <T, K extends Serializable> T withObjectLock(
         @Nullable final K key,
         @NonNull final String reason,
+        @NonNull final Consumer<LockHolder<K>> consumer,
         @NonNull final Callable<T> callable,
         @NonNull final Map<K, LockHolder<K>> locks,
         @NonNull final BiPredicate<Serializable, K> comparable
@@ -148,6 +173,7 @@ public class ObjectLocker {
         }
         final long nanoStart = System.nanoTime();
         final LockHolder<K> lock = acquireLock(nanoStart, key, reason, locks, comparable);
+        consumer.accept(lock);
         try {
             return callable.call();
         } finally {
@@ -231,7 +257,7 @@ public class ObjectLocker {
                 log.debug("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
             }
         }
-        LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
+        final LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
         HOLDS.get().add(newHolder);
         return newHolder;
     }
@@ -251,12 +277,12 @@ public class ObjectLocker {
                     log.trace("Removed {}", key);
                     locks.remove(key);
                 }
-                Duration duration = Duration.ofNanos(System.nanoTime() - nanoStart);
+                final Duration duration = Duration.ofNanos(System.nanoTime() - nanoStart);
                 for (Listener listener : LISTENERS) {
                     listener.unlock(lock, duration);
                 }
 
-                Slf4jHelper.log(log, duration.compareTo(Duration.ofSeconds(30))> 0 ? Level.WARN :  Level.DEBUG,
+                Slf4jHelper.log(log, duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG,
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
@@ -284,6 +310,10 @@ public class ObjectLocker {
         final Thread thread;
         final Instant createdAt = Instant.now();
         final String reason;
+
+        @Getter
+        @Setter
+        private Duration warnTime = ObjectLocker.defaultWarnTime;
 
         LockHolder(K k, String reason, ReentrantLock lock, Exception cause) {
             this.key = k;
