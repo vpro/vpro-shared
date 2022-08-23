@@ -27,6 +27,8 @@ public class LoggingInterceptor implements ContainerRequestFilter {
     @Getter
     private boolean enabled = true;
 
+
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String method = requestContext.getMethod();

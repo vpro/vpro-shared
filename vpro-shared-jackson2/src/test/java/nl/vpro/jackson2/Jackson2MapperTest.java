@@ -1,5 +1,7 @@
 package nl.vpro.jackson2;
 
+import lombok.extern.log4j.Log4j2;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -9,11 +11,13 @@ import javax.xml.bind.annotation.*;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Log4j2
 public class Jackson2MapperTest {
 
     public enum EnumValues {
@@ -43,8 +47,6 @@ public class Jackson2MapperTest {
         assertThat(a.optional.get()).isEqualTo(3);
 
         Jackson2Mapper.getLenientInstance().readerFor(A.class).readValue(example.getBytes(StandardCharsets.UTF_8));
-
-
     }
 
     @Test
@@ -79,15 +81,23 @@ public class Jackson2MapperTest {
         a.integer = 2;
         a.optional = Optional.of(3);
         assertThat(Jackson2Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2,\"optional\":3}");
-
     }
+
     @Test
     public void writeWithEmptyOptional() throws JsonProcessingException {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.empty();
         assertThat(Jackson2Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2}");
+    }
 
+    @Test
+    public void unmodifiable() {
+        Jackson2Mapper mapper = Jackson2Mapper.getInstance();
+        log.info("{}", mapper.getSerializationConfig().getActiveView());
+        SerializationConfig serializationConfig = mapper.getSerializationConfig().withView(Views.Javascript.class);
+        mapper.setConfig(serializationConfig);
+        log.info("{}", mapper.getSerializationConfig().getActiveView());
     }
 
 }
