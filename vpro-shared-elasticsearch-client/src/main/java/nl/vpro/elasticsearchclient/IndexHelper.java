@@ -1510,9 +1510,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         log.info("Closing {}", clientFactory);
-        clientFactory.close();
+        CloseableIterator.closeQuietly(clientFactory);
         clientFactory = null;
     }
 
