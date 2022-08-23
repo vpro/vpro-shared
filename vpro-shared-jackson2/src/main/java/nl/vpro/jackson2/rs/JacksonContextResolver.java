@@ -26,7 +26,7 @@ public class JacksonContextResolver extends JacksonJaxbJsonProvider implements C
     private final ObjectMapper mapper;
 
     public JacksonContextResolver() {
-        this(Jackson2Mapper.LENIENT);
+        this(Jackson2Mapper.getLenientInstance());
     }
     public JacksonContextResolver(ObjectMapper mapper) {
         this.mapper = mapper;
@@ -34,7 +34,7 @@ public class JacksonContextResolver extends JacksonJaxbJsonProvider implements C
 
     @Override
     public ObjectMapper getContext(Class<?> objectType) {
-        return mapper == null ? Jackson2Mapper.LENIENT : mapper;
+        return mapper == null ? Jackson2Mapper.getLenientInstance() : mapper;
     }
 }
 

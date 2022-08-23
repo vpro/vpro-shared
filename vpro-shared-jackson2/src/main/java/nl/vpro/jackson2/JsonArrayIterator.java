@@ -298,7 +298,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         final CountedIterator<T> iterator,
         final OutputStream out,
         final Function<T, Void> logging) throws IOException {
-        try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
+        try (JsonGenerator jg = Jackson2Mapper.getInstance().getFactory().createGenerator(out)) {
             jg.writeStartObject();
             jg.writeArrayFieldStart("array");
             writeObjects(iterator, jg, logging);
@@ -314,7 +314,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     public static <T> void writeArray(
         final CountedIterator<T> iterator,
         final OutputStream out, final Function<T, Void> logging) throws IOException {
-        try (JsonGenerator jg = Jackson2Mapper.INSTANCE.getFactory().createGenerator(out)) {
+        try (JsonGenerator jg = Jackson2Mapper.getInstance().getFactory().createGenerator(out)) {
             jg.writeStartArray();
             writeObjects(iterator, jg, logging);
             jg.writeEndArray();

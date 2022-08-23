@@ -35,6 +35,8 @@ import nl.vpro.logging.Slf4jHelper;
 @Slf4j
 public class Jackson2Mapper extends ObjectMapper {
 
+    private static final long serialVersionUID = 8353430660109292010L;
+
     private static boolean loggedAboutAvro = false;
     private static boolean loggedAboutFallback = false;
 
@@ -91,7 +93,7 @@ public class Jackson2Mapper extends ObjectMapper {
         PRETTY_STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
     }
 
-    public static Jackson2Mapper getInstance() {
+    public static Jackson2Mapper getInstance()  {
         return INSTANCE;
     }
 
@@ -108,10 +110,13 @@ public class Jackson2Mapper extends ObjectMapper {
     }
 
 
+    public static Jackson2Mapper getStrictInstance() {
+        return STRICT;
+    }
+
     public static Jackson2Mapper getPublisherInstance() {
         return PUBLISHER;
     }
-
 
     public static Jackson2Mapper getPrettyPublisherInstance() {
         return PRETTY_PUBLISHER;
@@ -138,6 +143,7 @@ public class Jackson2Mapper extends ObjectMapper {
     }
 
     private final String toString;
+    private boolean inited = false;
 
     private Jackson2Mapper(String toString, Predicate<Module> predicate) {
         configureMapper(this, predicate);
@@ -149,8 +155,16 @@ public class Jackson2Mapper extends ObjectMapper {
         this.toString = toString;
     }
 
+    @Override
+    public Jackson2Mapper setConfig(SerializationConfig config) {
+        if (inited) {
+            throw new IllegalStateException("Already initialized. Pleasy copy first");
+        }
+        return (Jackson2Mapper) super.setConfig(config);
+    }
+
     @SafeVarargs
-    public  static Jackson2Mapper create(String toString, Predicate<Module> module, Consumer<ObjectMapper>... consumer) {
+    public static Jackson2Mapper create(String toString, Predicate<Module> module, Consumer<ObjectMapper>... consumer) {
         Jackson2Mapper result =  new Jackson2Mapper(toString, module);
         for (Consumer<ObjectMapper> c : consumer){
             c.accept(result);
