@@ -93,9 +93,8 @@ public class Jackson2Mapper extends ObjectMapper {
         PRETTY_STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
     }
 
-    @SneakyThrows
     public static Jackson2Mapper getInstance()  {
-        return (Jackson2Mapper) INSTANCE.clone();
+        return INSTANCE;
     }
 
     public static Jackson2Mapper getLenientInstance() {
