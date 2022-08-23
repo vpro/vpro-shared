@@ -50,7 +50,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
 
     /**
      * If the iterator is in some way restricted you may also want to report a total size, representing the unrestricted size.
-     *
+     * <p>
      * The default implementation is {@link #getSize()}.
      */
     @NonNull
@@ -82,6 +82,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     /**
      * If you need a guava {@link PeekingIterator}, this will make you one. It remains also a {@link CountedIterator}
      */
+    @Override
     default CountedPeekingIterator<T> peeking() {
         return new CountedPeekingIteratorImpl<>(this);
     }

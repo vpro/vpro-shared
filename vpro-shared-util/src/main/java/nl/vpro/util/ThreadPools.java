@@ -42,7 +42,7 @@ public final class ThreadPools {
 
     /**
      * An executor service used for 'copy' threads. Mainly in {@link Copier}, but it can be used for similar processes.
-     *
+     * <p>
      * These may be quite long-lived thread, performing simple jobs like copying streams.
      */
     public static final ThreadPoolExecutor copyExecutor =

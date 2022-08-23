@@ -3,6 +3,7 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -35,7 +36,7 @@ public class Strings {
         } else {
             try {
                 BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), UTF_8));
+                    new InputStreamReader(Files.newInputStream(file.toPath()), UTF_8));
                 return reader.lines().onClose(() -> {
                     try {
                         reader.close();

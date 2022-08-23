@@ -17,7 +17,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
 
 /**
- * See https://jira.vpro.nl/browse/MSE-1372
+ * See <a href="https://jira.vpro.nl/browse/MSE-1372">JIRA</a>
  *
  * @author Roelof Jan Koekoek
  * @since 1.5

@@ -8,9 +8,9 @@ import org.checkerframework.checker.nullness.qual.*;
 
 /**
  * A version is basically a string existing of a number of parts.
- *
+ * <p>
  * This base class leaves open how these parts should look like, but we supply an extension where they are integers.
- *
+ * <p>
  * The point is that these things can now be compared in the logical way, such that e.g. 5.12.0 > 5.2.0
  *
  * @author Michiel Meeuwissen
@@ -28,7 +28,7 @@ public class Version<T extends Comparable<T>> implements Comparable<Version<T>> 
 
     /**
      * Produces an {@link IntegerVersion}, but ignores everything after the first hyphen.
-     *
+     * <p>
      * In that way something like '5.12-SNAPSHOT' will simply be equivalent to '5.12'.
      */
     @PolyNull

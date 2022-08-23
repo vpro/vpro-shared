@@ -14,9 +14,9 @@ public class ExceptionUtils {
 
     /**
      * Wraps a {@link Callable} in a {@link Supplier}.
-     *
+     * <p>
      * You may need a supplier, but have code that throws an exception. Like this:
-     *
+     * <p>
      * {@code
      *   service.download(file, ExceptionUtils.wrapException(() -> new FileOutputStream(destFile)))
      * }
@@ -36,9 +36,9 @@ public class ExceptionUtils {
 
     /**
      * Wraps a {@link Callable} in a {@link Supplier}.
-     *
+     * <p>
      * You may need a supplier, but have code that throws an exception. Like this:
-     *
+     * <p>
      * {@code
      *   service.download(file, ExceptionUtils.wrapException(() -> new FileOutputStream(destFile)))
      * }

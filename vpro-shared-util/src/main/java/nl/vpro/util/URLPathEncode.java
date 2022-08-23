@@ -17,7 +17,7 @@ public class URLPathEncode {
 
     /**
      * Escapes every character of the input string for the path part of a URL.
-     *
+     * <p>
      * This differs from {@link URLEncoder#encode(String, String)} that it will leave more characters untouched (see {@link #isSafe(char)}, and that space will be replaced by +;
      */
     @PolyNull

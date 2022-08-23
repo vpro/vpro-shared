@@ -28,10 +28,12 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
     /**
      * This doesn't use a queue, so it is also useable with Hibernate.
      */
+    @SafeVarargs
     public static <T> MergedSortedIterator<T> mergeInSameThread(Comparator<? super T> comparator, CountedIterator<T>... iterators) {
         return mergeInSameThread(comparator, Arrays.asList(iterators));
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static <T> MergedSortedIterator<T> merge(Comparator<? super T> comparator, Iterable<CountedIterator<T>> iterators) {
         return new MergedSortedIterator<>(
             () -> getSize(iterators),
@@ -74,6 +76,7 @@ public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements
         return size;
     }
 
+    @SuppressWarnings({"OptionalAssignedToNull", "OptionalUsedAsFieldOrParameterType"})
     protected static class SameThreadMergingIterator<S> implements Iterator<S> {
         final List<PeekingIterator<S>> iterators;
         final Comparator<? super S> comparator;

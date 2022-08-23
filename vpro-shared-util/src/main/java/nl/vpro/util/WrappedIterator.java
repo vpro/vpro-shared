@@ -35,7 +35,7 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
     }
 
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public @NonNull Optional<Long> getSize() {
         if (wrapped instanceof CountedIterator) {
@@ -45,6 +45,7 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
 
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Long getCount() {
         if (wrapped instanceof CountedIterator) {
@@ -53,7 +54,7 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public @NonNull Optional<Long> getTotalSize() {
         if (wrapped instanceof CountedIterator) {

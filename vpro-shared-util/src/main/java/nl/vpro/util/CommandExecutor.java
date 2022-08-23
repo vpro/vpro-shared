@@ -261,6 +261,8 @@ public interface CommandExecutor {
 
     class BrokenPipe extends RuntimeException {
 
+        private static final long serialVersionUID = 973250365216289481L;
+
         public BrokenPipe(IOException e) {
             super(e);
         }
@@ -269,6 +271,7 @@ public interface CommandExecutor {
 
     @Getter
     class ExitCodeException extends RuntimeException {
+        private static final long serialVersionUID = 6103943329292512702L;
         final int exitCode;
         public ExitCodeException(String message, int exitCode) {
             super(message);

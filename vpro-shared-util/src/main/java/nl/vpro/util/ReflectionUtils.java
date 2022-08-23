@@ -19,9 +19,9 @@ import static nl.vpro.util.ReflectionUtils.ResultAction.*;
  *
  * This provides some basic reflection code to call setters and getters on java beans. There are of course other libraries available
  * for these kind of things, but it is not hard,  and this allows for customizing details of it.
- *
+ * <p>
  * Most importantly we add a number of {@link #configured(Object, Map)} methods so this class together with {@link ConfigUtils} provides a complete configuration mechanism.
- *
+ * <p>
  *
  * @author Michiel Meeuwissen
  * @since 0.40
@@ -137,7 +137,7 @@ public class ReflectionUtils {
     /**
      * Defaulting version of {@link #configured(Object, Map, Collection)}.
      * Using {@link #SETTER}, {@link #IDENTITY} for the setter discovery, which means that normal bean like setters and builder pattern setters are supported.
-     *
+     * <p>
      * E.g. if the given properties contain 'title=foo bar' then the code will try {@code setTitle("foo bar")}, or if this method does not exist {@code title("foo bar"}}
 
      */

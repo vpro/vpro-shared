@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Recognized by {@link nl.vpro.guice.OptionalModule}
+ * Recognized by {@code nl.vpro.guice.OptionalModule}
  * @author Michiel Meeuwissen
  * @since 1.69
  */

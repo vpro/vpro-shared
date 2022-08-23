@@ -7,7 +7,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * An iterator that can call a callback function when its iteration is finished.
- *
+ * <p>
  * It simply wraps another iterator, which is one iteration ahead on call of 'hasNext'.
  * @author Michiel Meeuwissen
  */
@@ -55,6 +55,7 @@ public class CallbackIterator<T> implements CountedIterator<T> {
         return hasNext;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     @NonNull
     public Optional<Long> getSize() {

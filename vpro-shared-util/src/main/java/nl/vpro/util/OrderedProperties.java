@@ -11,6 +11,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class OrderedProperties extends Properties {
 
+    private static final long serialVersionUID = 5640271520019127358L;
+
     private final List<Object> names = new ArrayList<>();
 
 

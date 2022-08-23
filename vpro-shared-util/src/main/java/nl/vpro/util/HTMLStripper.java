@@ -12,6 +12,10 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 
+/**
+ * Swing contains a nice html parser, which can be used to clean existing html.
+ *
+ */
 public class HTMLStripper {
 
     final HTMLEditorKit.Parser parser = new ParserGetter().getParser();
@@ -194,6 +198,7 @@ public class HTMLStripper {
             return match;
         }
 
+        @Override
         public String toString() {
             return "!" + pattern.toString();
         }
