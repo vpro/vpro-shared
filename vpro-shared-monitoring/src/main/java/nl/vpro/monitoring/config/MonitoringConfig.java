@@ -191,9 +191,18 @@ public class MonitoringConfig {
                 .description("The total number of locked objects until now")
                 .register(registry);
 
-            Gauge.builder("locks.average_acquiretime", () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue())
+            Gauge.builder("locks.average_acquiretime",
+                    () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue()
+                )
                 .description("The average time in ms to acquire a lock")
                 .register(registry);
+
+            Gauge.builder("locks.average_duration",
+                    () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockDuration().getWindowValue().getValue()
+                )
+                .description("The average time in ms to hold a lock")
+                .register(registry);
+
 
             Gauge.builder("locks.max_concurrency", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
                 .description("The maximum number threads waiting for the same object")
