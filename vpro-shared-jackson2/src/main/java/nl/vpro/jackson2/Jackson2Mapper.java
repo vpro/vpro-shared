@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -25,6 +24,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.google.common.annotations.Beta;
 
 import nl.vpro.logging.Slf4jHelper;
 
@@ -52,6 +52,11 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
     public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
     public static final Jackson2Mapper BACKWARDS_PUBLISHER = new Jackson2Mapper("backwards_publisher");
+
+    private static final Jackson2Mapper MODEL = new Jackson2Mapper("model");
+    private static final Jackson2Mapper MODEL_AND_NORMAL = new Jackson2Mapper("model_and_normal");
+
+
 
     private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
@@ -91,6 +96,11 @@ public class Jackson2Mapper extends ObjectMapper {
 
         //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
         PRETTY_STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
+
+
+        MODEL.setConfig(MODEL.getSerializationConfig().withView(Views.Model.class));
+        MODEL_AND_NORMAL.setConfig(MODEL_AND_NORMAL.getSerializationConfig().withView(Views.ModelAndNormal.class));
+
     }
 
     public static Jackson2Mapper getInstance()  {
@@ -124,6 +134,16 @@ public class Jackson2Mapper extends ObjectMapper {
 
     public static Jackson2Mapper getBackwardsPublisherInstance() {
         return BACKWARDS_PUBLISHER;
+    }
+
+    @Beta
+    public static Jackson2Mapper getModelInstance() {
+        return MODEL;
+    }
+
+    @Beta
+    public static Jackson2Mapper getModelAndNormalInstance() {
+        return MODEL_AND_NORMAL;
     }
 
     public static Jackson2Mapper getThreadLocal() {
