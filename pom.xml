@@ -239,7 +239,7 @@
     <skipITs>true</skipITs>
 
     <spring.version>5.3.22</spring.version>
-    <spring-security.version>5.7.2</spring-security.version>
+    <spring-security.version>5.7.3</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
     <junit.version>5.9.0</junit.version>
@@ -250,7 +250,7 @@
     <slf4j.version>1.7.32</slf4j.version>
     <log4j2.version>2.18.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
-    <javassist.version>3.29.0-GA</javassist.version>
+    <javassist.version>3.29.1-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.9.0</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
@@ -541,7 +541,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.15.2</version>
+        <version>1.15.3</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
