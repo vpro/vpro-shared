@@ -56,9 +56,7 @@ public class ObjectLocker {
 
     static Duration defaultWarnTime  = Duration.ofSeconds(30);
 
-
     private static final List<Listener> LISTENERS = new CopyOnWriteArrayList<>();
-
 
     /**
      * You can register {@link Listener}s for lock events, for logging or other reporting purposes
@@ -209,9 +207,11 @@ public class ObjectLocker {
         }
 
         log.trace("{} holdcount {}", Thread.currentThread().hashCode(), holder.lock.getHoldCount());
-        Duration acquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
+        final Duration acquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
+
+
         if (holder.lock.getHoldCount() == 1) {
-            log.debug("Acquired lock for {}  ({}) in {}", key, reason, acquireTime);
+            Slf4jHelper.log(log, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG, "Acquired lock for {} ({}) in {}", holder, reason, acquireTime);
         }
 
         for(Listener listener : LISTENERS) {
@@ -229,13 +229,14 @@ public class ObjectLocker {
             log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
             if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
                 log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
-                break;
+                return;
             }
             if (wait.compareTo(maxWait) < 0) {
                 wait = wait.multipliedBy(2);
             }
-            log.info("Wait {}", wait);
+            log.info("Now waiting {}", wait);
         }
+
     }
 
     private static <K extends Serializable>  LockHolder<K> computeLock(
@@ -314,6 +315,7 @@ public class ObjectLocker {
         @Getter
         @Setter
         private Duration warnTime = ObjectLocker.defaultWarnTime;
+
 
         LockHolder(K k, String reason, ReentrantLock lock, Exception cause) {
             this.key = k;
