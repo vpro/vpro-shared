@@ -11,8 +11,6 @@ import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-
-
 import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Ehcache;
 
@@ -35,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
-import static nl.vpro.util.locker.ObjectLocker.Listener.Type.LOCK;
+import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 
 @Configuration
 @Slf4j
@@ -177,34 +175,32 @@ public class MonitoringConfig {
         }
         if (properties.isMeterLocks()) {
             ObjectLocker.listen((type, holder, duration) -> {
-                if (holder.lock.getHoldCount() == 1 && type == LOCK) {
-                    Object key = holder.key;
-                    String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
-                    registry.counter("locks.event", "type", keyType).increment();
-                }
+                Object key = holder.key;
+                String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
+                registry.counter("locks.event", "keyType", keyType, "eventType", String.valueOf(type), "holdCount", String.valueOf(holder.lock.getHoldCount())).increment();
             });
-            Gauge.builder("locks.count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
+            Gauge.builder("locks.count", JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
                 .description("The current number of locked objects")
                 .register(registry);
 
-            Gauge.builder("locks.total_count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getLockCount)
+            Gauge.builder("locks.total_count", JMX_INSTANCE, ObjectLockerAdmin::getLockCount)
                 .description("The total number of locked objects until now")
                 .register(registry);
 
             Gauge.builder("locks.average_acquiretime",
-                    () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue()
+                    () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue()
                 )
-                .description("The average time in ms to acquire a lock")
+                .description("The average time in ms to acquire a lock (in " + JMX_INSTANCE.getAverageLockAcquireTime().getTotalDuration() + ")")
                 .register(registry);
 
             Gauge.builder("locks.average_duration",
-                    () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockDuration().getWindowValue().getValue()
+                    () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().getValue()
                 )
-                .description("The average time in ms to hold a lock")
+                .description("The average time in ms to hold a lock (in " + JMX_INSTANCE.getAverageLockDuration().getTotalDuration() +")")
                 .register(registry);
 
 
-            Gauge.builder("locks.max_concurrency", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+            Gauge.builder("locks.max_concurrency", JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
                 .description("The maximum number threads waiting for the same object")
                 .register(registry);
 
@@ -212,7 +208,7 @@ public class MonitoringConfig {
                 .description("The maximum number threads waiting for the same object")
                 .register(registry);
 
-            Gauge.builder("locks.maxDepth", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+            Gauge.builder("locks.maxDepth", JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
                 .description("The maximum number of locked objects in the same thread")
                 .register(registry);
 
