@@ -2,6 +2,8 @@ package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.time.*;
 
@@ -76,21 +78,34 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        boolean prometheusDown = prometheusController != null && prometheusController.getDuration().getWindowValue().durationValue().compareTo(unhealthyThreshold) > 0;
-        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        if (prometheusDown) {
-            if (! threadsDumped) {
-                new Thread(null, () -> {
-                    log.info("Dumping threads for later analysis");
-                    ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
 
-                }, "Dumping threads").start();
-                threadsDumped = true;
+        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().durationValue();
+        boolean prometheusDown = prometheusDown(prometheusDuration);
+
+        if (prometheusDown) {
+            try {
+                prometheusDuration = prometheusController.scrape(new StringWriter());
+                prometheusDown = prometheusDown(prometheusDuration);
+            } catch (IOException ioa) {
+                log.warn(ioa.getMessage());
+            }
+            if (prometheusDown) {
+                if (!threadsDumped) {
+
+                    new Thread(null, () -> {
+                        log.info("Dumping threads for later analysis");
+                        ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+
+                    }, "Dumping threads").start();
+                    threadsDumped = true;
+                }
             }
 
         } else {
             threadsDumped = false;
         }
+
+        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
         Health health = Health.builder()
             .status(effectiveStatus.code)
             .message(effectiveStatus.message)
@@ -106,15 +121,15 @@ public class HealthController {
                     .message(effectiveStatus.message)
                     .startTime(ready == null ? null : ready)
                     .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
-                    .prometheusCallDuration(prometheusController != null ? prometheusController.getDuration().getWindowValue().durationValue() : null)
-
+                    .prometheusCallDuration(prometheusDuration)
                     .build()
             );
-        if (prometheusDown) {
-              prometheusController.reset();
-        }
 
         return body;
+    }
+
+    protected boolean prometheusDown(Duration d) {
+        return d.compareTo(unhealthyThreshold) > 0;
     }
 
     private enum Status {
