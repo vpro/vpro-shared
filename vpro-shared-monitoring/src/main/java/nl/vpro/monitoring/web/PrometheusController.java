@@ -38,12 +38,15 @@ public class PrometheusController {
         response.setContentType(TextFormat.CONTENT_TYPE_004);
         long start = System.nanoTime();
         try (Writer writer = response.getWriter()) {
-            registry.scrape(writer);
-            writer.flush();
-        } finally {
-            duration.accept(Duration.ofNanos(System.nanoTime() - start));
+            Duration scrape = scrape(writer);
+            duration.accept(scrape);
         }
-
+    }
+    protected Duration scrape(Writer writer) throws IOException {
+        long start = System.nanoTime();
+        registry.scrape(writer);
+        writer.flush();
+        return Duration.ofNanos(System.nanoTime() - start);
     }
 
     public void reset() {
