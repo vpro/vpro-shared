@@ -87,11 +87,18 @@ public class HealthController {
                 }, "Dumping threads").start();
                 threadsDumped = true;
             }
+            prometheusController.reset();
         } else {
             threadsDumped = false;
         }
+        Health health = Health.builder()
+            .status(effectiveStatus.code)
+            .message(effectiveStatus.message)
+            .startTime(ready == null ? null : ready)
+            .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
+            .build();
 
-        return ResponseEntity
+        ResponseEntity<Health> body = ResponseEntity
             .status(effectiveStatus.code)
             .body(
                 Health.builder()
@@ -100,8 +107,11 @@ public class HealthController {
                     .startTime(ready == null ? null : ready)
                     .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
                     .prometheusCallDuration(prometheusController != null ? prometheusController.getDuration().getWindowValue().durationValue() : null)
+
                     .build()
             );
+
+        return body;
     }
 
     private enum Status {
