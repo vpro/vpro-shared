@@ -87,7 +87,7 @@ public class HealthController {
                 }, "Dumping threads").start();
                 threadsDumped = true;
             }
-            prometheusController.reset();
+
         } else {
             threadsDumped = false;
         }
@@ -110,6 +110,9 @@ public class HealthController {
 
                     .build()
             );
+        if (prometheusDown) {
+              prometheusController.reset();
+        }
 
         return body;
     }
