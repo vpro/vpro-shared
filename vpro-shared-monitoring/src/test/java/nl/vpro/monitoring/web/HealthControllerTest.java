@@ -5,8 +5,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 
 import java.time.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.meeuw.math.TestClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +91,7 @@ class HealthControllerTest {
     }
 
     @Test
+    @Disabled
     void statusUnhealthy() throws Exception {
 
         healthController.prometheusController.getDuration().accept(
