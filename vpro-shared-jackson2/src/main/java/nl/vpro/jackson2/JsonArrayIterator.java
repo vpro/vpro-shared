@@ -343,6 +343,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     logging.apply(change);
                 }
             } catch (Exception e) {
+                Throwable cause = e.getCause();
+                while (cause != null) {
+                    if (cause instanceof InterruptedException) {
+                        return;
+                    }
+                    cause = cause.getCause();
+                }
+
                 log.warn(e.getClass().getCanonicalName() + " " + e.getMessage());
                 jg.writeObject(e.getMessage());
             }
