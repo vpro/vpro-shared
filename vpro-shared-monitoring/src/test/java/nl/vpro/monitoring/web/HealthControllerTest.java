@@ -5,8 +5,7 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 
 import java.time.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.meeuw.math.TestClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +91,9 @@ class HealthControllerTest {
     }
 
     @Test
-    void statusUnhealthy() throws Exception {
+    void promotheusSlow() throws Exception {
+
+        assertThat(healthController.prometheusDownCount).hasValue(0);
 
         healthController.prometheusController.getDuration().accept(
             Duration.ofSeconds(20));
@@ -100,9 +101,13 @@ class HealthControllerTest {
         mockMvc.perform(
             get("/health")
                 .accept(APPLICATION_JSON_VALUE)
-        ).andExpect(status().is(503))
-            .andExpect(jsonPath("$.status", is(503)))
-            .andExpect(jsonPath("$.message", is("Application is unhealthy")))
-            .andExpect(jsonPath("$.prometheusCallDuration", is("PT20S")));
+        ).andExpect(status().is(200))
+            .andExpect(jsonPath("$.status", is(200)))
+            .andExpect(jsonPath("$.prometheusCallDuration", is("PT20S")))
+            .andExpect(jsonPath("$.prometheusDownCount", is(1)))
+            .andExpect(jsonPath("$.message", is("Application ready")))
+        ;
+
+        assertThat(healthController.prometheusDownCount).hasValue(1);
     }
 }

@@ -3,12 +3,13 @@ package nl.vpro.monitoring.web;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.time.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.output.NullWriter;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
@@ -41,6 +42,8 @@ public class HealthController {
     PrometheusController prometheusController;
 
     private boolean threadsDumped = false;
+
+    protected AtomicLong prometheusDownCount = new AtomicLong(0);
 
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
@@ -83,9 +86,10 @@ public class HealthController {
         boolean prometheusDown = prometheusDown(prometheusDuration);
 
         if (prometheusDown) {
+            prometheusDownCount.incrementAndGet();
             try {
-                prometheusDuration = prometheusController.scrape(new StringWriter());
-                prometheusDown = prometheusDown(prometheusDuration);
+                Duration secondPrometheusDuration = prometheusController.scrape(new NullWriter());
+                prometheusDown = prometheusDown(secondPrometheusDuration);
             } catch (IOException ioa) {
                 log.warn(ioa.getMessage());
             }
@@ -122,6 +126,7 @@ public class HealthController {
                     .startTime(ready == null ? null : ready)
                     .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
                     .prometheusCallDuration(prometheusDuration)
+                    .prometheusDownCount(prometheusDownCount.get() == 0 ? null : prometheusDownCount.get())
                     .build()
             );
 

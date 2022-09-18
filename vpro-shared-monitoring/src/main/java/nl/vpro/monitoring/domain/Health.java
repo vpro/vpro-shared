@@ -13,4 +13,5 @@ public class Health {
     private final Instant startTime;
     private final Duration upTime;
     private final Duration prometheusCallDuration;
+    private final Long prometheusDownCount;
 }
