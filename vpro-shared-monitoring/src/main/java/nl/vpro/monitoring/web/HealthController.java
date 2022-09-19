@@ -69,7 +69,6 @@ public class HealthController {
             return false;
 
         }
-
     }
 
     @EventListener
@@ -106,6 +105,7 @@ public class HealthController {
             }
 
         } else {
+            prometheusDownCount.set(0);
             threadsDumped = false;
         }
 

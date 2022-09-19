@@ -52,6 +52,7 @@ class HealthControllerTest {
             }
         }));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        this.healthController.markReady(null);
     }
 
     @Test
