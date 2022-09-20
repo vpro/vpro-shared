@@ -92,7 +92,7 @@ class HealthControllerTest {
     }
 
     @Test
-    void promotheusSlow() throws Exception {
+    void prometheusSlow() throws Exception {
 
         assertThat(healthController.prometheusDownCount).hasValue(0);
 
