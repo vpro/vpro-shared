@@ -10,6 +10,7 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -492,7 +493,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (builder.length() > 0) builder.append(' ');
             boolean needsQuotes = a.indexOf(' ') >= 0 || a.indexOf('|') > 0;
             if (needsQuotes) builder.append('"');
-            builder.append(a.replaceAll("\"", "\\\""));
+            builder.append(StringEscapeUtils.escapeJava(a));
             if (needsQuotes) builder.append('"');
         }
         return builder.toString();
