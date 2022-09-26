@@ -48,6 +48,14 @@ class LocalesTest {
             new Locale("nl")
             ))).contains(new Locale("nl"));
 
+        assertThat(Locales.findBestMatch(Locales.DUTCH_U, Stream.of(
+            new Locale("en"),
+            new Locale("nl", "BE"),
+            new Locale("nl", "NL"),
+            new Locale("nl")
+            ))).contains(new Locale("nl"));
+
+
         assertThat(Locales.findBestMatch(Locales.FLEMISH, Stream.of(
             new Locale("en"),
             new Locale("nl", "BE"),
@@ -132,7 +140,18 @@ class LocalesTest {
     public void dutch() {
         assertThat(WeekFields.of(Locales.NETHERLANDISH).getFirstDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
 
+
         //FAILS in java >=11
         //assertThat(WeekFields.of(Locales.DUTCH).getFirstDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+
+        // this may be used.
+        assertThat(WeekFields.of(Locales.DUTCH_U).getFirstDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+
+
+        assertThat(Locales.DUTCH.toLanguageTag()).isEqualTo("nl");
+        assertThat(Locales.DUTCH.toString()).isEqualTo("nl");
+
+        assertThat(Locales.DUTCH_U.toLanguageTag()).isEqualTo("nl");
+        assertThat(Locales.DUTCH_U.toString()).isEqualTo("nl_UNDEFINED");
     }
 }
