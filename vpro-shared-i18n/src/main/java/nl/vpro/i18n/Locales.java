@@ -22,11 +22,16 @@ public final class Locales {
     }
 
     /**
-     * The locale representing the dutch language, leaving unspecified for wich country.
+     * The locale representing the Dutch language, leaving unspecified for wich country.
+     * <p>
+     * Note that it seems to be undefined what {@code WeekFields.of(Locales.DUTCH).getFirstDayOfWeek()} should be. I'd day that it should be {@link java.time.DayOfWeek#MONDAY}, was it did in java 8, but in java 17 it seems to result {@link java.time.DayOfWeek#SUNDAY}, which is a bit silly, because afaik in no Dutch-speaking area in the world that would be correct.
+     * <p>
+     * Use {@link #NETHERLANDISH} or {@link #FLEMISH} if it is important that the first day of the week would be monday.
      */
     public static final Locale DUTCH         = of(LanguageCode.nl);
+
     /**
-     * The locale representing the <a href="https://en.wikipedia.org/wiki/Arabic">arabic language</a>, leaving unspecified for wich country.
+     * The locale representing the <a href="https://en.wikipedia.org/wiki/Arabic">Arabic language</a>, leaving unspecified for wich country.
      */
     public static final Locale ARABIC        = of(LanguageCode.ar);
 
@@ -49,7 +54,7 @@ public final class Locales {
 
     /**
      * Returns the current default locale for this thread.
-     *
+     * <p>
      * This initializes with {@link Locale#getDefault()}, but can be set per thread.
      */
     public static Locale getDefault() {

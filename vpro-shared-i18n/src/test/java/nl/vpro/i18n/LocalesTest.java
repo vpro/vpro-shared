@@ -1,5 +1,7 @@
 package nl.vpro.i18n;
 
+import java.time.DayOfWeek;
+import java.time.temporal.WeekFields;
 import java.util.Locale;
 import java.util.stream.Stream;
 
@@ -125,4 +127,12 @@ class LocalesTest {
 
     }
 
+
+    @Test
+    public void dutch() {
+        assertThat(WeekFields.of(Locales.NETHERLANDISH).getFirstDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+
+        //FAILS in java >=11
+        //assertThat(WeekFields.of(Locales.DUTCH).getFirstDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+    }
 }
