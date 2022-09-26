@@ -266,6 +266,9 @@ public class TimeUtils {
 
     }
 
+    /**
+     * @since 2.34
+     */
     @PolyNull
     public static Instant truncatedTo(
         @PolyNull Instant instant,
@@ -273,6 +276,9 @@ public class TimeUtils {
         return instant == null ? null : instant.truncatedTo(unit);
     }
 
+    /**
+     * @since 2.34
+     */
     @PolyNull
     public static Instant truncated(
         @PolyNull Instant instant) {
