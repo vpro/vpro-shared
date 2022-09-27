@@ -65,7 +65,7 @@ public class ExceptionUtils {
             }
         }
 
-        void acceptWithException(T e);
+        void acceptWithException(T e) throws Exception;
 
     }
 
