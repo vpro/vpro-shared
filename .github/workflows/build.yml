@@ -22,6 +22,10 @@ jobs:
         #  Unable to parse command line options: Unrecognized option: -inputFormat -> I don't get it, lets skip windows builds for now
         #  os: [ ubuntu-latest, windows-latest]
         os: [ubuntu-latest]
+        java: [8]
+        include:
+          - os: ubuntu-latest
+            java: 17
     runs-on: ${{ matrix.os }}
     env:
       MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
@@ -34,11 +38,11 @@ jobs:
           elasticsearch version: '7.9.0'
         if: runner.os == 'Linux'
       - uses: actions/checkout@v3
-      - name: Set up JDK 1.8
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 8
+          java-version: ${{ matrix.java }}
       - name: Create settings.xml
         uses: s4u/maven-settings-action@v2
         with:
