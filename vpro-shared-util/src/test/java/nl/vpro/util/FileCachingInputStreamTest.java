@@ -283,7 +283,7 @@ public class FileCachingInputStreamTest {
             }
         } catch (ClosedByInterruptException | InterruptedIOException ie) {
             isInterrupted = true;
-            log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
+            log.info("Caught {}", ie.getClass() + " " + ie.getMessage());
 
         } finally {
             isInterrupted |= thisThread.isInterrupted();

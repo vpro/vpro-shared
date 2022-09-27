@@ -69,7 +69,7 @@ public class XMLStreamWriterUtilTest {
             throw new Exception("bla");
         } catch (Exception e) {
             util.writeComment(e.getMessage());
-            log.info("Catched {}", e.getMessage());
+            log.info("Caught {}", e.getMessage());
         }
         assertThat(builder.toString()).isEqualTo("<a x=\"b\"><b>BB</b></a><!--bla-->");
     }
