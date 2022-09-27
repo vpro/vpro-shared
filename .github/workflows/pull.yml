@@ -16,7 +16,7 @@ jobs:
         with:
           elasticsearch version: '7.6.1'
       - uses: actions/checkout@v2
-      - name: Set up JDK 1.8
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
          distribution: 'temurin'
