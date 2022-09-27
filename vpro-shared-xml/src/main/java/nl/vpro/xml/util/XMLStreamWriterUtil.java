@@ -172,6 +172,10 @@ public class XMLStreamWriterUtil {
         return writer.getProperty(name);
     }
 
+
+    /**
+     * @since 2.34
+     */
     public class ElementCloser implements AutoCloseable {
         @Nullable
         final String nameSpace;
