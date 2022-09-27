@@ -557,7 +557,7 @@ public class FileCachingInputStream extends InputStream {
                 try {
                     toFileCopier.wait(1000);
                 } catch (InterruptedException e) {
-                    log.warn("Interrupted {}", e.getMessage());
+                    log.warn("Interrupted, message: {}", e.getMessage());
                     toFileCopier.close();
                     future.completeExceptionally(e);
                     close();
