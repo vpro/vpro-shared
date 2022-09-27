@@ -67,5 +67,5 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2.0.0
         if: always()
         with:
-          check_name: Tests results ${{ matrix.java }}
+          check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           junit_files: "**/target/surefire-reports/*.xml"
