@@ -45,7 +45,7 @@ public class ExceptionUtils {
      *
      * The point is that otherwise this nice lambda gets ugly because of the try/catch block.
      */
-    public static <T> Consumer<T> wrapConsumer(ThrowingConsumer<T> b) {
+    public static <T> Consumer<T> wrapConsumer(org.meeuw.functional.ThrowingConsumer<T, ?> b) {
         return b;
     }
 
@@ -53,6 +53,7 @@ public class ExceptionUtils {
 
 
     @FunctionalInterface
+    @Deprecated
     public interface ThrowingConsumer<T> extends Consumer<T> {
 
         @Override

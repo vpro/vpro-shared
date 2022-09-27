@@ -2,8 +2,7 @@ package nl.vpro.xml.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.OutputStream;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -13,8 +12,8 @@ import javax.xml.stream.*;
 
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.ThrowingConsumer;
 
-import nl.vpro.util.ExceptionUtils.ThrowingConsumer;
 
 /**
  * A wrapper around {@link XMLStreamWriter}, which uses {@link AutoCloseable} to automatically close the needed elements.
@@ -182,10 +181,10 @@ public class XMLStreamWriterUtil {
         final String name;
         final int closeTo = ++currentDepth;
 
-        final ThrowingConsumer<XMLStreamWriter> close;
+        final ThrowingConsumer<XMLStreamWriter, XMLStreamException> close;
 
 
-        protected ElementCloser(@Nullable String nameSpace, String name, ThrowingConsumer<XMLStreamWriter> close) {
+        protected ElementCloser(@Nullable String nameSpace, String name, ThrowingConsumer<XMLStreamWriter, XMLStreamException> close) {
             this.nameSpace = nameSpace;
             this.name = name;
             this.close = close;
