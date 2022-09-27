@@ -71,7 +71,8 @@ jobs:
         uses: codecov/codecov-action@v3
         continue-on-error: true
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1.39
+        uses: EnricoMi/publish-unit-test-result-action@v2.0.0
         if: always()
         with:
-          files: "**/target/surefire-reports/*.xml"
+          check_name: Tests results ${{ matrix.java }}
+          junit_files: "**/target/surefire-reports/*.xml"
