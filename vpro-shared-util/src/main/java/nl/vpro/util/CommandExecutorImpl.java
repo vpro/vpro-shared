@@ -32,8 +32,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
-    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
-        if (exitCode == null) exitCode = -1;
+    private static final IntFunction<Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
         switch(exitCode) {
             case 0:
                 return Level.DEBUG;
@@ -63,7 +62,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final Boolean closeStreams;
 
-    private final Function<Integer, Level> exitCodeLogLevel;
+    private final IntFunction<Level> exitCodeLogLevel;
 
 
     public CommandExecutorImpl(String c) {
@@ -117,7 +116,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         boolean optional,
         Boolean closeStreams,
         Duration processTimeout,
-        Function<Integer, Level> exitCodeLogLevel
+        IntFunction<Level> exitCodeLogLevel
         ) {
         this.workdir = getWorkdir(workdir);
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
@@ -386,9 +385,8 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             errorCopier.waitForAndClose();
             int result = p.exitValue();
-            if (result != 0) {
-                logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, String.join(" ", command));
-            }
+            logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, String.join(" ", command));
+
             if (parameters.out != null) {
                 parameters.out.flush();
             }
