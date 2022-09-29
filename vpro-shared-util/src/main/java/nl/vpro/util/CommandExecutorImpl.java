@@ -130,7 +130,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.closeStreams = closeStreams;
         this.processTimeout = processTimeout;
         this.exitCodeLogLevel = exitCodeLogLevel == null ? DEFAULT_EXIT_CODE_LEVEL : exitCodeLogLevel;
-
     }
 
     private Supplier<String> toString(Object o) {
@@ -186,14 +185,13 @@ public class CommandExecutorImpl implements CommandExecutor {
         } else {
             return () -> f.get().getAbsolutePath();
         }
-
     }
+
     private static File getWorkdir(File workdir) {
         if (workdir != null && !workdir.exists()) {
             throw new IllegalArgumentException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
         return workdir;
-
     }
 
 
@@ -259,6 +257,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             return this;
         }
+
         public Builder executablesPath(String executable) {
             return executablesPaths(executable);
         }
@@ -266,6 +265,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         public Builder wrapLogInfo(Function<CharSequence, String> wrapLoginfo) {
             return wrapLogInfo(ignoreArg1(wrapLoginfo));
         }
+
         public Builder wrapLogInfo(BiFunction<Level, CharSequence, String> wrapLoginfo) {
             return biWrapLogInfo(wrapLoginfo);
         }
@@ -283,7 +283,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     /**
-     * Eecutes the command with given arguments. Output is logged only.
+     * Executes the command with given arguments. Output is logged only.
      * @return  The exit code
      */
     @Override
@@ -293,7 +293,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             return execute(out, null, args);
         }
     }
-
 
     /**
      * Executes the command with given arguments, catch the output and error streams in the given output streams, and provide standard input with the given input stream
@@ -495,7 +494,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (needsQuotes) builder.append('"');
         }
         return builder.toString();
-
     }
 
     private static class ProcessTimeoutHandle {
@@ -510,7 +508,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             PROCESS_MONITOR.purge();
         }
     }
-
 
     @Slf4j
     private static class ProcessTimeoutTask extends TimerTask {
@@ -536,7 +533,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-
     private static ProcessTimeoutHandle startProcessTimeoutMonitor(
         Process process, String command, Duration timeout) {
         ProcessTimeoutTask task = new ProcessTimeoutTask(process, command); // task fires after timeout and kills the process
@@ -553,6 +549,5 @@ public class CommandExecutorImpl implements CommandExecutor {
                 .map(withArg1(this.wrapLogInfo, Level.INFO))
                 .collect(Collectors.joining(" ")));
     }
-
 
 }
