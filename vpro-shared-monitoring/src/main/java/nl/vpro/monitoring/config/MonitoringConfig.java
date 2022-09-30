@@ -178,6 +178,9 @@ public class MonitoringConfig {
                 Object key = holder.key;
                 String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
                 registry.counter("locks.event", "keyType", keyType, "eventType", String.valueOf(type), "holdCount", String.valueOf(holder.lock.getHoldCount())).increment();
+                if (type == ObjectLocker.Listener.Type.UNLOCK) {
+                    registry.timer("locks.duration", "keyType", keyType).record(duration);
+                }
             });
             Gauge.builder("locks.count", JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
                 .description("The current number of locked objects")
