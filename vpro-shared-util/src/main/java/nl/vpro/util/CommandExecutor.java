@@ -22,7 +22,7 @@ import nl.vpro.logging.simple.*;
 
 /**
  * Executor for external commands.
- *
+ * <p>
  * Three types of methods:
  *<ol>
  * <li>{@link #execute(InputStream, OutputStream, OutputStream, String...)} To synchronously execute and return exit code.</li>
