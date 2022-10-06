@@ -384,7 +384,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             errorCopier.waitForAndClose();
             int result = p.exitValue();
-            logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, String.join(" ", command));
+            logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, commandToString(command));
 
             if (parameters.out != null) {
                 parameters.out.flush();
@@ -409,6 +409,14 @@ public class CommandExecutorImpl implements CommandExecutor {
         } finally {
             this.logger.debug("Ready");
         }
+    }
+
+    protected static String commandToString(List<String> command) {
+        return command.stream().map(m -> m.contains(" ") ? '"' + escapeForBash(m) + '"' : escapeForBash(m)).collect(Collectors.joining(" "));
+    }
+
+    protected static String escapeForBash(String m) {
+        return StringEscapeUtils.escapeJava(m);
     }
 
     @Override
