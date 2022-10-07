@@ -216,8 +216,8 @@
           <version>3.10.1</version>
           <inherited>true</inherited>
           <configuration>
-            <source>8</source>
-            <target>8</target>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
@@ -237,6 +237,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
+    <java.version>8</java.version>
 
     <spring.version>5.3.23</spring.version>
     <spring-security.version>5.7.3</spring-security.version>
