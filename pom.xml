@@ -243,7 +243,7 @@
     <spring-security.version>5.7.3</spring-security.version>
     <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
 
-    <junit.version>5.9.0</junit.version>
+    <junit.version>5.9.1</junit.version>
     <mockito.version>4.8.0</mockito.version>
     <assertj.version>3.23.1</assertj.version>
     <resteasy.version>4.7.7.Final</resteasy.version>
@@ -710,7 +710,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.25.0</version>
+      <version>3.26.0</version>
       <optional>true</optional>
     </dependency>
       <dependency>
