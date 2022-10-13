@@ -298,6 +298,13 @@ public class ObjectLocker {
         }
     }
 
+    /**
+     * @since 2.34
+     */
+    public static List<LockHolder<? extends Serializable>> currentLocks() {
+        return Collections.unmodifiableList(new ArrayList<>(HOLDS.get()));
+    }
+
 
     /**
      *  Most importantly this is a wrapper around {@link ReentrantLock}, but it stores some extra meta information, like the original key, thread, and initialization time.
