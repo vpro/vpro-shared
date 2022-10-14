@@ -83,5 +83,9 @@
       <version>2.27.2</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+    </dependency>
   </dependencies>
 </project>

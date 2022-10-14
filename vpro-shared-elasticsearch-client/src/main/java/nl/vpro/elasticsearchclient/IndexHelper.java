@@ -36,8 +36,7 @@ import com.google.common.base.Suppliers;
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import nl.vpro.logging.simple.*;
 import nl.vpro.util.*;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -49,11 +48,10 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
  * Some tools to automatically create indices and put mappings and stuff.
- *
+ * <p>
  * It is associated with one index and one cluster, and contains the methods to create/delete/update the index settings themselves.
- *
- * Also it contains utilities to perform some common get/post-operations (like indexing/deleting a node), createing bulk requests, and executing them,
- * where the index name than can be implicit.
+ * <p>
+ * Also, it contains utilities to perform some common get/post-operations (like indexing/deleting a node), creating bulk requests, and executing them, where the index name than can be implicit.
  *
  * @author Michiel Meeuwissen
  * @since 0.24
@@ -151,6 +149,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
         return IndexHelper.builder()
             .log(log)
+            .client(client)
+            .elasticSearchIndex(index)
+            ;
+    }
+
+    public static IndexHelper.Builder of(org.apache.logging.log4j.Logger log, ESClientFactory client, ElasticSearchIndex index) {
+        return IndexHelper.builder()
+            .simpleLogger(Log4j2SimpleLogger.of(log))
             .client(client)
             .elasticSearchIndex(index)
             ;
@@ -314,7 +320,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     /**
      * For the current index. Reput the settings.
-     *
+     * <p>
      * Before doing that remove all settings from the settings object, that may not be updated, otherwise ES gives errors.
      *
      * @param postProcessSettings You may want to modify the settings objects even further before putting it to ES.
