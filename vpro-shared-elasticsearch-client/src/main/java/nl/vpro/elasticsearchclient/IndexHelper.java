@@ -84,6 +84,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             return this;
         }
 
+        public Builder log(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
+            return this;
+        }
+
         public Builder mappingResource(String mapping) {
             return mapping(() -> resourceToObjectNode(mapping));
         }
