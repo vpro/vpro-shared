@@ -141,10 +141,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     private SimpleLogger assembleLogger(SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
-        SimpleLogger result = null;
-        if (simpleLogger != null) {
-            result = simpleLogger;
-        }
+        SimpleLogger result = simpleLogger;
         if (result == null) {
             result = getDefaultLogger(this.binary.get());
         }
