@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static nl.vpro.util.CommandExecutor.isBrokenPipe;
 import static org.meeuw.functional.Functions.ignoreArg1;
 import static org.meeuw.functional.Functions.withArg1;
@@ -107,7 +108,6 @@ public class CommandExecutorImpl implements CommandExecutor {
     private CommandExecutorImpl(
         File workdir,
         List<File> executables,
-        Logger logger,
         SimpleLogger simpleLogger,
         BiFunction<Level, CharSequence, String> biWrapLogInfo,
         @Singular List<Object> commonArgsSuppliers,
@@ -121,7 +121,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.workdir = getWorkdir(workdir);
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
-        this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
+        this.logger = assembleLogger(simpleLogger, wrapLogInfo);
         this.commonArgs = (commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream())
             .map(this::toString)
             .collect(Collectors.toList());
@@ -140,13 +140,10 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-    private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
+    private SimpleLogger assembleLogger(SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
         SimpleLogger result = null;
-        if (logger != null) {
-            result = new Slf4jSimpleLogger(logger);
-        }
         if (simpleLogger != null) {
-            result = result == null ? simpleLogger : result.chain(simpleLogger);
+            result = simpleLogger;
         }
         if (result == null) {
             result = getDefaultLogger(this.binary.get());
@@ -268,6 +265,16 @@ public class CommandExecutorImpl implements CommandExecutor {
 
         public Builder wrapLogInfo(BiFunction<Level, CharSequence, String> wrapLoginfo) {
             return biWrapLogInfo(wrapLoginfo);
+        }
+
+        public Builder logger(Logger log){
+            this.simpleLogger(slf4j(log));
+            return this;
+        }
+
+        public Builder logger(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
+            return this;
         }
 
         public CommandExecutorImpl build() {
