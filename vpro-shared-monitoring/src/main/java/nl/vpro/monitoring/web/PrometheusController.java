@@ -36,10 +36,10 @@ public class PrometheusController {
         log.debug("Scraping Prometheus metrics");
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
-        long start = System.nanoTime();
-        try (Writer writer = response.getWriter()) {
-            Duration scrape = scrape(writer);
-            duration.accept(scrape);
+        try (
+            WindowedStatisticalLong.RunningDuration measure = duration.measure();
+            Writer writer = response.getWriter()) {
+            scrape(writer);
         }
     }
     protected Duration scrape(Writer writer) throws IOException {
