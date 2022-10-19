@@ -873,7 +873,7 @@
             </executions>
             <configuration>
               <sourcepath>
-                ${delombok.output},
+                ${delombok.output};
                 ${project.build.directory}/generated-sources/apt
               </sourcepath>
             </configuration>
