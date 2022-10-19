@@ -271,6 +271,8 @@
     -->
     <swagger.version>1.5.22</swagger.version>
     <lombok.version>1.18.24</lombok.version>
+    <delombok.output>${project.build.directory}/delombok</delombok.output>
+
 
     <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
 
@@ -871,7 +873,7 @@
             </executions>
             <configuration>
               <sourcepath>
-                ${project.build.directory}/generated-sources/delombok;
+                ${delombok.output},
                 ${project.build.directory}/generated-sources/apt
               </sourcepath>
             </configuration>
