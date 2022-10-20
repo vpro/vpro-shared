@@ -12,6 +12,8 @@ jobs:
     env:
       MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
+      - name: Cancel previous Action
+        uses: styfle/cancel-workflow-action@0.11.0
       - uses: getong/elasticsearch-action@v1.2
         with:
           elasticsearch version: '7.6.1'
