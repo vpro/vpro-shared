@@ -64,7 +64,7 @@ jobs:
         uses: codecov/codecov-action@v3
         continue-on-error: true
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.0.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.1.0
         if: always()
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
