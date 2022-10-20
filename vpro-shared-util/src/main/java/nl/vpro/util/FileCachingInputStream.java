@@ -562,7 +562,6 @@ public class FileCachingInputStream extends InputStream {
                     future.completeExceptionally(e);
                     close();
                     Thread.currentThread().interrupt();
-
                     throw new InterruptedIOException(e.getMessage());
                 }
                 result = tempFileInputStream.read(b, offset, length);
