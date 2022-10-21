@@ -81,7 +81,7 @@ public class HealthController {
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
 
-        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().durationValue();
+        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
         boolean prometheusDown = prometheusDown(prometheusDuration);
 
         if (prometheusDown) {
