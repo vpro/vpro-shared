@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
-import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static nl.vpro.util.CommandExecutor.isBrokenPipe;
 import static org.meeuw.functional.Functions.ignoreArg1;
 import static org.meeuw.functional.Functions.withArg1;
@@ -264,13 +263,23 @@ public class CommandExecutorImpl implements CommandExecutor {
             return biWrapLogInfo(wrapLoginfo);
         }
 
+        public Builder slf4j(Logger log){
+            this.simpleLogger(Slf4jSimpleLogger.slf4j(log));
+            return this;
+        }
+
+        public Builder log4j(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
+            return this;
+        }
+
         public Builder logger(Logger log){
-            this.simpleLogger(slf4j(log));
+            slf4j(log);
             return this;
         }
 
         public Builder logger(org.apache.logging.log4j.Logger log){
-            this.simpleLogger(Log4j2SimpleLogger.of(log));
+            log4j(log);
             return this;
         }
 
