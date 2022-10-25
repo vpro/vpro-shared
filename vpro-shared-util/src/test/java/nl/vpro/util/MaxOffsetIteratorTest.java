@@ -85,6 +85,28 @@ public class MaxOffsetIteratorTest {
         assertThat(mo.peekingWrapped().peek()).isEqualTo("d");
     }
 
+    @Test
+    public void predicate() throws Exception {
+        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+
+        try (MaxOffsetIterator<String> mo = MaxOffsetIterator
+            .<String>builder()
+            .wrapped(list.iterator())
+            .max(2)
+            .countPredicate(s -> ! "c".equals(s))
+            .offset(1)
+            .build()) {
+            assertThat(mo.next()).isEqualTo("b");
+            assertThat(mo.next()).isEqualTo("c");// not counted, but returned!
+            assertThat(mo.count).isEqualTo(2);
+            assertThat(mo.next()).isEqualTo("d");
+
+            assertThatThrownBy(mo::next).isInstanceOf(NoSuchElementException.class);
+        }
+
+    }
+
+
 
 
 
