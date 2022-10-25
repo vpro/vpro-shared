@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -273,13 +274,15 @@ public class CommandExecutorImpl implements CommandExecutor {
             return this;
         }
 
-        public Builder logger(Logger log){
-            slf4j(log);
-            return this;
-        }
-
-        public Builder logger(org.apache.logging.log4j.Logger log){
-            log4j(log);
+        public Builder logger(@NonNull Object log){
+            String className = log.getClass().getName();
+            if ("org.slf4j.Logger".equals(className)) {
+                slf4j((org.slf4j.Logger) log);
+            } else if ("org.apache.logging.log4j.Logger".equals(className)) {
+                log4j((org.apache.logging.log4j.Logger) log);
+            } else {
+                throw new IllegalArgumentException();
+            }
             return this;
         }
 
