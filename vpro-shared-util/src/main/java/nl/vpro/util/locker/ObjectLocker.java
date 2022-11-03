@@ -171,8 +171,8 @@ public class ObjectLocker {
         }
         final long nanoStart = System.nanoTime();
         final LockHolder<K> lock = acquireLock(nanoStart, key, reason, locks, comparable);
-        consumer.accept(lock);
         try {
+            consumer.accept(lock);
             return callable.call();
         } finally {
             releaseLock(nanoStart, key, reason, locks, lock);
@@ -226,7 +226,8 @@ public class ObjectLocker {
         final Duration maxWait = minWaitTime.multipliedBy(8);
         while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
             Duration duration = Duration.ofNanos(System.nanoTime() - start);
-            log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration, ObjectLocker.summarize(), holder.summarize());
+            log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration,
+                ObjectLocker.summarize(), holder.summarize());
             if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
                 log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
                 return;
@@ -322,7 +323,6 @@ public class ObjectLocker {
         @Getter
         @Setter
         private Duration warnTime = ObjectLocker.defaultWarnTime;
-
 
         LockHolder(K k, String reason, ReentrantLock lock, Exception cause) {
             this.key = k;
