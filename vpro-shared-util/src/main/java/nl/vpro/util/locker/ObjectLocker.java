@@ -169,24 +169,22 @@ public class ObjectLocker {
             log.warn("Calling with null key: {}", reason);
             return callable.call();
         }
-        final long nanoStart = System.nanoTime();
-        final LockHolder<K> lock = acquireLock(nanoStart, key, reason, locks, comparable);
-        try {
-            consumer.accept(lock);
+        try (final LockHolderCloser<K> lock = acquireLock(key, reason, locks, comparable)) {
+            consumer.accept(lock.lockHolder);
             return callable.call();
-        } finally {
-            releaseLock(nanoStart, key, reason, locks, lock);
         }
     }
 
 
+
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static  <K extends Serializable> LockHolder<K> acquireLock(
-        long nanoStart,
+    private static  <K extends Serializable> LockHolderCloser<K> acquireLock(
         final  K key,
         final @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
         final @NonNull BiPredicate<Serializable, K> comparable) throws InterruptedException {
+
+        final long nanoStart = System.nanoTime();
         LockHolder<K> holder;
         boolean alreadyWaiting = false;
         synchronized (locks) {
@@ -217,7 +215,7 @@ public class ObjectLocker {
         for(Listener listener : LISTENERS) {
             listener.lock(holder, acquireTime);
         }
-        return holder;
+        return new LockHolderCloser<>(nanoStart, locks, holder);
     }
 
     private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) throws InterruptedException {
@@ -363,6 +361,28 @@ public class ObjectLocker {
         @Override
         public String toString() {
             return "holder:" + key + ":" + createdAt;
+        }
+    }
+
+    private static class LockHolderCloser<K extends Serializable> implements AutoCloseable {
+        @Getter
+        final LockHolder<K> lockHolder;
+
+        final long nanoStart;
+
+        final @NonNull Map<K, LockHolder<K>> locks;
+        private LockHolderCloser(
+            final long nanoStart,
+            Map<K, LockHolder<K>> locks,
+            LockHolder<K> lockHolder) {
+            this.nanoStart = nanoStart;
+            this.locks = locks;
+            this.lockHolder = lockHolder;
+        }
+
+        @Override
+        public void close() throws Exception {
+            releaseLock(nanoStart, lockHolder.key, lockHolder.reason, locks, lockHolder);
         }
     }
 
