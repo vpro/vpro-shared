@@ -51,7 +51,7 @@ jobs:
           cache: maven
       - name: Build and deploy with Maven
         run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" deploy  -Dgpg.skip=false
-        if: matrix.java == 8
+        if: matrix.java == 11
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
