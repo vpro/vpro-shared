@@ -197,7 +197,7 @@ public class ObjectLocker {
             }
         }
 
-        if (Optional.ofNullable(threadLocalMonitorTime.get()).map(Objects::nonNull).orElse(monitor)) {
+        if (Optional.ofNullable(threadLocalMonitorTime.get()).map(c -> true).orElse(monitor)) {
             monitoredLock(holder, key);
         } else {
             holder.lock.lock();
@@ -376,8 +376,8 @@ public class ObjectLocker {
         final @NonNull Map<K, LockHolder<K>> locks;
         private LockHolderCloser(
             final long nanoStart,
-            Map<K, LockHolder<K>> locks,
-            LockHolder<K> lockHolder) {
+            @NonNull Map<K, LockHolder<K>> locks,
+            @NonNull LockHolder<K> lockHolder) {
             this.nanoStart = nanoStart;
             this.locks = locks;
             this.lockHolder = lockHolder;
