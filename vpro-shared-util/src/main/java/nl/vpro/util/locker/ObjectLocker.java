@@ -236,6 +236,10 @@ public class ObjectLocker {
             if (wait.compareTo(maxWait) < 0) {
                 wait = wait.multipliedBy(2);
             }
+            if (holder.isDisabled()) {
+                log.info("Holder got disabled, breaking now");
+                break;
+            }
             log.info("Now waiting {}", wait);
         }
 
@@ -322,6 +326,9 @@ public class ObjectLocker {
         final String reason;
 
         @Getter
+        boolean disabled = false;
+
+        @Getter
         @Setter
         private Duration warnTime = ObjectLocker.defaultWarnTime;
 
@@ -364,6 +371,13 @@ public class ObjectLocker {
         @Override
         public String toString() {
             return "holder:" + key + ":" + createdAt;
+        }
+
+        public void disable(boolean interrupt) {
+            disabled = true;
+            if (interrupt) {
+                thread.interrupt();
+            }
         }
     }
 
