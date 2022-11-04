@@ -185,48 +185,61 @@ public class ObjectLocker {
         final @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
         final @NonNull BiPredicate<Serializable, K> comparable) throws InterruptedException {
-
         final long nanoStart = System.nanoTime();
-        LockHolder<K> holder;
-        boolean alreadyWaiting = false;
-        synchronized (locks) {
-            holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable));
-            if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
-                log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
-                alreadyWaiting = true;
+        LockHolderCloser<K> closer = null;
+        try {
+
+            LockHolder<K> holder;
+            boolean alreadyWaiting = false;
+            synchronized (locks) {
+                holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable));
+                closer = new LockHolderCloser<>(nanoStart, locks, holder);
+                if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
+                    log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
+                    alreadyWaiting = true;
+                }
             }
-        }
 
-        if (Optional.ofNullable(threadLocalMonitorTime.get()).map(c -> true).orElse(monitor)) {
-            monitoredLock(holder, key);
-        } else {
-            holder.lock.lock();
-        }
-        if (alreadyWaiting) {
-            log.debug("Released and continuing {}", key);
-        }
+            if (Optional.ofNullable(threadLocalMonitorTime.get()).map(c -> true).orElse(monitor)) {
+                monitoredLock(holder, key);
+            } else {
+                holder.lock.lock();
+            }
+            if (alreadyWaiting) {
+                log.debug("Released and continuing {}", key);
+            }
 
-        log.trace("{} holdcount {}", Thread.currentThread().hashCode(), holder.lock.getHoldCount());
-        final Duration acquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
+            log.trace("{} holdcount {}", Thread.currentThread().hashCode(), holder.lock.getHoldCount());
+            final Duration acquireTime = Duration.ofNanos(System.nanoTime() - nanoStart);
 
 
-        if (holder.lock.getHoldCount() == 1) {
-            Slf4jHelper.log(log, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG, "Acquired lock for {} ({}) in {}", holder, reason, acquireTime);
+            if (holder.lock.getHoldCount() == 1) {
+                Slf4jHelper.log(log, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG, "Acquired lock for {} ({}) in {}", holder, reason, acquireTime);
+            }
+
+            for (Listener listener : LISTENERS) {
+                try {
+                    listener.lock(holder, acquireTime);
+                }  catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        } catch (InterruptedException | RuntimeException interruptedException) {
+            if (closer != null) {
+                closer.close();
+            }
+            throw interruptedException;
         }
-
-        for(Listener listener : LISTENERS) {
-            listener.lock(holder, acquireTime);
-        }
-        return new LockHolderCloser<>(nanoStart, locks, holder);
+        return closer;
     }
 
     private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) throws InterruptedException {
-        final long start = System.nanoTime();
-        final Duration maxTime = Optional.ofNullable(threadLocalMonitorTime.get()).orElse(ObjectLocker.maxLockAcquireTime);
+        final var start = System.nanoTime();
+        final var maxTime = Optional.ofNullable(threadLocalMonitorTime.get()).orElse(ObjectLocker.maxLockAcquireTime);
         Duration wait =  minWaitTime;
-        final Duration maxWait = minWaitTime.multipliedBy(8);
+        final var maxWait = minWaitTime.multipliedBy(8);
         while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
-            Duration duration = Duration.ofNanos(System.nanoTime() - start);
+            final var duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration,
                 ObjectLocker.summarize(), holder.summarize());
             if (duration.compareTo(maxTime) > 0) {
@@ -256,15 +269,15 @@ public class ObjectLocker {
                 currentLocks.stream().filter(l -> comparable.test(l.key, key)).findFirst();
             if (compatibleLocks.isPresent()) {
                 if (strictlyOne) {
-                    throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s + %s", summarize(), compatibleLocks.get().summarize(), key));
+                    throw new IllegalStateException(String.format("%s Getting a lock on a different key! %s\n\t\t+\n%s", summarize(), compatibleLocks.get().summarize(), key));
                 } else {
-                    log.warn("Getting a lock on a different key! {} + {}", compatibleLocks.get().summarize(), key);
+                    log.warn("Getting a lock on a different key! {}\n\t\t+\n{}", compatibleLocks.get().summarize(), key);
                 }
             } else {
                 log.debug("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
             }
         }
-        final LockHolder<K> newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
+        final var newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
         HOLDS.get().add(newHolder);
         return newHolder;
     }
@@ -398,7 +411,7 @@ public class ObjectLocker {
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             releaseLock(nanoStart, lockHolder.key, lockHolder.reason, locks, lockHolder);
         }
     }
