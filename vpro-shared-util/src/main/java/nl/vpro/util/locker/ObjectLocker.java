@@ -50,6 +50,8 @@ public class ObjectLocker {
     static boolean strictlyOne;
     static boolean monitor;
 
+    static ThreadLocal<Duration> threadLocalMonitorTime = ThreadLocal.withInitial(() -> null);
+
     static Duration maxLockAcquireTime = Duration.ofMinutes(10);
 
     static Duration minWaitTime  = Duration.ofSeconds(5);
@@ -195,7 +197,7 @@ public class ObjectLocker {
             }
         }
 
-        if (monitor) {
+        if (Optional.ofNullable(threadLocalMonitorTime.get()).map(Objects::nonNull).orElse(monitor)) {
             monitoredLock(holder, key);
         } else {
             holder.lock.lock();
@@ -220,13 +222,14 @@ public class ObjectLocker {
 
     private static  <K extends Serializable> void monitoredLock(LockHolder<K> holder, K key) throws InterruptedException {
         final long start = System.nanoTime();
+        final Duration maxTime = Optional.ofNullable(threadLocalMonitorTime.get()).orElse(ObjectLocker.maxLockAcquireTime);
         Duration wait =  minWaitTime;
         final Duration maxWait = minWaitTime.multipliedBy(8);
         while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
             Duration duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration,
                 ObjectLocker.summarize(), holder.summarize());
-            if (duration.compareTo(ObjectLocker.maxLockAcquireTime) > 0) {
+            if (duration.compareTo(maxTime) > 0) {
                 log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
                 return;
             }
