@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -191,15 +192,25 @@ public class ObjectLocker {
 
             LockHolder<K> holder;
             boolean alreadyWaiting = false;
-            synchronized (locks) {
-                holder = locks.computeIfAbsent(key, (m) -> computeLock(m, reason, comparable));
-                closer = new LockHolderCloser<>(nanoStart, locks, holder);
-                if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
-                    log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
-                    alreadyWaiting = true;
+            while (true) {
+                synchronized (locks) {
+                    holder = locks.computeIfAbsent(key, (m) ->
+                        computeLock(m, reason, comparable))
+                    ;
+                    if (holder.disabled) {
+                        // holders can (via JMX) be disabled, in which case we just dispose it now.
+                        log.warn("Found a disabled lock {}. Discarding it now.", holder);
+                        locks.remove(key);
+                        continue;
+                    }
+                    closer = new LockHolderCloser<>(nanoStart, locks, holder);
+                    if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
+                        log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
+                        alreadyWaiting = true;
+                    }
+                    break;
                 }
             }
-
             if (Optional.ofNullable(threadLocalMonitorTime.get()).map(c -> true).orElse(monitor)) {
                 monitoredLock(holder, key);
             } else {
@@ -310,7 +321,7 @@ public class ObjectLocker {
                 lock.lock.unlock();
             } else {
                 // can happen if 'continuing without lock'
-                log.warn("Current lock {} not hold by current thread {} but by {}", lock, Thread.currentThread().getName(), lock.thread.getName());
+                log.warn("Current lock {} not hold by current thread {} but by {}", lock, Thread.currentThread().getName(), Optional.ofNullable(lock.thread.get()).map(Thread::getName).orElse(null));
             }
 
             locks.notifyAll();
@@ -334,7 +345,7 @@ public class ObjectLocker {
         public final K key;
         public final ReentrantLock lock;
         final Exception cause;
-        final Thread thread;
+        final WeakReference<Thread> thread;
         final Instant createdAt = Instant.now();
         final String reason;
 
@@ -349,7 +360,7 @@ public class ObjectLocker {
             this.key = k;
             this.lock = lock;
             this.cause = cause;
-            this.thread = Thread.currentThread();
+            this.thread = new WeakReference<>(Thread.currentThread());
             this.reason = reason;
         }
 
@@ -378,7 +389,7 @@ public class ObjectLocker {
 
         public String summarize() {
             return key + ":" + createdAt + "(age: " + getAge() + "):" + reason + ":" +
-                ObjectLocker.summarize(this.thread, this.cause);
+                ObjectLocker.summarize(this.thread.get(), this.cause);
         }
 
         @Override
@@ -389,7 +400,12 @@ public class ObjectLocker {
         public void disable(boolean interrupt) {
             disabled = true;
             if (interrupt) {
-                thread.interrupt();
+                Thread t = thread.get();
+                if (t == null){
+                    log.warn("Thread of {} was collected already", this);
+                } else {
+                    t.interrupt();
+                }
             }
         }
     }
@@ -418,7 +434,7 @@ public class ObjectLocker {
 
 
     private static String summarize(Thread t, Exception e) {
-        return t.getName() + ":" + summarizeStackTrace(e);
+        return Optional.ofNullable(t).map(Thread::getName).orElse(null) + ":" + summarizeStackTrace(e);
     }
 
     private static String summarize() {
