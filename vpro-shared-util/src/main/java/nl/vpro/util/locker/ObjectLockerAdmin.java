@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -90,12 +91,12 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     /**
      * Total number of locks per 'reason'. Never decreases
      */
-    private final Map<String, AtomicInteger> lockCount = new HashMap<>();
+    private final Map<String, AtomicInteger> lockCount = new ConcurrentHashMap<>();
 
     /**
      * Current count per 'reason'.
      */
-    Map<String, AtomicInteger> currentCount = new HashMap<>();
+    private final Map<String, AtomicInteger> currentCount = new ConcurrentHashMap<>();
 
     @Getter
     private int maxConcurrency = 0;
