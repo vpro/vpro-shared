@@ -269,6 +269,11 @@ public class CommandExecutorImpl implements CommandExecutor {
             return this;
         }
 
+        @Deprecated
+        public Builder logger(Logger log){
+            return slf4j(log);
+        }
+
         public Builder log4j(org.apache.logging.log4j.Logger log){
             this.simpleLogger(Log4j2SimpleLogger.of(log));
             return this;
