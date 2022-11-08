@@ -283,10 +283,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             String className = log.getClass().getName();
             if ("org.slf4j.Logger".equals(className)) {
                 slf4j((org.slf4j.Logger) log);
-            } else if ("org.apache.logging.log4j.Logger".equals(className)) {
+            } else if (className.startsWith("org.apache.logging.log4j") && className.endsWith("Logger")) {
                 log4j((org.apache.logging.log4j.Logger) log);
             } else {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Unrecognized " + className);
             }
             return this;
         }
