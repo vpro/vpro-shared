@@ -404,7 +404,7 @@ public class ObjectLocker {
                     this.thread.get(),
                     this.initiator
                 ) + (
-                  threadStackTrace != null ? "\n THREAD is busy with: {}" + summarizeStackTrace(threadStackTrace) : ""
+                  threadStackTrace != null ? "\n THREAD is busy with: " + summarizeStackTrace(threadStackTrace) : ""
             );
         }
 
