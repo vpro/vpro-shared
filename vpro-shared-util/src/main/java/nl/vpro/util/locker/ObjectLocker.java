@@ -252,7 +252,9 @@ public class ObjectLocker {
         while (!holder.lock.tryLock(wait.toMillis(), TimeUnit.MILLISECONDS)) {
             final var duration = Duration.ofNanos(System.nanoTime() - start);
             log.info("Couldn't acquire lock for {} during {}, {}, locked by {}", key, duration,
-                ObjectLocker.summarize(), holder.summarize());
+                ObjectLocker.summarize(),
+                holder.summarize(true)
+            );
             if (duration.compareTo(maxTime) > 0) {
                 log.warn("Took over {} to acquire {}, continuing without lock now", ObjectLocker.maxLockAcquireTime, holder);
                 return;
@@ -288,7 +290,7 @@ public class ObjectLocker {
                 log.debug("Getting a lock on a different (incompatible) key! {} + {}", currentLocks.get(0).key, key);
             }
         }
-        final var newHolder = new LockHolder<>(key, reason, new ReentrantLock(), new Exception());
+        final var newHolder = new LockHolder<>(key, reason, new ReentrantLock());
         HOLDS.get().add(newHolder);
         return newHolder;
     }
@@ -344,7 +346,7 @@ public class ObjectLocker {
     public static class LockHolder<K> {
         public final K key;
         public final ReentrantLock lock;
-        final Exception cause;
+        final StackTraceElement[] initiator;
         final WeakReference<Thread> thread;
         final Instant createdAt = Instant.now();
         final String reason;
@@ -356,10 +358,10 @@ public class ObjectLocker {
         @Setter
         private Duration warnTime = ObjectLocker.defaultWarnTime;
 
-        LockHolder(K k, String reason, ReentrantLock lock, Exception cause) {
+        LockHolder(K k, String reason, ReentrantLock lock) {
             this.key = k;
             this.lock = lock;
-            this.cause = cause;
+            this.initiator = Thread.currentThread().getStackTrace();
             this.thread = new WeakReference<>(Thread.currentThread());
             this.reason = reason;
         }
@@ -388,8 +390,22 @@ public class ObjectLocker {
         }
 
         public String summarize() {
+            return summarize(false);
+        }
+
+        public String summarize(boolean showThreadBusy) {
+            Thread thr = this.thread.get();
+            StackTraceElement[] threadStackTrace = null;
+            if (thr != null && showThreadBusy) {
+                threadStackTrace = thr.getStackTrace();
+            }
             return key + ":" + createdAt + "(age: " + getAge() + "):" + reason + ":" +
-                ObjectLocker.summarize(this.thread.get(), this.cause);
+                ObjectLocker.summarize(
+                    this.thread.get(),
+                    this.initiator
+                ) + (
+                  threadStackTrace != null ? "\n THREAD is busy with: {}" + summarizeStackTrace(threadStackTrace) : ""
+            );
         }
 
         @Override
@@ -433,17 +449,19 @@ public class ObjectLocker {
     }
 
 
-    private static String summarize(Thread t, Exception e) {
-        return Optional.ofNullable(t).map(Thread::getName).orElse(null) + ":" + summarizeStackTrace(e);
+    private static String summarize(Thread t, StackTraceElement[] cause) {
+        return Optional.ofNullable(t)
+            .map(Thread::getName)
+            .orElse(null) + "CAUSE:" + summarizeStackTrace(cause);
     }
 
     private static String summarize() {
-        return summarize(Thread.currentThread(), new Exception());
+        return summarize(Thread.currentThread(), Thread.currentThread().getStackTrace());
     }
 
-    private static String summarizeStackTrace(Exception ex) {
+    private static String summarizeStackTrace(StackTraceElement[] stackTraceElements) {
         return "\n" +
-            Stream.of(ex.getStackTrace())
+            Stream.of(stackTraceElements)
                 .filter(summaryPredicate)
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n   <-"));
