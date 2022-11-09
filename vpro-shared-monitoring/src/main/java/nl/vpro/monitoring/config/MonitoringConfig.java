@@ -191,13 +191,13 @@ public class MonitoringConfig {
                 .register(registry);
 
             Gauge.builder("locks.average_acquiretime",
-                    () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue()
+                    () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().optionalDoubleMean().orElse(0d)
                 )
                 .description("The average time in ms to acquire a lock (in " + JMX_INSTANCE.getAverageLockAcquireTime().getTotalDuration() + ")")
                 .register(registry);
 
             Gauge.builder("locks.average_duration",
-                    () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().getValue()
+                    () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().optionalDoubleMean().orElse(0d)
                 )
                 .description("The average time in ms to hold a lock (in " + JMX_INSTANCE.getAverageLockDuration().getTotalDuration() +")")
                 .register(registry);
