@@ -423,7 +423,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public long clearIndex() {
-        List<BulkRequestEntry> bulk = new ArrayList<>();
+        final List<BulkRequestEntry> bulk = new ArrayList<>();
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client())) {
             i.prepareSearch(getIndexName());
 
@@ -591,7 +591,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull final Collection<BulkRequestEntry> jobs,
         @NonNull final ObjectNode responseItem) {
         return jobs.stream().filter(
-            item -> BulkRequestEntry.idFromActionNode(responseItem).equals(item.getId())
+            item -> BulkRequestEntry
+                .idFromActionNode(responseItem)
+                .equals(item.getId())
         ).findFirst();
     }
 
@@ -909,17 +911,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-
     String encode(@NonNull String id) {
-        try {
-            return URLEncoder.encode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-            return id;
-        }
+        return URLEncoder.encode(id, StandardCharsets.UTF_8);
     }
-
-
 
     /**
      * Creates a {@link BulkRequestEntry} for indexing an object with given id.
