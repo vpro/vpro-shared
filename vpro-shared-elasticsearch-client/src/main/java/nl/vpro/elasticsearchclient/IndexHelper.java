@@ -640,7 +640,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         rl.accept(error);
                     }
                 }
-
             }
         };
     }
@@ -724,7 +723,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     @SafeVarargs
-    private final CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
+    private CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync(createDelete( "/" + type + "/" + encode(id)),
@@ -926,49 +925,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      * Creates a {@link BulkRequestEntry} for indexing an object with given id.
      * @param id The id of the object to use
      * @param o The object to index
-     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the source node after that is constructed from the object to index
      */
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(id, null, o, consumers);
-    }
-    /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
-     * @param id The id of the object to use
-     * @param o The object to index
-     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
-     */
-    @SafeVarargs
-    public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _updateRequest(id,  o, consumers);
-    }
-
-    /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
-     * @param id The id of the object to use
-     * @param o The object to index
-     * @param routing The routing to use
-     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
-     */
-    @SafeVarargs
-    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
-        BulkRequestEntry request =
-            _indexRequest(id, null, o, consumers);
-        request.getAction()
-            .with(INDEX)
-            .put(ROUTING, routing);
-        return request;
-    }
-
-    @SafeVarargs
-    private final BulkRequestEntry _indexRequest(String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
-        if (version != null) { // somewhy, this is not supported
-            index.put(Fields.VERSION, version);
-        }
 
         ObjectNode objectNode  = objectMapper.valueToTree(o);
         return BulkRequestEntry.builder()
@@ -981,10 +945,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     c.accept(on);
                 }
             }).build();
-    }
 
+    }
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
     @SafeVarargs
-    private final BulkRequestEntry _updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
+    public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode update = actionLine.with(UPDATE);
         update.put(Fields.ID, id);
@@ -1006,21 +976,28 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     c.accept(doc);
                 }}
             ).build();
+
     }
 
-
-    public BulkRequestEntry deleteRequest(String id) {
-        return _deleteRequest(id);
-    }
-
-    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
-        BulkRequestEntry request  = _deleteRequest(id);
-        request.getAction().with(DELETE)
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param routing The routing to use
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
+    @SafeVarargs
+    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
+        BulkRequestEntry request =
+            indexRequest(id, o, consumers);
+        request.getAction()
+            .with(INDEX)
             .put(ROUTING, routing);
         return request;
     }
 
-    protected BulkRequestEntry _deleteRequest(String id) {
+
+    public BulkRequestEntry deleteRequest(String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with(DELETE);
         index.put(Fields.ID, id);
@@ -1028,6 +1005,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
     }
 
+    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
+        BulkRequestEntry request  = deleteRequest(id);
+        request.getAction().with(DELETE)
+            .put(ROUTING, routing);
+        return request;
+    }
 
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
         if (request.isEmpty()) {
