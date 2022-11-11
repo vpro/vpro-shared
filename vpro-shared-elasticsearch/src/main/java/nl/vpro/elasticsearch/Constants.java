@@ -2,12 +2,15 @@ package nl.vpro.elasticsearch;
 
 import java.time.Duration;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 /**
  * @author Michiel Meeuwissen
  */
 public class Constants {
 
-    public static final Duration ES_LATENCY = Duration.ofSeconds(10);
+    @NonNull
+    public static Duration ES_LATENCY = Duration.ofSeconds(10);
 
     public static class Fields {
         public static final String TYPE    = "_type";
