@@ -1,9 +1,13 @@
 package nl.vpro.elasticsearch;
 
+import java.time.Duration;
+
 /**
  * @author Michiel Meeuwissen
  */
 public class Constants {
+
+    public static final Duration ES_LATENCY = Duration.ofSeconds(10);
 
     public static class Fields {
         public static final String TYPE    = "_type";
