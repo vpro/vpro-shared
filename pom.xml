@@ -267,19 +267,10 @@
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
 
     <ektorp.version>1.5.0</ektorp.version>
-<<<<<<< HEAD
 
     <swagger.version>2.1.13</swagger.version>
-    <lombok.version>1.18.22</lombok.version>
-=======
-    <!--
-    <swagger.version>2.0.0-rc2</swagger.version>
-    -->
-    <swagger.version>1.5.22</swagger.version>
     <lombok.version>1.18.24</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
-
->>>>>>> main
 
     <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
 
