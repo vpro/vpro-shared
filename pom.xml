@@ -246,7 +246,7 @@
     <junit.version>5.9.1</junit.version>
     <mockito.version>4.8.1</mockito.version>
     <assertj.version>3.23.1</assertj.version>
-    <resteasy.version>4.7.7.Final</resteasy.version>
+    <resteasy.version>5.0.4.Final</resteasy.version>
     <bytebuddy.version>1.12.17</bytebuddy.version>
     <slf4j.version>1.7.32</slf4j.version>
     <log4j2.version>2.19.0</log4j2.version>
@@ -280,7 +280,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.9.4</micrometer.version>
+    <micrometer.version>1.10.0</micrometer.version>
   </properties>
 
   <dependencyManagement>
