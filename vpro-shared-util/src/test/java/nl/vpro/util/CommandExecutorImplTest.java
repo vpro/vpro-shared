@@ -5,8 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.file.*;
 import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.zip.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -15,8 +20,10 @@ import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,11 +74,11 @@ public class CommandExecutorImplTest {
         CommandExecutor find =
                  CommandExecutorImpl.builder()
                      .executablesPaths("/usr/bin/env")
-                     .commonArg("find", "-s")
+                     .commonArg("find")
                      .useFileCache(useFileCache)
                      .optional(true)
                      .build();
-        assertThat(find.toString()).isEqualTo("/usr/bin/env find -s");
+        assertThat(find.toString()).isEqualTo("/usr/bin/env find");
         try (Stream<String> s = find.lines(".")
             .limit(20)) {
             s.forEach(log::info);
@@ -165,5 +172,111 @@ public class CommandExecutorImplTest {
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/"), null)).isInstanceOf(IllegalArgumentException.class);
         new File("/tmp/pietjepuk").createNewFile();
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/pietjepuk"), null)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+
+
+    @Test
+    public void commonArgsSupplier() {
+        AtomicLong i = new AtomicLong(0);
+        CommandExecutor test =
+                 CommandExecutorImpl.builder()
+                     .executablesPaths("/usr/bin/env")
+                     .commonArgsSupplier((Supplier<String>) () -> String.valueOf(i.get()))
+                     .commonArg("a")
+                     .commonArgs(Arrays.asList("a1", "a2"))
+                     .commonArg(() -> "b")
+                     .commonArg(() -> i)
+                     .commonArgs(Arrays.asList("c", "d"))
+                     .optional(true)
+                     .build();
+        i.set(100);
+        assertThat(test.toString()).isEqualTo("/usr/bin/env 100 a a1 a2 b 100 c d");
+    }
+
+
+    @ValueSource(booleans = {true, false})
+    @ParameterizedTest
+    public void noCloseStreams(boolean useFile) {
+        CommandExecutor cat =
+            CommandExecutorImpl.builder()
+                .executablesPaths("/bin/cat")
+                .simpleLogger(Slf4jSimpleLogger.of(log))
+                .useFileCache(useFile)
+                .closeStreams(false)
+                .batchSize(2)
+                .build();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (ZipInputStream input = new ZipInputStream(new ByteArrayInputStream(getZip()))
+        ) {
+            while(true) {
+                ZipEntry e = input.getNextEntry();
+                if (e == null) {
+                    break;
+                }
+                log.info(e.getName());
+                OutputStream err = LoggerOutputStream.error(log, true);
+                cat.execute(input, output, err);
+            }
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+        }
+        assertThat(output.toString()).isEqualTo("aabb");
+        log.info("Ready");
+    }
+
+    byte[] getZip() throws IOException {
+         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (
+            ZipOutputStream zip = new ZipOutputStream(bytes);) {
+
+            ZipEntry a = new ZipEntry("a");
+            a.setComment("first entry");
+            zip.putNextEntry(a);
+            zip.write("aa".getBytes(UTF_8));
+            zip.closeEntry();
+            ZipEntry b = new ZipEntry("b");
+            b.setComment("second entry");
+            zip.putNextEntry(b);
+            zip.write("bb".getBytes(UTF_8));
+            zip.closeEntry();
+        }
+        return bytes.toByteArray();
+
+    }
+
+    @Test
+    public void events() throws InterruptedException {
+        CommandExecutor find =
+            CommandExecutorImpl.builder()
+                .executablesPaths("/usr/bin/env")
+                .commonArg("find")
+                .optional(true)
+                .build();
+        final List<CharSequence> events = new ArrayList<>();
+        CompletableFuture<Integer> submit = find.submit(CommandExecutor.parameters()
+            .arg("/")
+            .outputConsumer(e -> {
+                synchronized (events) {
+                    events.add(e.getMessage());
+                    events.notifyAll();
+                }
+            }));
+
+        synchronized (events) {
+            while (events.size() < 3) {
+                events.wait();
+                log.info("{} {}", events.size(), events.get(events.size() -1));
+            }
+        }
+        assertThat(events.size()).isGreaterThanOrEqualTo(3);
+    }
+
+    @Test
+    public void commandToString() {
+        assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo bar"))).isEqualTo("ls \"/tmp/foo bar\"");
+
+        assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo\"bar"))).isEqualTo("ls /tmp/foo\\\"bar");
     }
 }

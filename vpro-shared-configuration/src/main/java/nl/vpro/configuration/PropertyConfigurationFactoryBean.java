@@ -27,6 +27,7 @@ import org.springframework.core.io.Resource;
  * @version $Id$
  * @deprecated uses apache configuration 1, which seems to be superseded by configuration2
  */
+@Deprecated
 public class PropertyConfigurationFactoryBean implements InitializingBean, FactoryBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropertyConfigurationFactoryBean.class);

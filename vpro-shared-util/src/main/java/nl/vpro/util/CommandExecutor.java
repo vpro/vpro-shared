@@ -18,20 +18,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
-import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.*;
 
 /**
  * Executor for external commands.
- *
+ * <p>
  * Three types of methods:
- *<ul>
+ *<ol>
  * <li>{@link #execute(InputStream, OutputStream, OutputStream, String...)} To synchronously execute and return exit code.</li>
- * <li>{@link #submit(java.io.InputStream, java.io.OutputStream, java.io.OutputStream, java.util.function.IntConsumer, java.lang.String...) For asynchronous execution</li>
- * </ul>
- * These  two also have versions with a {@link Parameters} argument, so you can use builder pattern to fill in parameters.
- *<ul>
+ * <li>{@link #submit(java.io.InputStream, java.io.OutputStream, java.io.OutputStream, java.util.function.IntConsumer, java.lang.String...)} For asynchronous execution</li>
+ * </ol>
+ * These  two also have versions with a {@link Parameters} (or {@link Parameters.Builder} or {@code Consumer<Parameters.Builder>}) argument, so you can use the builder pattern to fill in parameters.
+ *<ol start='3'>
  * <li>{@link #lines(InputStream, OutputStream, String...)} For synchronous execution and returing the output as a stream of strings.</li>
- *</ul>
+ *</ol>
  * @author Michiel Meeuwissen
  * @since 1.6
  */
@@ -132,18 +132,22 @@ public interface CommandExecutor {
 
     }
 
+
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters.Builder parameters) {
         return submit(callback, parameters.build());
     }
 
+    /**
+     *
+     */
     default CompletableFuture<Integer> submit(IntConsumer callback, Parameters parameters) {
         final int[] result = {-1};
         return CompletableFuture.supplyAsync(() -> {
             result[0] = execute(parameters);
             return result[0];
         }).whenComplete((i, t) -> {
-            getLogger().debug("Calling back {}", callback);
             if (callback != null) {
+                getLogger().debug("Calling back {}", callback);
                 synchronized (callback) {
                     callback.accept(result[0]);
                     callback.notifyAll();
@@ -151,6 +155,20 @@ public interface CommandExecutor {
             }
         });
     }
+    default CompletableFuture<Integer> submit(Parameters parameters) {
+        return submit((i) -> {}, parameters);
+    }
+    default CompletableFuture<Integer> submit(Parameters.Builder parameters) {
+        return submit((i) -> {}, parameters.build());
+    }
+
+    default CompletableFuture<Integer> submit(Consumer<Parameters.Builder> parameters) {
+        Parameters.Builder builder = parameters();
+        parameters.accept(builder);
+        return submit(builder);
+    }
+
+
 
     default CompletableFuture<Integer> submit(InputStream in, OutputStream out, OutputStream error, String... args) {
         return submit(in, out, error, null, args);
@@ -195,11 +213,11 @@ public interface CommandExecutor {
      */
     default Stream<String> lines(InputStream in, OutputStream errors, String... args) {
         try {
-            PipedInputStream reader = new PipedInputStream();
-            PipedOutputStream writer = new PipedOutputStream(reader);
-            BufferedReader result = new BufferedReader(new InputStreamReader(reader));
+            final PipedInputStream reader = new PipedInputStream();
+            final PipedOutputStream writer = new PipedOutputStream(reader);
+            final BufferedReader result = new BufferedReader(new InputStreamReader(reader));
 
-            CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
+            final CompletableFuture<Integer> submit = submit(in, writer, errors, (i) -> {
                 try {
                     writer.flush();
                     writer.close();
@@ -228,7 +246,6 @@ public interface CommandExecutor {
         }
     }
 
-
     default Stream<String> lines(String... args) {
         return lines(null,
             LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args
@@ -244,6 +261,8 @@ public interface CommandExecutor {
 
     class BrokenPipe extends RuntimeException {
 
+        private static final long serialVersionUID = 973250365216289481L;
+
         public BrokenPipe(IOException e) {
             super(e);
         }
@@ -252,6 +271,7 @@ public interface CommandExecutor {
 
     @Getter
     class ExitCodeException extends RuntimeException {
+        private static final long serialVersionUID = 6103943329292512702L;
         final int exitCode;
         public ExitCodeException(String message, int exitCode) {
             super(message);
@@ -264,9 +284,14 @@ public interface CommandExecutor {
         }
     }
 
+    static Parameters.Builder parameters() {
+        return Parameters.builder();
+    }
+
     /**
-     * The parameters of {@link #submit(IntConsumer, Parameters)}.
+     * The parameters of {@link #submit(IntConsumer, Parameters)}, in other words,  an object representing the one time parameters of a call to a {@link CommandExecutor}.
      */
+    @Getter
     class Parameters {
         /**
          * InputStream (optional)
@@ -274,18 +299,34 @@ public interface CommandExecutor {
         final InputStream in;
         final OutputStream out;
         final OutputStream errors;
-        final Consumer<Process> consumer;
+
+        final Consumer<Process> onProcessCreation;
+
+        /**
+         * (Extra) arguments for the external command
+         */
         final String[] args;
 
+        /**
+         * @param in The input stream for the external command
+         * @param out The input stream for the external command
+         * @param onProcessCreation  As soon as the {@link Process} is created  this is called.
+         */
         @lombok.Builder(builderClassName = "Builder")
-        public Parameters(InputStream in, OutputStream out, OutputStream errors, Consumer<Process> consumer, @Singular List<String> listArgs) {
+        private Parameters(
+            InputStream in,
+            OutputStream out,
+            OutputStream errors,
+            Consumer<Process> onProcessCreation,
+            @Singular List<String> listArgs) {
             this.in = in;
             this.out = out;
             this.errors = errors == null ?
                 LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true) : errors;
-            this.consumer = consumer == null ? (p) -> {} : consumer;
+            this.onProcessCreation = onProcessCreation == null ? (p) -> {} : onProcessCreation;
             this.args = listArgs == null ? new String[0] : listArgs.toArray(new String[0]);
         }
+
         public static class Builder {
 
             public Builder args(String... args) {
@@ -301,17 +342,53 @@ public interface CommandExecutor {
 
             public CompletableFuture<Integer> submit(IntConsumer exitCode, CommandExecutor executor) {
                 return executor.submit(exitCode, this);
-
             }
+
             public CompletableFuture<Integer> submit(CommandExecutor executor) {
-                return submit((exitCode) -> {}, executor);
-
+                return submit((exitCode) -> {
+                }, executor);
             }
+
             public int execute(CommandExecutor executor) {
                 return executor.execute(this);
-
             }
 
+            /**
+             * <p>
+             * Sets up input and errors stream (unless they are set already) so they can be
+             * used via a {@link Consumer} of {@link Event}s.
+             * </p>
+             * <p>
+             * Lines on stdin are fed to the consumer as Events on level {@link Level#INFO}
+             * </p>
+             * <p>
+             * Lines on stderr are fed to the consumer as Events on level {@link Level#ERROR}
+             * </p>
+             * <p>Empty lines are ignored.</p>
+             */
+            public Builder outputConsumer(Consumer<Event> outputConsumer) {
+                if (outputConsumer != null) {
+                    if (out != null && errors != null) {
+                        throw new IllegalArgumentException();
+                    }
+                    EventSimpleLogger<Event> eventLogger = EventSimpleLogger.of(outputConsumer);
+                    if (out == null) {
+                        out = SimpleLoggerOutputStream.info(eventLogger, true);
+                    }
+                    if (errors == null) {
+                        errors = SimpleLoggerOutputStream.error(eventLogger, true);
+                    }
+                }
+                return this;
+            }
+
+            /**
+             * @deprecated Use {@link #onProcessCreation(Consumer)}
+             */
+            @Deprecated
+            public Builder consumer(Consumer<Process> consumer) {
+                return onProcessCreation(consumer);
+            }
         }
     }
 }

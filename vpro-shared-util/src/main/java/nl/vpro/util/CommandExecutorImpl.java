@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -11,6 +10,8 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.text.StringEscapeUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -32,11 +33,16 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
-    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) ->
-        exitCode == null ||
-            (exitCode == 0 // no error
-                || exitCode == 137 // killed
-            )  ? Level.DEBUG : Level.ERROR;
+    private static final IntFunction<Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
+        switch(exitCode) {
+            case 0:
+                return Level.DEBUG;
+            case 137:
+                return Level.WARN;
+            default:
+                return Level.ERROR;
+        }
+    };
 
     @Getter
     private final Supplier<String> binary;
@@ -57,7 +63,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final Boolean closeStreams;
 
-    private final Function<Integer, Level> exitCodeLogLevel;
+    private final IntFunction<Level> exitCodeLogLevel;
 
 
     public CommandExecutorImpl(String c) {
@@ -102,26 +108,21 @@ public class CommandExecutorImpl implements CommandExecutor {
     private CommandExecutorImpl(
         File workdir,
         List<File> executables,
-        Logger logger,
         SimpleLogger simpleLogger,
         BiFunction<Level, CharSequence, String> biWrapLogInfo,
-        List<String> commonArgs,
-        List<Object> commonArgsSuppliers,
+        @Singular List<Object> commonArgsSuppliers,
         boolean useFileCache,
         Integer batchSize,
         boolean optional,
         Boolean closeStreams,
         Duration processTimeout,
-        Function<Integer, Level> exitCodeLogLevel
+        IntFunction<Level> exitCodeLogLevel
         ) {
         this.workdir = getWorkdir(workdir);
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
-        this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
-        this.commonArgs = Stream.concat(
-                commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream(),
-                commonArgs == null ? Stream.empty() : commonArgs.stream()
-            )
+        this.logger = assembleLogger(simpleLogger, wrapLogInfo);
+        this.commonArgs = (commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream())
             .map(this::toString)
             .collect(Collectors.toList());
         this.useFileCache = useFileCache;
@@ -129,7 +130,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.closeStreams = closeStreams;
         this.processTimeout = processTimeout;
         this.exitCodeLogLevel = exitCodeLogLevel == null ? DEFAULT_EXIT_CODE_LEVEL : exitCodeLogLevel;
-
     }
 
     private Supplier<String> toString(Object o) {
@@ -140,16 +140,12 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-    private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
-        SimpleLogger result;
-        if (logger != null) {
-            result = new Slf4jSimpleLogger(logger);
-        } else {
+    private SimpleLogger assembleLogger(SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
+        SimpleLogger result = simpleLogger;
+        if (result == null) {
             result = getDefaultLogger(this.binary.get());
         }
-        if (simpleLogger != null) {
-            result = result.chain(simpleLogger);
-        }
+
         if (wrapLogInfo != null) {
             result = new SimpleLoggerWrapper(result) {
                 @Override
@@ -183,14 +179,13 @@ public class CommandExecutorImpl implements CommandExecutor {
         } else {
             return () -> f.get().getAbsolutePath();
         }
-
     }
+
     private static File getWorkdir(File workdir) {
         if (workdir != null && !workdir.exists()) {
             throw new IllegalArgumentException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
         return workdir;
-
     }
 
 
@@ -209,16 +204,34 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     public static class Builder {
 
-        private final List<Object> cargs = new ArrayList<>();
         private final List<File>   execs = new ArrayList<>();
 
-        public Builder commonArg(String... args) {
-            cargs.addAll(Arrays.asList(args));
+        public Builder commonArgs(List<String> args) {
+            for (String s : args) {
+                commonArgsSupplier(s);
+            }
             return this;
         }
 
-        public final Builder commonArg(Object... args) {
-            cargs.addAll(Arrays.asList(args));
+        public Builder commonArg(String... args) {
+            for (String s : args) {
+                commonArgsSupplier(s);
+            }
+            return this;
+        }
+
+        public Builder commonArg(Object... args) {
+            for (Object s : args) {
+                commonArgsSupplier(s);
+            }
+            return this;
+        }
+
+        @SafeVarargs
+        public final Builder commonArg(Supplier<Object>... args) {
+            for (Supplier<Object> s : args) {
+                commonArgsSupplier(s);
+            }
             return this;
         }
 
@@ -238,6 +251,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             return this;
         }
+
         public Builder executablesPath(String executable) {
             return executablesPaths(executable);
         }
@@ -245,17 +259,39 @@ public class CommandExecutorImpl implements CommandExecutor {
         public Builder wrapLogInfo(Function<CharSequence, String> wrapLoginfo) {
             return wrapLogInfo(ignoreArg1(wrapLoginfo));
         }
+
         public Builder wrapLogInfo(BiFunction<Level, CharSequence, String> wrapLoginfo) {
             return biWrapLogInfo(wrapLoginfo);
         }
 
-        public CommandExecutorImpl build() {
-            if (commonArgsSuppliers != null){
-                commonArgsSuppliers = new ArrayList<>(commonArgsSuppliers);
-                commonArgsSuppliers.addAll(cargs);
+        public Builder slf4j(Logger log){
+            this.simpleLogger(Slf4jSimpleLogger.slf4j(log));
+            return this;
+        }
+
+        @Deprecated
+        public Builder logger(Logger log){
+            return slf4j(log);
+        }
+
+        public Builder log4j(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
+            return this;
+        }
+
+        public Builder logger(@NonNull Object log){
+            String className = log.getClass().getName();
+            if ("org.slf4j.Logger".equals(className)) {
+                slf4j((org.slf4j.Logger) log);
+            } else if (className.startsWith("org.apache.logging.log4j") && className.endsWith("Logger")) {
+                log4j((org.apache.logging.log4j.Logger) log);
             } else {
-                commonArgsSuppliers(cargs);
+                throw new IllegalArgumentException("Unrecognized " + className);
             }
+            return this;
+        }
+
+        public CommandExecutorImpl build() {
             if (executables != null) {
                 executables = new ArrayList<>(executables);
                 executables.addAll(execs);
@@ -268,7 +304,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     /**
-     * Eecutes the command with given arguments. Output is logged only.
+     * Executes the command with given arguments. Output is logged only.
      * @return  The exit code
      */
     @Override
@@ -279,7 +315,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-
     /**
      * Executes the command with given arguments, catch the output and error streams in the given output streams, and provide standard input with the given input stream
      * @return  The exit code
@@ -288,16 +323,16 @@ public class CommandExecutorImpl implements CommandExecutor {
     public int execute(Parameters parameters) {
 
         final List<String> command = new ArrayList<>();
-        String b = binary.get();
+        final String b = binary.get();
         if (b == null) {
             throw new IllegalStateException("No binary found");
         }
         command.add(binary.get());
-        ProcessBuilder pb = new ProcessBuilder(command);
+        final ProcessBuilder pb = new ProcessBuilder(command);
         if (workdir != null) {
             pb.directory(workdir);
         }
-        Process p;
+        final Process p;
         try {
             if (commonArgs != null) {
                 command.addAll(commonArgs.stream().map(Supplier::get).collect(Collectors.toList()));
@@ -305,7 +340,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             Collections.addAll(command, parameters.args);
             logger.info(toString(command));
             p = pb.start();
-            parameters.consumer.accept(p);
+            parameters.onProcessCreation.accept(p);
 
             final ProcessTimeoutHandle handle;
             if (processTimeout != null) {
@@ -313,40 +348,65 @@ public class CommandExecutorImpl implements CommandExecutor {
             } else {
                 handle = null;
             }
-            final Copier inputCopier = parameters.in != null ? copyThread("input copier", parameters.in, p.getOutputStream(), (e) -> {}) : null;
+            final Copier inputCopier = parameters.in != null ?
+                copyThread(
+                    "input -> process input copier",
+                    parameters.in,
+                    p.getOutputStream(),
+                    (c) -> closeSilently(p.getOutputStream()),
+                    (e) -> {},
+                    p
+                ) : null;
 
             final Copier copier;
             if (parameters.out != null) {
-                InputStream commandOutput = p.getInputStream();
+                InputStream commandOutput;
                 if (useFileCache) {
                     commandOutput = FileCachingInputStream
                         .builder()
-                        .input(commandOutput)
+                        .input(p.getInputStream())
                         .noProgressLogging()
                         .build();
+                } else {
+                    commandOutput = p.getInputStream();
                 }
-                copier = copyThread("command output", commandOutput, parameters.out,
+                copier = copyThread("process output parameters out copier",
+                    commandOutput,
+                    parameters.out,
+                    (c) -> closeSilently(commandOutput),
                     (e) -> {
-                    Process process = p.destroyForcibly();
-                    logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
-                });
+                        Process process = p.destroyForcibly();
+                        logger.info("Killed {} because {}: {}", process, e.getClass(), e.getMessage());
+                    }, p);
             } else {
                 copier = null;
             }
 
-            Copier errorCopier = copyThread("error copier", p.getErrorStream(), parameters.errors, (e) -> {});
+            final Copier errorCopier = copyThread(
+                "error copier",
+                p.getErrorStream(),
+                parameters.errors,
+                (c) -> closeSilently(p.getErrorStream()),
+                (e) -> {},
+                p
+            );
             if (inputCopier != null) {
-                inputCopier.waitForAndClose();
+                if (needsClose(p.getInputStream())) {
+                    inputCopier.waitForAndClose();
+                } else {
+                    inputCopier.waitFor();
+                }
             }
+
             p.waitFor();
+
             if (copier != null) {
                 copier.waitForAndClose();
             }
             errorCopier.waitForAndClose();
             int result = p.exitValue();
-            if (result != 0) {
-                logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, String.join(" ", command));
-            }
+            logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, commandToString(command));
+
             if (parameters.out != null) {
                 parameters.out.flush();
             }
@@ -372,6 +432,14 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
+    protected static String commandToString(List<String> command) {
+        return command.stream().map(m -> m.contains(" ") ? '"' + escapeForBash(m) + '"' : escapeForBash(m)).collect(Collectors.joining(" "));
+    }
+
+    protected static String escapeForBash(String m) {
+        return StringEscapeUtils.escapeJava(m);
+    }
+
     @Override
     public SimpleLogger getLogger() {
         return logger;
@@ -393,13 +461,22 @@ public class CommandExecutorImpl implements CommandExecutor {
         return Slf4jSimpleLogger.of(category.toString());
     }
 
-    Copier copyThread(String name, InputStream in, OutputStream out, Consumer<Throwable> errorHandler) {
+    Copier copyThread(
+        String name,
+        InputStream in,
+        OutputStream out,
+        Consumer<Copier> callBack,
+        Consumer<Throwable> errorHandler,
+        Process process) {
         Copier copier = Copier.builder()
             .name(name)
             .input(in)
             .output(out)
-            .callback((c) -> closeIf(in, out))
-            .errorHandler((c, t) -> errorHandler.accept(t))
+            .callback(callBack)
+            .errorHandler((c, t) ->
+                errorHandler.accept(t)
+            )
+            .notify(process)
             .batch(batchSize)
             .build();
         copier.execute();
@@ -412,15 +489,27 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         return closeable != System.out && closeable != System.in && closeable != System.err;
     }
-    private void closeIf(Closeable... closeables) {
+
+    private boolean closeIf(Closeable... closeables) {
+        boolean value = false;
         for (Closeable closeable : closeables) {
             if (needsClose(closeable)) {
-                try {
-                    closeable.close();
-                } catch (IOException ioe) {
-                    logger.warn(ioe.getClass().getName() + ":" + ioe.getMessage());
-                }
+                value = closeSilently(closeable);
+            } else {
+                logger.debug("Not closing {}", closeable);
             }
+        }
+        return value;
+    }
+
+    private boolean closeSilently(Closeable closeable) {
+        try {
+            logger.debug("Closing {}", closeable);
+            closeable.close();
+            return true;
+        } catch (IOException ioe) {
+            logger.warn(ioe.getClass().getName() + ":" + ioe.getMessage());
+            return false;
         }
     }
 
@@ -430,11 +519,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (builder.length() > 0) builder.append(' ');
             boolean needsQuotes = a.indexOf(' ') >= 0 || a.indexOf('|') > 0;
             if (needsQuotes) builder.append('"');
-            builder.append(a.replaceAll("\"", "\\\""));
+            builder.append(StringEscapeUtils.escapeJava(a));
             if (needsQuotes) builder.append('"');
         }
         return builder.toString();
-
     }
 
     private static class ProcessTimeoutHandle {
@@ -449,7 +537,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             PROCESS_MONITOR.purge();
         }
     }
-
 
     @Slf4j
     private static class ProcessTimeoutTask extends TimerTask {
@@ -475,7 +562,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-
     private static ProcessTimeoutHandle startProcessTimeoutMonitor(
         Process process, String command, Duration timeout) {
         ProcessTimeoutTask task = new ProcessTimeoutTask(process, command); // task fires after timeout and kills the process
@@ -492,6 +578,5 @@ public class CommandExecutorImpl implements CommandExecutor {
                 .map(withArg1(this.wrapLogInfo, Level.INFO))
                 .collect(Collectors.joining(" ")));
     }
-
 
 }

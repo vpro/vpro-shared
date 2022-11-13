@@ -46,7 +46,7 @@ public class MonitoringProperties {
     @Value("${monitoring.hibernate.name:hibernate}")
     private String meterHibernateName;
 
-    @Value("${monitoring.hibernate.query.enabled:true}")
+    @Value("${monitoring.hibernate.query.enabled:false}") // ''Be aware of the potential for high cardinality of unique Hibernate queries executed by your application'
     private boolean meterHibernateQuery;
 
     @Value("${monitoring.postgres.enabled:true}")

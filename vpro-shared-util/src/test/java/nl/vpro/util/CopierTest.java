@@ -25,9 +25,9 @@ class CopierTest {
     @Test
     void basic() throws InterruptedException, IOException {
         try (
-            InputStream in = randomStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Copier copier = new Copier(in, out)) {
+            final InputStream in = randomStream();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final Copier copier = new Copier(in, out)) {
 
             copier.execute();
             assertThatThrownBy(copier::execute).isInstanceOf(IllegalStateException.class);
@@ -44,9 +44,9 @@ class CopierTest {
     void basicConsuming() throws InterruptedException, IOException {
         final List<String> batches = new ArrayList<>();
         try (
-            InputStream in = randomStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Copier copier = Copier
+            final InputStream in = randomStream();
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final Copier copier = Copier
                 .builder()
                 .input(in)
                 .batch(213)

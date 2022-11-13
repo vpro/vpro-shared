@@ -5,9 +5,11 @@ import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.Predicates;
 
 import com.google.common.collect.PeekingIterator;
 
@@ -17,6 +19,7 @@ import com.google.common.collect.PeekingIterator;
  * @author Michiel Meeuwissen
  * @since 3.1
  */
+@SuppressWarnings("UnusedReturnValue")
 @Slf4j
 public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
 
@@ -35,7 +38,7 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
     @Getter
     private final long offset;
 
-    private final boolean countNulls;
+    private final Predicate<T> countPredicate;
 
     /**
      * The count of the next element. First value will be the supplied value of offset.
@@ -63,7 +66,7 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
     }
 
     public MaxOffsetIterator(Iterator<T> wrapped, Number max, Number offset, boolean countNulls) {
-        this(wrapped, max, offset, countNulls, null, false);
+        this(wrapped, max, offset, null, countNulls, null, false);
     }
 
     @lombok.Builder(builderClassName = "Builder")
@@ -71,6 +74,7 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
         @NonNull Iterator<T> wrapped,
         @Nullable Number max,
         @Nullable Number offset,
+        @Nullable Predicate<T> countPredicate,
         boolean countNulls,
         @Nullable @Singular  List<Runnable> callbacks,
         boolean autoClose) {
@@ -82,7 +86,7 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
         this.offset = offset == null ? 0L : offset.longValue();
         this.max = max == null ? Long.MAX_VALUE : max.longValue();
         this.offsetmax = max == null ? Long.MAX_VALUE : max.longValue() + this.offset;
-        this.countNulls = countNulls;
+        this.countPredicate = effectiveCountPredicate(countPredicate, countNulls);
         this.callback = () -> {
             if (callbacks != null) {
                 for (Runnable r : callbacks) {
@@ -98,6 +102,14 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
             autoClose();
         }
 
+    }
+
+    protected static <S>  Predicate<S> effectiveCountPredicate(Predicate<S> countPredicate, boolean countNulls) {
+        Predicate<S> effective = countPredicate == null ? Predicates.alwaysTrue() : countPredicate;
+        if (! countNulls) {
+            effective = ((Predicate<S>) Objects::nonNull).and(effective);
+        }
+        return effective;
     }
 
     public MaxOffsetIterator<T> callBack(Runnable run) {
@@ -182,12 +194,12 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
                 } catch(RuntimeException runtimeException) {
                     n = null;
                 }
-                if (countNulls || n != null) {
+                if (countPredicate.test(n)) {
                     count++;
                 }
             }
 
-            if(count < offsetmax && wrapped.hasNext()) {
+            if (count < offsetmax && wrapped.hasNext()) {
                 try {
                     exception = null;
                     next = wrapped.next();
@@ -196,7 +208,7 @@ public class MaxOffsetIterator<T> implements CloseablePeekingIterator<T> {
                     next = null;
 
                 }
-                if (countNulls || next != null) {
+                if (countPredicate.test(next)) {
                     count++;
                 }
                 hasNext = true;

@@ -70,8 +70,9 @@ public class FileCachingInputStream extends InputStream {
      * @param path Directory for temporary files
      * @param tempPath Path to temporary file to use
      * @param logger The logger to which possible logging will happen. Defaults to the logger of the {@link FileCachingInputStream} class itself
-     * @param progressLogging Wether progress logging must be done (every batch)
-     * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explictely false)
+     * @param downloadFirst If true, then the entire inputstream will be consumed first (defaults to false)
+     * @param progressLogging Whether progress logging must be done (every batch)
+     * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explicitly false)
      * @param deleteTempFile Whether the intermediate temporary file must be deleted immediately on closing of this stream
      */
     @lombok.Builder(builderClassName = "Builder")
@@ -126,7 +127,11 @@ public class FileCachingInputStream extends InputStream {
 
             OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
 
-            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(progressLogging, batchConsumer,progressLoggingBatch);
+            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(
+                progressLogging,
+                batchConsumer,
+                progressLoggingBatch
+            );
 
             this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile));
             incStreams(tempFileInputStream);
@@ -147,7 +152,7 @@ public class FileCachingInputStream extends InputStream {
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);
             Thread.currentThread().interrupt();
-            throw  new RuntimeException(e);
+            throw new RuntimeException(e);
         } catch (ExecutionException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -155,7 +160,7 @@ public class FileCachingInputStream extends InputStream {
     }
 
     /**
-     *   copier is responsible for copying the remaining of the stream to the file
+     *   Copier is responsible for copying the remaining of the stream to the file
      *   in a separate thread
      */
     private Copier createToFileCopier(
@@ -166,6 +171,7 @@ public class FileCachingInputStream extends InputStream {
         final Consumer<FileCachingInputStream> consumer,
         final long batchSize,
         final Boolean progressLogging) throws ExecutionException, InterruptedException {
+
         final boolean effectiveProgressLogging;
         if (progressLogging == null) {
             effectiveProgressLogging = ! this.deleteTempFile;
@@ -220,22 +226,24 @@ public class FileCachingInputStream extends InputStream {
     private Consumer<FileCachingInputStream> assembleEffectiveConsumer(
         final Boolean progressLogging,
         final Consumer<FileCachingInputStream> batchConsumer,
-        Integer progressLoggingBatch) {
-           final Consumer<FileCachingInputStream> consumer;
-            if ((progressLogging == null || progressLogging || progressLoggingBatch != null) && !(progressLogging != null && ! progressLogging)) {
-                final AtomicLong batchCount = new AtomicLong(0);
-                consumer = t -> {
-                    if (progressLoggingBatch == null || batchCount.incrementAndGet() % progressLoggingBatch == 0) {
-                        log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
-                    }
-                    if (batchConsumer != null) {
-                        batchConsumer.accept(t);
-                    }
-                };
-            } else {
-                consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
-            }
-            return consumer;
+        final Integer progressLoggingBatch) {
+        final Consumer<FileCachingInputStream> consumer;
+        if ((progressLogging == null || progressLogging || progressLoggingBatch != null) &&
+            !(progressLogging != null && ! progressLogging)) {
+            final AtomicLong batchCount = new AtomicLong(0);
+            consumer = t -> {
+                if (progressLoggingBatch == null ||
+                    batchCount.incrementAndGet() % progressLoggingBatch == 0) {
+                    log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
+                }
+                if (batchConsumer != null) {
+                    batchConsumer.accept(t);
+                }
+            };
+        } else {
+            consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
+        }
+        return consumer;
     }
 
     private Path createTempFile(@Nullable Path path, @Nullable Path tempPath, @Nullable String filePrefix) throws IOException {
@@ -250,7 +258,7 @@ public class FileCachingInputStream extends InputStream {
             }
         }
 
-        Path tempFile = tempPath == null ? Files.createTempFile(
+        final Path tempFile = tempPath == null ? Files.createTempFile(
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
             filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null) : tempPath;
@@ -277,9 +285,9 @@ public class FileCachingInputStream extends InputStream {
 
     private InitialBufferResult fillInitialBuffer(int initialBuffer, InputStream input, Path tempPath) throws IOException {
         // first use an initial buffer of memory only
-        byte[] buf = new byte[initialBuffer];
+        final byte[] buf = new byte[initialBuffer];
 
-        InitialBufferResult.Builder builder = InitialBufferResult.builder();
+        final InitialBufferResult.Builder builder = InitialBufferResult.builder();
         int bufferOffset = 0;
         int numRead;
         boolean complete;
@@ -299,7 +307,7 @@ public class FileCachingInputStream extends InputStream {
             if (tempPath != null) {
                 // there is no need for the file., but since an explitely file was
                 // configured write it to that file anyways
-                try (OutputStream out = Files.newOutputStream(tempPath)) {
+                try (final OutputStream out = Files.newOutputStream(tempPath)) {
                     IOUtils.copy(new ByteArrayInputStream(builder.buffer), out);
                 }
                 builder.tempFile(tempPath);
@@ -392,7 +400,7 @@ public class FileCachingInputStream extends InputStream {
                     log.debug("Deleting {}", tempFile);
                     Files.deleteIfExists(tempFile);
                 } catch (IOException ioException) {
-                    log.debug(ioException.getMessage());
+                    log.debug(ioException.getClass().getName() + ": " + ioException.getMessage());
                 }
             }
         } else {
@@ -549,12 +557,11 @@ public class FileCachingInputStream extends InputStream {
                 try {
                     toFileCopier.wait(1000);
                 } catch (InterruptedException e) {
-                    log.warn("Interrupted {}", e.getMessage());
+                    log.warn("Interrupted, message: {}", e.getMessage());
                     toFileCopier.close();
                     future.completeExceptionally(e);
                     close();
                     Thread.currentThread().interrupt();
-
                     throw new InterruptedIOException(e.getMessage());
                 }
                 result = tempFileInputStream.read(b, offset, length);

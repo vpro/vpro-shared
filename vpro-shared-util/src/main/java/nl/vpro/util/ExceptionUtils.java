@@ -14,9 +14,9 @@ public class ExceptionUtils {
 
     /**
      * Wraps a {@link Callable} in a {@link Supplier}.
-     *
+     * <p>
      * You may need a supplier, but have code that throws an exception. Like this:
-     *
+     * <p>
      * {@code
      *   service.download(file, ExceptionUtils.wrapException(() -> new FileOutputStream(destFile)))
      * }
@@ -36,16 +36,16 @@ public class ExceptionUtils {
 
     /**
      * Wraps a {@link Callable} in a {@link Supplier}.
-     *
+     * <p>
      * You may need a supplier, but have code that throws an exception. Like this:
-     *
+     * <p>
      * {@code
      *   service.download(file, ExceptionUtils.wrapException(() -> new FileOutputStream(destFile)))
      * }
      *
      * The point is that otherwise this nice lambda gets ugly because of the try/catch block.
      */
-    public static <T> Consumer<T> wrapConsumer(ThrowingConsumer<T> b) {
+    public static <T> Consumer<T> wrapConsumer(org.meeuw.functional.ThrowingConsumer<T, ?> b) {
         return b;
     }
 
@@ -53,6 +53,7 @@ public class ExceptionUtils {
 
 
     @FunctionalInterface
+    @Deprecated
     public interface ThrowingConsumer<T> extends Consumer<T> {
 
         @Override
@@ -65,7 +66,7 @@ public class ExceptionUtils {
             }
         }
 
-        void acceptWithException(T e);
+        void acceptWithException(T e) throws Exception;
 
     }
 

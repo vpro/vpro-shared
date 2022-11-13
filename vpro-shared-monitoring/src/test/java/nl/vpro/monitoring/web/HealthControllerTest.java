@@ -1,10 +1,11 @@
 package nl.vpro.monitoring.web;
 
-import java.time.Instant;
-import java.time.ZoneId;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.time.*;
+
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.meeuw.math.TestClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,14 @@ class HealthControllerTest {
     @BeforeEach
     public void setup() {
         this.healthController.clock = clock;
+        this.healthController.prometheusController = new PrometheusController(new PrometheusMeterRegistry(new PrometheusConfig() {
+            @Override
+            public String get(String s) {
+                return null;
+            }
+        }));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+        this.healthController.markReady(null);
     }
 
     @Test
@@ -81,5 +89,26 @@ class HealthControllerTest {
         ).andExpect(status().is(503))
             .andExpect(jsonPath("$.status", is(503)))
             .andExpect(jsonPath("$.message", is("Application shutdown")));
+    }
+
+    @Test
+    void prometheusSlow() throws Exception {
+
+        assertThat(healthController.prometheusDownCount).hasValue(0);
+
+        healthController.prometheusController.getDuration().accept(
+            Duration.ofSeconds(20));
+
+        mockMvc.perform(
+            get("/health")
+                .accept(APPLICATION_JSON_VALUE)
+        ).andExpect(status().is(200))
+            .andExpect(jsonPath("$.status", is(200)))
+            .andExpect(jsonPath("$.prometheusCallDuration", is("PT20S")))
+            .andExpect(jsonPath("$.prometheusDownCount", is(1)))
+            .andExpect(jsonPath("$.message", is("Application ready")))
+        ;
+
+        assertThat(healthController.prometheusDownCount).hasValue(1);
     }
 }

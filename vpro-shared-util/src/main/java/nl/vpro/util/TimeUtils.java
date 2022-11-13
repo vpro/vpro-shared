@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAmount;
+import java.time.temporal.*;
 import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 /**
  * @author Michiel Meeuwissen
@@ -168,7 +169,7 @@ public class TimeUtils {
      * Parses a {@link CharSequence} to a {@link TemporalAmount}. First using {@link Period#parse(CharSequence)}, and than, if that fails, using
      * {@link #parseDuration(CharSequence)}
      */
-    public static Optional<? extends TemporalAmount> parseTemporalAmount(CharSequence d) {
+    public static Optional<? extends TemporalAmount> parseTemporalAmount(@Nullable CharSequence d) {
         if (d == null) {
             return Optional.empty();
         }
@@ -215,7 +216,8 @@ public class TimeUtils {
         return Optional.ofNullable(i == null ? null : Duration.ofMillis(i.getTime()));
     }
 
-    public static Duration durationOf(javax.xml.datatype.Duration d) {
+    @PolyNull
+    public static Duration durationOf(javax.xml.datatype.@PolyNull Duration d) {
         return d == null ? null : Duration.parse(d.toString());
     }
 
@@ -223,28 +225,32 @@ public class TimeUtils {
         return Optional.ofNullable(d == null ? null : (int) (d.toMillis() / 1000));
     }
 
-    public static Optional<Float> toSeconds(Duration d) {
+    public static Optional<Float> toSeconds(@Nullable Duration d) {
         return Optional.ofNullable(d == null ? null : d.toMillis() / 1000f);
     }
 
-    public static Optional<Long> toMillis(Duration d) {
+    public static Optional<Long> toMillis(@Nullable Duration d) {
         return Optional.ofNullable(d == null ? null : d.toMillis());
     }
 
-
-    public static Date asDate(Duration duration) {
+    @PolyNull
+    public static Date asDate(@PolyNull Duration duration) {
         return duration == null ? null : new Date(duration.toMillis());
     }
 
 
-    public static Duration between(Instant instant1, Instant instant2) {
+    /**
+     * {@code null} safe version of {@link Duration#between(Temporal, Temporal)}. If one  or both of the arguments are null, the result is {@code null} too.
+     */
+    @PolyNull
+    public static Duration between(@PolyNull Temporal instant1, @PolyNull Temporal instant2) {
         if (instant1 == null || instant2 == null) {
             return null;
         }
         return Duration.between(instant1, instant2);
     }
 
-    public static boolean isLarger(Duration duration1, Duration duration2) {
+    public static boolean isLarger(@Nullable Duration duration1, @Nullable Duration duration2) {
         if (duration1 == null || duration2 == null) {
             return false;
         }
@@ -254,9 +260,29 @@ public class TimeUtils {
     /**
      * Rounds the duration to the nearest millis (This may round up half a millis).
      */
-    public static Duration roundToMillis(Duration duration) {
+    @PolyNull
+    public static Duration roundToMillis(@PolyNull Duration duration) {
         return duration == null ? null : Duration.ofMillis(duration.plus(Duration.ofNanos(500_000)).toMillis());
 
+    }
+
+    /**
+     * @since 2.34
+     */
+    @PolyNull
+    public static Instant truncatedTo(
+        @PolyNull Instant instant,
+        @Nullable ChronoUnit unit) {
+        return instant == null ? null : instant.truncatedTo(unit);
+    }
+
+    /**
+     * @since 2.34
+     */
+    @PolyNull
+    public static Instant truncated(
+        @PolyNull Instant instant) {
+        return truncatedTo(instant, ChronoUnit.MILLIS);
     }
 
 

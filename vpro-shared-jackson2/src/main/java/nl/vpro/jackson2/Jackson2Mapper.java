@@ -7,12 +7,16 @@ package nl.vpro.jackson2;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 import org.slf4j.event.Level;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -21,6 +25,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.google.common.annotations.Beta;
 
 import nl.vpro.logging.Slf4jHelper;
 
@@ -30,6 +35,8 @@ import nl.vpro.logging.Slf4jHelper;
  */
 @Slf4j
 public class Jackson2Mapper extends ObjectMapper {
+
+    private static final long serialVersionUID = 8353430660109292010L;
 
     private static boolean loggedAboutAvro = false;
     private static boolean loggedAboutFallback = false;
@@ -46,6 +53,11 @@ public class Jackson2Mapper extends ObjectMapper {
     public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
     public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
     public static final Jackson2Mapper BACKWARDS_PUBLISHER = new Jackson2Mapper("backwards_publisher");
+
+    private static final Jackson2Mapper MODEL = new Jackson2Mapper("model");
+    private static final Jackson2Mapper MODEL_AND_NORMAL = new Jackson2Mapper("model_and_normal");
+
+
 
     private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
@@ -85,9 +97,14 @@ public class Jackson2Mapper extends ObjectMapper {
 
         //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
         PRETTY_STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
+
+
+        MODEL.setConfig(MODEL.getSerializationConfig().withView(Views.Model.class));
+        MODEL_AND_NORMAL.setConfig(MODEL_AND_NORMAL.getSerializationConfig().withView(Views.ModelAndNormal.class));
+
     }
 
-    public static Jackson2Mapper getInstance() {
+    public static Jackson2Mapper getInstance()  {
         return INSTANCE;
     }
 
@@ -99,16 +116,18 @@ public class Jackson2Mapper extends ObjectMapper {
         return PRETTY;
     }
 
-
     public static Jackson2Mapper getPrettyStrictInstance() {
         return PRETTY_STRICT;
     }
 
 
+    public static Jackson2Mapper getStrictInstance() {
+        return STRICT;
+    }
+
     public static Jackson2Mapper getPublisherInstance() {
         return PUBLISHER;
     }
-
 
     public static Jackson2Mapper getPrettyPublisherInstance() {
         return PRETTY_PUBLISHER;
@@ -116,6 +135,16 @@ public class Jackson2Mapper extends ObjectMapper {
 
     public static Jackson2Mapper getBackwardsPublisherInstance() {
         return BACKWARDS_PUBLISHER;
+    }
+
+    @Beta
+    public static Jackson2Mapper getModelInstance() {
+        return MODEL;
+    }
+
+    @Beta
+    public static Jackson2Mapper getModelAndNormalInstance() {
+        return MODEL_AND_NORMAL;
     }
 
     public static Jackson2Mapper getThreadLocal() {
@@ -135,15 +164,40 @@ public class Jackson2Mapper extends ObjectMapper {
     }
 
     private final String toString;
+    private boolean inited = false;
+
+    private Jackson2Mapper(String toString, Predicate<Module> predicate) {
+        configureMapper(this, predicate);
+        this.toString = toString;
+    }
 
     private Jackson2Mapper(String toString) {
         configureMapper(this);
         this.toString = toString;
-
     }
 
+    @Override
+    public Jackson2Mapper setConfig(SerializationConfig config) {
+        if (inited) {
+            throw new IllegalStateException("Already initialized. Pleasy copy first");
+        }
+        return (Jackson2Mapper) super.setConfig(config);
+    }
+
+    @SafeVarargs
+    public static Jackson2Mapper create(String toString, Predicate<Module> module, Consumer<ObjectMapper>... consumer) {
+        Jackson2Mapper result =  new Jackson2Mapper(toString, module);
+        for (Consumer<ObjectMapper> c : consumer){
+            c.accept(result);
+        }
+        return result;
+    }
 
     public static void configureMapper(ObjectMapper mapper) {
+        configureMapper(mapper, m -> true);
+    }
+
+    public static void configureMapper(ObjectMapper mapper, Predicate<Module> filter) {
         mapper.setFilterProvider(FILTER_PROVIDER);
 
          AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
@@ -177,12 +231,12 @@ public class Jackson2Mapper extends ObjectMapper {
 
         }
 
-        mapper.registerModule(new JavaTimeModule());
-        mapper.registerModule(new DateModule());
+        register(mapper, filter, new JavaTimeModule());
+        register(mapper, filter, new DateModule());
         // For example normal support for Optional.
         Jdk8Module jdk8Module = new Jdk8Module();
         jdk8Module.configureAbsentsAsNulls(true);
-        mapper.registerModule(jdk8Module);
+        register(mapper, filter, jdk8Module);
 
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
@@ -194,7 +248,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
-            mapper.registerModule((com.fasterxml.jackson.databind.Module) avro.newInstance());
+            register(mapper, filter, (com.fasterxml.jackson.databind.Module) avro.newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
@@ -207,7 +261,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
         try {
             Class<?> guava = Class.forName("nl.vpro.jackson2.GuavaRangeModule");
-            mapper.registerModule((com.fasterxml.jackson.databind.Module) guava.newInstance());
+            register(mapper, filter, (com.fasterxml.jackson.databind.Module) guava.newInstance());
         } catch (ClassNotFoundException ncdfe) {
             log.debug(ncdfe.getMessage());
         } catch (IllegalAccessException | InstantiationException e) {
@@ -218,6 +272,12 @@ public class Jackson2Mapper extends ObjectMapper {
     public static void addFilter(String key, PropertyFilter filter) {
         FILTER_PROVIDER.addFilter(key, filter);
         log.info("Installed filter {} -> {}", key, filter);
+    }
+
+    private static void register(ObjectMapper mapper, Predicate<Module> predicate, Module module) {
+        if (predicate.test(module)) {
+            mapper.registerModule(module);
+        }
     }
 
     @Override

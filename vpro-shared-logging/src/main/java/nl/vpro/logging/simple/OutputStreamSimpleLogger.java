@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 
 /**
+ * A {@link SimpleLogger} implementation that just writes everything to a {@link OutputStream}
  * @author Michiel Meeuwissen
  * @since 1.79
  */

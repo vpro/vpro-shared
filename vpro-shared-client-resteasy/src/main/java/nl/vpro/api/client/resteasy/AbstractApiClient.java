@@ -47,6 +47,7 @@ import org.apache.http.protocol.HttpContext;
 import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private final List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
     private boolean shutdown = false;
     protected boolean trustAll = false;
 
@@ -81,11 +81,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration connectTimeout;
     protected Duration socketTimeout;
 
+    @Getter
     protected Integer maxConnections;
+    @Getter
     protected Integer maxConnectionsPerRoute;
+    @Getter
     protected Integer maxConnectionsNoTimeout;
+    @Getter
     protected Integer maxConnectionsPerRouteNoTimeout;
-
 
     protected Duration connectionInPoolTTL;
     protected Duration validateAfterInactivity;
@@ -94,8 +97,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration countWindow = Duration.ofHours(24);
     protected Integer bucketCount = 24;
 
+    @Getter
     protected Duration warnThreshold = Duration.ofMillis(100);
 
+    @Getter
     protected List<Locale> acceptableLanguages = new ArrayList<>();
 
     protected MediaType accept;
@@ -103,6 +108,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected MediaType contentType;
 
     private BrowserCache resteasyBrowserCache;
+
+    protected boolean browserCache = true;
 
     private Instant initializationInstant = Instant.now();
 
@@ -118,6 +125,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected final String userAgent;
 
     protected boolean eager;
+
+
 
     @Deprecated
     protected AbstractApiClient(
@@ -202,6 +211,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
         this.maxConnectionsNoTimeout = maxConnectionsNoTimeout == null ? 3 : maxConnectionsNoTimeout;
         this.maxConnectionsPerRouteNoTimeout = maxConnectionsPerRouteNoTimeout == null ? 3 : maxConnectionsPerRouteNoTimeout;
+        if ((maxConnections != null || maxConnectionsPerRoute != null) && connectionInPoolTTL == null) {
+            connectionInPoolTTL = Duration.ofMinutes(5);
+            log.info("Connection in pool ttl defaulted to {}", connectionInPoolTTL);
+        }
         this.connectionInPoolTTL = connectionInPoolTTL;
         this.validateAfterInactivity = validateAfterInactivity;
         setBaseUrl(baseUrl);
@@ -419,7 +432,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
 
     /**
-     * Checks wether supplier has null, if so produces it while locking, so it happens only once
+     * Checks whether supplier has null, if so produces it while locking, so it happens only once
      */
     protected <T> T produceIfNull(Supplier<T> supplier, Supplier<T> producer) {
         T t = supplier.get();
@@ -445,11 +458,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private CloseableHttpClient getHttpClient(
         Duration connectionRequestTimeout,
         Duration connectTimeout,
-        Duration socketTimeout,
-        Integer maxConnections,
-        Integer maxConnectionsPerRoute,
-        Duration connectionInPoolTTL,
-        Duration validateAfterInactivity) {
+        Duration socketTimeout) {
 
         RequestConfig defaultRequestConfig = RequestConfig.custom()
             .setExpectContinueEnabled(true)
@@ -459,7 +468,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             .setSocketTimeout(socketTimeout == null ? 0 : (int) socketTimeout.toMillis())
             .build();
 
-        List<Header> defaultHeaders = new ArrayList<>();
+        final List<Header> defaultHeaders = new ArrayList<>();
         defaultHeaders.add(new BasicHeader("Keep-Alive", "timeout=1000, max=500"));
 
         HttpClientBuilder client = HttpClients.custom()
@@ -487,7 +496,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 log.error(e.getMessage(), e);
             }
         }
-
         return client.build();
     }
 
@@ -523,10 +531,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
             connectionManager.setDefaultSocketConfig(socketConfig);
 
-
             if (maxConnections > 1) {
                 watchIdleConnections(connectionManager);
             }
+        } else {
+            log.info("No TTL configured");
         }
         if (connectionManager != null){
             client.setConnectionManager(connectionManager);
@@ -536,7 +545,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngine() {
         if (clientHttpEngine == null) {
-            clientHttpEngine = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, socketTimeout, maxConnections, maxConnectionsPerRoute, connectionInPoolTTL, validateAfterInactivity), false);
+            clientHttpEngine = ApacheHttpClientEngine.create(
+                getHttpClient(
+                    connectionRequestTimeout,
+                    connectTimeout,
+                    socketTimeout
+                ),
+                false
+            );
 
         }
         return clientHttpEngine;
@@ -544,16 +560,17 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     public synchronized ClientHttpEngine getClientHttpEngineNoTimeout() {
         if (clientHttpEngineNoTimeout == null) {
-            clientHttpEngineNoTimeout = ResteasyHelper.createApacheHttpClient(getHttpClient(connectionRequestTimeout, connectTimeout, null, maxConnectionsNoTimeout, maxConnectionsPerRouteNoTimeout, null, validateAfterInactivity), false);
+            clientHttpEngineNoTimeout = ApacheHttpClientEngine.create(
+                getHttpClient(
+                    connectionRequestTimeout,
+                    connectTimeout,
+                    null
+                ),
+                false);
         }
         return clientHttpEngineNoTimeout;
     }
 
-
-    @Override
-    public Integer getMaxConnections() {
-        return maxConnections;
-    }
 
     @Override
     public void setMaxConnections(Integer maxConnections) {
@@ -561,11 +578,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             this.maxConnections = maxConnections;
             invalidate();
         }
-    }
-
-    @Override
-    public Integer getMaxConnectionsPerRoute() {
-        return maxConnectionsPerRoute;
     }
 
     @Override
@@ -578,21 +590,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
 
     @Override
-    public Integer getMaxConnectionsNoTimeout() {
-        return maxConnectionsNoTimeout;
-    }
-
-    @Override
     public void setMaxConnectionsNoTimeout(Integer maxConnectionsNoTimeout) {
         if (! Objects.equals(this.maxConnectionsNoTimeout, maxConnectionsNoTimeout)) {
             this.maxConnectionsNoTimeout = maxConnectionsNoTimeout;
             invalidate();
         }
-    }
-
-    @Override
-    public Integer getMaxConnectionsPerRouteNoTimeout() {
-        return maxConnectionsPerRouteNoTimeout;
     }
 
     @Override
@@ -674,19 +676,12 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         setWarnThreshold(TimeUtils.parseDuration(warnThreshold).orElse(Duration.ofMillis(100)));
     }
 
-    public Duration getWarnThreshold() {
-        return warnThreshold;
-    }
 
     public void setWarnThreshold(Duration warnThreshold) {
         if (! Objects.equals(warnThreshold, this.warnThreshold)) {
             this.warnThreshold = warnThreshold;
             invalidate();
         }
-    }
-
-    public List<Locale> getAcceptableLanguages() {
-        return acceptableLanguages;
     }
 
     public void setAcceptableLanguages(List<Locale> acceptableLanguages) {
@@ -818,7 +813,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         return builder;
     }
 
-     protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
+    protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
         ResteasyClientBuilder builder = ResteasyHelper.clientBuilder()
             .httpEngine(engine);
         builder.register(new JacksonContextResolver(objectMapper));
@@ -827,17 +822,22 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         builder.register(new CountFilter(log));
         builder.register(HeaderInterceptor.INSTANCE);
 
-        BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
-
-        if (this.resteasyBrowserCache != null) {
-            browserCacheFeature.setCache(this.resteasyBrowserCache);
-        }
-        builder.register(browserCacheFeature);
-        if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
-            this.resteasyBrowserCache = browserCacheFeature.getCache();
-            log.info("Set browser cache to {}", this.resteasyBrowserCache);
-        } else {
-            log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+        if (this.browserCache) {
+            BrowserCacheFeature browserCacheFeature = new BrowserCacheFeature();
+            if (this.resteasyBrowserCache != null) {
+                browserCacheFeature.setCache(this.resteasyBrowserCache);
+                builder.register(browserCacheFeature);
+                if (browserCacheFeature.getCache() != this.resteasyBrowserCache) {
+                    this.resteasyBrowserCache = browserCacheFeature.getCache();
+                    log.info("Set browser cache to {}", this.resteasyBrowserCache);
+                } else {
+                    log.debug("Browser cache was already set to be {}", this.resteasyBrowserCache);
+                }
+            } else {
+                builder.register(browserCacheFeature);
+                this.resteasyBrowserCache = browserCacheFeature.getCache();
+                log.debug("No browser cache set. Using default {}", browserCacheFeature.getCache());
+            }
         }
         return builder;
     }
@@ -924,6 +924,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         return resteasyBrowserCache;
     }
 
+    public void clearBrowserCache() {
+        if (resteasyBrowserCache != null) {
+            resteasyBrowserCache.clear();
+        }
+    }
+
+    /**
+     * Default the client is backed by a {@link org.jboss.resteasy.client.jaxrs.cache.LightweightBrowserCache}, you may replace it by {@link JavaxBrowserCache}, backed with a more generic {@link Cache}, so that the client can hitch on your preferred caching framework.
+     */
+    @SuppressWarnings("unchecked")
     public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
@@ -931,6 +941,14 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     public void setBrowserCache(BrowserCache browserCache) {
         if (! Objects.equals(browserCache, this.resteasyBrowserCache)) {
             this.resteasyBrowserCache = browserCache;
+            this.browserCache = this.resteasyBrowserCache != null;
+            invalidate();
+        }
+    }
+
+    public void setBrowserCache(boolean browserCache) {
+        if (browserCache != this.browserCache) {
+            this.browserCache = browserCache;
             invalidate();
         }
     }
@@ -982,18 +1000,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     private synchronized void watchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         log.debug("Watching idle connections in {}", connectionManager);
-        GUARD.connectionManagers.add(connectionManager);
-        connectionManagers.add(connectionManager);
+        GUARD.add(connectionManager);
         if (connectionGuardThread == null) {
             GUARD.start();
             connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
             connectionGuardThread.start();
         }
     }
-
     private synchronized void unwatchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         log.debug("Unwatching idle connections in {}", connectionManager);
-        GUARD.connectionManagers.remove(connectionManager);
+        GUARD.remove(connectionManager);
         if (GUARD.connectionManagers.isEmpty()) {
             connectionGuardThread.interrupt();
             GUARD.shutdown();
@@ -1007,8 +1023,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         closeClients();
         if(!shutdown) {
             shutdown = true;
-            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
-                unwatchIdleConnections(connectionManager);
+            synchronized (GUARD) {
+                for (PoolingHttpClientConnectionManager connectionManager : new ArrayList<>(GUARD.connectionManagers)) {
+                    unwatchIdleConnections(connectionManager);
+                }
             }
         }
         invalidate();
@@ -1030,7 +1048,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
-        private final List<HttpClientConnectionManager> connectionManagers = new ArrayList<>();
+        private final List<PoolingHttpClientConnectionManager> connectionManagers = new CopyOnWriteArrayList<>();
 
         void shutdown() {
             shutdown = true;
@@ -1041,6 +1059,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
         void start() {
             shutdown = false;
+        }
+
+        void add(PoolingHttpClientConnectionManager connectionManager) {
+            connectionManagers.add(connectionManager);
+        }
+        void remove(PoolingHttpClientConnectionManager connectionManager) {
+            connectionManagers.remove(connectionManager);
         }
 
         @Override

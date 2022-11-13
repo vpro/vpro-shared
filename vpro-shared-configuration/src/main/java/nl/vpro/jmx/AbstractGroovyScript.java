@@ -49,7 +49,7 @@ public abstract class AbstractGroovyScript {
         }
     }
 
-    abstract void run(String... args);
+    protected abstract void run(String... args);
 
 
 }

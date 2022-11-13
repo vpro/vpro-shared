@@ -1,13 +1,8 @@
 package nl.vpro.logging.simple;
 
-import lombok.Getter;
-
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Queue;
-
-import org.slf4j.MDC;
 
 /**
  * A {@link SimpleLogger} that adds every log event to a {@link Queue} of {@link Event}'s (or possibly extensions thereof)
@@ -18,25 +13,20 @@ import org.slf4j.MDC;
  * @author Michiel Meeuwissen
  * @since 1.76
  */
-public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> implements SimpleLogger {
+public abstract class QueueSimpleLogger<E extends nl.vpro.logging.simple.Event> extends EventSimpleLogger<E> {
 
-    private final Queue<E> queue;
+    private final Queue<? super E> queue;
 
-    protected QueueSimpleLogger(Queue<E> queue) {
+    protected QueueSimpleLogger(Queue<? super E> queue) {
+        super(queue::add);
         this.queue = queue;
     }
 
-
-    public static QueueSimpleLogger<Event> of(Queue<Event> q, Clock clock) {
+    public static QueueSimpleLogger<Event> of(Queue<? super Event> q, Clock clock) {
         return new QueueSimpleLogger<Event>(q) {
             @Override
             protected Event createEvent(Level level, CharSequence message, Throwable t) {
-                return  Event.builder()
-                    .level(level)
-                    .message(message)
-                    .throwable(t)
-                    .timeStamp(clock.instant())
-                    .build();
+                return createEvent(level, message, t, clock);
             }
         };
     }
@@ -44,25 +34,8 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     /**
      * Creates a straight forward instance for a {@link Queue}
      */
-    public static QueueSimpleLogger<Event> of(Queue<Event> q) {
+    public static QueueSimpleLogger<Event> of(Queue<? super Event> q) {
         return of(q, Clock.systemUTC());
-    }
-
-    @Override
-    public void accept(Level level, CharSequence message, Throwable t) {
-        queue.add(createEvent(level, message, t));
-    }
-
-    @Override
-    public void accept(Level level, CharSequence message) {
-        queue.add(createEvent(level, message));
-    }
-
-
-    protected abstract E createEvent(Level level, CharSequence message, Throwable t);
-
-    protected E createEvent(Level level, CharSequence message) {
-        return createEvent(level, message.toString(), null);
     }
 
 
@@ -72,30 +45,30 @@ public abstract class QueueSimpleLogger<E extends QueueSimpleLogger.Event> imple
     }
 
 
+    @Override
+    @Deprecated
+    protected Event createEvent(Level level, CharSequence message, Throwable t, Clock clock) {
+        return  Event.builder()
+            .level(level)
+            .message(message)
+            .throwable(t)
+            .timeStamp(clock.instant())
+            .build();
+    }
     /**
-     * A representation of a log event
+     * @deprecated Just use {@link nl.vpro.logging.simple.Event}
      */
-    @Getter
-    public static class Event {
-        private final Instant timeStamp;
-        private final Level level;
-        private final CharSequence message;
-        private final Throwable throwable;
-        private final Map<String, String> mdc = MDC.getCopyOfContextMap();
-        private final int levelInt;
+    @Deprecated
+    public static class Event  extends nl.vpro.logging.simple.Event {
 
         @lombok.Builder
         protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
-            this.level = level;
-            this.message = message;
-            this.throwable = throwable;
-            this.levelInt = level.toInt();
-            this.timeStamp = timeStamp;
+            super(level, message, throwable, timeStamp);
         }
 
-        @Override
-        public String toString() {
-            return (timeStamp == null ? "" : (timeStamp + ":")) + level + ":" + message;
+        public static class Builder extends nl.vpro.logging.simple.Event.Builder {
+
         }
+
     }
 }

@@ -49,8 +49,8 @@ public class  MDCFilter implements Filter {
             } catch (Exception e) {
                 log.debug(e.getMessage());
             }
-            String query = request.getQueryString();
-            MDC.put(REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : ("?" + query)));
+            final String query = request.getQueryString();
+            MDC.put(REQUEST, request.getMethod() + " " + path + (StringUtils.isEmpty(query) ? "" : "?" + query));
 
             String ipAddress = request.getHeader("X-FORWARDED-FOR");
             if (ipAddress == null) {

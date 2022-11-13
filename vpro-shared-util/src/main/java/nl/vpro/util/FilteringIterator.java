@@ -55,6 +55,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         KeepAlive keepAlive) {
         this(wrapped, filter, keepAlive, null);
     }
+
     @lombok.Builder(builderClassName = "Builder")
     private FilteringIterator(
             Iterator<? extends T> wrapped,
@@ -98,6 +99,7 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         while(hasNext == null) {
             exception = null;
             try {
+
                 while (wrapped.hasNext()) {
                     next = wrapped.next();
                     totalCountForKeepAlive++;
@@ -226,7 +228,6 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
         public KeepAlive(long count, Function<Long, Boolean> callback) {
             this.count = count;
             this.callback = callback;
-
         }
     }
 }

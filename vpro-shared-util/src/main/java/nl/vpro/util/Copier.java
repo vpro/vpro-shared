@@ -111,12 +111,12 @@ public class Copier implements Runnable, Closeable {
             log.debug(ioe.getMessage());
         } catch (Exception t) {
             if (! CommandExecutor.isBrokenPipe(t)) {
-                log.warn("{}Connector {}\n{} {}", logPrefix, toString(), t.getClass().getName(), t.getMessage());
+                log.warn("{}Connector {}\n{} {}", logPrefix, this, t.getClass().getName(), t.getMessage());
             }
             log.warn(t.getMessage());
             exception = t;
         } finally {
-            log.debug("finally");
+            log.debug("finally" + name);
             afterRun();
 
         }
@@ -170,7 +170,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     /**
-     * Given a batch size, divide it up in equal parts smaller then 8k in size.
+     * Given a batch size, divide it up in equal parts smaller than 8k in size.
      * @return An array of at least one element. The sum of all elements is the argument. All values are smaller then {@link #MAX_BUFFER}
      */
     static int[] equalsParts(long batch) {
@@ -186,7 +186,7 @@ public class Copier implements Runnable, Closeable {
     }
 
     private void afterRun() {
-        log.debug("Ready");
+        log.debug("Ready  {}", name);
         synchronized (this) {
             ready = true;
         }
@@ -331,7 +331,7 @@ public class Copier implements Runnable, Closeable {
                     log.error("Error was {}", exception.getMessage(), exception);
                 }
             } else {
-                log.warn(exception.getMessage());
+                log.warn("{}: {}", exception.getClass().getName(), exception.getMessage());
             }
         }
     }
@@ -346,6 +346,6 @@ public class Copier implements Runnable, Closeable {
 
     @Override
     public String toString() {
-        return logPrefix + super.toString();
+        return getClass().getSimpleName() + " " + logPrefix + " (" + getCount()  + " copied)";
     }
 }

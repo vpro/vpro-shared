@@ -42,7 +42,7 @@ public class StringBuilderSimpleLoggerTest {
         logger.info("b");
         logger.info("c");
         logger.info("d");
-        logger.info("e");
+        logger.info(() -> "e");
         assertThat(logger.getStringBuilder().toString()).isEqualTo("...\n" +
             "INFO b\n" +
             "INFO c\n" +

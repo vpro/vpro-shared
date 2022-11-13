@@ -197,7 +197,7 @@ public class Helper {
 
     /**
      * Converts a number to another number, potentially rounding to fit the target type.
-     *
+     * <p>
      * Does all standard java types except Atomic* and Mutable*.
      *
      * @param <N> the target number type
@@ -244,7 +244,7 @@ public class Helper {
         } else if (targetType.equals(Float.class)) {
             result = value.floatValue();
         } else {
-            throw new IllegalStateException("Unkown Number type");
+            throw new IllegalStateException("Unknown Number type");
         }
         return (N) result;
     }

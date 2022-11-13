@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 
 /**
- *
+ * This is an output stream that logs every received line
  * @author Michiel Meeuwissen
  * @since 2.10
  */
@@ -20,7 +20,7 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
     public static Log4j2OutputStream debug(Logger log, boolean skipEmptyLines) {
         return new Log4j2OutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 log.debug(line);
             }
         };
@@ -33,12 +33,11 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
     public static Log4j2OutputStream info(Logger log, boolean skipEmptyLines) {
         return new Log4j2OutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 log.info(line);
             }
         };
     }
-
 
     public static Log4j2OutputStream warn(Logger log) {
         return warn(log, false);
@@ -47,7 +46,7 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
     public static Log4j2OutputStream warn(Logger log, boolean skipEmptyLines) {
         return new Log4j2OutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 log.warn(line);
             }
         };
@@ -56,7 +55,7 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
     public static Log4j2OutputStream warn(final Logger log, boolean skipEmptyLines, final Integer max) {
         return new Log4j2OutputStream(skipEmptyLines, max) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 log.warn(line);
             }
         };
@@ -70,17 +69,17 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
     public static Log4j2OutputStream error(Logger log, boolean skipEmptyLines) {
         return new Log4j2OutputStream(skipEmptyLines) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 log.error(line);
             }
         };
     }
 
 
-    public static LoggerOutputStream log(final Logger log, Function<String, Level> level) {
-        return new LoggerOutputStream(false) {
+    public static Log4j2OutputStream log(final Logger log, Function<String, Level> level) {
+        return new Log4j2OutputStream(false) {
             @Override
-            void log(String line) {
+            protected void log(String line) {
                 Level l = level.apply(line);
                 if (l != null) {
                     log.log(l, line);

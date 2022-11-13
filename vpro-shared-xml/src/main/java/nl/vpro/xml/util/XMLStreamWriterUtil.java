@@ -1,24 +1,27 @@
 package nl.vpro.xml.util;
 
-import java.io.OutputStream;
-import java.io.Writer;
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.*;
 
 import org.apache.commons.io.output.StringBuilderWriter;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.ThrowingConsumer;
+
 
 /**
- * A wrapper around {@link XMLStreamWriter}, which uses {@link AutoCloseable} to automaticly close the needed elements.
+ * A wrapper around {@link XMLStreamWriter}, which uses {@link AutoCloseable} to automatically close the needed elements.
  *
  * @author Michiel Meeuwissen
  * @since 2.8
  */
+@Slf4j
 public class XMLStreamWriterUtil {
 
     private static final XMLOutputFactory FACTORY = XMLOutputFactory.newInstance();
@@ -44,40 +47,31 @@ public class XMLStreamWriterUtil {
     }
 
 
-    public AutoCloseable writeElement(String name) throws XMLStreamException {
-        currentDepth++;
-        final int closeTo = currentDepth;
+    public ElementCloser writeElement(final String name) throws XMLStreamException {
+        log.info("Opening {}", name);
         writer.writeStartElement(name);
-
-        AutoCloseable closeable = () -> {
-            while (currentDepth > closeTo) {
-                currentDepth--;
-                closeables.pop().close();
-            }
-            writer.writeEndElement();
-        };
-        closeables.push(closeable);
-        return closeable;
+        return new ElementCloser(null, name);
     }
-     public AutoCloseable writeElement(String namespace, String name) throws XMLStreamException {
+     public ElementCloser writeElement(String namespace, String name) throws XMLStreamException {
+         log.info("Opening {}{}", namespace, name);
+
         writer.writeStartElement(namespace, name);
-        return writer::writeEndElement;
+        return new ElementCloser(namespace, name);
 
     }
-    public AutoCloseable writeDocument() throws XMLStreamException {
+    public ElementCloser writeDocument() throws XMLStreamException {
         writer.writeStartDocument();
-        return writer::writeEndDocument;
+        return new ElementCloser(null, "#DOCUMENT", XMLStreamWriter::writeEndDocument);
 
     }
-    public AutoCloseable writeDocument(String version) throws XMLStreamException {
+    public ElementCloser writeDocument(String version) throws XMLStreamException {
         writer.writeStartDocument(version);
-        return writer::writeEndDocument;
+        return new ElementCloser(null, "#DOCUMENT", XMLStreamWriter::writeEndDocument);
 
     }
-     public AutoCloseable writeDocument(Charset charset, String version) throws XMLStreamException {
+     public ElementCloser writeDocument(Charset charset, String version) throws XMLStreamException {
         writer.writeStartDocument(charset.toString(), version);
-        return writer::writeEndDocument;
-
+         return new ElementCloser(null, "#DOCUMENT", XMLStreamWriter::writeEndDocument);
     }
 
 
@@ -175,6 +169,49 @@ public class XMLStreamWriterUtil {
 
     public Object getProperty(String name) throws IllegalArgumentException {
         return writer.getProperty(name);
+    }
+
+
+    /**
+     * @since 2.34
+     */
+    public class ElementCloser implements AutoCloseable {
+        @Nullable
+        final String nameSpace;
+        final String name;
+        final int closeTo = ++currentDepth;
+
+        final ThrowingConsumer<XMLStreamWriter, XMLStreamException> close;
+
+
+        protected ElementCloser(@Nullable String nameSpace, String name, ThrowingConsumer<XMLStreamWriter, XMLStreamException> close) {
+            this.nameSpace = nameSpace;
+            this.name = name;
+            this.close = close;
+            closeables.push(this);
+        }
+
+        protected ElementCloser(@Nullable String nameSpace, String name) {
+            this(nameSpace, name, XMLStreamWriter::writeEndElement);
+        }
+
+
+        @Override
+        public void close() throws Exception {
+            log.trace("Closing {}", name);
+            while (currentDepth > closeTo) {
+                currentDepth--;
+                log.trace("And also {}", closeables.peek());
+                closeables.pop().close();
+            }
+            currentDepth--;
+            close.accept(writer);
+        }
+
+        @Override
+        public String toString() {
+            return nameSpace + ":" + name;
+        }
     }
 
 

@@ -6,18 +6,24 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Isolated;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michiel Meeuwissen
  * @since 0.53
  */
-@Disabled("Doesnt assert anything, just trying out")
+@Isolated
 @Slf4j
 public class ThreadPoolsTest {
 
+
+
     @Test
+    @Disabled
     public void background() throws ExecutionException, InterruptedException {
         List<Future<Integer>> futures = new ArrayList<>();
         int k = 0;
@@ -35,30 +41,57 @@ public class ThreadPoolsTest {
         for (Future<Integer> f : futures) {
             f.get();
         }
-        ThreadPools.shutdown();
     }
 
 
     @Test
-    @Disabled
-    public void background2() throws ExecutionException, InterruptedException {
-      Future<?> f1 = ThreadPools.backgroundExecutor.submit(() -> {
-          Thread.sleep(10000);
-          return null;
+    public void blockingThreads() throws ExecutionException, InterruptedException {
+        final long start = System.currentTimeMillis();
+        Future<?> f1 = ThreadPools.backgroundExecutor.submit(() -> {
+            Thread.sleep(500);
+            return null;
           }
         );
         Future<?> f2 = ThreadPools.backgroundExecutor.submit(() -> {
-            Thread.sleep(10000);
+            Thread.sleep(500);
             return null;
             }
         );
 
-        System.out.println("");
         f1.get();
         f2.get();
 
-        ThreadPools.shutdown();
+        long duration = System.currentTimeMillis() - start;
+
+        assertThat(duration).isCloseTo(500L, Percentage.withPercentage(20));
+
     }
+
+    @Test
+    public void copyingThreads() throws ExecutionException, InterruptedException {
+        log.info("pool size: {}", ThreadPools.copyExecutor.getPoolSize());
+        final long start = System.currentTimeMillis();
+        List<Future<?>> futures = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            final int j = i;
+            futures.add(ThreadPools.copyExecutor.submit(() -> {
+                log.info("> {}", j);
+                Thread.sleep(500);
+                return Thread.currentThread().getName() + ":" + j;
+            }));
+        }
+        for (Future<?> future : futures) {
+            log.info("< {}", future.get());
+        }
+
+        long duration = System.currentTimeMillis() - start;
+
+        assertThat(duration)
+            .isCloseTo(500L, Percentage.withPercentage(150));
+        log.info("pool size: {}", ThreadPools.copyExecutor.getPoolSize());
+
+    }
+
 
     @Test
     @Disabled

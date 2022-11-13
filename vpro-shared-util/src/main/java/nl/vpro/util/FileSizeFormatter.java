@@ -12,14 +12,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Formatting file sizes it not always very trivial. This can help.
- *
- * E.g. {@code
+ * <p>
+ * E.g.
+ * <pre>{@code
  * FileSizeFormatter.DEFAULT.format(12345)
  * }
- *
+ * </pre>
  * For customizing a builder is available (Use {@link #builder()})
- *
- * Find more examples in {@link FileSizeFormatterTest}.
+ * <p>
+ * Find more examples in {@code FileSizeFormatterTest}.
  *
  * @author Michiel Meeuwissen
  * @since 1.76

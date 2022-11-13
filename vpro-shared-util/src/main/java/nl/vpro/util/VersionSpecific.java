@@ -7,7 +7,6 @@ package nl.vpro.util;
  */
 public interface VersionSpecific<T extends Comparable<T>> {
 
-
     /**
      * For which version this object is supposed to be filled.
      */

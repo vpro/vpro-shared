@@ -80,10 +80,10 @@ public class SwaggerApplication extends Application {
             modifiersField.set(externalTypesField, externalTypesField.getModifiers() & ~Modifier.FINAL);
 
             Map<String, PrimitiveType> externalTypesInternal = externalTypes.entrySet().stream()
-                    .collect(Collectors.toMap(e -> e.getKey().getName(), e -> e.getValue()));
+                    .collect(Collectors.toMap(e -> e.getKey().getName(), Map.Entry::getValue));
             externalTypesField.set(null, externalTypesInternal);
-        } catch (NoSuchFieldException|IllegalAccessException e) {
-            log.warn("Couldn't set external types", e);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            log.warn("Couldn't set external types: " + e.getClass().getName() + ":" + e.getMessage(), e);
         }
     }
 

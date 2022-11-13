@@ -7,7 +7,9 @@ import org.apache.log4j.Logger;
  *  SimpleLogger that wraps {@link org.apache.log4j.Logger}
  * @author Michiel Meeuwissen
  * @since 1.79
+ * @deprecated Migrate to log4j2
  */
+@Deprecated
 public class Log4jSimpleLogger implements SimpleLogger {
     private final Logger log;
 

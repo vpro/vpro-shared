@@ -9,8 +9,8 @@ import nl.vpro.util.*;
 
 /**
  * Provides some convertors for the <a href="https://picocli.info/">picocli</a> command line parser, wich wrap some tools which are in this module.
- *
- * The dependency on picocli is optional, so these classes are only useable if you havva picocli anyway.
+ * <p>
+ * The dependency on picocli is optional, so these classes are only usable if you have picocli anyway.
  *
  * @author Michiel Meeuwissen
  * @since 2.12

@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.lang.reflect.*;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -37,6 +38,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
 
     private final Class<E> errorClass;
 
+
     /**
      *
      * @param errorClass The class which an error is tried to be unmarshalled to.
@@ -51,9 +53,14 @@ public class ErrorAspect<T, E> implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Throwable t;
-        Message mes;
-        Logger l;
+        return invoke(proxy, method, args, 0);
+    }
+
+    protected Object invoke(Object proxy, Method method, Object[] args, int retryCount) throws Throwable {
+
+        final Throwable t;
+        final Message mes;
+        final Logger l;
         boolean error;
         try {
             try {
@@ -92,12 +99,21 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             } else {
                 error = status >= 400;
             }
+            wea.getResponse().close();
 
         } catch (javax.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
             l = log;
             t = pe;
+            if (cause instanceof SocketException && "Connection or outbound has closed".equals(cause.getMessage()) && retryCount < 10) {
+                String name = method.getDeclaringClass().getSimpleName() + "#" + method.getName();
+                log.warn("{}. Retrying {}: {}", cause.getMessage(), retryCount, name);
+                Thread.sleep((int) Math.max(1000, Math.pow(2, retryCount) * 100));
+                Object result = invoke(proxy, method, args, retryCount + 1);
+                log.info("Retry {}: {} successful ", retryCount, name);
+                return result;
+            }
             error = ! (cause instanceof ConnectException);
         } catch (Throwable e) {
             mes = new Message(null, e.getClass().getName() + " " + e.getMessage());
@@ -115,11 +131,12 @@ public class ErrorAspect<T, E> implements InvocationHandler {
                         .collect(joining("\n")),
                 mes);
         } else {
-            l.info("For {}{}(\n{}\n) {}",
+            l.debug("For {}{}(\n{}\n) {}",
                 string.get(),
                 method.getDeclaringClass().getSimpleName() + "#" + method.getName(),
                 args == null ? "(no args)" :
                     Arrays.stream(args)
+                        .filter(Objects::nonNull)
                         .map(ErrorAspect.this::valueToString)
                         .collect(joining("\n")),
                 mes);

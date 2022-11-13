@@ -1,18 +1,18 @@
 package nl.vpro.logging;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 /**
- * Wraps a {@link Logger} in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
+ * Wraps some logger in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
  * @author Michiel Meeuwissen
  */
-abstract class AbstractLoggerOutputStream extends OutputStream {
+public abstract class AbstractLoggerOutputStream extends OutputStream {
 
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     private final boolean skipEmptyLines;
@@ -25,12 +25,16 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
     @Setter
     protected Integer max;
 
-    AbstractLoggerOutputStream(boolean skipEmptyLines, Integer max) {
+    @Getter
+    @Setter
+    protected Charset charset = StandardCharsets.UTF_8;
+
+    protected AbstractLoggerOutputStream(boolean skipEmptyLines, Integer max) {
         this.skipEmptyLines = skipEmptyLines;
         this.max = max;
     }
 
-    abstract void log(String line);
+    protected abstract void log(String line);
 
     @Override
     public void write(int b) {
@@ -60,8 +64,9 @@ abstract class AbstractLoggerOutputStream extends OutputStream {
         log(true);
     }
 
+    @SneakyThrows
     private void log(boolean skipEmpty) {
-        final String line = buffer.toString();
+        final String line = buffer.toString(charset.name());
         try {
             if (!skipEmpty || StringUtils.isNotBlank(line)) {
                 count++;

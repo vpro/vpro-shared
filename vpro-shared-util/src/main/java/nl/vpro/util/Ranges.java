@@ -12,7 +12,6 @@ public class Ranges {
 
     }
 
-
     /**
      * Creates on {@link Range#openClosed(Comparable, Comparable)} range, but the arguments can be {@code null}
      * in which case unbounded ranges are created

@@ -66,7 +66,7 @@ public class SkipAtStartInputStream extends InputStream {
                     if (s[count - 1] == result) {// this array still matches
                         matching = true;
                     } else {
-                        // not matched any more, this array certainly does not match.
+                        // not matched anymore, this array certainly does not match.
                         si.remove();
                     }
                 }
@@ -98,7 +98,7 @@ public class SkipAtStartInputStream extends InputStream {
     }
 
     @Override
-    public int read(@NonNull byte[] b) throws IOException {
+    public int read(byte @NonNull[] b) throws IOException {
         if (skip.isEmpty()) {
             return wrapped.read(b, 0, b.length);
         } else {
@@ -107,7 +107,7 @@ public class SkipAtStartInputStream extends InputStream {
     }
 
     @Override
-    public int read(@NonNull byte[] b, int off, int len) throws IOException {
+    public int read(byte @NonNull[] b, int off, int len) throws IOException {
         if (skip.isEmpty()) {
             return wrapped.read(b, off, len);
         } else {

@@ -51,19 +51,19 @@ public class MBeans {
             return Futures.immediateFuture("Not running");
         }
         future.cancel();
-        // should not be needed, because happening in finally, but if the called code does reuse to shut down propery, then simply abandon it.
-        ScheduledFuture<String> schedule = ThreadPools.backgroundExecutor.schedule(() -> {
-                LockValue abandoned = locks.remove(key);
+        // should not be needed, because happening in finally, but if the called code does refuse to shut down properly, then simply abandon it.
+
+        return ThreadPools.backgroundExecutor.schedule(() -> {
+                final LockValue abandoned = locks.remove(key);
                 if (abandoned != null) {
-                    log.warn("abandonded {}", abandoned);
-                    return "Abandonded";
+                    log.warn("abandoned {}", abandoned);
+                    return "Abandoned " + abandoned;
                 }
                 return "Canceled";
             },
             2,
             TimeUnit.SECONDS
         );
-        return schedule;
     }
 
 
@@ -72,30 +72,27 @@ public class MBeans {
      *
      * @param key A key on which the job can be 'locked'.
      * @param description A supplier that before the job starts should describe the job. One can be created using e.g. {@link #multiLine(Logger, String, Object...)} or {@link #singleLine(Logger, String, Object...)}
-     * @param wait How long to wait before returing with a message that the job is not yet finished, but still running.
+     * @param wait How long to wait before returning with a message that the job is not yet finished, but still running. This may be {@code null}, in which case this will run nothing in the background
      * @param logger A job returning a String when ready. This string will be returned.
      * @return The string to be used as a return value for a JMX operation
      */
     public static String returnString(
         @Nullable final String key,
-        @NonNull final StringSupplierSimpleLogger description,
-        @NonNull final Duration wait,
-        @NonNull final Consumer<StringSupplierSimpleLogger> logger) {
+        @NonNull  final StringSupplierSimpleLogger description,
+        @Nullable final Duration wait,
+        @NonNull  final Consumer<StringSupplierSimpleLogger> logger) {
         if (key != null) {
             if (isRunning(key)) {
                 return "Job " + key + " is still running, so could not be started again with " + description.get();
             }
         }
-        LockValue value = new LockValue(description);
+        final LockValue value = new LockValue(description);
         if (key != null) {
             locks.put(key, value);
         }
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-            final String threadName = Thread.currentThread().getName();
-            final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+
+        Supplier<String> job = () -> {
             try {
-                Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
-                Thread.currentThread().setName(threadName + ":" + description.get());
                 value.setThread(Thread.currentThread());
                 logger.accept(description);
             } catch (Exception e) {
@@ -104,27 +101,53 @@ public class MBeans {
                 if (key != null) {
                     locks.remove(key);
                 }
-                Thread.currentThread().setContextClassLoader(contextClassLoader);
-                Thread.currentThread().setName(threadName);
             }
             return description.get();
 
-        }, EXECUTOR);
-        value.setFuture(future);
+        };
+        if (wait != null) {
+            CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+                final String threadName = Thread.currentThread().getName();
+                final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                try {
+                    Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
+                    Thread.currentThread().setName(threadName + ":" + description.get());
+                    return job.get();
+                } finally {
+                    Thread.currentThread().setContextClassLoader(contextClassLoader);
+                    Thread.currentThread().setName(threadName);
+                }
+            }, EXECUTOR);
+            value.setFuture(future);
 
-        try {
-            return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ie) {
-            log.info(ie.getMessage());
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            log.info(e.getMessage());
-        } catch (TimeoutException e) {
-            return description.get() + "\n...\nstill busy. Please check logs";
+            try {
+                return future.get(wait.toMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ie) {
+                log.info(ie.getMessage());
+                Thread.currentThread().interrupt();
+                return description.get();
+            } catch (ExecutionException e) {
+                log.info(e.getMessage());
+                return description.get();
+            } catch (TimeoutException e) {
+                return description.get() + "\n...\nstill busy. Please check logs";
+            }
+        } else {
+            return job.get();
         }
-        return description.get();
     }
 
+
+
+    /**
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}, with a duration {@link #DEFAULT_DURATION}
+     */
+    public static String returnString(
+        @NonNull String key,
+        @NonNull StringSupplierSimpleLogger description,
+        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
+        return returnString(key, description, DEFAULT_DURATION, logger);
+    }
 
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
@@ -150,7 +173,6 @@ public class MBeans {
         @NonNull Consumer<StringSupplierSimpleLogger> logger) {
         return returnString(multiLine(log), logger);
     }
-
 
 
     @Deprecated

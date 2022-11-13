@@ -19,6 +19,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Costin Leau
  * @deprecated uses apache configuration 1, which seems to be superseded by configuration2
  */
+@Deprecated
 public class CommonsConfigurationFactoryBean implements InitializingBean, FactoryBean<Object> {
 
     private CompositeConfiguration configuration;

@@ -127,6 +127,7 @@ public class Counter implements CounterMXBean {
         if (name != null) {
             MBeans.unregister(name);
         }
+        rate.close();
     }
 
 }

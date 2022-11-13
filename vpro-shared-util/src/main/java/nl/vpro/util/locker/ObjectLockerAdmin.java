@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.annotation.PreDestroy;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -24,7 +27,6 @@ import nl.vpro.util.TimeUtils;
  */
 @Slf4j
 public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
-
 
     public static final ObjectLockerAdmin JMX_INSTANCE    = new ObjectLockerAdmin();
 
@@ -43,6 +45,15 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
         .mode(StatisticalLong.Mode.DURATION)
         .window(Duration.ofMinutes(60))
         .bucketCount(60)
+        .build();
+
+
+
+    @Getter
+    final WindowedStatisticalLong averageLockDuration = WindowedStatisticalLong.builder()
+        .mode(StatisticalLong.Mode.DURATION)
+        .window(Duration.ofMinutes(5))
+        .bucketCount(5)
         .build();
 
     @Getter
@@ -66,11 +77,12 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
                        lockCount.computeIfAbsent(holder.reason, s -> new AtomicInteger()).incrementAndGet();
                        currentCount.computeIfAbsent(holder.reason, s -> new AtomicInteger()).incrementAndGet();
                        lockRate.newEvent();
-                       averageLockAcquireTime.accept(duration.toMillis());
+                       averageLockAcquireTime.accept(duration);
                    }
                    break;
                case UNLOCK:
                    currentCount.computeIfAbsent(holder.reason, s -> new AtomicInteger()).decrementAndGet();
+                   averageLockDuration.accept(Duration.between(holder.createdAt, Instant.now()));
 
            }
        });
@@ -79,12 +91,12 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     /**
      * Total number of locks per 'reason'. Never decreases
      */
-    private final Map<String, AtomicInteger> lockCount = new HashMap<>();
+    private final Map<String, AtomicInteger> lockCount = new ConcurrentHashMap<>();
 
     /**
      * Current count per 'reason'.
      */
-    Map<String, AtomicInteger> currentCount = new HashMap<>();
+    private final Map<String, AtomicInteger> currentCount = new ConcurrentHashMap<>();
 
     @Getter
     private int maxConcurrency = 0;
@@ -109,7 +121,8 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public Set<String> getLocks() {
         return Collections.unmodifiableSet(ObjectLocker.LOCKED_OBJECTS.values().stream()
-            .map(ObjectLocker.LockHolder::summarize).collect(Collectors.toSet()));
+            .map(ObjectLocker.LockHolder::summarize)
+            .collect(Collectors.toSet()));
     }
 
     @Override
@@ -139,6 +152,7 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
         return ObjectLocker.maxLockAcquireTime.toString();
     }
 
+
     @Override
     public void setMaxLockAcquireTime(String duration) {
         ObjectLocker.maxLockAcquireTime = TimeUtils.parseDuration(duration).orElse(ObjectLocker.maxLockAcquireTime);
@@ -165,5 +179,10 @@ public class ObjectLockerAdmin implements ObjectLockerAdminMXBean {
     @Override
     public void setStrictlyOne(boolean strictlyOne) {
         ObjectLocker.strictlyOne = strictlyOne;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        lockRate.close();
     }
 }

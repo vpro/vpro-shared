@@ -7,6 +7,7 @@ import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
@@ -35,8 +36,7 @@ import com.google.common.base.Suppliers;
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import nl.vpro.logging.simple.*;
 import nl.vpro.util.*;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -44,20 +44,19 @@ import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToObjectNode;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.Slf4jHelper.log;
-import static nl.vpro.logging.simple.SimpleLogger.slfj4;
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
  * Some tools to automatically create indices and put mappings and stuff.
- *
+ * <p>
  * It is associated with one index and one cluster, and contains the methods to create/delete/update the index settings themselves.
- *
- * Also it contains utilities to perform some common get/post-operations (like indexing/deleting a node), createing bulk requests, and executing them,
- * where the index name than can be implicit.
+ * <p>
+ * Also, it contains utilities to perform some common get/post-operations (like indexing/deleting a node), creating bulk requests, and executing them, where the index name than can be implicit.
  *
  * @author Michiel Meeuwissen
  * @since 0.24
  */
-@SuppressWarnings("UnusedReturnValue")
+@SuppressWarnings({"UnusedReturnValue", "unused", "resource"})
 @Getter
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
@@ -81,7 +80,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static class Builder {
 
         public Builder log(Logger log){
-            this.simpleLogger(slfj4(log));
+            this.simpleLogger(slf4j(log));
+            return this;
+        }
+
+        public Builder log(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
             return this;
         }
 
@@ -125,14 +129,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 mapping = elasticSearchIndex.mapping();
             }
             if (aliases == null || aliases.isEmpty()) {
+                // no explicit aliases, use those as specified by index
                 aliases = new ArrayList<>(elasticSearchIndex.getAliases());
+                // also add the index name itself if that is missing, which is implicit.
                 if (! aliases.contains(elasticSearchIndex.getIndexName())) {
                     aliases.add(elasticSearchIndex.getIndexName());
                 }
             }
             this.elasticSearchIndex = elasticSearchIndex;
         }
-        this.log = simpleLogger == null ? slfj4(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
+        this.log = simpleLogger == null ? slf4j(LoggerFactory.getLogger(IndexHelper.class)) : simpleLogger;
         this.clientFactory = client;
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
@@ -148,6 +154,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
         return IndexHelper.builder()
             .log(log)
+            .client(client)
+            .elasticSearchIndex(index)
+            ;
+    }
+
+    public static IndexHelper.Builder of(org.apache.logging.log4j.Logger log, ESClientFactory client, ElasticSearchIndex index) {
+        return IndexHelper.builder()
+            .simpleLogger(Log4j2SimpleLogger.of(log))
             .client(client)
             .elasticSearchIndex(index)
             ;
@@ -226,9 +240,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.with("aliases");
             for (String alias : this.aliases) {
-                if (! Objects.equals(alias, indexName) && ! Objects.equals(alias, supplied)) {
-                    aliases.with(alias);
+                if (alias.equals(indexName)) {
+                    continue;
                 }
+                if (alias.equals(supplied)) {
+                    if (aliasExists(alias)) {
+                        log.info("Not making alias {} because it exists already");
+                        continue;
+                    }
+                }
+                aliases.with(alias);
             }
         }
 
@@ -304,7 +325,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     /**
      * For the current index. Reput the settings.
-     *
+     * <p>
      * Before doing that remove all settings from the settings object, that may not be updated, otherwise ES gives errors.
      *
      * @param postProcessSettings You may want to modify the settings objects even further before putting it to ES.
@@ -402,7 +423,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public long clearIndex() {
-        List<BulkRequestEntry> bulk = new ArrayList<>();
+        final List<BulkRequestEntry> bulk = new ArrayList<>();
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client())) {
             i.prepareSearch(getIndexName());
 
@@ -466,7 +487,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public String unalias(String alias) {
         if (unaliasing == null) {
             if (clientFactory == null) {
-                log.warn("No client factory, can't implicitely unalias");
+                log.warn("No client factory, can't implicitly unalias");
                 unaliasing = HashMap::new;
             } else {
                 unaliasing = Suppliers.memoizeWithExpiration(() -> {
@@ -489,6 +510,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
         }
         return unaliasing.get().getOrDefault(alias, alias);
+    }
+
+    public boolean aliasExists(String alias) throws IOException {
+        Request request = new Request(HEAD, "/_alias/" + alias);
+        Response response = client().performRequest(request);
+        return response.getStatusLine().getStatusCode() == 200;
     }
 
     public ObjectNode search(ObjectNode request) {
@@ -564,7 +591,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull final Collection<BulkRequestEntry> jobs,
         @NonNull final ObjectNode responseItem) {
         return jobs.stream().filter(
-            item -> BulkRequestEntry.idFromActionNode(responseItem).equals(item.getId())
+            item -> BulkRequestEntry
+                .idFromActionNode(responseItem)
+                .equals(item.getId())
         ).findFirst();
     }
 
@@ -613,7 +642,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         rl.accept(error);
                     }
                 }
-
             }
         };
     }
@@ -669,7 +697,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return _indexPath(DOC, id, null);
     }
 
-
     protected String _indexPath(String type, @Nullable String id, @Nullable String parent) {
         String path = getIndexName() + "/" + type + (id == null ? "" : ("/" + encode(id)));
         if (parent != null) {
@@ -679,15 +706,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-
     public ObjectNode delete(String id) {
-        return _delete(DOC, id);
-    }
-
-
-    private ObjectNode _delete(String type, String id) {
         try {
-            client().performRequest(createDelete("/" + type + "/" + encode(id)));
+            client().performRequest(createDelete("/" + DOC + "/" + encode(id)));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -704,7 +725,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     @SafeVarargs
-    private final CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
+    private CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync(createDelete( "/" + type + "/" + encode(id)),
@@ -714,7 +735,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  Optional<JsonNode> get(String id){
-        return _get(DOC, id, null);
+        return _get(id, null);
     }
 
     public  List<@NonNull Optional<JsonNode>> mget(String... ids){
@@ -771,17 +792,17 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  Optional<JsonNode> getWithRouting(String id, String routing){
-        return _get(DOC, id, routing);
+        return _get(id, routing);
     }
 
     public  Optional<JsonNode> getWithRouting(RoutedId id){
-        return _get(DOC, id.id, id.routing);
+        return _get(id.id, id.routing);
     }
 
 
-    protected Optional<JsonNode> _get(String type, String id, String routing) {
+    protected Optional<JsonNode> _get(String id, String routing) {
         try {
-            Request get = createGet("/" + type + "/" + encode(id));
+            Request get = createGet("/" + DOC + "/" + encode(id));
             if (routing != null){
                 get.addParameter("routing", routing);
             }
@@ -890,68 +911,22 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-
     String encode(@NonNull String id) {
-        try {
-            return URLEncoder.encode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-            return id;
-        }
+        return URLEncoder.encode(id, StandardCharsets.UTF_8);
     }
-
-
 
     /**
      * Creates a {@link BulkRequestEntry} for indexing an object with given id.
      * @param id The id of the object to use
      * @param o The object to index
-     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the source node after that is constructed from the object to index
      */
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(DOC, id, null, o, consumers);
-    }
-    /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
-     * @param id The id of the object to use
-     * @param o The object to index
-     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
-     */
-    @SafeVarargs
-    public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _updateRequest(id,  o, consumers);
-    }
-
-    /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
-     * @param id The id of the object to use
-     * @param o The object to index
-     * @param routing The routing to use
-     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
-     */
-    @SafeVarargs
-    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
-        BulkRequestEntry request =
-            _indexRequest(DOC, id, null, o, consumers);
-        request.getAction()
-            .with(INDEX)
-            .put(ROUTING, routing);
-        return request;
-    }
-
-    @SafeVarargs
-    private final BulkRequestEntry _indexRequest(String type, String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
-        if (! DOC.equals(type)) {
-            index.put(Fields.TYPE, type);
-        }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
-        if (version != null) { // somewhy, this is not supported
-            index.put(Fields.VERSION, version);
-        }
 
         ObjectNode objectNode  = objectMapper.valueToTree(o);
         return BulkRequestEntry.builder()
@@ -964,10 +939,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     c.accept(on);
                 }
             }).build();
-    }
 
+    }
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
     @SafeVarargs
-    private final BulkRequestEntry _updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
+    public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode update = actionLine.with(UPDATE);
         update.put(Fields.ID, id);
@@ -989,31 +970,41 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     c.accept(doc);
                 }}
             ).build();
+
     }
 
-
-    public BulkRequestEntry deleteRequest(String id) {
-        return _deleteRequest(DOC, id);
-    }
-
-    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
-        BulkRequestEntry request  = _deleteRequest(DOC, id);
-        request.getAction().with(DELETE)
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param routing The routing to use
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
+    @SafeVarargs
+    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
+        BulkRequestEntry request =
+            indexRequest(id, o, consumers);
+        request.getAction()
+            .with(INDEX)
             .put(ROUTING, routing);
         return request;
     }
 
-    protected BulkRequestEntry _deleteRequest(String type, String id) {
+
+    public BulkRequestEntry deleteRequest(String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with(DELETE);
-        if (! DOC.equals(type)) {
-            index.put(Fields.TYPE, type);
-        }
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
     }
 
+    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
+        BulkRequestEntry request  = deleteRequest(id);
+        request.getAction().with(DELETE)
+            .put(ROUTING, routing);
+        return request;
+    }
 
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
         if (request.isEmpty()) {
@@ -1104,7 +1095,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public void countAsync(final Consumer<Long> consumer) {
         Request get = createGet(Paths.COUNT);
-        client().performRequestAsync(get, new ResponseListener() {
+        clientAsync(c -> c.performRequestAsync(get, new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 long count = parseCount(response);
@@ -1115,13 +1106,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             public void onFailure(Exception e) {
                 log.warn("For count on {}", this, e);
             }
-        });
+        }));
     }
 
     protected long parseCount(Response response) {
-            JsonNode result = read(response);
-            return result.get("count").longValue();
-        }
+        JsonNode result = read(response);
+        return result.get("count").longValue();
+    }
 
     public  Optional<JsonNode> getActualSettings() throws IOException {
         Request get = createGet(Paths.SETTINGS);
@@ -1269,7 +1260,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public Consumer<ObjectNode> deleteLogger(@NonNull Logger logger, @NonNull Supplier<String> prefix) {
-        return deleteLogger(slfj4(logger), prefix);
+        return deleteLogger(slf4j(logger), prefix);
     }
 
     public Consumer<ObjectNode> deleteLogger(@NonNull SimpleLogger logger, @NonNull Supplier<String> prefix) {
@@ -1303,7 +1294,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull Logger indexLog,
         @NonNull Logger deleteLog,
         @NonNull Logger updateLog) {
-        return bulkLogger(slfj4(indexLog), slfj4(deleteLog), slfj4(updateLog));
+        return bulkLogger(slf4j(indexLog), slf4j(deleteLog), slf4j(updateLog));
     }
 
 
@@ -1507,9 +1498,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         log.info("Closing {}", clientFactory);
-        clientFactory.close();
+        CloseableIterator.closeQuietly(clientFactory);
         clientFactory = null;
     }
 
@@ -1541,7 +1532,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             File file = new File(writeJsonDir, id.replace(
                 File.separator, "_"
             ) + ".json");
-            try (OutputStream out = new FileOutputStream(file)) {
+            try (OutputStream out = Files.newOutputStream(file.toPath())) {
                 Jackson2Mapper.getPrettyInstance().writeValue(out, jsonNode);
                 log.info("Wrote {}", file);
             } catch (IOException e) {

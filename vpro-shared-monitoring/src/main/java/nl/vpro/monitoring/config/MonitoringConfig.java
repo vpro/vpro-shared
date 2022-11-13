@@ -5,9 +5,9 @@ import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
+import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
 import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
-import io.micrometer.core.instrument.binder.system.UptimeMetrics;
+import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -15,8 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.ehcache.Ehcache;
 
 import java.io.File;
-import java.util.Optional;
+import java.util.*;
 
+import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
-import static nl.vpro.util.locker.ObjectLocker.Listener.Type.LOCK;
+import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 
 @Configuration
 @Slf4j
@@ -44,11 +45,25 @@ public class MonitoringConfig {
     @Autowired
     private ApplicationContext applicationContext;
 
+    private final List<AutoCloseable> closables = new ArrayList<>();
+
     @Bean("globalMeterRegistry")
     public PrometheusMeterRegistry globalMeterRegistry() {
         final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         start(registry);
         return registry;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        for (AutoCloseable c : closables) {
+            try {
+                c.close();
+                log.info("Closed {}", c);
+            } catch (Exception e) {
+                log.warn("{}: {}", c, e.getMessage());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -61,7 +76,9 @@ public class MonitoringConfig {
         }
 
         if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
-            new io.micrometer.core.instrument.binder.logging.Log4j2Metrics().bindTo(registry);
+            Log4j2Metrics metrics = new Log4j2Metrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
 
         final Optional<Ehcache> ehCache = (Optional<Ehcache>) getEhCache();
@@ -69,10 +86,14 @@ public class MonitoringConfig {
             new EhCache2Metrics(ehCache.get(), Tags.empty()).bindTo(registry);
         }
         if (properties.isMeterJvmHeap()) {
-            new JvmHeapPressureMetrics().bindTo(registry);
+            JvmHeapPressureMetrics metrics = new JvmHeapPressureMetrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (properties.isMeterJvmGc()) {
-            new JvmGcMetrics().bindTo(registry);
+            JvmGcMetrics metrics = new JvmGcMetrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (properties.isMeterJvmMemory()) {
             new JvmMemoryMetrics().bindTo(registry);
@@ -80,32 +101,41 @@ public class MonitoringConfig {
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
-        try {
-            if (properties.isMeterHibernate()) {
 
-                final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
-                if (sessionFactory.isPresent()) {
-                    new HibernateMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+        if (classForName("org.hibernate.SessionFactory").isPresent()) {
 
-                } else {
-                    log.error("No session factory to monitor");
+            try {
+                if (properties.isMeterHibernate()) {
+                    final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+                    if (sessionFactory.isPresent()) {
+                        new HibernateMetrics(
+                            sessionFactory.get(),
+                            properties.getMeterHibernateName(),
+                            Tags.empty()
+                        ).bindTo(registry);
+
+                    } else {
+                        log.warn("No session factory to monitor (hibernate)");
+                    }
                 }
+            } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
+                log.warn("No hibernate metrics: Missing class {}", noClassDefFoundError.getMessage());
             }
-        } catch(java.lang.NoClassDefFoundError noClassDefFoundError) {
-            log.warn("No hibernate metrics: Missing class {}", noClassDefFoundError.getMessage());
-        }
-        try {
-            if (properties.isMeterHibernateQuery()) {
-                final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+            try {
+                if (properties.isMeterHibernateQuery()) {
+                    final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
-                if (sessionFactory.isPresent()) {
-                    new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
-                } else {
-                    log.error("No session factory to monitor");
+                    if (sessionFactory.isPresent()) {
+                        new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+                    } else {
+                        log.warn("No session factory to monitor (hibernate query)");
+                    }
                 }
+            } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
+                log.warn("No hibernate query metrics. Missing class {}", noClassDefFoundError.getMessage());
             }
-        } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
-            log.warn("No hibernate query metrics. Missing class {}", noClassDefFoundError.getMessage());
+        } else {
+            log.debug("No org.hibernate.SessionFactory");
         }
         try {
             if (properties.isMeterPostgres()) {
@@ -126,37 +156,54 @@ public class MonitoringConfig {
         }
         final Optional<Manager> manager = (Optional<Manager>) getManager();
         if (properties.isMeterTomcat() && manager.isPresent()) {
-            new TomcatMetrics(manager.get(), Tags.empty()).bindTo(registry);
+            TomcatMetrics metrics = new TomcatMetrics(manager.get(), Tags.empty());
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (properties.isMeterUptime()) {
             new UptimeMetrics().bindTo(registry);
         }
         if (properties.getMeterVolumes() != null) {
             for (String folder : properties.getMeterVolumes()) {
-                new DiskSpaceMetrics(new File(folder)).bindTo(registry);
+                File dir = new File(folder);
+                if (dir.exists()) {
+                    new DiskSpaceMetrics(dir).bindTo(registry);
+                } else {
+                    log.info("Not metring {}, because it does not exist", dir);
+                }
             }
         }
         if (properties.isMeterLocks()) {
             ObjectLocker.listen((type, holder, duration) -> {
-                if (holder.lock.getHoldCount() == 1 && type == LOCK) {
-                    Object key = holder.key;
-                    String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
-                    registry.counter("locks.event", "type", keyType).increment();
+                Object key = holder.key;
+                String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
+                registry.counter("locks.event", "keyType", keyType, "eventType", String.valueOf(type), "holdCount", String.valueOf(holder.lock.getHoldCount())).increment();
+                if (type == ObjectLocker.Listener.Type.UNLOCK) {
+                    registry.timer("locks.duration", "keyType", keyType).record(duration);
                 }
             });
-            Gauge.builder("locks.count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
+            Gauge.builder("locks.count", JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
                 .description("The current number of locked objects")
                 .register(registry);
 
-            Gauge.builder("locks.total_count", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getLockCount)
+            Gauge.builder("locks.total_count", JMX_INSTANCE, ObjectLockerAdmin::getLockCount)
                 .description("The total number of locked objects until now")
                 .register(registry);
 
-            Gauge.builder("locks.average_acquiretime", () -> ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue())
-                .description("The average time in ms to acquire a lock")
+            Gauge.builder("locks.average_acquiretime",
+                    () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().optionalDoubleMean().orElse(0d)
+                )
+                .description("The average time in ms to acquire a lock (in " + JMX_INSTANCE.getAverageLockAcquireTime().getTotalDuration() + ")")
                 .register(registry);
 
-            Gauge.builder("locks.max_concurrency", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+            Gauge.builder("locks.average_duration",
+                    () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().optionalDoubleMean().orElse(0d)
+                )
+                .description("The average time in ms to hold a lock (in " + JMX_INSTANCE.getAverageLockDuration().getTotalDuration() +")")
+                .register(registry);
+
+
+            Gauge.builder("locks.max_concurrency", JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
                 .description("The maximum number threads waiting for the same object")
                 .register(registry);
 
@@ -164,7 +211,7 @@ public class MonitoringConfig {
                 .description("The maximum number threads waiting for the same object")
                 .register(registry);
 
-            Gauge.builder("locks.maxDepth", ObjectLockerAdmin.JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
+            Gauge.builder("locks.maxDepth", JMX_INSTANCE, ObjectLockerAdmin::getMaxConcurrency)
                 .description("The maximum number of locked objects in the same thread")
                 .register(registry);
 

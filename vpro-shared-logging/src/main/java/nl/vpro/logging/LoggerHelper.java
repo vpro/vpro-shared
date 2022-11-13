@@ -4,6 +4,8 @@
  */
 package nl.vpro.logging;
 
+import java.time.Clock;
+
 import org.slf4j.Logger;
 import org.slf4j.ext.LoggerWrapper;
 
@@ -13,24 +15,41 @@ import org.slf4j.ext.LoggerWrapper;
 
 public final class LoggerHelper extends LoggerWrapper {
 
+    private final Clock clock;
+
+
+    public LoggerHelper(Logger logger, Clock clock) {
+        super(logger, logger.getName());
+        this.clock = clock;
+    }
 
     public LoggerHelper(Logger logger) {
-        super(logger, logger.getName());
+        this(logger, Clock.systemUTC());
     }
 
     public static void trace(Logger logger, String message, Object... args) {
+        trace(Clock.systemUTC(), logger, message, args);
+    }
+
+     public static void trace(Clock clock, Logger logger, String message, Object... args) {
         if (logger.isTraceEnabled()) {
-            logger.trace(String.format("%1$tT.%1$tL - %2$s", System.currentTimeMillis(), message), args);
+            logger.trace(
+                String.format(
+                    "%1$tT.%1$tL - %2$s",
+                    clock.instant().atZone(clock.getZone()), message
+                ),
+                args
+            );
         }
     }
 
     @Override
     public void trace(String message, Object... args) {
-        LoggerHelper.trace(logger, message, args);
+        LoggerHelper.trace(clock, logger, message, args);
     }
 
     @Override
     public void trace(String message, Object arg) {
-        LoggerHelper.trace(logger, message, arg);
+        LoggerHelper.trace(clock, logger, message, arg);
     }
 }

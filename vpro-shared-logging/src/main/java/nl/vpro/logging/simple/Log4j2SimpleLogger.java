@@ -4,7 +4,7 @@ package nl.vpro.logging.simple;
 import org.apache.logging.log4j.Logger;
 
 /**
- *  SimpleLogger that wraps log4j2's {@link Logger}.
+ * SimpleLogger that wraps log4j2's {@link Logger}.
  * @author Michiel Meeuwissen
  * @since 2.9
  */
@@ -17,6 +17,10 @@ public class Log4j2SimpleLogger implements SimpleLogger {
 
     public static Log4j2SimpleLogger of(Logger log) {
         return new Log4j2SimpleLogger(log);
+    }
+
+    public static Log4j2SimpleLogger simple(Logger logger) {
+        return of(logger);
     }
 
     @Override

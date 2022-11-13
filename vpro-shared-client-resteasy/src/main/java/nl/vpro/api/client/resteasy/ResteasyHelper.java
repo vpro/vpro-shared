@@ -36,8 +36,13 @@ public class ResteasyHelper {
 
     }
 
+    /**
+     * Support resteasy 3 vs resteasy 4
+     * @deprecated Just use {@link org.jboss.resteasy.client.jaxrs.internal.BasicAuthentication}
+     */
     @SuppressWarnings("unchecked")
     @SneakyThrows
+    @Deprecated
     public static ClientRequestFilter getBasicAuthentication(String userName, String password, Logger log) {
         Class<? extends ClientRequestFilter> clazz;
         try {
@@ -56,7 +61,14 @@ public class ResteasyHelper {
         return clazz.getConstructor(String.class, String.class).newInstance(userName, password);
     }
 
+
+    /**
+     * Support resteasy 3 vs resteasy 4
+     * @deprecated Just use {@link org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine}
+     */
+
     @SneakyThrows
+    @Deprecated
     public static ClientHttpEngine createApacheHttpClient(CloseableHttpClient closeableHttpClient, boolean closeHttpClient) {
         try {
             Class<?> clazz = Class.forName("org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine");
@@ -67,6 +79,12 @@ public class ResteasyHelper {
 
         }
     }
+    /*
+    // we may want to support async clients?
+
+    public static ClientHttpEngine createApacheHttpClient(CloseableHttpAsyncClient closeableHttpClient, boolean closeHttpClient) {
+        return new ApacheHttpAsyncClient4Engine(closeableHttpClient, closeHttpClient);
+    }*/
 }
 
 

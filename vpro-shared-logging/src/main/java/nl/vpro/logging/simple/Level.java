@@ -12,6 +12,7 @@ public enum Level {
     TRACE(0)
     ;
     private final int intValue;
+
     Level(int intValue) {
         this.intValue = intValue;
     }

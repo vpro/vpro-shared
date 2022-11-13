@@ -68,8 +68,6 @@ public class ObjectLockerTest {
         });
         submitA.get();
         assertThat(events).containsExactly("a1", "a2", "b1");
-
-
     }
 
 
@@ -100,7 +98,7 @@ public class ObjectLockerTest {
     }
 
     /**
-     * Try locking on something different than a String too..
+     * Try locking on something different from a String too.
      */
     @EqualsAndHashCode
     static class Key implements Serializable {
@@ -156,6 +154,8 @@ public class ObjectLockerTest {
         submitA.get();
         // the lock took too long (over 20 ms in this), continued without lock
         assertThat(events).containsExactly("a1", "b1", "a2");
+        log.info("Average duration {}", ObjectLockerAdmin.JMX_INSTANCE.getAverageLockDuration().getWindowValue());
+        log.info("Average acquire duration {}", ObjectLockerAdmin.JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue());
     }
 
 
@@ -201,7 +201,7 @@ public class ObjectLockerTest {
         assertThat(Duration.parse(ObjectLockerAdmin.JMX_INSTANCE.getMaxLockAcquireTime())).isEqualTo(Duration.ofSeconds(10));
 
         assertThat(listenedEvents).containsExactly("LOCK:keya", "LOCK:keyb", "UNLOCK:keyb", "UNLOCK:keya");
-        ObjectLocker.unlisten(listener);
+        ObjectLocker.unListen(listener);
         assertThat(ObjectLocker.getLockedObjects()).isEmpty();
 
     }
