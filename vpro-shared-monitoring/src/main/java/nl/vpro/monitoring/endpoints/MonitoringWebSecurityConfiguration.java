@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -36,13 +37,17 @@ public class MonitoringWebSecurityConfiguration extends WebSecurityConfigurerAda
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.antMatcher("/manage/**")
+        ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http.antMatcher("/manage/**")
             .sessionManagement()
-            .   sessionCreationPolicy(SessionCreationPolicy.NEVER)
+            .sessionCreationPolicy(SessionCreationPolicy.NEVER)
             .and()
-            .authorizeRequests()
-            .   antMatchers("/manage/**").permitAll()
-            //.   antMatchers("/manage/**").hasRole("MANAGER")
+            .authorizeRequests();
+
+        if (properties.isHealthPermitAll()) {
+            expressionInterceptUrlRegistry.antMatchers("/manage/health").permitAll();
+        }
+
+        expressionInterceptUrlRegistry.antMatchers("/manage/**").hasRole("MANAGER")
             .and()
             .httpBasic()
             .   realmName("management")
