@@ -72,10 +72,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new JULSimpleLogger(log);
     }
 
-    @Deprecated
-    static Log4jSimpleLogger log4j(org.apache.log4j.Logger  log) {
-        return new Log4jSimpleLogger(log);
-    }
 
     default String getName() {
         return getClass().getSimpleName();

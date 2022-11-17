@@ -36,13 +36,6 @@
       <version>0.7.4</version>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <!-- deprecated -->
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <optional>true</optional>
-      <version>1.2.17</version>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>

@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 // logging configuration is reused by other tests, so run this isolated.
 @Isolated
 @Execution(SAME_THREAD)
-public class LoggerHelperTest {
+class LoggerHelperTest {
     private static final Logger log = LoggerFactory.getLogger(LoggerHelperTest.class);
 
     @Test
