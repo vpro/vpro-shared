@@ -1,6 +1,6 @@
 package nl.vpro.util;
 
-public interface URLResourceMBean {
+public interface URLResourceMXBean {
 
     void expire();
 }
