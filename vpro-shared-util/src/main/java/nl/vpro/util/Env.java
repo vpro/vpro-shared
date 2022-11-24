@@ -11,9 +11,7 @@ import java.util.function.BooleanSupplier;
  */
 public enum Env {
     LOCALHOST,
-    DEV,
-    DEV_NEW,
-    DEV_OLD,
+
     TEST,
     TESTA(TEST),
     TESTB(TEST),
@@ -21,6 +19,7 @@ public enum Env {
     TEST_OLD,
     TESTA_NEW(TEST_NEW),
     TESTB_NEW(TEST_NEW),
+
     ACC,
     ACCA(ACC),
     ACCB(ACC),
@@ -28,6 +27,7 @@ public enum Env {
     ACC_OLD,
     ACCA_NEW(ACC_NEW),
     ACCB_NEW(ACC_NEW),
+
     PROD,
     PRODA(PROD),
     PRODB(PROD),
