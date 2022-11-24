@@ -5,6 +5,8 @@ import lombok.Getter;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.42
@@ -48,7 +50,18 @@ public enum Env {
         result.add(null);
         result.addAll(Arrays.asList(fallbacks));
         return Collections.unmodifiableList(result);
+    }
 
+    public static Optional<Env> optionalValueOf(@Nullable String value) {
+        if (value == null) {
+            return Optional.empty();
+        }
+        try {
+            Env foundEnv = Env.valueOf(value.toUpperCase());
+            return Optional.of(foundEnv);
+        } catch (IllegalArgumentException iae) {
+            return Optional.empty();
+        }
     }
     /**
      * @return 1 if env if exact match, 0 if fallback match, -
