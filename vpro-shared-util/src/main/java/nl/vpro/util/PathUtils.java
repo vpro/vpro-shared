@@ -43,6 +43,13 @@ public class PathUtils {
     }
 
 
+    public static synchronized void cancelDeleteOnExit(Path p) {
+        if (paths != null) {
+            paths.remove(p);
+        }
+    }
+
+
     /**
      * Very similar {@link File#deleteOnExit()} (code was more or less copied from there) but based on {@link Path}
      */
