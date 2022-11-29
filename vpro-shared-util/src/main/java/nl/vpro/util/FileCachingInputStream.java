@@ -178,7 +178,7 @@ public class FileCachingInputStream extends InputStream {
         } else {
             effectiveProgressLogging = progressLogging;
         }
-        final Copier copier = Copier.builder()
+        return Copier.builder()
             .input(input)
             .expectedCount(expectedCount)
             .offset(offset)
@@ -205,9 +205,6 @@ public class FileCachingInputStream extends InputStream {
             .batch(batchSize)
             .batchConsumer(c -> consumer.accept(this))
             .build();
-
-
-        return copier;
     }
 
     private void executeCopier(Boolean downloadFirst, Boolean startImmediately) throws ExecutionException, InterruptedException {
@@ -619,7 +616,7 @@ public class FileCachingInputStream extends InputStream {
         }
 
         /**
-         * Calls {@link #path} but with an string argument
+         * Calls {@link #path} but with a string argument
          */
         public Builder tempDir(@Nullable String uri) {
             if (uri == null) {
