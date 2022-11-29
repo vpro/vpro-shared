@@ -248,7 +248,7 @@
     <assertj.version>3.23.1</assertj.version>
     <resteasy.version>5.0.4.Final</resteasy.version>
     <bytebuddy.version>1.12.19</bytebuddy.version>
-    <slf4j.version>2.0.4</slf4j.version>
+    <slf4j.version>2.0.5</slf4j.version>
     <log4j2.version>2.19.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
     <javassist.version>3.29.2-GA</javassist.version>
@@ -280,7 +280,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.10.1</micrometer.version>
+    <micrometer.version>1.10.2</micrometer.version>
   </properties>
 
   <dependencyManagement>
