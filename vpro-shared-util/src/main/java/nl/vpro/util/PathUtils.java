@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Utils related to {@link java.nio}
  *
- * @since 3.2
+ * @since 3.1
  */
 public class PathUtils {
 
@@ -35,7 +35,7 @@ public class PathUtils {
         Collections.reverse(toBeDeleted);
         for (Path p : toBeDeleted) {
             try {
-                Files.delete(p);
+                Files.deleteIfExists(p);
             } catch (IOException | RuntimeException e) {
                 // do nothing - best-effort
             }
