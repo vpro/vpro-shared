@@ -10,6 +10,8 @@ import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.text.StringEscapeUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -31,8 +33,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
-    private static final Function<Integer, Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
-        if (exitCode == null) exitCode = -1;
+    private static final IntFunction<Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
         switch(exitCode) {
             case 0:
                 return Level.DEBUG;
@@ -62,7 +63,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final Boolean closeStreams;
 
-    private final Function<Integer, Level> exitCodeLogLevel;
+    private final IntFunction<Level> exitCodeLogLevel;
 
 
     public CommandExecutorImpl(String c) {
@@ -107,7 +108,6 @@ public class CommandExecutorImpl implements CommandExecutor {
     private CommandExecutorImpl(
         File workdir,
         List<File> executables,
-        Logger logger,
         SimpleLogger simpleLogger,
         BiFunction<Level, CharSequence, String> biWrapLogInfo,
         @Singular List<Object> commonArgsSuppliers,
@@ -116,12 +116,12 @@ public class CommandExecutorImpl implements CommandExecutor {
         boolean optional,
         Boolean closeStreams,
         Duration processTimeout,
-        Function<Integer, Level> exitCodeLogLevel
+        IntFunction<Level> exitCodeLogLevel
         ) {
         this.workdir = getWorkdir(workdir);
         this.wrapLogInfo =  biWrapLogInfo == null  ? ignoreArg1(CharSequence::toString) : biWrapLogInfo;
         this.binary = getBinary(executables, optional);
-        this.logger = assembleLogger(logger, simpleLogger, wrapLogInfo);
+        this.logger = assembleLogger(simpleLogger, wrapLogInfo);
         this.commonArgs = (commonArgsSuppliers == null ? Stream.empty() : commonArgsSuppliers.stream())
             .map(this::toString)
             .collect(Collectors.toList());
@@ -130,7 +130,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         this.closeStreams = closeStreams;
         this.processTimeout = processTimeout;
         this.exitCodeLogLevel = exitCodeLogLevel == null ? DEFAULT_EXIT_CODE_LEVEL : exitCodeLogLevel;
-
     }
 
     private Supplier<String> toString(Object o) {
@@ -141,14 +140,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-    private SimpleLogger assembleLogger(Logger logger, SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
-        SimpleLogger result = null;
-        if (logger != null) {
-            result = new Slf4jSimpleLogger(logger);
-        }
-        if (simpleLogger != null) {
-            result = result == null ? simpleLogger : result.chain(simpleLogger);
-        }
+    private SimpleLogger assembleLogger(SimpleLogger simpleLogger, BiFunction<Level, CharSequence, String> wrapLogInfo) {
+        SimpleLogger result = simpleLogger;
         if (result == null) {
             result = getDefaultLogger(this.binary.get());
         }
@@ -186,14 +179,13 @@ public class CommandExecutorImpl implements CommandExecutor {
         } else {
             return () -> f.get().getAbsolutePath();
         }
-
     }
+
     private static File getWorkdir(File workdir) {
         if (workdir != null && !workdir.exists()) {
             throw new IllegalArgumentException("Working directory " + workdir.getAbsolutePath() + " does not exist.");
         }
         return workdir;
-
     }
 
 
@@ -259,6 +251,7 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             return this;
         }
+
         public Builder executablesPath(String executable) {
             return executablesPaths(executable);
         }
@@ -266,8 +259,36 @@ public class CommandExecutorImpl implements CommandExecutor {
         public Builder wrapLogInfo(Function<CharSequence, String> wrapLoginfo) {
             return wrapLogInfo(ignoreArg1(wrapLoginfo));
         }
+
         public Builder wrapLogInfo(BiFunction<Level, CharSequence, String> wrapLoginfo) {
             return biWrapLogInfo(wrapLoginfo);
+        }
+
+        public Builder slf4j(Logger log){
+            this.simpleLogger(Slf4jSimpleLogger.slf4j(log));
+            return this;
+        }
+
+        @Deprecated
+        public Builder logger(Logger log){
+            return slf4j(log);
+        }
+
+        public Builder log4j(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
+            return this;
+        }
+
+        public Builder logger(@NonNull Object log){
+            String className = log.getClass().getName();
+            if ("org.slf4j.Logger".equals(className)) {
+                slf4j((org.slf4j.Logger) log);
+            } else if (className.startsWith("org.apache.logging.log4j") && className.endsWith("Logger")) {
+                log4j((org.apache.logging.log4j.Logger) log);
+            } else {
+                throw new IllegalArgumentException("Unrecognized " + className);
+            }
+            return this;
         }
 
         public CommandExecutorImpl build() {
@@ -283,7 +304,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     }
 
     /**
-     * Eecutes the command with given arguments. Output is logged only.
+     * Executes the command with given arguments. Output is logged only.
      * @return  The exit code
      */
     @Override
@@ -293,7 +314,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             return execute(out, null, args);
         }
     }
-
 
     /**
      * Executes the command with given arguments, catch the output and error streams in the given output streams, and provide standard input with the given input stream
@@ -385,9 +405,8 @@ public class CommandExecutorImpl implements CommandExecutor {
             }
             errorCopier.waitForAndClose();
             int result = p.exitValue();
-            if (result != 0) {
-                logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, String.join(" ", command));
-            }
+            logger.log(exitCodeLogLevel.apply(result), "Exit code {} for calling {}", result, commandToString(command));
+
             if (parameters.out != null) {
                 parameters.out.flush();
             }
@@ -411,6 +430,14 @@ public class CommandExecutorImpl implements CommandExecutor {
         } finally {
             this.logger.debug("Ready");
         }
+    }
+
+    protected static String commandToString(List<String> command) {
+        return command.stream().map(m -> m.contains(" ") ? '"' + escapeForBash(m) + '"' : escapeForBash(m)).collect(Collectors.joining(" "));
+    }
+
+    protected static String escapeForBash(String m) {
+        return StringEscapeUtils.escapeJava(m);
     }
 
     @Override
@@ -492,11 +519,10 @@ public class CommandExecutorImpl implements CommandExecutor {
             if (builder.length() > 0) builder.append(' ');
             boolean needsQuotes = a.indexOf(' ') >= 0 || a.indexOf('|') > 0;
             if (needsQuotes) builder.append('"');
-            builder.append(a.replaceAll("\"", "\\\""));
+            builder.append(StringEscapeUtils.escapeJava(a));
             if (needsQuotes) builder.append('"');
         }
         return builder.toString();
-
     }
 
     private static class ProcessTimeoutHandle {
@@ -511,7 +537,6 @@ public class CommandExecutorImpl implements CommandExecutor {
             PROCESS_MONITOR.purge();
         }
     }
-
 
     @Slf4j
     private static class ProcessTimeoutTask extends TimerTask {
@@ -537,7 +562,6 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
-
     private static ProcessTimeoutHandle startProcessTimeoutMonitor(
         Process process, String command, Duration timeout) {
         ProcessTimeoutTask task = new ProcessTimeoutTask(process, command); // task fires after timeout and kills the process
@@ -554,6 +578,5 @@ public class CommandExecutorImpl implements CommandExecutor {
                 .map(withArg1(this.wrapLogInfo, Level.INFO))
                 .collect(Collectors.joining(" ")));
     }
-
 
 }

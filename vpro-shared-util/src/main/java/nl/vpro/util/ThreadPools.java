@@ -46,10 +46,25 @@ public final class ThreadPools {
      * These may be quite long-lived thread, performing simple jobs like copying streams.
      */
     public static final ThreadPoolExecutor copyExecutor =
-        new ThreadPoolExecutor(0, 2000, 60, TimeUnit.SECONDS,
+        new ThreadPoolExecutor(2, 2000, 60, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
             ThreadPools.createThreadFactory(
                 "nl.vpro.util.threadpools-Copier",
+                false,
+                Thread.NORM_PRIORITY));
+
+
+    /**
+     * An executor service used for relatively long-lived background jobs.
+     * <p>
+     * These may be quite long-lived thread, performing more complex jobs like complicated SQL queries.
+     * @since 3.0
+     */
+    public static final ThreadPoolExecutor longBackgroundExecutor =
+        new ThreadPoolExecutor(2, 100, 60, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            ThreadPools.createThreadFactory(
+                "nl.vpro.util.threadpools-LongBackground",
                 false,
                 Thread.NORM_PRIORITY));
 
@@ -81,6 +96,7 @@ public final class ThreadPools {
         copyExecutor.shutdown();
         startUpExecutor.shutdown();
         backgroundExecutor.shutdown();
+        longBackgroundExecutor.shutdown();
 	}
 }
 

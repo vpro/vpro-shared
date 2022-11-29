@@ -74,7 +74,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private ClientHttpEngine clientHttpEngine;
     private ClientHttpEngine clientHttpEngineNoTimeout;
 
-    private final List<PoolingHttpClientConnectionManager> connectionManagers = new ArrayList<>();
     private boolean shutdown = false;
     protected boolean trustAll = false;
 
@@ -934,6 +933,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     /**
      * Default the client is backed by a {@link org.jboss.resteasy.client.jaxrs.cache.LightweightBrowserCache}, you may replace it by {@link JavaxBrowserCache}, backed with a more generic {@link Cache}, so that the client can hitch on your preferred caching framework.
      */
+    @SuppressWarnings("unchecked")
     public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
@@ -1000,18 +1000,16 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     private synchronized void watchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         log.debug("Watching idle connections in {}", connectionManager);
-        GUARD.connectionManagers.add(connectionManager);
-        connectionManagers.add(connectionManager);
+        GUARD.add(connectionManager);
         if (connectionGuardThread == null) {
             GUARD.start();
             connectionGuardThread = THREAD_FACTORY.newThread(GUARD);
             connectionGuardThread.start();
         }
     }
-
     private synchronized void unwatchIdleConnections(PoolingHttpClientConnectionManager connectionManager) {
         log.debug("Unwatching idle connections in {}", connectionManager);
-        GUARD.connectionManagers.remove(connectionManager);
+        GUARD.remove(connectionManager);
         if (GUARD.connectionManagers.isEmpty()) {
             connectionGuardThread.interrupt();
             GUARD.shutdown();
@@ -1025,8 +1023,10 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         closeClients();
         if(!shutdown) {
             shutdown = true;
-            for (PoolingHttpClientConnectionManager connectionManager : connectionManagers) {
-                unwatchIdleConnections(connectionManager);
+            synchronized (GUARD) {
+                for (PoolingHttpClientConnectionManager connectionManager : new ArrayList<>(GUARD.connectionManagers)) {
+                    unwatchIdleConnections(connectionManager);
+                }
             }
         }
         invalidate();
@@ -1048,7 +1048,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     private static class ConnectionGuard implements Runnable {
 
         private boolean shutdown = false;
-        private final List<HttpClientConnectionManager> connectionManagers = new ArrayList<>();
+        private final List<PoolingHttpClientConnectionManager> connectionManagers = new CopyOnWriteArrayList<>();
 
         void shutdown() {
             shutdown = true;
@@ -1059,6 +1059,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
         void start() {
             shutdown = false;
+        }
+
+        void add(PoolingHttpClientConnectionManager connectionManager) {
+            connectionManagers.add(connectionManager);
+        }
+        void remove(PoolingHttpClientConnectionManager connectionManager) {
+            connectionManagers.remove(connectionManager);
         }
 
         @Override

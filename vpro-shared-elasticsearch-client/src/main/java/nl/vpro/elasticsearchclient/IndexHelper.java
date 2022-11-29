@@ -36,8 +36,7 @@ import com.google.common.base.Suppliers;
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.logging.simple.Slf4jSimpleLogger;
+import nl.vpro.logging.simple.*;
 import nl.vpro.util.*;
 
 import static nl.vpro.elasticsearch.Constants.*;
@@ -49,11 +48,10 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
  * Some tools to automatically create indices and put mappings and stuff.
- *
+ * <p>
  * It is associated with one index and one cluster, and contains the methods to create/delete/update the index settings themselves.
- *
- * Also it contains utilities to perform some common get/post-operations (like indexing/deleting a node), createing bulk requests, and executing them,
- * where the index name than can be implicit.
+ * <p>
+ * Also, it contains utilities to perform some common get/post-operations (like indexing/deleting a node), creating bulk requests, and executing them, where the index name than can be implicit.
  *
  * @author Michiel Meeuwissen
  * @since 0.24
@@ -83,6 +81,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
         public Builder log(Logger log){
             this.simpleLogger(slf4j(log));
+            return this;
+        }
+
+        public Builder log(org.apache.logging.log4j.Logger log){
+            this.simpleLogger(Log4j2SimpleLogger.of(log));
             return this;
         }
 
@@ -151,6 +154,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static IndexHelper.Builder of(Logger log, ESClientFactory client, ElasticSearchIndex index) {
         return IndexHelper.builder()
             .log(log)
+            .client(client)
+            .elasticSearchIndex(index)
+            ;
+    }
+
+    public static IndexHelper.Builder of(org.apache.logging.log4j.Logger log, ESClientFactory client, ElasticSearchIndex index) {
+        return IndexHelper.builder()
+            .simpleLogger(Log4j2SimpleLogger.of(log))
             .client(client)
             .elasticSearchIndex(index)
             ;
@@ -314,7 +325,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     /**
      * For the current index. Reput the settings.
-     *
+     * <p>
      * Before doing that remove all settings from the settings object, that may not be updated, otherwise ES gives errors.
      *
      * @param postProcessSettings You may want to modify the settings objects even further before putting it to ES.
@@ -412,7 +423,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public long clearIndex() {
-        List<BulkRequestEntry> bulk = new ArrayList<>();
+        final List<BulkRequestEntry> bulk = new ArrayList<>();
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.of(client())) {
             i.prepareSearch(getIndexName());
 
@@ -580,7 +591,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         @NonNull final Collection<BulkRequestEntry> jobs,
         @NonNull final ObjectNode responseItem) {
         return jobs.stream().filter(
-            item -> BulkRequestEntry.idFromActionNode(responseItem).equals(item.getId())
+            item -> BulkRequestEntry
+                .idFromActionNode(responseItem)
+                .equals(item.getId())
         ).findFirst();
     }
 
@@ -629,7 +642,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         rl.accept(error);
                     }
                 }
-
             }
         };
     }
@@ -713,7 +725,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     @SafeVarargs
-    private final CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
+    private CompletableFuture<ObjectNode> deleteAsync(String type, @NonNull String id, @NonNull Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
 
         client().performRequestAsync(createDelete( "/" + type + "/" + encode(id)),
@@ -899,65 +911,22 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-
     String encode(@NonNull String id) {
-        try {
-            return URLEncoder.encode(id, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(), e);
-            return id;
-        }
+        return URLEncoder.encode(id, StandardCharsets.UTF_8);
     }
-
-
 
     /**
      * Creates a {@link BulkRequestEntry} for indexing an object with given id.
      * @param id The id of the object to use
      * @param o The object to index
-     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the source node after that is constructed from the object to index
      */
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _indexRequest(id, null, o, consumers);
-    }
-    /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
-     * @param id The id of the object to use
-     * @param o The object to index
-     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
-     */
-    @SafeVarargs
-    public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
-        return _updateRequest(id,  o, consumers);
-    }
-
-    /**
-     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
-     * @param id The id of the object to use
-     * @param o The object to index
-     * @param routing The routing to use
-     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
-     */
-    @SafeVarargs
-    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
-        BulkRequestEntry request =
-            _indexRequest(id, null, o, consumers);
-        request.getAction()
-            .with(INDEX)
-            .put(ROUTING, routing);
-        return request;
-    }
-
-    @SafeVarargs
-    private final BulkRequestEntry _indexRequest(String id, Integer version, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode index = actionLine.with(INDEX);
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
-        if (version != null) { // somewhy, this is not supported
-            index.put(Fields.VERSION, version);
-        }
 
         ObjectNode objectNode  = objectMapper.valueToTree(o);
         return BulkRequestEntry.builder()
@@ -970,10 +939,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     c.accept(on);
                 }
             }).build();
-    }
 
+    }
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id.
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param consumers a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
     @SafeVarargs
-    private final BulkRequestEntry _updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
+    public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
         ObjectNode update = actionLine.with(UPDATE);
         update.put(Fields.ID, id);
@@ -995,21 +970,28 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     c.accept(doc);
                 }}
             ).build();
+
     }
 
-
-    public BulkRequestEntry deleteRequest(String id) {
-        return _deleteRequest(id);
-    }
-
-    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
-        BulkRequestEntry request  = _deleteRequest(id);
-        request.getAction().with(DELETE)
+    /**
+     * Creates a {@link BulkRequestEntry} for indexing an object with given id, and routing
+     * @param id The id of the object to use
+     * @param o The object to index
+     * @param routing The routing to use
+     * @param consumers consumer a list of {@link ObjectNode} {@link Consumer}s that will be called on the the source node after that is constructed from the object to index
+     */
+    @SafeVarargs
+    public final BulkRequestEntry indexRequestWithRouting(String id, Object o, String routing, Consumer<ObjectNode>... consumers) {
+        BulkRequestEntry request =
+            indexRequest(id, o, consumers);
+        request.getAction()
+            .with(INDEX)
             .put(ROUTING, routing);
         return request;
     }
 
-    protected BulkRequestEntry _deleteRequest(String id) {
+
+    public BulkRequestEntry deleteRequest(String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode index = actionLine.with(DELETE);
         index.put(Fields.ID, id);
@@ -1017,6 +999,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
     }
 
+    public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
+        BulkRequestEntry request  = deleteRequest(id);
+        request.getAction().with(DELETE)
+            .put(ROUTING, routing);
+        return request;
+    }
 
     public ObjectNode bulk(Collection<BulkRequestEntry> request) {
         if (request.isEmpty()) {

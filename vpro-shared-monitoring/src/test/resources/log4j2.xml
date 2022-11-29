@@ -6,12 +6,8 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger level="DEBUG" name="nl.vpro.util.FileCachingInputStreamTest" />
-    <Root level="INFO">
+    <Root level="DEBUG">
       <Appender-Ref ref="stdout" />
     </Root>
-
-
-
   </Loggers>
 </Configuration>

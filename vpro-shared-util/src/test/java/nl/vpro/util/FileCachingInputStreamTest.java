@@ -242,7 +242,7 @@ public class FileCachingInputStreamTest {
         boolean isInterrupted = false;
         try{
             try (
-            FileCachingInputStream inputStream = FileCachingInputStream.builder()
+                FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
                 .batchSize(3)
                 .batchConsumer((f) -> {
@@ -279,12 +279,10 @@ public class FileCachingInputStreamTest {
                 }
                 log.info("EOF !, {}", r);
                 throw new AssertionFailedError("should not reach this, it should have been interrupted!");
-
             }
         } catch (ClosedByInterruptException | InterruptedIOException ie) {
             isInterrupted = true;
-            log.info("Catched {}", ie.getClass() + " " + ie.getMessage());
-
+            log.info("Caught {}", ie.getClass() + " " + ie.getMessage(), ie);
         } finally {
             isInterrupted |= thisThread.isInterrupted();
             closed.getAndIncrement();

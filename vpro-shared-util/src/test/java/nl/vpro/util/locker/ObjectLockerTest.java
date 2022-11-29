@@ -68,8 +68,6 @@ public class ObjectLockerTest {
         });
         submitA.get();
         assertThat(events).containsExactly("a1", "a2", "b1");
-
-
     }
 
 

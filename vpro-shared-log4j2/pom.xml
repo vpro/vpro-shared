@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>2.33-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-log4j2</artifactId>
@@ -27,6 +27,13 @@
     </dependency>
     <!-- besides log4j api itself, support logging
     via slf4j and jul api's -->
+    <dependency>
+      <!-- support slf4j2 -->
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
+      <version>${log4j2.version}</version>
+      <scope>runtime</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>

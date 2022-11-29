@@ -2,11 +2,14 @@ package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.time.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.output.NullWriter;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
@@ -40,6 +43,8 @@ public class HealthController {
 
     private boolean threadsDumped = false;
 
+    protected AtomicLong prometheusDownCount = new AtomicLong(0);
+
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
      */
@@ -64,7 +69,6 @@ public class HealthController {
             return false;
 
         }
-
     }
 
     @EventListener
@@ -76,22 +80,44 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        boolean prometheusDown = prometheusController != null && prometheusController.getDuration().getWindowValue().durationValue().compareTo(unhealthyThreshold) > 0;
-        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        if (prometheusDown) {
-            if (! threadsDumped) {
-                new Thread(null, () -> {
-                    log.info("Dumping threads for later analysis");
-                    ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
 
-                }, "Dumping threads").start();
-                threadsDumped = true;
+        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
+        boolean prometheusDown = prometheusDown(prometheusDuration);
+
+        if (prometheusDown) {
+            prometheusDownCount.incrementAndGet();
+            try {
+                Duration secondPrometheusDuration = prometheusController.scrape(new NullWriter());
+                prometheusDown = prometheusDown(secondPrometheusDuration);
+            } catch (IOException ioa) {
+                log.warn(ioa.getMessage());
             }
+            if (prometheusDown) {
+                if (!threadsDumped) {
+
+                    new Thread(null, () -> {
+                        log.info("Dumping threads for later analysis");
+                        ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+
+                    }, "Dumping threads").start();
+                    threadsDumped = true;
+                }
+            }
+
         } else {
+            prometheusDownCount.set(0);
             threadsDumped = false;
         }
 
-        return ResponseEntity
+        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
+        Health health = Health.builder()
+            .status(effectiveStatus.code)
+            .message(effectiveStatus.message)
+            .startTime(ready == null ? null : ready)
+            .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
+            .build();
+
+        ResponseEntity<Health> body = ResponseEntity
             .status(effectiveStatus.code)
             .body(
                 Health.builder()
@@ -99,9 +125,16 @@ public class HealthController {
                     .message(effectiveStatus.message)
                     .startTime(ready == null ? null : ready)
                     .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
-                    .prometheusCallDuration(prometheusController != null ? prometheusController.getDuration().getWindowValue().durationValue() : null)
+                    .prometheusCallDuration(prometheusDuration)
+                    .prometheusDownCount(prometheusDownCount.get() == 0 ? null : prometheusDownCount.get())
                     .build()
             );
+
+        return body;
+    }
+
+    protected boolean prometheusDown(Duration d) {
+        return d.compareTo(unhealthyThreshold) > 0;
     }
 
     private enum Status {

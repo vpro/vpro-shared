@@ -10,7 +10,7 @@ import nl.vpro.logging.simple.SimpleLogger;
 
 /**
  * Wraps a {@link Logger} in an {@link OutputStream}, making logging available as an outputstream, which can be useful for things that accept outputstreams (e.g. external processes)
- *
+ * <p>
  * Supports slf4j and JUL. For log4j2 see, {@link Log4j2OutputStream}
  *
  * @author Michiel Meeuwissen

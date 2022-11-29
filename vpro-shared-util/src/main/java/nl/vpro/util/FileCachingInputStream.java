@@ -255,7 +255,7 @@ public class FileCachingInputStream extends InputStream {
             }
         }
 
-        Path tempFile = tempPath == null ? Files.createTempFile(
+        final Path tempFile = tempPath == null ? Files.createTempFile(
             path == null ? Paths.get(System.getProperty("java.io.tmpdir")) : path,
             filePrefix == null ? "file-caching-inputstream" : filePrefix,
             null) : tempPath;
@@ -282,9 +282,9 @@ public class FileCachingInputStream extends InputStream {
 
     private InitialBufferResult fillInitialBuffer(int initialBuffer, InputStream input, Path tempPath) throws IOException {
         // first use an initial buffer of memory only
-        byte[] buf = new byte[initialBuffer];
+        final byte[] buf = new byte[initialBuffer];
 
-        InitialBufferResult.Builder builder = InitialBufferResult.builder();
+        final InitialBufferResult.Builder builder = InitialBufferResult.builder();
         int bufferOffset = 0;
         int numRead;
         boolean complete;
@@ -554,12 +554,11 @@ public class FileCachingInputStream extends InputStream {
                 try {
                     toFileCopier.wait(1000);
                 } catch (InterruptedException e) {
-                    log.warn("Interrupted {}", e.getMessage());
+                    log.warn("Interrupted, message: {}", e.getMessage());
                     toFileCopier.close();
                     future.completeExceptionally(e);
                     close();
                     Thread.currentThread().interrupt();
-
                     throw new InterruptedIOException(e.getMessage());
                 }
                 result = tempFileInputStream.read(b, offset, length);

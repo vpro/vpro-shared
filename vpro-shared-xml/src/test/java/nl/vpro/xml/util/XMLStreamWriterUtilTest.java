@@ -48,14 +48,13 @@ public class XMLStreamWriterUtilTest {
 
         ) {
             util.writeAttribute("x", "b");
-            util.writeElement("b");
-            util.writeCData("cdata");
-            util.writeCharacters("characters");
-            util.writeEmptyElement("urn:bla", "empty");
-            util.writeEntityRef("amp");
-            util.writeComment("comment");
-
-
+            try (AutoCloseable c3 = util.writeElement("b")) {
+                util.writeCData("cdata");
+                util.writeCharacters("characters");
+                util.writeEmptyElement("urn:bla", "empty");
+                util.writeEntityRef("amp");
+                util.writeComment("comment");
+            }
         }
         assertThat(builder.toString()).isEqualTo("<?xml version=\"1.0\"?><a x=\"b\"><b><![CDATA[cdata]]>characters<empty/>&amp;<!--comment--></b></a>");
     }
@@ -69,7 +68,7 @@ public class XMLStreamWriterUtilTest {
             throw new Exception("bla");
         } catch (Exception e) {
             util.writeComment(e.getMessage());
-            log.info("Catched {}", e.getMessage());
+            log.info("Caught {}", e.getMessage());
         }
         assertThat(builder.toString()).isEqualTo("<a x=\"b\"><b>BB</b></a><!--bla-->");
     }

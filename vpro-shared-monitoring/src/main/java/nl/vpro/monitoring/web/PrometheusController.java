@@ -23,11 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class PrometheusController {
 
     @Getter
-    private final  WindowedStatisticalLong duration = WindowedStatisticalLong.builder()
-        .mode(StatisticalLong.Mode.DURATION)
-        .bucketCount(10)
-        .bucketDuration(Duration.ofMinutes(5))
-        .build();
+    private WindowedStatisticalLong duration = createDuration();
 
     private final PrometheusMeterRegistry registry;
 
@@ -38,17 +34,31 @@ public class PrometheusController {
     @GetMapping
     public void metrics(final HttpServletResponse response) throws IOException {
         log.debug("Scraping Prometheus metrics");
-
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
-        long start = System.nanoTime();
-        try (Writer writer = response.getWriter()) {
-            registry.scrape(writer);
-            writer.flush();
-        } finally {
-            duration.accept(Duration.ofNanos(System.nanoTime() - start));
+        try (
+            WindowedStatisticalLong.RunningDuration measure = duration.measure();
+            Writer writer = response.getWriter()) {
+            scrape(writer);
         }
-
+    }
+    protected Duration scrape(Writer writer) throws IOException {
+        long start = System.nanoTime();
+        registry.scrape(writer);
+        writer.flush();
+        return Duration.ofNanos(System.nanoTime() - start);
     }
 
+    public void reset() {
+        this.duration = createDuration();
+    }
+
+    private WindowedStatisticalLong createDuration() {
+
+        return WindowedStatisticalLong.builder()
+            .mode(StatisticalLong.Mode.DURATION)
+            .bucketCount(10)
+            .bucketDuration(Duration.ofSeconds(5))
+            .build();
+    }
 }

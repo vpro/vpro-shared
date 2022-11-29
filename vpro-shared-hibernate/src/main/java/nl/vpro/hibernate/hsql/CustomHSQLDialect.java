@@ -29,6 +29,8 @@ public class CustomHSQLDialect extends HSQLDialect {
 
     public static class UUIDType extends AbstractSingleColumnStandardBasicType<UUID> {
 
+        private static final long serialVersionUID = -7244515432254939427L;
+
         public UUIDType() {
             super(VarcharTypeDescriptor.INSTANCE, UUIDTypeDescriptor.INSTANCE);
         }

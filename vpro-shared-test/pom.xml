@@ -6,7 +6,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>2.33-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-test</artifactId>
   <packaging>jar</packaging>
@@ -29,11 +29,6 @@
       <groupId>org.xmlunit</groupId>
       <artifactId>xmlunit-core</artifactId>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

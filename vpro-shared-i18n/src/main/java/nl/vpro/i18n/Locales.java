@@ -3,13 +3,14 @@ package nl.vpro.i18n;
 import java.util.*;
 import java.util.stream.Stream;
 
-import org.meeuw.i18n.regions.Region;
 import org.meeuw.i18n.countries.Country;
+import org.meeuw.i18n.regions.Region;
 
 import com.neovisionaries.i18n.*;
 
-import static com.neovisionaries.i18n.CountryCode.BE;
-import static com.neovisionaries.i18n.CountryCode.NL;
+import static com.neovisionaries.i18n.CountryCode.*;
+import static com.neovisionaries.i18n.LanguageCode.ar;
+import static com.neovisionaries.i18n.LanguageCode.nl;
 
 /**
  * @author Michiel Meeuwissen
@@ -22,23 +23,34 @@ public final class Locales {
     }
 
     /**
-     * The locale representing the dutch language, leaving unspecified for wich country.
+     * The locale representing the Dutch language, leaving unspecified for wich country.
+     * <p>
+     * Note that it seems to be undefined what {@code WeekFields.of(Locales.DUTCH).getFirstDayOfWeek()} should be. I'd day that it should be {@link java.time.DayOfWeek#MONDAY}, was it did in java 8, but in java 17 it seems to result {@link java.time.DayOfWeek#SUNDAY}, which is a bit silly, because afaik in no Dutch-speaking area in the world that would be correct.
+     * <p>
+     * Use {@link #NETHERLANDISH} or {@link #FLEMISH}, {@link #DUTCH_U} if it is important that the first day of the week would be monday.
      */
-    public static final Locale DUTCH         = of(LanguageCode.nl);
+    public static final Locale DUTCH         = of(nl);
+
     /**
-     * The locale representing the <a href="https://en.wikipedia.org/wiki/Arabic">arabic language</a>, leaving unspecified for wich country.
+     * Like {@link #DUTCH}, but the country is explicitly {@link CountryCode#UNDEFINED}.
+     * @since 2.34
      */
-    public static final Locale ARABIC        = of(LanguageCode.ar);
+    public static final Locale DUTCH_U         = of (nl, UNDEFINED);
+
+    /**
+     * The locale representing the <a href="https://en.wikipedia.org/wiki/Arabic">Arabic language</a>, leaving unspecified for wich country.
+     */
+    public static final Locale ARABIC        = of(ar);
 
     /**
      * Dutch as spoken in the Netherlands.
      */
-    public static final Locale NETHERLANDISH = of(LanguageCode.nl, Country.of(NL));
+    public static final Locale NETHERLANDISH = of(nl, NL);
 
     /**
      * Dutch as spoken in the Flanders
      */
-    public static final Locale FLEMISH       = of(LanguageCode.nl, Country.of(BE));
+    public static final Locale FLEMISH       = of(nl, BE);
 
     /**
      * The locale representing and 'undetermined' language {@link LanguageAlpha3Code#und}
@@ -49,7 +61,7 @@ public final class Locales {
 
     /**
      * Returns the current default locale for this thread.
-     *
+     * <p>
      * This initializes with {@link Locale#getDefault()}, but can be set per thread.
      */
     public static Locale getDefault() {
@@ -85,6 +97,10 @@ public final class Locales {
 
     public static Locale of(LanguageCode lc, Country  code) {
         return new Locale(lc.name(), code.getCode());
+    }
+
+    public static Locale of(LanguageCode lc, CountryCode  code) {
+        return of(lc, Country.of(code));
     }
 
     public static Locale of(LanguageCode lc) {
@@ -132,7 +148,7 @@ public final class Locales {
         } else {
             return score;
         }
-        if (Objects.equals(locale1.getCountry(), locale2.getCountry())) {
+        if (countryScoreEquals(locale1.getCountry(), locale2.getCountry())) {
             score++;
         } else {
             return score;
@@ -141,6 +157,16 @@ public final class Locales {
             score++;
         }
         return score;
+    }
+
+    private static boolean countryScoreEquals(String country1, String country2) {
+        if (UNDEFINED.name().equals(country1)) {
+            country1 = "";
+        }
+        if (UNDEFINED.name().equals(country2)) {
+            country2 = "";
+        }
+        return Objects.equals(country1, country2);
     }
 
     public static Optional<Locale> findBestMatch(Locale request, Stream<Locale> candidates) {

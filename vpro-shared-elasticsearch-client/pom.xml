@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>2.33-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-elasticsearch-client</artifactId>
@@ -29,7 +29,7 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-core</artifactId>
-      <version>1.12.196</version>
+      <version>1.12.318</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -82,6 +82,10 @@
       <artifactId>wiremock-standalone</artifactId>
       <version>2.27.2</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
     </dependency>
   </dependencies>
 </project>

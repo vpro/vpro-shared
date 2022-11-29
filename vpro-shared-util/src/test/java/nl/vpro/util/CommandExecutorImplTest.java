@@ -272,4 +272,11 @@ public class CommandExecutorImplTest {
         }
         assertThat(events.size()).isGreaterThanOrEqualTo(3);
     }
+
+    @Test
+    public void commandToString() {
+        assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo bar"))).isEqualTo("ls \"/tmp/foo bar\"");
+
+        assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo\"bar"))).isEqualTo("ls /tmp/foo\\\"bar");
+    }
 }

@@ -25,7 +25,7 @@ import nl.vpro.jmx.MBeans;
  * @since 0.37
  */
 @Slf4j
-public class URLResource<T> implements URLResourceMBean {
+public class URLResource<T> implements URLResourceMXBean {
 
     @SafeVarargs
     public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {

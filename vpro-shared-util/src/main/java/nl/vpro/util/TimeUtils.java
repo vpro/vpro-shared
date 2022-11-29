@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
+import java.time.temporal.*;
 import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -265,6 +264,25 @@ public class TimeUtils {
     public static Duration roundToMillis(@PolyNull Duration duration) {
         return duration == null ? null : Duration.ofMillis(duration.plus(Duration.ofNanos(500_000)).toMillis());
 
+    }
+
+    /**
+     * @since 2.34
+     */
+    @PolyNull
+    public static Instant truncatedTo(
+        @PolyNull Instant instant,
+        @Nullable ChronoUnit unit) {
+        return instant == null ? null : instant.truncatedTo(unit);
+    }
+
+    /**
+     * @since 2.34
+     */
+    @PolyNull
+    public static Instant truncated(
+        @PolyNull Instant instant) {
+        return truncatedTo(instant, ChronoUnit.MILLIS);
     }
 
 

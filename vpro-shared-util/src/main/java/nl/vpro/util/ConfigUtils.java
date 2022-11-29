@@ -272,9 +272,13 @@ public class ConfigUtils {
                     // prefix doesn't match, skip it.
                     return;
                 }
-                Env foundEnv = Env.valueOf(split[2].toUpperCase());
-                if (foundEnv == env) {
-                    result.put(split[1], value);
+                Optional<Env> foundEnv = Env.optionalValueOf(split[2]);
+                if (foundEnv.isPresent()) {
+                    if (foundEnv.get() == env) {
+                        result.put(split[1], value);
+                    }
+                } else {
+                    log.warn("Illegal environment {} found and ignored", split[2]);
                 }
                 return;
             }

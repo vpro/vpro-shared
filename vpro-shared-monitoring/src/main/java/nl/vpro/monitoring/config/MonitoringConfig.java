@@ -178,6 +178,9 @@ public class MonitoringConfig {
                 Object key = holder.key;
                 String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
                 registry.counter("locks.event", "keyType", keyType, "eventType", String.valueOf(type), "holdCount", String.valueOf(holder.lock.getHoldCount())).increment();
+                if (type == ObjectLocker.Listener.Type.UNLOCK) {
+                    registry.timer("locks.duration", "keyType", keyType).record(duration);
+                }
             });
             Gauge.builder("locks.count", JMX_INSTANCE, ObjectLockerAdmin::getCurrentCount)
                 .description("The current number of locked objects")
@@ -188,13 +191,13 @@ public class MonitoringConfig {
                 .register(registry);
 
             Gauge.builder("locks.average_acquiretime",
-                    () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().getValue()
+                    () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().optionalDoubleMean().orElse(0d)
                 )
                 .description("The average time in ms to acquire a lock (in " + JMX_INSTANCE.getAverageLockAcquireTime().getTotalDuration() + ")")
                 .register(registry);
 
             Gauge.builder("locks.average_duration",
-                    () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().getValue()
+                    () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().optionalDoubleMean().orElse(0d)
                 )
                 .description("The average time in ms to hold a lock (in " + JMX_INSTANCE.getAverageLockDuration().getTotalDuration() +")")
                 .register(registry);
