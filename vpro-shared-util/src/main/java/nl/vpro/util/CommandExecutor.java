@@ -9,8 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.output.WriterOutputStream;
@@ -287,6 +286,11 @@ public interface CommandExecutor {
     static Parameters.Builder parameters() {
         return Parameters.builder();
     }
+
+    /**
+     * The binary associated with the CommandExecutor.
+     */
+    Supplier<String> getBinary();
 
     /**
      * The parameters of {@link #submit(IntConsumer, Parameters)}, in other words,  an object representing the one time parameters of a call to a {@link CommandExecutor}.
