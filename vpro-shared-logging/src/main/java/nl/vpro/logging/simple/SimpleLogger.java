@@ -146,7 +146,15 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             if (format == null) {
                 format = "null";
             }
-            final FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), arg);
+            Object[] effectiveArg = new Object[arg.length];
+            for (int i = 0; i < arg.length; i++) {
+                if (arg[i] instanceof Supplier) {
+                    effectiveArg[i] = ((Supplier<?>) arg[i]).get();
+                } else {
+                    effectiveArg[i] = arg[i];
+                }
+            }
+            final FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), effectiveArg);
             final String message = ft.getMessage();
             if (ft.getArgArray().length == arg.length) {
                 accept(level, message, null);
