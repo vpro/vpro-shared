@@ -10,7 +10,7 @@
 
   <artifactId>vpro-shared-log4j2</artifactId>
   <description>
-    Just arrange dependencies to set up log4j2, arrange logging from jul and slf4j to log4j2.
+    Just arranges dependencies to set up log4j2. Arranges logging from jul and slf4j (1 &amp; 2) to log4j2.
   </description>
 
 
