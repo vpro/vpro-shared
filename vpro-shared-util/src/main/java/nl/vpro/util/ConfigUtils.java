@@ -278,7 +278,7 @@ public class ConfigUtils {
                         result.put(split[1], value);
                     }
                 } else {
-                    log.warn("Illegal environment {} found and ignored", split[2]);
+                    log.warn("Illegal environment on {}={} {} found and ignored", key , value, split[2]);
                 }
                 return;
             }
