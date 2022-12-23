@@ -11,7 +11,10 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -177,10 +180,10 @@ public class URLResourceTest {
         assertThat((long) props.size()).isEqualTo(1);
     }
 
-    @Test
-    @Disabled
-    public void broadcastersReal() {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create("https://poms-test.omroep.nl/broadcasters/"));
+    @ParameterizedTest
+    @ValueSource(strings = {"", "-acc", "-test"})
+    public void broadcastersReal(String env) {
+        URLResource<Properties> broadcasters = URLResource.properties(URI.create(String.format("https://poms%s.omroep.nl/broadcasters/", env)));
         broadcasters.setMinAge(Duration.ZERO);
         assertTrue(broadcasters.get().size() > 0);
         assertThat(broadcasters.getChangesCount()).isEqualTo(1);
@@ -188,7 +191,7 @@ public class URLResourceTest {
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         broadcasters.get();
         assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         System.out.println(broadcasters.get());
     }
