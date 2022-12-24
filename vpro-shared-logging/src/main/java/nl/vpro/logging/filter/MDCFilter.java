@@ -1,4 +1,4 @@
-package nl.vpro.filter;
+package nl.vpro.logging.filter;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import nl.vpro.logging.Slf4jHelper;
 
-import static nl.vpro.mdc.MDCConstants.*;
+import static nl.vpro.logging.mdc.MDCConstants.*;
 
 /**
  * Puts a few things related to authentication and accountability (remote address) on the Mapped Diagnostic Context of SLF4J

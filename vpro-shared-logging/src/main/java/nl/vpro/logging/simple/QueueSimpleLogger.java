@@ -6,7 +6,7 @@ import java.util.Queue;
 
 /**
  * A {@link SimpleLogger} that adds every log event to a {@link Queue} of {@link Event}'s (or possibly extensions thereof)
- *
+ * <p>
  * It is abstract because you need to implement how to instantiate a new {@link Event} extension for the queue via {@link #createEvent(Level, CharSequence, Throwable)}
  * If you have no need for that, you can instantiate via {@link #of(Queue)}.
  *
