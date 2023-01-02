@@ -19,16 +19,20 @@ public final class ThreadPools {
         // this class has no instances
     }
 
-    private static final ThreadGroup THREAD_GROUP = new ThreadGroup(ThreadPools.class.getName());
+    public static final ThreadGroup THREAD_GROUP = new ThreadGroup(ThreadPools.class.getName());
+
 
 
     public static ThreadFactory createThreadFactory(final String namePrefix, final boolean daemon, final int priority) {
+        return createThreadFactory(THREAD_GROUP, namePrefix, daemon, priority);
+    }
+    public static ThreadFactory createThreadFactory(final ThreadGroup threadGroup, final String namePrefix, final boolean daemon, final int priority) {
         return new ThreadFactory() {
             long counter = 1;
 
             @Override
             public Thread newThread(@NonNull Runnable r) {
-                Thread thread = new Thread(THREAD_GROUP, r);
+                Thread thread = new Thread(threadGroup, r);
                 thread.setDaemon(daemon);
                 thread.setPriority(priority);
                 thread.setName(namePrefix +
