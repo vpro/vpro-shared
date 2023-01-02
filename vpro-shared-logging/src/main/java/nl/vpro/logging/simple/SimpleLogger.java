@@ -3,6 +3,7 @@ package nl.vpro.logging.simple;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.helpers.FormattingTuple;
@@ -38,7 +39,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return threadLocal;
     }
     static SimpleLogger threadLocalOr(Logger logger) {
-        return threadLocalOr(slfj4(logger));
+        return threadLocalOr(slf4j(logger));
     }
 
     class RemoveFromThreadLocal implements  AutoCloseable {
