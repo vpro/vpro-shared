@@ -213,4 +213,25 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return Slf4jSimpleLogger.chain(this, logger);
     }
 
+    /**
+     * Returns a new {@link SimpleLogger} which will never log higher then {@code maxLevel}.
+     * @since 3.1
+     */
+    default SimpleLogger truncated(Level maxLevel) {
+        SimpleLogger wrapped = this;
+        return new SimpleLogger() {
+            @Override
+            public void accept(Level level, CharSequence message, @Nullable Throwable t) {
+                if (level.compareTo(maxLevel) < 0) {
+                    level = maxLevel;
+                }
+                wrapped.accept(level, message, t);
+            }
+            @Override
+            public boolean isEnabled(Level level) {
+                return wrapped.isEnabled(level);
+            }
+
+        };
+    }
 }
