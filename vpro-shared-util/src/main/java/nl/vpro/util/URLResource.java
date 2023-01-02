@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import nl.vpro.jmx.MBeans;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
@@ -56,6 +57,7 @@ public class URLResource<T> implements URLResourceMXBean {
     private Instant lastTry = null;
 
     @Getter
+    @MonotonicNonNull
     private Integer code = null;
     @Getter
     private URI url;

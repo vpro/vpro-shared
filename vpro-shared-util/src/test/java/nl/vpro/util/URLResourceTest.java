@@ -185,16 +185,21 @@ public class URLResourceTest {
     public void broadcastersReal(String env) {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create(String.format("https://poms%s.omroep.nl/broadcasters/", env)));
         broadcasters.setMinAge(Duration.ZERO);
-        assertTrue(broadcasters.get().size() > 0);
-        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
-        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-        broadcasters.get();
-
-        if (! "".equals(env)) { // TODO remove this in >= 7.1
+        Properties properties = broadcasters.get();
+        if (broadcasters.getCode() != 503) {
+            assertTrue(properties.size() > 0);
             assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-            assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+            assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
             assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+            broadcasters.get();
+
+            if (!"".equals(env)) { // TODO remove this in >= 7.1
+                assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+                assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+                assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+            }
+        } else {
+            log.info("Skipping because code = {}", broadcasters.getCode());
         }
         System.out.println(broadcasters.get());
     }
