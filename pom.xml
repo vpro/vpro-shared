@@ -262,9 +262,9 @@
 
     <junit.version>5.9.1</junit.version>
     <mockito.version>4.11.0</mockito.version>
-    <assertj.version>3.23.1</assertj.version>
+    <assertj.version>3.24.1</assertj.version>
     <resteasy.version>5.0.5.Final</resteasy.version>
-    <bytebuddy.version>1.12.20</bytebuddy.version>
+    <bytebuddy.version>1.12.21</bytebuddy.version>
     <slf4j.version>2.0.6</slf4j.version>
     <log4j2.version>2.19.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
@@ -689,7 +689,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.7.1</version>
+        <version>1.7.2</version>
       </dependency>
 
       <dependency>
@@ -729,7 +729,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.28.0</version>
+      <version>3.29.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
