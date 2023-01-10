@@ -3,11 +3,13 @@ package nl.vpro.logging.simple;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
+
+import static nl.vpro.logging.simple.Level.shiftedLevel;
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 
 /**
@@ -231,7 +233,24 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             public boolean isEnabled(Level level) {
                 return wrapped.isEnabled(level);
             }
-
+        };
+    }
+    /**
+     * Returns a new {@link SimpleLogger} with shifted levels.
+     * @since 3.1
+     * @param shift The amount to shift. Positive values will shift to {@link Level#TRACE}, negative values to {@link Level#ERROR}
+     */
+    default SimpleLogger shift(int shift) {
+        SimpleLogger wrapped = this;
+        return new SimpleLogger() {
+            @Override
+            public void accept(Level level, CharSequence message, @Nullable Throwable t) {
+                wrapped.accept(shiftedLevel(level, shift), message, t);
+            }
+            @Override
+            public boolean isEnabled(Level level) {
+                return wrapped.isEnabled(shiftedLevel(level, shift));
+            }
         };
     }
 }

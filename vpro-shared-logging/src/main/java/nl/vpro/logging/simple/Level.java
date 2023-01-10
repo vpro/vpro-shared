@@ -20,4 +20,17 @@ public enum Level {
     public int toInt() {
         return intValue;
     }
+
+    private static int acceptableIndex(int i) {
+        if (i < 0) {
+            return 0;
+        }
+        if (i >= Level.values().length) {
+            return Level.values().length -1;
+        }
+        return i;
+    }
+    public static Level shiftedLevel(Level l, int shift) {
+        return values()[acceptableIndex(l.ordinal() + shift)];
+    }
 }
