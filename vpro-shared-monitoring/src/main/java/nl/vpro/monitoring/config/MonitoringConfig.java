@@ -1,7 +1,6 @@
 package nl.vpro.monitoring.config;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
@@ -39,6 +38,8 @@ import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 @Slf4j
 public class MonitoringConfig {
 
+    public static MeterRegistry meterRegistry;
+
     @Autowired(required = false)
     public MonitoringProperties properties = new MonitoringProperties();
 
@@ -51,6 +52,7 @@ public class MonitoringConfig {
     public PrometheusMeterRegistry globalMeterRegistry() {
         final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
         start(registry);
+        meterRegistry = registry;
         return registry;
     }
 

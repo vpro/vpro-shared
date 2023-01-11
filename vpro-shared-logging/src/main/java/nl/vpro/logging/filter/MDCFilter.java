@@ -100,9 +100,4 @@ public class  MDCFilter implements Filter {
         return LoggerFactory.getLogger(MDCFilter.class.getName() + "." + postfix);
     }
 
-    @Override
-    public void destroy() {
-
-
-    }
 }
