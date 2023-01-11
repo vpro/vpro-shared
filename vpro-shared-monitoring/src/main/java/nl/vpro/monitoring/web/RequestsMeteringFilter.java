@@ -1,5 +1,7 @@
 package nl.vpro.monitoring.web;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import com.google.common.net.MediaType;
 import static nl.vpro.monitoring.config.MonitoringConfig.meterRegistry;
 
 
+@Slf4j
 public class RequestsMeteringFilter implements Filter {
 
 
@@ -79,8 +82,18 @@ public class RequestsMeteringFilter implements Filter {
         try {
             chain.doFilter(req, res);
         } finally {
-            MediaType type = MediaType.parse(res.getContentType());
-            String[] tags = new String[] {"path", pathTag, "contentType", type.type() + "/" + type.subtype()};
+            String contentType = "?";
+            {
+                if (res.getContentType() != null) {
+                    MediaType type = MediaType.parse(res.getContentType());
+                    contentType = type.withoutParameters().toString();
+                } else {
+                    if (200 == response.getStatus()) {
+                        log.warn("No content type in {}", path);
+                    }
+                }
+            }
+            String[] tags = new String[] {"path", pathTag, "contentType", contentType, "status", ""+ response.getStatus()};
             meterRegistry.counter("servlet_requests", tags).increment();
             meterRegistry.timer("servlet_requests_duration", tags)
                 .record(Duration.ofNanos(System.nanoTime() - nanoStart));
