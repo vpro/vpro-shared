@@ -54,7 +54,7 @@ public class RequestsMeteringFilter implements Filter {
     public void init(FilterConfig filterConfig) throws ServletException {
         String prefixes = filterConfig.getInitParameter("prefixes");
         if (StringUtils.isNotBlank(prefixes)) {
-            for (String pref :prefixes.split(",")) {
+            for (String pref :prefixes.split("[,\\s]+")) {
                 String trimmed = pref.trim();
                 matchers.add(Matcher.of(pref, s -> s.startsWith(trimmed)));
             }
