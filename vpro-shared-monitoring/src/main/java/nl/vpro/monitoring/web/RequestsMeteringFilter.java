@@ -93,7 +93,12 @@ public class RequestsMeteringFilter implements Filter {
                     }
                 }
             }
-            String[] tags = new String[] {"path", pathTag, "contentType", contentType, "status", ""+ response.getStatus()};
+            String[] tags = new String[] {
+                "path", pathTag,
+                "contentType", contentType,
+                "status", ""+ response.getStatus(),
+                "method", request.getMethod()
+            };
             meterRegistry.counter("servlet_requests", tags).increment();
             meterRegistry.timer("servlet_requests_duration", tags)
                 .record(Duration.ofNanos(System.nanoTime() - nanoStart));
