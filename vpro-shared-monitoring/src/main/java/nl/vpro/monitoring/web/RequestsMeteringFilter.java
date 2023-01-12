@@ -20,6 +20,30 @@ import com.google.common.net.MediaType;
 import static nl.vpro.monitoring.config.MonitoringConfig.meterRegistry;
 
 
+/**
+ * Just put something like this in {@code web.xml} and meter all requests.
+ * <pre>
+ * {@code
+ *   <filter>
+ *     <filter-name>RequestsMeteringFilter</filter-name>
+ *     <filter-class>nl.vpro.monitoring.web.RequestsMeteringFilter</filter-class>
+ *     <init-param>
+ *       <param-name>prefixes</param-name>
+ *       <param-value>
+ *           /manage
+ *           /import
+ *       </param-value>
+ *     </init-param>
+ *   </filter>
+ *   <filter-mapping>
+ *     <filter-name>RequestsMeteringFilter</filter-name>
+ *     <url-pattern>/*</url-pattern>
+ *   </filter-mapping>
+ *   }
+ *  </pre>
+ *
+ *  The {@code prefixes} parameter defines a lists of recognized 'prefixes'. The path of the request is matched to those, and the first match will result a tag with this prefix value. (e.g. {@code path=/manage}). If none matched then the used tag will be {@code path=*}.
+ */
 @Slf4j
 public class RequestsMeteringFilter implements Filter {
 
