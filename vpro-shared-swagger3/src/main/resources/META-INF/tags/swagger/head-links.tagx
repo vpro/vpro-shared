@@ -1,0 +1,19 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:swagger="https://www.vpro.nl/shared/tags/swagger"
+    version="2.0"
+    >
+  <jsp:directive.tag
+            description="This includes the head links for the swagger index" />
+
+  <swagger:swaggerbase />
+
+	<link rel="stylesheet" type="text/css" href="${swaggerbase}/swagger-ui.css" />
+	<link rel="stylesheet" type="text/css" href="${swaggerbase}/index.css" />
+
+  <link href='css/override.css' rel='stylesheet' type='text/css'/>
+
+	<script src="${swaggerbase}swagger-ui-bundle.js" charset="UTF-8"><jsp:text> </jsp:text></script>
+	<script src="${swaggerbase}swagger-ui-standalone-preset.js" charset="UTF-8"><jsp:text> </jsp:text></script>
+
+</jsp:root>

@@ -69,7 +69,7 @@
     <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
-    <module>vpro-shared-swagger</module>
+    <module>vpro-shared-swagger3</module>
 
     <module>vpro-shared-test</module>
     <module>vpro-shared-util</module>
@@ -81,6 +81,7 @@
     <module>vpro-shared-bom</module>
 
     <!--
+        <module>vpro-shared-swagger</module>
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
          <module>vpro-shared-resteasy</module>
         <module>vpro-shared-camel</module>
@@ -285,10 +286,8 @@
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
 
     <ektorp.version>1.5.0</ektorp.version>
-    <!--
-    <swagger.version>2.0.0-rc2</swagger.version>
-    -->
-    <swagger.version>1.6.9</swagger.version>
+
+    <swagger.version>2.2.8</swagger.version>
     <lombok.version>1.18.24</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
@@ -305,14 +304,19 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.swagger</groupId>
+        <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-annotations</artifactId>
         <version>${swagger.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.swagger</groupId>
-        <artifactId>swagger-jaxrs</artifactId>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-jaxrs2</artifactId>
         <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+         <version>${swagger.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>

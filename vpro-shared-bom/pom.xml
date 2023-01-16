@@ -159,9 +159,11 @@
         <artifactId>vpro-shared-xml</artifactId>
         <version>${project.version}</version>
       </dependency>
+
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-swagger</artifactId>
+        <artifactId>vpro-shared-swagger3</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -232,6 +234,11 @@
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-resteasy</artifactId>
         <version>2.21.0</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-swagger</artifactId>
+        <version>3.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
