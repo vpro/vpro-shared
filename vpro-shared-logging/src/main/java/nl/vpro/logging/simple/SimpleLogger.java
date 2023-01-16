@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
+import static nl.vpro.logging.simple.Level.shiftedLevel;
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
+
 
 /**
  *<p>A very simplified Logger. This can e.g. be used as messaging system. It was made to use in conjuction with {@link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.</p>
@@ -38,7 +41,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return threadLocal;
     }
     static SimpleLogger threadLocalOr(Logger logger) {
-        return threadLocalOr(slfj4(logger));
+        return threadLocalOr(slf4j(logger));
     }
 
     class RemoveFromThreadLocal implements  AutoCloseable {
@@ -72,10 +75,6 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return new JULSimpleLogger(log);
     }
 
-    @Deprecated
-    static Log4jSimpleLogger log4j(org.apache.log4j.Logger  log) {
-        return new Log4jSimpleLogger(log);
-    }
 
     default String getName() {
         return getClass().getSimpleName();
@@ -150,7 +149,15 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             if (format == null) {
                 format = "null";
             }
-            final FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), arg);
+            Object[] effectiveArg = new Object[arg.length];
+            for (int i = 0; i < arg.length; i++) {
+                if (arg[i] instanceof Supplier) {
+                    effectiveArg[i] = ((Supplier<?>) arg[i]).get();
+                } else {
+                    effectiveArg[i] = arg[i];
+                }
+            }
+            final FormattingTuple ft = MessageFormatter.arrayFormat(format.toString(), effectiveArg);
             final String message = ft.getMessage();
             if (ft.getArgArray().length == arg.length) {
                 accept(level, message, null);
@@ -208,4 +215,42 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
         return Slf4jSimpleLogger.chain(this, logger);
     }
 
+    /**
+     * Returns a new {@link SimpleLogger} which will never log higher then {@code maxLevel}.
+     * @since 3.1
+     */
+    default SimpleLogger truncated(Level maxLevel) {
+        SimpleLogger wrapped = this;
+        return new SimpleLogger() {
+            @Override
+            public void accept(Level level, CharSequence message, @Nullable Throwable t) {
+                if (level.compareTo(maxLevel) < 0) {
+                    level = maxLevel;
+                }
+                wrapped.accept(level, message, t);
+            }
+            @Override
+            public boolean isEnabled(Level level) {
+                return wrapped.isEnabled(level);
+            }
+        };
+    }
+    /**
+     * Returns a new {@link SimpleLogger} with shifted levels.
+     * @since 3.1
+     * @param shift The amount to shift. Positive values will shift to {@link Level#TRACE}, negative values to {@link Level#ERROR}
+     */
+    default SimpleLogger shift(int shift) {
+        SimpleLogger wrapped = this;
+        return new SimpleLogger() {
+            @Override
+            public void accept(Level level, CharSequence message, @Nullable Throwable t) {
+                wrapped.accept(shiftedLevel(level, shift), message, t);
+            }
+            @Override
+            public boolean isEnabled(Level level) {
+                return wrapped.isEnabled(shiftedLevel(level, shift));
+            }
+        };
+    }
 }

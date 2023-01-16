@@ -128,7 +128,6 @@ public abstract class AbstractSchemaTest {
     }
     public static JAXBContext generate(File dir, Class<?>... classes) throws JAXBException, IOException {
         JAXBContext context = JAXBContext.newInstance(classes);
-
         context.generateSchema(new SchemaOutputResolver() {
             @Override
             public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {

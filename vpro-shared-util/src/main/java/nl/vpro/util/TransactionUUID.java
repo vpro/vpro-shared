@@ -71,7 +71,7 @@ public class TransactionUUID {
     @Getter
     @Setter
     public static class Holder {
-        final UUID uuid;
+        private final UUID uuid;
         private boolean valid = true;
 
 

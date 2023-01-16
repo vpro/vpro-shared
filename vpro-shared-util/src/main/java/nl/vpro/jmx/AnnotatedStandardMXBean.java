@@ -13,7 +13,7 @@ import static nl.vpro.util.ReflectionUtils.defaultGetter;
  * Provides support for the annotation {@link Description}, {@link Name} and, {@link Units}. {@link MBeans#registerBean(ObjectName, Object), wraps mbeans in this,
  * so that the proper metadata of them is visible in mbean clients (like visualvm).
  *
- * See http://actimem.com/java/jmx-annotations/, from which this class was largely copied.
+ * See <a href="http://actimem.com/java/jmx-annotations/">here</a>, from which this class was largely copied.
  */
 
 public class AnnotatedStandardMXBean extends StandardMBean {

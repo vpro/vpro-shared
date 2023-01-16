@@ -4,7 +4,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -16,6 +16,8 @@
     <license>
       <name>The Apache Software License, Version 2.0</name>
       <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
 
@@ -220,8 +222,25 @@
             <source>${java.version}</source>
             <target>${java.version}</target>
             <encoding>UTF-8</encoding>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
+      <!--  <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Automatic-Module-Name>${project.groupId}.${project.artifactId}</Automatic-Module-Name>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>-->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
@@ -240,16 +259,16 @@
     <skipITs>true</skipITs>
     <java.version>11</java.version>
 
-    <spring.version>5.3.23</spring.version>
-    <spring-security.version>5.7.3</spring-security.version>
-    <jackson2.version>2.13.2.1</jackson2.version>
+    <spring.version>5.3.25</spring.version>
+    <spring-security.version>5.8.1</spring-security.version>
+    <jackson2.version>2.14.1</jackson2.version>
 
     <junit.version>5.9.1</junit.version>
-    <mockito.version>4.8.1</mockito.version>
-    <assertj.version>3.23.1</assertj.version>
-    <resteasy.version>5.0.4.Final</resteasy.version>
-    <bytebuddy.version>1.12.17</bytebuddy.version>
-    <slf4j.version>1.7.32</slf4j.version>
+    <mockito.version>4.11.0</mockito.version>
+    <assertj.version>3.24.1</assertj.version>
+    <resteasy.version>5.0.5.Final</resteasy.version>
+    <bytebuddy.version>1.12.21</bytebuddy.version>
+    <slf4j.version>2.0.6</slf4j.version>
     <log4j2.version>2.19.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
     <javassist.version>3.29.2-GA</javassist.version>
@@ -257,8 +276,8 @@
     <xmlunit.version>2.9.0</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
 
-    <httpcomponents.version>4.5.13</httpcomponents.version>
-    <httpcomponentscore.version>4.4.15</httpcomponentscore.version>
+    <httpcomponents.version>4.5.14</httpcomponents.version>
+    <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
     <hibernate.version>5.6.14.Final</hibernate.version>
     <hibernate.search.version>5.11.11.Final</hibernate.search.version>
@@ -272,13 +291,14 @@
     <lombok.version>1.18.24</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
+
     <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
 
     <!-- elasticsearch client version must be < 7.14 -->
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.10.0</micrometer.version>
+    <micrometer.version>1.10.2</micrometer.version>
   </properties>
 
   <dependencyManagement>
@@ -629,7 +649,7 @@
       <dependency>
         <groupId>com.github.tomakehurst</groupId>
         <artifactId>wiremock-jre8</artifactId>
-        <version>2.34.0</version>
+        <version>2.35.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -649,7 +669,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.7</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
@@ -665,7 +685,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>4.6.3</version>
+        <version>4.7.0</version>
       </dependency>
       <dependency>
         <groupId>io.github.java-diff-utils</groupId>
@@ -675,7 +695,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.7.1</version>
+        <version>1.7.2</version>
       </dependency>
 
       <dependency>
@@ -715,12 +735,12 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.26.0</version>
+      <version>3.29.0</version>
       <optional>true</optional>
     </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

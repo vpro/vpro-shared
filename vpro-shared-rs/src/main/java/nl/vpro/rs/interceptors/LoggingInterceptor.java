@@ -12,7 +12,7 @@ import javax.ws.rs.ext.Provider;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 
-import nl.vpro.mdc.MDCConstants;
+import nl.vpro.logging.mdc.MDCConstants;
 
 /**
  * @author Michiel Meeuwissen

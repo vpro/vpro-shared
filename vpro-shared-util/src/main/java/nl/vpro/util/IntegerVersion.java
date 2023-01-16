@@ -61,7 +61,7 @@ public class IntegerVersion extends Version<Integer> {
     }
 
     /**
-     * Seems like a usefull method in general, but fow now only used to escape '.'....
+     * Seems like a useful method in general, but fow now only used to escape '.'....
      */
     protected static String escapeSpecialRegexChars(String str) {
         return SPECIAL_REGEX_CHARS.matcher(str).replaceAll("\\\\$0");

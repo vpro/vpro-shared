@@ -124,6 +124,9 @@ public class DateUtils {
         return date == null ? null : date.atZone(zoneId).toLocalDateTime();
     }
 
+    /**
+     * {@code null}-safe version of {@link Instant#isAfter(Instant)}
+     */
     public static boolean isAfter(@Nullable Instant instant1, @Nullable Instant instant2) {
         if (instant1 == null || instant2 == null) {
             return false;

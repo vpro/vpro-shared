@@ -35,6 +35,7 @@ public class Constants {
     public static final String SCROLL = "scroll";
 
     public static final String QUERY = "query";
+    public static final String P_QUERY = "/" + QUERY;
     public static final String SCRIPT= "script";
     public static final String VERSION = "version";
     public static final String SORT = "sort";
@@ -43,13 +44,20 @@ public class Constants {
     public static final String ASC = "asc";
     public static class Query {
         public static final String BOOL = "bool";
+        public static final String P_BOOL = "/" + BOOL;
         public static final String MUST = "must";
+        public static final String P_MUST = "/" + MUST;
         public static final String SHOULD = "should";
+        public static final String P_SHOULD = "/" + SHOULD;
         public static final String RANGE = "range";
+        public static final String P_RANGE = "/" + RANGE;
         public static final String TERM = "term";
+        public static final String P_TERM = "/" + TERM;
         public static final String WILDCARD = "wildcard";
         public static final String TERMS = "terms";
+        public static final String P_TERMS = "/" + TERMS;
         public static final String PREFIX = "prefix";
+        public static final String P_PREFIX = "/" + PREFIX;
         public static final String SIZE = "size";
 
     }
