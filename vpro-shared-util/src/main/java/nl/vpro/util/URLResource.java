@@ -1,5 +1,9 @@
 package nl.vpro.util;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -11,11 +15,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.*;
 import java.util.stream.Collectors;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import nl.vpro.jmx.MBeans;
+
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.slf4j.event.Level;
+
+import nl.vpro.jmx.MBeans;
+import nl.vpro.logging.Slf4jHelper;
 
 /**
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
@@ -46,6 +51,7 @@ public class URLResource<T> implements URLResourceMXBean, Supplier<T> {
     private static final int SC_NOT_MODIFIED = 304;
     private static final int SC_FOUND = 302;
     private static final int SC_MOVED_PERMANENTLY = 301;
+    private static final int SC_SERVICE_UNAVAILABLE = 503;
 
 
     @Getter
@@ -354,7 +360,8 @@ public class URLResource<T> implements URLResourceMXBean, Supplier<T> {
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
-                log.warn("{}:{}: (caching until {})", code, url, expires);
+                Slf4jHelper.log(log, code == SC_SERVICE_UNAVAILABLE ? Level.INFO : Level.WARN,
+                    "{}:{}: (caching until {})", code, url, expires);
         }
     }
     @Override
