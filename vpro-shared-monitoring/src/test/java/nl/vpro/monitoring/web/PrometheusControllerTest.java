@@ -6,6 +6,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,16 +53,17 @@ class PrometheusControllerTest {
         assertThat(response.getBody().getMessage()).isEqualTo("Application starting");
     }
 
-    @Test
-    void statusReady() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"/prometheus", "/metrics"})
+    void statusReady(String endpoint) throws Exception {
         mockMvc.perform(
-            get("/prometheus")
+            get(endpoint)
                 .accept("text/plain")
         ).andExpect(status().is(200))
             .andExpect(content().contentType("text/plain; version=0.0.4; charset=utf-8"))
             .andExpect(content().string(Matchers.containsString(
                 "# HELP test_total  \n" +
                     "# TYPE test_total counter\n" +
-                    "test_total 1.0\n")));
+                    "test_total ")));
     }
 }

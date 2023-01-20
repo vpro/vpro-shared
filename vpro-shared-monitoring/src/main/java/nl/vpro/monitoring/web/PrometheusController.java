@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 @Lazy(false)
 @RestController
-@RequestMapping(value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
 @Slf4j
 public class PrometheusController {
 
@@ -31,7 +30,10 @@ public class PrometheusController {
         this.registry = registry;
     }
 
-    @GetMapping
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/metrics", produces = TextFormat.CONTENT_TYPE_004)
+
     public void metrics(final HttpServletResponse response) throws IOException {
         log.debug("Scraping Prometheus metrics");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -41,6 +43,13 @@ public class PrometheusController {
             Writer writer = response.getWriter()) {
             scrape(writer);
         }
+    }
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
+    @Deprecated
+    public void prometheus(final HttpServletResponse response) throws IOException {
+        metrics(response);
     }
     protected Duration scrape(Writer writer) throws IOException {
         long start = System.nanoTime();
