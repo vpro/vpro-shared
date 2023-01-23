@@ -9,14 +9,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
-      - name: Cache local Maven repository
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-
-      - uses: oleksiyrudenko/gha-git-credentials@v2.1
+      - uses: oleksiyrudenko/gha-git-credentials@v2.1.1
         with:
           global: true
           name: 'github'

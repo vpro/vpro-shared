@@ -27,8 +27,6 @@ jobs:
           - os: ubuntu-latest
             java: 17
     runs-on: ${{ matrix.os }}
-    env:
-      MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
       - name: Cancel previous Action
         uses: styfle/cancel-workflow-action@0.11.0
@@ -50,21 +48,21 @@ jobs:
           gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
       - name: Build and deploy with Maven
-        run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" deploy  -Dgpg.skip=false
+        run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" deploy  -Dgpg.skip=false
         if: matrix.java == 11
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
       - name: Build with Maven
-        run: mvn -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B  test
+        run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B  test
         if: matrix.java == 17
         continue-on-error: true
       - name: Publish to codecov
         uses: codecov/codecov-action@v3
         continue-on-error: true
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.2.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.3.0
         if: always()
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
