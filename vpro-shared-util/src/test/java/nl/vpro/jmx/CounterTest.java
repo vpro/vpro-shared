@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
-import org.meeuw.math.TestClock;
+import org.meeuw.math.time.TestClock;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
