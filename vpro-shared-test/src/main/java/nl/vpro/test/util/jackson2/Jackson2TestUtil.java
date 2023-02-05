@@ -4,26 +4,22 @@
  */
 package nl.vpro.test.util.jackson2;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-
+import com.fasterxml.jackson.databind.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-
+import java.util.function.Supplier;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.test.util.TestClass;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.api.Fail;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import com.fasterxml.jackson.databind.*;
-
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.test.util.TestClass;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -161,12 +157,8 @@ public class Jackson2TestUtil {
 
     @SneakyThrows
     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference, boolean remarshall) {
-        StringWriter originalWriter = new StringWriter();
-        mapper.writeValue(originalWriter, input);
-        String marshalled = originalWriter.toString();
+        String marshalled = marshallAndSimilar(mapper, input, expected);
 
-        log.debug("Comparing {} with expected {}", marshalled, expected);
-        assertJsonEquals(expected, marshalled);
         T unmarshalled =  mapper.readValue(marshalled, typeReference);
         if (remarshall) {
             StringWriter remarshal = new StringWriter();
@@ -177,10 +169,20 @@ public class Jackson2TestUtil {
             assertJsonEquals("REMARSHALLED", expected, remarshalled);
         }
         return unmarshalled;
-
     }
 
-     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, JavaType typeReference, boolean remarshall) throws Exception {
+    protected static <T> String marshallAndSimilar(ObjectMapper mapper, T input, String expected) throws IOException {
+        StringWriter originalWriter = new StringWriter();
+        mapper.writeValue(originalWriter, input);
+        String marshalled = originalWriter.toString();
+
+        log.debug("Comparing {} with expected {}", marshalled, expected);
+        assertJsonEquals(expected, marshalled);
+        return marshalled;
+    }
+
+
+    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, JavaType typeReference, boolean remarshall) throws Exception {
          return roundTripAndSimilar(mapper, input, mapper.writeValueAsString(expected), typeReference, remarshall);
     }
 
@@ -217,7 +219,8 @@ public class Jackson2TestUtil {
     }
 
 
-    public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
+    @SuppressWarnings("UnusedReturnValue")
+    public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> implements Supplier<A> {
 
         A rounded;
         private final ObjectMapper mapper;
@@ -271,6 +274,9 @@ public class Jackson2TestUtil {
             copy.checkRemarshal = false;
             return copy;
         }
+        public JsonMarshallAssert<A> withoutUnmarshalling() {
+            return new JsonMarshallAssert<>(mapper, actual);
+        }
 
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(JsonNode expected) {
@@ -296,6 +302,36 @@ public class Jackson2TestUtil {
         }
 
     }
+    public static class JsonMarshallAssert<A>
+        extends AbstractObjectAssert<JsonMarshallAssert<A>, A> implements Supplier<String> {
+
+        final ObjectMapper mapper;
+        String marshalled;
+
+        protected JsonMarshallAssert(A a) {
+            this(MAPPER, a);
+        }
+
+        protected JsonMarshallAssert(ObjectMapper mapper, A a) {
+            super(a, JsonMarshallAssert.class);
+            this.mapper = mapper;
+        }
+
+        @SneakyThrows
+        public JsonMarshallAssert<A> isSimilarTo(String expected)  {
+            marshalled = marshallAndSimilar(mapper, actual, expected);
+            return myself;
+        }
+
+        @Override
+        public String get() {
+            if (marshalled == null) {
+                throw new IllegalStateException("No similation was done already.");
+            }
+            return marshalled;
+        }
+    }
+
 
     public static class JsonStringAssert extends AbstractObjectAssert<JsonStringAssert, CharSequence> {
 

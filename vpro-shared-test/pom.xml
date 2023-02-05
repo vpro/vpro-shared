@@ -69,6 +69,12 @@
       <artifactId>hamcrest-core</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.meeuw.math</groupId>
+      <artifactId>mihxil-theories</artifactId>
+      <version>0.10.0</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
