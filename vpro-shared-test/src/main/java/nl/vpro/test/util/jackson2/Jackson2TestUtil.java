@@ -4,28 +4,34 @@
  */
 package nl.vpro.test.util.jackson2;
 
-import com.fasterxml.jackson.databind.*;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.test.util.TestClass;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.api.Fail;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+
+import com.fasterxml.jackson.databind.*;
+
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.test.util.TestClass;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
  * @author Roelof Jan Koekoek
  * @since 3.3
  */
+@SuppressWarnings("UnusedReturnValue")
 @Slf4j
 public class Jackson2TestUtil {
 
