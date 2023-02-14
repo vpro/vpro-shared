@@ -69,4 +69,7 @@ public class MonitoringProperties {
 
     @Value("${monitoring.locks:true}")
     private boolean meterLocks;
+
+    @Value("${monitoring.health.permitAll:true}")
+    private boolean healthPermitAll;
 }

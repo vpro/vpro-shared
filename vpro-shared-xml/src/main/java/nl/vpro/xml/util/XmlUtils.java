@@ -77,8 +77,16 @@ public class XmlUtils  {
         if (date == null) {
             return null;
         }
-        return toXml(DEFAULT_ZONE, date.toInstant());
+        return toXml(date.toInstant());
     }
+
+    public static XMLGregorianCalendar toXml(Instant date) {
+        if (date == null) {
+            return null;
+        }
+        return toXml(DEFAULT_ZONE, date);
+    }
+
 
     public static XMLGregorianCalendar toXml(ZoneId zoneId, Instant date) {
         if (date == null) {

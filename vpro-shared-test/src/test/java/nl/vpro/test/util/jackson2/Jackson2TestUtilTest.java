@@ -2,7 +2,7 @@ package nl.vpro.test.util.jackson2;
 
 
 import javax.xml.bind.annotation.*;
-
+import lombok.Getter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +39,16 @@ public class Jackson2TestUtilTest {
             return a != null ? a.hashCode() : 0;
         }
     }
+
+    @Getter
+    public static class NotUnmarshable {
+        private final String string;
+
+        public NotUnmarshable(String a) {
+            this.string = a;
+        }
+    }
+
     @Test
     public void roundTrip() throws Exception {
         Jackson2TestUtil.roundTrip(new A());
@@ -66,6 +76,16 @@ public class Jackson2TestUtilTest {
         Assertions.assertThrows(AssertionError.class, () ->
             Jackson2TestUtil.roundTripAndSimilarValue("a", "\"b\"")
         );
+    }
+
+    @Test
+    public void testNotunmarshable() {
+        Jackson2TestUtil
+            .assertThatJson(new NotUnmarshable("x"))
+            .withoutUnmarshalling()
+            .isSimilarTo("{\n" +
+            "  \"string\" : \"x\"\n" +
+            "}");
     }
 
 }

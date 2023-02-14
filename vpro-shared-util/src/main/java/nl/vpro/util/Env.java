@@ -5,15 +5,15 @@ import lombok.Getter;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * @author Michiel Meeuwissen
  * @since 0.42
  */
 public enum Env {
     LOCALHOST,
-    DEV,
-    DEV_NEW,
-    DEV_OLD,
+
     TEST,
     TESTA(TEST),
     TESTB(TEST),
@@ -21,6 +21,7 @@ public enum Env {
     TEST_OLD,
     TESTA_NEW(TEST_NEW),
     TESTB_NEW(TEST_NEW),
+
     ACC,
     ACCA(ACC),
     ACCB(ACC),
@@ -28,6 +29,7 @@ public enum Env {
     ACC_OLD,
     ACCA_NEW(ACC_NEW),
     ACCB_NEW(ACC_NEW),
+
     PROD,
     PRODA(PROD),
     PRODB(PROD),
@@ -48,7 +50,18 @@ public enum Env {
         result.add(null);
         result.addAll(Arrays.asList(fallbacks));
         return Collections.unmodifiableList(result);
+    }
 
+    public static Optional<Env> optionalValueOf(@Nullable String value) {
+        if (value == null) {
+            return Optional.empty();
+        }
+        try {
+            Env foundEnv = Env.valueOf(value.toUpperCase());
+            return Optional.of(foundEnv);
+        } catch (IllegalArgumentException iae) {
+            return Optional.empty();
+        }
     }
     /**
      * @return 1 if env if exact match, 0 if fallback match, -

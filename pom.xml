@@ -4,18 +4,19 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
   <description>Description These are various shared utility modules which are used on several places in VPRO artifacts.</description>
   <url>https://github.com/vpro/vpro-shared</url>
 
-
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
       <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
 
@@ -49,7 +50,6 @@
     <tag>HEAD</tag>
   </scm>
 
-
   <modules>
     <module>vpro-shared-rs-client</module>
     <module>vpro-shared-client-resteasy</module>
@@ -61,13 +61,16 @@
 
     <module>vpro-shared-hibernate</module>
     <module>vpro-shared-hibernate-search</module>
+    <!--
+        <module>vpro-shared-hibernate-search6</module>
+    -->
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-logging</module>
     <module>vpro-shared-log4j2</module>
     <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
-    <module>vpro-shared-swagger</module>
+    <module>vpro-shared-swagger3</module>
 
     <module>vpro-shared-test</module>
     <module>vpro-shared-util</module>
@@ -79,6 +82,7 @@
     <module>vpro-shared-bom</module>
 
     <!--
+        <module>vpro-shared-swagger</module>
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
          <module>vpro-shared-resteasy</module>
         <module>vpro-shared-camel</module>
@@ -219,8 +223,25 @@
             <source>${java.version}</source>
             <target>${java.version}</target>
             <encoding>UTF-8</encoding>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+              </path>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
+      <!--  <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Automatic-Module-Name>${project.groupId}.${project.artifactId}</Automatic-Module-Name>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>-->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
@@ -239,38 +260,38 @@
     <skipITs>true</skipITs>
     <java.version>11</java.version>
 
-    <spring.version>5.3.23</spring.version>
-    <spring-security.version>5.7.3</spring-security.version>
-    <jackson2.version>2.10.5.20201202</jackson2.version> <!-- 2.11.0 breaks io.swagger.jackson.ModelResolver -->
+    <spring.version>5.3.25</spring.version>
+    <spring-security.version>5.8.1</spring-security.version>
+    <jackson2.version>2.14.2</jackson2.version>
 
-    <junit.version>5.9.1</junit.version>
-    <mockito.version>4.8.1</mockito.version>
-    <assertj.version>3.23.1</assertj.version>
-    <resteasy.version>4.7.7.Final</resteasy.version>
-    <bytebuddy.version>1.12.17</bytebuddy.version>
-    <slf4j.version>1.7.32</slf4j.version>
+    <junit.version>5.9.2</junit.version>
+    <mockito.version>5.1.1</mockito.version>
+    <assertj.version>3.24.2</assertj.version>
+    <resteasy.version>5.0.5.Final</resteasy.version>
+    <bytebuddy.version>1.12.22</bytebuddy.version>
+    <slf4j.version>2.0.6</slf4j.version>
     <log4j2.version>2.19.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.9.0</xmlunit.version>
+    <xmlunit.version>2.9.1</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
 
-    <httpcomponents.version>4.5.13</httpcomponents.version>
-    <httpcomponentscore.version>4.4.15</httpcomponentscore.version>
+    <httpcomponents.version>4.5.14</httpcomponents.version>
+    <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
     <hibernate.version>5.6.14.Final</hibernate.version>
     <hibernate.search.version>5.11.11.Final</hibernate.search.version>
+
+    <hibernate.search6.version>6.1.7.Final</hibernate.search6.version>
 
     <validation.api.version>2.0.2</validation.api.version>
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
 
     <ektorp.version>1.5.0</ektorp.version>
-    <!--
-    <swagger.version>2.0.0-rc2</swagger.version>
-    -->
-    <swagger.version>1.5.22</swagger.version>
-    <lombok.version>1.18.24</lombok.version>
+
+    <swagger.version>2.2.8</swagger.version>
+    <lombok.version>1.18.26</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
 
@@ -280,20 +301,25 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.9.4</micrometer.version>
+    <micrometer.version>1.10.3</micrometer.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.swagger</groupId>
+        <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-annotations</artifactId>
         <version>${swagger.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.swagger</groupId>
-        <artifactId>swagger-jaxrs</artifactId>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-jaxrs2</artifactId>
         <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-core</artifactId>
+         <version>${swagger.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -341,6 +367,16 @@
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-search-orm</artifactId>
         <version>${hibernate.search.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.search</groupId>
+        <artifactId>hibernate-search-mapper-orm</artifactId>
+        <version>${hibernate.search6.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.search</groupId>
+        <artifactId>hibernate-search-backend-lucene</artifactId>
+        <version>${hibernate.search6.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>
@@ -626,7 +662,7 @@
       <dependency>
         <groupId>com.github.tomakehurst</groupId>
         <artifactId>wiremock-jre8</artifactId>
-        <version>2.34.0</version>
+        <version>2.35.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -646,7 +682,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.7</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
@@ -662,7 +698,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>4.6.3</version>
+        <version>4.7.1</version>
       </dependency>
       <dependency>
         <groupId>io.github.java-diff-utils</groupId>
@@ -672,7 +708,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.7.0</version>
+        <version>1.7.2</version>
       </dependency>
 
       <dependency>
@@ -712,12 +748,12 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.26.0</version>
+      <version>3.30.0</version>
       <optional>true</optional>
     </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -726,8 +762,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-
 
   <distributionManagement>
     <snapshotRepository>
@@ -739,7 +773,6 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-
 
   <profiles>
     <profile>

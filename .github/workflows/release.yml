@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/REL-')
+    env:
+      MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
       - name: echo
         run: echo {{ $github.ref }}
@@ -21,14 +23,14 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
-      - uses: oleksiyrudenko/gha-git-credentials@v2.1
+      - uses: oleksiyrudenko/gha-git-credentials@v2.1.1
         with:
           global: true
           name: 'github'
           email: 'digitaal-techniek@vpro.nl'
           token: '${{ secrets.GITHUB_TOKEN  }}'
       - name: Release
-        run: mvn -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
+        run: mvn -ntp -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

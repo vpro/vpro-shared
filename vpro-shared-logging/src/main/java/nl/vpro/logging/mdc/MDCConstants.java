@@ -1,4 +1,4 @@
-package nl.vpro.mdc;
+package nl.vpro.logging.mdc;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;

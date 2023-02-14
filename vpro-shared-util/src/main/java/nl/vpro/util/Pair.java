@@ -12,7 +12,6 @@ import java.util.Map;
 @Data
 @AllArgsConstructor(staticName = "of")
 @lombok.Builder(builderClassName = "Builder")
-
 public class Pair<F, S> implements Map.Entry<F, S> {
 
     private F first;

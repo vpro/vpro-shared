@@ -69,7 +69,7 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
 
     /**
      * In combination with {@link AbortOnException}. A test annotated with this will not be skipped, even if a previous test failed.
-     *
+     * <p>
      * Sometimes in integrations test some later test mainly perform clean up actions, and you'd better not skip it.
      * @since 2.10
      */
@@ -91,7 +91,7 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
     }
 
     /**
-     * Like having both {@link NoAbort} and {@link Except}, effectively makng the complete test method ignored by the abort on exception logic.
+     * Like having both {@link NoAbort} and {@link Except}, effectively making the complete test method ignored by the abort on exception logic.
      *
      * @since 2.12
      */
@@ -103,8 +103,8 @@ public class AbortOnException extends ExceptionCollector implements InvocationIn
 
     /**
      * Only it the test class is also 'ordered' apply the abort on exception logic.
-     *
-     * You may place the {@link AbortOnException} on super class, where some sub classes are not ordered, and for those it will not apply then.
+     * <p>
+     * You may place the {@link AbortOnException} on super class, where some subclasses are not ordered, and for those it will not apply then.
      * @since 2.10
      */
     @Retention(RetentionPolicy.RUNTIME)

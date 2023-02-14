@@ -465,7 +465,7 @@ public class ObjectLocker {
     }
 
 
-    private static String summarize(Thread t, StackTraceElement@Nullable[] cause) {
+    private static String summarize(Thread t, StackTraceElement[] cause) {
         return Optional.ofNullable(t)
             .map(Thread::getName)
             .orElse(null) +

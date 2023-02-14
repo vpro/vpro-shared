@@ -1,4 +1,4 @@
-package nl.vpro.util;
+package nl.vpro.logging;
 
 
 import java.util.Iterator;
@@ -7,12 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.ext.LoggerWrapper;
 
-import nl.vpro.logging.Slf4jHelper;
-
 
 /**
  * An iterator that wraps another one, but adds some logging.
- *
+ * <p>
  * Once in every 'interval' an element is logged.
  *
  * @author Michiel Meeuwissen

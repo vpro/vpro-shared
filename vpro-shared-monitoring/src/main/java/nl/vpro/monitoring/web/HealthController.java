@@ -67,7 +67,6 @@ public class HealthController {
         } else {
             log.debug("Ready already ({})", event);
             return false;
-
         }
     }
 

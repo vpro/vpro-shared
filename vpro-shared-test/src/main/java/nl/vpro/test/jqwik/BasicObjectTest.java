@@ -5,6 +5,8 @@ import net.jqwik.api.*;
 
 import java.util.*;
 
+import org.meeuw.util.test.BasicObjectTheory;
+
 import nl.vpro.util.Pair;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,8 +17,10 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
  * Basic tests on {@link Object#equals(Object)}, {@link Object#hashCode()} and {@link Object#toString()}, which must probably be valid for _any_ override of those.
  *
  * @author Michiel Meeuwissen
- * @since 2.22
+ * @since 2.2
+ * @deprecated Just use {@link BasicObjectTheory}
  */
+@Deprecated
 public interface BasicObjectTest<E> {
 
     String DATAPOINTS = "datapoints";

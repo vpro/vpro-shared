@@ -48,8 +48,7 @@ public class CountAspect<T> implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Local local = start(method);
         try {
-            Object o = method.invoke(proxied, args);
-            return o;
+            return method.invoke(proxied, args);
         } finally {
             local.responseEnd();
             if (local.needsCount()) {
@@ -130,10 +129,7 @@ public class CountAspect<T> implements InvocationHandler {
 
 
         public boolean needsCount() {
-            if (method.getName().equals("toString")) {
-                return false;
-            }
-            return true;
+            return !method.getName().equals("toString");
         }
 
         public Duration getRequestDuration() {

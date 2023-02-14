@@ -3,7 +3,7 @@
 
 
   <groupId>nl.vpro.shared</groupId>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.2-SNAPSHOT</version>
   <artifactId>vpro-shared-bom</artifactId>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
@@ -12,8 +12,10 @@
 
   <licenses>
     <license>
-      <name>GPLv3</name>
-      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
     </license>
   </licenses>
 
@@ -159,12 +161,12 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-swagger</artifactId>
+        <artifactId>vpro-shared-swagger3</artifactId>
         <version>${project.version}</version>
       </dependency>
 
 
-      <!-- not maintained any more -->
+      <!-- not maintained anymore -->
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-ws</artifactId>
@@ -225,11 +227,15 @@
         <artifactId>vpro-shared-camel</artifactId>
         <version>2.11.3</version>
       </dependency>
-
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-resteasy</artifactId>
         <version>2.21.0</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-swagger</artifactId>
+        <version>3.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -269,7 +275,7 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.8</version>
+            <version>1.6.13</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>vpro-ossrh</serverId>
@@ -278,7 +284,6 @@
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
             <version>3.2.1</version>
             <executions>
@@ -291,9 +296,8 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>3.0.1</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

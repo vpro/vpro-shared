@@ -113,15 +113,15 @@ public class JAXBTestUtil {
 
      *
      * One might disagree on this subject!
-     *
+     * <p>
      * I prefer a decent error report. The supposed improvement {#link roundTripAndSimilar} returns "expected [true]
      * got [false]" on failure which is a very poor description of what goes wrong and always needs further debugging
      * to investigate the source. Besides that, if a whatever upgrade brakes the layout, while honoring the syntax, I
      * would still like the be informed om this change.
-     *
+     * <p>
      * MM: The difference was in the order of attributes and/or namespaces. Those are not relevant changes.
      *     SAX implementations are not required to preserve or guarantee any order in this. It is hence impossible to make a test using this that succeeds in every java version.
-     *     Furthermore roundTripAndSimilar will if not similar still do a test for equals to enforce a clearer message.
+     *     Furthermore, roundTripAndSimilar will if not similar still do a test for equals to enforce a clearer message.
      *
      * @deprecated  unfeasible for different java versions. (tests which used this where often failing with java 8). Use e.g {#link roundTripContains}
      */
@@ -157,7 +157,6 @@ public class JAXBTestUtil {
         for (Element elementToFind : elementsToFind) {
             NodeList elementsByTagName = xml.getElementsByTagName(elementToFind.getTagName());
             boolean found = false;
-            List<Diff> diffs = new ArrayList<>();
             for (int i = 0; i < elementsByTagName.getLength(); i++) {
                 Node element = elementsByTagName.item(i);
                 element.normalize();
@@ -167,7 +166,6 @@ public class JAXBTestUtil {
                     .ignoreWhitespace()
                     .checkForSimilar()
                     .build();
-                diffs.add(diff);
                 if (!diff.hasDifferences()) {
                     found = true;
                 }
@@ -356,6 +354,7 @@ public class JAXBTestUtil {
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public static class XMLObjectAssert<S extends XMLObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
         A rounded;
@@ -364,7 +363,7 @@ public class JAXBTestUtil {
             super(actual, XMLObjectAssert.class);
         }
 
-        @SuppressWarnings({"CatchMayIgnoreException", "ResultOfMethodCallIgnored"})
+        @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
             try {
                 rounded = roundTripAndSimilar(actual, expected);
@@ -374,7 +373,7 @@ public class JAXBTestUtil {
             return myself;
         }
 
-        @SuppressWarnings({"CatchMayIgnoreException", "ResultOfMethodCallIgnored"})
+        @SuppressWarnings({"CatchMayIgnoreException"})
         public S containsSimilar(String expected) {
             try {
                 rounded = roundTripContains(actual, expected);

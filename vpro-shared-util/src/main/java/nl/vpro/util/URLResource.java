@@ -13,11 +13,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.slf4j.event.Level;
+
 import nl.vpro.jmx.MBeans;
+import nl.vpro.logging.Slf4jHelper;
 
 /**
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
@@ -25,7 +28,7 @@ import nl.vpro.jmx.MBeans;
  * @since 0.37
  */
 @Slf4j
-public class URLResource<T> implements URLResourceMBean {
+public class URLResource<T> implements URLResourceMXBean, Supplier<T> {
 
     @SafeVarargs
     public static URLResource<Properties> properties(URI url, Consumer<Properties>... callbacks) {
@@ -48,6 +51,7 @@ public class URLResource<T> implements URLResourceMBean {
     private static final int SC_NOT_MODIFIED = 304;
     private static final int SC_FOUND = 302;
     private static final int SC_MOVED_PERMANENTLY = 301;
+    private static final int SC_SERVICE_UNAVAILABLE = 503;
 
 
     @Getter
@@ -55,7 +59,12 @@ public class URLResource<T> implements URLResourceMBean {
     @Getter
     private Instant lastTry = null;
 
+    /**
+     * The HTTP status code on the last invocation of {@link #get()}
+     * @return {@code null} if never called, {@code -1} if no status code could be obtained e.g. because of socket exceptions.
+     */
     @Getter
+    @MonotonicNonNull
     private Integer code = null;
     @Getter
     private URI url;
@@ -121,6 +130,11 @@ public class URLResource<T> implements URLResourceMBean {
         this(url, reader, null, callbacks);
     }
 
+    /**
+     * Returns the supplied value backed by the {@link #getUrl()}. In case this is {@link #isAsync()}  then
+     * this may (temporary) return the specified {@link #empty} value.
+     */
+    @Override
     public T get() {
         if (result == null) {
             if (async) {
@@ -346,7 +360,8 @@ public class URLResource<T> implements URLResourceMBean {
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
-                log.warn("{}:{}: (caching until {})", code, url, expires);
+                Slf4jHelper.log(log, code == SC_SERVICE_UNAVAILABLE ? Level.INFO : Level.WARN,
+                    "{}:{}: (caching until {})", code, url, expires);
         }
     }
     @Override

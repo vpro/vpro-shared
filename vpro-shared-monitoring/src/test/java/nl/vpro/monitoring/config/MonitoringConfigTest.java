@@ -2,6 +2,7 @@ package nl.vpro.monitoring.config;
 
 import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Log4j2
 class MonitoringConfigTest {
 
     @Mock
@@ -126,9 +128,10 @@ class MonitoringConfigTest {
     @Test
     void meterVolumesWitTags() {
         when(properties.getCommonTags()).thenReturn(Arrays.asList("tag", "value"));
-        when(properties.getMeterVolumes()).thenReturn(Collections.singletonList("volume"));
+        when(properties.getMeterVolumes()).thenReturn(Collections.singletonList("/"));
         final PrometheusMeterRegistry registry = config.globalMeterRegistry();
         assertThat(registry.getMeters()).hasSizeGreaterThanOrEqualTo(1);
         assertThat(registry.getMeters().get(0).getId().getTags()).contains(new ImmutableTag("tag", "value"));
+        log.info("Found meters {}", registry.getMeters());
     }
 }
