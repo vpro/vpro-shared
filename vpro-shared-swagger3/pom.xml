@@ -14,13 +14,33 @@
     <swagger.ui.version>4.15.5</swagger.ui.version>
   </properties>
 
+
   <build>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
+        <includes>
+          <include>META-INF/tags/**</include>
+        </includes>
         <filtering>true</filtering>
       </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>META-INF/tags/**</exclude>
+        </excludes>
+        <filtering>false</filtering>
+      </resource>
     </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+         <escapeString>\</escapeString>
+       </configuration>
+     </plugin>
+    </plugins>
   </build>
 
 

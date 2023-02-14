@@ -23,7 +23,7 @@
 
 		window.onload = function() {
 			window.ui = SwaggerUIBundle({
-				url: "${swaggerjson}",
+				url: "\${swaggerjson}",
 				dom_id: '#swagger-ui',
 				deepLinking: false,
 				presets: [
