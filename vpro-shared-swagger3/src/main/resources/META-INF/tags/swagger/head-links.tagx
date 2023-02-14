@@ -13,7 +13,7 @@
 
   <link href='css/override.css' rel='stylesheet' type='text/css'/>
 
-	<script src="${swaggerbase}swagger-ui-bundle.js" charset="UTF-8"><jsp:text> </jsp:text></script>
-	<script src="${swaggerbase}swagger-ui-standalone-preset.js" charset="UTF-8"><jsp:text> </jsp:text></script>
+	<script src="${swaggerbase}/swagger-ui-bundle.js" charset="UTF-8"><jsp:text> </jsp:text></script>
+	<script src="${swaggerbase}/swagger-ui-standalone-preset.js" charset="UTF-8"><jsp:text> </jsp:text></script>
 
 </jsp:root>
