@@ -11,7 +11,18 @@
   <version>3.2-SNAPSHOT</version>
 
   <properties>
+    <swagger.ui.version>4.15.5</swagger.ui.version>
   </properties>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
 
   <dependencies>
     <dependency>
