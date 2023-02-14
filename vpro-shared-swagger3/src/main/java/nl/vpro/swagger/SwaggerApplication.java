@@ -42,7 +42,7 @@ public class SwaggerApplication extends Application {
     }
 
     /**
-     * Inject Swagger annotated JAX-RS api's you want to publish. Swagger only calls #getSingletons on the first
+     * Inject Swagger annotated JAX-RS ap's you want to publish. Swagger only calls #getSingletons on the first
      * API documentation request, so you must take care that your services get injected before an application accepts
      * web requests. (Using @PostConstruct on your services is a viable solution)
      *

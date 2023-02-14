@@ -15,7 +15,7 @@ import org.meeuw.json.grep.matching.*;
 import nl.vpro.web.HttpServletRequestUtils;
 
 /**
- * This filter can be used to fill in 'api.basePath' using the request, so you don't have to configure it any more.
+ * This filter can be used to fill in 'api.basePath' using the request, so you don't have to configure it anymore.
  * @author Michiel Meeuwissen
  * @since 0.21
  */
