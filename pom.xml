@@ -25,7 +25,7 @@
     <mockito.version>5.1.1</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <resteasy.version>5.0.5.Final</resteasy.version>
-    <bytebuddy.version>1.12.22</bytebuddy.version>
+    <bytebuddy.version>1.13.0</bytebuddy.version>
     <slf4j.version>2.0.6</slf4j.version>
     <log4j2.version>2.19.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
@@ -38,7 +38,7 @@
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
     <hibernate.version>5.6.14.Final</hibernate.version>
-    <hibernate.search.version>5.11.11.Final</hibernate.search.version>
+    <hibernate.search.version>5.11.12.Final</hibernate.search.version>
 
     <hibernate.search6.version>6.1.7.Final</hibernate.search6.version>
 
@@ -58,7 +58,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.10.3</micrometer.version>
+    <micrometer.version>1.10.4</micrometer.version>
   </properties>
 
   <licenses>
@@ -684,7 +684,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>4.0.7</version>
+        <version>4.0.9</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
