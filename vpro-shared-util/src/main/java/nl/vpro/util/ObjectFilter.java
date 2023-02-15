@@ -2,8 +2,7 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,7 +90,7 @@ public class ObjectFilter {
             if (!objects.containsKey(hash)) {
                 Class<T> clazz = (Class<T>) object.getClass();
                 try {
-                    T copy = clazz.newInstance();
+                    T copy = clazz.getDeclaredConstructor().newInstance();
                     objects.put(hash, copy);
                     for (Field f : listAllFields(clazz)) {
                         int modifiers = f.getModifiers();
@@ -107,7 +106,7 @@ public class ObjectFilter {
                     }
 
                     return copy;
-                } catch (IllegalAccessException | InstantiationException e) {
+                } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
                     log.warn(e.getClass().getName() + " " + e.getMessage());
                     objects.put(hash, object);
                     return object;
