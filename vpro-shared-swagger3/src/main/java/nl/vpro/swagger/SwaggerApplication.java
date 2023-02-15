@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
@@ -35,12 +34,6 @@ public class SwaggerApplication extends Application {
     public Set<Object> getSingletons() {
         return singletons;
     }
-
-    @PostConstruct
-    public void init() {
-        //inject();
-    }
-
     /**
      * Inject Swagger annotated JAX-RS ap's you want to publish. Swagger only calls #getSingletons on the first
      * API documentation request, so you must take care that your services get injected before an application accepts

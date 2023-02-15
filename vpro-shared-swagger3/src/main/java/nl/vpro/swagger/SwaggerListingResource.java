@@ -3,6 +3,9 @@ package nl.vpro.swagger;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 
+import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
+
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
@@ -23,7 +26,11 @@ public class SwaggerListingResource extends OpenApiResource {
     @Context
     ServletContext context;
 
-    public SwaggerListingResource() {
+
+
+    @Inject
+    public SwaggerListingResource(OpenAPIConfiguration openAPIConfiguration) {
+        setOpenApiConfiguration(openAPIConfiguration);
 
     }
 

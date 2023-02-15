@@ -5,11 +5,7 @@
 
 
   <bean class="nl.vpro.swagger.SwaggerApplication" />
-  <bean class="nl.vpro.swagger.SwaggerListingResource">
-    <property name="openApiConfiguration">
-      <bean class="io.swagger.v3.oas.integration.SwaggerConfiguration">
-        <property name="readAllResources" value="false" />
-      </bean>
-    </property>
-  </bean>
+
+  <!-- make sure to supplier OpenApiConfiguration bean -->
+  <bean class="nl.vpro.swagger.SwaggerListingResource" />
 </beans>
