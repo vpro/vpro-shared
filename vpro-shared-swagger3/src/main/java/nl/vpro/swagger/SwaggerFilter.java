@@ -102,7 +102,7 @@ public class SwaggerFilter implements Filter {
 
 
     PathMatcher getPathMatcher(HttpServletRequest req) {
-        String host = req.getServerName() + HttpServletRequestUtils.getPortPostFixIfNeeded(req);
+        String host = req.getScheme() + "://" + req.getServerName() + HttpServletRequestUtils.getPortPostFixIfNeeded(req);
         String basePath = req.getContextPath() + "/api";
         return getPathMatcher(basePath, host);
     }
@@ -111,7 +111,7 @@ public class SwaggerFilter implements Filter {
         return new PathMatcherOrChain(
             new PathMatcherAndChain(
                 new SinglePathMatcher(new PreciseMatch("servers"), new ArrayEntryMatch(), new PreciseMatch("url")),
-                new ScalarEqualsMatcher("${api.basePath}", basePath)
+                new ScalarEqualsMatcher("${api.basePath}", host + basePath)
             )
         );
     }
