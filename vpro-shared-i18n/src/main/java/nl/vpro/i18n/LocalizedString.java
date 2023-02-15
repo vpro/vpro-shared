@@ -1,23 +1,28 @@
 package nl.vpro.i18n;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.neovisionaries.i18n.LanguageCode;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Supplier;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import static nl.vpro.i18n.Locales.score;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neovisionaries.i18n.LanguageCode;
+
+import static nl.vpro.i18n.Locales.score;
 
 /**
  * Basically wraps a string together with the {@link Locale} describing in what language it is.
