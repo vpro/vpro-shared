@@ -31,7 +31,7 @@ public class SwaggerListingResource extends BaseOpenApiResource  {
     @Context
     Application app;
 
-    static OpenAPI api;
+    OpenAPI api;
     boolean pretty;
     OpenApiContext ctx;
 
