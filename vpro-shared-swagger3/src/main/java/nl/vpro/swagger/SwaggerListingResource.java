@@ -82,7 +82,8 @@ public class SwaggerListingResource extends BaseOpenApiResource  {
                 .ctxId(ctxId)
                 .buildContext(true);
             api = ctx.read();
-            pretty = ctx.getOpenApiConfiguration() != null && Boolean.TRUE.equals(ctx.getOpenApiConfiguration().isPrettyPrint());
+            pretty = ctx.getOpenApiConfiguration() != null &&
+                Boolean.TRUE.equals(ctx.getOpenApiConfiguration().isPrettyPrint());
         }
         return api;
     }
