@@ -6,6 +6,6 @@
 
   <bean class="nl.vpro.swagger.SwaggerApplication" />
 
-  <!-- make sure to supplier OpenApiConfiguration bean -->
+  <!-- make sure to supply OpenApiConfiguration bean -->
   <bean class="nl.vpro.swagger.SwaggerListingResource" />
 </beans>
