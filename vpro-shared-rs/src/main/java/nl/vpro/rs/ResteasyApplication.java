@@ -15,7 +15,8 @@ import javax.ws.rs.core.Application;
 /**
  * Static helper to expose a dummy JAX-RS Application. Swagger needs such an application to expose the API docs for
  * the given endpoints.
- *
+ * <p>
+ * Note, this used to be SwaggerApplication in vpro-shared-swagger. But it's not related to swagger. It has to do with RestEasy.
  * @author Roelof Jan Koekoek
  * @since 2.0
  */

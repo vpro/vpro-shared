@@ -5,5 +5,5 @@
 
 
   <!-- make sure to supply OpenApiConfiguration bean -->
-  <bean class="nl.vpro.swagger.SwaggerListingResource" lazy-init="true"/>
+  <bean class="nl.vpro.swagger.SwaggerListingResource" />
 </beans>

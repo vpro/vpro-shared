@@ -8,11 +8,14 @@ import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+
+import nl.vpro.rs.ResteasyApplication;
 
 
 /**
@@ -34,6 +37,11 @@ public class SwaggerListingResource extends BaseOpenApiResource  {
         this.ctx = openApiContext;
         this.api = api;
         this.pretty = openAPIConfiguration.isPrettyPrint();
+    }
+
+    @PostConstruct
+    public void inject() {
+        ResteasyApplication.inject(this);
     }
 
     @GET

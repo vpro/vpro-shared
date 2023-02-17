@@ -29,6 +29,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jackson2.Views;
 import nl.vpro.util.ThreadPools;
@@ -95,9 +98,15 @@ public abstract class OpenAPIApplication {
     public OpenAPI getOpenAPI(Environment environment, OpenApiContext ctx) {
         if (api == null) {
             Jackson2Mapper.configureMapper(Json.mapper());
+            Json.mapper()
+                .registerModule(new JaxbAnnotationModule())
+                .registerModule(new JavaTimeModule());
             Json.mapper().setConfig(Json.mapper().getSerializationConfig().withView(Views.Normal.class));
 
             api = ctx.read();
+
+            //log.info("Found for openapi {}", api.getPaths());
+
             boolean pretty = ctx.getOpenApiConfiguration() != null &&
                 Boolean.TRUE.equals(ctx.getOpenApiConfiguration().isPrettyPrint());
 

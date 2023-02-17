@@ -55,6 +55,11 @@
     </dependency>
 
     <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-rs</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core</artifactId>
     </dependency>
