@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.Predicates;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -26,10 +28,24 @@ import nl.vpro.logging.Slf4jHelper;
 @Slf4j
 public class ObjectLocker {
 
-    public static Predicate<StackTraceElement> summaryPredicate =
-        e -> e.getClassName().startsWith("nl.vpro") &&
-            !e.getClassName().startsWith("nl.vpro.spring") &&
-            e.getFileName() != null && !e.getFileName().contains("generated");
+    public static BiPredicate<StackTraceElement, AtomicInteger> summaryBiPredicate =
+        (e, count) -> {
+            boolean match = e.getClassName().startsWith("nl.vpro") &&
+                !e.getClassName().startsWith("nl.vpro.spring") &&
+                e.getFileName() != null && !e.getFileName().contains("generated");
+            int foundMatches;
+            if (match) {
+                foundMatches =  count.getAndIncrement();
+            } else {
+                foundMatches = count.get();
+            }
+            return foundMatches == 0 || match;
+        };
+
+    public static Predicate<StackTraceElement> summaryPredicate() {
+        AtomicInteger matchCount = new AtomicInteger(0);
+        return Predicates.withArg2(summaryBiPredicate, matchCount);
+    }
 
     private ObjectLocker() {
         // private constructor to avoid all instantiation
@@ -402,7 +418,7 @@ public class ObjectLocker {
             return key + ":" + createdAt + "(age: " + getAge() + "):" + reason + ":" +
                 ObjectLocker.summarize(
                     this.thread.get(),
-                    this.initiator
+                    threadStackTrace == null ? this.initiator : null
                 ) + (
                   threadStackTrace != null ? "\n THREAD is busy with: " + summarizeStackTrace(threadStackTrace) : ""
             );
@@ -452,7 +468,8 @@ public class ObjectLocker {
     private static String summarize(Thread t, StackTraceElement[] cause) {
         return Optional.ofNullable(t)
             .map(Thread::getName)
-            .orElse(null) + "\nCAUSE:" + summarizeStackTrace(cause);
+            .orElse(null) +
+            (cause == null ? "": "\nCAUSE:" + summarizeStackTrace(cause));
     }
 
     private static String summarize() {
@@ -462,7 +479,7 @@ public class ObjectLocker {
     private static String summarizeStackTrace(StackTraceElement[] stackTraceElements) {
         return "\n" +
             Stream.of(stackTraceElements)
-                .filter(summaryPredicate)
+                .filter(summaryPredicate())
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n   <-"));
     }
