@@ -1,5 +1,6 @@
 package nl.vpro.i18n;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,7 @@ public class LocalizedString implements CharSequence, Serializable {
     @XmlJavaTypeAdapter(value = XmlLangAdapter.class)
     @Getter
     @Setter
+    @Schema(implementation = String.class, type = "string")
     private Locale locale;
 
     @XmlValue

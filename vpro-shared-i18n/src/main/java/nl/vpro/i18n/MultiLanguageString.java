@@ -16,9 +16,8 @@ import static nl.vpro.i18n.Locales.DUTCH;
 
 /**
  * Represent multiple strings for different locales.
- *
+ * <p>
  * This is a simple way to internationalize a string, completely in code.
- *
  *
  * @author Michiel Meeuwissen
  * @since 0.47

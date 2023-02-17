@@ -1,8 +1,6 @@
 package nl.vpro.i18n;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 
@@ -40,9 +38,16 @@ public class Dutch {
                 .withZone(ZONE_ID);
     }
 
+    /**
+     * Like {@link #formatSmartly(Temporal)}, but with the option to specify the {@link Clock}, useful for testing.
+     */
+    public static String formatSmartly(Clock clock, Temporal instant)
+    {
+        return formatSmartly(clock.instant(), instant);
+    }
 
     /**
-     * Like {@link #formatSmartly(Temporal)}, but with the option to specify 'now'. Mainly usefull for testing.
+     * Like {@link #formatSmartly(Temporal)}, but with the option to specify 'now'. Mainly useful for testing.
      */
     public static String formatSmartly(Temporal now, Temporal instant) {
 

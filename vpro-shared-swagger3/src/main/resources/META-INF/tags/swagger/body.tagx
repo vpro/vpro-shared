@@ -15,7 +15,7 @@
 			<jsp:text> </jsp:text>
 		</div>
 
-		<swagger:javascript url="${url}"/>
+		<swagger:javascript url="\${url}"/>
   </body>
 
 </jsp:root>

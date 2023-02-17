@@ -5,7 +5,6 @@
     >
     <swagger:swaggerbase />
     <a id="logo" href="http://swagger.io">
-        <img class="logo__img" alt="swagger" height="30" width="30" src="${webjars}/swagger-ui/swagger_icon.svg" />
+        <img class="logo__img" alt="swagger" height="30" width="30" src="\${webjars}/swagger-ui/swagger_icon.svg" />
     </a>
-
 </jsp:root>

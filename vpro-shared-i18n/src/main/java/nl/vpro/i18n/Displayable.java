@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * A displayable has a {@link #getDisplayName()} method, to display the object as a single string (in {@link Locales#getDefault()}) to the user.
- *
+ * <p>
  * This interface contains only default methods, which call each other.
  * Implementations must override at least one, either {@link #getDisplayName()} if no localization is necessary or {@link #getDisplayName(Locale)} if it is.
  *
@@ -72,7 +72,7 @@ public interface Displayable {
 
     /**
      * An url for an icon associated with this displayable object.
-     *
+     * <p>
      * It may be that this to be interpreted relative to the current 'context path'.
      */
     default Optional<String> getIcon() {
@@ -80,7 +80,7 @@ public interface Displayable {
     }
     /**
      * An url for an icon associated with this displayable object.
-     *
+     * <p>
      * It may be that this to be interpreted relative to the current 'context path'.
      */
     default Optional<String> getIconClass() {

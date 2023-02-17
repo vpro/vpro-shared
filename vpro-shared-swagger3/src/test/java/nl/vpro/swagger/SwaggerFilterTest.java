@@ -32,15 +32,15 @@ public class SwaggerFilterTest {
             out.write(input.getBytes());
         }
         Jackson2TestUtil.assertThatJson(outputStream.toString()).isSimilarTo("{\n" +
-            "    \"openapi\" : \"3.0.1\",\n" +
-            "    \"externalDocs\" : {\n" +
-            "      \"description\" : \"NPO Frontend API WIKI\",\n" +
-            "      \"url\" : \"https://wiki.publiekeomroep.nl/display/npoapi/\"\n" +
-            "    },\n" +
-            "    \"servers\" : [ {\n" +
-            "      \"url\" : \"/v3/api\"\n" +
-            "    } ]\n" +
-            "  }");
+            "  \"openapi\" : \"3.0.1\",\n" +
+            "  \"externalDocs\" : {\n" +
+            "    \"description\" : \"NPO Frontend API WIKI\",\n" +
+            "    \"url\" : \"https://wiki.publiekeomroep.nl/display/npoapi/\"\n" +
+            "  },\n" +
+            "  \"servers\" : [ {\n" +
+            "    \"url\" : \"rs.poms.omroep.nl/v3/api\"\n" +
+            "  } ]\n" +
+            "}");
 
 
 

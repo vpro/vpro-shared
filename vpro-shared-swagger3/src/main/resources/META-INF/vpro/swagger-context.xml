@@ -3,9 +3,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <bean class="nl.vpro.swagger.SwaggerApplication">
-  </bean>
-  <bean class="nl.vpro.swagger.SwaggerListingResource">
-    <constructor-arg value="${swagger.maxAge:#{null}}" />
-  </bean>
+
+  <!-- make sure to supply OpenApiConfiguration bean -->
+  <bean class="nl.vpro.swagger.SwaggerListingResource" lazy-init="true"/>
 </beans>
