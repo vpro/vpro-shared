@@ -1,4 +1,4 @@
-package nl.vpro.rs.media;
+package nl.vpro.swagger;
 
 import lombok.extern.slf4j.Slf4j;
 

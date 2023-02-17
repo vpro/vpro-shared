@@ -4,8 +4,6 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
-  <bean class="nl.vpro.swagger.SwaggerApplication" />
-
   <!-- make sure to supply OpenApiConfiguration bean -->
-  <bean class="nl.vpro.swagger.SwaggerListingResource" />
+  <bean class="nl.vpro.swagger.SwaggerListingResource" lazy-init="true"/>
 </beans>

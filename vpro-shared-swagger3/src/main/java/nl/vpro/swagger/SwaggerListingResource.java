@@ -1,7 +1,6 @@
 package nl.vpro.swagger;
 
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.BaseOpenApiResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,11 +8,14 @@ import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import lombok.extern.slf4j.Slf4j;
+
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 
 
 /**
@@ -21,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Michiel Meeuwissen
  * @since 1.60
  */
-@Path("/openapi")
+@Path("/openapi") // we use to arrange content negotation with headers, and via resteasy.media.type.mappings in web.xml (to support .json, .yaml too)
 @Slf4j
 public class SwaggerListingResource extends BaseOpenApiResource  {
 
@@ -32,12 +34,15 @@ public class SwaggerListingResource extends BaseOpenApiResource  {
     Application app;
 
     OpenAPI api;
-    boolean pretty;
     OpenApiContext ctx;
+    boolean pretty;
+
 
     @Inject
-    public SwaggerListingResource(OpenAPIConfiguration openAPIConfiguration) {
+    public SwaggerListingResource(OpenAPIConfiguration openAPIConfiguration, OpenApiContext openApiContext, OpenAPI api) {
         setOpenApiConfiguration(openAPIConfiguration);
+        this.ctx = openApiContext;
+        this.api = api;
     }
 
     @GET

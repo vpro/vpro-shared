@@ -1,4 +1,4 @@
-= Swagger utilities
+= Swagger utilities, and OpenAPI
 
 This contains a few utility methods to deal with swagger.
 

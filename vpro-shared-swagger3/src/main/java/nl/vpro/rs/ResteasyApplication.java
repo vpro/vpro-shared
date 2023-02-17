@@ -2,7 +2,7 @@
  * Copyright (C) 2013 All rights reserved
  * VPRO The Netherlands
  */
-package nl.vpro.swagger;
+package nl.vpro.rs;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,13 +21,12 @@ import javax.ws.rs.core.Application;
  */
 @Slf4j
 @ApplicationPath("")
-public class SwaggerApplication extends Application {
+public class ResteasyApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> set = new HashSet<>();
-        return set;
+        return Set.of();
     }
 
     @Override
