@@ -4,7 +4,10 @@
     version="2.0"
     >
     <swagger:swaggerbase />
-    <a id="logo" href="http://swagger.io">
-        <img class="logo__img" alt="swagger" height="30" width="30" src="\${webjars}/swagger-ui/swagger_icon.svg" />
+    <a id="swaggerlogo" href="https://swagger.io/">
+			<img class="logo__img" alt="swagger" height="30" width="30" src="\${webjars}/swagger-ui/swagger_icon.svg" />
     </a>
+	  <a id="openapilogo" href="https://www.openapis.org/">
+			<img class="logo__img" alt="openapis" height="30" width="30" src="\${webjars}/swagger-ui/openapis-icon.svg" />
+		</a>
 </jsp:root>
