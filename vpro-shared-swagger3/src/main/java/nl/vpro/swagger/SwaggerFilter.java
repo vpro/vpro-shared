@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -22,9 +23,13 @@ import nl.vpro.web.HttpServletRequestUtils;
 @Slf4j
 public class SwaggerFilter implements Filter {
 
-
+    boolean filterAlways = false;
+    String restPrefix = "/";
     @Override
     public void init(FilterConfig filterConfig) {
+        filterAlways = "true".equals(filterConfig.getInitParameter("filterAlways"));
+
+        restPrefix = Optional.ofNullable(filterConfig.getServletContext().getInitParameter("resteasy.servlet.mapping.prefix")).orElse(restPrefix);
 
     }
 
@@ -34,7 +39,7 @@ public class SwaggerFilter implements Filter {
         ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
 
-        if (! req.getPathInfo().endsWith(".json")) {
+        if (! filterAlways && (req.getPathInfo() == null || ! req.getPathInfo().endsWith(".json"))) {
             String accept = req.getHeader("accept");
             if (accept != null) {
                 boolean json = false;
@@ -103,7 +108,7 @@ public class SwaggerFilter implements Filter {
 
     PathMatcher getPathMatcher(HttpServletRequest req) {
         String host = req.getScheme() + "://" + req.getServerName() + HttpServletRequestUtils.getPortPostFixIfNeeded(req);
-        String basePath = req.getContextPath() + "/api";
+        String basePath = req.getContextPath() + restPrefix;
         return getPathMatcher(basePath, host);
     }
 
