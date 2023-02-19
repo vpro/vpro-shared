@@ -4,6 +4,7 @@
  */
 package nl.vpro.swagger;
 
+import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jackson2.Views;
+import nl.vpro.swagger.model.EnumModelConverter;
 import nl.vpro.util.ThreadPools;
 
 
@@ -69,6 +71,7 @@ public abstract class OpenAPIApplication {
 
     @Bean
     public OpenAPIConfiguration swaggerConfiguration() {
+        ModelConverters.getInstance().addConverter(new EnumModelConverter());
         final SwaggerConfiguration config = new SwaggerConfiguration();
         config.cacheTTL(cacheTTL.toMillis() / 1000);
         config.prettyPrint(false);
@@ -88,7 +91,7 @@ public abstract class OpenAPIApplication {
     OpenApiContext getOpenApiContext(OpenAPIConfiguration openApiConfiguration) throws OpenApiConfigurationException {
         return new JaxrsOpenApiContextBuilder()
             .openApiConfiguration(openApiConfiguration)
-            .ctxId("bla")
+            .ctxId("our-id")
             .buildContext(true);
 
     }
@@ -101,7 +104,9 @@ public abstract class OpenAPIApplication {
             Json.mapper()
                 .registerModule(new JaxbAnnotationModule())
                 .registerModule(new JavaTimeModule());
-            Json.mapper().setConfig(Json.mapper().getSerializationConfig().withView(Views.Normal.class));
+
+            Json.mapper().setConfig(
+                Json.mapper().getSerializationConfig().withView(Views.Normal.class));
 
             api = ctx.read();
 
