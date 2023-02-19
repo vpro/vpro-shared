@@ -53,7 +53,7 @@ public abstract class OpenAPIApplication {
 
     //extends Application {
 
-    @Value("${api.version}")
+    @Value("${openapi.info.version}")
     String apiVersion;
 
     @Value("${swagger.maxAge}")
