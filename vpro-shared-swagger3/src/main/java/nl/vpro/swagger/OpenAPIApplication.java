@@ -89,7 +89,7 @@ public abstract class OpenAPIApplication {
 
 
     @Bean()
-    @Lazy // lazy, we need servlet Config
+    @Lazy
     OpenApiContext getOpenApiContext(OpenAPIConfiguration openApiConfiguration) throws OpenApiConfigurationException {
         return new JaxrsOpenApiContextBuilder()
             .openApiConfiguration(openApiConfiguration)
