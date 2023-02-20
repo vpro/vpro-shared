@@ -99,7 +99,7 @@ public abstract class OpenAPIApplication {
     }
 
     @Bean
-    @Lazy// lazy, we need servlet Config
+    @Lazy
     public OpenAPI getOpenAPI(Environment environment, OpenApiContext ctx) {
         if (api == null) {
             Jackson2Mapper.configureMapper(Json.mapper());
