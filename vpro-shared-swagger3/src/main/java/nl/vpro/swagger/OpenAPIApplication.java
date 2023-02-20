@@ -55,7 +55,7 @@ public abstract class OpenAPIApplication {
     @Value("${openapi.info.version}")
     String apiVersion;
 
-    @Value("${swagger.maxAge}")
+    @Value("${swagger.maxAge:PT1H}")
     Duration cacheTTL;
 
     @Value("${documentation.baseUrl}")
