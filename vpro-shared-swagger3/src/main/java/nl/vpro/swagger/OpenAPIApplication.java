@@ -35,8 +35,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jackson2.Views;
-import nl.vpro.swagger.model.EnumModelConverter;
-import nl.vpro.swagger.model.LocaleModelConverter;
+import nl.vpro.swagger.model.*;
 import nl.vpro.util.ThreadPools;
 
 
@@ -74,6 +73,7 @@ public abstract class OpenAPIApplication {
     public OpenAPIConfiguration swaggerConfiguration() {
         ModelConverters.getInstance().addConverter(new EnumModelConverter());
         ModelConverters.getInstance().addConverter(new LocaleModelConverter());
+        ModelConverters.getInstance().addConverter(new DurationModelConverter());
         final SwaggerConfiguration config = new SwaggerConfiguration();
         config.cacheTTL(cacheTTL.toMillis() / 1000);
         config.prettyPrint(false);
