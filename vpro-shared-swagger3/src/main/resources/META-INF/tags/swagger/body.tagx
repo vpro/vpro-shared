@@ -9,12 +9,14 @@
                              type="java.lang.String" description="swagger json to load" required="false" />
 	<swagger:swaggerbase />
 	<body>
-		<jsp:doBody />
-
+		<div id='header' class="swagger-ui">
+			<div class="wrapper">
+				<jsp:doBody />
+			</div>
+		</div>
 		<div id="swagger-ui">
 			<jsp:text> </jsp:text>
 		</div>
-
 		<swagger:javascript url="\${url}"/>
   </body>
 

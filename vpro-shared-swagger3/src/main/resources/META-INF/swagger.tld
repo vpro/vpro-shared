@@ -16,6 +16,10 @@
     <path>/META-INF/tags/swagger/javascript.tagx</path>
   </tag-file>
   <tag-file>
+    <description>
+      Creates the necessary html to set up swagger 3.
+      Body is used to created extra heading.
+    </description>
     <name>body</name>
     <path>/META-INF/tags/swagger/body.tagx</path>
   </tag-file>
