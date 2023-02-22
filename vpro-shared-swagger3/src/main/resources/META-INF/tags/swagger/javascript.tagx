@@ -5,9 +5,9 @@
     <jsp:directive.tag
             description="This includes the javascript for the swagger index" />
     <jsp:directive.attribute
-			name="url"
-			rtexprvalue="true"
-			type="java.lang.String" description="swagger json to load" required="false" />
+      name="url"
+      rtexprvalue="true"
+      type="java.lang.String" description="swagger json to load" required="false" />
 
 
     <jsp:scriptlet>
@@ -22,21 +22,21 @@
 
     <script type="text/javascript"><![CDATA[
 
-		window.onload = function() {
-			window.ui = SwaggerUIBundle({
-				url: "\${swaggerjson}",
-				dom_id: '#swagger-ui',
-				deepLinking: false,
-				presets: [
-					SwaggerUIBundle.presets.apis
-					//SwaggerUIStandalonePreset
-				],
+    window.onload = function() {
+      window.ui = SwaggerUIBundle({
+        url: "\${swaggerjson}",
+        dom_id: '#swagger-ui',
+        deepLinking: false,
+        presets: [
+          SwaggerUIBundle.presets.apis
+          //SwaggerUIStandalonePreset
+        ],
 
-				plugins: [
-					//SwaggerUIBundle.plugins.DownloadUrl
-				],
-				layout: "BaseLayout"
-			});
+        plugins: [
+          //SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "BaseLayout"
+      });
 
 };]]></script>
 
