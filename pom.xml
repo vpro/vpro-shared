@@ -25,9 +25,9 @@
     <mockito.version>5.1.1</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <resteasy.version>5.0.5.Final</resteasy.version>
-    <bytebuddy.version>1.13.0</bytebuddy.version>
+    <bytebuddy.version>1.14.0</bytebuddy.version>
     <slf4j.version>2.0.6</slf4j.version>
-    <log4j2.version>2.19.0</log4j2.version>
+    <log4j2.version>2.20.0</log4j2.version>
     <guava.version>31.1-jre</guava.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
@@ -582,7 +582,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.15.3</version>
+        <version>1.15.4</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -750,7 +750,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.30.0</version>
+      <version>3.31.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
