@@ -17,8 +17,12 @@
 			name="url"
 			rtexprvalue="true"
 			type="java.lang.String" description="open api url" required="false" />
+	<jsp:directive.attribute
+			name="lang"
+			rtexprvalue="true"
+			type="java.lang.String" description="lang" required="false" />
 
-	<html>
+	<html lang="${empty lang ? 'en': lang}">
 		<head>
 			<title>\${title}</title>
 			<jsp:invoke fragment="head" />
