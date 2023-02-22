@@ -1,0 +1,32 @@
+<jsp:root
+	xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:swagger="https://www.vpro.nl/shared/tags/swagger"
+	version="2.0">
+	<jsp:output omit-xml-declaration="false" />
+  <jsp:output doctype-root-element="HTML"
+              doctype-system="" />
+	<jsp:directive.tag
+		description="This creates html for swagger." />
+	<jsp:directive.attribute name="head" fragment="true"  required="false"/>
+	<jsp:directive.attribute
+		name="title"
+		rtexprvalue="true"
+			type="java.lang.String" description="extra css to load" required="true" />
+	<jsp:directive.attribute
+			name="url"
+			rtexprvalue="true"
+			type="java.lang.String" description="open api url" required="false" />
+
+	<html>
+		<head>
+			<title>${title}</title>
+			<jsp:invoke fragment="head" />
+			<swagger:head-links />
+		</head>
+		<swagger:body  url="${url}">
+			<swagger:logo />
+			<jsp:doBody />
+		</swagger:body>
+	</html>
+</jsp:root>

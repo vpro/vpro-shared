@@ -31,5 +31,9 @@
     <name>swaggerbase</name>
     <path>/META-INF/tags/swagger/swaggerbase.tagx</path>
   </tag-file>
+   <tag-file>
+    <name>html</name>
+    <path>/META-INF/tags/swagger/html.tagx</path>
+  </tag-file>
 
 </taglib>
