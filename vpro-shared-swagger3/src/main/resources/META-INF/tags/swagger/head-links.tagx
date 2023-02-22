@@ -19,7 +19,7 @@
 	<jsp:scriptlet>
 		if (overridecss == null) {
 	</jsp:scriptlet>
-  <link href='\${swaggerbase}/override.css' rel='stylesheet' type='text/css'/>
+  <link href='${webjars}/swagger-ui/override.css' rel='stylesheet' type='text/css'/>
 	<jsp:scriptlet>} else {</jsp:scriptlet>
 	<link href='\${overridecss}' rel='stylesheet' type='text/css'/>
 	<jsp:scriptlet>}</jsp:scriptlet>
