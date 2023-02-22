@@ -7,9 +7,9 @@
             description="This includes the head links for the swagger index" />
 
 	<jsp:directive.attribute
-			name="overridecss"
+			name="css"
 			rtexprvalue="true"
-			type="java.lang.String" description="swagger json to load" required="false" />
+			type="java.lang.String" description="extra css to load" required="false" />
 
   <swagger:swaggerbase />
 
@@ -17,11 +17,11 @@
 	<link rel="stylesheet" type="text/css" href="\${swaggerbase}/index.css" />
 
 	<jsp:scriptlet>
-		if (overridecss == null) {
+		if (css == null) {
 	</jsp:scriptlet>
   <link href='${webjars}/swagger-ui/override.css' rel='stylesheet' type='text/css'/>
 	<jsp:scriptlet>} else {</jsp:scriptlet>
-	<link href='\${overridecss}' rel='stylesheet' type='text/css'/>
+	<link href='\${css}' rel='stylesheet' type='text/css'/>
 	<jsp:scriptlet>}</jsp:scriptlet>
 	<script src="\${swaggerbase}/swagger-ui-bundle.js" charset="UTF-8"><jsp:text> </jsp:text></script>
 	<script src="\${swaggerbase}/swagger-ui-standalone-preset.js" charset="UTF-8"><jsp:text> </jsp:text></script>
