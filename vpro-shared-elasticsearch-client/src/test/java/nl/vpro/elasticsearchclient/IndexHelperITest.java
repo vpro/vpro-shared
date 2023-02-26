@@ -153,4 +153,27 @@ public class IndexHelperITest {
         log.info("{}", warnings);
     }
 
+    @Test
+    public void indexAndGet() {
+        helper.refresh();
+        long before = helper.count();
+        TestObject test = new TestObject();
+        test.setId("https://www-acc.vpro.nl/speel~WO_VPRO_442926~interview-frédérik-ruys~.html");
+        test.setTitle("ok");
+        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(test);
+        helper.index(test.getId(), jsonNode);
+
+        helper.refresh();
+        log.info("CReading indexing");
+        Optional<JsonNode> jsonNode1 = helper.get(test.getId());
+        assertThat(jsonNode1).isPresent();
+        log.info("{}", jsonNode1);
+
+
+        helper.delete(test.getId());
+        helper.refresh();
+        assertThat(helper.count()).isEqualTo(before);
+    }
+
+
 }
