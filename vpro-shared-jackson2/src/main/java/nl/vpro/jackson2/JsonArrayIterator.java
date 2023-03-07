@@ -253,8 +253,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public void finalize() {
+    protected void finalize() {
         if (! callBackHasRun && callback != null) {
             logger.warn("Callback not run in finalize. Did you not close the iterator?");
             callback.run();
@@ -287,6 +288,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * Write the entire stream to an output stream
      * @deprecated Use {@link #write(OutputStream, Consumer)}
      */
+    @Deprecated
     public void write(OutputStream out, final Function<T, Void> logging) throws IOException {
         write(this, out, logging);
     }
