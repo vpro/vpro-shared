@@ -4,9 +4,13 @@
  */
 package nl.vpro.swagger;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
@@ -14,8 +18,6 @@ import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.Duration;
@@ -25,18 +27,19 @@ import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
+import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson2.Views;
+import nl.vpro.rs.ResteasyApplication;
+import nl.vpro.swagger.model.*;
+import nl.vpro.util.ThreadPools;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
-
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
-
-import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.jackson2.Views;
-import nl.vpro.swagger.model.*;
-import nl.vpro.util.ThreadPools;
 
 
 /**
@@ -66,7 +69,13 @@ public abstract class OpenAPIApplication {
 
     OpenAPI api;
 
-    public abstract Set<Class<?>> getClasses();
+    public  Set<Class<?>> getClasses() {
+        return ResteasyApplication.getInstance().getSingletons().stream().map(Object::getClass)
+            .filter(c -> {
+                return c.getAnnotation(OpenAPIDefinition.class) != null;
+            })
+            .collect(Collectors.toSet());
+    }
 
 
     @Bean

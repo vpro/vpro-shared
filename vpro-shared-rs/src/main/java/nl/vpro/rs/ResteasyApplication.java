@@ -25,6 +25,18 @@ import javax.ws.rs.core.Application;
 public class ResteasyApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
 
+
+    private static ResteasyApplication INSTANCE;
+
+    public ResteasyApplication() {
+        INSTANCE = this;
+    }
+
+    public static ResteasyApplication getInstance() {
+        return INSTANCE;
+    }
+
+
     @Override
     public Set<Class<?>> getClasses() {
         return Set.of();
