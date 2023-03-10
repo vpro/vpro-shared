@@ -28,7 +28,7 @@
       <jsp:invoke fragment="head" />
       <swagger:head-links />
     </head>
-    <swagger:body  url="\${url}">
+    <swagger:body url="\${url}">
       <swagger:logo />
       <jsp:doBody />
     </swagger:body>
