@@ -135,6 +135,8 @@ public abstract class OpenAPIApplication {
             info.setContact(contact);
             fixDocumentation(api);
             log.info("Assembled {}, because", api.getInfo(), new Exception());
+        } else {
+            log.info("Returning previously assembled {}", api.getInfo(), new Exception());
         }
 
         return api;
