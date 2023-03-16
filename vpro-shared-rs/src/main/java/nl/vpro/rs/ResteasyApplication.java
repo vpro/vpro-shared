@@ -54,7 +54,9 @@ public class ResteasyApplication extends Application {
      * @param services
      */
     public static void inject(Object... services) {
-        singletons.addAll(Arrays.asList(services));
+        List<Object> list = Arrays.asList(services);
+        log.info("Injecting singletons {}", list);
+        singletons.addAll(list);
     }
 
 
