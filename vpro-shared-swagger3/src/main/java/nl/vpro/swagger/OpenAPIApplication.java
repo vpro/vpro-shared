@@ -78,6 +78,7 @@ public abstract class OpenAPIApplication {
 
 
     @Bean
+    @Lazy
     public OpenAPIConfiguration swaggerConfiguration() {
         ModelConverters.getInstance().addConverter(new EnumModelConverter());
         ModelConverters.getInstance().addConverter(new LocaleModelConverter());
