@@ -134,7 +134,7 @@ public abstract class OpenAPIApplication {
             contact.setEmail(email);
             info.setContact(contact);
             fixDocumentation(api);
-            log.info("Assembled {}", api);
+            log.info("Assembled {}", api.getInfo());
         }
 
         return api;
