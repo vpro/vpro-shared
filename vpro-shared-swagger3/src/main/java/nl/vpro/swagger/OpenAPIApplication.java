@@ -7,6 +7,7 @@ package nl.vpro.swagger;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenAPIConfiguration;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jackson2.Views;
+import nl.vpro.rs.ResteasyApplication;
 import nl.vpro.swagger.model.*;
 import nl.vpro.util.ThreadPools;
 
@@ -66,7 +68,13 @@ public abstract class OpenAPIApplication {
 
     OpenAPI api;
 
-    public abstract Set<Class<?>> getClasses();
+    protected Set<Class<?>> getClasses() {
+        return ResteasyApplication.getInstance().getSingletons().stream().map(Object::getClass)
+            .filter(c -> {
+                return c.getAnnotation(OpenAPIDefinition.class) != null;
+            })
+            .collect(Collectors.toSet());
+    }
 
 
     @Bean
@@ -77,11 +85,13 @@ public abstract class OpenAPIApplication {
         final SwaggerConfiguration config = new SwaggerConfiguration();
         config.cacheTTL(cacheTTL.toMillis() / 1000);
         config.prettyPrint(false);
-        config.setResourceClasses(
+        Set<String> resourceClasses =
             Stream.concat(
-                    Set.of(getClass()).stream(), getClasses().stream())
-                .map(Class::getName).collect(Collectors.toSet())
-        );
+                Set.of(getClass()).stream(),
+                getClasses().stream()
+                ).map(Class::getName).collect(Collectors.toSet());
+        log.info("Configured open api with resources classes {}", resourceClasses);
+        config.setResourceClasses(resourceClasses);
         config.setReadAllResources(false);
         log.info("Created {}", config);
         return  config;
@@ -128,6 +138,8 @@ public abstract class OpenAPIApplication {
             contact.setUrl(documentationBaseUrl.toString());
             contact.setEmail(email);
             info.setContact(contact);
+            fixDocumentation(api);
+            log.info("Assembled {}", api);
         }
 
         return api;
@@ -149,15 +161,16 @@ public abstract class OpenAPIApplication {
 
     @SneakyThrows
     protected void fixDocumentation(io.swagger.v3.oas.models.ExternalDocumentation documentation) {
-        URI url = URI.create(documentation.getUrl());
-        URI newUri = new URI(
-            documentationBaseUrl.getScheme(),
-            documentationBaseUrl.getAuthority(),
-            url.getPath(),
-            url.getQuery(),
-            url.getFragment());
-        documentation.setUrl(newUri.toString());
+        if (documentation != null) {
+            URI url = URI.create(documentation.getUrl());
+            URI newUri = new URI(
+                documentationBaseUrl.getScheme(),
+                documentationBaseUrl.getAuthority(),
+                url.getPath(),
+                url.getQuery(),
+                url.getFragment());
+            documentation.setUrl(newUri.toString());
+        }
     }
-
 
 }

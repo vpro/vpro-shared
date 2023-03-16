@@ -25,6 +25,17 @@ import javax.ws.rs.core.Application;
 public class ResteasyApplication extends Application {
     private static final Set<Object> singletons = new HashSet<>();
 
+
+    private static ResteasyApplication INSTANCE;
+
+    public ResteasyApplication() {
+        INSTANCE = this;
+    }
+
+    public static ResteasyApplication getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public Set<Class<?>> getClasses() {
         return Set.of();
@@ -42,7 +53,9 @@ public class ResteasyApplication extends Application {
      * @param services
      */
     public static void inject(Object... services) {
-        singletons.addAll(Arrays.asList(services));
+        List<Object> list = Arrays.asList(services);
+        log.info("Injecting singletons {}", list);
+        singletons.addAll(list);
     }
 
 
