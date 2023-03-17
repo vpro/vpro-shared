@@ -132,7 +132,7 @@ public class ObjectLockerTest {
                 synchronized (events) {
                     events.notifyAll();
                 }
-                sleep(100);
+                sleep(200);
                 events.add("a2");
             });
         });
