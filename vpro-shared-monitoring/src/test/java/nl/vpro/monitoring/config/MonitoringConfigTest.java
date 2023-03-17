@@ -49,8 +49,8 @@ class MonitoringConfigTest {
     }
 
     @Test
-    void isMeterEhCache2() {
-        when(properties.isMeterEhCache2()).thenReturn(true);
+    void isMeterJCache() {
+        when(properties.isMeterJCache()).thenReturn(true);
         final PrometheusMeterRegistry registry = config.globalMeterRegistry();
         assertThat(registry.getMeters()).hasSize(offset);
     }
