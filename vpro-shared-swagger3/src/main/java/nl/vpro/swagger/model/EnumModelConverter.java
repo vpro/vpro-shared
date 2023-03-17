@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.type.SimpleType;
  *<p>
  * I also think it is silly that openapi doesn't support something basic like htmls <option value="key">displayable string</input>
  * <p>
- * https://github.com/springdoc/springdoc-openapi/issues/1247
- * https://github.com/springdoc/springdoc-openapi/issues/2048
+ * <a href="https://github.com/springdoc/springdoc-openapi/issues/1247">issue 1247</a>
+ * <a href="https://github.com/springdoc/springdoc-openapi/issues/2048">issue 2048</a>
  */
 public class EnumModelConverter implements ModelConverter {
 

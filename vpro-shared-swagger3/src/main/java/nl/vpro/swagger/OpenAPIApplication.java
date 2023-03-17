@@ -78,6 +78,7 @@ public abstract class OpenAPIApplication {
 
 
     @Bean
+    @Lazy
     public OpenAPIConfiguration swaggerConfiguration() {
         ModelConverters.getInstance().addConverter(new EnumModelConverter());
         ModelConverters.getInstance().addConverter(new LocaleModelConverter());
@@ -122,11 +123,6 @@ public abstract class OpenAPIApplication {
 
             api = ctx.read();
 
-            //log.info("Found for openapi {}", api.getPaths());
-
-            boolean pretty = ctx.getOpenApiConfiguration() != null &&
-                Boolean.TRUE.equals(ctx.getOpenApiConfiguration().isPrettyPrint());
-
 
             Info info = api.getInfo();
             if (info == null) {
@@ -139,7 +135,9 @@ public abstract class OpenAPIApplication {
             contact.setEmail(email);
             info.setContact(contact);
             fixDocumentation(api);
-            log.info("Assembled {}", api);
+            log.info("Assembled {}, because", api.getInfo(), new Exception());
+        } else {
+            log.info("Returning previously assembled {}", api.getInfo(), new Exception());
         }
 
         return api;
@@ -172,5 +170,6 @@ public abstract class OpenAPIApplication {
             documentation.setUrl(newUri.toString());
         }
     }
+
 
 }
