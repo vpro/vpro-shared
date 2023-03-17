@@ -25,8 +25,8 @@ public class MonitoringProperties {
     @Value("${monitoring.classloader.enabled:true}")
     private boolean meterClassloader;
 
-    @Value("${monitoring.ehcache2.enabled:true}")
-    private boolean meterEhCache2;
+    @Value("${monitoring.jcache.enabled:true}")
+    private boolean meterJCache;
 
     @Value("${monitoring.jvm.heap.enabled:true}")
     private boolean meterJvmHeap;

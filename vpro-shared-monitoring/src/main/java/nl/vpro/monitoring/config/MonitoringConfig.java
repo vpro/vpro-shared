@@ -1,7 +1,7 @@
 package nl.vpro.monitoring.config;
 
 import io.micrometer.core.instrument.*;
-import io.micrometer.core.instrument.binder.cache.EhCache2Metrics;
+import io.micrometer.core.instrument.binder.cache.JCacheMetrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
 import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
@@ -11,12 +11,12 @@ import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.ehcache.Ehcache;
 
 import java.io.File;
 import java.util.*;
 
 import javax.annotation.PreDestroy;
+import javax.cache.CacheManager;
 import javax.sql.DataSource;
 
 import org.apache.catalina.Manager;
@@ -83,9 +83,12 @@ public class MonitoringConfig {
             closables.add(metrics);
         }
 
-        final Optional<Ehcache> ehCache = (Optional<Ehcache>) getEhCache();
-        if (properties.isMeterEhCache2() && ehCache.isPresent()) {
-            new EhCache2Metrics(ehCache.get(), Tags.empty()).bindTo(registry);
+        final Optional<?> cacheManager = getCacheManager();
+        if (properties.isMeterJCache() && cacheManager.isPresent()) {
+            CacheManager manager = (CacheManager)  cacheManager.get();
+            manager.getCacheNames().forEach(cacheName -> {
+                new JCacheMetrics<>(manager.getCache(cacheName), Tags.empty()).bindTo(registry);
+            });
         }
         if (properties.isMeterJvmHeap()) {
             JvmHeapPressureMetrics metrics = new JvmHeapPressureMetrics();
@@ -232,8 +235,8 @@ public class MonitoringConfig {
             .flatMap(this::getBean);
     }
 
-    private Optional<?> getEhCache() {
-        return classForName("net.sf.ehcache.Ehcache")
+    private Optional<?> getCacheManager() {
+        return classForName("javax.cache.CacheManager")
             .flatMap(this::getBean);
     }
 

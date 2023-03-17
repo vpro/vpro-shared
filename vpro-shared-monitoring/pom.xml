@@ -10,15 +10,11 @@
   <description>This modules contains utilities and endpoints for application deployments and monitoring.</description>
   <dependencies>
     <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path-assert</artifactId>
-    </dependency>
-    <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.sf.ehcache</groupId>
+      <groupId>org.ehcache</groupId>
       <artifactId>ehcache</artifactId>
       <scope>provided</scope>
     </dependency>
