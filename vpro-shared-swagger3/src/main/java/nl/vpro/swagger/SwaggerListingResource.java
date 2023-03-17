@@ -23,7 +23,7 @@ import nl.vpro.rs.ResteasyApplication;
  * @author Michiel Meeuwissen
  * @since 1.60
  */
-@Path("/openapi") // we use to arrange content negotation with headers, and via resteasy.media.type.mappings in web.xml (to support .json, .yaml too)
+@Path("/openapi") // we use to arrange content negotiation with headers, and via resteasy.media.type.mappings in web.xml (to support .json, .yaml too)
 @Slf4j
 public class SwaggerListingResource extends BaseOpenApiResource  {
 
