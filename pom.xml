@@ -130,6 +130,7 @@
     <module>vpro-shared-xml</module>
     <module>vpro-shared-guice</module>
     <module>vpro-shared-i18n</module>
+    <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
 
     <!--

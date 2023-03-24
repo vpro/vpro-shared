@@ -164,7 +164,11 @@
         <artifactId>vpro-shared-swagger3</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-jcache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <!-- not maintained anymore -->
       <dependency>
