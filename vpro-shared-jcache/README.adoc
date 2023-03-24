@@ -1,4 +1,10 @@
 = Extra MBeans for jcache JSR-107
 
-Some MBeans can easily be installed, but th
+Some MBeans can easily be installed, but in previous version of ehcache we also had
+the possibility to clear caches.
 
+This restores it for ecache-3.
+
+
+
+image:screenshot.png[]]
