@@ -1541,8 +1541,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-
     public void waitForHealth() throws InterruptedException {
+        waitForHealth(client(), log);
+    }
+
+    public static void waitForHealth(RestClient client, SimpleLogger log) throws InterruptedException {
         while (true) {
             try {
                 Request request = new Request(GET, "/_cat/health");
@@ -1550,14 +1553,14 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     .toBuilder()
                     .addHeader("accept", "application/json"));
 
-                Response response = client().performRequest(request);
+                Response response = client.performRequest(request);
                 ArrayNode health = Jackson2Mapper.getLenientInstance()
                     .readerFor(ArrayNode.class)
                     .readValue(response.getEntity().getContent());
 
                 String status = health.get(0).get("status").textValue();
-                boolean serviceIsUp = "green".equals(status) || "yellow".equals(status);
                 log.info("status {}", status);
+                boolean serviceIsUp = "green".equals(status) || "yellow".equals(status);
                 if (serviceIsUp) {
                     break;
                 }
