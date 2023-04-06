@@ -135,7 +135,7 @@ public abstract class OpenAPIApplication {
             contact.setEmail(email);
             info.setContact(contact);
             fixDocumentation(api);
-            log.info("Assembled {}, because", api.getInfo(), new Exception());
+            log.info("Assembled {}", info);
         } else {
             log.info("Returning previously assembled {}", api.getInfo(), new Exception());
         }
