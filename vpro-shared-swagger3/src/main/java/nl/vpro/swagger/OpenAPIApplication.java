@@ -137,7 +137,7 @@ public abstract class OpenAPIApplication {
             fixDocumentation(api);
             log.info("Assembled {}", info);
         } else {
-            log.info("Returning previously assembled {}", api.getInfo(), new Exception());
+            log.info("Returning previously assembled {}", api.getInfo());
         }
 
         return api;
