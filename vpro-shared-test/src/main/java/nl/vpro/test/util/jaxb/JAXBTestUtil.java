@@ -359,16 +359,29 @@ public class JAXBTestUtil {
 
         A rounded;
 
+        boolean roundTrip = true;
+
+
+        public S noRoundTrip() {
+            roundTrip = false;
+            return myself;
+        }
+
         protected XMLObjectAssert(A actual) {
             super(actual, XMLObjectAssert.class);
         }
 
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
-            try {
-                rounded = roundTripAndSimilar(actual, expected);
-            } catch (Exception e) {
-                Fail.fail(e.getMessage(), e);
+            if (roundTrip) {
+                try {
+                    rounded = roundTripAndSimilar(actual, expected);
+                } catch (Exception e) {
+                    Fail.fail(e.getMessage(), e);
+                }
+            } else {
+                String xml = marshal(actual);
+                similar(xml, expected);
             }
             return myself;
         }
