@@ -14,7 +14,7 @@ import com.google.common.collect.PeekingIterator;
  * @author Michiel Meeuwissen
  * @since 0.31
  */
-public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
+public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T>, Counted {
 
     static <S> CountedIterator<S> of(Collection<S> wrapped) {
         return new BasicWrappedIterator<>(wrapped);
@@ -46,6 +46,7 @@ public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T> {
     /**
      * The current position. Will return {@code 1} after first successfull call to {@link #next()}, {@code 2} after the second one, and so on. It will return {@code 0} before the first call.
      */
+    @Override
     Long getCount();
 
     /**
