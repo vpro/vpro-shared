@@ -22,10 +22,10 @@ public class RandomStream extends InputStream {
     int count = 0;
     @Override
     public int read() {
-        if (count++ > size) {
+        if (++count > size) {
             return EOF;
         } else {
-            return random.nextInt();
+            return random.nextInt(256);
         }
     }
     @Override

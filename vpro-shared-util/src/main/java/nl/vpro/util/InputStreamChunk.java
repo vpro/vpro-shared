@@ -5,6 +5,14 @@ import java.io.InputStream;
 
 import static nl.vpro.util.FileCachingInputStream.EOF;
 
+
+/**
+ * Wraps an {@link InputStream} to limit the number of bytes to produces.
+ * <p>
+ * Never closes the underlying stream.
+ * @author Michiel Meeuwissen
+ * @since 3.4
+ */
 public class InputStreamChunk extends InputStream implements Counted {
 
     private final InputStream wrapped;
