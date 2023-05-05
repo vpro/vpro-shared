@@ -3,3 +3,30 @@
 This contains a few utility methods to deal with swagger.
 
 It has a dependency on a webjars for swagger frontend itself, and supplies a simply taglib to wire that into the actual HTML.
+
+E.g. our index page is normally implemented something like so:
+[source,xhtml]
+----
+<jsp:root
+        xmlns:jsp="http://java.sun.com/JSP/Page"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:swagger="https://www.vpro.nl/shared/tags/swagger"
+        xmlns:npo="https://www.vpro.nl/shared/tags/npo"
+        version="2.0">
+  <jsp:directive.page contentType="text/html" pageEncoding="UTF-8" session="false" />
+  <swagger:html
+    title="Pages Publisher Swagger UI"
+    deepLinking="true"
+    filter="true"
+    operationsSorter="alpha">
+  >
+    <jsp:attribute name="head">
+      <npo:favicon />
+    </jsp:attribute>
+    <a href="https://wiki.vpro.nl/display/npoapi/Indexing">
+      <npo:logo />
+    </a>
+  </swagger:html>
+</jsp:root>
+
+----
