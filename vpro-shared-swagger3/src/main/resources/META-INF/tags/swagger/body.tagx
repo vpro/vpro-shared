@@ -11,6 +11,10 @@
       name="deepLinking"
       rtexprvalue="true"
       type="java.lang.Boolean"  required="false" />
+   <jsp:directive.attribute
+      name="filter"
+      rtexprvalue="true"
+      type="java.lang.Boolean"  required="false" />
   <swagger:swaggerbase />
   <body>
     <div id='header' class="swagger-ui">
@@ -21,7 +25,7 @@
     <div id="swagger-ui">
       <jsp:text> </jsp:text>
     </div>
-    <swagger:javascript url="\${url}" deepLinking="\${deepLinking}"/>
+    <swagger:javascript url="\${url}" deepLinking="\${deepLinking}" filter="\${filter}"/>
   </body>
 
 </jsp:root>

@@ -21,6 +21,14 @@
       name="lang"
       rtexprvalue="true"
       type="java.lang.String" description="lang" required="false" />
+    <jsp:directive.attribute
+      name="deepLinking"
+      rtexprvalue="true"
+      type="java.lang.Boolean"  required="false" />
+   <jsp:directive.attribute
+      name="filter"
+      rtexprvalue="true"
+      type="java.lang.Boolean"  required="false" />
 
   <html lang="${empty lang ? 'en': lang}">
     <head>
@@ -28,7 +36,7 @@
       <jsp:invoke fragment="head" />
       <swagger:head-links />
     </head>
-    <swagger:body url="\${url}">
+    <swagger:body url="\${url}" deepLinking="\${deepLinking}" filter="\${filter}">
       <swagger:logo />
       <jsp:doBody />
     </swagger:body>
