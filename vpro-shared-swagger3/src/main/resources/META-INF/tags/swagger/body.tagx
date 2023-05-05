@@ -7,6 +7,10 @@
   <jsp:directive.attribute name="url"
                              rtexprvalue="true"
                              type="java.lang.String" description="swagger json to load" required="false" />
+  <jsp:directive.attribute
+      name="deepLinking"
+      rtexprvalue="true"
+      type="java.lang.Boolean"  required="false" />
   <swagger:swaggerbase />
   <body>
     <div id='header' class="swagger-ui">
@@ -17,7 +21,7 @@
     <div id="swagger-ui">
       <jsp:text> </jsp:text>
     </div>
-    <swagger:javascript url="\${url}"/>
+    <swagger:javascript url="\${url}" deepLinking="\${deepLinking}"/>
   </body>
 
 </jsp:root>
