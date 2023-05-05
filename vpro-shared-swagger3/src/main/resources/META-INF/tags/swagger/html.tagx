@@ -40,7 +40,12 @@
       <jsp:invoke fragment="head" />
       <swagger:head-links />
     </head>
-    <swagger:body url="\${url}" deepLinking="\${deepLinking}" filter="\${filter}">
+    <swagger:body
+      url="\${url}"
+      deepLinking="\${deepLinking}"
+      filter="\${filter}"
+      operationsSorter="\${operationsSorter}"
+    >
       <swagger:logo />
       <jsp:doBody />
     </swagger:body>

@@ -4,9 +4,10 @@
     version="2.0"
     >
   <jsp:directive.tag body-content="scriptless" />
-  <jsp:directive.attribute name="url"
-                             rtexprvalue="true"
-                             type="java.lang.String" description="swagger json to load" required="false" />
+  <jsp:directive.attribute
+    name="url"
+    rtexprvalue="true"
+    type="java.lang.String" description="swagger json to load" required="false" />
   <jsp:directive.attribute
       name="deepLinking"
       rtexprvalue="true"
@@ -18,7 +19,9 @@
    <jsp:directive.attribute
       name="operationsSorter"
       rtexprvalue="true"
-      type="java.lang.String"  required="false" />
+      type="java.lang.String"
+      required="false" />
+
   <swagger:swaggerbase />
   <body>
     <div id='header' class="swagger-ui">
@@ -29,7 +32,12 @@
     <div id="swagger-ui">
       <jsp:text> </jsp:text>
     </div>
-    <swagger:javascript url="\${url}" deepLinking="\${deepLinking}" filter="\${filter}"/>
+    <swagger:javascript
+      url="\${url}"
+      deepLinking="\${deepLinking}"
+      filter="\${filter}"
+      operationsSorter="\${operationsSorter}"
+    />
   </body>
 
 </jsp:root>
