@@ -43,7 +43,7 @@
         dom_id: '#swagger-ui',
         deepLinking: '\${empty deepLinking ? true : deepLinking}',
         filter: '\${empty filter ? false : filter}',
-        operationsSorter: '${empty operationsSorter ? "alpha": operationsSorter},
+        operationsSorter: '${empty operationsSorter ? "alpha": operationsSorter}',
         presets: [
           SwaggerUIBundle.presets.apis
           //SwaggerUIStandalonePreset
