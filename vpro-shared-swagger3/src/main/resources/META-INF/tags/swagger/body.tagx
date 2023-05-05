@@ -14,7 +14,11 @@
    <jsp:directive.attribute
       name="filter"
       rtexprvalue="true"
-      type="java.lang.Boolean"  required="false" />
+      type="java.lang.String"  required="false" />
+   <jsp:directive.attribute
+      name="operationsSorter"
+      rtexprvalue="true"
+      type="java.lang.String"  required="false" />
   <swagger:swaggerbase />
   <body>
     <div id='header' class="swagger-ui">

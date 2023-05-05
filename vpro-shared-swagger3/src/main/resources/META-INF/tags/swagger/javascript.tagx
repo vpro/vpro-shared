@@ -17,7 +17,12 @@
    <jsp:directive.attribute
       name="filter"
       rtexprvalue="true"
-      type="java.lang.Boolean"  required="false" />
+      type="java.lang.String"  required="false" />
+
+  <jsp:directive.attribute
+      name="operationsSorter"
+      rtexprvalue="true"
+      type="java.lang.String"  required="false" />
 
 
     <jsp:scriptlet>
@@ -38,6 +43,7 @@
         dom_id: '#swagger-ui',
         deepLinking: '\${empty deepLinking ? true : deepLinking}',
         filter: '\${empty filter ? false : filter}',
+        operationsSorter: '${empty operationsSorter ? "alpha": operationsSorter},
         presets: [
           SwaggerUIBundle.presets.apis
           //SwaggerUIStandalonePreset

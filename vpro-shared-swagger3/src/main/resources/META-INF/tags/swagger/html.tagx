@@ -28,7 +28,11 @@
    <jsp:directive.attribute
       name="filter"
       rtexprvalue="true"
-      type="java.lang.Boolean"  required="false" />
+      type="java.lang.String"  required="false" />
+   <jsp:directive.attribute
+      name="operationsSorter"
+      rtexprvalue="true"
+      type="java.lang.String"  required="false" />
 
   <html lang="${empty lang ? 'en': lang}">
     <head>
