@@ -107,13 +107,19 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     protected MediaType contentType;
 
+    /**
+     * The actual browser cache that is in use.
+     */
     private BrowserCache resteasyBrowserCache;
 
+    /**
+     * Whether to do browser caching.
+     */
     protected boolean browserCache = true;
 
     private Instant initializationInstant = Instant.now();
 
-    protected String mbeanName = null;
+    protected String mbeanName;
 
     protected boolean registerMBean = false;
 
@@ -263,7 +269,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
 
     @SneakyThrows
     protected String getVersion(String prop, ClassLoader loader) {
-        Properties properties = new Properties();
+        final Properties properties = new Properties();
         try {
             URL resource = loader.getResource("/maven.properties");
             if (resource == null) {
@@ -927,25 +933,38 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     public void clearBrowserCache() {
         if (resteasyBrowserCache != null) {
             resteasyBrowserCache.clear();
+        } else if (browserCache) {
+            log.warn("Tried to clear browser caches, but no resteasy browser cache was found");
         }
     }
 
     /**
      * Default the client is backed by a {@link org.jboss.resteasy.client.jaxrs.cache.LightweightBrowserCache}, you may replace it by {@link JavaxBrowserCache}, backed with a more generic {@link Cache}, so that the client can hitch on your preferred caching framework.
+     *
+     * @see #setBrowserCache(BrowserCache)
      */
     @SuppressWarnings("unchecked")
     public void setBrowserCache(Cache<?, ?> browserCache) {
         setBrowserCache(new JavaxBrowserCache((Cache<String, Map<String, BrowserCache.Entry>>) browserCache));
     }
 
+    /**
+     * Configures the actual {@link BrowserCache} to use when using {@link #isBrowserCaching()}
+     */
     public void setBrowserCache(BrowserCache browserCache) {
         if (! Objects.equals(browserCache, this.resteasyBrowserCache)) {
             this.resteasyBrowserCache = browserCache;
             this.browserCache = this.resteasyBrowserCache != null;
             invalidate();
+        } else {
+            log.debug("Browser cache is already {}", browserCache);
         }
     }
 
+    /**
+     * Configures whether to use {@link BrowserCache browser caching} or not.
+     * @see #setBrowserCache(BrowserCache)
+     */
     public void setBrowserCache(boolean browserCache) {
         if (browserCache != this.browserCache) {
             this.browserCache = browserCache;
@@ -953,11 +972,19 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         }
     }
 
+    /**
+     * Whether this client is doing {@link BrowserCache browser caching}, in other words client side caching.
+     */
+    public boolean isBrowserCaching() {
+        return browserCache;
+    }
+
     @PreDestroy
     public void shutdown() {
         close();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void finalize() throws Throwable {
         shutdown();
