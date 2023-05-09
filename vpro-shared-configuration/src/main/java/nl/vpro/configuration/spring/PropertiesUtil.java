@@ -179,6 +179,11 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         return Collections.unmodifiableMap(propertiesMap);
     }
 
+    @Override
+    public void loadProperties(Properties properties) throws IOException {
+        super.loadProperties(properties);
+    }
+
     /**
      * @since 2.4
      */
