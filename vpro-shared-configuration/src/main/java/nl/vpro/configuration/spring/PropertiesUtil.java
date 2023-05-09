@@ -185,7 +185,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     }
 
     /**
-     * @since 2.4
+     * @since 3.5
      */
     public Provider<Map<String, String>> provideMap() {
         return this::getMap;
