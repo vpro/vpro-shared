@@ -180,7 +180,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     }
 
     @Override
-    public void loadProperties(Properties properties) throws IOException {
+    public void loadProperties(@NonNull Properties properties) throws IOException {
         super.loadProperties(properties);
     }
 
