@@ -2,7 +2,8 @@
     xmlns:jsp="http://java.sun.com/JSP/Page"
     version="2.0"
     >
-    <jsp:directive.tag
+  <jsp:directive.tag import="org.apache.commons.text.StringEscapeUtils"/>
+  <jsp:directive.tag
             description="This includes the javascript for the swagger index" />
     <jsp:directive.attribute
       name="url"
@@ -26,13 +27,17 @@
 
 
     <jsp:scriptlet>
-        if (url == null || url.length() == 0) {
-            url = "/api/openapi.json";
-        }
-        if (url.startsWith("/")) {
-            url = request.getServletContext().getContextPath() + url;
-        }
-        request.setAttribute("swaggerjson", url);
+      if (url == null || url.length() == 0) {
+        url = "/api/openapi.json";
+      }
+      if (url.startsWith("/")) {
+        url = request.getServletContext().getContextPath() + url;
+      }
+      request.setAttribute("swaggerjson", url);
+      // avoid dependency on jstl:fn
+      request.setAttribute("escapedOperationSorter", StringEscapeUtils.escapeXml11(operationsSorter));
+      request.setAttribute("escapedFilter", StringEscapeUtils.escapeXml11(filter));
+
     </jsp:scriptlet>
 
     <script type="text/javascript"><![CDATA[
