@@ -8,11 +8,13 @@ import javax.ws.rs.core.MediaType;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 
+import org.jboss.resteasy.annotations.DecorateTypes;
 import org.jboss.resteasy.spi.DecoratorProcessor;
 
 import nl.vpro.rs.XmlFragment;
 
 @Slf4j
+@DecorateTypes({"text/*+xml", "application/*+xml"})
 public class JaxbFragmentDecorator implements DecoratorProcessor<Marshaller, XmlFragment>
  {
     @Override
