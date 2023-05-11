@@ -39,7 +39,6 @@
       request.setAttribute("escapedFilter", StringEscapeUtils.escapeXml11(filter));
 
     </jsp:scriptlet>
-
     <script type="text/javascript"><![CDATA[
 
     window.onload = function() {
@@ -47,8 +46,8 @@
         url: "\${swaggerjson}",
         dom_id: '#swagger-ui',
         deepLinking: '\${empty deepLinking ? true : deepLinking}',
-        filter: '\${empty filter ? false : filter}',
-        operationsSorter: '${empty operationsSorter ? "alpha": operationsSorter}',
+        filter: '\${empty escapedFilter ? false : escapedFilter}',
+        operationsSorter: '${empty escapedOperationSorter ? "alpha": escapedOperationSorter}',
         presets: [
           SwaggerUIBundle.presets.apis
           //SwaggerUIStandalonePreset
