@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "class",
     "stackTraceElements"
     })
+@XmlFragment
 public class Error {
 
     String message;
