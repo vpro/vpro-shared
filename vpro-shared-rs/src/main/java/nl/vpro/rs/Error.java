@@ -44,11 +44,18 @@ public class Error {
 
     }
 
-    public Error(Throwable  e) {
+    public Error(Throwable e) {
+        this(e, true);
+    }
+
+
+    public Error(Throwable e, boolean fillStackTrace) {
         this.message = e.getMessage();
-        this.stackTraceElement = Arrays.stream(e.getStackTrace())
-            .map(StackTraceElement::toString)
-            .collect(Collectors.toList());
+        if (fillStackTrace) {
+            this.stackTraceElement = Arrays.stream(e.getStackTrace())
+                .map(StackTraceElement::toString)
+                .collect(Collectors.toList());
+        }
         this.clazz = e.getClass().getName();
     }
 
