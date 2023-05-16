@@ -20,11 +20,7 @@ public class ISO6937CharsetProvider extends CharsetProvider {
     public static Charset forName(String charset) {
 
         Charset result = INSTANCE.charsetForName(charset);
-        if (result != null) {
-            return result;
-        } else {
-            return Charset.forName(charset);
-        }
+        return Objects.requireNonNullElseGet(result, () -> Charset.forName(charset));
     }
 
 
@@ -90,7 +86,8 @@ public class ISO6937CharsetProvider extends CharsetProvider {
                     if (isAscii(c1)) {
                         charBuffer.append((char) c1);
                         c1 = UNSET;
-                    } else if (isCombining(c1)) {
+                    } else //noinspection StatementWithEmptyBody
+                        if (isCombining(c1)) {
                         // read c2 in next iteration
                     } else {
                         charBuffer.append(getChar(c1));

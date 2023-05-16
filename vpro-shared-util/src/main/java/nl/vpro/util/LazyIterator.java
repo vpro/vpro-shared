@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * Wrap's a supplier around an iterator. This way you can delay the instantiation of the actual iterator until the first call
+ * Wraps a supplier around an iterator. This way you can delay the instantiation of the actual iterator until the first call
  * of hasNext() or next().
  * @author Michiel Meeuwissen
  */
