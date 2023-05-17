@@ -11,7 +11,7 @@ import nl.vpro.util.TimeUtils;
 import nl.vpro.xml.util.XmlUtils;
 
 /**
- * https://bugs.openjdk.java.net/browse/JDK-8042456
+ * <a href="https://bugs.openjdk.java.net/browse/JDK-8042456">JDK-8042456</a>
  * Use like so
  * <pre>
  * {@code
@@ -38,8 +38,6 @@ public class InstantXmlAdapter extends XmlAdapter<String, Instant> {
             .ofPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
             .withLocale(Locale.US)
             .withZone(XmlUtils.DEFAULT_ZONE);
-
-
 
     @Override
     public Instant unmarshal(String dateValue) {
