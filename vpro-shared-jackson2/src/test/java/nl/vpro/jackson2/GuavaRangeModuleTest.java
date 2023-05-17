@@ -2,13 +2,12 @@ package nl.vpro.jackson2;
 
 import java.time.Instant;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.google.common.collect.Range;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +22,7 @@ class GuavaRangeModuleTest {
 
 
     static class WithoutSerializer {
+        @JsonProperty
         Range<Integer> range;
     }
     static class WithIntegerRange {
@@ -36,12 +36,14 @@ class GuavaRangeModuleTest {
 
 
     @Test
-    public void without() {
-        Assertions.assertThatThrownBy(() -> {
-            WithoutSerializer a = new WithoutSerializer();
-            a.range = Range.closedOpen(1, 2);
-            mapper.writeValueAsString(a);
-        }).isInstanceOf(InvalidDefinitionException.class);
+    public void without() throws JsonProcessingException {
+        WithoutSerializer a = new WithoutSerializer();
+        a.range = Range.closedOpen(1, 2);
+        String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\"}}";
+        assertThat(mapper.writeValueAsString(a)).isEqualTo(example);
+
+        Range<?> range = mapper.readValue(example, Range.class);
+        assertThat(range).isEqualTo(a.range);
 
     }
 
