@@ -63,7 +63,7 @@ class GuavaRangeModuleTest {
         WithIntegerRange a = new WithIntegerRange();
         a.range = Range.closedOpen(1, 10);
 
-        assertThat(mapper.writeValueAsString(a)).isEqualTo("{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":10,\"upperBoundType\":\"OPEN\"}}");
+        assertThat(mapper.writeValueAsString(a)).isEqualTo("{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":10,\"upperBoundType\":\"OPEN\",\"type\":\"java.lang.Integer\"}}");
 
     }
 
@@ -76,7 +76,7 @@ class GuavaRangeModuleTest {
         );
 
         assertThat(mapper.writeValueAsString(a)).isEqualTo(
-            "{\"range\":{\"lowerEndpoint\":1640340000000,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":1640426400000,\"upperBoundType\":\"OPEN\"}}");
+            "{\"range\":{\"lowerEndpoint\":1640340000000,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":1640426400000,\"upperBoundType\":\"OPEN\",\"type\":\"java.time.Instant\"}}");
 
     }
 
