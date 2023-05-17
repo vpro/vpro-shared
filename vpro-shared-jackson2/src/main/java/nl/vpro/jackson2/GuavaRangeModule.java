@@ -1,12 +1,12 @@
 package nl.vpro.jackson2;
 
+import lombok.SneakyThrows;
+
 import java.io.IOException;
-import java.time.Instant;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.SimpleType;
@@ -15,18 +15,17 @@ import com.google.common.collect.Range;
 
 public class GuavaRangeModule extends SimpleModule {
 
+    public static final String LOWER_ENDPOINT = "lowerEndpoint";
+    public static final String LOWER_BOUND_TYPE = "lowerBoundType";
+    public static final String UPPER_ENDPOINT = "upperEndpoint";
+    public static final String UPPER_BOUND_TYPE = "upperBoundType";
+
     private static final long serialVersionUID = -8048846883670339246L;
 
     public GuavaRangeModule() {
         super(new Version(3, 5, 0, "", "nl.vpro.shared", "vpro-jackson2-guavarange"));
         addSerializer( Serializer.INSTANCE);
-        addDeserializer(Range.class, new Deserializer<>(Instant.class));
-        addDeserializer(Range.class, new Deserializer<>(Integer.class));
-        addDeserializer(Range.class, new Deserializer<>(String.class));
-        addDeserializer(Range.class, new Deserializer<>(Instant.class));
-
-
-
+        addDeserializer(Range.class, Deserializer.INSTANCE);
     }
 
     public static class Serializer extends com.fasterxml.jackson.databind.ser.std.StdSerializer<Range<?>> {
@@ -48,51 +47,90 @@ public class GuavaRangeModule extends SimpleModule {
                 gen.writeNull();
             } else {
                 gen.writeStartObject();
+                Class<?> type = null;
+
                 if (value.hasLowerBound()) {
-                    gen.writeObjectField("lowerEndpoint", value.lowerEndpoint());
-                    gen.writeObjectField("lowerBoundType", value.lowerBoundType());
+                    type = value.lowerEndpoint().getClass();
+                    gen.writeObjectField(LOWER_ENDPOINT, value.lowerEndpoint());
+                    gen.writeObjectField(LOWER_BOUND_TYPE, value.lowerBoundType());
                 }
                 if (value.hasUpperBound()) {
-                    gen.writeObjectField("upperEndpoint", value.upperEndpoint());
-                    gen.writeObjectField("upperBoundType", value.upperBoundType());
+                    type = value.upperEndpoint().getClass();
+                    gen.writeObjectField(UPPER_ENDPOINT, value.upperEndpoint());
+                    gen.writeObjectField(UPPER_BOUND_TYPE, value.upperBoundType());
+                }
+                if (type != null) {
+                    gen.writeObjectField("type", type.getName());
                 }
                 gen.writeEndObject();
             }
         }
     }
 
-    public static class Deserializer<T extends Comparable<T>> extends StdDeserializer<Range<T>> {
+    public static class Deserializer extends StdDeserializer<Range<?>> {
 
         private static final long serialVersionUID = -4394016847732058088L;
+        public static Deserializer INSTANCE = new Deserializer();
 
-        private final Class<T> clazz;
 
-        protected Deserializer(Class<T> comparable) {
+        protected Deserializer() {
             super(new CollectionLikeType(
                 SimpleType.constructUnsafe(Range.class),
-                SimpleType.constructUnsafe(comparable)) {
+                SimpleType.constructUnsafe(Comparable.class)) {
                 private static final long serialVersionUID = -2803462566784593946L;
             });
-            this.clazz = comparable;
         }
 
+
+
+        @SneakyThrows
         @Override
-        public Range<T> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-            return null;
-        }
+        public Range<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
-        @Override
-        public Range<T> deserializeWithType(JsonParser p, DeserializationContext ctxt,
-            TypeDeserializer typeDeserializer) throws IOException {
-
-            JsonNode node = ctxt.readValue(p, JsonNode.class);
-
-            if (node.has("lowerEndpoint")) {
-                BoundType type = BoundType.valueOf(node.get("lowerBoundType").asText());
-                return Range.downTo(p.readValueAs(clazz),  type);
+            if (p.currentToken() == JsonToken.START_OBJECT) {
+                p.nextToken();
             }
-            return null;
+            JsonNode node = ctxt.readValue(p, JsonNode.class);
+            if (node.has("type")) {
+                Class type = Class.forName(node.get("type").textValue());
+                return of(type, p, node);
+            } else {
+                return Range.all();
+            }
 
         }
     }
+
+    static <C extends Comparable<C>> Range<C> of(Class<C> clazz, JsonParser p, JsonNode node) throws IOException {
+
+        BoundType lowerBoundType = null;
+        C lowerValue = null;
+        BoundType upperBoundType = null;
+        C upperValue = null;
+
+        if (node.has(LOWER_ENDPOINT)) {
+            lowerBoundType = BoundType.valueOf(node.get(LOWER_BOUND_TYPE).asText());
+            lowerValue = p.getCodec().treeToValue(node.get(LOWER_ENDPOINT), clazz);
+        }
+        if (node.has(UPPER_ENDPOINT)) {
+            upperBoundType = BoundType.valueOf(node.get(UPPER_BOUND_TYPE).asText());
+            upperValue = p.getCodec().treeToValue(node.get(UPPER_ENDPOINT), clazz);
+        }
+        if (lowerValue != null) {
+            if (upperValue != null) {
+                return Range.range(lowerValue, lowerBoundType, upperValue, upperBoundType);
+            } else {
+                return Range.downTo(lowerValue, lowerBoundType);
+            }
+        } else {
+            if (upperValue != null) {
+                return Range.upTo(upperValue, upperBoundType);
+            } else {
+                return Range.all();
+            }
+        }
+    }
+
+
+
 }

@@ -42,12 +42,11 @@ class GuavaRangeModuleTest {
     public void without() throws JsonProcessingException {
         WithoutSerializer a = new WithoutSerializer();
         a.range = Range.closedOpen(1, 2);
-        String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\"},\"anotherField\":1}";
+        String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\",\"type\":\"java.lang.Integer\"},\"anotherField\":1}";
         assertThat(mapper.writeValueAsString(a)).isEqualTo(example);
 
-        //WithoutSerializer ab = mapper.readValue(example, WithoutSerializer.class);
-        // TODO
-        //assertThat(ab.range).isEqualTo(a.range);
+        WithoutSerializer ab = mapper.readValue(example, WithoutSerializer.class);
+        assertThat(ab.range).isEqualTo(a.range);
 
     }
 
