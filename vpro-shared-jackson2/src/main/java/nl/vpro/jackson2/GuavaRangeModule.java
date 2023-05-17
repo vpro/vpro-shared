@@ -1,10 +1,12 @@
 package nl.vpro.jackson2;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.CollectionLikeType;
 import com.fasterxml.jackson.databind.type.SimpleType;
@@ -18,7 +20,12 @@ public class GuavaRangeModule extends SimpleModule {
     public GuavaRangeModule() {
         super(new Version(3, 5, 0, "", "nl.vpro.shared", "vpro-jackson2-guavarange"));
         addSerializer( Serializer.INSTANCE);
-        addDeserializer( Range.class, Deserializer.INSTANCE);
+        addDeserializer(Range.class, new Deserializer<>(Instant.class));
+        addDeserializer(Range.class, new Deserializer<>(Integer.class));
+        addDeserializer(Range.class, new Deserializer<>(String.class));
+        addDeserializer(Range.class, new Deserializer<>(Instant.class));
+
+
 
     }
 
@@ -54,26 +61,35 @@ public class GuavaRangeModule extends SimpleModule {
         }
     }
 
-    public static class Deserializer extends StdDeserializer<Range<?>> {
+    public static class Deserializer<T extends Comparable<T>> extends StdDeserializer<Range<T>> {
 
         private static final long serialVersionUID = -4394016847732058088L;
-        public static Deserializer INSTANCE = new Deserializer();
 
-        protected Deserializer() {
+        private final Class<T> clazz;
+
+        protected Deserializer(Class<T> comparable) {
             super(new CollectionLikeType(
                 SimpleType.constructUnsafe(Range.class),
-                SimpleType.constructUnsafe(Comparable.class)) {
+                SimpleType.constructUnsafe(comparable)) {
                 private static final long serialVersionUID = -2803462566784593946L;
             });
+            this.clazz = comparable;
         }
 
         @Override
-        public Range<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-            /// TODO
-            JsonNode n = p.readValueAsTree();
-            if (n.has("lowerEndpoint")) {
-                BoundType type = BoundType.valueOf(n.get("lowerBindType").asText());
-                return Range.downTo(p.getValueAsString(),  type);
+        public Range<T> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+            return null;
+        }
+
+        @Override
+        public Range<T> deserializeWithType(JsonParser p, DeserializationContext ctxt,
+            TypeDeserializer typeDeserializer) throws IOException {
+
+            JsonNode node = ctxt.readValue(p, JsonNode.class);
+
+            if (node.has("lowerEndpoint")) {
+                BoundType type = BoundType.valueOf(node.get("lowerBoundType").asText());
+                return Range.downTo(p.readValueAs(clazz),  type);
             }
             return null;
 

@@ -10,7 +10,7 @@ import nl.vpro.util.BindingUtils;
 import nl.vpro.util.DateUtils;
 
 /**
- * The dependency on natty in {@link StringInstantToJsonTimestamp} is optional. Put support for it in this class so we can just catch the resulting NoClassDefFoundError.
+ * The dependency on natty in {@link StringInstantToJsonTimestamp} is optional. Put support for it in this class, so we can just catch the resulting NoClassDefFoundError.
  * @author Michiel Meeuwissen
  * @since 2.14
  */

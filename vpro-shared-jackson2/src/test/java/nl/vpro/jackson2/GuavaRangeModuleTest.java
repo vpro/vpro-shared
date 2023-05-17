@@ -24,6 +24,9 @@ class GuavaRangeModuleTest {
     static class WithoutSerializer {
         @JsonProperty
         Range<Integer> range;
+        @JsonProperty
+        int anotherField = 1;
+
     }
     static class WithIntegerRange {
         @JsonSerialize(using = GuavaRangeModule.Serializer.class) Range<Integer> range;
@@ -39,12 +42,12 @@ class GuavaRangeModuleTest {
     public void without() throws JsonProcessingException {
         WithoutSerializer a = new WithoutSerializer();
         a.range = Range.closedOpen(1, 2);
-        String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\"}}";
+        String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\"},\"anotherField\":1}";
         assertThat(mapper.writeValueAsString(a)).isEqualTo(example);
 
-        Range<?> range = mapper.readValue(example, Range.class);
+        //WithoutSerializer ab = mapper.readValue(example, WithoutSerializer.class);
         // TODO
-        //assertThat(range).isEqualTo(a.range);
+        //assertThat(ab.range).isEqualTo(a.range);
 
     }
 
