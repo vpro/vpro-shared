@@ -4,7 +4,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * This is a nice idea. The sad thing however, is that when using this, the generated XSD will not any more be an enum.
+ * This is a nice idea. The sad thing however, is that when using this, the generated XSD will not anymore be an enum.
  *
  * @author Michiel Meeuwissen
  * @since 1.63
@@ -16,7 +16,6 @@ public abstract class EnumAdapter<T extends Enum<T>> extends XmlAdapter<String, 
     protected EnumAdapter(Class<T> enumClass) {
         this.enumClass = enumClass;
     }
-
 
     protected T valueOf(String v) {
          return Enum.valueOf(enumClass, v.trim());
