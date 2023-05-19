@@ -44,11 +44,17 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     };
 
+    /**
+     * The binary to wrap
+     */
     @Getter
     private final Supplier<String> binary;
 
     private final List<Supplier<String>> commonArgs;
 
+    /**
+     * Optional workdir to process.
+     */
     private final File workdir;
 
     private final Duration processTimeout;
@@ -104,6 +110,9 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
     }
 
+    /**
+     * @param optional Whether the binary to exists is optional
+     */
     @lombok.Builder(builderClassName = "Builder", buildMethodName = "_build")
     private CommandExecutorImpl(
         File workdir,
