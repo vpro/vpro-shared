@@ -19,6 +19,8 @@ import javax.annotation.PreDestroy;
 import javax.cache.CacheManager;
 import javax.sql.DataSource;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory;
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.HibernateMetrics;
@@ -159,6 +161,20 @@ public class MonitoringConfig {
         if (properties.isMeterProcessor()) {
             new ProcessorMetrics().bindTo(registry);
         }
+
+        if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
+            try {
+                MicrometerRoutePolicyFactory factory = new MicrometerRoutePolicyFactory();
+                factory.setMeterRegistry(meterRegistry);
+                CamelContext camelContext = applicationContext.getBean(CamelContext.class);
+                camelContext.addRoutePolicyFactory(factory);
+                log.info("Set up {}", factory);
+            } catch (Exception e) {
+                log.warn(e.getMessage(), e);
+            }
+        }
+
+
         final Optional<Manager> manager = (Optional<Manager>) getManager();
         if (properties.isMeterTomcat() && manager.isPresent()) {
             TomcatMetrics metrics = new TomcatMetrics(manager.get(), Tags.empty());

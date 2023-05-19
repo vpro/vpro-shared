@@ -45,10 +45,12 @@
 
     <validation.api.version>2.0.2</validation.api.version>
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
-
-    <ektorp.version>1.5.0</ektorp.version>
+    <camel.version>3.20.4</camel.version>
 
     <swagger.version>2.2.10</swagger.version>
+
+
+
     <lombok.version>1.18.26</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
@@ -388,7 +390,11 @@
         <version>${hibernate.validator.version}</version>
         <scope>test</scope>
       </dependency>
-
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-micrometer</artifactId>
+        <version>${camel.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-bom</artifactId>
