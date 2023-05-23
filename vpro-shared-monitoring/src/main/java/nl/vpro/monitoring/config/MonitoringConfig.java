@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
@@ -40,7 +42,7 @@ import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 @Slf4j
 public class MonitoringConfig {
 
-    public static MeterRegistry meterRegistry;
+    public static PrometheusMeterRegistry meterRegistry;
 
     @Autowired(required = false)
     public MonitoringProperties properties = new MonitoringProperties();
@@ -52,10 +54,11 @@ public class MonitoringConfig {
 
     @Bean("globalMeterRegistry")
     public PrometheusMeterRegistry globalMeterRegistry() {
-        final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        start(registry);
-        meterRegistry = registry;
-        return registry;
+        if (meterRegistry == null) {
+            final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+            meterRegistry = registry;
+        }
+        return meterRegistry;
     }
 
     @PreDestroy
@@ -70,8 +73,18 @@ public class MonitoringConfig {
         }
     }
 
+    private boolean started = false;
+    @EventListener
+    public synchronized void init(ContextRefreshedEvent event) throws BeansException {
+        if (! started) {
+            start(globalMeterRegistry());
+        }
+        started = true;
+    }
+
+
     @SuppressWarnings("unchecked")
-    protected void start(PrometheusMeterRegistry registry) {
+    protected void start(MeterRegistry registry) {
         if (properties.getCommonTags() != null) {
             registry.config().commonTags(properties.getCommonTags().toArray(new String[0]));
         }
