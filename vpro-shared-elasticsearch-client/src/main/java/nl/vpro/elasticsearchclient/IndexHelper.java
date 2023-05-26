@@ -1378,7 +1378,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 if (on.has(DELETE)) {
                     final ObjectNode delete = on.with(DELETE);
                     index = delete.get(Fields.INDEX).textValue();
-                    String type = delete.get(Fields.TYPE).textValue();
+                    String type = delete.has(Fields.TYPE) ? delete.get(Fields.TYPE).textValue() : DOC;
                     String id = delete.get(Fields.ID).textValue();
                     String logEntry = handleResponse(delete, type, id);
                     deleted.add(logEntry);
@@ -1431,7 +1431,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         };
     }
 
-    static  String handleResponse(@NonNull JsonNode indexResponse, @NonNull String type, @NonNull String id) {
+    static  String handleResponse(
+        @NonNull JsonNode indexResponse,
+        @NonNull String type,
+        @NonNull String id) {
         int status = -1;
         if (indexResponse.has("status")) {
             status = indexResponse.get("status").intValue();
