@@ -20,8 +20,6 @@ import javax.annotation.PreDestroy;
 import javax.cache.CacheManager;
 import javax.sql.DataSource;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory;
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.HibernateMetrics;
@@ -197,16 +195,20 @@ public class MonitoringConfig {
             new ProcessorMetrics().bindTo(registry);
         }
 
-        if (properties.isMeterCamel() && classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
+        if (properties.isMeterCamel()) {
             try {
-                MicrometerRoutePolicyFactory factory = new MicrometerRoutePolicyFactory();
-                factory.setMeterRegistry(meterRegistry);
-                CamelContext camelContext = applicationContext.getBean(CamelContext.class);
-                if (camelContext == null) {
-                    log.warn("No camel context found in {}", applicationContext);
-                } else {
-                    camelContext.addRoutePolicyFactory(factory);
-                    log.info("Set up {}", factory);
+                if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
+                    Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory factory");
+                    Object factory = factoryClass.getDeclaredConstructor().newInstance();
+                    factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
+                    Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
+                    Object camelContext = applicationContext.getBean(camelContextClass);
+                    if (camelContext == null) {
+                        log.warn("No camel context found in {}", applicationContext);
+                    } else {
+                        camelContextClass.getMethod("addRoutePolicyFactory", Class.forName("org.apache.camel.spi.RoutePolicyFactory")).invoke(camelContext, factory);
+                        log.info("Set up {}", factory);
+                    }
                 }
             } catch (Exception e) {
                 log.warn(e.getMessage(), e);

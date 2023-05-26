@@ -44,7 +44,7 @@ public class MonitoringProperties {
     private boolean meterJvmThread;
 
 
-    @Value("${monitoring.camel:true}") // ''Be aware of the potential for high cardinality of unique Hibernate queries executed by your application'
+    @Value("${monitoring.camel:true}")
     private boolean meterCamel;
 
     @Value("${monitoring.hibernate.enabled:true}")
