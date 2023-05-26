@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class MDCConstants {
 
     public static final String USER_NAME    = "userName";
-    public static final String ONBEHALFOF   = "onBehalfOf";
+    public static final String ON_BEHALF_OF = "onBehalfOf";
     public static final String REQUEST      = "request";
     public static final String REMOTE_ADDR  = "remoteAddr";
     public static final String USER_AGENT   = "userAgent";
@@ -26,7 +26,7 @@ public class MDCConstants {
             MDC.put(USER_NAME, String.valueOf(authentication.getPrincipal()));
         }
         String currentUser = MDC.get(USER_NAME);
-        MDC.put(ONBEHALFOF, StringUtils.isEmpty(currentUser) ? user  : (":" + user));
+        MDC.put(ON_BEHALF_OF, StringUtils.isEmpty(currentUser) ? user  : (":" + user));
 
     }
 }
