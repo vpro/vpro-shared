@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.jmx.export.annotation.ManagedOperation;
 
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
@@ -52,12 +54,24 @@ public class MonitoringConfig {
 
     private final List<AutoCloseable> closables = new ArrayList<>();
 
+    @Getter
+    private final List<String> warnings = new ArrayList<>();
+
     @Bean("globalMeterRegistry")
-    public PrometheusMeterRegistry globalMeterRegistry() {
-        if (meterRegistry == null) {
-            final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-            meterRegistry = registry;
+    public PrometheusMeterRegistry createMeterRegistry() {
+        final PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        if (meterRegistry != null) {
+            log.info("Replacing meterRegistry {} -> {}", meterRegistry, registry);
         }
+        meterRegistry = registry;
+        return meterRegistry;
+    }
+
+    public PrometheusMeterRegistry getGlobalMeterRegistry() {
+        if (meterRegistry == null) {
+            createMeterRegistry();
+        }
+        init(null);
         return meterRegistry;
     }
 
@@ -77,14 +91,27 @@ public class MonitoringConfig {
     @EventListener
     public synchronized void init(ContextRefreshedEvent event) throws BeansException {
         if (! started) {
-            start(globalMeterRegistry());
+            if (meterRegistry == null) {
+                createMeterRegistry();
+            }
+            start(meterRegistry);
         }
         started = true;
     }
 
 
-    @SuppressWarnings("unchecked")
     protected void start(MeterRegistry registry) {
+        configure(registry);
+    }
+
+    @ManagedOperation
+    public PrometheusMeterRegistry configure() {
+        configure(meterRegistry);
+        return meterRegistry;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void configure(MeterRegistry registry) {
         if (properties.getCommonTags() != null) {
             registry.config().commonTags(properties.getCommonTags().toArray(new String[0]));
         }
@@ -92,10 +119,13 @@ public class MonitoringConfig {
             new ClassLoaderMetrics().bindTo(registry);
         }
 
-        if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
-            Log4j2Metrics metrics = new Log4j2Metrics();
-            metrics.bindTo(registry);
-            closables.add(metrics);
+        if (properties.isMeterLog4j()) {
+            if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
+
+                Log4j2Metrics metrics = new Log4j2Metrics();
+                metrics.bindTo(registry);
+                closables.add(metrics);
+            }
         }
 
         final Optional<?> cacheManager = getCacheManager();
@@ -122,42 +152,32 @@ public class MonitoringConfig {
             new JvmThreadMetrics().bindTo(registry);
         }
 
-        if (classForName("org.hibernate.SessionFactory").isPresent()) {
 
-            try {
-                if (properties.isMeterHibernate()) {
-                    final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
-                    if (sessionFactory.isPresent()) {
-                        new HibernateMetrics(
-                            sessionFactory.get(),
-                            properties.getMeterHibernateName(),
-                            Tags.empty()
-                        ).bindTo(registry);
 
-                    } else {
-                        log.warn("No session factory to monitor (hibernate)");
-                    }
-                }
-            } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
-                log.warn("No hibernate metrics: Missing class {}", noClassDefFoundError.getMessage());
+        if (properties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent()) {
+            final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+            if (sessionFactory.isPresent()) {
+                new HibernateMetrics(
+                    sessionFactory.get(),
+                    properties.getMeterHibernateName(),
+                    Tags.empty()
+                ).bindTo(registry);
+
+            } else {
+                warn("No session factory to monitor (hibernate)");
             }
-            try {
-                if (properties.isMeterHibernateQuery()) {
-                    final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
-
-                    if (sessionFactory.isPresent()) {
-                        new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
-                    } else {
-                        log.warn("No session factory to monitor (hibernate query)");
-                    }
-                }
-            } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
-                log.warn("No hibernate query metrics. Missing class {}", noClassDefFoundError.getMessage());
-            }
-        } else {
-            log.debug("No org.hibernate.SessionFactory");
         }
-        try {
+        if (properties.isMeterHibernateQuery() && classForName("org.hibernate.SessionFactory").isPresent()) {
+            final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
+
+            if (sessionFactory.isPresent()) {
+                new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+            } else {
+                warn("No session factory to monitor (hibernate query)");
+            }
+        }
+
+        try  {
             if (properties.isMeterPostgres()) {
                 final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
                 if (dataSource.isPresent()) {
@@ -166,30 +186,36 @@ public class MonitoringConfig {
                     } else {
                         log.error("For metering postgres one should provide an existing database name");
                     }
+                } else {
+                    warn("No datasource to monitor (postgres)");
                 }
             }
         } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
-            log.warn("No hibernate postgresql metrics. Missing class {}", noClassDefFoundError.getMessage());
+            warn(String.format("No hibernate postgresql metrics. Missing class %s", noClassDefFoundError.getMessage()));
         }
         if (properties.isMeterProcessor()) {
             new ProcessorMetrics().bindTo(registry);
         }
 
-        if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
+        if (properties.isMeterCamel() && classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
             try {
                 MicrometerRoutePolicyFactory factory = new MicrometerRoutePolicyFactory();
                 factory.setMeterRegistry(meterRegistry);
                 CamelContext camelContext = applicationContext.getBean(CamelContext.class);
-                camelContext.addRoutePolicyFactory(factory);
-                log.info("Set up {}", factory);
+                if (camelContext == null) {
+                    log.warn("No camel context found in {}", applicationContext);
+                } else {
+                    camelContext.addRoutePolicyFactory(factory);
+                    log.info("Set up {}", factory);
+                }
             } catch (Exception e) {
                 log.warn(e.getMessage(), e);
             }
         }
 
 
-        final Optional<Manager> manager = (Optional<Manager>) getManager();
-        if (properties.isMeterTomcat() && manager.isPresent()) {
+        if (properties.isMeterTomcat() && getManager().isPresent()) {
+            final Optional<Manager> manager = (Optional<Manager>) getManager();
             TomcatMetrics metrics = new TomcatMetrics(manager.get(), Tags.empty());
             metrics.bindTo(registry);
             closables.add(metrics);
@@ -270,8 +296,12 @@ public class MonitoringConfig {
     }
 
     private Optional<?> getManager() {
-        return classForName("org.apache.catalina.Manager")
+        Optional<?> manager = classForName("org.apache.catalina.Manager")
             .flatMap(this::getBean);
+        if (!manager.isPresent()) { {
+            warn("no tomcat manager found");
+        }}
+        return manager;
     }
 
     private Optional<Class<?>> classForName(String name) {
@@ -279,8 +309,14 @@ public class MonitoringConfig {
             final Class<?> aClass = Class.forName(name, true, this.getClass().getClassLoader());
             return Optional.of(aClass);
         } catch (ClassNotFoundException e) {
+            warn(name + ":" + e.getMessage());
             return Optional.empty();
         }
+    }
+
+    private void warn(String warn){
+        log.warn(warn);
+        warnings.add(warn);
     }
 
     private Optional<?> getBean(Class<?> clazz) {

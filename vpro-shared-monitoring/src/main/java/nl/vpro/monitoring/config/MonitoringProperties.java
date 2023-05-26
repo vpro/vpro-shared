@@ -22,6 +22,9 @@ public class MonitoringProperties {
     @Value("${monitoring.tags:#{null}}")
     private List<String> commonTags;
 
+    @Value("${monitoring.log4j.enabled:true}")
+    private boolean meterLog4j;
+
     @Value("${monitoring.classloader.enabled:true}")
     private boolean meterClassloader;
 
@@ -39,6 +42,10 @@ public class MonitoringProperties {
 
     @Value("${monitoring.jvm.thread.enabled:true}")
     private boolean meterJvmThread;
+
+
+    @Value("${monitoring.camel:true}") // ''Be aware of the potential for high cardinality of unique Hibernate queries executed by your application'
+    private boolean meterCamel;
 
     @Value("${monitoring.hibernate.enabled:true}")
     private boolean meterHibernate;
