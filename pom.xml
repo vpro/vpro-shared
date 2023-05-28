@@ -62,6 +62,8 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.11.0</micrometer.version>
+
+    <vpro.shared.bom.version>3.5.1</vpro.shared.bom.version>
   </properties>
 
   <licenses>
@@ -330,7 +332,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-bom</artifactId>
-        <version>${project.version}</version>
+        <version>${vpro.shared.bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
