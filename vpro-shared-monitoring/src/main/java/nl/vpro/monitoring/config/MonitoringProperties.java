@@ -16,7 +16,7 @@ public class MonitoringProperties {
     @Value("${monitoring.user:manager}")
     private String user;
 
-    @Value("${monitoring.password#{systemProperties('MONITORING_PASSWORD')}")
+    @Value("${monitoring.password:#{systemProperties['MONITORING_PASSWORD']}")
     private String password;
 
     @Value("${monitoring.tags:#{null}}")
