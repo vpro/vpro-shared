@@ -63,7 +63,7 @@
 
     <micrometer.version>1.11.0</micrometer.version>
 
-    <vpro.shared.bom.version>3.5.1</vpro.shared.bom.version>
+    <vpro.shared.bom.version>${project.version}</vpro.shared.bom.version>
   </properties>
 
   <licenses>
