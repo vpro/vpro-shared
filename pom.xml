@@ -332,7 +332,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-bom</artifactId>
-        <version>${vpro.shared.bom.version}</version>
+        <version>${project.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
