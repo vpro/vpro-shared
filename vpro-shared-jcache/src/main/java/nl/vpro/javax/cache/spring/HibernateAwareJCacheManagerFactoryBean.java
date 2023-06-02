@@ -8,7 +8,7 @@ import org.springframework.cache.jcache.JCacheManagerFactoryBean;
 public class HibernateAwareJCacheManagerFactoryBean  extends JCacheManagerFactoryBean {
 
      {
-                // See, MSE-5473 This is what org.hibernate.cache.jcache.internal.JCacheRegionFactory ends up doing.
+         // See, MSE-5473 This is what org.hibernate.cache.jcache.internal.JCacheRegionFactory ends up doing.
          super.setBeanClassLoader(Caching.getCachingProvider().getDefaultClassLoader());
 
      }
