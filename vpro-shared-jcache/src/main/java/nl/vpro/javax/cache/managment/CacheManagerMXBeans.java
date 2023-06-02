@@ -38,6 +38,14 @@ public class CacheManagerMXBeans {
                 log.warn(e.getMessage(), e);
             }
         });
+        try {
+            ObjectName name = new ObjectName(
+                String.format("javax.cache:type=CacheManager,CacheManager=%s",
+                    sanitize(cacheManager.getURI().toString())));
+            MBeans.registerBean(name, new CacheManagerWrapper(cacheManager));
+        } catch (MalformedObjectNameException e) {
+            log.warn(e.getMessage(), e);
+        }
     }
 
     // copied from ehcache code, so have exact same escaping
