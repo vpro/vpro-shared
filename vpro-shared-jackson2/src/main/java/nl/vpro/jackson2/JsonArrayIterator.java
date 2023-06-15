@@ -1,12 +1,10 @@
 package nl.vpro.jackson2;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -59,16 +57,18 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private boolean skipNulls = true;
 
+    private final Listener<T> eventListener;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
         this(inputStream, clazz, null);
-
     }
+
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
-        this(inputStream, null, clazz, callback, null, null, null, null, null);
+        this(inputStream, null, clazz, callback, null, null, null, null, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null, null, null, null, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
     }
 
 
@@ -95,60 +95,71 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      *                        not be tokenized.
      */
      @lombok.Builder(builderClassName = "Builder", builderMethodName = "builder")
-    private JsonArrayIterator(
-        @NonNull  InputStream inputStream,
-        @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
-        @Nullable final Class<T> valueClass,
-        @Nullable Runnable callback,
-        @Nullable String sizeField,
-        @Nullable String totalSizeField,
-        @Nullable ObjectMapper objectMapper,
-        @Nullable Logger logger,
-        @Nullable Boolean skipNulls
-        ) throws IOException {
-        if (inputStream == null) {
-            throw new IllegalArgumentException("No inputStream given");
-        }
-        this.jp = (objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper).getFactory().createParser(inputStream);
-        this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
-        if (valueCreator != null && valueClass != null) {
-            throw new IllegalArgumentException();
-        }
+     private JsonArrayIterator(
+         @NonNull  InputStream inputStream,
+         @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
+         @Nullable final Class<T> valueClass,
+         @Nullable Runnable callback,
+         @Nullable String sizeField,
+         @Nullable String totalSizeField,
+         @Nullable ObjectMapper objectMapper,
+         @Nullable Logger logger,
+         @Nullable Boolean skipNulls,
+         @Nullable Listener<T> eventListener
+     ) throws IOException {
+         if (inputStream == null) {
+             throw new IllegalArgumentException("No inputStream given");
+         }
+         this.jp = (objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper).getFactory().createParser(inputStream);
+         this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
+         if (valueCreator != null && valueClass != null) {
+             throw new IllegalArgumentException();
+         }
          if (logger != null) {
              this.logger = logger;
          }
-        Long tmpSize = null;
-        Long tmpTotalSize = null;
-        String fieldName = null;
-        if (sizeField == null) {
-            sizeField = "size";
-        }
-        if (totalSizeField == null) {
-            totalSizeField = "totalSize";
-        }
-        // find the start of the array, where we will start iterating.
-        while(true) {
-            JsonToken token = jp.nextToken();
-            if (token == null) {
-                break;
-            }
-            if (token == JsonToken.FIELD_NAME) {
-                fieldName = jp.getCurrentName();
-            }
-            if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
-                tmpSize = jp.getLongValue();
-            }
-            if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
-                tmpTotalSize = jp.getLongValue();
-            }
-            if (token == JsonToken.START_ARRAY) break;
-        }
-        this.size = tmpSize;
-        this.totalSize = tmpTotalSize;
-        jp.nextToken();
-        this.callback = callback;
-        this.skipNulls = skipNulls == null || skipNulls;
-    }
+         Long tmpSize = null;
+         Long tmpTotalSize = null;
+         String fieldName = null;
+         if (sizeField == null) {
+             sizeField = "size";
+         }
+         if (totalSizeField == null) {
+             totalSizeField = "totalSize";
+         }
+         this.eventListener = eventListener == null? (e) -> {} : eventListener;
+         // find the start of the array, where we will start iterating.
+         while(true) {
+             JsonToken token = jp.nextToken();
+             if (token == null) {
+                 break;
+             }
+             this.eventListener.accept(new TokenEvent(token));
+             if (token == JsonToken.FIELD_NAME) {
+                 fieldName = jp.getCurrentName();
+             }
+             if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
+                 tmpSize = jp.getLongValue();
+                 this.eventListener.accept(new SizeEvent(tmpSize));
+             }
+             if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
+                 tmpTotalSize = jp.getLongValue();
+                 this.eventListener.accept(new TotalSizeEvent(tmpSize));
+
+             }
+             if (token == JsonToken.START_ARRAY) {
+                 break;
+             }
+         }
+         this.size = tmpSize;
+         this.totalSize = tmpTotalSize;
+         this.eventListener.accept(new StartEvent());
+         JsonToken token = jp.nextToken();
+         this.eventListener.accept(new TokenEvent(token));
+
+         this.callback = callback;
+         this.skipNulls = skipNulls == null || skipNulls;
+     }
 
     private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
         return (jp, tree) -> {
@@ -200,6 +211,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             while(true) {
                 try {
                     TreeNode tree = jp.readValueAsTree();
+                    this.eventListener.accept(new TokenEvent(jp.getLastClearedToken()));
 
                     if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
                         tree = null;
@@ -220,6 +232,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                             }
 
                             next = valueCreator.apply(jp, tree);
+                            eventListener.accept(new NextEvent(next));
                             hasNext = true;
                         }
                         break;
@@ -381,4 +394,62 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             super(e);
         }
     }
+
+    public class Event {
+
+        public JsonArrayIterator<T> getParent() {
+            return JsonArrayIterator.this;
+        }
+    }
+
+    public class StartEvent extends Event {
+    }
+
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public class TokenEvent extends Event {
+        final JsonToken token;
+
+        public TokenEvent(JsonToken token) {
+            this.token = token;
+        }
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public class TotalSizeEvent extends Event {
+        final long totalSize;
+
+        public TotalSizeEvent(long totalSize) {
+            this.totalSize = totalSize;
+        }
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public class SizeEvent extends Event {
+        final long size;
+
+        public SizeEvent(long size) {
+            this.size = size;
+        }
+    }
+
+    public class NextEvent extends Event {
+
+        final T next;
+
+        public NextEvent(T next) {
+            this.next = next;
+        }
+    }
+
+    @FunctionalInterface
+    public interface Listener<S> extends EventListener, Consumer<JsonArrayIterator<S>.Event> {
+
+
+    }
+
+
 }
