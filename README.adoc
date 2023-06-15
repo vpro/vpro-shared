@@ -33,3 +33,25 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 * Some of these modules are old, contain very little usefull or are very specific for VPRO. We should remove them.
 * A bit more of documentation here and there would be welcome. Though we provide this mainly to be able to provide _other_ artifact too, which themselves depend on this
 * Some, or perhaps even most or all, of the submodules should be migrated to git repositories of their own. They don't change often. This will make the builds faster and leaner.
+
+
+== Version history
+
+
+|===
+|Major |remarks
+
+| 0/1.x
+| lived at subversion @ vpro
+
+| 2.x
+| First version at github, java 8
+
+| 3.x
+| java 11
+
+| 4.x
+| java 17
+
+|===
+
