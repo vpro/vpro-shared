@@ -39,19 +39,23 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 
 
 |===
-|Major |remarks
+|Major |remarks |
 
 | 0/1.x
 | lived at subversion @ vpro
+| 2008 - 2018
 
 | 2.x
 | First version at github, java 8
+| september 2018
 
 | 3.x
 | java 11
+| november 2022
 
 | 4.x
 | java 17
+| june 2023
 
 |===
 
