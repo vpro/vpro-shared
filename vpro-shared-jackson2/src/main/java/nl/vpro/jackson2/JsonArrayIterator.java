@@ -88,9 +88,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * @param totalSizeField  Sometimes the array is part of something bigger, e.g. a page in a search result. The size
      *                        of the 'complete' result can be in the beginning of the json in this field.
      * @param objectMapper    Default the objectMapper {@link Jackson2Mapper#getLenientInstance()} will be used (in
-     *                        conjuction with <code>valueClass</code>, but you may specify another one
+     *                        conjunction with <code>valueClass</code>, but you may specify another one
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
-     * @param skipNulls
+     * @param skipNulls       Whether to skip nulls in the array. Default true.
+     * @param eventListener   A listener for events that happen during parsing and iteration of the array. See {@link Event} and extension classes.
      * @throws IOException    If the json parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
      */

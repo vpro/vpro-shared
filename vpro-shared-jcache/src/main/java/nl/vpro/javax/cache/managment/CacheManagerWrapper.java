@@ -2,7 +2,6 @@ package nl.vpro.javax.cache.managment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -24,6 +23,6 @@ public class CacheManagerWrapper implements CacheManagerWrapperMXBean {
             cache.removeAll();
             cleared.add(cacheName);
         }
-        return "Cleared " + cleared.stream().collect(Collectors.joining(", "));
+        return "Cleared " + String.join(", ", cleared);
     }
 }
