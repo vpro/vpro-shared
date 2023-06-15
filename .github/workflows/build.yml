@@ -22,10 +22,7 @@ jobs:
         #  Unable to parse command line options: Unrecognized option: -inputFormat -> I don't get it, lets skip windows builds for now
         #  os: [ ubuntu-latest, windows-latest]
         os: [ubuntu-latest]
-        java: [11]
-        include:
-          - os: ubuntu-latest
-            java: 17
+        java: [17]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cancel previous Action
@@ -49,15 +46,11 @@ jobs:
           cache: maven
       - name: Build and deploy with Maven
         run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" deploy  -Dgpg.skip=false
-        if: matrix.java == 11
+        if: matrix.java == 17
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
-      - name: Build with Maven
-        run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B  test
-        if: matrix.java == 17
-        continue-on-error: true
       - name: Publish to codecov
         uses: codecov/codecov-action@v3
         continue-on-error: true
