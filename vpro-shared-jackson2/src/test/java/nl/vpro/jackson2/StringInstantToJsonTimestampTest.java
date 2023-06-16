@@ -2,14 +2,12 @@ package nl.vpro.jackson2;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Michiel Meeuwissen
@@ -43,6 +41,12 @@ public class StringInstantToJsonTimestampTest {
             StringInstantToJsonTimestamp.parseDateTime("dit is echt geen datum");
         }).isInstanceOf(IllegalArgumentException.class);
 
+    }
+
+
+    @Test
+    public void testNattyNow() {
+        assertThat(StringInstantToJsonTimestamp.parseDateTime("now")).isCloseTo(Instant.now(), within(10, ChronoUnit.SECONDS));
     }
 
 
