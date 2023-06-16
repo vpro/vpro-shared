@@ -3,8 +3,8 @@ package nl.vpro.jackson2;
 import java.time.Instant;
 import java.util.*;
 
-import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.Parser;
+import org.natty.DateGroup;
+import org.natty.Parser;
 
 import nl.vpro.util.BindingUtils;
 import nl.vpro.util.DateUtils;

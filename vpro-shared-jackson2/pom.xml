@@ -51,9 +51,9 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.joestelmach</groupId>
+      <groupId>io.github.natty-parser</groupId>
       <artifactId>natty</artifactId>
-      <version>0.13</version>
+      <version>1.0.1</version>
       <optional>true</optional>
     </dependency>
     <dependency>
