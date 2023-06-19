@@ -198,7 +198,7 @@ public class MonitoringConfig {
         if (properties.isMeterCamel()) {
             try {
                 if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
-                    Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory factory");
+                    Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
                     Object factory = factoryClass.getDeclaredConstructor().newInstance();
                     factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
                     Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
