@@ -169,7 +169,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private Supplier<String> getBinary(List<File> executables, boolean optional) {
         Optional<File> f = getExecutable(executables);
-        if (! f.isPresent()) {
+        if (f.isEmpty()) {
             if (! optional) {
                 throw new RuntimeException("None of " + executables + " can be executed");
             } else {

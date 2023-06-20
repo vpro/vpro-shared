@@ -1,18 +1,29 @@
 == Release to maven central
 
-[source,bash]
-----
-mvn release:branch -DbranchName=REL-2.12-SNAPSHOT -DdevelopmentVersion=2.13-SNAPSHOT
-git checkout REL-2.12-SNAPSHOT
-mvn -Pdeploy release:prepare release:perform -DreleaseVersion=2.12.0 -DdevelopmentVersion=2.12.1-SNAPSHOT
-----
+=== Normally
+
+* https://github.com/vpro/vpro-shared/actions/workflows/branch.yml[Create release branch]
+* https://github.com/vpro/vpro-shared/actions/workflows/release.yml[then build release from that new branch]
 
 
-== Getting it faster in vpro-nexus.
+=== Getting it faster in vpro-nexus.
 
 Checkout tag and build with -P`vpro-nexus`
 [source,bash]
 ----
-git checkout REL-5.16.1
+git checkout REL-3.6.1
 mvn -Pvpro-nexus deploy
 ----
+
+==== Publishing one module only
+[source, bash]
+----
+git checkout REL-3.5-SNAPSHOT
+VERSION=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`
+TAG_VERSION=`echo $VERSION | gawk 'match($1, /([0-9]+)\.([0-9]+)\.([0-9]+)([\.-].*)/, a) {print a[1]"."a[2]"."(a[3] - 1)".1"}'`
+
+git branch ${BRANCH_VERSION}
+git checkout ${BRANCH_VERSION}
+mvn -DnewVersion=$BRANCH_VERSION versions:set
+----
+Now make changes to the module you want to publish and commit them.
