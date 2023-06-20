@@ -301,7 +301,7 @@ public class MonitoringConfig {
         Optional<?> manager = classForName("org.apache.catalina.Manager")
             .flatMap(this::getBean);
         if (!manager.isPresent()) { {
-            warn("no tomcat manager found");
+            log.info("no tomcat manager found");
         }}
         return manager;
     }
