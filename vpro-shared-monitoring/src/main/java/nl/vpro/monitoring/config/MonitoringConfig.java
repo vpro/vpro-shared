@@ -209,9 +209,11 @@ public class MonitoringConfig {
                         camelContextClass.getMethod("addRoutePolicyFactory", Class.forName("org.apache.camel.spi.RoutePolicyFactory")).invoke(camelContext, factory);
                         log.info("Set up {}", factory);
                     }
+                } else {
+                    log.info("No camel micrometer route policy factory found");
                 }
             } catch (Exception e) {
-                log.warn(e.getMessage(), e);
+                log.warn(e.getClass() + ":" + e.getMessage(), e);
             }
         }
 
