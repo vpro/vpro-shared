@@ -238,7 +238,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
 
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
-            ObjectNode aliases = request.with("aliases");
+            ObjectNode aliases = request.withObject("/aliases");
             for (String alias : this.aliases) {
                 if (alias.equals(indexName)) {
                     continue;
@@ -249,7 +249,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         continue;
                     }
                 }
-                aliases.with(alias);
+                aliases.withObject("/" + alias);
             }
         }
 
@@ -258,11 +258,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             forReindex(settings);
         }
         if (createIndex.getShards() != null) {
-            ObjectNode index = settings.with("settings").with("index");
+            ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
             index.put("number_of_shards", createIndex.getShards());
         }
         if (createIndex.getNumberOfReplicas() != null) {
-            ObjectNode index = settings.with("settings").with("index");
+            ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
             index.put("number_of_replicas", createIndex.getNumberOfReplicas());
         }
         if (mapping == null) {
@@ -335,7 +335,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final void reputSettings(Consumer<ObjectNode>... postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", this.settings.get());
-        ObjectNode index = settings.with("settings").with("index");
+        ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
         if (!index.has("refresh_interval")) {
             index.put("refresh_interval", "30s");
         }
@@ -388,7 +388,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      */
     public static void forReindex(ObjectNode  settings) {
         //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
-        ObjectNode index = settings.with("settings").with("index");
+        ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
         index.put("refresh_interval", -1);
         index.put("number_of_replicas", 0);
     }
@@ -924,7 +924,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     public final BulkRequestEntry indexRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
-        ObjectNode index = actionLine.with(INDEX);
+        ObjectNode index = actionLine.withObject(P_INDEX);
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
 
@@ -950,7 +950,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     public final BulkRequestEntry updateRequest(String id, Object o, Consumer<ObjectNode>... consumers) {
         ObjectNode actionLine = objectMapper.createObjectNode();
-        ObjectNode update = actionLine.with(UPDATE);
+        ObjectNode update = actionLine.withObject(P_UPDATE);
         update.put(Fields.ID, id);
         update.put(Fields.INDEX, getIndexName());
         update.put(RETRY_ON_CONFLICT, 3);
@@ -985,7 +985,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         BulkRequestEntry request =
             indexRequest(id, o, consumers);
         request.getAction()
-            .with(INDEX)
+            .withObject(P_INDEX)
             .put(ROUTING, routing);
         return request;
     }
@@ -993,7 +993,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public BulkRequestEntry deleteRequest(String id) {
         ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
-        ObjectNode index = actionLine.with(DELETE);
+        ObjectNode index = actionLine.withObject(P_DELETE);
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
         return new BulkRequestEntry(actionLine, null, this::unalias, mdcSupplier.get());
@@ -1001,7 +1001,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public BulkRequestEntry deleteRequestWithRouting(String id, String routing) {
         BulkRequestEntry request  = deleteRequest(id);
-        request.getAction().with(DELETE)
+        request.getAction().withObject(P_DELETE)
             .put(ROUTING, routing);
         return request;
     }
@@ -1055,7 +1055,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         writeJson(log, jsonDir, request);
 
         client.performRequestAsync(req,
-            listen(log, "" + request.size() + " bulk operations", future, listeners)
+            listen(log, request.size() + " bulk operations", future, listeners)
         );
         return future;
     }
@@ -1193,7 +1193,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     ObjectNode jsonNode = (ObjectNode) Jackson2Mapper.getLenientInstance().readTree(inputStream);
                     String clusterName = jsonNode.get("cluster_name").textValue();
                     String name = jsonNode.get("name").textValue();
-                    JsonNode version = jsonNode.with("version");
+                    JsonNode version = jsonNode.withObject("/version");
                     String buildFlavor = version.has("build_flavor") ? version.get("build_flavor").textValue() : "default";
                     Distribution distribution = version.has("distribution") ? Distribution.valueOf(version.get("distribution").textValue().toUpperCase()): "default".equals(buildFlavor) ? Distribution.ELASTICSEARCH : Distribution.OPENSEARCH;
                     Info info = Info.builder()
@@ -1333,15 +1333,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 ObjectNode on = (ObjectNode) n;
                 boolean recognized = false;
                 if (on.has(DELETE)) {
-                    deletes.accept(on.with(DELETE));
+                    deletes.accept(on.withObject(P_DELETE));
                     recognized = true;
                 }
                 if (n.has(INDEX)) {
-                    indexes.accept(on.with(INDEX));
+                    indexes.accept(on.withObject(P_INDEX));
                     recognized = true;
                 }
                 if (n.has(UPDATE)) {
-                    updates.accept(on.with(UPDATE));
+                    updates.accept(on.withObject(P_UPDATE));
                     recognized = true;
                 }
                 if (! recognized) {
@@ -1376,7 +1376,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     log(logger, singleLevel.get(), "{}", on);
                 }
                 if (on.has(DELETE)) {
-                    final ObjectNode delete = on.with(DELETE);
+                    final ObjectNode delete = on.withObject(P_DELETE);
                     index = delete.get(Fields.INDEX).textValue();
                     String type = delete.get(Fields.TYPE).textValue();
                     String id = delete.get(Fields.ID).textValue();
@@ -1388,7 +1388,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     continue;
                 }
                 if (n.has(INDEX)) {
-                    ObjectNode indexResponse = on.with(INDEX);
+                    ObjectNode indexResponse = on.withObject(P_INDEX);
                     index = indexResponse.get(Fields.INDEX).textValue();
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
@@ -1400,7 +1400,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     continue;
                 }
                 if (n.has(UPDATE)) {
-                    ObjectNode indexResponse = on.with(UPDATE);
+                    ObjectNode indexResponse = on.withObject(P_UPDATE);
                     index = indexResponse.get(Fields.INDEX).textValue();
                     String type = indexResponse.get(Fields.TYPE).textValue();
                     String id = indexResponse.get(Fields.ID).textValue();
@@ -1475,9 +1475,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (operation == null) {
             operation = "";
         }
-        if (StringUtils.isNotEmpty(operation)) {
-            assert operation.startsWith("/");
-        }
+
+        assert !StringUtils.isNotEmpty(operation) || operation.startsWith("/");
+
         return new Request(method, "/" + getIndexName() + operation);
     }
 
