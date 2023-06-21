@@ -229,7 +229,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
         final String indexName;
         if (createIndex.isUseNumberPostfix()) {
-            int number = firstNewNumber();
+            long number = firstNewNumber();
             indexName = supplied + "-" + number;
         } else {
             indexName = supplied;
@@ -310,11 +310,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return result;
     }
 
-    public int firstNewNumber() throws IOException {
-        int number = 0;
+    public long firstNewNumber() throws IOException {
+        long number = 0;
         for (String existing : getIndices()) {
             String[] split = existing.split("-", 2);
-            int existingNumber = Integer.parseInt(split[1]);
+            long existingNumber = Long.parseLong(split[1]);
             if (existingNumber >= number) {
                 number = existingNumber + 1;
             }
