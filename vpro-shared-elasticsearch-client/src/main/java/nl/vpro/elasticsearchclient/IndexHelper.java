@@ -258,11 +258,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             forReindex(settings);
         }
         if (createIndex.getShards() != null) {
-            ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
+            ObjectNode index = settings.withObject(P_SETTINGS).withObject(P_INDEX);
             index.put("number_of_shards", createIndex.getShards());
         }
         if (createIndex.getNumberOfReplicas() != null) {
-            ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
+            ObjectNode index = settings.withObject(P_SETTINGS).withObject(P_INDEX);
             index.put("number_of_replicas", createIndex.getNumberOfReplicas());
         }
         if (mapping == null) {
@@ -335,7 +335,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final void reputSettings(Consumer<ObjectNode>... postProcessSettings) {
         ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
         ObjectNode  settings = request.set("settings", this.settings.get());
-        ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
+        ObjectNode index = settings.withObject(P_SETTINGS).withObject(P_INDEX);
         if (!index.has("refresh_interval")) {
             index.put("refresh_interval", "30s");
         }
@@ -388,7 +388,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
      */
     public static void forReindex(ObjectNode  settings) {
         //https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade-remote.html
-        ObjectNode index = settings.withObject(Paths.SETTINGS).withObject(P_INDEX);
+        ObjectNode index = settings.withObject(P_SETTINGS).withObject(P_INDEX);
         index.put("refresh_interval", -1);
         index.put("number_of_replicas", 0);
     }

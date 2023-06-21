@@ -78,6 +78,8 @@ public class Constants {
     public static final String P_UPDATE = "/" + UPDATE;
     public static final String DELETE = "delete";
     public static final String P_DELETE = "/" + DELETE;
+    public static final String SETTINGS = "settings";
+    public static final String P_SETTINGS = "/" + SETTINGS;
 
 
     public static final String RETRY_ON_CONFLICT = "retry_on_conflict";
