@@ -63,7 +63,6 @@ public class Constants {
     }
 
     public static final String FILTER = "filter";
-    public static final String DELETE = "delete";
 
 
     /**
@@ -74,7 +73,13 @@ public class Constants {
     public static final String PARENT   = "parent";
     public static final String ROUTING  = "routing";
     public static final String INDEX    = "index";
+    public static final String P_INDEX = "/" + INDEX;
     public static final String UPDATE   = "update";
+    public static final String P_UPDATE = "/" + UPDATE;
+    public static final String DELETE = "delete";
+    public static final String P_DELETE = "/" + DELETE;
+
+
     public static final String RETRY_ON_CONFLICT = "retry_on_conflict";
     public static final String DOC       = "_doc";
 
@@ -87,6 +92,8 @@ public class Constants {
         public static final String SETTINGS = "/_settings";
         public static final String MAPPING= "/_mapping";
         public static final String BULK = "/_bulk";
+
+
     }
 
     public static class Methods {
