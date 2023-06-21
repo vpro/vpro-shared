@@ -117,7 +117,7 @@ class MonitoringConfigTest {
     void isMeterTomcat() {
         properties.setMeterTomcat(true);
         final PrometheusMeterRegistry registry = config.configure();
-        assertThat(config.getWarnings()).hasSize(1);
+        assertThat(config.getWarnings()).hasSize(0);
     }
 
     @Test
