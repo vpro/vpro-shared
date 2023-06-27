@@ -37,9 +37,8 @@ public class GroovyMBean {
     public String executeGroovySript(String groovyScript, String arguments) {
         return
             MBeans.returnString(groovyScript,  MBeans.multiLine(log, groovyScript), Duration.ofSeconds(10), (logger) -> {
-                try {
-                    ClassLoader parent = getClass().getClassLoader();
-                    GroovyClassLoader loader = new GroovyClassLoader(parent);
+                ClassLoader parent = getClass().getClassLoader();
+                try (GroovyClassLoader loader = new GroovyClassLoader(parent)) {
 
                     File file = new File(groovyScript);
                     Class<GroovyObject> groovyClass;
@@ -55,7 +54,7 @@ public class GroovyMBean {
 
                         groovyObject = constructor.newInstance(applicationContext, logger);
                     } catch (NoSuchMethodException nsme) {
-                        groovyObject = groovyClass.newInstance();
+                        groovyObject = groovyClass.getConstructor().newInstance();
                     }
                     Object[] args = arguments.split(",");
                     currentlyRunning = groovyObject;

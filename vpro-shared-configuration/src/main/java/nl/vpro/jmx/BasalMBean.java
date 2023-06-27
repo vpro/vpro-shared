@@ -57,7 +57,7 @@ public class BasalMBean {
             .build();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int result = executor.execute(outputStream, outputStream, arg);
-        return result + ":" + new String(outputStream.toByteArray());
+        return result + ":" + outputStream;
 
     }
 
