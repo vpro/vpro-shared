@@ -7,6 +7,7 @@ package nl.vpro.jackson2;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -36,6 +37,7 @@ import nl.vpro.logging.Slf4jHelper;
 @Slf4j
 public class Jackson2Mapper extends ObjectMapper {
 
+    @Serial
     private static final long serialVersionUID = 8353430660109292010L;
 
     private static boolean loggedAboutAvro = false;
@@ -65,6 +67,8 @@ public class Jackson2Mapper extends ObjectMapper {
 
     static {
         LENIENT.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        LENIENT.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
         STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
         PRETTY_STRICT.enable(SerializationFeature.INDENT_OUTPUT);
