@@ -763,8 +763,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             ObjectNode doc = array.addObject();
             doc.put(Fields.ID, id.id);
             if (id.routing != null) {
-                //doc.put(Fields.ROUTING, id.routing); // something wrong with doc?
-                doc.put("routing", id.routing);
+                doc.put(ROUTING, id.routing);
             }
         }
 
