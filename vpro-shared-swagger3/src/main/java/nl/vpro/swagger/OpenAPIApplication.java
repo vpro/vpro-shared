@@ -69,8 +69,15 @@ public abstract class OpenAPIApplication {
     OpenAPI api;
 
     protected Set<Class<?>> getClasses() {
-        return ResteasyApplication.getInstance().getSingletons().stream().map(Object::getClass)
-            .filter(c -> {
+        return
+            Stream.concat(
+                    ResteasyApplication.getInstance()
+                        .getSingletons().stream()
+                        .map(Object::getClass),
+                    ResteasyApplication.getInstance()
+                        .getClasses().stream()
+                )
+                .filter(c -> {
                 return c.getAnnotation(OpenAPIDefinition.class) != null;
             })
             .collect(Collectors.toSet());
