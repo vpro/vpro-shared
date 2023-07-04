@@ -42,7 +42,7 @@ import nl.vpro.util.ThreadPools;
 
 
 /**
- * Static helper to expose a dummy JAX-RS Application. Swagger needs such an application to expose the API docs for
+ * Static helper to expose a JAX-RS Application to API. Swagger needs such an application to expose the API docs for
  * the given endpoints.
  *
  * @author Michiel Meeuwissen
@@ -69,7 +69,7 @@ public abstract class OpenAPIApplication {
     OpenAPI api;
 
     protected Set<Class<?>> getClasses() {
-        return
+        Set<Class<?>> result =
             Stream.concat(
                     ResteasyApplication.getInstance()
                         .getSingletons().stream()
@@ -77,10 +77,12 @@ public abstract class OpenAPIApplication {
                     ResteasyApplication.getInstance()
                         .getClasses().stream()
                 )
-                .filter(c -> {
-                return c.getAnnotation(OpenAPIDefinition.class) != null;
-            })
+                .filter(c ->
+                    c.getAnnotation(OpenAPIDefinition.class) != null
+                )
             .collect(Collectors.toSet());
+        log.info("Using {} for openapi", result);
+        return result;
     }
 
 
