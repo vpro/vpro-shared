@@ -66,6 +66,4 @@ public class ResteasyApplication extends Application {
     }
 
 
-
-
 }

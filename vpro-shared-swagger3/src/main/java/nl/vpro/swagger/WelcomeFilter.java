@@ -15,21 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class WelcomeFilter implements Filter {
 
-
-
-    @Override
-    public void init(FilterConfig filterConfig) {
-
-    }
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException {
         ((HttpServletResponse)servletResponse).sendRedirect("docs/api");
-
-    }
-
-    @Override
-    public void destroy() {
 
     }
 }
