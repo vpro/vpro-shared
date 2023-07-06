@@ -2,6 +2,7 @@ package nl.vpro.jackson2;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Calendar;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,6 +31,21 @@ public class DurationToJsonTimestamp {
                 jgen.writeNull();
             } else {
                 jgen.writeNumber(value.toMillis());
+            }
+        }
+    }
+
+    public static class XmlSerializer extends JsonSerializer<javax.xml.datatype.Duration> {
+
+
+        public static final Serializer INSTANCE = new Serializer();
+
+        @Override
+        public void serialize(javax.xml.datatype.Duration value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+            if (value == null) {
+                jgen.writeNull();
+            } else {
+                jgen.writeNumber(value.getTimeInMillis(Calendar.getInstance()));
             }
         }
     }
