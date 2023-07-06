@@ -3,8 +3,7 @@ package nl.vpro.util;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -86,6 +85,7 @@ public class Ssh {
 
     @Getter
     public static class SshException extends RuntimeException  {
+        @Serial
         private static final long serialVersionUID = -1961506805996420257L;
 
         private final int exitCode;

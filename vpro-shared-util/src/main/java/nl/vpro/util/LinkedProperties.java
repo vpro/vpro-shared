@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.io.Serial;
 import java.util.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -10,6 +11,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @since 0.47
  */
 public class LinkedProperties extends Properties {
+    @Serial
     private static final long serialVersionUID = -3876347316189857710L;
 
     private final HashSet<Object> keys = new LinkedHashSet<>();

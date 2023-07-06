@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.*;
 import nl.vpro.logging.Slf4jHelper;
 
 /**
- * These can be used in conjuction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
+ * These can be used in conjunction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
  * (this is what we normally do)
  * @author Michiel Meeuwissen
  * @since 0.39

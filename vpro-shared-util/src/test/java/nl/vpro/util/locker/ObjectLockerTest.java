@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.*;
@@ -102,6 +103,7 @@ public class ObjectLockerTest {
      */
     @EqualsAndHashCode
     static class Key implements Serializable {
+        @Serial
         private static final long serialVersionUID = -1689250631089355976L;
         private final String v;
 

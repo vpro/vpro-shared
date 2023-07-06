@@ -1,6 +1,7 @@
 package nl.vpro.jackson2;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -32,6 +33,7 @@ public class DateToJsonTimestamp {
     public static class Deserializer extends StdDeserializer<Date> {
 
         public static final Deserializer INSTANCE = new Deserializer(Date.class);
+        @Serial
         private static final long serialVersionUID = -7053202522314720853L;
 
         protected Deserializer(Class<?> vc) {
