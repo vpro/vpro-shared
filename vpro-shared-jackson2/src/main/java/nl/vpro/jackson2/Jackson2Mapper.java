@@ -31,8 +31,12 @@ import com.google.common.annotations.Beta;
 import nl.vpro.logging.Slf4jHelper;
 
 /**
+ * Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
+ * Please use the static getters (like {@link #getInstance()}, so we could change that.
+ *
  * @author Rico
  * @author Michiel Meeuwissen
+
  */
 @Slf4j
 public class Jackson2Mapper extends ObjectMapper {

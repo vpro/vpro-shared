@@ -1,16 +1,13 @@
 package nl.vpro.jackson2;
 
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
-
-import java.util.AbstractMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * @author Michiel Meeuwissen
@@ -51,8 +48,7 @@ public class Utils {
             entry.setValue(((Integer) entry.getValue()).longValue());
         }
 
-        if (entry.getValue() instanceof List<?>) {
-            List<?> list = (List<?>) entry.getValue();
+        if (entry.getValue() instanceof List<?> list) {
             return IntStream.range(0, list.size())
                     .mapToObj(i -> new AbstractMap.SimpleEntry<String, Object>(entry.getKey() + "/" + i, list.get(i)))
                     .flatMap(Utils::flatten);
