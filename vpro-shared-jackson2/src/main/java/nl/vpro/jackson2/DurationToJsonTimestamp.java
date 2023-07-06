@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.*;
 
+import nl.vpro.util.TimeUtils;
+
 /**
  * Default Jackson serialized Durations as seconds. In poms we used to serialize durations as Dates, and hence as _milliseconds_.
  * @author Michiel Meeuwissen
@@ -42,7 +44,7 @@ public class DurationToJsonTimestamp {
                 if (jp.getText().isEmpty() && ctxt.hasDeserializationFeatures(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT.getMask())) {
                     return null;
                 } else {
-                    return Duration.ofMillis(Long.parseLong(jp.getText()));
+                    return TimeUtils.parseDuration(jp.getText()).orElseThrow();
                 }
             } else {
                 return Duration.ofMillis(jp.getLongValue());
