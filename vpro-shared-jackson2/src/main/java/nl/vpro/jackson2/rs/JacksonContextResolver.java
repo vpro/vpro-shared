@@ -16,6 +16,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 /**
  * This is used to bind our object mapper to resteasy/jaxrs.
  * <p>
+ * The exposed mapper is actually in a thread local. Some interceptor may influence it.
  *
  * @author Michiel Meeuwissen
  * @since 2.0
