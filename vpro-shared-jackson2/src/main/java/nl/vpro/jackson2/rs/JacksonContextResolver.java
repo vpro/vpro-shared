@@ -47,10 +47,16 @@ public class JacksonContextResolver extends JacksonJaxbJsonProvider implements C
         return mapper.get();
     }
 
+    /**
+     * @since 4.0
+     */
     public void set(ObjectMapper mapper) {
         this.mapper.set(mapper);
     }
 
+    /**
+     * @since 4.0
+     */
     public void reset() {
         mapper.remove();
     }
