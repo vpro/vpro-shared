@@ -90,7 +90,7 @@ public class TimeUtils {
 
     /**
      * Parses a {@link CharSequence} to a duration. This begins for checking emptyness (and returns then an empty {@link Optional} .
-     * Then it basicly calls {@link Duration#parse(CharSequence)}, but if that fails it has several fall backs:
+     * Then it basically calls {@link Duration#parse(CharSequence)}, but if that fails it has several fall backs:
      * <ul>
      *     <li>Also a week notation like <code>PT2W</code> as defined by ISO-8601 is supported</li>
      *     <li>Possible white space breaking the parsing will be ignored</li>
@@ -116,7 +116,7 @@ public class TimeUtils {
             return Optional.empty();
         }
         if (d.toString().startsWith("${")) {// unresolved spring setting;
-            log.warn("Found {} as duration, returing empty", d);
+            log.warn("Found {} as duration, returning empty", d);
             return Optional.empty();
         }
 
@@ -202,6 +202,30 @@ public class TimeUtils {
         } catch (DateTimeParseException dtp) {
             try {
                 return Optional.of(LocalDate.parse(d).atStartOfDay());
+            } catch (DateTimeParseException dtp2) {
+                throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
+            }
+        }
+    }
+
+    /**
+     * @since 4.0
+     */
+    public static Optional<LocalDate> parseLocalDate(CharSequence d) {
+        if (StringUtils.isBlank(d)) {
+            return Optional.empty();
+        }
+        if (d.toString().startsWith("${")) {// unresolved spring setting;
+            log.warn("Found {} as localdatetime, returing empty", d);
+            return Optional.empty();
+        }
+
+
+        try {
+            return Optional.of(LocalDate.parse(d));
+        } catch (DateTimeParseException dtp) {
+            try {
+                return Optional.of(LocalDateTime.parse(d).toLocalDate());
             } catch (DateTimeParseException dtp2) {
                 throw new DateTimeParseException(dtp.getParsedString() + ":" + dtp.getMessage(), dtp.getParsedString(), dtp.getErrorIndex());
             }

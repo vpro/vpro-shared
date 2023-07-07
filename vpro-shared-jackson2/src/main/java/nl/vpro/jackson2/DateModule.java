@@ -1,5 +1,6 @@
 package nl.vpro.jackson2;
 
+import java.io.Serial;
 import java.time.*;
 import java.util.Date;
 
@@ -17,6 +18,7 @@ public class DateModule extends SimpleModule {
     public static final ZoneId ZONE = ZoneId.of("Europe/Amsterdam");
 
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public DateModule() {

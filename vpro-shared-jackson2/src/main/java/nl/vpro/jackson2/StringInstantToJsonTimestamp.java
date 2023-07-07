@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.*;
 import nl.vpro.logging.Slf4jHelper;
 
 /**
- * These can be used in conjuction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
+ * These can be used in conjunction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
  * (this is what we normally do)
  * @author Michiel Meeuwissen
  * @since 0.39
@@ -66,11 +66,11 @@ public class StringInstantToJsonTimestamp {
                 if (natty.isPresent()) {
                     return natty.get();
                 } else {
-                    log.debug("Natty din't match");
+                    log.debug("Natty didn't match");
                 }
             } catch (NoClassDefFoundError classNotFoundException) {
-                warnedNatty  = true;
                 Slf4jHelper.log(log, warnedNatty ? Level.DEBUG : Level.WARN, "No natty?: " + classNotFoundException.getMessage());
+                warnedNatty  = true;
             } catch (Throwable e) {
                 log.debug("Natty couldn't parse {}: {}", value, e.getMessage());
             }
@@ -84,21 +84,25 @@ public class StringInstantToJsonTimestamp {
 
         @Override
         public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-            switch(jp.getCurrentTokenId()) {
-                case JsonTokenId.ID_NUMBER_INT:
+            switch (jp.currentTokenId()) {
+                case JsonTokenId.ID_NUMBER_INT -> {
                     return Instant.ofEpochMilli(jp.getLongValue());
-                case JsonTokenId.ID_NULL:
+                }
+                case JsonTokenId.ID_NULL -> {
                     return null;
-                case JsonTokenId.ID_STRING:
+                }
+                case JsonTokenId.ID_STRING -> {
                     try {
                         return parseDateTime(jp.getText());
                     } catch (IllegalArgumentException iae) {
                         log.warn("Could not parse {}. Writing null to json", jp.getText());
                         return null;
                     }
-                default:
+                }
+                default -> {
                     log.warn("Could not parse {} to instant. Returning null", jp.toString());
                     return null;
+                }
             }
         }
     }

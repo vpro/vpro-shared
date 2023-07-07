@@ -4,6 +4,7 @@
  */
 package nl.vpro.hibernate.hsql;
 
+import java.io.Serial;
 import java.util.UUID;
 
 import org.hibernate.boot.model.TypeContributions;
@@ -29,6 +30,7 @@ public class CustomHSQLDialect extends HSQLDialect {
 
     public static class UUIDType extends AbstractSingleColumnStandardBasicType<UUID> {
 
+        @Serial
         private static final long serialVersionUID = -7244515432254939427L;
 
         public UUIDType() {

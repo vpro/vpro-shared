@@ -3,6 +3,7 @@ package nl.vpro.jackson2;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
+import java.io.Serial;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
@@ -20,6 +21,7 @@ public class GuavaRangeModule extends SimpleModule {
     public static final String UPPER_ENDPOINT = "upperEndpoint";
     public static final String UPPER_BOUND_TYPE = "upperBoundType";
 
+    @Serial
     private static final long serialVersionUID = -8048846883670339246L;
 
     public GuavaRangeModule() {
@@ -30,6 +32,7 @@ public class GuavaRangeModule extends SimpleModule {
 
     public static class Serializer extends com.fasterxml.jackson.databind.ser.std.StdSerializer<Range<?>> {
 
+        @Serial
         private static final long serialVersionUID = -4394016847732058088L;
         public static Serializer INSTANCE = new Serializer();
 
@@ -37,6 +40,7 @@ public class GuavaRangeModule extends SimpleModule {
             super(new CollectionLikeType(
                 SimpleType.constructUnsafe(Range.class),
                 SimpleType.constructUnsafe(Comparable.class)) {
+                @Serial
                 private static final long serialVersionUID = -2803462566784593946L;
             });
         }
@@ -69,6 +73,7 @@ public class GuavaRangeModule extends SimpleModule {
 
     public static class Deserializer extends StdDeserializer<Range<?>> {
 
+        @Serial
         private static final long serialVersionUID = -4394016847732058088L;
         public static Deserializer INSTANCE = new Deserializer();
 
@@ -77,6 +82,7 @@ public class GuavaRangeModule extends SimpleModule {
             super(new CollectionLikeType(
                 SimpleType.constructUnsafe(Range.class),
                 SimpleType.constructUnsafe(Comparable.class)) {
+                @Serial
                 private static final long serialVersionUID = -2803462566784593946L;
             });
         }

@@ -15,7 +15,7 @@ import nl.vpro.util.BindingUtils;
 import nl.vpro.util.TimeUtils;
 
 /**
- * https://bugs.openjdk.java.net/browse/JDK-8042456
+ * <a href="https://bugs.openjdk.java.net/browse/JDK-8042456">JDK-8042456</a>
  * @author Michiel Meeuwissen
  * @since 0.21
  */
@@ -34,7 +34,7 @@ public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, 
         if (xmlDurationValue != null) {
             final String string;
             if (xmlDurationValue.getYears() > 0) {
-                string = "" + xmlDurationValue.getTimeInMillis(new Date(0));
+                string = String.valueOf(xmlDurationValue.getTimeInMillis(new Date(0)));
             } else {
                 string = xmlDurationValue.toString();
             }

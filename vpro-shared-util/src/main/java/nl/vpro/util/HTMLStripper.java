@@ -1,9 +1,6 @@
 package nl.vpro.util;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -42,6 +39,7 @@ public class HTMLStripper {
     }
 
     protected static class ParserGetter extends HTMLEditorKit {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         // purely to make this method public

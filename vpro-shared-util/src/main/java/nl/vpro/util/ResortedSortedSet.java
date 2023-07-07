@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,6 +13,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0L;
 
     final Collection<T> wrapped;

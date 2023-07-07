@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Locale;
@@ -35,6 +36,7 @@ import static nl.vpro.i18n.Locales.score;
 @Slf4j
 public class LocalizedString implements CharSequence, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 6128871258866551736L; //implements javax.xml.registry.infomodel.LocalizedString {
 
     @PolyNull
@@ -196,6 +198,7 @@ public class LocalizedString implements CharSequence, Serializable {
     @XmlRootElement(name = "localizedString")
     public static class Impl extends LocalizedString {
 
+        @Serial
         private static final long serialVersionUID = -6556571754244929512L;
 
         public Impl() {

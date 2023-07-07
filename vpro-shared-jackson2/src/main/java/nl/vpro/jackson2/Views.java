@@ -3,8 +3,8 @@ package nl.vpro.jackson2;
 import com.google.common.annotations.Beta;
 
 /**
- *  * Several setups at VPRO and at NPO involve a backend system that publishes JSON to ElasticSearch.
- * In some cases this published json must be somewhat adapted, in contrast to when it not yet published.
+ * Several setups at VPRO and at NPO involve a backend system that publishes JSON to ElasticSearch.
+ * In some cases this published json must be somewhat adapted, in contrast to when it is not yet published.
  * @author Michiel Meeuwissen
  * @since 1.72
  */

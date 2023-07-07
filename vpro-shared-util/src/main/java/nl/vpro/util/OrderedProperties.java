@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.io.Serial;
 import java.util.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -11,6 +12,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class OrderedProperties extends Properties {
 
+    @Serial
     private static final long serialVersionUID = 5640271520019127358L;
 
     private final List<Object> names = new ArrayList<>();
