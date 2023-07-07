@@ -33,15 +33,11 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private static final Timer PROCESS_MONITOR = new Timer(true); // create as daemon so that it shuts down at program exit
     private static final int DEFAULT_BATCH_SIZE = 8192;
-    private static final IntFunction<Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) -> {
-        switch(exitCode) {
-            case 0:
-                return Level.DEBUG;
-            case 137:
-                return Level.WARN;
-            default:
-                return Level.ERROR;
-        }
+    private static final IntFunction<Level> DEFAULT_EXIT_CODE_LEVEL = (exitCode) ->
+        switch (exitCode) {
+            case 0 -> Level.DEBUG;
+            case 137 -> Level.WARN;
+            default -> Level.ERROR;
     };
 
     /**
@@ -181,7 +177,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                     }
                     @Override
                     public String toString() {
-                        return "" + executables;
+                        return String.valueOf(executables);
                     }
                 };
             }
@@ -344,7 +340,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         final Process p;
         try {
             if (commonArgs != null) {
-                command.addAll(commonArgs.stream().map(Supplier::get).collect(Collectors.toList()));
+                command.addAll(commonArgs.stream().map(Supplier::get).toList());
             }
             Collections.addAll(command, parameters.args);
             logger.info(toString(command));
@@ -353,7 +349,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
             final ProcessTimeoutHandle handle;
             if (processTimeout != null) {
-                handle = startProcessTimeoutMonitor(p, "" + command, processTimeout);
+                handle = startProcessTimeoutMonitor(p, String.valueOf(command), processTimeout);
             } else {
                 handle = null;
             }

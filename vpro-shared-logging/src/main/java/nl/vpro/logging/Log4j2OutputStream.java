@@ -74,10 +74,13 @@ public abstract class Log4j2OutputStream extends AbstractLoggerOutputStream {
             }
         };
     }
-
-
     public static Log4j2OutputStream log(final Logger log, Function<String, Level> level) {
-        return new Log4j2OutputStream(false) {
+        return log(log, false, level);
+    }
+
+
+    public static Log4j2OutputStream log(final Logger log, boolean skipEmptyLines, Function<String, Level> level) {
+        return new Log4j2OutputStream(skipEmptyLines) {
             @Override
             protected void log(String line) {
                 Level l = level.apply(line);

@@ -38,17 +38,14 @@ public abstract class AbstractLoggerOutputStream extends OutputStream {
 
     @Override
     public void write(int b) {
-        switch(b) {
-            case '\n':
-                log(skipEmptyLines);
-                break;
-            case '\r':
+        switch (b) {
+            case '\n' -> log(skipEmptyLines);
+            case '\r' -> {
                 if (lastChar != '\n') {
                     log(skipEmptyLines);
                 }
-                break;
-            default:
-                buffer.write(b);
+            }
+            default -> buffer.write(b);
         }
         lastChar = b;
     }
@@ -66,7 +63,7 @@ public abstract class AbstractLoggerOutputStream extends OutputStream {
 
     @SneakyThrows
     private void log(boolean skipEmpty) {
-        final String line = buffer.toString(charset.name());
+        final String line = buffer.toString(charset);
         try {
             if (!skipEmpty || StringUtils.isNotBlank(line)) {
                 count++;
