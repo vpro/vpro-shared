@@ -21,14 +21,14 @@
     <spring-security.version>5.8.3</spring-security.version>
     <jackson2.version>2.15.2</jackson2.version>
 
-    <junit.version>5.9.3</junit.version>
-    <mockito.version>5.3.1</mockito.version>
+    <junit.version>5.10.0</junit.version>
+    <mockito.version>5.4.0</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <resteasy.version>5.0.7.Final</resteasy.version>
-    <bytebuddy.version>1.14.4</bytebuddy.version>
+    <bytebuddy.version>1.14.5</bytebuddy.version>
     <slf4j.version>2.0.7</slf4j.version>
     <log4j2.version>2.20.0</log4j2.version>
-    <guava.version>32.0.1-jre</guava.version>
+    <guava.version>32.1.2-jre</guava.version>
     <javassist.version>3.29.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.9.1</xmlunit.version>
@@ -47,7 +47,7 @@
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
     <camel.version>3.20.4</camel.version>
 
-    <swagger.version>2.2.12</swagger.version>
+    <swagger.version>2.2.15</swagger.version>
 
     <lombok.version>1.18.28</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -59,7 +59,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.11.1</micrometer.version>
+    <micrometer.version>1.11.2</micrometer.version>
 
     <vpro.shared.bom.version>${project.version}</vpro.shared.bom.version>
   </properties>
@@ -429,7 +429,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.12.0</version>
+        <version>3.13.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -712,7 +712,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>4.0.12</version>
+        <version>4.0.13</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
@@ -738,7 +738,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.7.3</version>
+        <version>1.7.4</version>
       </dependency>
 
       <dependency>
@@ -778,7 +778,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.35.0</version>
+      <version>3.37.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
