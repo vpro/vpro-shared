@@ -16,11 +16,13 @@
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
     </dependency>
+  <!-- dependency breaks mockito?
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy-dep</artifactId>
-      <!-- otherwise java.lang.NoClassDefFoundError: net/bytebuddy/NamingStrategy$SuffixingRandom$BaseNameResolver -->
+      &lt;!&ndash; otherwise java.lang.NoClassDefFoundError: net/bytebuddy/NamingStrategy$SuffixingRandom$BaseNameResolver &ndash;&gt;
     </dependency>
+  -->
     <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-test</artifactId>
