@@ -60,6 +60,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.11.2</micrometer.version>
+    <flyway.version>9.21.0</flyway.version>
 
     <vpro.shared.bom.version>${project.version}</vpro.shared.bom.version>
   </properties>
@@ -750,6 +751,12 @@
         <groupId>org.ehcache</groupId>
         <artifactId>ehcache</artifactId>
         <version>3.10.8</version>
+      </dependency>
+      <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>${flyway.version}</version>
+        <scope>compile</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
