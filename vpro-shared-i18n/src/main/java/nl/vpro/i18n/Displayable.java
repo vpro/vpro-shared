@@ -4,6 +4,7 @@
  */
 package nl.vpro.i18n;
 
+import java.net.URI;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -75,7 +76,7 @@ public interface Displayable {
      * <p>
      * It may be that this to be interpreted relative to the current 'context path'.
      */
-    default Optional<String> getIcon() {
+    default Optional<URI> getIcon() {
         return Optional.empty();
     }
     /**
