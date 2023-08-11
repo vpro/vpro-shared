@@ -22,6 +22,7 @@ import org.jsoup.safety.Safelist;
  * @author Roelof Jan Koekoek
  * @since 1.5
  */
+@SuppressWarnings("UnnecessaryUnicodeEscape")
 public class TextUtil {
 
     /**
@@ -82,7 +83,7 @@ public class TextUtil {
     }
 
     /**
-     * Replaces all non breaking space characters (\u00A0) with a normal white space character.
+     * Replaces all non-breaking space characters (\u00A0) with a normal white space character.
      */
     @PolyNull
     public static String replaceNonBreakingSpace(@PolyNull String input) {
@@ -173,7 +174,9 @@ public class TextUtil {
             .replaceAll(" +", " ")
             .replaceAll("\u00a0+", "\u00a0") // no break space
             .replaceAll("\u2028", "\n") // line seperator
-            .replaceAll("\n{3,}", "\n\n");
+            .replaceAll("\n{3,}", "\n\n")
+            .replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "") // control characters, (but not newlines and tabs)
+            ;
     }
 
     /**
@@ -255,7 +258,7 @@ public class TextUtil {
     }
 
     /**
-     * Selects first non null of the parameters.
+     * Selects first non-null of the parameters.
      * @deprecated  Can easily be achieved with stream filter {@link Objects#nonNull(Object)}
      */
     @Deprecated

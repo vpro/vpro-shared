@@ -62,7 +62,7 @@ public class SwaggerFilter implements Filter {
             }
         }
 
-        PathMatcher matcher = getPathMatcher(req);
+        final PathMatcher matcher = getPathMatcher(req);
 
         final ServletOutputStream servletOutputStream = response.getOutputStream();
         final OutputStream out = transform(servletOutputStream, matcher);
@@ -122,7 +122,9 @@ public class SwaggerFilter implements Filter {
     }
 
     public OutputStream transform(OutputStream to, PathMatcher pathMatcher) throws IOException {
-        return Sed.transform(to, pathMatcher);
+        return Sed.transform(to,
+            pathMatcher
+        );
     }
 
 
