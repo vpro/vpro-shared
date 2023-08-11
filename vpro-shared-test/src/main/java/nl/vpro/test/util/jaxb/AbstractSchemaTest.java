@@ -67,6 +67,9 @@ public abstract class AbstractSchemaTest {
         testEnum(resource, enumTypeName, () -> getEnumValue(enumClass));
     }
 
+    /**
+     * @since 4.0
+     */
     @SneakyThrows
     protected <T extends Enum<T>> void testEnum(String resource, String enumTypeName, Supplier<List<String>> enumsValues) {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
