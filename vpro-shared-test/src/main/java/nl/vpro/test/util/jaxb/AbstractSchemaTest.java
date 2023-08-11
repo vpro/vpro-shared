@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,8 +63,12 @@ public abstract class AbstractSchemaTest {
     }
     protected abstract Class<?>[] getClasses();
 
-    @SneakyThrows
     protected <T extends Enum<T>> void testEnum(String resource, String enumTypeName, Class<T> enumClass) {
+        testEnum(resource, enumTypeName, () -> getEnumValue(enumClass));
+    }
+
+    @SneakyThrows
+    protected <T extends Enum<T>> void testEnum(String resource, String enumTypeName, Supplier<List<String>> enumsValues) {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document document = dBuilder.parse(getClass().getResourceAsStream(resource));
@@ -76,6 +81,14 @@ public abstract class AbstractSchemaTest {
             valuesInXsd.add(nodes.item(i).getAttributes().getNamedItem("value").getTextContent());
         }
 
+        List<String> valuesInEnum = enumsValues.get();
+
+        assertThat(valuesInXsd)
+            .containsExactlyInAnyOrderElementsOf(valuesInEnum);
+    }
+
+    @SneakyThrows
+    protected static <T extends Enum<T>> List<String> getEnumValue(Class<T> enumClass) {
         List<String> valuesInEnum = new ArrayList<>();
 
         T[] values = enumClass.getEnumConstants();
@@ -83,9 +96,9 @@ public abstract class AbstractSchemaTest {
             XmlEnumValue xmlEnumValue = enumClass.getField(v.name()).getAnnotation(XmlEnumValue.class);
             valuesInEnum.add(xmlEnumValue != null ? xmlEnumValue.value() : v.name());
         }
-        assertThat(valuesInXsd)
-            .containsExactlyInAnyOrderElementsOf(valuesInEnum);
+        return valuesInEnum;
     }
+
 
     private  static  File getFile(File dir, final String namespace) {
         String filename = namespace.replaceAll("[/:]", "_");
