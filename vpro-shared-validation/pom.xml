@@ -10,8 +10,6 @@
 
   <artifactId>vpro-shared-validation</artifactId>
 
-  <properties>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>jakarta.validation</groupId>

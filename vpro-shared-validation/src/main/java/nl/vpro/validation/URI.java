@@ -4,9 +4,7 @@
  */
 package nl.vpro.validation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -22,10 +20,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * throws an exception
  */
 
-@Target({METHOD, FIELD, ANNOTATION_TYPE, PARAMETER, TYPE_USE})
-@Retention(RUNTIME)
 @Constraint(validatedBy = URIValidator.class)
 @Documented
+@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
+@Retention(RUNTIME)
+@Repeatable(URI.List.class)
 public @interface URI {
     String message() default "{nl.vpro.constraints.URI}";
 
@@ -57,4 +56,17 @@ public @interface URI {
     boolean lenient() default false;
 
     boolean allowEmptyString() default false;
+
+
+	/**
+	 * Defines several {@code @URI} constraints on the same element.
+	 *
+	 * @see URI
+	 */
+	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
+	@Retention(RUNTIME)
+	@Documented
+	public @interface List {
+		URI[] value();
+	}
 }
