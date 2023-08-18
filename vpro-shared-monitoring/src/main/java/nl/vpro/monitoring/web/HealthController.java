@@ -86,7 +86,7 @@ public class HealthController {
         if (prometheusDown) {
             prometheusDownCount.incrementAndGet();
             try {
-                Duration secondPrometheusDuration = prometheusController.scrape(new NullWriter());
+                Duration secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
                 prometheusDown = prometheusDown(secondPrometheusDuration);
             } catch (IOException ioa) {
                 log.warn(ioa.getMessage());
@@ -96,7 +96,7 @@ public class HealthController {
 
                     new Thread(null, () -> {
                         log.info("Dumping threads for later analysis");
-                        ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+                        log.info("Threads: {}", (Object) ManagementFactory.getThreadMXBean().dumpAllThreads(true, true));
 
                     }, "Dumping threads").start();
                     threadsDumped = true;
@@ -109,12 +109,7 @@ public class HealthController {
         }
 
         Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        Health health = Health.builder()
-            .status(effectiveStatus.code)
-            .message(effectiveStatus.message)
-            .startTime(ready == null ? null : ready)
-            .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
-            .build();
+
 
         ResponseEntity<Health> body = ResponseEntity
             .status(effectiveStatus.code)
