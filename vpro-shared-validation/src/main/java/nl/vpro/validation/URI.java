@@ -35,8 +35,8 @@ public @interface URI {
 
      /**
       * The number of parts (when the string is separated by a dot) the URI must have.
-      * E.g. if this is 2, then the url http://vpro/foobar will not be valid.
-      * (because you'd expect at least something like http://vpro.nl/foobar
+      * E.g. if this is 2, then the url {@code http://vpro/foobar} will not be valid.
+      * (because you'd expect at least something like {@code http://vpro.nl/foobar}
       */
     int  minHostParts() default 0;
 
@@ -66,7 +66,7 @@ public @interface URI {
 	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
 	@Retention(RUNTIME)
 	@Documented
-	public @interface List {
+    @interface List {
 		URI[] value();
 	}
 }
