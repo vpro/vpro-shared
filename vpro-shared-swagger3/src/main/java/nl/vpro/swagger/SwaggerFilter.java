@@ -4,10 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Optional;
+import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.meeuw.json.grep.Sed;
@@ -23,12 +24,12 @@ import nl.vpro.web.HttpServletRequestUtils;
 @Slf4j
 public class SwaggerFilter implements Filter {
 
+
     boolean filterAlways = false;
     String restPrefix = "/";
     @Override
     public void init(FilterConfig filterConfig) {
         filterAlways = "true".equals(filterConfig.getInitParameter("filterAlways"));
-
         restPrefix = Optional.ofNullable(filterConfig.getServletContext().getInitParameter("resteasy.servlet.mapping.prefix")).orElse(restPrefix);
 
     }
@@ -38,27 +39,21 @@ public class SwaggerFilter implements Filter {
         ServletRequest request,
         ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
+        String accept = req.getHeader(HttpHeaders.ACCEPT);
 
-        if (! filterAlways && (req.getPathInfo() == null || ! req.getPathInfo().endsWith(".json"))) {
-            String accept = req.getHeader("accept");
-            if (accept != null) {
-                boolean json = false;
-                try {
-                    String[] mtypes = accept.split(";", 2)[0].split(",");
-                    for (String mtype : mtypes) {
-                        if (MediaType.valueOf(mtype).isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
-                            json = true;
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    log.warn(e.getMessage());
-                }
-                if (!json) {
-                    log.debug("Not json");
-                    chain.doFilter(request, response);
-                    return;
-                }
+        boolean yaml = SwaggerListingResource.isYaml(parseAcceptHeader(accept));
+
+        if (yaml) {
+            log.debug("Not json, because yaml");
+            chain.doFilter(request, response);
+            return;
+        }
+        if (! filterAlways) {
+            // only filter if path ends with .json
+            if (req.getPathInfo() == null || ! req.getPathInfo().endsWith(".json")) {
+                // not surely json. Just skip.
+                chain.doFilter(request, response);
+                return;
             }
         }
 
@@ -125,6 +120,15 @@ public class SwaggerFilter implements Filter {
         return Sed.transform(to,
             pathMatcher
         );
+    }
+
+    public static List<MediaType> parseAcceptHeader(String accept) {
+        List<MediaType> result = new ArrayList<>();
+        String[] mtypes = accept.split(";", 2)[0].split(",");
+        for (String mtype : mtypes) {
+            result.add(MediaType.valueOf(mtype));
+        }
+        return result;
     }
 
 

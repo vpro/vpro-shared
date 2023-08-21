@@ -8,6 +8,8 @@ import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -58,8 +60,8 @@ public class SwaggerListingResource extends BaseOpenApiResource  {
         }
 
         boolean pretty = openApiConfiguration.get().isPrettyPrint();
-        // something with filter here, which I dropped, because currently not used
-        if (headers.getAcceptableMediaTypes().get(0).isCompatible(MediaType.valueOf("application/yaml"))) {
+
+        if (isYaml(headers)) {
             return Response.status(Response.Status.OK)
                     .entity(pretty ?
                             ctx.get().getOutputYamlMapper().writer(new DefaultPrettyPrinter()).writeValueAsString(oas) :
@@ -74,6 +76,30 @@ public class SwaggerListingResource extends BaseOpenApiResource  {
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build();
         }
+    }
+
+    private static final MediaType YAML = new MediaType("application", "yaml");
+
+    /**
+     * (Reluctantly) match to yaml.
+     */
+    static boolean isYaml(HttpHeaders headers) {
+        return isYaml(headers.getAcceptableMediaTypes());
+    }
+
+     /**
+     * (Reluctantly) match to yaml.
+     */
+    public  static boolean isYaml(List<MediaType> acceptable) {
+        boolean yaml = false;
+        for (MediaType type : acceptable) {
+            if (YAML.getType().equals(type.getType()) && YAML.getSubtype().equals(type.getSubtype())) {
+                yaml = true;
+                break;
+            }
+
+        }
+        return yaml;
     }
 
     synchronized OpenAPI getOpenAPI() {
