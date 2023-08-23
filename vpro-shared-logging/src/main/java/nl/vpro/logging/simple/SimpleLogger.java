@@ -1,5 +1,7 @@
 package nl.vpro.logging.simple;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -202,10 +204,14 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
      * Returns a new {@link SimpleLogger} that logs to both the current logger and the loggers given as argument.
      * @param logger The loggers to chain
      */
-    default SimpleLogger chain(SimpleLogger... logger) {
-        SimpleLogger[] array = new SimpleLogger[logger.length + 1];
+    default SimpleLogger chain(@Nullable SimpleLogger... logger) {
+        SimpleLogger[] nonNulls = Arrays.stream(logger).filter(Objects::nonNull).toArray(SimpleLogger[]::new);
+        if (nonNulls.length == 0) {
+            return this;
+        }
+        SimpleLogger[] array = new SimpleLogger[nonNulls.length + 1];
         array[0] = this;
-        System.arraycopy(logger, 0, array, 1, logger.length);
+        System.arraycopy(nonNulls, 0, array, 1, nonNulls.length);
         return new ChainedSimpleLogger(array);
     }
 

@@ -1,5 +1,6 @@
 package nl.vpro.logging.simple;
 
+import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,11 @@ public class Slf4jSimpleLogger implements SimpleLogger {
         this(LoggerFactory.getLogger(clazz));
     }
 
-    public static Slf4jSimpleLogger of(Logger logger) {
+    @PolyNull
+    public static Slf4jSimpleLogger of(@PolyNull Logger logger) {
+        if (logger == null) {
+            return null;
+        }
         return new Slf4jSimpleLogger(logger);
     }
 
