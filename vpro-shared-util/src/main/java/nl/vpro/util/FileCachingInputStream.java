@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
 
 /**
  * <p>When wrapping this around your inputstream, it will be read as fast a possible, but you can
@@ -59,7 +60,7 @@ public class FileCachingInputStream extends InputStream {
 
     private volatile boolean closed = false;
     private final AtomicLong count = new AtomicLong(0);
-    private final Logger log ;
+    private final SimpleLogger log ;
 
     @Getter
     private final CompletableFuture<FileCachingInputStream> future = new CompletableFuture<>();
@@ -86,6 +87,7 @@ public class FileCachingInputStream extends InputStream {
         @Nullable final Consumer<FileCachingInputStream> batchConsumer,
         @Nullable Integer outputBuffer,
         @Nullable final Logger logger,
+        @Nullable final SimpleLogger simpleLogger,
         @Nullable Integer initialBuffer,
         @Nullable final Boolean startImmediately,
         @Nullable final Boolean downloadFirst,
@@ -95,7 +97,9 @@ public class FileCachingInputStream extends InputStream {
         @Nullable final Boolean deleteTempFile
     ) {
         super();
-        this.log = logger == null ? LoggerFactory.getLogger(FileCachingInputStream.class) : logger;
+        this.log = simpleLogger == null ?
+            Slf4jSimpleLogger.of(logger == null ? LoggerFactory.getLogger(FileCachingInputStream.class) : logger) :
+            simpleLogger.chain(Slf4jSimpleLogger.of(logger));
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
@@ -200,7 +204,7 @@ public class FileCachingInputStream extends InputStream {
                 } catch (IOException ioe) {
                     this.future.completeExceptionally(ioe);
                 }
-                Slf4jHelper.debugOrInfo(log, effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
+                log.debugOrInfo(effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
             })
             .batch(batchSize)
             .batchConsumer(c -> consumer.accept(this))
