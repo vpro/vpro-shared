@@ -37,7 +37,7 @@ public class InputStreamChunk extends InputStream implements Counted {
     }
 
     @Override
-    public int read(byte b[]) throws IOException {
+    public int read(byte[] b) throws IOException {
         int maxRead = Math.min(b.length, chunkSize - (int) count);
         if (maxRead == 0) {
             return EOF;
@@ -51,7 +51,7 @@ public class InputStreamChunk extends InputStream implements Counted {
 
 
     @Override
-    public int read(byte b[], int off, int len) throws IOException {
+    public int read(byte[] b, int off, int len) throws IOException {
         int maxRead = Math.max(0, Math.min(off + len, chunkSize - (int) count) - off);
         if (maxRead == 0) {
             return EOF;

@@ -41,8 +41,8 @@ class InputStreamChunkTest {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 while (true) {
 
-                    byte[] bytes = new byte[8192];
-                    int b = chunk.read(bytes, 0, 8192);
+                    byte[] bytes = new byte[8193];
+                    int b = chunk.read(bytes, 0, bytes.length);
                     if (b == -1) {
                         break;
                     }
@@ -82,8 +82,6 @@ class InputStreamChunkTest {
             assertThat(chunk.getCount()).isEqualTo(123);
 
         }
-
-
     }
 
 
@@ -113,6 +111,5 @@ class InputStreamChunkTest {
         assertThat(chunk4.getCount()).isEqualTo(1);
         assertThat(chunk4.read()).isEqualTo(-1);
         assertThat(chunk4.getCount()).isEqualTo(1);
-
     }
 }
