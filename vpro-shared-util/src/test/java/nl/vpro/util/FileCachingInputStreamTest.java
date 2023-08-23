@@ -140,7 +140,7 @@ public class FileCachingInputStreamTest {
             int tresult = 0;
             int r;
             byte[] buffer = new byte[RANDOM.nextInt(900) + 100];
-
+            log.info("Available: {}", inputStream.available());
             while ((r = inputStream.read(buffer, 0, buffer.length)) != -1) {
                 result += r;
                 tresult += r;
@@ -364,12 +364,15 @@ public class FileCachingInputStreamTest {
             .build()) {
 
             assertThat(inputStream.getBufferLength()).isEqualTo(MANY_BYTES.length);
+            log.info("Available: {}", inputStream.available());
 
             int r;
             while ((r = inputStream.read()) != -1) {
                 out.write(r);
-            }
+                log.debug("Available: {}", inputStream.available());
 
+            }
+            assertThat(inputStream.available()).isEqualTo(0);
         }
         out.close();
         assertThat(out.toByteArray()).hasSize(MANY_BYTES.length);

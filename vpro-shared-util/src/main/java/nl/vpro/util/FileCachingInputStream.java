@@ -163,6 +163,17 @@ public class FileCachingInputStream extends InputStream {
         }
     }
 
+
+    @Override
+    public int available() throws IOException {
+        if (tempFileInputStream == null) {
+            return buffer.length - (int) count.get();
+        } else {
+            toFileCopier.executeIfNotRunning();
+            return tempFileInputStream.available();
+        }
+    }
+
     /**
      *   Copier is responsible for copying the remaining of the stream to the file
      *   in a separate thread

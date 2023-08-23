@@ -48,8 +48,6 @@ public class Copier implements Runnable, Closeable {
     private final Object notify;
 
 
-
-
     /**
      *
      * @param input The input stream to copy from (will be closed if ready)
@@ -279,6 +277,10 @@ public class Copier implements Runnable, Closeable {
         }
         input.close();
         log.debug("closed");
+    }
+
+    public int available() throws IOException {
+        return input.available();
     }
 
     /**

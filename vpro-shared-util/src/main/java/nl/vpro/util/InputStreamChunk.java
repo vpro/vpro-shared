@@ -67,4 +67,13 @@ public class InputStreamChunk extends InputStream implements Counted {
     public Long getCount() {
         return count;
     }
+
+    @Override
+    public int available() throws IOException {
+        return Math.min(wrapped.available(), chunkSize);
+    }
+    @Override
+    public void close() {
+        // nothing to do
+    }
 }
