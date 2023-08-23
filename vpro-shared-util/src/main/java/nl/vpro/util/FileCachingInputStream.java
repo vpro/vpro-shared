@@ -166,6 +166,9 @@ public class FileCachingInputStream extends InputStream {
 
     @Override
     public int available() throws IOException {
+        if (isClosed() || getException().isPresent()) {
+            return 0;
+        }
         if (tempFileInputStream == null) {
             return buffer.length - (int) count.get();
         } else {
