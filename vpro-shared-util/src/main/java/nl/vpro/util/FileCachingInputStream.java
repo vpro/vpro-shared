@@ -63,6 +63,9 @@ public class FileCachingInputStream extends InputStream {
     private final SimpleLogger log ;
 
     @Getter
+    private final Long expectedCount;
+
+    @Getter
     private final CompletableFuture<FileCachingInputStream> future = new CompletableFuture<>();
 
     /**
@@ -104,7 +107,7 @@ public class FileCachingInputStream extends InputStream {
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
-
+        this.expectedCount = expectedCount;
         try {
             if (initialBuffer > 0) {
                 if (! this.deleteTempFile) {
