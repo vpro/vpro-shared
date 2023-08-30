@@ -2,7 +2,7 @@ package nl.vpro.validation;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URISyntaxException;
+import java.net.*;
 
 import javax.validation.*;
 
@@ -125,10 +125,24 @@ public class URIValidatorTest {
          //data.beeldengeluid.nl/gtaa/1234, false
         """
     )
-    public void gtaa(String uri, boolean valid) throws URISyntaxException {
+    public void gtaa(String uri, boolean valid) throws URISyntaxException, NoSuchFieldException, MalformedURLException {
 
         Gtaa a1 = new Gtaa(uri);
         assertThat(validator.validate(a1)).hasSize(valid ? 0 : 1);
+        URIValidator uriValidator = new URIValidator();
+        uriValidator.initialize(a1.getClass().getDeclaredField("uri").getAnnotation(URI.class));
+
+
+        assertThat(uriValidator.validateCharSequence(uri)).isEqualTo(valid);
+
+        try {
+            assertThat(uriValidator.validateURL(new URL(uri))).isEqualTo(valid);
+        } catch (MalformedURLException mue) {
+            assertThat(valid).isFalse();
+        }
+        assertThat(uriValidator.validateURI(java.net.URI.create(uri))).isEqualTo(valid);
+
+
     }
 
 }
