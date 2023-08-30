@@ -46,7 +46,7 @@ public class URIValidatorTest {
         }
     }
     public static class Gtaa {
-        @URI(schemes = {"http", "https"}, mustHaveScheme = true, hosts = {"data.beeldengeluid.nl"}, patterns = {"http://data\\.beeldengeluid\\.nl/gtaa/\\d+"})
+        @URI(schemes = {"http"}, mustHaveScheme = true, hosts = {"data.beeldengeluid.nl"}, patterns = {"http://data\\.beeldengeluid\\.nl/gtaa/\\d+"})
         java.net.URI uri;
         public Gtaa(String url) {
             this.uri = java.net.URI.create(url);
@@ -122,6 +122,7 @@ public class URIValidatorTest {
         http://dataa.beeldengeluid.nl/gtaa/241892, false
         http://data.beeldengeluid.nl/gtab/241892, false
         http://data.beeldengeluid.nl/gtaa/aaaa, false
+         //data.beeldengeluid.nl/gtaa/1234, false
         """
     )
     public void gtaa(String uri, boolean valid) throws URISyntaxException {
