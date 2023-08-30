@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.*;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -46,27 +47,7 @@ public class URIValidator implements ConstraintValidator<URI, Object> {
 
 
 
-    boolean validateURL(URL url) {
-        if (annotation.mustHaveScheme()) {
-            if (StringUtils.isEmpty(url.getProtocol())) {
-                log.debug("Scheme empty");
-                return false;
-            }
-        }
-        if (annotation.schemes().length > 0) {
-            if (! Arrays.asList(annotation.schemes()).contains(url.getProtocol())) {
-                log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
-                return false;
-                        }
-        }
-        if (annotation.minHostParts() > 0) {
-            if (url.getHost() == null || url.getHost().split("\\.").length < annotation.minHostParts()) {
-                log.debug("Too few host parts");
-                return false;
-            }
-        }
-        return true;
-    }
+
 
     boolean validateCharSequence(CharSequence value) {
         if (StringUtils.isEmpty(value) && annotation.allowEmptyString()) {
@@ -105,9 +86,55 @@ public class URIValidator implements ConstraintValidator<URI, Object> {
                 return false;
             }
         }
+        if (annotation.hosts().length > 0) {
+            if (! Arrays.asList(annotation.hosts()).contains(uri.getHost())) {
+                log.debug("Host not one of {}", Arrays.asList(annotation.hosts()));
+                return false;
+            }
+        }
         if (annotation.minHostParts() > 0) {
             if (uri.getHost() == null || uri.getHost().split("\\.").length < annotation.minHostParts()) {
                 log.debug("Too few host parts");
+                return false;
+            }
+        }
+        for (String p : annotation.patterns()) {
+            if (!Pattern.compile(p).matcher(uri.toString()).matches()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean validateURL(URL url) {
+        if (annotation.mustHaveScheme()) {
+            if (StringUtils.isEmpty(url.getProtocol())) {
+                log.debug("Scheme empty");
+                return false;
+            }
+        }
+        if (annotation.schemes().length > 0) {
+            if (! Arrays.asList(annotation.schemes()).contains(url.getProtocol())) {
+                log.debug("Scheme not one of {}", Arrays.asList(annotation.schemes()));
+                return false;
+            }
+        }
+
+        if (annotation.hosts().length > 0) {
+            if (! Arrays.asList(annotation.hosts()).contains(url.getHost())) {
+                log.debug("Host not one of {}", Arrays.asList(annotation.hosts()));
+                return false;
+            }
+        }
+        if (annotation.minHostParts() > 0) {
+            if (url.getHost() == null || url.getHost().split("\\.").length < annotation.minHostParts()) {
+                log.debug("Too few host parts");
+                return false;
+            }
+        }
+
+        for (String p : annotation.patterns()) {
+            if (!Pattern.compile(p).matcher(url.toString()).matches()) {
                 return false;
             }
         }

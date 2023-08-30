@@ -7,6 +7,8 @@ import java.net.URISyntaxException;
 import javax.validation.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +44,14 @@ public class URIValidatorTest {
         public Lenient(String url) {
             this.url = url;
         }
+    }
+    public static class Gtaa {
+        @URI(schemes = {"http", "https"}, mustHaveScheme = true, hosts = {"data.beeldengeluid.nl"}, patterns = {"http://data\\.beeldengeluid\\.nl/gtaa/\\d+"})
+        java.net.URI uri;
+        public Gtaa(String url) {
+            this.uri = java.net.URI.create(url);
+        }
+
     }
 
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -102,6 +112,22 @@ public class URIValidatorTest {
 
         assertThat(validator.validate(ae1)).isEmpty();
         assertThat(validator.validate(ae2)).isEmpty();
+    }
+
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+        http://data.beeldengeluid.nl/gtaa/241892, true
+        https://data.beeldengeluid.nl/gtaa/241892, false
+        http://dataa.beeldengeluid.nl/gtaa/241892, false
+        http://data.beeldengeluid.nl/gtab/241892, false
+        http://data.beeldengeluid.nl/gtaa/aaaa, false
+        """
+    )
+    public void gtaa(String uri, boolean valid) throws URISyntaxException {
+
+        Gtaa a1 = new Gtaa(uri);
+        assertThat(validator.validate(a1)).hasSize(valid ? 0 : 1);
     }
 
 }

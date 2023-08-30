@@ -40,6 +40,15 @@ public @interface URI {
       */
     int  minHostParts() default 0;
 
+    /**
+     * Allowed hosts (if set)
+     */
+    String[] hosts() default {};
+
+    /**
+     * If set, pattern mattching too.
+     */
+    String[] patterns() default {};
 
     /**
      * If set, the acceptable schemes. E.g. {http, https}
@@ -51,7 +60,7 @@ public @interface URI {
     Class<? extends Payload>[] payload() default {};
 
     /**
-     * If the check is lenient, than also 'new URL' will be tried.
+     * If the check is lenient, then also 'new URL' will be tried.
      */
     boolean lenient() default false;
 
