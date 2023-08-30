@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.*;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -38,6 +40,7 @@ public class Error {
     String clazz;
 
     @JsonProperty("stackTraceElements")
+    @Nullable
     List<String> stackTraceElement;
 
     public Error() {
