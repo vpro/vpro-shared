@@ -61,6 +61,6 @@ public class Error {
 
     @Override
     public String toString() {
-        return message + "\n" + clazz + "\n" + String.join("\n", stackTraceElement);
+        return message + "\n" + clazz +(stackTraceElement == null ? "" : "\n" + String.join("\n", stackTraceElement));
     }
 }
