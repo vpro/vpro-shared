@@ -245,7 +245,7 @@ public class MBeans {
     public static StringSupplierSimpleLogger multiLine(Level level, Logger log, String message, Object... args) {
 
         StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
-            .prefix((l) -> l.compareTo(Level.ERROR) < 0 ? "" : l.name() + " ")
+            .prefix((l) -> l.compareTo(Level.ERROR) <= 0 ? "" : l.name() + " ")
             .level(level)
             .chain(Slf4jSimpleLogger.of(log));
         if (message != null) {
@@ -299,7 +299,7 @@ public class MBeans {
 
     /**
      *  A 'visualvm' oriented check whether a string is 'empty'. i.e. not filled.
-     *
+     * <p>
      *  The point being that also the string 'String' is considered empty, because that is the default value in visualvm, so that's the value when untouched.
      * @since 2.7
      */
@@ -309,13 +309,21 @@ public class MBeans {
 
     /**
      * A 'visualvm' oriented check whether a string is 'blank'. i.e. not filled, or only filled with space.
-     *
+     * <p>
      * The point being that also the string 'String' is considered blank, because that is the default value in visualvm, so that's the value when untouched.
      * @since 2.7
      */
     public static boolean isBlank(String string) {
         return "String".equals(string) || StringUtils.isBlank(string);
     }
+
+    /**
+     * @since 4.0
+     */
+    public static boolean asBoolean(String string, boolean defaultValue) {
+        return isBlank(string) ? defaultValue : Boolean.parseBoolean(string);
+    }
+
 
     /**
      * @since 2.10
@@ -388,8 +396,7 @@ public class MBeans {
     @SneakyThrows
     public static ObjectName getObjectNameWithName(Object object, String name) {
         Class<?> clazz= object.getClass();
-        ObjectName objectName = new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
-        return objectName;
+        return new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
     }
 
 
@@ -402,7 +409,7 @@ public class MBeans {
         @NonNull
         Supplier<String> description;
 
-        private LockValue(Supplier<String> description) {
+        private LockValue(@NonNull Supplier<String> description) {
             this.description = description;
         }
 
