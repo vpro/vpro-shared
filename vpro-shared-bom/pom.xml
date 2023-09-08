@@ -1,9 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-
-  <groupId>nl.vpro.shared</groupId>
-  <version>4.0-SNAPSHOT</version>
+  <parent>
+    <artifactId>vpro-shared-parent</artifactId>
+    <groupId>nl.vpro.shared</groupId>
+    <version>4.0-SNAPSHOT</version>
+  </parent>
   <artifactId>vpro-shared-bom</artifactId>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
@@ -51,124 +52,6 @@
 
   <dependencyManagement>
     <dependencies>
-
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-rs-client</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-client-resteasy</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-configuration</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-elasticsearch</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-elasticsearch-client</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-guice</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate-search</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-i18n</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jackson2</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-logging</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-log4j2</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-monitoring</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-persistence</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-rs</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-test</artifactId>
-        <version>${vpro.shared.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-util</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-validation</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-web</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-xml</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-swagger3</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jcache</artifactId>
-        <version>${vpro.shared.version}</version>
-      </dependency>
-
       <!-- not maintained anymore -->
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -262,12 +145,12 @@
         <repository>
           <id>nexus</id>
           <name>Nexus releases</name>
-          <url>http://nexus.vpro.nl/content/repositories/releases</url>
+          <url>https://nexus.vpro.nl/content/repositories/releases</url>
         </repository>
         <snapshotRepository>
           <id>nexus</id>
           <name>Nexus snapshots</name>
-          <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
+          <url>https://nexus.vpro.nl/content/repositories/snapshots</url>
         </snapshotRepository>
       </distributionManagement>
     </profile>

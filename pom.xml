@@ -938,18 +938,18 @@
         <repository>
           <id>nexus</id>
           <name>Nexus releases</name>
-          <url>http://nexus.vpro.nl/content/repositories/releases</url>
+          <url>https://nexus.vpro.nl/content/repositories/releases</url>
         </repository>
         <snapshotRepository>
           <id>nexus</id>
           <name>Nexus snapshots</name>
-          <url>http://nexus.vpro.nl/content/repositories/snapshots</url>
+          <url>https://nexus.vpro.nl/content/repositories/snapshots</url>
         </snapshotRepository>
       </distributionManagement>
       <repositories>
         <repository>
           <id>nexus</id>
-          <url>http://nexus.vpro.nl/content/groups/public</url>
+          <url>https://nexus.vpro.nl/content/groups/public</url>
           <releases>
             <enabled>true</enabled>
           </releases>
