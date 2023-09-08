@@ -62,8 +62,6 @@
     <micrometer.version>1.11.3</micrometer.version>
     <flyway.version>9.22.0</flyway.version>
 
-    <vpro.shared.version>${project.version}</vpro.shared.version>
-
   </properties>
 
   <licenses>
@@ -326,118 +324,118 @@
          <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-rs-client</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-client-resteasy</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-configuration</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-client</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-guice</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate-search</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-i18n</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson2</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-logging</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-log4j2</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-monitoring</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-persistence</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-rs</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-test</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-util</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-validation</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-web</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-xml</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger3</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jcache</artifactId>
-        <version>${vpro.shared.version}</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
@@ -690,12 +688,6 @@
         <groupId>javax</groupId>
         <artifactId>javaee-api</artifactId>
         <version>8.0.1</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-test</artifactId>
-        <version>${project.version}</version>
-        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.meeuw.math</groupId>
