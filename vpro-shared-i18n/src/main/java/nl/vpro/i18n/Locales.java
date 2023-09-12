@@ -43,12 +43,12 @@ public final class Locales {
     public static final Locale ARABIC        = of(ar);
 
     /**
-     * Dutch as spoken in the Netherlands.
+     * Dutch as spoken in the <a href="https://en.wikipedia.org/wiki/Netherlands">Netherlands</a>.
      */
     public static final Locale NETHERLANDISH = of(nl, NL);
 
     /**
-     * Dutch as spoken in the Flanders
+     * Dutch as spoken in <a href="https://en.wikipedia.org/wiki/Flemish_Community">Flanders</a>.
      */
     public static final Locale FLEMISH       = of(nl, BE);
 
