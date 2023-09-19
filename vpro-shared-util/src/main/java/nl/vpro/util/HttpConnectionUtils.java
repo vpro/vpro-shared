@@ -36,24 +36,27 @@ public class HttpConnectionUtils {
      * @since 4.1
      */
     public static OptionalLong getOptionalByteSize(String locationUrl) {
-        final URI uri = URI.create(locationUrl);
-        final String scheme = uri.getScheme();
-        if (! ("http".equals(scheme) || "https".equals(scheme))) {
+        if (locationUrl == null) {
             return OptionalLong.empty();
         }
-        final HttpRequest head = HttpRequest.newBuilder()
-            .uri(uri)
-            .method("HEAD", noBody())
-            .build(); // .HEAD() in java 18
         try {
+            final URI uri = URI.create(locationUrl);
+            final String scheme = uri.getScheme();
+            if (!("http".equals(scheme) || "https".equals(scheme))) {
+                return OptionalLong.empty();
+            }
+            final HttpRequest head = HttpRequest.newBuilder()
+                .uri(uri)
+                .method("HEAD", noBody())
+                .build(); // .HEAD() in java 18
             final HttpResponse<Void> send = CLIENT.send(head, discarding());
             if (send.statusCode() == 200) {
                 return send.headers().firstValueAsLong("Content-Length");
             } else {
                 log.warn("HEAD {} returned {}", locationUrl, send.statusCode());
             }
-        } catch (IOException | InterruptedException e) {
-            log.warn(e.getMessage(), e);
+        } catch (IOException | InterruptedException | IllegalArgumentException e) {
+            log.warn(e.getClass() + ":" + e.getMessage(), e);
         }
         return OptionalLong.empty();
     }
