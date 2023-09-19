@@ -11,6 +11,7 @@ import javax.servlet.http.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.json.grep.Sed;
 import org.meeuw.json.grep.matching.*;
 
@@ -122,11 +123,13 @@ public class SwaggerFilter implements Filter {
         );
     }
 
-    public static List<MediaType> parseAcceptHeader(String accept) {
+    public static List<MediaType> parseAcceptHeader(@Nullable String accept) {
         List<MediaType> result = new ArrayList<>();
-        String[] mtypes = accept.split(";", 2)[0].split(",");
-        for (String mtype : mtypes) {
-            result.add(MediaType.valueOf(mtype));
+        if (accept != null) {
+            String[] mtypes = accept.split(";", 2)[0].split(",");
+            for (String mtype : mtypes) {
+                result.add(MediaType.valueOf(mtype));
+            }
         }
         return result;
     }
