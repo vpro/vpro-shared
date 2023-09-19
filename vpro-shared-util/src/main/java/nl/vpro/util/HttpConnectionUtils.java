@@ -36,8 +36,8 @@ public class HttpConnectionUtils {
      * @since 4.1
      */
     public static OptionalLong getOptionalByteSize(String locationUrl) {
-        URI uri = URI.create(locationUrl);
-        String scheme = uri.getScheme();
+        final URI uri = URI.create(locationUrl);
+        final String scheme = uri.getScheme();
         if (! ("http".equals(scheme) || "https".equals(scheme))) {
             return OptionalLong.empty();
         }
