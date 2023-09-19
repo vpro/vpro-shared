@@ -18,7 +18,9 @@ import static java.net.http.HttpResponse.BodyHandlers.discarding;
 @Slf4j
 public class HttpConnectionUtils {
 
+    private HttpConnectionUtils() {
 
+    }
 
     /**
      * Client used for {@link #getByteSize(String)}}
@@ -29,14 +31,18 @@ public class HttpConnectionUtils {
         .build();
 
 
-
     /**
      * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
      * @since 4.1
      */
     public static OptionalLong getOptionalByteSize(String locationUrl) {
+        URI uri = URI.create(locationUrl);
+        String scheme = uri.getScheme();
+        if (! ("http".equals(scheme) || "https".equals(scheme))) {
+            return OptionalLong.empty();
+        }
         final HttpRequest head = HttpRequest.newBuilder()
-            .uri(URI.create(locationUrl))
+            .uri(uri)
             .method("HEAD", noBody())
             .build(); // .HEAD() in java 18
         try {
