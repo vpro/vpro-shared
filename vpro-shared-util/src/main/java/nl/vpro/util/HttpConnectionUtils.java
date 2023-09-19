@@ -18,6 +18,8 @@ import static java.net.http.HttpResponse.BodyHandlers.discarding;
 @Slf4j
 public class HttpConnectionUtils {
 
+    public static final ThreadLocal<Boolean> ENABLED = ThreadLocal.withInitial(() -> true);
+
     private HttpConnectionUtils() {
 
     }
@@ -36,7 +38,7 @@ public class HttpConnectionUtils {
      * @since 4.1
      */
     public static OptionalLong getOptionalByteSize(String locationUrl) {
-        if (locationUrl == null) {
+        if (locationUrl == null || ! ENABLED.get()) {
             return OptionalLong.empty();
         }
         try {
