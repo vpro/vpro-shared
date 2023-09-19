@@ -3,9 +3,13 @@ package nl.vpro.util;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
+import java.net.http.*;
+import java.time.Duration;
+import java.util.OptionalLong;
+
+import static java.net.http.HttpRequest.BodyPublishers.noBody;
+import static java.net.http.HttpResponse.BodyHandlers.discarding;
 
 /**
  * @author Michiel Meeuwissen
@@ -15,34 +19,47 @@ import java.net.URL;
 public class HttpConnectionUtils {
 
 
+
     /**
-     * TODO in vpro api we find a HttpClient version of this, with connection pooling.
+     * Client used for {@link #getByteSize(String)}}
+     */
+    private static final HttpClient CLIENT = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.ALWAYS)
+        .connectTimeout(Duration.ofSeconds(3))
+        .build();
+
+
+
+    /**
+     * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
+     * @since 4.1
+     */
+    public static OptionalLong getOptionalByteSize(String locationUrl) {
+        final HttpRequest head = HttpRequest.newBuilder()
+            .uri(URI.create(locationUrl))
+            .method("HEAD", noBody())
+            .build(); // .HEAD() in java 18
+        try {
+            final HttpResponse<Void> send = CLIENT.send(head, discarding());
+            if (send.statusCode() == 200) {
+                return send.headers().firstValueAsLong("Content-Length");
+            } else {
+                log.warn("HEAD {} returned {}", locationUrl, send.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            log.warn(e.getMessage(), e);
+        }
+        return OptionalLong.empty();
+    }
+
+    /**
+     * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
      */
     public static Long getByteSize(String u) {
-        try {
-            URL url = new URL(u);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setInstanceFollowRedirects(true);
-            connection.setRequestMethod("HEAD");
-            if (connection.getResponseCode() == 200) {
-                String contentLength = connection.getHeaderField("Content-Length");
-                if (contentLength != null) {
-                    Long result = Long.parseLong(contentLength);
-                    log.info("Byte size of {} is {} (determined by head request)", u, result);
-                    return result;
-                } else {
-                    log.warn("No content length in {}" + u);
-                    return null;
-                }
-            } else {
-                log.warn("For determining byte sise. Response code {} from {}", connection.getResponseCode(), u);
-                return null;
-            }
-        } catch (MalformedURLException mf) {
-            log.debug(mf.getMessage());
-            return null;
-        } catch (IOException e) {
-            log.warn("For determining byte size of {}: {}", u, e.getMessage(), e);
+        OptionalLong result = getOptionalByteSize(u);
+        if (result.isPresent()) {
+            return result.getAsLong();
+        } else {
             return null;
         }
     }
