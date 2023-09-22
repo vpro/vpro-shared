@@ -2,9 +2,7 @@ package nl.vpro.jmx;
 
 import lombok.Data;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
@@ -12,7 +10,8 @@ import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.slf4j.Logger;
+import nl.vpro.logging.simple.Level;
+import nl.vpro.logging.simple.SimpleLogger;
 
 import static nl.vpro.util.TimeUtils.roundToMillis;
 
@@ -26,15 +25,16 @@ public class CountAspect<T> implements InvocationHandler {
 
     public static final ThreadLocal<Local> currentThreadLocal = ThreadLocal.withInitial(() -> null);
 
-    private final Logger log;
+    private final SimpleLogger log;
     private final T proxied;
     private final Map<String, Counter> counts;
     private final ObjectName name;
     private final Duration countWindow;
     private final Duration warnThreshold;
     private final Integer bucketCount;
+    private final Level warnLevel;
 
-    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name, Logger log, Duration warnThreshold) {
+    CountAspect(T proxied, Map<String, Counter> counter, Duration countWindow, Integer bucketCount, ObjectName name, SimpleLogger log, Duration warnThreshold, Level warnLevel) {
         this.proxied = proxied;
         this.counts = counter;
         this.name = name;
@@ -42,6 +42,7 @@ public class CountAspect<T> implements InvocationHandler {
         this.bucketCount = bucketCount;
         this.log = log;
         this.warnThreshold = warnThreshold;
+        this.warnLevel = warnLevel == null ? Level.WARN : warnLevel;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class CountAspect<T> implements InvocationHandler {
                     String durationReport = (((float) totalDuration.toMillis()) / local.getRequestDuration().toMillis() > 1.5f) ?
                         String.format("%s/%s", roundToMillis(local.getRequestDuration()), roundToMillis(totalDuration)) :
                         roundToMillis(totalDuration).toString();
-                    log.warn("Took {}: {} {}",
+                    log.log(warnLevel, "Took {}: {} {}",
                         durationReport,
                         local.key,
                         local.requestUri);
@@ -98,12 +99,13 @@ public class CountAspect<T> implements InvocationHandler {
         Integer bucketCount,
         ObjectName name, Class<T> restInterface,
         T service,
-        Logger log,
-        Duration warnThreshold
+        SimpleLogger log,
+        Duration warnThreshold,
+        Level warnLevel
         ) {
         return (T) Proxy.newProxyInstance(CountAspect.class.getClassLoader(),
             new Class[]{restInterface},
-            new CountAspect<>(service, counter, countWindow, bucketCount, name, log, warnThreshold));
+            new CountAspect<>(service, counter, countWindow, bucketCount, name, log, warnThreshold, warnLevel));
     }
 
     private Local start(Method method) {

@@ -53,6 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jmx.*;
+import nl.vpro.logging.simple.Level;
+import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.rs.client.*;
 import nl.vpro.util.*;
 
@@ -101,10 +103,15 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration warnThreshold = Duration.ofMillis(100);
 
     @Getter
+    protected Level warnLevel = Level.WARN;
+
+    @Getter
     protected List<Locale> acceptableLanguages = new ArrayList<>();
 
+    @Getter
     protected MediaType accept;
 
+    @Getter
     protected MediaType contentType;
 
     /**
@@ -145,6 +152,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         Integer maxConnectionsNoTimeout,
         Integer maxConnectionsPerRouteNoTimeout,
         Duration connectionInPoolTTL,
+        Duration validateAfterInactivity,
         Duration countWindow,
         Integer bucketCount,
         Duration warnThreshold,
@@ -156,7 +164,8 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         String mbeanName,
         ClassLoader classLoader,
         String userAgent,
-        Boolean registerMBean
+        Boolean registerMBean,
+        boolean eager
     ) {
         this(
             baseUrl,
@@ -168,10 +177,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             maxConnectionsNoTimeout,
             maxConnectionsPerRouteNoTimeout,
             connectionInPoolTTL,
-            null,
+            validateAfterInactivity,
             countWindow,
             bucketCount,
             warnThreshold,
+            null,
             acceptableLanguages,
             accept,
             contentType,
@@ -181,7 +191,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
             classLoader,
             userAgent,
             registerMBean,
-            false);
+            eager);
     }
 
     protected AbstractApiClient(
@@ -198,6 +208,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         Duration countWindow,
         Integer bucketCount,
         Duration warnThreshold,
+        Level warnLevel,
         List<Locale> acceptableLanguages,
         MediaType accept,
         MediaType contentType,
@@ -227,6 +238,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         this.countWindow = countWindow == null ? this.countWindow : countWindow;
         this.bucketCount = bucketCount == null ? this.bucketCount : bucketCount;
         this.warnThreshold = warnThreshold == null ? this.warnThreshold : warnThreshold;
+        this.warnLevel = warnLevel == null ? this.warnLevel : warnLevel;
         this.acceptableLanguages = acceptableLanguages;
         this.accept = accept;
         this.contentType = contentType;
@@ -379,20 +391,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         });
     }
 
-    public MediaType getAccept() {
-        return accept;
-    }
-
     public void setAccept(MediaType mediaType) {
         if (this.accept != mediaType) {
             this.accept = mediaType;
             this.invalidate();
         }
-    }
-
-
-    public MediaType getContentType() {
-        return contentType;
     }
 
     public void setContentType(MediaType mediaType) {
@@ -751,7 +754,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
      */
     protected <T> T proxyCounter(Class<T> service, T proxy) {
         return CountAspect.proxyCounter(counter, countWindow, bucketCount,
-                registerMBean ? getObjectName() : null, service, proxy, log, warnThreshold);
+                registerMBean ? getObjectName() : null, service, proxy, Slf4jSimpleLogger.slf4j(log), warnThreshold, warnLevel);
     }
 
     protected <T> T build(ClientHttpEngine engine, Class<T> service, Consumer<ResteasyClientBuilder> buildFurther) {
