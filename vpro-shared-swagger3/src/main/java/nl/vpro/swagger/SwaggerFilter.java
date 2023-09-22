@@ -62,7 +62,7 @@ public class SwaggerFilter implements Filter {
 
         final ServletOutputStream servletOutputStream = response.getOutputStream();
         final OutputStream out = transform(servletOutputStream, matcher);
-        HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
+        final HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
             @Override
             public ServletOutputStream getOutputStream() {
                 return new ServletOutputStream() {

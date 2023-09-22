@@ -2,9 +2,9 @@ package nl.vpro.logging.simple;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
+import java.util.function.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.helpers.FormattingTuple;
@@ -247,7 +247,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
      * @param shift The amount to shift. Positive values will shift to {@link Level#TRACE}, negative values to {@link Level#ERROR}
      */
     default SimpleLogger shift(int shift) {
-        SimpleLogger wrapped = this;
+        final SimpleLogger wrapped = this;
         return new SimpleLogger() {
             @Override
             public void accept(Level level, CharSequence message, @Nullable Throwable t) {
@@ -259,4 +259,18 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
             }
         };
     }
+
+    /**
+     * @since 4.1
+     */
+    default SimpleLogger withMessageConverter(UnaryOperator<CharSequence> messageConverter, boolean applyToBlank) {
+        final SimpleLogger wrapped = this;
+        return (level, message, t) ->
+            wrapped.accept(level, applyToBlank || StringUtils.isNotBlank(message) ? messageConverter.apply(message) : message, t);
+
+    }
+    default SimpleLogger withMessageConverter(UnaryOperator<CharSequence> messageConverter) {
+        return withMessageConverter(messageConverter, false);
+    }
+
 }
