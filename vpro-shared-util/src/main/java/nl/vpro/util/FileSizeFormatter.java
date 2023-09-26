@@ -39,6 +39,7 @@ public class FileSizeFormatter {
     public static final DecimalFormatSymbols DECIMAL = DecimalFormatSymbols.getInstance(Locale.US);
 
     private final DecimalFormat format;
+    private final DecimalFormat exactFormat;
 
     /**
      * Whether to use <a href="https://en.wikipedia.org/wiki/Binary_prefix">binary prefixes</a>
@@ -46,14 +47,16 @@ public class FileSizeFormatter {
     private final boolean mebi;
 
     @lombok.Builder(builderClassName = "Builder", toBuilder = true)
-    public FileSizeFormatter(DecimalFormat format, boolean mebi) {
+    public FileSizeFormatter(DecimalFormat format, DecimalFormat exactFormat, boolean mebi) {
         this.format = format== null ? new DecimalFormat("#") : format;
+        this.exactFormat = exactFormat == null ? this.format : exactFormat;
         this.mebi = mebi;
     }
 
 
     public static final FileSizeFormatter DEFAULT = FileSizeFormatter.builder()
         .pattern("#.0")
+        .exactPattern("#")
         .mebi(true)
         .build();
 
@@ -64,13 +67,18 @@ public class FileSizeFormatter {
         .build();
 
     public String format(@Nullable Number numberOfBytes) {
+        return format(numberOfBytes, true);
+    }
+
+
+    public String format(@Nullable Number numberOfBytes, boolean exact) {
         if (numberOfBytes == null) {
             return "? B";
         }
         if (mebi) {
-            return formatMebi(numberOfBytes.floatValue());
+            return formatMebi(numberOfBytes, exact);
         } else {
-            return formatSI(numberOfBytes.floatValue());
+            return formatSI(numberOfBytes, exact);
         }
     }
 
@@ -80,13 +88,13 @@ public class FileSizeFormatter {
      */
     public String formatSpeed(@Nullable Number numberOfBytes, Duration duration) {
         if (numberOfBytes == null || duration == null) {
-            return format(null) + "/s";
+            return format(null, false) + "/s";
         }
         if (duration.isZero()) {
             return "\u221E B/s";
         }
         Float perSecond = 1000f * numberOfBytes.floatValue() / duration.toMillis();
-        return format(perSecond) + "/s";
+        return format(perSecond, false) + "/s";
     }
 
 
@@ -95,31 +103,34 @@ public class FileSizeFormatter {
         return formatSpeed(length, Duration.between(start, Instant.now()));
     }
 
-    private String formatMebi(float length) {
-        if (length > GiB) {
-            return format.format(length / GiB) + " GiB";
+    private String formatMebi(Number length, boolean exact) {
+        long longValue = length.longValue();
+        if (longValue > GiB) {
+            return format.format(length.floatValue() / GiB) + " GiB";
         }
-        if (length > MiB) {
-            return format.format(length / MiB) + " MiB";
+        if (longValue > MiB) {
+            return format.format(length.floatValue() / MiB) + " MiB";
         }
-        if (length > KiB) {
-            return format.format(length / KiB) + " KiB";
+        if (longValue > KiB) {
+            return format.format( length.floatValue() / KiB) + " KiB";
         }
-        return format.format(length) + " B";
+        return (exact ? exactFormat.format(length) : format.format(length)) + " B";
     }
 
 
-    private String formatSI(float length) {
-        if (length > G) {
-            return format.format(length / G) + " GB";
+    private String formatSI(Number length, boolean exact) {
+        long longValue = length.longValue();
+
+        if (longValue > G) {
+            return format.format(length.floatValue() / G) + " GB";
         }
-        if (length > M) {
-            return format.format(length / M) + " MB";
+        if (longValue > M) {
+            return format.format(length.floatValue() / M) + " MB";
         }
-        if (length > K) {
-            return format.format(length / K) + " KB";
+        if (longValue > K) {
+            return format.format(length.floatValue() / K) + " KB";
         }
-        return format.format(length) + " B";
+        return (exact ? exactFormat.format(length) : format.format(length)) + " B";
     }
 
 
@@ -145,6 +156,11 @@ public class FileSizeFormatter {
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
             decimalFormat.setDecimalFormatSymbols(symbols);
             return format(decimalFormat);
+        }
+        public Builder exactPattern(String pattern) {
+            DecimalFormat decimalFormat = new DecimalFormat(pattern);
+            decimalFormat.setDecimalFormatSymbols(symbols);
+            return exactFormat(decimalFormat);
         }
 
 
