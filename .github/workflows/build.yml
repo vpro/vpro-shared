@@ -53,7 +53,7 @@ jobs:
           gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
       - name: Build and ${{ matrix.target }} with Maven
-        run: mvn -ntp -fae -DskipITs=false -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" ${{ matrix.target }}  -Dgpg.skip=false
+        run: "mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P'deploy,sonatype' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
