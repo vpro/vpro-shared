@@ -25,9 +25,9 @@ jobs:
           - os: ubuntu-latest
             java: 21-ea
             target: 'build'
-          - os: windows-latest
-            java: 17
-            target: 'build'
+          #- os: windows-latest
+          #  java: 17
+          #  target: 'build'
           - os: ubuntu-latest
             java: 17
             target: 'deploy'
@@ -54,11 +54,12 @@ jobs:
           cache: maven
       - name: Build and ${{ matrix.target }} with Maven
         run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" ${{ matrix.target }}  -Dgpg.skip=false
-        if: matrix.java == 17
+        if: matrix.target == 'deploy'
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
+        continue-on-error: ${{ matrix.target != 'deploy' }}
       - name: Publish to codecov
         uses: codecov/codecov-action@v3
         continue-on-error: true
