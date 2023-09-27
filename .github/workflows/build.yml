@@ -65,7 +65,7 @@ jobs:
         if:  matrix.target == 'deploy'
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2.3.0
-        if: always() && && runner.os == 'Linux'
+        if: always() && runner.os == 'Linux'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           junit_files: "**/target/surefire-reports/*.xml"
