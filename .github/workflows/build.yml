@@ -54,7 +54,6 @@ jobs:
           cache: maven
       - name: Build and ${{ matrix.target }} with Maven
         run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" ${{ matrix.target }}  -Dgpg.skip=false
-        if: matrix.target == 'deploy'
         env:
           SONATYPE_USERNAME: vpro
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
@@ -63,9 +62,10 @@ jobs:
       - name: Publish to codecov
         uses: codecov/codecov-action@v3
         continue-on-error: true
+        if:  matrix.target == 'deploy'
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2.3.0
-        if: always()
+        if: always() && && runner.os == 'Linux'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           junit_files: "**/target/surefire-reports/*.xml"
