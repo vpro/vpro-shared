@@ -25,6 +25,9 @@ jobs:
           - os: ubuntu-latest
             java: 21-ea
             target: 'build'
+          - os: windows-latest
+            java: 17
+            target: 'build'
           - os: ubuntu-latest
             java: 17
             target: 'deploy'
