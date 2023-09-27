@@ -24,10 +24,10 @@ jobs:
         include:
           - os: ubuntu-latest
             java: 21-ea
-            target: 'compile'
+            target: 'test'
           - os: windows-latest
             java: 17
-            target: 'compile'
+            target: 'test'
           - os: ubuntu-latest
             java: 17
             target: 'deploy'
