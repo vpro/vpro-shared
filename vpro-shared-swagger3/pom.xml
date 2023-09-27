@@ -11,7 +11,7 @@
   <version>4.1-SNAPSHOT</version>
 
   <properties>
-    <swagger.ui.version>5.4.2</swagger.ui.version>
+    <swagger.ui.version>5.7.2</swagger.ui.version>
   </properties>
 
 

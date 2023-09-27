@@ -25,7 +25,7 @@
     <mockito.version>5.5.0</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <resteasy.version>5.0.8.Final</resteasy.version>
-    <bytebuddy.version>1.14.7</bytebuddy.version>
+    <bytebuddy.version>1.14.8</bytebuddy.version>
     <slf4j.version>2.0.9</slf4j.version>
     <log4j2.version>2.20.0</log4j2.version>
     <guava.version>32.1.2-jre</guava.version>
@@ -47,7 +47,7 @@
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
     <camel.version>3.20.4</camel.version>
 
-    <swagger.version>2.2.15</swagger.version>
+    <swagger.version>2.2.16</swagger.version>
 
     <lombok.version>1.18.30</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -59,8 +59,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.11.3</micrometer.version>
-    <flyway.version>9.22.0</flyway.version>
+    <micrometer.version>1.11.4</micrometer.version>
+    <flyway.version>9.22.2</flyway.version>
 
   </properties>
 
@@ -795,7 +795,7 @@
       <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
