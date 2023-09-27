@@ -23,6 +23,13 @@ jobs:
         #  os: [ ubuntu-latest, windows-latest]
         os: [ubuntu-latest]
         java: [17]
+        target: ['build']
+        include:
+          - os: ubuntu-latest
+            java: 21-ea
+          - os: ubuntu-latest
+            java: 17
+            target: 'deploy'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cancel previous Action
@@ -44,8 +51,8 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
-      - name: Build and deploy with Maven
-        run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" deploy  -Dgpg.skip=false
+      - name: Build and ${{ matrix.target }} with Maven
+        run: mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P"deploy,sonatype" ${{ matrix.target }}  -Dgpg.skip=false
         if: matrix.java == 17
         env:
           SONATYPE_USERNAME: vpro
