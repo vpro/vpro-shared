@@ -107,10 +107,10 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 }
             }
         }
-        if (registeredAsString.size() > 0) {
+        if (!registeredAsString.isEmpty()) {
             log.info("Registered {} singleton strings: {} ", registeredAsString.size(), registeredAsString);
         }
-        if (registeredAsObject.size() > 0) {
+        if (!registeredAsObject.isEmpty()) {
             log.info("Registered {} singleton objects: {} ", registeredAsObject.size(), registeredAsObject.stream().map(v -> v.getClass().getSimpleName() + ":" + v).collect(Collectors.toList()));
         }
 
@@ -135,11 +135,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                         return placeholderName;
                     }
                 });
-                log.info("{}", value);
+                log.debug("{}", value);
             }
-        }
-        if (systemPropertiesMode == PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE) {
-            log.info("");
         }
         if (afterProperties != null) {
             for (Consumer<Map<String, String>> after : afterProperties) {
