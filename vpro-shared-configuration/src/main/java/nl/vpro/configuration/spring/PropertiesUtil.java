@@ -74,6 +74,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     protected void processProperties(
         @NonNull ConfigurableListableBeanFactory beanFactory,
         @NonNull Properties props) throws BeansException {
+        putSystemPropertiesIfNeeded(props);
         super.processProperties(beanFactory, props);
         initMap(props);
         initSystemProperties();
@@ -200,7 +201,6 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     public void setSystemPropertiesMode(int systemPropertiesMode) {
         super.setSystemPropertiesMode(systemPropertiesMode);
         this.systemPropertiesMode = systemPropertiesMode;
-
     }
 
 
@@ -229,12 +229,18 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         super.setLocations(locations);
     }
 
+    private int  putSystemPropertiesIfNeeded(Properties p) {
+        if (systemPropertiesMode != SYSTEM_PROPERTIES_MODE_NEVER) {
+            p.putAll(System.getProperties());
+            return System.getProperties().size();
+        }
+        return 0;
+    }
+
     private void initMap(Properties props) {
 
         Properties p = new Properties();
-        if (this.systemPropertiesMode != SYSTEM_PROPERTIES_MODE_NEVER) {
-            p.putAll(System.getProperties());
-        }
+        putSystemPropertiesIfNeeded(p);
         p.putAll(props);
 
         PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
