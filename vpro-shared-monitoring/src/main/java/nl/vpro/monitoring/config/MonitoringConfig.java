@@ -33,6 +33,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
+import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.Level;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
@@ -86,9 +88,10 @@ public class MonitoringConfig {
     }
 
     private boolean started = false;
+
     @EventListener
     public synchronized void init(ContextRefreshedEvent event) throws BeansException {
-        if (! started) {
+        if (!started) {
             if (meterRegistry == null) {
                 createMeterRegistry();
             }
@@ -128,7 +131,7 @@ public class MonitoringConfig {
 
         final Optional<?> cacheManager = getCacheManager();
         if (properties.isMeterJCache() && cacheManager.isPresent()) {
-            CacheManager manager = (CacheManager)  cacheManager.get();
+            CacheManager manager = (CacheManager) cacheManager.get();
             manager.getCacheNames().forEach(cacheName -> {
                 new JCacheMetrics<>(manager.getCache(cacheName), Tags.empty()).bindTo(registry);
             });
@@ -149,7 +152,6 @@ public class MonitoringConfig {
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
-
 
 
         if (properties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent()) {
@@ -175,7 +177,7 @@ public class MonitoringConfig {
             }
         }
 
-        try  {
+        try {
             if (properties.isMeterPostgres()) {
                 final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
                 if (dataSource.isPresent()) {
@@ -195,28 +197,27 @@ public class MonitoringConfig {
             new ProcessorMetrics().bindTo(registry);
         }
 
-       if (properties.isMeterCamel()) {
-           try {
-               if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
-                   Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
-                   Object factory = factoryClass.getDeclaredConstructor().newInstance();
-                   factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
-                   Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
-                   Object camelContext = applicationContext.getBean(camelContextClass);
-                   if (camelContext == null) {
-                       log.warn("No camel context found in {}", applicationContext);
-                   } else {
-                       camelContextClass.getMethod("addRoutePolicyFactory", Class.forName("org.apache.camel.spi.RoutePolicyFactory")).invoke(camelContext, factory);
-                       log.info("Set up {}", factory);
-                   }
-               } else {
-                   log.info("No camel micrometer route policy factory found");
-               }
-           } catch (Exception e) {
-               log.warn(e.getClass() + ":" + e.getMessage(), e);
-           }
-       }
-
+        if (properties.isMeterCamel()) {
+            try {
+                if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
+                    Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
+                    Object factory = factoryClass.getDeclaredConstructor().newInstance();
+                    factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
+                    Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
+                    Object camelContext = applicationContext.getBean(camelContextClass);
+                    if (camelContext == null) {
+                        log.warn("No camel context found in {}", applicationContext);
+                    } else {
+                        camelContextClass.getMethod("addRoutePolicyFactory", Class.forName("org.apache.camel.spi.RoutePolicyFactory")).invoke(camelContext, factory);
+                        log.info("Set up {}", factory);
+                    }
+                } else {
+                    log.info("No camel micrometer route policy factory found");
+                }
+            } catch (Exception e) {
+                log.warn(e.getClass() + ":" + e.getMessage(), e);
+            }
+        }
 
 
         if (properties.isMeterTomcat() && getManager().isPresent()) {
@@ -264,7 +265,7 @@ public class MonitoringConfig {
             Gauge.builder("locks.average_duration",
                     () -> JMX_INSTANCE.getAverageLockDuration().getWindowValue().optionalDoubleMean().orElse(0d)
                 )
-                .description("The average time in ms to hold a lock (in " + JMX_INSTANCE.getAverageLockDuration().getTotalDuration() +")")
+                .description("The average time in ms to hold a lock (in " + JMX_INSTANCE.getAverageLockDuration().getTotalDuration() + ")")
                 .register(registry);
 
 
@@ -301,26 +302,35 @@ public class MonitoringConfig {
     }
 
     private Optional<?> getManager() {
-        Optional<?> manager = classForName("org.apache.catalina.Manager")
+        Optional<?> manager = classForName("org.apache.catalina.Manager", Level.DEBUG)
             .flatMap(this::getBean);
-        if (manager.isEmpty()) { {
-            log.info("no tomcat manager found");
-        }}
+        if (manager.isEmpty()) {
+            log.info("No tomcat manager found");
+        }
         return manager;
     }
 
     private Optional<Class<?>> classForName(String name) {
+        return classForName(name, Level.WARN);
+    }
+
+
+    private Optional<Class<?>> classForName(String name, Level level) {
         try {
             final Class<?> aClass = Class.forName(name, true, this.getClass().getClassLoader());
             return Optional.of(aClass);
         } catch (ClassNotFoundException e) {
-            warn(name + ":" + e.getMessage());
+            warn("class not found: " + name + ":" + e.getMessage(), level);
             return Optional.empty();
         }
     }
 
     private void warn(String warn){
-        log.warn(warn);
+        warn(warn, Level.WARN);
+    }
+
+    private void warn(String warn, Level level){
+        Slf4jHelper.log(log, level,warn);
         warnings.add(warn);
     }
 
