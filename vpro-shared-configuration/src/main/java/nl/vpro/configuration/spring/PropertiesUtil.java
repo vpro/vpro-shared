@@ -18,6 +18,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.core.SpringProperties;
+import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -45,6 +47,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     private String[] systemProperties;
 
     private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
+
+    private boolean searchSystemEnvironment = !SpringProperties.getFlag(AbstractEnvironment.IGNORE_GETENV_PROPERTY_NAME);
 
     /**
      * All properties for which the key matches this regexp will be registered as a singleton String spring bean
@@ -78,8 +82,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         super.processProperties(beanFactory, props);
         initMap(props);
         initSystemProperties();
-        Set<String> registeredAsString = new HashSet<>();
-        Set<String> registeredAsObject = new HashSet<>();
+        final Set<String> registeredAsString = new HashSet<>();
+        final Set<String> registeredAsObject = new HashSet<>();
         for (Map.Entry<String, String> e : propertiesMap.entrySet()) {
             if (registerAsSingletonStringRegexp.matcher(e.getKey()).matches()) {
                 try {
@@ -232,11 +236,21 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     private int  putSystemPropertiesIfNeeded(Properties p) {
         if (systemPropertiesMode != SYSTEM_PROPERTIES_MODE_NEVER) {
             p.putAll(System.getProperties());
+            if (searchSystemEnvironment) {
+                p.putAll(System.getenv());
+            }
+            log.debug("Put {} system properties: {}", System.getProperties().size(), System.getProperties().keySet());
             return System.getProperties().size();
         }
         return 0;
     }
 
+
+    @Override
+    public void setSearchSystemEnvironment(boolean searchSystemEnvironment) {
+        super.setSearchSystemEnvironment(searchSystemEnvironment);
+		this.searchSystemEnvironment = searchSystemEnvironment;
+	}
     private void initMap(Properties props) {
 
         Properties p = new Properties();
