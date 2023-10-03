@@ -8,8 +8,6 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -49,15 +47,10 @@ public class URLPathEncodeTest {
     @ParameterizedTest
     @MethodSource("cases")
     public void encodePathUrlEncoder(Case c) throws UnsupportedEncodingException {
-        assertThat(URLEncoder.encode(c.in, StandardCharsets.UTF_8.name())).isEqualTo(c.encoded);
+        assertThat(URLEncoder.encode(c.in, StandardCharsets.UTF_8)).isEqualTo(c.encoded);
     }
 
-    @ParameterizedTest
-    @MethodSource("cases")
-    public void encodePathHttpClient(Case c) throws URIException {
-        assertThat(URIUtil.encodePath(c.in)).isEqualTo(c.pathEncoded);
-        assertThat(URIUtil.encode(c.in, null)).isEqualTo(c.encoded);
-    }
+
 
     @ParameterizedTest
     @MethodSource("cases")
@@ -74,14 +67,6 @@ public class URLPathEncodeTest {
         assertThat(URLPathEncode.decode(c.pathEncodedVariant)).isEqualTo(c.in);
     }
 
-     @ParameterizedTest
-    @MethodSource("cases")
-    public void decodeHttpClient(Case c) throws URIException {
-        assertThat(URIUtil.decode(c.encoded)).isEqualTo(c.in);
-        assertThat(URIUtil.decode(c.encodedVariant)).isEqualTo(c.in);
-        assertThat(URIUtil.decode(c.pathEncoded)).isEqualTo(c.in);
-        assertThat(URIUtil.decode(c.pathEncodedVariant)).isEqualTo(c.in);
-    }
 
     @Test
     public void encode() {
@@ -100,7 +85,7 @@ public class URLPathEncodeTest {
     }
 
     @ToString
-    static class Case {
+    public static class Case {
         final String in;
         final String encoded;                 // httpclient's URIUtil#encode does this
 

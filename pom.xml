@@ -43,7 +43,13 @@
 
     <hibernate.search6.version>6.1.7.Final</hibernate.search6.version>
 
+    <!-- jakarta versions -->
+    <servlet.api.version>4.0.4</servlet.api.version>
     <validation.api.version>2.0.2</validation.api.version>
+    <persistence.api.version>2.2.3</persistence.api.version>
+    <annotation.api.version>1.3.5</annotation.api.version>
+    <xml-bind.api.version>2.3.3</xml-bind.api.version>
+
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
     <camel.version>3.20.4</camel.version>
 
@@ -625,7 +631,7 @@
       <dependency>
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
-        <version>4.0.4</version>
+        <version>${servlet.api.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -682,7 +688,7 @@
       <dependency>
         <groupId>jakarta.persistence</groupId>
         <artifactId>jakarta.persistence-api</artifactId>
-        <version>2.2.3</version>
+        <version>${persistence.api.version}</version>
       </dependency>
       <dependency>
         <groupId>javax</groupId>
@@ -774,21 +780,14 @@
         <version>1.1.1</version>
       </dependency>
       <dependency>
-        <groupId>com.google.code.findbugs</groupId>
-        <artifactId>jsr305</artifactId>
-        <version>3.0.2</version>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>2.3.1</version>
-        <scope>provided</scope>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${xml-bind.api.version}</version>
       </dependency>
       <dependency>
         <groupId>jakarta.annotation</groupId>
         <artifactId>jakarta.annotation-api</artifactId>
-        <version>1.3.5</version>
+        <version>${annotation.api.version}</version>
         <!-- java 11 compliancy -->
         <optional>true</optional>
       </dependency>
