@@ -482,6 +482,12 @@
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
         <version>${hibernate.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
@@ -779,7 +785,7 @@
         <groupId>jakarta.xml.bind</groupId>
         <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${xml-bind.api.version}</version>
-        <scope>provided</scope> <!-- hibernate provides it as javax.xml -->
+        <scope>compile</scope> <!--look out,  hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>jakarta.annotation</groupId>
