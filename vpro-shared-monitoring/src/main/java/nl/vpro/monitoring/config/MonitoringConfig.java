@@ -204,7 +204,12 @@ public class MonitoringConfig {
                     Object factory = factoryClass.getDeclaredConstructor().newInstance();
                     factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
                     Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
-                    Object camelContext = applicationContext.getBean(camelContextClass);
+                    Object camelContext;
+                    try {
+                        camelContext = applicationContext.getBean(camelContextClass);
+                    } catch (BeansException e) {
+                        camelContext = null;
+                    }
                     if (camelContext == null) {
                         log.warn("No camel context found in {}", applicationContext);
                     } else {
