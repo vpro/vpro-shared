@@ -692,11 +692,6 @@
         <scope>provided</scope> <!-- hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
-        <groupId>javax</groupId>
-        <artifactId>javaee-api</artifactId>
-        <version>8.0.1</version>
-      </dependency>
-      <dependency>
         <groupId>org.meeuw.math</groupId>
         <artifactId>mihxil-theories</artifactId>
         <version>${theories.version}</version>
@@ -771,7 +766,7 @@
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>s
+        <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
         <scope>provided</scope>
       </dependency>
