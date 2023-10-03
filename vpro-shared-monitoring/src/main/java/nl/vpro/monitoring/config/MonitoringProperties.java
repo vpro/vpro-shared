@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class MonitoringProperties {
 
-    @Value("${monitoring.user:#{systemProperties['MONITORING_USER'] ?: 'manager'}}")
+    @Value("${monitoring.user:${MONITORING_USER:manager}}")
     private String user;
 
-    @Value("${monitoring.password:#{systemProperties['MONITORING_PASSWORD'] ?: 'admin2k'}}")
+    @Value("${monitoring.password:${MONITORING_PASSWORD:admin2k}}")
     private String password;
 
     @Value("${monitoring.tags:#{null}}")
