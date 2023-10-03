@@ -689,6 +689,7 @@
         <groupId>jakarta.persistence</groupId>
         <artifactId>jakarta.persistence-api</artifactId>
         <version>${persistence.api.version}</version>
+        <scope>provided</scope> <!-- hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>javax</groupId>
@@ -770,7 +771,7 @@
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
+        <artifactId>lombok</artifactId>s
         <version>${lombok.version}</version>
         <scope>provided</scope>
       </dependency>
@@ -783,6 +784,7 @@
         <groupId>jakarta.xml.bind</groupId>
         <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${xml-bind.api.version}</version>
+        <scope>provided</scope> <!-- hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>jakarta.annotation</groupId>
