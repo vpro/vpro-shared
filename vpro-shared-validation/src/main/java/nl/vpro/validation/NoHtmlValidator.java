@@ -11,9 +11,6 @@ import nl.vpro.util.TextUtil;
 
 public class NoHtmlValidator implements ConstraintValidator<NoHtml, Object> {
 
-    @Override
-    public void initialize(NoHtml constraintAnnotation) {
-    }
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext constraintValidatorContext) {
@@ -31,8 +28,8 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, Object> {
                     return false;
                 }
             }
-        } else if(value instanceof Iterable) {
-            for(Object item : (Iterable)value) {
+        } else if(value instanceof Iterable<?> iterable) {
+            for(Object item : iterable) {
                 if(item != null) {
                     if(!(item instanceof String)) {
                         throw new UnsupportedOperationException("NoHtml validation only supports collections of strings. Got an " + item.getClass().getSimpleName());

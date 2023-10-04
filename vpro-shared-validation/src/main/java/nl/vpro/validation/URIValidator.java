@@ -31,14 +31,14 @@ public class URIValidator implements ConstraintValidator<URI, Object> {
             return true;
         }
 
-        if (value instanceof CharSequence) {
-            return validateCharSequence((CharSequence) value);
+        if (value instanceof CharSequence charSequence) {
+            return validateCharSequence(charSequence);
         }
-        if (value instanceof java.net.URI) {
-            return validateURI((java.net.URI) value);
+        if (value instanceof java.net.URI uri) {
+            return validateURI(uri);
         }
-        if (value instanceof URL) {
-            return validateURL((URL) value);
+        if (value instanceof URL url) {
+            return validateURL(url);
         }
         log.debug("Type unrecognized");
         return false;
@@ -53,7 +53,6 @@ public class URIValidator implements ConstraintValidator<URI, Object> {
         if (StringUtils.isEmpty(value) && annotation.allowEmptyString()) {
             return true;
         }
-
         try {
             java.net.URI uri = new java.net.URI(value.toString());
             return validateURI(uri);

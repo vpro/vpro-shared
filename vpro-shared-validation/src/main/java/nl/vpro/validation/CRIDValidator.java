@@ -13,10 +13,7 @@ public class CRIDValidator implements ConstraintValidator<CRID, String> {
     public static final String  REGEXP  = "crid://.*/.*";
     public static final Pattern PATTERN = Pattern.compile(REGEXP, Pattern.CASE_INSENSITIVE);
 
-    @Override
-    public void initialize(CRID crid) {
-        // nothing to initialize
-    }
+
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
