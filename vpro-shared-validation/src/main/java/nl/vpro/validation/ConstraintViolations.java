@@ -14,8 +14,8 @@ import com.google.common.base.Joiner;
 public class ConstraintViolations {
 
     public static  <T extends Iterable<? extends ConstraintViolation<?>>> String humanReadable(T violations) {
-        StringBuilder builder = new StringBuilder();
-        List<String> propsWithHtml = new ArrayList<>();
+        final StringBuilder builder = new StringBuilder();
+        final List<String> propsWithHtml = new ArrayList<>();
         for (ConstraintViolation<?> violation : violations) {
             if (violation.getConstraintDescriptor().getAnnotation().annotationType().isAssignableFrom(NoHtml.class)) {
                 String prop = violation.getPropertyPath().toString();
