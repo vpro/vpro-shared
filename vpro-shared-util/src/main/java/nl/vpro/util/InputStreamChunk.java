@@ -3,6 +3,8 @@ package nl.vpro.util;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import static nl.vpro.util.FileCachingInputStream.EOF;
 
 
@@ -51,7 +53,7 @@ public class InputStreamChunk extends InputStream implements Counted {
 
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(byte @NonNull [] b, int off, int len) throws IOException {
         int maxRead = Math.max(0, Math.min(off + len, chunkSize - (int) count) - off);
         if (maxRead == 0) {
             return EOF;
@@ -72,6 +74,7 @@ public class InputStreamChunk extends InputStream implements Counted {
     public int available() throws IOException {
         return Math.min(wrapped.available(), chunkSize);
     }
+
     @Override
     public void close() {
         // nothing to do
