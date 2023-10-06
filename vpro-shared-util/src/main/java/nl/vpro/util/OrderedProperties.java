@@ -2,6 +2,7 @@ package nl.vpro.util;
 
 import java.io.Serial;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -23,10 +24,37 @@ public class OrderedProperties extends Properties {
         return Collections.enumeration(names);
     }
 
+    @Override
+    public synchronized @NonNull Set<Object> keySet() {
+        return new LinkedHashSet<>(names);
+    }
+
+    @Override
+    public synchronized @NonNull Enumeration<Object> keys() {
+        return Collections.enumeration(names);
+    }
+    @Override
+    public @NonNull Collection<Object> values() {
+        return entrySet().stream().map(Map.Entry::getValue).toList();
+    }
+
+
+    @Override
+    public synchronized void forEach(BiConsumer<? super Object, ? super Object> action) {
+        entrySet().forEach(e -> action.accept(e.getKey(), e.getValue()));
+    }
+
+
+    @Override
+    public Enumeration<Object> elements() {
+        // CHM.elements() returns Iterator w/ remove() - instead wrap values()
+        return Collections.enumeration(values().stream().toList());
+    }
+
     @NonNull
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
-        return new AbstractSet<Map.Entry<Object, Object>>() {
+        return new AbstractSet<>() {
 
             @NonNull
             @Override
@@ -63,7 +91,6 @@ public class OrderedProperties extends Properties {
     public synchronized Object put(Object key, Object value) {
         names.remove(key);
         names.add(key);
-
         return super.put(key, value);
     }
 
@@ -72,4 +99,19 @@ public class OrderedProperties extends Properties {
         names.remove(key);
         return super.remove(key);
     }
+
+    @Override
+    public synchronized String toString() {
+        return sortedMap().toString();
+    }
+
+    protected Map<Object, Object> sortedMap() {
+        return new AbstractMap<>() {
+            @Override
+            public @NonNull Set<Entry<Object, Object>> entrySet() {
+                return OrderedProperties.this.entrySet();
+            }
+        };
+    }
+
 }
