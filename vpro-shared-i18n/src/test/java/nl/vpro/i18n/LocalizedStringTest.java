@@ -3,8 +3,8 @@ package nl.vpro.i18n;
 import java.io.StringReader;
 import java.util.*;
 
-import javax.xml.bind.JAXB;
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.JAXB;
+import jakarta.xml.bind.annotation.XmlElement;
 
 import org.junit.jupiter.api.Test;
 

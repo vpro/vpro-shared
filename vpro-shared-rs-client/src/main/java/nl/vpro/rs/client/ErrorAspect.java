@@ -1,5 +1,7 @@
 package nl.vpro.rs.client;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 
 import java.lang.reflect.*;
@@ -7,9 +9,6 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.*;
 import java.util.function.Supplier;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +100,7 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             }
             wea.getResponse().close();
 
-        } catch (javax.ws.rs.ProcessingException pe) {
+        } catch (jakarta.ws.rs.ProcessingException pe) {
             Throwable cause = pe.getCause();
             mes = new Message(null, cause.getClass().getName() + " " + cause.getMessage());
             l = log;

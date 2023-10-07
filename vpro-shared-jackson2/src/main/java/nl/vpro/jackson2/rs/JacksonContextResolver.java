@@ -1,15 +1,15 @@
 package nl.vpro.jackson2.rs;
 
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
+
 import java.util.function.Supplier;
 
-import javax.annotation.Priority;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 
@@ -25,7 +25,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
 @Consumes({MediaType.APPLICATION_JSON, "application/*+json", "text/json"})
 @Produces({MediaType.APPLICATION_JSON, "application/*+json", "text/json"})
 @Priority(JacksonContextResolver.PRIORITY)
-public class JacksonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
+public class JacksonContextResolver extends JacksonXmlBindJsonProvider implements ContextResolver<ObjectMapper> {
 
     static final int PRIORITY = Priorities.USER;
 

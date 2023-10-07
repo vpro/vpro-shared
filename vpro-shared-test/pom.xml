@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.2-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-test</artifactId>
   <packaging>jar</packaging>
@@ -97,6 +97,11 @@
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
       <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
       <optional>true</optional>
     </dependency>
   </dependencies>

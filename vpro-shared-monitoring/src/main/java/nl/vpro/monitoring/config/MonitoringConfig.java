@@ -10,13 +10,13 @@ import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.*;
 
-import javax.annotation.PreDestroy;
 import javax.cache.CacheManager;
 import javax.sql.DataSource;
 

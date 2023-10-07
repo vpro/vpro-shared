@@ -4,10 +4,10 @@
  */
 package nl.vpro.apache.ws.security;
 
-import javax.annotation.Resource;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
+import jakarta.annotation.Resource;
+import jakarta.security.auth.callback.Callback;
+import jakarta.security.auth.callback.CallbackHandler;
+import jakarta.security.auth.callback.UnsupportedCallbackException;
 import java.io.IOException;
 
 import org.apache.wss4j.common.ext.WSPasswordCallback;

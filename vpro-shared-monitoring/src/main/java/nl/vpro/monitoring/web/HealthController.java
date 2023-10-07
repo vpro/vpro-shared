@@ -7,7 +7,7 @@ import java.lang.management.ManagementFactory;
 import java.time.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.io.output.NullWriter;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;

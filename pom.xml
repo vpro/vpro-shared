@@ -4,7 +4,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>4.2-SNAPSHOT</version>
+  <version>5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -17,20 +17,20 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>5.3.30</spring.version>
-    <spring-security.version>5.8.3</spring-security.version>
+    <spring.version>6.0.12</spring.version>
+    <spring-security.version>6.0.7</spring-security.version>
     <jackson2.version>2.15.2</jackson2.version>
 
     <junit.version>5.10.0</junit.version>
     <mockito.version>5.5.0</mockito.version>
     <assertj.version>3.24.2</assertj.version>
-    <resteasy.version>5.0.8.Final</resteasy.version>
+    <resteasy.version>6.2.5.Final</resteasy.version>
     <bytebuddy.version>1.14.8</bytebuddy.version>
     <slf4j.version>2.0.9</slf4j.version>
     <log4j2.version>2.20.0</log4j2.version>
     <guava.version>32.1.2-jre</guava.version>
     <javassist.version>3.29.2-GA</javassist.version>
-    <wss4j.version>2.3.2</wss4j.version>
+    <wss4j.version>3.0.1</wss4j.version>
     <xmlunit.version>2.9.1</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <theories.version>0.11.0</theories.version>
@@ -38,17 +38,17 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>5.6.14.Final</hibernate.version>
+    <hibernate.version>6.3.1.Final</hibernate.version>
     <hibernate.search.version>5.11.12.Final</hibernate.search.version>
 
-    <hibernate.search6.version>6.1.7.Final</hibernate.search6.version>
+    <hibernate.search6.version>6.2.2.Final</hibernate.search6.version>
 
     <!-- jakarta versions -->
-    <servlet.api.version>4.0.4</servlet.api.version>
-    <validation.api.version>2.0.2</validation.api.version>
-    <persistence.api.version>2.2.3</persistence.api.version>
-    <annotation.api.version>1.3.5</annotation.api.version>
-    <xml-bind.api.version>2.3.3</xml-bind.api.version>
+    <servlet.api.version>5.0.0</servlet.api.version>
+    <validation.api.version>3.0.2</validation.api.version>
+    <persistence.api.version>3.1.0</persistence.api.version>
+    <annotation.api.version>2.1.1</annotation.api.version>
+    <xml-bind.api.version>4.0.1</xml-bind.api.version>
 
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
     <camel.version>3.20.4</camel.version>
@@ -450,7 +450,7 @@
       </dependency>
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-jaxrs2</artifactId>
+        <artifactId>swagger-jaxrs2-jakarta</artifactId>
         <version>${swagger.version}</version>
       </dependency>
       <dependency>
@@ -537,7 +537,7 @@
       <dependency>
         <groupId>jakarta.ws.rs</groupId>
         <artifactId>jakarta.ws.rs-api</artifactId>
-        <version>2.1.6</version>
+        <version>3.1.0</version>
         <scope>provided</scope>
       </dependency>
 
@@ -795,6 +795,11 @@
         <optional>true</optional>
       </dependency>
       <dependency>
+        <groupId>jakarta.inject</groupId>
+        <artifactId>jakarta.inject-api</artifactId>
+        <version>2.0.1</version>
+      </dependency>
+      <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
         <version>3.2.0</version>
@@ -828,7 +833,7 @@
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
-        <version>2.3.8</version>
+        <version>4.0.3</version>
       </dependency>
       <dependency>
         <groupId>info.picocli</groupId>

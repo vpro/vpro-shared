@@ -4,8 +4,8 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 /**
  * @author Michiel Meeuwissen

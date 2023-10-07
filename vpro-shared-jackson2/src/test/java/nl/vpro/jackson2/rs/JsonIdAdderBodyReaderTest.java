@@ -3,8 +3,8 @@ package nl.vpro.jackson2.rs;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Providers;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.Providers;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

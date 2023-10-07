@@ -2,7 +2,7 @@ package nl.vpro.test.psql;
 
 import lombok.extern.log4j.Log4j2;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;

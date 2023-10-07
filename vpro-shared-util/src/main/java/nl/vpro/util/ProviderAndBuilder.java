@@ -9,7 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * If you have a provider implementation based on a builder, you can fill the fields of the provider to the builder using

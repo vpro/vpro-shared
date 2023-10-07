@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeansException;

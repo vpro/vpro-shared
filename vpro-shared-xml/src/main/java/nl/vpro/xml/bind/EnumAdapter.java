@@ -1,7 +1,7 @@
 package nl.vpro.xml.bind;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * This is a nice idea. The sad thing however, is that when using this, the generated XSD will not anymore be an enum.

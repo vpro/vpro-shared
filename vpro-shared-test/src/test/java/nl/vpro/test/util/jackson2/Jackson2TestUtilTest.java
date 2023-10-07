@@ -1,7 +1,7 @@
 package nl.vpro.test.util.jackson2;
 
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import lombok.Getter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

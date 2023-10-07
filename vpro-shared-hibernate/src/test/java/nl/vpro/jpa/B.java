@@ -1,6 +1,6 @@
 package nl.vpro.jpa;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * @author Michiel Meeuwissen

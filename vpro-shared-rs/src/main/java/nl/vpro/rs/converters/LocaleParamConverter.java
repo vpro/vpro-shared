@@ -2,7 +2,7 @@ package nl.vpro.rs.converters;
 
 import java.util.Locale;
 
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverter;
 
 
 /**

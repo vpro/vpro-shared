@@ -2,7 +2,7 @@ package nl.vpro.apache.ws.security;
 
 import java.io.IOException;
 
-import javax.security.auth.callback.*;
+import jakarta.security.auth.callback.*;
 
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 import org.springframework.security.core.context.SecurityContextHolder;

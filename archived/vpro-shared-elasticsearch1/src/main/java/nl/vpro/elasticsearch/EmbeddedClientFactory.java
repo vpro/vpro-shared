@@ -6,7 +6,7 @@ package nl.vpro.elasticsearch;
 
 import java.util.concurrent.Callable;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;

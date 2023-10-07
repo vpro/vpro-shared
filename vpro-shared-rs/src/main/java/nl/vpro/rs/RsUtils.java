@@ -1,14 +1,14 @@
 package nl.vpro.rs;
 
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.NotAcceptableException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+
 import java.util.Arrays;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.MediaType.APPLICATION_XML_TYPE;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_XML_TYPE;
 
 public class RsUtils {
 

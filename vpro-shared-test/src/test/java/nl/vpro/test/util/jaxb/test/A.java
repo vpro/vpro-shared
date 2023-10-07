@@ -2,7 +2,7 @@ package nl.vpro.test.util.jaxb.test;
 
 import lombok.Getter;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 /**
  * @author Michiel Meeuwissen

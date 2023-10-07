@@ -3,7 +3,7 @@ package nl.vpro.rs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.xml.bind.Marshaller;
+import jakarta.xml.bind.Marshaller;
 
 import org.jboss.resteasy.annotations.Decorator;
 

@@ -6,8 +6,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 
 import java.util.Arrays;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
 

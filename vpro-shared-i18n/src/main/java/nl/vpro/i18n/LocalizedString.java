@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,12 +15,10 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.neovisionaries.i18n.LanguageCode;
@@ -31,6 +31,7 @@ import static nl.vpro.i18n.Locales.score;
  * @author Michiel Meeuwissen
  * @since 3.2
  */
+@Getter
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlTransient
 @Slf4j
@@ -57,18 +58,15 @@ public class LocalizedString implements CharSequence, Serializable {
     @XmlAttribute(name = "lang", namespace = XMLConstants.XML_NS_URI)
     @JsonProperty("lang")
     @XmlJavaTypeAdapter(value = XmlLangAdapter.class)
-    @Getter
     @Setter
     @Schema(implementation = String.class, type = "string")
     private Locale locale;
 
     @XmlValue
     @NonNull
-    @Getter
     @Setter
     private String value;
 
-    @Getter
     @Setter
     private String charsetName;
 
@@ -175,14 +173,11 @@ public class LocalizedString implements CharSequence, Serializable {
         LanguageCode languageCode = LanguageCode.getByCode(split[0], false);
         String language = languageCode == null ? split[0] : languageCode.name().toLowerCase();
 
-        switch (split.length) {
-            case 1:
-                return new Locale(language);
-            case 2:
-                return new Locale(language, split[1].toUpperCase());
-            default:
-                return new Locale(language, split[1].toUpperCase(), split[2]);
-        }
+        return switch (split.length) {
+            case 1 -> new Locale(language);
+            case 2 -> new Locale(language, split[1].toUpperCase());
+            default -> new Locale(language, split[1].toUpperCase(), split[2]);
+        };
     }
     public static class Builder implements Supplier<CharSequence> {
         public Builder charset(Charset charset) {

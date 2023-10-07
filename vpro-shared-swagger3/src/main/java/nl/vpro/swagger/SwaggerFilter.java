@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.json.grep.Sed;

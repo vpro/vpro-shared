@@ -6,10 +6,10 @@ import io.swagger.jaxrs.listing.BaseApiListingResource;
 
 import java.time.Duration;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

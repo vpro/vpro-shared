@@ -4,18 +4,19 @@
  */
 package nl.vpro.test.util.jaxb;
 
+import jakarta.xml.bind.*;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.SneakyThrows;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,7 +25,6 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Validator;
 import javax.xml.validation.*;
 
 import org.apache.commons.io.IOUtils;

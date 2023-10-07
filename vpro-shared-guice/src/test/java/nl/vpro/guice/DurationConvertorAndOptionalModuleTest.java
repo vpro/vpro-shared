@@ -3,8 +3,8 @@ package nl.vpro.guice;
 import java.time.Duration;
 import java.util.*;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

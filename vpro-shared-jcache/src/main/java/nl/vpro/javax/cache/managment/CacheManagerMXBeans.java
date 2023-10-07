@@ -2,10 +2,10 @@ package nl.vpro.javax.cache.managment;
 
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.cache.Cache;
 import javax.cache.CacheManager;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 

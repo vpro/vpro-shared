@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.inject.*;
+import jakarta.inject.*;
 
 import org.junit.jupiter.api.Test;
 

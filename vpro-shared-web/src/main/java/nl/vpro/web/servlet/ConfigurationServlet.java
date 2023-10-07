@@ -1,5 +1,9 @@
 package nl.vpro.web.servlet;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.*;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -7,9 +11,6 @@ import java.util.*;
 import java.util.function.Function;
 
 import javax.naming.*;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 

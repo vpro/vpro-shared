@@ -1,5 +1,6 @@
 package nl.vpro.elasticsearchclient;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;

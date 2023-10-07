@@ -8,7 +8,7 @@ import ru.lanwen.wiremock.ext.WiremockUriResolver.WiremockUri;
 
 import java.util.Date;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;

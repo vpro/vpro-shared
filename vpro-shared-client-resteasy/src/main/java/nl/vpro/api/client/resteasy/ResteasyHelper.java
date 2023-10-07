@@ -2,7 +2,7 @@ package nl.vpro.api.client.resteasy;
 
 import lombok.SneakyThrows;
 
-import javax.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.ClientRequestFilter;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;

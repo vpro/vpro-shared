@@ -6,7 +6,7 @@ import java.lang.reflect.*;
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;

@@ -3,7 +3,7 @@ package nl.vpro.validation;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 
 import com.google.common.base.Joiner;
 

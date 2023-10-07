@@ -2,7 +2,7 @@ package nl.vpro.rs.converters;
 
 import java.time.Duration;
 
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverter;
 
 import nl.vpro.util.TimeUtils;
 

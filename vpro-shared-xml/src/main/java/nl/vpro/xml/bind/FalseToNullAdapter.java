@@ -1,6 +1,6 @@
 package nl.vpro.xml.bind;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * @author Michiel Meeuwissen

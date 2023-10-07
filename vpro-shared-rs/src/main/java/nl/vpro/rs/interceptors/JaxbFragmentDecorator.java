@@ -1,12 +1,11 @@
 package nl.vpro.rs.interceptors;
 
+import jakarta.ws.rs.core.MediaType;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.PropertyException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
-
-import javax.ws.rs.core.MediaType;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.PropertyException;
 
 import org.jboss.resteasy.annotations.DecorateTypes;
 import org.jboss.resteasy.spi.DecoratorProcessor;
@@ -28,5 +27,4 @@ public class JaxbFragmentDecorator implements DecoratorProcessor<Marshaller, Xml
         }
         return target;
     }
-
-}
+ }

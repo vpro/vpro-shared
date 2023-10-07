@@ -5,7 +5,7 @@ import java.time.Year;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * https://bugs.openjdk.java.net/browse/JDK-8042456

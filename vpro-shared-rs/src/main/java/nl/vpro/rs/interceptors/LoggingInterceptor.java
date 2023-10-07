@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 
-import javax.ws.rs.container.*;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.container.*;
+import jakarta.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;

@@ -3,8 +3,8 @@ package nl.vpro.rs.converters;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.ws.rs.ext.ParamConverter;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.ws.rs.ext.ParamConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 
 /**

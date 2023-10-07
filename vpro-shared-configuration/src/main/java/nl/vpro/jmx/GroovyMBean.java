@@ -8,7 +8,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.jmx.export.annotation.*;

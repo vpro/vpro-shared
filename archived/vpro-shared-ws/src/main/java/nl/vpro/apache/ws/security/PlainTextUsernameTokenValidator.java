@@ -4,7 +4,7 @@
  */
 package nl.vpro.apache.ws.security;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.handler.RequestData;

@@ -1,5 +1,7 @@
 package nl.vpro.api.client.resteasy;
 
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,8 +10,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.cache.Cache;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.CacheEntry;
