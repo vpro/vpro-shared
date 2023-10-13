@@ -23,7 +23,7 @@ jobs:
         #  os: [ ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            java: 21-ea
+            java: 21
             target: 'test'
           - os: windows-latest
             java: 17
