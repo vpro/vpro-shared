@@ -1,5 +1,4 @@
 = VPRO Shared modules
-
 :toc:
 
 //image:https://travis-ci.com/vpro/vpro-shared.svg[BuildStatus,link=https://travis-ci.com/vpro/vpro-shared]
