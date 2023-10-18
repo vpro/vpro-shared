@@ -24,11 +24,6 @@ public class HttpConnectionUtils {
 
     }
 
-
-    private static final ConnectionConfig connConfig = ConnectionConfig.custom()
-    .setConnectTimeout(timeout, TimeUnit.MILLISECONDS)
-    .setSocketTimeout(timeout, TimeUnit.MILLISECONDS)
-    .build();
     /**
      * Client used for {@link #getByteSize(String)}}
      */
@@ -42,6 +37,7 @@ public class HttpConnectionUtils {
     /**
      * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
      * @since 4.1
+     * @return an optional with the size in bytes of the resource represented by the given url.
      */
     public static OptionalLong getOptionalByteSize(String locationUrl) {
         if (locationUrl == null || ! ENABLED.get()) {
@@ -71,9 +67,12 @@ public class HttpConnectionUtils {
 
     /**
      * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
+     *
+     * @return the size in bytes, or {@code null} if it could not be determined.
+     * @see #getOptionalByteSize(String) getOptionalByteSize
      */
     public static Long getByteSize(String u) {
-        OptionalLong result = getOptionalByteSize(u);
+        final OptionalLong result = getOptionalByteSize(u);
         if (result.isPresent()) {
             return result.getAsLong();
         } else {
