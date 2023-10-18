@@ -24,10 +24,16 @@ public class HttpConnectionUtils {
 
     }
 
+
+    private static final ConnectionConfig connConfig = ConnectionConfig.custom()
+    .setConnectTimeout(timeout, TimeUnit.MILLISECONDS)
+    .setSocketTimeout(timeout, TimeUnit.MILLISECONDS)
+    .build();
     /**
      * Client used for {@link #getByteSize(String)}}
      */
     private static final HttpClient CLIENT = HttpClient.newBuilder()
+
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .connectTimeout(Duration.ofSeconds(3))
         .build();
@@ -58,7 +64,7 @@ public class HttpConnectionUtils {
                 log.warn("HEAD {} returned {}", locationUrl, send.statusCode());
             }
         } catch (IOException | InterruptedException | IllegalArgumentException e) {
-            log.warn(e.getClass() + ":" + e.getMessage(), e);
+            log.warn("For {}: {} {}", locationUrl, e.getClass().getName(), e.getMessage());
         }
         return OptionalLong.empty();
     }
