@@ -19,13 +19,13 @@
 
     <spring.version>5.3.30</spring.version>
     <spring-security.version>5.8.3</spring-security.version>
-    <jackson2.version>2.15.2</jackson2.version>
+    <jackson2.version>2.15.3</jackson2.version>
 
     <junit.version>5.10.0</junit.version>
     <mockito.version>5.5.0</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <resteasy.version>5.0.8.Final</resteasy.version>
-    <bytebuddy.version>1.14.8</bytebuddy.version>
+    <bytebuddy.version>1.14.9</bytebuddy.version>
     <slf4j.version>2.0.9</slf4j.version>
     <log4j2.version>2.20.0</log4j2.version>
     <guava.version>32.1.2-jre</guava.version>
@@ -41,7 +41,7 @@
     <hibernate.version>5.6.14.Final</hibernate.version>
     <hibernate.search.version>5.11.12.Final</hibernate.search.version>
 
-    <hibernate.search6.version>6.1.7.Final</hibernate.search6.version>
+    <hibernate.search6.version>6.1.8.Final</hibernate.search6.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>4.0.4</servlet.api.version>
@@ -53,7 +53,7 @@
     <hibernate.validator.version>6.2.5.Final</hibernate.validator.version>
     <camel.version>3.20.4</camel.version>
 
-    <swagger.version>2.2.16</swagger.version>
+    <swagger.version>2.2.18</swagger.version>
 
     <lombok.version>1.18.30</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -65,7 +65,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.11.4</micrometer.version>
+    <micrometer.version>1.11.5</micrometer.version>
     <flyway.version>9.22.2</flyway.version>
 
   </properties>
