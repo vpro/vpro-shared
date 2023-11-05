@@ -5,7 +5,6 @@ import net.jqwik.api.*;
 
 import java.util.*;
 
-import org.meeuw.util.test.BasicObjectTheory;
 
 import nl.vpro.util.Pair;
 
@@ -18,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
  *
  * @author Michiel Meeuwissen
  * @since 2.2
- * @deprecated Just use {@link BasicObjectTheory}
+ * @deprecated Just use {@link org.meeuw.theories.BasicObjectTheory}
  */
 @Deprecated
 public interface BasicObjectTest<E> {

@@ -2,8 +2,6 @@ package nl.vpro.test.jqwik;
 
 import net.jqwik.api.*;
 
-import org.meeuw.util.test.ComparableTheory;
-
 import nl.vpro.util.Pair;
 
 import static java.lang.Integer.signum;
@@ -13,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author Michiel Meeuwissen
  * @since 2.22
- * @deprecated Just use {@link ComparableTheory}
+ * @deprecated Just use {@link org.meeuw.theories.ComparableTheory}
  */
 @Deprecated
 public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest<E> {
