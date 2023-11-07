@@ -1,10 +1,12 @@
 package nl.vpro.util;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -27,6 +29,11 @@ import static nl.vpro.util.FileCachingInputStream.EOF;
 public class Copier implements Runnable, Closeable {
     static final int MAX_BUFFER = 8192;
 
+    /**
+     *  Checks whether this copier is ready. You may want to check
+     *  or use to deal with unsuccessful terminations
+     */
+    @Getter
     private volatile boolean ready;
     private volatile boolean readyAndCallbacked;
 
@@ -46,6 +53,8 @@ public class Copier implements Runnable, Closeable {
     private final String name;
     private final String logPrefix;
     private final Object notify;
+
+    private final ExecutorService executorService;
 
 
     /**
@@ -71,7 +80,8 @@ public class Copier implements Runnable, Closeable {
         @Nullable BiConsumer<Copier, Throwable> errorHandler,
         int offset,
         @Nullable String name,
-        @Nullable Object notify
+        @Nullable Object notify,
+        @Nullable ExecutorService executorService
         ) {
         this.input = input;
         this.expectedCount = expectedCount;
@@ -84,10 +94,11 @@ public class Copier implements Runnable, Closeable {
         this.name = name;
         this.logPrefix = name == null ? "" : name + ": ";
         this.notify = notify;
+        this.executorService = executorService == null ? ThreadPools.copyExecutor : executorService;
     }
 
     public Copier(@NonNull InputStream i, @NonNull OutputStream o, long batch) {
-        this(i, null, o, batch, null, null, null,  0, null, null);
+        this(i, null, o, batch, null, null, null,  0, null, null, null);
     }
 
 
@@ -213,13 +224,6 @@ public class Copier implements Runnable, Closeable {
     }
 
     /**
-     * Checks whether this copier is ready. You may want to check {@link #getException()} or use {@link #isReadyIOException()} to deal with unsuccessfull terminations
-     */
-    public boolean isReady() {
-        return ready;
-    }
-
-    /**
      * Checks whether this copier is ready, but will throw an {@link IOException} it it did not _successfully_ finish.
      */
     public boolean isReadyIOException() throws IOException {
@@ -254,7 +258,7 @@ public class Copier implements Runnable, Closeable {
         if (this.future != null) {
             throw new IllegalStateException(logPrefix + "Already running");
         }
-        this.future = ThreadPools.copyExecutor.submit(this);
+        this.future = executorService.submit(this);
         return this;
     }
 

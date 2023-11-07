@@ -9,8 +9,7 @@ import java.nio.file.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -52,12 +51,17 @@ public class FileCachingInputStream extends InputStream {
 
     private final byte[] buffer;
 
+    /**
+     *  If a temp file is used for buffering, you may obtain it.
+     */
+    @Getter
     private final Path tempFile;
     private final boolean deleteTempFile;
 
     private final InputStream tempFileInputStream;
     private boolean tempFileInputStreamClosed = false;
 
+    @Getter
     private volatile boolean closed = false;
     private final AtomicLong count = new AtomicLong(0);
     private final SimpleLogger log ;
@@ -97,7 +101,8 @@ public class FileCachingInputStream extends InputStream {
         @Nullable final Boolean progressLogging,
         @Nullable final Integer progressLoggingBatch,
         @Nullable final Path tempPath,
-        @Nullable final Boolean deleteTempFile
+        @Nullable final Boolean deleteTempFile,
+        @Nullable final ExecutorService executorService
     ) {
         super();
         this.log = simpleLogger == null ?
@@ -150,7 +155,8 @@ public class FileCachingInputStream extends InputStream {
                 expectedCount,
                 consumer,
                 batchSize,
-                progressLogging
+                progressLogging,
+                executorService
             );
             executeCopier(downloadFirst, startImmediately);
         } catch (IOException e) {
@@ -191,7 +197,9 @@ public class FileCachingInputStream extends InputStream {
         final Long expectedCount,
         final Consumer<FileCachingInputStream> consumer,
         final long batchSize,
-        final Boolean progressLogging) throws ExecutionException, InterruptedException {
+        final Boolean progressLogging,
+        final ExecutorService executorService
+        ) throws ExecutionException, InterruptedException {
 
         final boolean effectiveProgressLogging;
         if (progressLogging == null) {
@@ -203,13 +211,13 @@ public class FileCachingInputStream extends InputStream {
             .input(input)
             .expectedCount(expectedCount)
             .offset(offset)
-
             .output(tempFileOutputStream)
             .name(this.tempFile.toString())
             .notify(this)
             .errorHandler((c, e) ->
                 this.future.completeExceptionally(e)
             )
+            .executorService(executorService)
             .callback(c -> {
                 log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
                 try {
@@ -427,9 +435,6 @@ public class FileCachingInputStream extends InputStream {
 
          log.debug("closed");
     }
-    public boolean isClosed() {
-        return closed;
-    }
 
     @Override
     public String toString() {
@@ -471,13 +476,6 @@ public class FileCachingInputStream extends InputStream {
      */
     public Optional<Throwable> getException() {
         return toFileCopier == null ? Optional.empty(): toFileCopier.getException();
-    }
-
-    /**
-     * If a temp file is used for buffering, you can may obtain it.
-     */
-    public Path getTempFile() {
-        return tempFile;
     }
 
     /**
