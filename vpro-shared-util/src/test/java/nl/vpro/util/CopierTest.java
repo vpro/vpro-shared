@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import static nl.vpro.util.Copier.DEFAULT_BATCH_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -49,7 +50,7 @@ class CopierTest {
             final Copier copier = Copier
                 .builder()
                 .input(in)
-                .batch(213)
+                .batch(213L)
                 .batchConsumer((c) ->
                     batches.add("" + c.getCount())
                 )
@@ -74,7 +75,7 @@ class CopierTest {
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @Test
-    void ioExceptional(TestInfo info) throws InterruptedException {
+    void ioExceptional(TestInfo info) throws InterruptedException, IOException {
         InputStream in = randomStream((count) ->  {
             if (count % 10 ==0) {
                 log.info("" + count);
@@ -86,35 +87,35 @@ class CopierTest {
         });
         final Object notifiable = new Object();
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
         Copier copier = Copier
             .builder()
             .input(in)
             .output(out)
-            .batch(100)
+            .batch(100L)
             .notify(notifiable)
             .name(info.getDisplayName())
-            .build();
+            .build()) {
 
-        if (copier.executeIfNotRunning()) {
-            log.info("Started copier");
-        } else {
-            log.info("Copier was running already");
-        }
-
-        synchronized (notifiable) {
-            while(!copier.isReady()) {
-                notifiable.wait();
-                log.info("Waited");
+            if (copier.executeIfNotRunning()) {
+                log.info("Started copier");
+            } else {
+                log.info("Copier was running already");
             }
-        }
-        log.info("Ready");
-        //assertThat(copier.getCount()).isEqualTo(500);
-        assertThat(copier.isReady()).isTrue();
-        assertThatThrownBy(copier::isReadyIOException).isInstanceOf(IOException.class)
-            .hasMessage("foo bar");
-        assertThat(copier.getException()).isPresent().containsInstanceOf(IOException.class);
 
+            synchronized (notifiable) {
+                while (!copier.isReady()) {
+                    notifiable.wait();
+                    log.info("Waited");
+                }
+            }
+            log.info("Ready");
+            //assertThat(copier.getCount()).isEqualTo(500);
+            assertThat(copier.isReady()).isTrue();
+            assertThatThrownBy(copier::isReadyIOException).isInstanceOf(IOException.class)
+                .hasMessage("foo bar");
+            assertThat(copier.getException()).isPresent().containsInstanceOf(IOException.class);
+        }
     }
 
 
@@ -133,7 +134,7 @@ class CopierTest {
             .builder()
             .input(in)
             .output(out)
-            .batch(100)
+            .batch(100L)
             .callback((c) ->
                 callback.add(c.toString())
             )
@@ -193,7 +194,7 @@ class CopierTest {
             Copier copier = Copier
                 .builder()
                 .input(in)
-                .batch(20)
+                .batch(20L)
                 .output(out)
                 .batchConsumer((c) -> {
                     sleep(10);
@@ -225,13 +226,16 @@ class CopierTest {
 
     @Test
     void equalsParts() {
-        assertThat(Copier.equalsParts(3)).containsExactly(3);
-        assertThat(Copier.equalsParts(100)).containsExactly(100);
-        assertThat(Copier.equalsParts(9000)).containsExactly(4500, 4500);
-        assertThat(Copier.equalsParts(9001)).containsExactly(4501, 4500);
-        assertThat(Copier.equalsParts(100000)).containsExactly(7693, 7693, 7693, 7693, 7692, 7692, 7692, 7692, 7692, 7692, 7692, 7692, 7692);
+        assertThat(Copier.equalsParts(3, DEFAULT_BATCH_SIZE)).containsExactly(3);
+        assertThat(Copier.equalsParts(100, DEFAULT_BATCH_SIZE)).containsExactly(100);
+        assertThat(Copier.equalsParts(9000, DEFAULT_BATCH_SIZE)).containsExactly(4500, 4500);
+        assertThat(Copier.equalsParts(9001, DEFAULT_BATCH_SIZE)).containsExactly(4501, 4500);
+        assertThat(Copier.equalsParts(100000, DEFAULT_BATCH_SIZE)).containsExactly(7693, 7693, 7693, 7693, 7692, 7692, 7692, 7692, 7692, 7692, 7692, 7692, 7692);
 
-        assertThat(Arrays.stream(Copier.equalsParts(100000)).sum()).isEqualTo(100000);
+        assertThat(Copier.equalsParts(12, 1)).containsExactly(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+
+        assertThat(Arrays.stream(Copier.equalsParts(100000, 8172)).sum()).isEqualTo(100000);
     }
 
 

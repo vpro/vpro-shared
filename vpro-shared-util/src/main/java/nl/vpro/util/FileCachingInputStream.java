@@ -137,9 +137,9 @@ public class FileCachingInputStream extends InputStream {
             // if arriving here, a temp file will be needed
             this.tempFile = createTempFile(path, tempPath, filePrefix);
 
-            OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
+            final OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
 
-            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(
+            final Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(
                 progressLogging,
                 batchConsumer,
                 progressLoggingBatch
@@ -195,7 +195,7 @@ public class FileCachingInputStream extends InputStream {
         final int offset,
         final OutputStream tempFileOutputStream,
         final Long expectedCount,
-        final Consumer<FileCachingInputStream> consumer,
+        @Nullable final Consumer<FileCachingInputStream> consumer,
         final long batchSize,
         final Boolean progressLogging,
         final ExecutorService executorService
@@ -223,8 +223,10 @@ public class FileCachingInputStream extends InputStream {
                 try {
                     closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
                     log.debug("{} {} {}", c.isReady(), this.tempFile, this.tempFile.toFile().length());
-                    consumer.accept(FileCachingInputStream.this);
-                    log.debug("accepted {}", consumer);
+                    if (consumer != null) {
+                        consumer.accept(FileCachingInputStream.this);
+                        log.debug("accepted {}", consumer);
+                    }
                     this.future.complete(this);
                 } catch (IOException ioe) {
                     this.future.completeExceptionally(ioe);
@@ -232,7 +234,7 @@ public class FileCachingInputStream extends InputStream {
                 log.debugOrInfo(effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
             })
             .batch(batchSize)
-            .batchConsumer(c -> consumer.accept(this))
+            .batchConsumer(consumer == null ? null : c -> consumer.accept(this))
             .build();
     }
 
@@ -249,6 +251,7 @@ public class FileCachingInputStream extends InputStream {
     /**
      * Combines the user provided 'batchConsumer' (if there is one), with some other settings, to one 'effective' consumer.
      */
+    @Nullable
     private Consumer<FileCachingInputStream> assembleEffectiveConsumer(
         final Boolean progressLogging,
         final Consumer<FileCachingInputStream> batchConsumer,
@@ -267,7 +270,7 @@ public class FileCachingInputStream extends InputStream {
                 }
             };
         } else {
-            consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
+            consumer = batchConsumer;
         }
         return consumer;
     }
