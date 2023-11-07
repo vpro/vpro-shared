@@ -73,7 +73,7 @@ public class FileCachingInputStream extends InputStream {
     private final CompletableFuture<FileCachingInputStream> future = new CompletableFuture<>();
 
     /**
-     * @param batchSize Batch size
+     * @param batchSize Batch size/buffer size used when copying
      * @param batchConsumer After reading every batch, you have the possibility to do something yourself too
      * @param path Directory for temporary files
      * @param tempPath Path to temporary file to use
