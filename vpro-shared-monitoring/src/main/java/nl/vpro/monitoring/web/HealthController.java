@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -11,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.output.NullWriter;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.MediaType;
@@ -40,6 +44,9 @@ public class HealthController {
 
     @Inject
     PrometheusController prometheusController;
+
+    @Value("${data.dir}")
+    String dataDir;
 
     private boolean threadsDumped = false;
 
@@ -93,10 +100,20 @@ public class HealthController {
             }
             if (prometheusDown) {
                 if (!threadsDumped) {
-
+                    final Path threadFile = Path.of(dataDir, "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
                     new Thread(null, () -> {
-                        log.info("Dumping threads for later analysis");
-                        ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+                        log.info("Dumping threads to {} for later analysis", threadFile);
+                        StringBuilder builder = new StringBuilder();
+
+                        for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
+                            builder.append(threadInfo.toString());
+                            builder.append('\n');
+                        }
+                        try {
+                            Files.writeString(threadFile, builder.toString());
+                        } catch (IOException e) {
+                            log.warn(e.getMessage(), e);
+                        }
 
                     }, "Dumping threads").start();
                     threadsDumped = true;
