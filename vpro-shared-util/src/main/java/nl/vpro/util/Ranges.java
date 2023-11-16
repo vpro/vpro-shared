@@ -16,6 +16,8 @@ public class Ranges {
      * Creates on {@link Range#openClosed(Comparable, Comparable)} range, but the arguments can be {@code null}
      * in which case unbounded ranges are created
      * @since 2.29.1
+     * @see Range#closedOpen(Comparable, Comparable)
+     * @throws IllegalArgumentException if {@code lower} is greater than {@code upper}
      */
     public static <C extends Comparable<?>> Range<C> closedOpen(@Nullable C start, @Nullable C stop) {
         if(start == null) {
@@ -39,6 +41,8 @@ public class Ranges {
      * Creates on {@link Range#closed(Comparable, Comparable)} range, but the arguments can be {@code null}
      * in which case unbounded ranges are created
      * @since 2.29.3
+     * @see Range#closed(Comparable, Comparable)
+     * @throws IllegalArgumentException if {@code lower} is greater than {@code upper}
      */
     public static <C extends Comparable<?>> Range<C> closedClosed(@Nullable C start, @Nullable C stop) {
         if(start == null) {
