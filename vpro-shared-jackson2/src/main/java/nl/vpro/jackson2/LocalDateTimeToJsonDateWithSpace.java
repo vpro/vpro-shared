@@ -2,6 +2,7 @@ package nl.vpro.jackson2;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -9,6 +10,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+
+import nl.vpro.util.TimeUtils;
 
 
 /**
@@ -42,7 +45,11 @@ public class LocalDateTimeToJsonDateWithSpace {
             if (text == null) {
                 return null;
             } else {
-                return LocalDateTime.parse(text.replaceFirst(" ", "T"));
+                try {
+                    return LocalDateTime.parse(text.replaceFirst(" ", "T"));
+                } catch (DateTimeParseException dtf) {
+                    return TimeUtils.parse(text).map(i -> i.atZone(TimeUtils.ZONE_ID).toLocalDateTime()).orElseThrow(() -> new IOException("Cannot parse " + text));
+                }
             }
         }
     }
