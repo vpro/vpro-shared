@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.*;
 
 import nl.vpro.jackson2.Jackson2Mapper;
@@ -35,7 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class Jackson2TestUtil {
 
-    private static final ObjectMapper MAPPER = Jackson2Mapper.getPrettyStrictInstance();
+    private static final ObjectMapper MAPPER =
+        Jackson2Mapper.getPrettyStrictInstance();
+
+    private static final ObjectReader JSON_READER = MAPPER.readerFor(JsonNode.class).with(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION);
 
 
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual) {
@@ -57,7 +61,7 @@ public class Jackson2TestUtil {
             return null;
         }
         try {
-            JsonNode jsonNode = MAPPER.readTree(String.valueOf(test));
+            JsonNode jsonNode = JSON_READER.readTree(String.valueOf(test));
             String pretty = MAPPER.writeValueAsString(jsonNode);
             return pretty;
         } catch (IOException e) {
@@ -153,12 +157,23 @@ public class Jackson2TestUtil {
 
     public static <T> T assertJsonEquals(String actual, String expected, Class<T> typeReference) throws IOException {
         assertJsonEquals("",  expected, actual);
-        return MAPPER.readValue(actual, typeReference);
+        return objectReader(MAPPER, typeReference).readValue(actual, typeReference);
     }
 
 
     protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference, boolean remarshal) {
         return roundTripAndSimilar(MAPPER, input, expected, typeReference, remarshal);
+    }
+
+    protected static ObjectReader objectReader(ObjectMapper mapper, JavaType typeReference) {
+        return mapper.readerFor(typeReference)
+            .with(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION);
+
+    }
+    protected static ObjectReader objectReader(ObjectMapper mapper, Class<?> typeReference) {
+        return mapper.readerFor(typeReference)
+            .with(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION);
+
     }
 
     @SneakyThrows
