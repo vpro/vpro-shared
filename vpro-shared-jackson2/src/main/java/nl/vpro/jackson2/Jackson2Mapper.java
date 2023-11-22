@@ -213,8 +213,7 @@ public class Jackson2Mapper extends ObjectMapper {
             new JaxbAnnotationIntrospector(mapper.getTypeFactory()
             ));
 
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
         mapper.setAnnotationIntrospector(introspector);
 
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
@@ -229,6 +228,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
+
         } catch (NoClassDefFoundError noClassDefFoundError) {
             Slf4jHelper.log(log,  loggedAboutFallback ? Level.DEBUG : Level.WARN, noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
             loggedAboutFallback = true;
@@ -243,7 +243,7 @@ public class Jackson2Mapper extends ObjectMapper {
         register(mapper, filter, new DateModule());
         // For example normal support for Optional.
         Jdk8Module jdk8Module = new Jdk8Module();
-        jdk8Module.configureAbsentsAsNulls(true);
+        // jdk8Module.configureAbsentsAsNulls(true); This I think it covered by com.fasterxml.jackson.annotation.JsonInclude.Include.NON_ABSENT
         register(mapper, filter, jdk8Module);
 
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
