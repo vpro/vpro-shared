@@ -206,7 +206,7 @@ public class Jackson2Mapper extends ObjectMapper {
             new JaxbAnnotationIntrospector(mapper.getTypeFactory()
             ));
 
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setAnnotationIntrospector(introspector);
 
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
