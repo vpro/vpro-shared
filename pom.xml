@@ -41,7 +41,7 @@
     <hibernate.version>5.6.15.Final</hibernate.version>
     <hibernate.search.version>5.11.12.Final</hibernate.search.version>
 
-    <hibernate.search6.version>6.1.8.Final</hibernate.search6.version>
+    <hibernate.search6.version>6.2.2.Final</hibernate.search6.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>4.0.4</servlet.api.version>
@@ -550,7 +550,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.13.0</version>
+        <version>3.14.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
