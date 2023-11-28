@@ -334,7 +334,7 @@ public class FileCachingInputStream extends InputStream {
             log.debug("The inputstream gave EOF after {} bytes. Completely fitting into memory buffer", bufferLength);
             builder.buffer(Arrays.copyOf(buf, bufferLength));
             if (tempPath != null) {
-                // there is no need for the file., but since an explicit file was
+                // there is no need for the file., but since an explitely file was
                 // configured write it to that file anyway
                 try (final OutputStream out = Files.newOutputStream(tempPath)) {
                     IOUtils.copy(new ByteArrayInputStream(builder.buffer), out);
