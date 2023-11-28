@@ -41,15 +41,16 @@ public class WrappedReadableChannel implements ReadableByteChannel {
     @Override
     public int read(ByteBuffer dst) throws IOException {
         int result =  delegate.read(dst);
-        total += result;
-        if (hasConsumer) {
-            prevBatch += result;
-            if (prevBatch > batchSize) {
-                consumer.accept(total);
-                prevBatch = 0;
+        if (result > 0) {
+            total += result;
+            if (hasConsumer) {
+                prevBatch += result;
+                if (prevBatch > batchSize) {
+                    consumer.accept(total);
+                    prevBatch = 0;
+                }
             }
         }
-
         return result;
     }
 

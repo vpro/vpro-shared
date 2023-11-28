@@ -9,14 +9,23 @@ import static org.apache.commons.io.IOUtils.EOF;
 
 public class RandomStream extends InputStream {
     final Random random;
-    final int seed;
+    final String toString;
     final int size;
 
     public RandomStream(int seed, int size) {
-        this.random = new Random(seed);
-        this.seed = seed;
-        this.size = size;
+        this(new Random(seed), "seed: " + seed, size);
+    }
 
+
+    public RandomStream(Random random, int size) {
+        this(random, "random: " + random, size);
+    }
+
+
+    private RandomStream(Random random, String toString, int size) {
+        this.random = random;
+        this.toString = toString;
+        this.size = size;
     }
 
     int count = 0;
@@ -41,7 +50,7 @@ public class RandomStream extends InputStream {
     }
     @Override
     public String toString() {
-        return size + " random bytes (seed: " + seed + ")";
+        return size + " random bytes (" + toString + ")";
     }
 
     protected void nextBytes(Random random, int count,  byte[] b, int off, int l) {
