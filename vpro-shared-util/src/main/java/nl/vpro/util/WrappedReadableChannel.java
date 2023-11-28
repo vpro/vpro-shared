@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -10,16 +11,19 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.function.LongConsumer;
 
 /**
+ * Wraps a {@link ReadableByteChannel}. Records the number of channelled bytes. Also, it can have a consumer, which is called every batchsize bytes.
  * @since 4.2
  */
 @Log4j2
 public class WrappedReadableChannel implements ReadableByteChannel {
 
+    @Getter
     long total = 0;
     long prevBatch = 0;
     final long batchSize;
     final ReadableByteChannel delegate;
     final LongConsumer consumer;
+    final boolean hasConsumer;
 
     @lombok.Builder
     private WrappedReadableChannel(
@@ -30,6 +34,7 @@ public class WrappedReadableChannel implements ReadableByteChannel {
         this.delegate = inputStream == null ?  delegate: Channels.newChannel(inputStream) ;
         this.batchSize = batchSize == null ? 1_000_000L : batchSize;
         this.consumer = consumer;
+        this.hasConsumer = consumer != null;
     }
 
 
@@ -37,14 +42,13 @@ public class WrappedReadableChannel implements ReadableByteChannel {
     public int read(ByteBuffer dst) throws IOException {
         int result =  delegate.read(dst);
         total += result;
-        if (consumer != null) {
+        if (hasConsumer) {
             prevBatch += result;
             if (prevBatch > batchSize) {
                 consumer.accept(total);
                 prevBatch = 0;
             }
         }
-
 
         return result;
     }
