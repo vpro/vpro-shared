@@ -40,7 +40,7 @@ import nl.vpro.logging.simple.Slf4jSimpleLogger;
 
 public class FileCachingInputStream extends InputStream {
 
-    static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
+    static final int DEFAULT_INITIAL_BUFFER_SIZE = 8192;
     static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
     static final int EOF = -1;
     static final AtomicInteger openStreams = new AtomicInteger(0);
@@ -231,7 +231,7 @@ public class FileCachingInputStream extends InputStream {
                 } catch (IOException ioe) {
                     this.future.completeExceptionally(ioe);
                 }
-                log.debugOrInfo(effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
+                log.debugOrInfo(effectiveProgressLogging, "Created {} ({} ({}) bytes written)", this.tempFile, c.getCount(), FileSizeFormatter.DEFAULT.format(c.getCount()));
             })
             .batch(batchSize)
             .batchConsumer(consumer == null ? null : c -> consumer.accept(this))
@@ -263,7 +263,7 @@ public class FileCachingInputStream extends InputStream {
             consumer = t -> {
                 if (progressLoggingBatch == null ||
                     batchCount.incrementAndGet() % progressLoggingBatch == 0) {
-                    log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
+                    log.info("Creating {} ({} bytes ({}) written)", tempFile, t.toFileCopier.getCount(), FileSizeFormatter.DEFAULT.format(t.toFileCopier.getCount()));
                 }
                 if (batchConsumer != null) {
                     batchConsumer.accept(t);
@@ -334,8 +334,8 @@ public class FileCachingInputStream extends InputStream {
             log.debug("The inputstream gave EOF after {} bytes. Completely fitting into memory buffer", bufferLength);
             builder.buffer(Arrays.copyOf(buf, bufferLength));
             if (tempPath != null) {
-                // there is no need for the file., but since an explitely file was
-                // configured write it to that file anyways
+                // there is no need for the file., but since an explicit file was
+                // configured write it to that file anyway
                 try (final OutputStream out = Files.newOutputStream(tempPath)) {
                     IOUtils.copy(new ByteArrayInputStream(builder.buffer), out);
                 }
