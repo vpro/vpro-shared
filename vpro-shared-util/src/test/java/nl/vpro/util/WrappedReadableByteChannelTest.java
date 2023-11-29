@@ -29,9 +29,9 @@ class WrappedReadableByteChannelTest {
             IOUtils.copy(Channels.newInputStream(wrapped), NullOutputStream.nullOutputStream());
 
             assertThat(wrapped.getTotal()).isEqualTo(size);
+            assertThat(wrapped.isOpen()).isTrue();
         }
-
-
+        assertThat(channel.isOpen()).isFalse();
     }
 
 }
