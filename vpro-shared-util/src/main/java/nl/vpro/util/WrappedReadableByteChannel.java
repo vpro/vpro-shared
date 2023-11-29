@@ -15,7 +15,7 @@ import java.util.function.LongConsumer;
  * @since 4.2
  */
 @Log4j2
-public class WrappedReadableChannel implements ReadableByteChannel {
+public class WrappedReadableByteChannel implements ReadableByteChannel {
 
     @Getter
     long total = 0;
@@ -26,7 +26,7 @@ public class WrappedReadableChannel implements ReadableByteChannel {
     final boolean hasConsumer;
 
     @lombok.Builder
-    private WrappedReadableChannel(
+    private WrappedReadableByteChannel(
         InputStream inputStream,
         ReadableByteChannel delegate,
         Long batchSize,

@@ -14,14 +14,14 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
-class WrappedReadableChannelTest {
+class WrappedReadableByteChannelTest {
 
     @Test
     public void test() throws IOException {
         Random random = new Random();
         int size = random.nextInt(1_000_000) + 500_000;
         ReadableByteChannel channel = Channels.newChannel(new RandomStream(random, size));
-        try (WrappedReadableChannel wrapped = WrappedReadableChannel.builder()
+        try (WrappedReadableByteChannel wrapped = WrappedReadableByteChannel.builder()
             .delegate(channel)
             .batchSize(100_000L)
             .consumer((l) -> log.info("{}", () -> FileSizeFormatter.DEFAULT.format(l)))
