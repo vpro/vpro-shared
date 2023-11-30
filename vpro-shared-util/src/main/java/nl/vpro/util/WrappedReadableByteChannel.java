@@ -51,7 +51,7 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
             total += result;
             if (hasConsumer) {
                 prevBatch += result;
-                if (prevBatch > batchSize) {
+                if (prevBatch >= batchSize) {
                     consumer.accept(total);
                     prevBatch = 0;
                 }
