@@ -32,6 +32,12 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
         Long batchSize,
         LongConsumer consumer) {
         this.delegate = inputStream == null ?  delegate: Channels.newChannel(inputStream) ;
+        if (inputStream != null && delegate != null) {
+            throw new IllegalArgumentException("Only one of inputStream or delegate should be set");
+        }
+        if (inputStream == null && delegate == null) {
+            throw new IllegalArgumentException("One of inputStream or delegate should be set");
+        }
         this.batchSize = batchSize == null ? 1_000_000L : batchSize;
         this.consumer = consumer;
         this.hasConsumer = consumer != null;
@@ -45,9 +51,8 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
             total += result;
             if (hasConsumer) {
                 prevBatch += result;
-                if (prevBatch > batchSize) {
-                    consumer.accept(total);
-                    prevBatch = 0;
+                if (prevBatch >= batchSize) {
+                    consume();
                 }
             }
         }
@@ -62,5 +67,13 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
     @Override
     public void close() throws IOException {
         delegate.close();
+        if (prevBatch > 0) {
+            consume();
+        }
+    }
+
+    private void consume() {
+        consumer.accept(total);
+        prevBatch = 0;
     }
 }
