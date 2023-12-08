@@ -52,8 +52,7 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
             if (hasConsumer) {
                 prevBatch += result;
                 if (prevBatch >= batchSize) {
-                    consumer.accept(total);
-                    prevBatch = 0;
+                    consume();
                 }
             }
         }
@@ -68,5 +67,13 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
     @Override
     public void close() throws IOException {
         delegate.close();
+        if (prevBatch > 0) {
+            consume();
+        }
+    }
+
+    private void consume() {
+        consumer.accept(total);
+        prevBatch = 0;
     }
 }
