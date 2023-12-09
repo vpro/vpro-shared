@@ -385,16 +385,25 @@ public class FileCachingInputStream extends InputStream {
         if (this.tempFileInputStream != null && ! tempFileInputStreamClosed) {
             closeAndDecStreams("file input", this.tempFileInputStream);
             if (tempFile != null && this.deleteTempFile) {
+                deleteTempFile();
+            }
+            tempFileInputStreamClosed = true;
+        }
+    }
+
+    public void deleteTempFile() {
+        if (tempFile != null) {
+            try {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
                 } else {
                     //   openOptions.add(StandardOpenOption.DELETE_ON_CLOSE); would have arranged that!
                     log.debug("Could not delete because didn't exists any more {}", tempFile);
                 }
+            } catch(IOException ioe) {
+                log.debug("Could not delete {}", tempFile, ioe);
             }
-            tempFileInputStreamClosed = true;
         }
-
     }
 
     @Override
