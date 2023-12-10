@@ -112,6 +112,22 @@ public class MultiLanguageStringTest {
     }
 
     @Test
+    public void testWithFormattedArgs() {
+        MultiLanguageString string = MultiLanguageString.builder()
+            .nl("a %s b %s")
+            .en("b %2$s a %1$s")
+            .in("eo").is("c %s %s")
+            .defaultLocale(new Locale("nl"))
+            .formatted("A", 1)
+            .build();
+
+        assertThat(string.toString()).isEqualTo("a A b 1");
+        assertThat(string.get(new Locale("en"))).isEqualTo("b 1 a A");
+        assertThat(string.get(new Locale("eo"))).isEqualTo("c A 1");
+        assertThat(string.get(new Locale("en", "US"))).isEqualTo("b 1 a A");
+    }
+
+    @Test
     public void withBundle() throws Exception {
         try (AutoCloseable autoCloseable = Locales.with(new Locale("eo"))) {
             MultiLanguageString string = MultiLanguageString.builder()
