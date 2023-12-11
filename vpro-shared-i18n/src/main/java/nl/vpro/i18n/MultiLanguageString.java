@@ -211,6 +211,11 @@ public class MultiLanguageString implements CharSequence {
         public In in(String locale) {
             return in(LanguageCode.languageCode(locale));
         }
+
+        public In in(LanguageCode language) {
+            return in(new Locale(language.getCode()));
+        }
+
         public MultiLanguageString build() {
             return created;
         }
