@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.i18n.languages.LanguageCode;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -42,6 +43,12 @@ public class MultiLanguageString implements CharSequence {
 
     public static Builder.In in(Locale locale) {
         Builder builder = new Builder();
+        return builder.defaultLocale(locale).in(locale);
+    }
+
+    public static Builder.In in(LanguageCode language) {
+        Builder builder = new Builder();
+        Locale locale = new Locale(language.getCode());
         return builder.defaultLocale(locale).in(locale);
     }
 
@@ -139,6 +146,11 @@ public class MultiLanguageString implements CharSequence {
             return this;
         }
 
+        public Builder defaultLocale(LanguageCode locale) {
+            created.defaultLocale = new Locale(locale.getCode());
+            return this;
+        }
+
         public Builder slf4jArgs(Object... args) {
             created.slf4jArgs = args;
             return this;
@@ -171,7 +183,7 @@ public class MultiLanguageString implements CharSequence {
         }
 
         public In in(String locale) {
-            return new In(new Locale(locale));
+            return in(LanguageCode.languageCode(locale));
         }
         public MultiLanguageString build() {
             return created;
