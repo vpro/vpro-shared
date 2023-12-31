@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.container.*;
 import javax.ws.rs.ext.Provider;
@@ -38,7 +39,7 @@ public class LoggingInterceptor implements ContainerRequestFilter {
             if (enabled && (contentLength == null || Long.parseLong(contentLength) < 100000) && ! "PUT".equals(method)) {
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 IOUtils.copy(requestContext.getEntityStream(), bytes);
-                String body = bytes.toString("UTF-8");
+                String body = bytes.toString(StandardCharsets.UTF_8);
                 int length = Math.min(body.length(), 2000);
                 boolean truncated = length < body.length();
                 MDC.put(MDCConstants.BODY, "\n" + body.substring(0, length) + (truncated ? "(TRUNCATED, total " + bytes.toByteArray().length + " bytes))" : ""));
