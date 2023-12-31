@@ -36,7 +36,12 @@ public class MBeansUtils implements MBeansUtilsMXBean {
     public Map<String, String> getRunning() {
         return MBeans.locks.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, x -> x.getValue().toString()));
+    }
 
+    @Override
+    @SneakyThrows
+    public  String waitFor(String key) {
+        return "Result for " + key + ":" + MBeans.locks.get(key).getFuture().get();
     }
 
 }
