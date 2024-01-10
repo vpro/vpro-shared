@@ -77,7 +77,10 @@ public interface CommandExecutor {
     @SneakyThrows
     default int execute(Writer out, String... args) {
         return execute(
-            WriterOutputStream.builder().setWriter(out).setCharset(StandardCharsets.UTF_8).get(),
+            WriterOutputStream.builder()
+                .setWriter(out)
+                .setCharset(StandardCharsets.UTF_8)
+                .get(),
             LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
 
