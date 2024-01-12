@@ -1128,12 +1128,28 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     @SneakyThrows
     public Duration getRefreshInterval()  {
-        JsonNode refreshInterval = getActualSettings().map(jn -> jn.get("refresh_interval")).orElse(null);
-        if (refreshInterval == null) {
-            return Duration.ofSeconds(30);
-        } else {
-            return TimeUtils.parseDuration(refreshInterval.textValue()).orElseThrow(IllegalArgumentException::new);
+        return getActualSettings().map(IndexHelper::getRefreshInterval).orElse(Duration.ofSeconds(30));
+    }
+
+    public static Duration getRefreshInterval(JsonNode settings)  {
+        return getRefreshInterval(settings, Duration.ofSeconds(30));
+    }
+
+    public static Duration getRefreshInterval(JsonNode settings, Duration defaultValue)  {
+        if (settings == null) {
+            return defaultValue;
         }
+
+        JsonNode jsonNode = settings.get("refresh_interval");
+        if (jsonNode == null) {
+            return defaultValue;
+        }
+        Duration result = TimeUtils.parseDuration(jsonNode.textValue()).orElse(defaultValue);
+
+        if (result.isNegative()) {
+            return TimeUtils.MAX_DURATION;
+        }
+        return result;
     }
 
     public void setIndexName(String indexName) {

@@ -25,6 +25,8 @@ public class TimeUtils {
     public static final ZoneId ZONE_ID =  ZoneId.of("Europe/Amsterdam");
     public static final ZonedDateTime LOCAL_EPOCH = Instant.EPOCH.atZone(ZONE_ID);
 
+    public static final Duration MAX_DURATION = Duration.ofSeconds(Long.MAX_VALUE, 999_999_999);
+
 
     public static Optional<ZonedDateTime> parseZoned(CharSequence parse) {
         if (StringUtils.isBlank(parse)) {
@@ -308,6 +310,8 @@ public class TimeUtils {
         @PolyNull Instant instant) {
         return truncatedTo(instant, ChronoUnit.MILLIS);
     }
+
+
 
 
     private static final DateTimeFormatter LOCAL_TIME_PATTERN = DateTimeFormatter.ofPattern("H:mm");
