@@ -3,11 +3,12 @@ package nl.vpro.util;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * A modifiable SortedSet, that wrapped another collection (changes are reflected), with an explicit sort order.
+ * A modifiable SortedSet, that wraps another collection (changes are reflected), with an explicit sort order.
  * @author Michiel Meeuwissen
  * @since 2.1
  */
@@ -18,27 +19,34 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
 
     final Collection<T> wrapped;
     final SortedSet<T> set;
+    final Consumer<T>[] addListeners;
 
-    public ResortedSortedSet(Collection<T> wrapped, Comparator<T> comparator) {
+    @SafeVarargs
+    public ResortedSortedSet(Collection<T> wrapped, Comparator<T> comparator, Consumer<T>... addListeners) {
         set = new TreeSet<>(comparator);
         set.addAll(wrapped);
         this.wrapped = wrapped;
+        this.addListeners = addListeners;
     }
 
-    private ResortedSortedSet(Collection<T> wrapped, SortedSet<T> set) {
+    @SafeVarargs
+    private ResortedSortedSet(Collection<T> wrapped, SortedSet<T> set, Consumer<T>... addListeners) {
         this.set = set;
         set.addAll(wrapped);
         this.wrapped = wrapped;
+        this.addListeners = addListeners;
     }
 
     public static <S extends Comparable<?>> ResortedSortedSet<S> of(
-        Collection<S> wrapped) {
-        return new ResortedSortedSet<>(wrapped, new TreeSet<>());
+        Collection<S> wrapped, Consumer<S>... addListener) {
+        return new ResortedSortedSet<>(wrapped, new TreeSet<>(), addListener);
     }
 
-    public ResortedSortedSet(SortedSet<T> set, Collection<T> wrapped) {
+    @SafeVarargs
+    public ResortedSortedSet(SortedSet<T> set, Collection<T> wrapped, Consumer<T>... addListeners) {
         this.set = set;
         this.wrapped = wrapped;
+        this.addListeners = addListeners;
     }
 
     @NonNull
@@ -53,7 +61,6 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
             @Override
             public boolean hasNext() {
                 return i.hasNext();
-
             }
 
             @Override
@@ -72,7 +79,6 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
                 } else {
                     throw new IllegalStateException();
                 }
-
             }
         };
 
@@ -88,6 +94,9 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
         boolean result = set.add(element);
         if (result) {
             wrapped.add(element);
+            for (Consumer<T> addListener : addListeners) {
+                addListener.accept(element);
+            }
         }
         return result;
     }
@@ -109,20 +118,17 @@ public class ResortedSortedSet<T> extends AbstractSet<T> implements SortedSet<T>
     @Override
     public SortedSet<T> headSet(T toElement) {
         return new ResortedSortedSet<>(set.headSet(toElement), wrapped);
-
     }
 
     @NonNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
         return new ResortedSortedSet<>(set.tailSet(fromElement), wrapped);
-
     }
 
     @Override
     public T first() {
         return set.first();
-
     }
 
     @Override
