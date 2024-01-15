@@ -22,7 +22,7 @@
     <jackson2.version>2.16.1</jackson2.version>
 
     <junit.version>5.10.1</junit.version>
-    <mockito.version>5.8.0</mockito.version>
+    <mockito.version>5.9.0</mockito.version>
     <assertj.version>3.24.2</assertj.version>
     <resteasy.version>5.0.9.Final</resteasy.version>
     <bytebuddy.version>1.14.11</bytebuddy.version>
