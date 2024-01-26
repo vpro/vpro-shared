@@ -61,6 +61,10 @@ public abstract class AbstractSchemaTest {
     public  final void generateXSDs() throws JAXBException, IOException {
         context = generate(getClasses());
     }
+
+    /**
+     * TODO: how about jaxb.index?
+     */
     protected abstract Class<?>[] getClasses();
 
     protected <T extends Enum<T>> void testEnum(String resource, String enumTypeName, Class<T> enumClass) {

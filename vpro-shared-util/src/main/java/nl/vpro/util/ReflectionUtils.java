@@ -123,7 +123,7 @@ public class ReflectionUtils {
                         log.warn("{} Set twice!", k);
                     }
                 } else {
-                    if (result.isErrorneous()) {
+                    if (result.isErroneous()) {
                         notfound.add(k);
                     }
                 }
@@ -148,6 +148,7 @@ public class ReflectionUtils {
     /**
      * Defaulting version of {@link #configureIfNull(Object, Map, Collection, Collection)} Using {@link #SETTER}, {@link #IDENTITY} for the setter discovery, and {@link #GETTER}, {@link #IDENTITY} for getter.
      */
+    @SuppressWarnings("UnusedReturnValue")
     public static <T> T configureIfNull(T instance, Map<String, String> properties) {
         return configureIfNull(instance, properties,
             Arrays.asList(SETTER, IDENTITY),
@@ -380,10 +381,10 @@ public class ReflectionUtils {
         Class<?> parameterClass;
         if (parameterType instanceof Class) {
             parameterClass = (Class) parameterType;
-        } else if (parameterType instanceof ParameterizedType) {
-            parameterClass = (Class) ((ParameterizedType) parameterType).getRawType();
-        } else if (parameterType instanceof WildcardType) {
-            parameterClass = (Class) ((WildcardType) parameterType).getUpperBounds()[0];
+        } else if (parameterType instanceof ParameterizedType parameterizedType) {
+            parameterClass = (Class) parameterizedType.getRawType();
+        } else if (parameterType instanceof WildcardType wildcardType) {
+            parameterClass = (Class) wildcardType.getUpperBounds()[0];
         } else {
             throw new UnsupportedOperationException("Cannot convert " + o + " to " + parameterType);
         }
@@ -473,6 +474,32 @@ public class ReflectionUtils {
         return classForName(name, ReflectionUtils.class.getClassLoader());
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T callProtected(Object o, Class<?> clazz, String method) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method   m = clazz.getDeclaredMethod("getPredictionsForXml");
+        m.setAccessible(true);
+        T t = (T) m.invoke(o);
+        return t;
+    }
+
+    public static <T> T callProtected(Object o, String method) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class<?> clazz = o.getClass();
+        while(! clazz.equals(Object.class)) {
+            try {
+                return callProtected(o, clazz, method);
+            } catch (NoSuchMethodException nsm) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        throw new NoSuchMethodException();
+    }
+
+
+
+
+
+
+
 
     private static final Map<String, Class<?>> primitiveClasses = new HashMap<>();
     static {
@@ -498,10 +525,10 @@ public class ReflectionUtils {
         NOTFOUND(true),
         ERROR(true),
         IGNORED(false);
-        final boolean errorneous;
+        final boolean erroneous;
 
-        ResultAction(boolean errorneous) {
-            this.errorneous = errorneous;
+        ResultAction(boolean erroneous) {
+            this.erroneous = erroneous;
         }
     }
 

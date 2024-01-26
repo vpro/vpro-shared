@@ -571,6 +571,7 @@ public class FileCachingInputStreamTest {
 
             IOUtils.copy(inputStream, out);
 
+            assertThat(out.toByteArray()).containsExactly(HELLO);
             assertThat(inputStream.getCount()).isEqualTo(HELLO.length);
 
 

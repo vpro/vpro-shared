@@ -14,8 +14,7 @@ import java.util.function.Predicate;
 import org.slf4j.event.Level;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
@@ -31,7 +30,8 @@ import com.google.common.annotations.Beta;
 import nl.vpro.logging.Slf4jHelper;
 
 /**
- * Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
+ * TODO: Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
+ * <p>
  * Please use the static getters (like {@link #getInstance()}, so we could change that.
  *
  * @author Rico
@@ -50,109 +50,109 @@ public class Jackson2Mapper extends ObjectMapper {
     private static final SimpleFilterProvider FILTER_PROVIDER = new SimpleFilterProvider();
 
 
-    public static final Jackson2Mapper INSTANCE = new Jackson2Mapper("instance");
-    public static final Jackson2Mapper LENIENT = new Jackson2Mapper("lenient");
-    public static final Jackson2Mapper STRICT = new Jackson2Mapper("strict");
-    public static final Jackson2Mapper PRETTY_STRICT = new Jackson2Mapper("pretty_strict");
 
-    public static final Jackson2Mapper PRETTY = new Jackson2Mapper("pretty");
-    public static final Jackson2Mapper PUBLISHER = new Jackson2Mapper("publisher");
-    public static final Jackson2Mapper PRETTY_PUBLISHER = new Jackson2Mapper("pretty_publisher");
-    public static final Jackson2Mapper BACKWARDS_PUBLISHER = new Jackson2Mapper("backwards_publisher");
+    @Deprecated
+    public static final Jackson2Mapper INSTANCE = getInstance();
+    @Deprecated
+    public static final Jackson2Mapper LENIENT = getLenientInstance();
+    @Deprecated
+    public static final Jackson2Mapper STRICT = getStrictInstance();
+    @Deprecated
+    public static final Jackson2Mapper PRETTY_STRICT = getPrettyStrictInstance();
 
-    private static final Jackson2Mapper MODEL = new Jackson2Mapper("model");
-    private static final Jackson2Mapper MODEL_AND_NORMAL = new Jackson2Mapper("model_and_normal");
-
-
-
-    private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
-
-
-
-    static {
-        LENIENT.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
-        LENIENT.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-        STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        PRETTY.enable(SerializationFeature.INDENT_OUTPUT);
-        PRETTY_STRICT.enable(SerializationFeature.INDENT_OUTPUT);
-
-        INSTANCE.setConfig(INSTANCE.getSerializationConfig().withView(Views.Forward.class));
-        INSTANCE.setConfig(INSTANCE.getDeserializationConfig().withView(Views.Forward.class));
-
-        LENIENT.setConfig(LENIENT.getSerializationConfig().withView(Views.Forward.class));
-        LENIENT.setConfig(LENIENT.getDeserializationConfig().withView(Views.Forward.class));
-
-        STRICT.setConfig(STRICT.getSerializationConfig().withView(Views.Forward.class));
-        STRICT.setConfig(STRICT.getDeserializationConfig().withView(Views.Forward.class));
+    @Deprecated
+    public static final Jackson2Mapper PRETTY = getPrettyInstance();
+    @Deprecated
+    public static final Jackson2Mapper PUBLISHER = getPublisherInstance();
+    @Deprecated
+    public static final Jackson2Mapper PRETTY_PUBLISHER = getPublisherInstance();
+    @Deprecated
+    public static final Jackson2Mapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
 
 
-        PRETTY_STRICT.setConfig(PRETTY_STRICT.getSerializationConfig().withView(Views.Forward.class));
-        PRETTY_STRICT.setConfig(PRETTY_STRICT.getDeserializationConfig().withView(Views.Forward.class));
+    private static final ThreadLocal<Jackson2Mapper> THREAD_LOCAL = ThreadLocal.withInitial(Jackson2Mapper::getInstance);
 
-
-        PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
-        PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Forward.class));
-
-        PRETTY_PUBLISHER.setConfig(PUBLISHER.getSerializationConfig().withView(Views.ForwardPublisher.class));
-        PRETTY_PUBLISHER.setConfig(PUBLISHER.getDeserializationConfig().withView(Views.Forward.class));
-        PRETTY_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
-
-        BACKWARDS_PUBLISHER.setConfig(BACKWARDS_PUBLISHER.getSerializationConfig().withView(Views.Publisher.class));
-        BACKWARDS_PUBLISHER.setConfig(BACKWARDS_PUBLISHER.getDeserializationConfig().withView(Views.Normal.class));
-        BACKWARDS_PUBLISHER.enable(SerializationFeature.INDENT_OUTPUT);
-
-
-        //PRETTY.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
-        PRETTY_STRICT.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
-
-
-        MODEL.setConfig(MODEL.getSerializationConfig().withView(Views.Model.class));
-        MODEL_AND_NORMAL.setConfig(MODEL_AND_NORMAL.getSerializationConfig().withView(Views.ModelAndNormal.class));
-
-    }
 
     public static Jackson2Mapper getInstance()  {
-        return INSTANCE;
+        Jackson2Mapper mapper =  new Jackson2Mapper("instance");
+        mapper.setConfig(mapper.getSerializationConfig().withView(Views.Forward.class));
+        mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Forward.class));
+        return mapper;
+
     }
 
     public static Jackson2Mapper getLenientInstance() {
-        return LENIENT;
+        Jackson2Mapper lenient = new Jackson2Mapper("lenient");
+        lenient.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        lenient.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        lenient.setConfig(lenient.getSerializationConfig().withView(Views.Forward.class));
+        lenient.setConfig(lenient.getDeserializationConfig().withView(Views.Forward.class));
+        return lenient;
     }
 
     public static Jackson2Mapper getPrettyInstance() {
-        return PRETTY;
+        Jackson2Mapper pretty = new Jackson2Mapper("pretty");
+        pretty.enable(SerializationFeature.INDENT_OUTPUT);
+        return pretty;
     }
 
     public static Jackson2Mapper getPrettyStrictInstance() {
-        return PRETTY_STRICT;
+        Jackson2Mapper pretty_and_strict = new Jackson2Mapper("pretty_strict");
+        pretty_and_strict.enable(SerializationFeature.INDENT_OUTPUT);
+
+        pretty_and_strict.setConfig(pretty_and_strict.getSerializationConfig().withView(Views.Forward.class));
+        pretty_and_strict.setConfig(pretty_and_strict.getDeserializationConfig().withView(Views.Forward.class));
+        pretty_and_strict.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
+
+        return pretty_and_strict;
     }
 
 
     public static Jackson2Mapper getStrictInstance() {
-        return STRICT;
+        Jackson2Mapper strict = new Jackson2Mapper("strict");
+        strict.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        strict.setConfig(strict.getSerializationConfig().withView(Views.Forward.class));
+        strict.setConfig(strict.getDeserializationConfig().withView(Views.Forward.class));
+
+        return strict;
     }
 
     public static Jackson2Mapper getPublisherInstance() {
-        return PUBLISHER;
+        Jackson2Mapper publisher = new Jackson2Mapper("publisher");
+        publisher.setConfig(publisher.getSerializationConfig().withView(Views.ForwardPublisher.class));
+        publisher.setConfig(publisher.getDeserializationConfig().withView(Views.Forward.class));
+
+        return publisher;
     }
 
     public static Jackson2Mapper getPrettyPublisherInstance() {
-        return PRETTY_PUBLISHER;
+        Jackson2Mapper prettyPublisher = new Jackson2Mapper("pretty_publisher");
+        prettyPublisher.setConfig(prettyPublisher.getSerializationConfig().withView(Views.ForwardPublisher.class));
+        prettyPublisher.setConfig(prettyPublisher.getDeserializationConfig().withView(Views.Forward.class));
+        prettyPublisher.enable(SerializationFeature.INDENT_OUTPUT);
+        return prettyPublisher;
     }
 
     public static Jackson2Mapper getBackwardsPublisherInstance() {
-        return BACKWARDS_PUBLISHER;
+        Jackson2Mapper backwardsPublisher = new Jackson2Mapper("backwards_publisher");
+        backwardsPublisher.setConfig(backwardsPublisher.getSerializationConfig().withView(Views.Publisher.class));
+        backwardsPublisher.setConfig(backwardsPublisher.getDeserializationConfig().withView(Views.Normal.class));
+        backwardsPublisher.enable(SerializationFeature.INDENT_OUTPUT);
+        return backwardsPublisher;
     }
 
     @Beta
     public static Jackson2Mapper getModelInstance() {
-        return MODEL;
+        Jackson2Mapper model = new Jackson2Mapper("model");
+        model.setConfig(model.getSerializationConfig().withView(Views.Model.class));
+        return model;
     }
 
     @Beta
     public static Jackson2Mapper getModelAndNormalInstance() {
-        return MODEL_AND_NORMAL;
+        Jackson2Mapper modalAndNormal = new Jackson2Mapper("model_and_normal");
+        modalAndNormal.setConfig(modalAndNormal.getSerializationConfig().withView(Views.ModelAndNormal.class));
+        return modalAndNormal;
     }
 
     public static Jackson2Mapper getThreadLocal() {
@@ -172,7 +172,6 @@ public class Jackson2Mapper extends ObjectMapper {
     }
 
     private final String toString;
-    private boolean inited = false;
 
     private Jackson2Mapper(String toString, Predicate<Module> predicate) {
         configureMapper(this, predicate);
@@ -184,13 +183,6 @@ public class Jackson2Mapper extends ObjectMapper {
         this.toString = toString;
     }
 
-    @Override
-    public Jackson2Mapper setConfig(SerializationConfig config) {
-        if (inited) {
-            throw new IllegalStateException("Already initialized. Pleasy copy first");
-        }
-        return (Jackson2Mapper) super.setConfig(config);
-    }
 
     @SafeVarargs
     public static Jackson2Mapper create(String toString, Predicate<Module> module, Consumer<ObjectMapper>... consumer) {
@@ -213,7 +205,6 @@ public class Jackson2Mapper extends ObjectMapper {
             new JaxbAnnotationIntrospector(mapper.getTypeFactory()
             ));
 
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setAnnotationIntrospector(introspector);
 
@@ -229,6 +220,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
+
         } catch (NoClassDefFoundError noClassDefFoundError) {
             Slf4jHelper.log(log,  loggedAboutFallback ? Level.DEBUG : Level.WARN, noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
             loggedAboutFallback = true;
@@ -243,7 +235,7 @@ public class Jackson2Mapper extends ObjectMapper {
         register(mapper, filter, new DateModule());
         // For example normal support for Optional.
         Jdk8Module jdk8Module = new Jdk8Module();
-        jdk8Module.configureAbsentsAsNulls(true);
+        // jdk8Module.configureAbsentsAsNulls(true); This I think it covered by com.fasterxml.jackson.annotation.JsonInclude.Include.NON_ABSENT
         register(mapper, filter, jdk8Module);
 
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));

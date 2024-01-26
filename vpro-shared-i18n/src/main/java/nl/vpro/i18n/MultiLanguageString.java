@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.i18n.languages.LanguageCode;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -18,7 +19,13 @@ import static nl.vpro.i18n.Locales.DUTCH;
  * Represent multiple strings for different locales.
  * <p>
  * This is a simple way to internationalize a string, completely in code.
- *
+ * <p>
+ * It supports three ways of providing parameters.
+ * <ul>
+ *     <li>slf4j style {@link Builder#slf4jArgs(Object...)}</li>
+ *     <li>{@link MessageFormat} style with {@link Builder#args(Object...)}</li>
+ *     <li>{@link String#formatted(Object...)} style with {@link Builder#formatted(Object...)}</li>
+ * </ul>
  * @author Michiel Meeuwissen
  * @since 0.47
  */
@@ -35,6 +42,8 @@ public class MultiLanguageString implements CharSequence {
 
     private Object[] args;
 
+    private Object[] formatArgs;
+
     private String bundleName;
 
     private String key;
@@ -45,10 +54,19 @@ public class MultiLanguageString implements CharSequence {
         return builder.defaultLocale(locale).in(locale);
     }
 
+    public static Builder.In in(LanguageCode language) {
+        Builder builder = new Builder();
+        Locale locale = new Locale(language.getCode());
+        return builder.defaultLocale(locale).in(locale);
+    }
+
     public static Builder of(Locale locale, String text) {
         return in(locale).is(text);
     }
 
+    /**
+     * Created a {@link Builder} for a {@link MultiLanguageString} and adds English text to it.
+     */
     public static Builder en(String text) {
         Builder builder = new Builder();
         return builder.en(text);
@@ -57,11 +75,11 @@ public class MultiLanguageString implements CharSequence {
         return new Builder();
     }
 
-    public static String get(CharSequence multiLanguageString, Locale locale) {
-        if (multiLanguageString instanceof MultiLanguageString){
-            return ((MultiLanguageString) multiLanguageString).get(locale);
+    public static String get(CharSequence charSequence, Locale locale) {
+        if (charSequence instanceof MultiLanguageString multiLanguageString){
+            return multiLanguageString.get(locale);
         } else {
-            return multiLanguageString.toString();
+            return charSequence.toString();
         }
     }
 
@@ -98,6 +116,10 @@ public class MultiLanguageString implements CharSequence {
                 FormattingTuple ft = MessageFormatter.arrayFormat(result, slf4jArgs);
                 result = ft.getMessage();
             }
+
+            if (formatArgs != null) {
+                result = result.formatted(formatArgs);
+            }
         }
         return LocalizedString.of(result, locale);
 
@@ -116,7 +138,7 @@ public class MultiLanguageString implements CharSequence {
     }
 
     @Override
-    public CharSequence subSequence(int start, int end) {
+    public @NonNull CharSequence subSequence(int start, int end) {
         return toString().subSequence(start, end);
 
     }
@@ -139,6 +161,11 @@ public class MultiLanguageString implements CharSequence {
             return this;
         }
 
+        public Builder defaultLocale(LanguageCode locale) {
+            created.defaultLocale = new Locale(locale.getCode());
+            return this;
+        }
+
         public Builder slf4jArgs(Object... args) {
             created.slf4jArgs = args;
             return this;
@@ -149,11 +176,22 @@ public class MultiLanguageString implements CharSequence {
             return this;
         }
 
+        public Builder formatted(Object... args) {
+            created.formatArgs = args;
+            return this;
+        }
+
+        /**
+         * Adds Dutch text to the {@link MultiLanguageString} being built.
+         */
         public Builder nl(String text) {
             created.strings.put(DUTCH, text);
             return this;
         }
 
+        /**
+         * Adds English text to the {@link MultiLanguageString} being built.
+         */
         public Builder en(String text) {
             created.strings.put(ENGLISH, text);
             return this;
@@ -171,8 +209,13 @@ public class MultiLanguageString implements CharSequence {
         }
 
         public In in(String locale) {
-            return new In(new Locale(locale));
+            return in(LanguageCode.languageCode(locale));
         }
+
+        public In in(LanguageCode language) {
+            return in(new Locale(language.getCode()));
+        }
+
         public MultiLanguageString build() {
             return created;
         }

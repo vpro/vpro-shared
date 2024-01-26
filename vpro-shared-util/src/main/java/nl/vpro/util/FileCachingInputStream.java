@@ -9,8 +9,7 @@ import java.nio.file.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -41,7 +40,7 @@ import nl.vpro.logging.simple.Slf4jSimpleLogger;
 
 public class FileCachingInputStream extends InputStream {
 
-    static final int DEFAULT_INITIAL_BUFFER_SIZE = 2048;
+    static final int DEFAULT_INITIAL_BUFFER_SIZE = 8192;
     static final int DEFAULT_FILE_BUFFER_SIZE = 8192;
     static final int EOF = -1;
     static final AtomicInteger openStreams = new AtomicInteger(0);
@@ -52,12 +51,17 @@ public class FileCachingInputStream extends InputStream {
 
     private final byte[] buffer;
 
+    /**
+     *  If a temp file is used for buffering, you may obtain it.
+     */
+    @Getter
     private final Path tempFile;
     private final boolean deleteTempFile;
 
     private final InputStream tempFileInputStream;
     private boolean tempFileInputStreamClosed = false;
 
+    @Getter
     private volatile boolean closed = false;
     private final AtomicLong count = new AtomicLong(0);
     private final SimpleLogger log ;
@@ -69,7 +73,7 @@ public class FileCachingInputStream extends InputStream {
     private final CompletableFuture<FileCachingInputStream> future = new CompletableFuture<>();
 
     /**
-     * @param batchSize Batch size
+     * @param batchSize Batch size/buffer size used when copying
      * @param batchConsumer After reading every batch, you have the possibility to do something yourself too
      * @param path Directory for temporary files
      * @param tempPath Path to temporary file to use
@@ -97,7 +101,8 @@ public class FileCachingInputStream extends InputStream {
         @Nullable final Boolean progressLogging,
         @Nullable final Integer progressLoggingBatch,
         @Nullable final Path tempPath,
-        @Nullable final Boolean deleteTempFile
+        @Nullable final Boolean deleteTempFile,
+        @Nullable final ExecutorService executorService
     ) {
         super();
         this.log = simpleLogger == null ?
@@ -132,9 +137,9 @@ public class FileCachingInputStream extends InputStream {
             // if arriving here, a temp file will be needed
             this.tempFile = createTempFile(path, tempPath, filePrefix);
 
-            OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
+            final OutputStream tempFileOutputStream = createTempFileOutputStream(outputBuffer);
 
-            Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(
+            final Consumer<FileCachingInputStream> consumer = assembleEffectiveConsumer(
                 progressLogging,
                 batchConsumer,
                 progressLoggingBatch
@@ -150,7 +155,8 @@ public class FileCachingInputStream extends InputStream {
                 expectedCount,
                 consumer,
                 batchSize,
-                progressLogging
+                progressLogging,
+                executorService
             );
             executeCopier(downloadFirst, startImmediately);
         } catch (IOException e) {
@@ -189,9 +195,11 @@ public class FileCachingInputStream extends InputStream {
         final int offset,
         final OutputStream tempFileOutputStream,
         final Long expectedCount,
-        final Consumer<FileCachingInputStream> consumer,
+        @Nullable final Consumer<FileCachingInputStream> consumer,
         final long batchSize,
-        final Boolean progressLogging) throws ExecutionException, InterruptedException {
+        final Boolean progressLogging,
+        final ExecutorService executorService
+        ) throws ExecutionException, InterruptedException {
 
         final boolean effectiveProgressLogging;
         if (progressLogging == null) {
@@ -203,28 +211,30 @@ public class FileCachingInputStream extends InputStream {
             .input(input)
             .expectedCount(expectedCount)
             .offset(offset)
-
             .output(tempFileOutputStream)
             .name(this.tempFile.toString())
             .notify(this)
             .errorHandler((c, e) ->
                 this.future.completeExceptionally(e)
             )
+            .executorService(executorService)
             .callback(c -> {
                 log.debug("callback for copier {} {}", c.getCount(), tempFileOutputStream);
                 try {
                     closeAndDecStreams("file output", tempFileOutputStream); // output is now closed
                     log.debug("{} {} {}", c.isReady(), this.tempFile, this.tempFile.toFile().length());
-                    consumer.accept(FileCachingInputStream.this);
-                    log.debug("accepted {}", consumer);
+                    if (consumer != null) {
+                        consumer.accept(FileCachingInputStream.this);
+                        log.debug("accepted {}", consumer);
+                    }
                     this.future.complete(this);
                 } catch (IOException ioe) {
                     this.future.completeExceptionally(ioe);
                 }
-                log.debugOrInfo(effectiveProgressLogging, "Created {} ({} bytes written)", this.tempFile, c.getCount());
+                log.debugOrInfo(effectiveProgressLogging, "Created {} ({} ({}) bytes written)", this.tempFile, c.getCount(), FileSizeFormatter.DEFAULT.format(c.getCount()));
             })
             .batch(batchSize)
-            .batchConsumer(c -> consumer.accept(this))
+            .batchConsumer(consumer == null ? null : c -> consumer.accept(this))
             .build();
     }
 
@@ -241,6 +251,7 @@ public class FileCachingInputStream extends InputStream {
     /**
      * Combines the user provided 'batchConsumer' (if there is one), with some other settings, to one 'effective' consumer.
      */
+    @Nullable
     private Consumer<FileCachingInputStream> assembleEffectiveConsumer(
         final Boolean progressLogging,
         final Consumer<FileCachingInputStream> batchConsumer,
@@ -252,14 +263,14 @@ public class FileCachingInputStream extends InputStream {
             consumer = t -> {
                 if (progressLoggingBatch == null ||
                     batchCount.incrementAndGet() % progressLoggingBatch == 0) {
-                    log.info("Creating {} ({} bytes written)", tempFile, t.toFileCopier.getCount());
+                    log.info("Creating {} ({} bytes ({}) written)", tempFile, t.toFileCopier.getCount(), FileSizeFormatter.DEFAULT.format(t.toFileCopier.getCount()));
                 }
                 if (batchConsumer != null) {
                     batchConsumer.accept(t);
                 }
             };
         } else {
-            consumer = batchConsumer == null ?  (t) -> { } : batchConsumer;
+            consumer = batchConsumer;
         }
         return consumer;
     }
@@ -324,7 +335,7 @@ public class FileCachingInputStream extends InputStream {
             builder.buffer(Arrays.copyOf(buf, bufferLength));
             if (tempPath != null) {
                 // there is no need for the file., but since an explitely file was
-                // configured write it to that file anyways
+                // configured write it to that file anyway
                 try (final OutputStream out = Files.newOutputStream(tempPath)) {
                     IOUtils.copy(new ByteArrayInputStream(builder.buffer), out);
                 }
@@ -374,16 +385,25 @@ public class FileCachingInputStream extends InputStream {
         if (this.tempFileInputStream != null && ! tempFileInputStreamClosed) {
             closeAndDecStreams("file input", this.tempFileInputStream);
             if (tempFile != null && this.deleteTempFile) {
+                deleteTempFile();
+            }
+            tempFileInputStreamClosed = true;
+        }
+    }
+
+    public void deleteTempFile() {
+        if (tempFile != null) {
+            try {
                 if (Files.deleteIfExists(tempFile)) {
                     log.debug("Deleted {}", tempFile);
                 } else {
                     //   openOptions.add(StandardOpenOption.DELETE_ON_CLOSE); would have arranged that!
                     log.debug("Could not delete because didn't exists any more {}", tempFile);
                 }
+            } catch(IOException ioe) {
+                log.debug("Could not delete {}", tempFile, ioe);
             }
-            tempFileInputStreamClosed = true;
         }
-
     }
 
     @Override
@@ -427,9 +447,6 @@ public class FileCachingInputStream extends InputStream {
 
          log.debug("closed");
     }
-    public boolean isClosed() {
-        return closed;
-    }
 
     @Override
     public String toString() {
@@ -471,13 +488,6 @@ public class FileCachingInputStream extends InputStream {
      */
     public Optional<Throwable> getException() {
         return toFileCopier == null ? Optional.empty(): toFileCopier.getException();
-    }
-
-    /**
-     * If a temp file is used for buffering, you can may obtain it.
-     */
-    public Path getTempFile() {
-        return tempFile;
     }
 
     /**

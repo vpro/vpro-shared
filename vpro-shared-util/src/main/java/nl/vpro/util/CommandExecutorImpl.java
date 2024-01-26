@@ -59,7 +59,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     private final boolean useFileCache;
 
-    private final int batchSize;
+    private final long batchSize;
 
     private final BiFunction<Level, CharSequence, String> wrapLogInfo;
 

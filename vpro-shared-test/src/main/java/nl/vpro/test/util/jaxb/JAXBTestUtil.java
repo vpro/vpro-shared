@@ -444,9 +444,10 @@ public class JAXBTestUtil {
 
     @SneakyThrows
     public static String pretty(byte[] xml) {
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        Transformer transformer = TransformerFactory.newInstance().newTransformer(new
+            StreamSource(JAXBTestUtil.class.getResourceAsStream("/pretty.xslt")));
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         StreamResult result = new StreamResult(new StringWriter());
         transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
         String xmlString = result.getWriter().toString();

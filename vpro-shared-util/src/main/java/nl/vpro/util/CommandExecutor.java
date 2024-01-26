@@ -1,7 +1,6 @@
 package nl.vpro.util;
 
-import lombok.Getter;
-import lombok.Singular;
+import lombok.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -75,8 +74,14 @@ public interface CommandExecutor {
      * @param out Stdout will be written to this.
      * @return the exit code
      */
+    @SneakyThrows
     default int execute(Writer out, String... args) {
-        return execute(new WriterOutputStream(out, StandardCharsets.UTF_8), LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
+        return execute(
+            WriterOutputStream.builder()
+                .setWriter(out)
+                .setCharset(StandardCharsets.UTF_8)
+                .get(),
+            LoggerOutputStream.error(LoggerFactory.getLogger(getClass()), true), args);
     }
 
 

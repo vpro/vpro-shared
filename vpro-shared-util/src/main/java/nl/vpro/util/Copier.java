@@ -1,10 +1,12 @@
 package nl.vpro.util;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -25,8 +27,14 @@ import static nl.vpro.util.FileCachingInputStream.EOF;
  */
 @Slf4j
 public class Copier implements Runnable, Closeable {
-    static final int MAX_BUFFER = 8192;
+    static final int DEFAULT_BATCH_SIZE = 8192;
 
+
+    /**
+     *  Checks whether this copier is ready. You may want to check
+     *  or use to deal with unsuccessful terminations
+     */
+    @Getter
     private volatile boolean ready;
     private volatile boolean readyAndCallbacked;
 
@@ -40,12 +48,17 @@ public class Copier implements Runnable, Closeable {
     private final Consumer<Copier> callback;
     private final BiConsumer<Copier, Throwable> errorHandler;
     private final Consumer<Copier> batchConsumer;
+
+    private final long consumeSize;
+
     @Getter
     private Future<?> future;
     @Getter(AccessLevel.NONE)
     private final String name;
     private final String logPrefix;
     private final Object notify;
+
+    private final ExecutorService executorService;
 
 
     /**
@@ -65,18 +78,21 @@ public class Copier implements Runnable, Closeable {
         @NonNull InputStream input,
         @Nullable Long expectedCount,
         @NonNull OutputStream output,
-        long batch,
+        Long batch,
         @Nullable Consumer<Copier> batchConsumer,
+        Long consumeSize,
         @Nullable Consumer<Copier> callback,
         @Nullable BiConsumer<Copier, Throwable> errorHandler,
         int offset,
         @Nullable String name,
-        @Nullable Object notify
+        @Nullable Object notify,
+        @Nullable ExecutorService executorService
         ) {
         this.input = input;
         this.expectedCount = expectedCount;
         this.output = output;
-        this.batch = batch == 0 ? MAX_BUFFER: batch;
+        this.batch = batch == null ? DEFAULT_BATCH_SIZE : batch;
+        this.consumeSize = consumeSize == null ? this.batch : consumeSize;
         this.callback = callback;
         this.batchConsumer = batchConsumer;
         this.errorHandler = errorHandler;
@@ -84,22 +100,24 @@ public class Copier implements Runnable, Closeable {
         this.name = name;
         this.logPrefix = name == null ? "" : name + ": ";
         this.notify = notify;
+        this.executorService = executorService == null ? ThreadPools.copyExecutor : executorService;
     }
 
-    public Copier(@NonNull InputStream i, @NonNull OutputStream o, long batch) {
-        this(i, null, o, batch, null, null, null,  0, null, null);
+    public Copier(@NonNull InputStream i, @NonNull OutputStream o, Long batch) {
+        this(i, null, o, batch, null, null, null, null,  0, null, null, null);
     }
 
 
     public Copier(@NonNull InputStream i, @NonNull OutputStream o) {
-        this(i, o, MAX_BUFFER);
+        this(i, o, null);
     }
 
     @Override
     public void run() {
         try {
             if (batchConsumer == null || batch < 1) {
-                count.addAndGet(IOUtils.copyLarge(input, output));
+                long copied = IOUtils.copyLarge(input, output);
+                count.addAndGet(copied);
             } else {
                 copyWithBatchCallBacks();
             }
@@ -164,15 +182,18 @@ public class Copier implements Runnable, Closeable {
     }
 
     private int[] equalsParts() {
-        return equalsParts(batch);
+        return equalsParts(batch, consumeSize);
     }
 
     /**
      * Given a batch size, divide it up in equal parts smaller than 8k in size.
-     * @return An array of at least one element. The sum of all elements is the argument. All values are smaller then {@link #MAX_BUFFER}
+     * @return An array of at least one element. The sum of all elements is the argument. All values are smaller then {@link #consumeSize}
      */
-    static int[] equalsParts(long batch) {
-        int parts = (int) (batch / MAX_BUFFER) + 1;
+    static int[] equalsParts(long batch, long consumeSize) {
+        int parts = (int) (batch / consumeSize);
+        if (batch % consumeSize != 0) {
+            parts++;
+        }
         int[] arr = new int[parts];
         long whole = batch;
         for (int i = 0; i < parts; i++) {
@@ -213,13 +234,6 @@ public class Copier implements Runnable, Closeable {
     }
 
     /**
-     * Checks whether this copier is ready. You may want to check {@link #getException()} or use {@link #isReadyIOException()} to deal with unsuccessfull terminations
-     */
-    public boolean isReady() {
-        return ready;
-    }
-
-    /**
      * Checks whether this copier is ready, but will throw an {@link IOException} it it did not _successfully_ finish.
      */
     public boolean isReadyIOException() throws IOException {
@@ -254,7 +268,7 @@ public class Copier implements Runnable, Closeable {
         if (this.future != null) {
             throw new IllegalStateException(logPrefix + "Already running");
         }
-        this.future = ThreadPools.copyExecutor.submit(this);
+        this.future = executorService.submit(this);
         return this;
     }
 

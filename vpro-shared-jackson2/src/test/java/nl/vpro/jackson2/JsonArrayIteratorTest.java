@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("DataFlowIssue")
 @Slf4j
 public class JsonArrayIteratorTest {
 
@@ -28,25 +29,26 @@ public class JsonArrayIteratorTest {
     public void test() throws IOException {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
-        JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson2Mapper.getInstance()).build();
-        assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
-        assertThat(it.getCount()).isEqualTo(1);
-        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
-        for (int i = 0; i < 9; i++) {
-            assertThat(it.hasNext()).isTrue();
+        try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson2Mapper.getInstance()).build()) {
+            assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
+            assertThat(it.getCount()).isEqualTo(1);
+            assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
+            for (int i = 0; i < 9; i++) {
+                assertThat(it.hasNext()).isTrue();
 
-            Change change = it.next(); // 10
-            Optional<Long> size = it.getSize();
-            if (size.isPresent()) {
-                log.info(it.getCount() + "/" + size.get() + " :" + change);
+                Change change = it.next(); // 10
+                Optional<Long> size = it.getSize();
+                if (size.isPresent()) {
+                    log.info(it.getCount() + "/" + size.get() + " :" + change);
+                }
+                if (!change.isDeleted()) {
+                    assertThat(change.getMedia()).isNotNull();
+                }
             }
-            if (!change.isDeleted()) {
-                assertThat(change.getMedia()).isNotNull();
-            }
+            assertThat(it.hasNext()).isTrue(); // 11
+            assertThat(it.next().getMid()).isEqualTo("POMS_VPRO_1139788");
+            assertThat(it.hasNext()).isFalse();
         }
-        assertThat(it.hasNext()).isTrue(); // 11
-        assertThat(it.next().getMid()).isEqualTo("POMS_VPRO_1139788");
-        assertThat(it.hasNext()).isFalse();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -119,25 +121,26 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void write() throws IOException, JSONException {
-        JsonArrayIterator<Change> it = JsonArrayIterator
+        try (JsonArrayIterator<Change> it = JsonArrayIterator
             .<Change>builder()
             .inputStream(getClass().getResourceAsStream("/changes.json"))
             .valueClass(Change.class)
             .objectMapper(Jackson2Mapper.getInstance())
             .skipNulls(false)
             .build();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-        it.write(out, (c) -> {
-            log.info("{}", c);
-        });
-        String expected = "{'array': " + IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8) + "}";
-        JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+            it.write(out, (c) -> {
+                log.info("{}", c);
+            });
+            String expected = "{'array': " + IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8) + "}";
+            JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+        }
     }
 
     @Test
     public void writeArray() throws IOException, JSONException {
-        JsonArrayIterator<Change> it = JsonArrayIterator
+        try (JsonArrayIterator<Change> it = JsonArrayIterator
             .<Change>builder()
             .inputStream(getClass().getResourceAsStream("/changes.json"))
             .valueClass(Change.class)
@@ -145,28 +148,34 @@ public class JsonArrayIteratorTest {
             .logger(log)
             .skipNulls(false)
             .build();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-        it.writeArray(out, (c) -> {
-            log.info("{}", c);
-        });
-        String expected = IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8);
-        JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+            it.writeArray(out, (c) -> {
+                log.info("{}", c);
+            });
+            String expected = IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8);
+            JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+        }
     }
 
     @Test
     public void illegalConstruction() {
         assertThatThrownBy(() -> {
-            JsonArrayIterator.builder().build();
+            try (JsonArrayIterator<Object> js = JsonArrayIterator.builder().build()) {
+                log.info("{}", js);
+            }
         }).isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() -> {
-            JsonArrayIterator
+            try (JsonArrayIterator<Change> js = JsonArrayIterator
                 .<Change>builder()
                 .inputStream(requireNonNull(getClass().getResourceAsStream("/changes.json")))
                 .valueClass(Change.class)
                 .valueCreator((jp, on) -> null)
-                .build();
+                .build()) {
+                log.info("{}", js);
+
+            }
         }).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -175,7 +184,7 @@ public class JsonArrayIteratorTest {
     public void interrupt() throws IOException {
         byte[] bytes = "[{},{},{},{},{},{}]".getBytes(StandardCharsets.UTF_8);
         final String[] callback = new String[1];
-        JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
+        try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
             .inputStream(new InputStream() {
                 int i = 0;
                 @Override
@@ -194,13 +203,13 @@ public class JsonArrayIteratorTest {
                 callback[0] = "called";
             })
             .valueClass(Simple.class)
-            .build();
-        log.info("{}", i.next());
-        log.info("{}", i.next());
-        assertThatThrownBy(() -> {
-            i.next();
-        }).isInstanceOf(RuntimeException.class);
-        assertThat(callback[0]).isEqualTo("called");
+            .build()) {
+            log.info("{}", i.next());
+            log.info("{}", i.next());
+            assertThatThrownBy(i::next)
+                .isInstanceOf(RuntimeException.class);
+            assertThat(callback[0]).isEqualTo("called");
+        }
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)

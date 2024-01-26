@@ -15,6 +15,9 @@ public interface MBeansUtilsMXBean {
     String cancel(@Name("key") String key);
 
     @Description("Running")
+    String waitFor(@Name("key") String key);
+
+    @Description("Running")
     Map<String, String> getRunning();
 
 
