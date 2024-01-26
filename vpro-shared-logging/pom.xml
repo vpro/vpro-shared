@@ -33,7 +33,7 @@
     <dependency>
       <groupId>com.google.flogger</groupId>
       <artifactId>flogger</artifactId>
-      <version>0.7.4</version>
+      <version>0.8</version>
       <optional>true</optional>
     </dependency>
 
@@ -61,7 +61,7 @@
     <dependency>
       <groupId>org.meeuw.math</groupId>
       <artifactId>mihxil-math</artifactId>
-      <version>0.7.0</version>
+      <version>0.12.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

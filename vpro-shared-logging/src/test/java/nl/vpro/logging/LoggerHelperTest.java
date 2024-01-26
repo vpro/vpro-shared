@@ -19,7 +19,7 @@ import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
-import org.meeuw.math.TestClock;
+import org.meeuw.math.time.TestClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

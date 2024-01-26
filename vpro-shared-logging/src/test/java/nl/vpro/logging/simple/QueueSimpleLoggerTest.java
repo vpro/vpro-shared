@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.junit.jupiter.api.Test;
-import org.meeuw.math.TestClock;
+import org.meeuw.math.time.TestClock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
