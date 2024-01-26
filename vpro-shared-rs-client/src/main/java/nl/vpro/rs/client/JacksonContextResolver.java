@@ -2,6 +2,7 @@ package nl.vpro.rs.client;
 
 import jakarta.ws.rs.ext.ContextResolver;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 
