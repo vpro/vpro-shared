@@ -60,7 +60,7 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 
 | 5.x ?
 | javax -> jakarta
-| somewhen 2023?
+| somewhen 2024?
 
 | 6.x >
 | java 21 (to be release in sep. 2023)
