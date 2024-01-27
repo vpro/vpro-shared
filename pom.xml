@@ -486,7 +486,7 @@
         <exclusions>
           <exclusion>
             <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
+            <artifactId>ax-api</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -824,7 +824,7 @@
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
-        <version>2.3.9</version>
+        <version>4.0.4</version>
       </dependency>
       <dependency>
         <groupId>info.picocli</groupId>
