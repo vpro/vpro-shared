@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * MSE-4330. Er was gewoon een index.jsp die dat deed, maar dat werkt niet meer, omdat om een of andere reden het resteasy servlet er altijd tussen zat (terwijl niet eens gemapt)

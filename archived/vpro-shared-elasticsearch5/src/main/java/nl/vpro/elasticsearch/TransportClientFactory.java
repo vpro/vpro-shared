@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PreDestroy;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;

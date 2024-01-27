@@ -3,7 +3,7 @@ package nl.vpro.elasticsearch;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 
 import org.elasticsearch.client.Client;
 

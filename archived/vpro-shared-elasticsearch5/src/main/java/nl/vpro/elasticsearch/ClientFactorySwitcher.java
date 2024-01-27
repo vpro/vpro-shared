@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 import javax.management.*;
 
 import org.elasticsearch.client.Client;

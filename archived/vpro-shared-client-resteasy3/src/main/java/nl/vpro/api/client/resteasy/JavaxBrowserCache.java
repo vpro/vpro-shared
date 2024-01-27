@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.CacheEntry;
 
-import jakarta.cache.Cache;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
+import javax.cache.Cache;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.core.Application;
+import javax.ws.rs.core.Application;
 
 import com.google.common.collect.ImmutableMap;
 

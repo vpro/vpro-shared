@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import jakarta.annotation.PreDestroy;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;

@@ -20,12 +20,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import jakarta.annotation.PreDestroy;
-import jakarta.cache.Cache;
+import javax.annotation.PreDestroy;
+import javax.cache.Cache;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import jakarta.net.ssl.SSLContext;
-import jakarta.ws.rs.core.MediaType;
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;

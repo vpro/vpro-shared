@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.regex.Pattern;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.ws.rs.core.MediaType;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.ws.rs.core.MediaType;
 
 import org.meeuw.json.grep.Sed;
 import org.meeuw.json.grep.matching.*;
