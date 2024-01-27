@@ -15,7 +15,13 @@ public class ZeroOneBooleanAdapter extends XmlAdapter<String,Boolean> {
         if(v == null) {
             return null;
         }
-        return DatatypeConverter.parseBoolean(v);
+        try {
+            return DatatypeConverter.parseBoolean(v);
+        } catch (IllegalArgumentException iae) {
+            //In jaxb.DataTypeConverter this was the behaviour.
+            // I suppose the change was good, but for now keep it compatible
+            return false;
+        }
     }
 
     public String marshal(Boolean v) {

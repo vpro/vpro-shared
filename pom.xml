@@ -38,7 +38,7 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>6.4.2.Final</hibernate.version>
+    <hibernate.version>5.6.15.Final</hibernate.version>
 
     <hibernate.search.version>5.11.12.Final</hibernate.search.version> <!-- deprecated -->
 
@@ -451,7 +451,7 @@
       </dependency>
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-jaxrs2</artifactId>
+        <artifactId>swagger-jaxrs2-jakarta</artifactId>
         <version>${swagger.version}</version>
       </dependency>
       <dependency>
@@ -481,14 +481,8 @@
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
-        <artifactId>hibernate-core</artifactId>
+        <artifactId>hibernate-core-jakarta</artifactId>
         <version>${hibernate.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>ax-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
