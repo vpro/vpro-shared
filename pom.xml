@@ -23,7 +23,7 @@
 
     <junit.version>5.10.1</junit.version>
     <mockito.version>5.10.0</mockito.version>
-    <assertj.version>3.24.2</assertj.version>
+    <assertj.version>3.25.2</assertj.version>
     <resteasy.version>6.2.7.Final</resteasy.version>
     <bytebuddy.version>1.14.11</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
@@ -48,7 +48,7 @@
     <servlet.api.version>6.0.0</servlet.api.version>
     <validation.api.version>3.0.2</validation.api.version>
     <persistence.api.version>3.1.0</persistence.api.version>
-    <annotation.api.version>2.1.0</annotation.api.version>
+    <annotation.api.version>2.1.1</annotation.api.version>
     <xml-bind.api.version>4.0.1</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
