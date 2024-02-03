@@ -1,10 +1,10 @@
-package nl.vpro.util;
+package nl.vpro.configuration.util;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import org.apache.commons.lang3.StringUtils;
 
 
 /**

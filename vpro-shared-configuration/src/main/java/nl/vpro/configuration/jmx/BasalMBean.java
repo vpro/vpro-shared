@@ -1,14 +1,11 @@
-package nl.vpro.jmx;
+package nl.vpro.configuration.jmx;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jmx.export.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedOperationParameter;
-import org.springframework.jmx.export.annotation.ManagedOperationParameters;
-import org.springframework.jmx.export.annotation.ManagedResource;
 
 import nl.vpro.util.CommandExecutorImpl;
 

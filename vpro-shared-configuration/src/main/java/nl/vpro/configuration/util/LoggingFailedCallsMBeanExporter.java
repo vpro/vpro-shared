@@ -1,17 +1,17 @@
-package nl.vpro.util;
+package nl.vpro.configuration.util;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.jmx.export.MBeanExporter;
+import org.springframework.jmx.export.SpringModelMBean;
 
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.RequiredModelMBean;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.springframework.jmx.export.MBeanExporter;
-import org.springframework.jmx.export.SpringModelMBean;
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Level;

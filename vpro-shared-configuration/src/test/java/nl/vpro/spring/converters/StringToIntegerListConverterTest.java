@@ -5,7 +5,7 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.TypeDescriptor;
 
-import static nl.vpro.spring.converters.StringToIntegerListConverter.INSTANCE;
+import static nl.vpro.configuration.spring.converters.StringToIntegerListConverter.INSTANCE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class StringToIntegerListConverterTest {

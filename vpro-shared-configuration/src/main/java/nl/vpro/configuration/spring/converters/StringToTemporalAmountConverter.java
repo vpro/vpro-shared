@@ -1,4 +1,4 @@
-package nl.vpro.spring.converters;
+package nl.vpro.configuration.spring.converters;
 
 import java.time.temporal.TemporalAmount;
 

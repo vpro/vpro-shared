@@ -3,6 +3,7 @@ package nl.vpro.spring.converters;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
+import nl.vpro.configuration.spring.converters.StringToLocalTimeConverter;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
