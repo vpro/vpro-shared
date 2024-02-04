@@ -22,8 +22,7 @@ public class DurationModelConverter implements ModelConverter {
         ModelConverterContext context,
         Iterator<ModelConverter> chain) {
         Type t = type.getType();
-        if (t instanceof SimpleType) {
-            SimpleType simpleType = (SimpleType) t;
+        if (t instanceof SimpleType simpleType) {
             if (Duration.class.isAssignableFrom(simpleType.getRawClass())) {
                 StringSchema stringSchema = new StringSchema();
                 // actuallyu, for json it's millis, for xml it's Duration#toString

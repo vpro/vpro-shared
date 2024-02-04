@@ -26,8 +26,7 @@ public class EnumModelConverter implements ModelConverter {
         ModelConverterContext context,
         Iterator<ModelConverter> chain) {
         Type t = type.getType();
-        if (t instanceof SimpleType) {
-            SimpleType simpleType = (SimpleType) t;
+        if (t instanceof SimpleType simpleType) {
             if (simpleType.getRawClass().isEnum()) {
                 Class<Enum<?>> enumClass = (Class<Enum<?>>) simpleType.getRawClass();
                 StringSchema stringSchema = new StringSchema();

@@ -67,7 +67,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.12.2</micrometer.version>
-    <flyway.version>10.6.0</flyway.version>
+    <flyway.version>10.7.1</flyway.version>
 
   </properties>
 
@@ -446,7 +446,7 @@
       </dependency>
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-annotations</artifactId>
+        <artifactId>swagger-annotations-jakarta</artifactId>
         <version>${swagger.version}</version>
       </dependency>
       <dependency>
@@ -456,7 +456,7 @@
       </dependency>
       <dependency>
         <groupId>io.swagger.core.v3</groupId>
-        <artifactId>swagger-core</artifactId>
+        <artifactId>swagger-core-jakarta</artifactId>
          <version>${swagger.version}</version>
       </dependency>
       <dependency>

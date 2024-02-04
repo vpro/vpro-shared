@@ -3,6 +3,8 @@ package nl.vpro.rs.interceptors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.MDC;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -10,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import jakarta.ws.rs.container.*;
 import jakarta.ws.rs.ext.Provider;
 
-import org.apache.commons.io.IOUtils;
-import org.slf4j.MDC;
 
 import nl.vpro.logging.mdc.MDCConstants;
 
@@ -19,13 +19,13 @@ import nl.vpro.logging.mdc.MDCConstants;
  * @author Michiel Meeuwissen
  * @since 1.79
  */
+@Getter
 @Provider
 @PreMatching
 @Slf4j
 public class LoggingInterceptor implements ContainerRequestFilter {
 
     @Setter
-    @Getter
     private boolean enabled = true;
 
 

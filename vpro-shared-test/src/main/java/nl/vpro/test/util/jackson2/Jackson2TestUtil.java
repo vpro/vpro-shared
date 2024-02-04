@@ -6,18 +6,17 @@ package nl.vpro.test.util.jackson2;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.Fail;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.AbstractObjectAssert;
-import org.assertj.core.api.Fail;
-import org.json.JSONException;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.*;
@@ -50,7 +49,7 @@ public class Jackson2TestUtil {
         } catch (AssertionError fail) {
             log.info(fail.getMessage());
             assertThat(prettify(actual)).isEqualTo(prettify(expected));
-        } catch (JSONException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
             assertThatJson(actual).isEqualTo(prettify(expected));
         }
