@@ -17,7 +17,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * A validator for Strings representing a crid URL.
- *
+ * <p>
  * You may just as wel use
  */
 @Target({METHOD, FIELD, PARAMETER, TYPE_USE})

@@ -5,8 +5,6 @@ import java.util.List;
 
 import jakarta.validation.ConstraintViolation;
 
-import com.google.common.base.Joiner;
-
 /**
  * @author Michiel Meeuwissen
  * @since 3.4
@@ -27,7 +25,7 @@ public class ConstraintViolations {
             }
         }
         if (! propsWithHtml.isEmpty()) {
-            builder.append('"').append(Joiner.on(", ").join(propsWithHtml)).append("\" contains HTML");
+            builder.append('"').append(String.join(", ", propsWithHtml)).append("\" contains HTML");
         }
         return builder.toString();
     }
