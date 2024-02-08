@@ -8,6 +8,10 @@
   </parent>
   <artifactId>vpro-shared-web</artifactId>
   <description>This modules contains web utils and classes to be shared among other modules.</description>
+
+  <properties>
+    <vpro.shared.module.postfix>web</vpro.shared.module.postfix>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>jakarta.servlet</groupId>

@@ -13,6 +13,10 @@
     Utilities related  to jakarta.ws.rs.client
 
   </description>
+  <properties>
+    <vpro.shared.module.postfix>rs-client</vpro.shared.module.postfix>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>nl.vpro.shared</groupId>

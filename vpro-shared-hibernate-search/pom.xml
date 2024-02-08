@@ -10,6 +10,10 @@
 
   <artifactId>vpro-shared-hibernate-search</artifactId>
 
+  <properties>
+    <vpro.shared.module.postfix>hibernate.search</vpro.shared.module.postfix>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.hibernate</groupId>

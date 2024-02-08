@@ -9,9 +9,13 @@
   </parent>
 
   <artifactId>vpro-shared-jcache</artifactId>
+
+
+  <properties>
+    <vpro.shared.module.postfix>jcache</vpro.shared.module.postfix>
+  </properties>
   <description>
     Jcache/ehcache don't provide Mbeans for clearing cache.
-    This
   </description>
 
 

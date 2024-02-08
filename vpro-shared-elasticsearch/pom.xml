@@ -12,6 +12,7 @@
   <description>Shared interfaces and constants for the other elasticsearch modules in this project</description>
 
   <properties>
+    <vpro.shared.module.postfix>elasticsearch</vpro.shared.module.postfix>
   </properties>
 
   <dependencies>

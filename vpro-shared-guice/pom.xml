@@ -11,6 +11,7 @@
   <artifactId>vpro-shared-guice</artifactId>
   <properties>
     <guice.version>4.2.3</guice.version>
+    <vpro.shared.module.postfix>guice</vpro.shared.module.postfix>
   </properties>
 
 

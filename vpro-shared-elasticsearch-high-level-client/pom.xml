@@ -13,6 +13,8 @@
   <properties>
     <elasticsearch.version>${elasticsearch7.version}</elasticsearch.version>
     <lucene.elasticsearch.version>${lucene.elasticsearch7.version}</lucene.elasticsearch.version>
+
+    <vpro.shared.module.postfix>elasticsearch.high-level.client</vpro.shared.module.postfix>
   </properties>
 
   <dependencies>

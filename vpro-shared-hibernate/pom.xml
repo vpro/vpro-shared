@@ -9,6 +9,9 @@
   </parent>
 
   <artifactId>vpro-shared-hibernate</artifactId>
+  <properties>
+    <vpro.shared.module.postfix>hibernate</vpro.shared.module.postfix>
+  </properties>
 
 
   <dependencies>

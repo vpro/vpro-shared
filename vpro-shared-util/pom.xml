@@ -12,7 +12,6 @@
 
   <properties>
     <vpro.shared.module.postfix>util</vpro.shared.module.postfix>
-
   </properties>
 
   <dependencies>

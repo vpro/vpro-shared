@@ -13,6 +13,7 @@
 
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
+    <vpro.shared.module.postfix>test</vpro.shared.module.postfix>
   </properties>
 
   <dependencies>

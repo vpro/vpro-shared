@@ -8,10 +8,11 @@
     <version>5.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-client-resteasy</artifactId>
-
+  <properties>
+    <vpro.shared.module.postfix>client.resteasy</vpro.shared.module.postfix>
+  </properties>
   <description>
     Utilities related to resteasy api clients.
-
   </description>
 
   <dependencies>

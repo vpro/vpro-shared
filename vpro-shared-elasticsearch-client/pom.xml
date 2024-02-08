@@ -16,6 +16,11 @@
 
 
 
+  <properties>
+    <vpro.shared.module.postfix>elasticsearch.client</vpro.shared.module.postfix>
+  </properties>
+
+
   <dependencies>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>

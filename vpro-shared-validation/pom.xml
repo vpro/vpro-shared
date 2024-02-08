@@ -9,6 +9,9 @@
   </parent>
 
   <artifactId>vpro-shared-validation</artifactId>
+  <properties>
+    <vpro.shared.module.postfix>validation</vpro.shared.module.postfix>
+  </properties>
 
   <dependencies>
     <dependency>

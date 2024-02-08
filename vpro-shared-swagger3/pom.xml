@@ -12,6 +12,8 @@
 
   <properties>
     <swagger.ui.version>5.10.3</swagger.ui.version>
+    <vpro.shared.module.postfix>swagger</vpro.shared.module.postfix>
+
   </properties>
 
 

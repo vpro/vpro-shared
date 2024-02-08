@@ -11,6 +11,7 @@
   <artifactId>vpro-shared-persistence</artifactId>
 
   <properties>
+    <vpro.shared.module.postfix>persistence</vpro.shared.module.postfix>
   </properties>
   <dependencies>
     <dependency>
