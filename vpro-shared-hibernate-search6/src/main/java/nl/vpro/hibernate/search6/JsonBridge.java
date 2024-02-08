@@ -5,7 +5,6 @@
 package nl.vpro.hibernate.search6;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
@@ -33,7 +32,6 @@ public class JsonBridge  implements ValueBridge<Object, String> {
 
     public final static int MAX_LENGTH = 32000;
 
-    @Setter
     private Class<?> type;
 
 
