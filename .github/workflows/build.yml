@@ -34,9 +34,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cancel previous Action
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12.1
         if: github.ref == 'refs/heads/main'
-      - uses: getong/elasticsearch-action@v1.2
+      - uses: getong/elasticsearch-action@v1.3
         with:
           elasticsearch version: '7.9.0'
         if: runner.os == 'Linux'
@@ -64,7 +64,7 @@ jobs:
         continue-on-error: true
         if:  matrix.target == 'deploy'
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.10.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.14.0
         if: always() && runner.os == 'Linux'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
