@@ -39,6 +39,10 @@
       <artifactId>junit-jupiter-params</artifactId>
       <optional>true</optional>
     </dependency>
+    <!-- TODO: jsonassert seems to have been abandoned
+         No JPMS support
+         Find alternative.
+         -->
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>

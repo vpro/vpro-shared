@@ -38,9 +38,9 @@ public class JsonArrayIteratorTest {
 
                 Change change = it.next(); // 10
                 Optional<Long> size = it.getSize();
-                if (size.isPresent()) {
-                    log.info(it.getCount() + "/" + size.get() + " :" + change);
-                }
+                size.ifPresent(aLong ->
+                    log.info(it.getCount() + "/" + aLong + " :" + change)
+                );
                 if (!change.isDeleted()) {
                     assertThat(change.getMedia()).isNotNull();
                 }
