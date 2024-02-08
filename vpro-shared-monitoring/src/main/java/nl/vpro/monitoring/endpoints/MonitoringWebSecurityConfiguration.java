@@ -2,6 +2,7 @@ package nl.vpro.monitoring.endpoints;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,9 +18,9 @@ import nl.vpro.monitoring.config.MonitoringProperties;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @EnableWebSecurity
-@Order(-1)
-public class MonitoringWebSecurityConfiguration { // deprecated damn.
+public class MonitoringWebSecurityConfiguration {
 
     private final MonitoringProperties properties;
 
@@ -29,8 +30,10 @@ public class MonitoringWebSecurityConfiguration { // deprecated damn.
         configure(auth);
     }
 
+
     @Bean
-    public SecurityFilterChain monitoringSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher(antMatcher("/manage/**"));
         if (properties.isHealthPermitAll()) {
             http.authorizeHttpRequests((authz) -> {
                 authz.requestMatchers(
@@ -44,7 +47,6 @@ public class MonitoringWebSecurityConfiguration { // deprecated damn.
                 .hasRole("MANAGER");
         }).httpBasic(
             httpBasic -> httpBasic.realmName("manager"));
-
         return http.build();
     }
 

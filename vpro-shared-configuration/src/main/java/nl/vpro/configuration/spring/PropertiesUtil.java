@@ -4,16 +4,6 @@ package nl.vpro.configuration.spring;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import jakarta.inject.Provider;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -26,13 +16,22 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import jakarta.inject.Provider;
+
 /**
  * An extension of {@link PropertyPlaceholderConfigurer} that can do:
  * <ul>
  * <li>expose the {@link #getMap()} map} of properties (for use in e.g. JSP).</li>
  * <li>expose some properties as {@link #setExposeAsSystemProperty(String) system properties}</li>
  * <li>{@link #setLog log} some things</li>
- * <li>Using {@link #setRegisterAsSingletonStringRegexp(Pattern)} you can also register specified properties as beans (this is usefull when using {@link javax.inject.Named} in stead of {@link org.springframework.beans.factory.annotation.Value}</li>
+ * <li>Using {@link #setRegisterAsSingletonStringRegexp(Pattern)} you can also register specified properties as beans (this is usefull when using {@link jakarta.inject.Named} in stead of {@link org.springframework.beans.factory.annotation.Value}</li>
  * <li>Have a {@link #setAfterProperties(List)}  call back}</li>
  *</ul>
  * @author Michiel Meeuwissen
