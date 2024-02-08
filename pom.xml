@@ -69,6 +69,9 @@
     <micrometer.version>1.12.2</micrometer.version>
     <flyway.version>10.7.1</flyway.version>
 
+
+    <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
+    <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
   </properties>
 
   <licenses>
@@ -227,6 +230,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
+          <argLine>${EXTRA_TEST_OPTS}</argLine>
           <systemPropertyVariables>
             <projectArtifactId>${project.artifactId}</projectArtifactId>
           </systemPropertyVariables>
@@ -293,16 +297,16 @@
             </annotationProcessorPaths>
           </configuration>
         </plugin>
-      <!--  <plugin>
+        <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <configuration>
             <archive>
               <manifestEntries>
-                <Automatic-Module-Name>${project.groupId}.${project.artifactId}</Automatic-Module-Name>
+                <Automatic-Module-Name>nl.vpro.shared.${vpro.shared.module.postfix}</Automatic-Module-Name>
               </manifestEntries>
             </archive>
           </configuration>
-        </plugin>-->
+        </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>

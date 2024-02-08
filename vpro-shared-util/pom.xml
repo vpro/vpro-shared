@@ -10,6 +10,11 @@
 
   <artifactId>vpro-shared-util</artifactId>
 
+  <properties>
+    <vpro.shared.module.postfix>util</vpro.shared.module.postfix>
+
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
