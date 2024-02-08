@@ -373,7 +373,7 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate-search</artifactId>
+        <artifactId>vpro-shared-hibernate-search6</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
