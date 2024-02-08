@@ -40,8 +40,6 @@
 
     <hibernate.version>5.6.15.Final</hibernate.version>
 
-    <hibernate.search.version>5.11.12.Final</hibernate.search.version> <!-- deprecated -->
-
     <hibernate.search6.version>6.2.3.Final</hibernate.search6.version>
 
     <!-- jakarta versions -->
@@ -123,10 +121,11 @@
     <module>vpro-shared-elasticsearch-high-level-client</module>
 
     <module>vpro-shared-hibernate</module>
-    <module>vpro-shared-hibernate-search</module>
     <!--
-        <module>vpro-shared-hibernate-search6</module>
+    <module>vpro-shared-hibernate-search</module>
     -->
+    <module>vpro-shared-hibernate-search6</module>
+
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-logging</module>
     <module>vpro-shared-log4j2</module>
@@ -494,9 +493,9 @@
         <version>${hibernate.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.hibernate</groupId>
-        <artifactId>hibernate-search-orm</artifactId>
-        <version>${hibernate.search.version}</version>
+        <groupId>org.hibernate.search</groupId>
+        <artifactId>hibernate-search-mapper-orm-jakarta</artifactId>
+        <version>${hibernate.search6.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate.search</groupId>
