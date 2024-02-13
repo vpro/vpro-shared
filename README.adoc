@@ -64,7 +64,7 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 | february 2024
 
 
-| 5.x ?
+| 5.x
 | javax -> jakarta
 | february 2024
 
