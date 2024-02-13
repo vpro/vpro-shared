@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.4-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-log4j2</artifactId>
@@ -13,6 +13,9 @@
     Just arranges dependencies to set up log4j2. Arranges logging from jul and slf4j (1 &amp; 2) to log4j2.
   </description>
 
+  <properties>
+    <vpro.shared.module.postfix>log4j</vpro.shared.module.postfix>
+  </properties>
 
   <dependencies>
     <!-- logging -->

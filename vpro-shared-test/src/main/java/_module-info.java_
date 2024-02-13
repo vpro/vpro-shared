@@ -1,0 +1,31 @@
+module nl.vpro.shared.test {
+    requires static lombok;
+    requires org.junit.jupiter.api;
+    requires org.hamcrest;
+    requires net.jqwik.api;
+    requires postgresql;
+    requires spring.context;
+    requires org.postgresql.jdbc;
+    requires jakarta.inject;
+    requires java.sql;
+    requires flyway.core;
+    requires com.fasterxml.jackson.databind;
+    requires nl.vpro.shared.jackson;
+    requires jsonassert;
+    requires org.assertj.core;
+    requires org.apache.commons.io;
+    requires org.apache.commons.lang3;
+    requires jakarta.xml.bind;
+    requires org.xmlunit;
+    requires io.github.javadiffutils;
+    requires org.slf4j;
+    requires nl.vpro.shared.util;
+
+    exports nl.vpro.test.util;
+    exports nl.vpro.test.util.jackson2;
+    exports nl.vpro.test.util.jaxb;
+    exports nl.vpro.test.util.serialize;
+    exports nl.vpro.test.jqwik;
+    exports nl.vpro.test.psql;
+    exports nl.vpro.test.jupiter;
+}

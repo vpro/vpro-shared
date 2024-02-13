@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.4-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-test</artifactId>
   <packaging>jar</packaging>
@@ -13,6 +13,7 @@
 
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
+    <vpro.shared.module.postfix>test</vpro.shared.module.postfix>
   </properties>
 
   <dependencies>

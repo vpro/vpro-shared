@@ -3,9 +3,7 @@ package nl.vpro.validation;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.ConstraintViolation;
-
-import com.google.common.base.Joiner;
+import jakarta.validation.ConstraintViolation;
 
 /**
  * @author Michiel Meeuwissen
@@ -27,7 +25,7 @@ public class ConstraintViolations {
             }
         }
         if (! propsWithHtml.isEmpty()) {
-            builder.append('"').append(Joiner.on(", ").join(propsWithHtml)).append("\" contains HTML");
+            builder.append('"').append(String.join(", ", propsWithHtml)).append("\" contains HTML");
         }
         return builder.toString();
     }

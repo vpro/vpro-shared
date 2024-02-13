@@ -10,11 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 

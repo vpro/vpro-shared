@@ -5,13 +5,14 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.4-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-elasticsearch</artifactId>
   <description>Shared interfaces and constants for the other elasticsearch modules in this project</description>
 
   <properties>
+    <vpro.shared.module.postfix>elasticsearch</vpro.shared.module.postfix>
   </properties>
 
   <dependencies>

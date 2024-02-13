@@ -5,13 +5,15 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.4-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-swagger3</artifactId>
-  <version>4.4-SNAPSHOT</version>
+  <version>5.0-SNAPSHOT</version>
 
   <properties>
     <swagger.ui.version>5.10.3</swagger.ui.version>
+    <vpro.shared.module.postfix>swagger</vpro.shared.module.postfix>
+
   </properties>
 
 
@@ -60,16 +62,16 @@
 
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-core</artifactId>
+      <artifactId>swagger-core-jakarta</artifactId>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-jaxrs2</artifactId>
+      <artifactId>swagger-jaxrs2-jakarta</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-      <version>2.0.2.Final</version>
+      <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
+      <version>1.0.1.Final</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -106,7 +108,7 @@
     <!-- handy to provide this -->
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-annotations</artifactId>
+      <artifactId>swagger-annotations-jakarta</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

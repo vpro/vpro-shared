@@ -1,7 +1,7 @@
 package nl.vpro.xml.bind;
 
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * Serializes <tt>boolean</tt> as 0 or 1.
@@ -15,7 +15,13 @@ public class ZeroOneBooleanAdapter extends XmlAdapter<String,Boolean> {
         if(v == null) {
             return null;
         }
-        return DatatypeConverter.parseBoolean(v);
+        try {
+            return DatatypeConverter.parseBoolean(v);
+        } catch (IllegalArgumentException iae) {
+            //In jaxb.DataTypeConverter this was the behaviour.
+            // I suppose the change was good, but for now keep it compatible
+            return false;
+        }
     }
 
     public String marshal(Boolean v) {

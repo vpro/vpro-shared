@@ -1,6 +1,6 @@
 package nl.vpro.jpa;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 /**
  * @author Michiel Meeuwissen

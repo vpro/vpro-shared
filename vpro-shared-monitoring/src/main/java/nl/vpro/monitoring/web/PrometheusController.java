@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.time.Duration;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.math.windowed.WindowedStatisticalLong;

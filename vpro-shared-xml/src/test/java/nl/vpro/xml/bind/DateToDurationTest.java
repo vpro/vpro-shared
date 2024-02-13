@@ -2,8 +2,8 @@ package nl.vpro.xml.bind;
 
 import java.util.Date;
 
-import javax.xml.bind.JAXB;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.JAXB;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.junit.jupiter.api.Test;
 

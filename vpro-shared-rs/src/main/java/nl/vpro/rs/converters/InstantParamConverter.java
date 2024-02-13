@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.ext.ParamConverter;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.Provider;
 
 import nl.vpro.util.TimeUtils;
 

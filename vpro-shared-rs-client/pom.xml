@@ -5,14 +5,17 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.4-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-rs-client</artifactId>
 
   <description>
     Utilities related  to jakarta.ws.rs.client
-
   </description>
+  <properties>
+    <vpro.shared.module.postfix>rs.client</vpro.shared.module.postfix>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
@@ -32,13 +35,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <artifactId>jackson-jakarta-rs-json-provider</artifactId>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-common</artifactId>
-      <version>2.35</version> <!-- 3 is jakarta.* -->
+      <version>3.1.5</version> <!-- 3 is jakarta.* -->
       <scope>test</scope>
     </dependency>
   </dependencies>

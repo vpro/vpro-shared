@@ -4,8 +4,8 @@
  */
 package nl.vpro.i18n.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import nl.vpro.i18n.Displayable;
 

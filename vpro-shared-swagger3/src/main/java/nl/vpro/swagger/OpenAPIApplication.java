@@ -17,6 +17,10 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 
 import java.net.URI;
 import java.time.Duration;
@@ -24,15 +28,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jackson2.Views;
@@ -111,7 +111,7 @@ public abstract class OpenAPIApplication {
     @Bean()
     @Lazy
     OpenApiContext getOpenApiContext(OpenAPIConfiguration openApiConfiguration) throws OpenApiConfigurationException {
-        return new JaxrsOpenApiContextBuilder()
+        return new JaxrsOpenApiContextBuilder<>()
             .openApiConfiguration(openApiConfiguration)
             .ctxId("our-id")
             .buildContext(true);
@@ -124,7 +124,7 @@ public abstract class OpenAPIApplication {
         if (api == null) {
             Jackson2Mapper.configureMapper(Json.mapper());
             Json.mapper()
-                .registerModule(new JaxbAnnotationModule())
+                .registerModule(new JakartaXmlBindAnnotationModule())
                 .registerModule(new JavaTimeModule());
 
             Json.mapper().setConfig(

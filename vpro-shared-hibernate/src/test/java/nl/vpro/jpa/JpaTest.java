@@ -1,11 +1,5 @@
 package nl.vpro.jpa;
 
-import java.util.Properties;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hsqldb.jdbc.JDBCDataSource;
@@ -14,6 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+
+import java.util.Properties;
+
+import javax.sql.DataSource;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * @author Michiel Meeuwissen
@@ -41,7 +41,7 @@ public class JpaTest {
         dataSource.setPassword("media");
 
         Properties properties = new Properties();
-        properties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQL82Dialect.class);
+        properties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQLDialect.class);
         properties.put("hibernate.connection.driver_class", org.postgresql.Driver.class);
         properties.put("hibernate.hbm2ddl.auto", "create-drop");
 

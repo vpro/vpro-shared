@@ -2,7 +2,7 @@ package nl.vpro.rs.client;
 
 import java.lang.reflect.Method;
 
-import javax.ws.rs.client.*;
+import jakarta.ws.rs.client.*;
 
 import org.slf4j.Logger;
 

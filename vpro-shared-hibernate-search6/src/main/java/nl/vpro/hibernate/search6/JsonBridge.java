@@ -5,16 +5,16 @@
 package nl.vpro.hibernate.search6;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
+import org.hibernate.search.mapper.pojo.common.annotation.Param;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
-import org.hibernate.search.bridge.ParameterizedBridge;
-import org.hibernate.search.bridge.TwoWayStringBridge;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -25,18 +25,18 @@ import nl.vpro.jackson2.Jackson2Mapper;
  * A straight forward bridge to store a complicated object as json in the index.
  * @since 3.5
  */
+@Getter
 @Slf4j
-public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
+@Param(name = "class", value = "java.lang.String")
+public class JsonBridge  implements ValueBridge<Object, String> {
 
     public final static int MAX_LENGTH = 32000;
 
-    @Getter
-    @Setter
     private Class<?> type;
 
 
     @Override
-    public Object stringToObject(String stringValue) {
+    public Object fromIndexedValue(String stringValue, ValueBridgeFromIndexedValueContext context) {
         if (stringValue == null) {
             return null;
         }
@@ -50,7 +50,7 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
     }
 
     @Override
-    public String objectToString(final Object object) {
+    public String toIndexedValue(Object object, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
         if (object == null) {
             return null;
         }
@@ -92,13 +92,13 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
         }
     }
 
-    @Override
-    public void setParameterValues(Map<String, String> parameters) {
+    public void setClass(String className) {
         try {
-            String className = parameters.get("class");
             type = Class.forName(className);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
+
+
 }

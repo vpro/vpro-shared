@@ -1,18 +1,19 @@
-package nl.vpro.jmx;
+package nl.vpro.configuration.jmx;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.jmx.export.annotation.*;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.time.Duration;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.jmx.export.annotation.*;
 
+import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.simple.SimpleLogger;
 
 /**

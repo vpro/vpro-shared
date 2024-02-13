@@ -6,15 +6,16 @@ package nl.vpro.jackson2;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 
 import java.io.Serial;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import org.slf4j.event.Level;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
@@ -24,7 +25,7 @@ import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
 import com.google.common.annotations.Beta;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -201,9 +202,9 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.setFilterProvider(FILTER_PROVIDER);
 
          AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
-            new JacksonAnnotationIntrospector(),
-            new JaxbAnnotationIntrospector(mapper.getTypeFactory()
-            ));
+             new JacksonAnnotationIntrospector(),
+             new JakartaXmlBindAnnotationIntrospector(mapper.getTypeFactory())
+         );
 
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setAnnotationIntrospector(introspector);

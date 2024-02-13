@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import nl.vpro.util.TimeUtils;
 

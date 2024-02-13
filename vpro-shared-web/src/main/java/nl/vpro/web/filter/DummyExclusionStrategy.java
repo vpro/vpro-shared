@@ -1,7 +1,7 @@
 package nl.vpro.web.filter;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * dummy implementation that passes all requests

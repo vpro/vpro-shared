@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.*;
 
-import javax.validation.*;
+import jakarta.validation.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

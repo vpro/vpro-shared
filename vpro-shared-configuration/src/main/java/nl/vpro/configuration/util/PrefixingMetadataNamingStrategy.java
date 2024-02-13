@@ -1,4 +1,4 @@
-package nl.vpro.util;
+package nl.vpro.configuration.util;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;

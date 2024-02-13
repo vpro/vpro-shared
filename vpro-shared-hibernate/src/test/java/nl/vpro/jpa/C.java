@@ -3,7 +3,7 @@ package nl.vpro.jpa;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * @author Michiel Meeuwissen

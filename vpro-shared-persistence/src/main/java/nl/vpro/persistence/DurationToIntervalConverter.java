@@ -2,8 +2,8 @@ package nl.vpro.persistence;
 
 import java.time.Duration;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 /**
  * Postgresql has a dedicated Interval type. I tried to get it working with something like this. It didn't work, I couldn't get hibernate to not report:

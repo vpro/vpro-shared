@@ -2,7 +2,7 @@ package nl.vpro.xml.bind;
 
 import java.util.Locale;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 
 /**

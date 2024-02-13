@@ -6,8 +6,8 @@ package nl.vpro.validation;
 
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CRIDValidator implements ConstraintValidator<CRID, String> {
     public static final String  REGEXP  = "crid://.*/.*";

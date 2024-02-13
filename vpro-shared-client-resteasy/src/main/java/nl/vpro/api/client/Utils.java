@@ -3,7 +3,7 @@ package nl.vpro.api.client;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 
 /**
  * @author Michiel Meeuwissen

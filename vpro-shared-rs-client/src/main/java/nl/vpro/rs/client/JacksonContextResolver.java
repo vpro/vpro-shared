@@ -1,9 +1,10 @@
 package nl.vpro.rs.client;
 
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.ContextResolver;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 
@@ -11,7 +12,7 @@ import nl.vpro.jackson2.Jackson2Mapper;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
-public class JacksonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper> {
+public class JacksonContextResolver extends JacksonXmlBindJsonProvider implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper mapper;
 

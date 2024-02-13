@@ -1,11 +1,10 @@
 package nl.vpro.logging;
 
 
-import java.util.Iterator;
-
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
-import org.slf4j.ext.LoggerWrapper;
+
+import java.util.Iterator;
 
 
 /**

@@ -1,7 +1,7 @@
 package nl.vpro.web.filter;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * This exclusion strategy is a workaround for an issue with a filter being

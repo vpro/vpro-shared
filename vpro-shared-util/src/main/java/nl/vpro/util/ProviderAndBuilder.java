@@ -2,21 +2,19 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
+
 
 /**
  * If you have a provider implementation based on a builder, you can fill the fields of the provider to the builder using
  * reflection.
  * Providers can come in usefull with IOC-frameworks like guice. The idea is to put {@link javax.inject.Named} annotation on the fields of the Provider.
  *
- * @author Michiel Meeuwissen
+ * @author Michiel MeeuwissenLocaleParamConverter.java
  * @since 1.69
  */
 @Slf4j

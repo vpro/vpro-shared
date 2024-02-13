@@ -1,13 +1,13 @@
 package nl.vpro.util;
 
 import lombok.*;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.inject.*;
+import jakarta.inject.*;
 
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 

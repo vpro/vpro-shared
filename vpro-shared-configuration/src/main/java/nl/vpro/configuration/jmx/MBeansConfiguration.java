@@ -1,4 +1,4 @@
-package nl.vpro.jmx;
+package nl.vpro.configuration.jmx;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

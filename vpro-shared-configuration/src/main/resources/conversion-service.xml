@@ -10,12 +10,12 @@
     class="org.springframework.context.support.ConversionServiceFactoryBean" > <!-- see e.g. https://stackoverflow.com/questions/12576156/reading-a-list-from-properties-file-and-load-with-spring-annotation-value -->
     <property name="converters">
       <list>
-        <bean class="nl.vpro.spring.converters.StringToDurationConverter" />
-        <bean class="nl.vpro.spring.converters.StringToTemporalAmountConverter" />
-        <bean class="nl.vpro.spring.converters.StringToIntegerListConverter" />
-        <bean class="nl.vpro.spring.converters.StringToLocalTimeConverter" />
-        <bean class="nl.vpro.spring.converters.StringToInstantConverter" />
-        <bean class="nl.vpro.spring.converters.StringToLocalDateTimeConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToDurationConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToTemporalAmountConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToIntegerListConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToLocalTimeConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToInstantConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToLocalDateTimeConverter" />
       </list>
     </property>
   </bean>

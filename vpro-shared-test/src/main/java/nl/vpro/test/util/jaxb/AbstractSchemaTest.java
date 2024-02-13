@@ -1,5 +1,7 @@
 package nl.vpro.test.util.jaxb;
 
+import jakarta.xml.bind.*;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,8 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;

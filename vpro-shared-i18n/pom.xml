@@ -4,9 +4,14 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>4.4-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-i18n</artifactId>
+
+
+  <properties>
+    <vpro.shared.module.postfix>i18n</vpro.shared.module.postfix>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -45,7 +50,7 @@
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
-      <artifactId>swagger-annotations</artifactId>
+      <artifactId>swagger-annotations-jakarta</artifactId>
       <scope>provided</scope>
     </dependency>
   </dependencies>

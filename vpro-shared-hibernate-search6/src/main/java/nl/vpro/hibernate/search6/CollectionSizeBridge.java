@@ -27,7 +27,6 @@ public class CollectionSizeBridge<T> implements ValueBridge<Object, Long> {
 
     @Override
     public Long toIndexedValue(Object value, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
-
         return getLong(value);
     }
 

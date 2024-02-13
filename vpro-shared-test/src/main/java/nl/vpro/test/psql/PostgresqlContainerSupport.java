@@ -1,18 +1,17 @@
 package nl.vpro.test.psql;
 
-import lombok.extern.log4j.Log4j2;
-
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
+import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import javax.sql.DataSource;
+import jakarta.inject.Inject;
+
 @Configuration
-@Log4j2
+@Slf4j
 public class PostgresqlContainerSupport {
 
     @Bean("psqlcontainer")

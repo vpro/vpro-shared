@@ -15,35 +15,39 @@ public class JAXBTestUtilTest {
 
     @Test
     public void testMarshal() {
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-            "<a xmlns=\"urn:test:1234\">\n" +
-            "    <value>aa</value>\n" +
-            "    <b i=\"1\" j=\"2\">\n" +
-            "        <value>bb</value>\n" +
-            "        <c>cc</c>\n" +
-            "    </b>\n" +
-            "</a>\n", JAXBTestUtil.marshal(new A()));
+        assertEquals("""
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <a xmlns="urn:test:1234">
+                <value>aa</value>
+                <b i="1" j="2">
+                    <value>bb</value>
+                    <c>cc</c>
+                </b>
+            </a>
+            """, JAXBTestUtil.marshal(new A()));
 
 
     }
 
     @Test
     public void testMarshalWithNoRootElement () {
-        assertThatXml(new B()).isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-            "<local:b xmlns=\"urn:test:1234\" xmlns:local=\"uri:local\" i=\"1\" j=\"2\">\n" +
-            "    <value>bb</value>\n" +
-            "    <c>cc</c>\n" +
-            "</local:b>");
+        assertThatXml(new B()).isSimilarTo("""
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <local:b xmlns="urn:test:1234" xmlns:local="uri:local" i="1" j="2">
+                <value>bb</value>
+                <c>cc</c>
+            </local:b>""");
 
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testContainsDeprecated() {
-        roundTrip(new A(), "<b i=\"1\" j=\"2\">\n" +
-            "        <value>bb</value>\n" +
-            "        <c>cc</c>\n" +
-            "    </b>");
+        roundTrip(new A(), """
+            <b i="1" j="2">
+                    <value>bb</value>
+                    <c>cc</c>
+                </b>""");
     }
 
 
@@ -82,20 +86,22 @@ public class JAXBTestUtilTest {
 
     @Test
     public void testContainsFluent() {
-        A rounded = assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='2'>\n" +
-            "            <value>bb</value>\n" +
-                "               <c>cc</c>\n" +
-                "         </b>").get();
+        A rounded = assertThatXml(new A()).containsSimilar("""
+            <b xmlns="urn:test:1234" i='1' j='2'>
+                        <value>bb</value>
+                           <c>cc</c>
+                     </b>""").get();
         assertThat(rounded.getB().getJ()).isEqualTo(2);
     }
 
     @Test
     public void testContainsFluentFails() {
         assertThatThrownBy(() ->
-            assertThatXml(new A()).containsSimilar("<b xmlns=\"urn:test:1234\" i='1' j='3'>\n" +
-                "            <value>bb</value>\n" +
-                "        <c>cc</c>\n" +
-                "</b>"))
+            assertThatXml(new A()).containsSimilar("""
+                <b xmlns="urn:test:1234" i='1' j='3'>
+                            <value>bb</value>
+                        <c>cc</c>
+                </b>"""))
             .isInstanceOf(AssertionError.class);
     }
 
