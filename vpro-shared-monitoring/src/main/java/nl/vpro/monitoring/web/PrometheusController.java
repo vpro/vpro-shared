@@ -30,12 +30,28 @@ public class PrometheusController {
         this.registry = registry;
     }
 
+
+    /**
+     * As {@link #prometheus(HttpServletResponse)}. TODO: spring boot actuator does something different.
+     * It give s json with all metric names for /metrics.
+     * May be we could conform?
+     */
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/metrics", produces = TextFormat.CONTENT_TYPE_004)
 
     public void metrics(final HttpServletResponse response) throws IOException {
-        log.debug("Scraping Prometheus metrics");
+        prometheus(response);
+    }
+
+    /**
+     * Returns metrics in format fit for prometheus
+     */
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
+    public void prometheus(final HttpServletResponse response) throws IOException {
+         log.debug("Scraping Prometheus metrics");
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
         try (
@@ -43,13 +59,6 @@ public class PrometheusController {
             Writer writer = response.getWriter()) {
             scrape(writer);
         }
-    }
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
-    @Deprecated
-    public void prometheus(final HttpServletResponse response) throws IOException {
-        metrics(response);
     }
     protected Duration scrape(Writer writer) throws IOException {
         long start = System.nanoTime();
