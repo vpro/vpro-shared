@@ -8,3 +8,16 @@ This restores it for ecache-3.
 
 
 image:screenshot.png[]]
+
+== How to install?
+
+Adding the dependency should do it:
+
+.pom.xml
+[source,xml]
+----
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-jcache</artifactId>
+    </dependency>
+----
