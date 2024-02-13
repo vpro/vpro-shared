@@ -58,13 +58,19 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 | java 17
 | june 2023
 
+| 4.3-SNAPHOT
+| This is the branch for javax compatiblity. From this minor release can/will be made. Possible it can be merged to 4.4 if needed
+  This would be done manually, since release branches are normally made from main
+| february 2024
+
+
 | 5.x ?
 | javax -> jakarta
-| somewhen 2024?
+| february 2024
 
 | 6.x >
-| java 21 (to be release in sep. 2023)
-| early 2024?
+| java 21 (released in sep. 2023)
+| 2024?
 
 
 |===
