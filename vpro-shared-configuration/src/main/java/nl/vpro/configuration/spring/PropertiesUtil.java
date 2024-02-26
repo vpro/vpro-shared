@@ -274,19 +274,23 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                     continue;
                 }
             }
-            String v = helper.replacePlaceholders(value, p);
-            String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
-                try {
-                    Expression exp = parser.parseExpression(placeholderName);
-                    return (String) exp.getValue();
-                } catch (org.springframework.expression.spel.SpelEvaluationException e) {
-                    log.debug(e.getMessage());
-                    return placeholderName;
+            try {
+                String v = helper.replacePlaceholders(value, p);
+                String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
+                    try {
+                        Expression exp = parser.parseExpression(placeholderName);
+                        return (String) exp.getValue();
+                    } catch (org.springframework.expression.spel.SpelEvaluationException e) {
+                        log.debug(e.getMessage());
+                        return placeholderName;
+                    }
+                });
+                Object prevValue = propertiesMap.put(keyStr, elV);
+                if (prevValue != null) {
+                    log.debug("Replaced {}: {} -> {}", keyStr, prevValue, elV);
                 }
-            });
-            Object prevValue = propertiesMap.put(keyStr, elV);
-            if (prevValue != null) {
-                log.debug("Replaced {}: {} -> {}", keyStr, prevValue, elV);
+            } catch (Exception e) {
+                log.info("Error replacing placeholders in " + keyStr + "=" + value + " " + e.getMessage());
             }
         }
 
