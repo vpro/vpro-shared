@@ -56,7 +56,7 @@ public class MultiLanguageString implements CharSequence {
 
     public static Builder.In in(LanguageCode language) {
         Builder builder = new Builder();
-        Locale locale = new Locale(language.getCode());
+        Locale locale = language.toLocale();
         return builder.defaultLocale(locale).in(locale);
     }
 
@@ -162,7 +162,7 @@ public class MultiLanguageString implements CharSequence {
         }
 
         public Builder defaultLocale(LanguageCode locale) {
-            created.defaultLocale = new Locale(locale.getCode());
+            created.defaultLocale = locale.toLocale();
             return this;
         }
 
@@ -213,7 +213,7 @@ public class MultiLanguageString implements CharSequence {
         }
 
         public In in(LanguageCode language) {
-            return in(new Locale(language.getCode()));
+            return in(language.toLocale());
         }
 
         public MultiLanguageString build() {
