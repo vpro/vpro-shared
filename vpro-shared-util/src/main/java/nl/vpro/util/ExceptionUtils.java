@@ -33,15 +33,8 @@ public class ExceptionUtils {
         };
     }
 
-        /**
-     * Wraps a {@link Callable} in a {@link Supplier}.
-     * <p>
-     * You may need a supplier, but have code that throws an exception. Like this:
-     * <p>
-     * {@code
-     *   service.download(file, ExceptionUtils.wrapException(() -> new FileOutputStream(destFile)))
-     * }
-     *
+    /**
+     * Wraps a {@link ThrowingFunction} in a {@link Function}.
      * The point is that otherwise this nice lambda gets ugly because of the try/catch block.
      */
     public static <A, R, E extends Exception> Function<A, R> wrapException(ThrowingFunction<A, R, E> f) {
