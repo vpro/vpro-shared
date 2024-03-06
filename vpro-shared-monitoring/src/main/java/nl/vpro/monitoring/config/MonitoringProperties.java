@@ -3,6 +3,7 @@ package nl.vpro.monitoring.config;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -79,4 +80,11 @@ public class MonitoringProperties {
 
     @Value("${monitoring.health.permitAll:true}")
     private boolean healthPermitAll;
+
+    @Value("${data.dir}")
+    String dataDir;
+
+    @Value("${monitoring.unhealthyThreshold:10s}")
+    Duration unhealthyThreshold = Duration.ofSeconds(10);
+
 }
