@@ -801,6 +801,11 @@
         <scope>import</scope>
       </dependency>
       <dependency>
+        <groupId>org.meeuw.i18n</groupId>
+        <artifactId>i18n-iso-639</artifactId>
+        <version>3.2-SNAPSHOT</version>
+      </dependency>
+      <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-bom</artifactId>
         <version>${micrometer.version}</version>
