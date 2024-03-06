@@ -1,6 +1,15 @@
 package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.output.NullWriter;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -12,15 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.io.output.NullWriter;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.*;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.WebApplicationContext;
 
 import nl.vpro.monitoring.domain.Health;
 
@@ -93,31 +93,40 @@ public class HealthController {
         if (prometheusDown) {
             prometheusDownCount.incrementAndGet();
             try {
-                Duration secondPrometheusDuration = prometheusController.scrape(new NullWriter());
+                Duration secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
                 prometheusDown = prometheusDown(secondPrometheusDuration);
+                if (prometheusDown) {
+                    log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealthyThreshold);
+                } else {
+                    log.debug("Prometheus is up again");
+                }
             } catch (IOException ioa) {
                 log.warn(ioa.getMessage());
             }
             if (prometheusDown) {
-                if (!threadsDumped) {
-                    final Path threadFile = Path.of(dataDir, "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
-                    new Thread(null, () -> {
-                        log.info("Dumping threads to {} for later analysis", threadFile);
-                        StringBuilder builder = new StringBuilder();
+                synchronized (HealthController.class) {
+                    if (!threadsDumped) {
+                        final Path threadFile = Path.of(dataDir, "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
+                        new Thread(null, () -> {
+                            log.info("Dumping threads to {} for later analysis", threadFile);
+                            StringBuilder builder = new StringBuilder();
 
-                        for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
-                            builder.append(threadInfo.toString());
-                            builder.append('\n');
-                        }
-                        try {
-                            Files.writeString(threadFile, builder.toString());
-                        } catch (IOException e) {
-                            log.warn(e.getMessage(), e);
-                        }
+                            for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
+                                builder.append(threadInfo.toString());
+                                builder.append('\n');
+                            }
+                            try {
+                                Files.writeString(threadFile, builder.toString());
+                            } catch (IOException e) {
+                                log.warn(e.getMessage(), e);
+                            }
 
-                    }, "Dumping threads").start();
-                    threadsDumped = true;
+                        }, "Dumping threads").start();
+                        threadsDumped = true;
+                    }
                 }
+            } else {
+                threadsDumped = false;
             }
 
         } else {
