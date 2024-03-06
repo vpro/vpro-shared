@@ -1,15 +1,6 @@
 package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.output.NullWriter;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.*;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -18,10 +9,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.io.output.NullWriter;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 
+import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 
 @Lazy(false)
@@ -37,7 +38,6 @@ public class HealthController {
 
     Clock clock = Clock.systemDefaultZone();
 
-    Duration unhealthyThreshold = Duration.ofSeconds(10);
 
     @Inject
     WebApplicationContext webApplicationContext;
@@ -45,8 +45,8 @@ public class HealthController {
     @Inject
     PrometheusController prometheusController;
 
-    @Value("${data.dir}")
-    String dataDir;
+    @Inject
+    MonitoringProperties monitoringProperties;
 
     private boolean threadsDumped = false;
 
@@ -86,17 +86,19 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
+        Duration unhealth = monitoringProperties.getUnhealthyThreshold();
+        Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
 
         Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
-        boolean prometheusDown = prometheusDown(prometheusDuration);
+        boolean prometheusDown = unhealthy.test(prometheusDuration);
 
         if (prometheusDown) {
             prometheusDownCount.incrementAndGet();
             try {
                 Duration secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
-                prometheusDown = prometheusDown(secondPrometheusDuration);
+                prometheusDown = unhealthy.test(secondPrometheusDuration);
                 if (prometheusDown) {
-                    log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealthyThreshold);
+                    log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
                 } else {
                     log.debug("Prometheus is up again");
                 }
@@ -106,7 +108,7 @@ public class HealthController {
             if (prometheusDown) {
                 synchronized (HealthController.class) {
                     if (!threadsDumped) {
-                        final Path threadFile = Path.of(dataDir, "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
+                        final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
                         new Thread(null, () -> {
                             log.info("Dumping threads to {} for later analysis", threadFile);
                             StringBuilder builder = new StringBuilder();
@@ -156,10 +158,6 @@ public class HealthController {
             );
 
         return body;
-    }
-
-    protected boolean prometheusDown(Duration d) {
-        return d.compareTo(unhealthyThreshold) > 0;
     }
 
     private enum Status {
