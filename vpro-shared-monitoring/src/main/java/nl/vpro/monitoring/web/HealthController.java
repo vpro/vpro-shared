@@ -132,19 +132,17 @@ public class HealthController {
             }
 
         } else {
-            prometheusDownCount.set(0);
-            threadsDumped = false;
+            if (threadsDumped || prometheusDownCount.get() > 0){
+                log.info("Prometheus seems up again");
+                prometheusDownCount.set(0);
+                threadsDumped = false;
+            }
         }
 
         Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        Health health = Health.builder()
-            .status(effectiveStatus.code)
-            .message(effectiveStatus.message)
-            .startTime(ready == null ? null : ready)
-            .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
-            .build();
+        log.warn("Effective status {} (prometheus: {})", effectiveStatus, prometheusDown);
 
-        ResponseEntity<Health> body = ResponseEntity
+        return  ResponseEntity
             .status(effectiveStatus.code)
             .body(
                 Health.builder()
@@ -157,7 +155,6 @@ public class HealthController {
                     .build()
             );
 
-        return body;
     }
 
     private enum Status {
