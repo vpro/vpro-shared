@@ -16,20 +16,21 @@ import org.meeuw.math.windowed.WindowedStatisticalLong;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
+import nl.vpro.logging.Slf4jHelper;
+
 @Lazy(false)
 @RestController
 @Slf4j
 public class PrometheusController {
 
     @Getter
-    private WindowedStatisticalLong duration = createDuration();
+    private final WindowedStatisticalLong duration = createDuration();
 
     private final PrometheusMeterRegistry registry;
 
     public PrometheusController(PrometheusMeterRegistry registry) {
         this.registry = registry;
     }
-
 
     /**
      * As {@link #prometheus(HttpServletResponse)}. TODO: spring boot actuator does something different.
@@ -50,14 +51,16 @@ public class PrometheusController {
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
-    public void prometheus(final HttpServletResponse response) throws IOException {
-         log.debug("Scraping Prometheus metrics");
+    public synchronized void prometheus(final HttpServletResponse response) throws IOException {
+        log.debug("Scraping Prometheus metrics");
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
         try (
             WindowedStatisticalLong.RunningDuration measure = duration.measure();
             Writer writer = response.getWriter()) {
-            scrape(writer);
+
+            Duration took = scrape(writer);
+            Slf4jHelper.debugOrInfo(log, took.compareTo(Duration.ofSeconds(2)) > 0, "Scraping Prometheus metrics took {}", took);
         }
     }
     protected Duration scrape(Writer writer) throws IOException {
@@ -68,11 +71,10 @@ public class PrometheusController {
     }
 
     public void reset() {
-        this.duration = createDuration();
+        this.duration.reset();
     }
 
     private WindowedStatisticalLong createDuration() {
-
         return WindowedStatisticalLong.builder()
             .mode(StatisticalLong.Mode.DURATION)
             .bucketCount(10)
