@@ -27,6 +27,7 @@ import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 
 
+
 @Lazy(false)
 @RestController
 @RequestMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -68,8 +69,8 @@ public class HealthController {
     }
 
     protected boolean markReady(ApplicationContextEvent event) {
-        if (status != READY) {
-            status = READY;
+        if (status != Status.READY) {
+            status = Status.READY;
             ready = clock.instant();
             log.info("Status {} at {} ({}) for {}", status, ready, event, webApplicationContext.getApplicationName());
             log.info("Prometheus unhealthy threshold is {}", monitoringProperties.getUnhealthyThreshold());
@@ -142,7 +143,7 @@ public class HealthController {
         }
 
         final var effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        Slf4jHelper.debugOrInfo(log, effectiveStatus != READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
+        Slf4jHelper.debugOrInfo(log, effectiveStatus != Status.READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
 
         return  ResponseEntity
             .status(effectiveStatus.code)
