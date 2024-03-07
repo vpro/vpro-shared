@@ -7,7 +7,11 @@
 
   <context:annotation-config/>
 
+  <import resource="classpath:/conversion-service.xml"/>
+
   <bean class="nl.vpro.monitoring.config.MonitoringConfig"/>
+
+  <bean class="nl.vpro.monitoring.config.MonitoringProperties"/>
 
   <bean class="nl.vpro.monitoring.endpoints.MonitoringEndpoints"/>
 
