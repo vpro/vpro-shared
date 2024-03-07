@@ -1,10 +1,8 @@
 package nl.vpro.monitoring.web;
 
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,6 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+
+import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +46,9 @@ class PrometheusControllerTest {
     @Test
     void initialValues() {
         // Pragmatic testing of initial values. Using #wac and #mockMvc is more or less impossible.
-        ResponseEntity<Health> response = new HealthController().health();
+        HealthController healthController = new HealthController();
+        healthController.monitoringProperties = new MonitoringProperties();
+        ResponseEntity<Health> response = healthController.health();
         assertThat(response.getStatusCodeValue()).isEqualTo(503);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getStatus()).isEqualTo(503);
