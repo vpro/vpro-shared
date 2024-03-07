@@ -24,7 +24,7 @@ import nl.vpro.logging.Slf4jHelper;
 public class PrometheusController {
 
     @Getter
-    private WindowedStatisticalLong duration = createDuration();
+    private final WindowedStatisticalLong duration = createDuration();
 
     private final PrometheusMeterRegistry registry;
 
@@ -51,7 +51,7 @@ public class PrometheusController {
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
-    public void prometheus(final HttpServletResponse response) throws IOException {
+    public synchronized void prometheus(final HttpServletResponse response) throws IOException {
         log.debug("Scraping Prometheus metrics");
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
@@ -71,7 +71,7 @@ public class PrometheusController {
     }
 
     public void reset() {
-        this.duration = createDuration();
+        this.duration.reset();
     }
 
     private WindowedStatisticalLong createDuration() {
