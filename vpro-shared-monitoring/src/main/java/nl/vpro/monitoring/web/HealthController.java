@@ -86,16 +86,16 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        Duration unhealth = monitoringProperties.getUnhealthyThreshold();
+        var unhealth = monitoringProperties.getUnhealthyThreshold();
         Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
 
-        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
-        boolean prometheusDown = unhealthy.test(prometheusDuration);
+        final var prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
+        var prometheusDown = unhealthy.test(prometheusDuration);
 
         if (prometheusDown) {
             prometheusDownCount.incrementAndGet();
             try {
-                Duration secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
+                var secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
                 prometheusDown = unhealthy.test(secondPrometheusDuration);
                 if (prometheusDown) {
                     log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
@@ -108,11 +108,10 @@ public class HealthController {
             if (prometheusDown) {
                 synchronized (HealthController.class) {
                     if (!threadsDumped) {
-                        final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
+                        final var threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
+                        log.info("Dumping threads to {} for later analysis", threadFile);
                         new Thread(null, () -> {
-                            log.info("Dumping threads to {} for later analysis", threadFile);
                             StringBuilder builder = new StringBuilder();
-
                             for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
                                 builder.append(threadInfo.toString());
                                 builder.append('\n');
@@ -132,19 +131,17 @@ public class HealthController {
             }
 
         } else {
-            prometheusDownCount.set(0);
-            threadsDumped = false;
+            if (threadsDumped || prometheusDownCount.get() > 0){
+                log.info("Prometheus seems up again");
+                prometheusDownCount.set(0);
+                threadsDumped = false;
+            }
         }
 
-        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        Health health = Health.builder()
-            .status(effectiveStatus.code)
-            .message(effectiveStatus.message)
-            .startTime(ready == null ? null : ready)
-            .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
-            .build();
+        final var effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
+        log.warn("Effective status {} (prometheus: {})", effectiveStatus, prometheusDown);
 
-        ResponseEntity<Health> body = ResponseEntity
+        return  ResponseEntity
             .status(effectiveStatus.code)
             .body(
                 Health.builder()
@@ -157,7 +154,6 @@ public class HealthController {
                     .build()
             );
 
-        return body;
     }
 
     private enum Status {
