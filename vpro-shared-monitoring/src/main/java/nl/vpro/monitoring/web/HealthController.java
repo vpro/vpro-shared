@@ -22,8 +22,10 @@ import java.util.function.Predicate;
 import jakarta.inject.Inject;
 
 
+import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
+
 
 @Lazy(false)
 @RestController
@@ -66,8 +68,8 @@ public class HealthController {
     }
 
     protected boolean markReady(ApplicationContextEvent event) {
-        if (status != Status.READY) {
-            status = Status.READY;
+        if (status != READY) {
+            status = READY;
             ready = clock.instant();
             log.info("Status {} at {} ({}) for {}", status, ready, event, webApplicationContext.getApplicationName());
             log.info("Prometheus unhealthy threshold is {}", monitoringProperties.getUnhealthyThreshold());
@@ -140,7 +142,7 @@ public class HealthController {
         }
 
         final var effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        log.warn("Effective status {} (prometheus: {})", effectiveStatus, prometheusDown);
+        Slf4jHelper.debugOrInfo(log, effectiveStatus != READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
 
         return  ResponseEntity
             .status(effectiveStatus.code)
