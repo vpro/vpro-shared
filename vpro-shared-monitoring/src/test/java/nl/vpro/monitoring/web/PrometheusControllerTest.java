@@ -51,8 +51,8 @@ class PrometheusControllerTest {
         ResponseEntity<Health> response = healthController.health();
         assertThat(response.getStatusCodeValue()).isEqualTo(503);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getStatus()).isEqualTo(503);
-        assertThat(response.getBody().getMessage()).isEqualTo("Application starting");
+        assertThat(response.getBody().status()).isEqualTo(503);
+        assertThat(response.getBody().message()).isEqualTo("Application starting");
     }
 
     @ParameterizedTest
