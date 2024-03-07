@@ -1,6 +1,10 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.*;
+import org.slf4j.event.Level;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +13,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.*;
-import org.slf4j.event.Level;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 1.75
  */
 @Slf4j
+@Disabled("Needs a running elasticsearch")
 public class IndexHelperITest {
 
 
@@ -81,10 +82,7 @@ public class IndexHelperITest {
     public void getClusterName() throws ExecutionException, InterruptedException {
         log.info("clustername: {}", helper.getClusterName());
         log.info("distribution: {}", helper.getInfo().get().getDistribution());
-
         log.info("info: {}", helper.getInfo().get());
-
-
     }
 
     @Test
@@ -107,7 +105,6 @@ public class IndexHelperITest {
                 log.info("{}", jobs);
                 for (JsonNode i : items) {
                     log.info("{}", IndexHelper.find(jobs, (ObjectNode) i));
-
                 }
 
             }
