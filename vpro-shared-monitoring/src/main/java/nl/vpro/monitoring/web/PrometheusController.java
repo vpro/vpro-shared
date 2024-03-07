@@ -15,6 +15,9 @@ import java.time.Duration;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+
+import nl.vpro.logging.Slf4jHelper;
+
 @Lazy(false)
 @RestController
 @Slf4j
@@ -28,7 +31,6 @@ public class PrometheusController {
     public PrometheusController(PrometheusMeterRegistry registry) {
         this.registry = registry;
     }
-
 
     /**
      * As {@link #prometheus(HttpServletResponse)}. TODO: spring boot actuator does something different.
@@ -56,7 +58,9 @@ public class PrometheusController {
         try (
             WindowedStatisticalLong.RunningDuration measure = duration.measure();
             Writer writer = response.getWriter()) {
-            scrape(writer);
+
+            Duration took = scrape(writer);
+            Slf4jHelper.debugOrInfo(log, took.compareTo(Duration.ofSeconds(2)) > 0, "Scraping Prometheus metrics took {}", took);
         }
     }
     protected Duration scrape(Writer writer) throws IOException {
@@ -71,7 +75,6 @@ public class PrometheusController {
     }
 
     private WindowedStatisticalLong createDuration() {
-
         return WindowedStatisticalLong.builder()
             .mode(StatisticalLong.Mode.DURATION)
             .bucketCount(10)

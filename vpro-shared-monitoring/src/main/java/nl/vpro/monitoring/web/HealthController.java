@@ -70,6 +70,7 @@ public class HealthController {
             status = Status.READY;
             ready = clock.instant();
             log.info("Status {} at {} ({}) for {}", status, ready, event, webApplicationContext.getApplicationName());
+            log.info("Prometheus unhealthy threshold is {}", monitoringProperties.getUnhealthyThreshold());
             return true;
         } else {
             log.debug("Ready already ({})", event);
