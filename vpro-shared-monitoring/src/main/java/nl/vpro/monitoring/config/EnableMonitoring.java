@@ -1,12 +1,13 @@
 package nl.vpro.monitoring.config;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.springframework.context.annotation.Import;
 
+import java.lang.annotation.*;
+
+
+/**
+ *This annotation can be used to bootstrap monitoring configuration as defined in {@link MonitoringConfig}
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Import({MonitoringConfig.class})

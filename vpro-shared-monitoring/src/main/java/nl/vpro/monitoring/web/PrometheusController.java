@@ -4,17 +4,16 @@ import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.meeuw.math.statistics.StatisticalLong;
+import org.meeuw.math.windowed.WindowedStatisticalLong;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Duration;
 
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.meeuw.math.statistics.StatisticalLong;
-import org.meeuw.math.windowed.WindowedStatisticalLong;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.*;
 
 @Lazy(false)
 @RestController
@@ -51,7 +50,7 @@ public class PrometheusController {
         method = RequestMethod.GET,
         value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
     public void prometheus(final HttpServletResponse response) throws IOException {
-         log.debug("Scraping Prometheus metrics");
+        log.debug("Scraping Prometheus metrics");
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(TextFormat.CONTENT_TYPE_004);
         try (
