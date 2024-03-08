@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 
@@ -140,7 +141,8 @@ public class HealthController {
         }
 
         Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        log.warn("Effective status {} (prometheus: {})", effectiveStatus, prometheusDown);
+        Slf4jHelper.debugOrInfo(log, effectiveStatus != Status.READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
+
 
         return  ResponseEntity
             .status(effectiveStatus.code)
