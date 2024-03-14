@@ -26,8 +26,6 @@ import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 
-
-
 @Lazy(false)
 @RestController
 @RequestMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -51,7 +49,7 @@ public class HealthController {
     @Inject
     MonitoringProperties monitoringProperties;
 
-    private boolean threadsDumped = false;
+    private Instant threadsDumped = null;
 
     protected AtomicLong prometheusDownCount = new AtomicLong(0);
 
@@ -73,7 +71,6 @@ public class HealthController {
             status = Status.READY;
             ready = clock.instant();
             log.info("Status {} at {} ({}) for {}", status, ready, event, webApplicationContext.getApplicationName());
-            log.info("Prometheus unhealthy threshold is {}", monitoringProperties.getUnhealthyThreshold());
             return true;
         } else {
             log.debug("Ready already ({})", event);
@@ -90,16 +87,16 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        var unhealth = monitoringProperties.getUnhealthyThreshold();
+        Duration unhealth = monitoringProperties.getUnhealthyThreshold();
         Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
 
-        final var prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
-        var prometheusDown = unhealthy.test(prometheusDuration);
+        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
+        boolean prometheusDown = unhealthy.test(prometheusDuration);
 
         if (prometheusDown) {
             prometheusDownCount.incrementAndGet();
             try {
-                var secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
+                Duration secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
                 prometheusDown = unhealthy.test(secondPrometheusDuration);
                 if (prometheusDown) {
                     log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
@@ -111,11 +108,12 @@ public class HealthController {
             }
             if (prometheusDown) {
                 synchronized (HealthController.class) {
-                    if (!threadsDumped) {
-                        final var threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
-                        log.info("Dumping threads to {} for later analysis", threadFile);
+                    if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(monitoringProperties.getMinThreadDumpInterval()))) {
+                        final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
                         new Thread(null, () -> {
+                            log.info("Dumping threads to {} for later analysis", threadFile);
                             StringBuilder builder = new StringBuilder();
+
                             for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
                                 builder.append(threadInfo.toString());
                                 builder.append('\n');
@@ -127,22 +125,19 @@ public class HealthController {
                             }
 
                         }, "Dumping threads").start();
-                        threadsDumped = true;
+                        threadsDumped = Instant.now();
                     }
                 }
-            } else {
-                threadsDumped = false;
             }
 
         } else {
-            if (threadsDumped || prometheusDownCount.get() > 0){
+            if (prometheusDownCount.get() > 0){
                 log.info("Prometheus seems up again");
                 prometheusDownCount.set(0);
-                threadsDumped = false;
             }
         }
 
-        final var effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
+        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
         Slf4jHelper.debugOrInfo(log, effectiveStatus != Status.READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
 
         return  ResponseEntity
