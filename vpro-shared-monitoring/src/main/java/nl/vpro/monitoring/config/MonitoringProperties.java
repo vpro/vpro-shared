@@ -87,4 +87,8 @@ public class MonitoringProperties {
     @Value("${monitoring.unhealthyThreshold:10s}")
     Duration unhealthyThreshold = Duration.ofSeconds(10);
 
+
+    @Value("${monitoring.minThreadDumpInterval:1h}")
+    Duration minThreadDumpInterval = Duration.ofHours(1);
+
 }

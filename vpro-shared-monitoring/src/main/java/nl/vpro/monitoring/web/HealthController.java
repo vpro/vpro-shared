@@ -49,7 +49,7 @@ public class HealthController {
     @Inject
     MonitoringProperties monitoringProperties;
 
-    private boolean threadsDumped = false;
+    private Instant threadsDumped = null;
 
     protected AtomicLong prometheusDownCount = new AtomicLong(0);
 
@@ -108,7 +108,7 @@ public class HealthController {
             }
             if (prometheusDown) {
                 synchronized (HealthController.class) {
-                    if (!threadsDumped) {
+                    if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(monitoringProperties.getMinThreadDumpInterval()))) {
                         final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
                         new Thread(null, () -> {
                             log.info("Dumping threads to {} for later analysis", threadFile);
@@ -125,18 +125,15 @@ public class HealthController {
                             }
 
                         }, "Dumping threads").start();
-                        threadsDumped = true;
+                        threadsDumped = Instant.now();
                     }
                 }
-            } else {
-                threadsDumped = false;
             }
 
         } else {
-            if (threadsDumped || prometheusDownCount.get() > 0){
+            if (prometheusDownCount.get() > 0){
                 log.info("Prometheus seems up again");
                 prometheusDownCount.set(0);
-                threadsDumped = false;
             }
         }
 
