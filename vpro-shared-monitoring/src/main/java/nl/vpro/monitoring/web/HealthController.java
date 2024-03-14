@@ -126,6 +126,8 @@ public class HealthController {
 
                         }, "Dumping threads").start();
                         threadsDumped = Instant.now();
+                    } else {
+                        log.info("Skipping thread dump, because it was done recently");
                     }
                 }
             }
