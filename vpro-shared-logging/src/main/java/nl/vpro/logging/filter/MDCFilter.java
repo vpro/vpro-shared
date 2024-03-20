@@ -5,11 +5,13 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.function.Function;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.*;
@@ -28,7 +30,10 @@ import static nl.vpro.logging.mdc.MDCConstants.*;
  * @since 0.30
  */
 @Slf4j
-public class  MDCFilter implements Filter {
+public class  MDCFilter extends HttpFilter {
+
+    @Serial
+    private static final long serialVersionUID = 4190489434067156597L;
 
     boolean clear = false;
 
@@ -51,17 +56,16 @@ public class  MDCFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-        final HttpServletRequest request = (HttpServletRequest) req;
-        final HttpServletResponse response  = (HttpServletResponse) res;
         final String path = request.getRequestURI().substring(request.getContextPath().length());
         final String logPostFix = path.replace('/', '.');
         try {
             try {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null) {
-                    MDC.put(USER_NAME, auth.getName());
+                    String name = auth.getName();
+                    MDC.put(USER_NAME, name);
                 }
             } catch (Exception e) {
                 log.debug(e.getMessage());
@@ -81,7 +85,7 @@ public class  MDCFilter implements Filter {
             }
 
 
-            chain.doFilter(req, res);
+            chain.doFilter(request, response);
         } finally {
             // access logging...
             Slf4jHelper.log(afterLogger(logPostFix), accessLevel.apply(path), "{} {}", response.getStatus(), response.getContentType());
