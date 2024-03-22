@@ -15,6 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class NoHtmlValidatorTest {
     private final NoHtmlValidator validator = new NoHtmlValidator();
 
+    private final NoHtmlValidator nonAggressive = new NoHtmlValidator();
+    {
+        nonAggressive.aggressive = false;
+    }
+
     @Test
     public void testIsValid() {
         assertTrue(validator.isValid("some text", null));
@@ -23,6 +28,9 @@ public class NoHtmlValidatorTest {
     @Test
     public void testIsValidShouldFailOnTags() {
         assertFalse(validator.isValid("some <text>", null));
+        assertTrue(nonAggressive.isValid("some <text>", null));
+        assertFalse(nonAggressive.isValid("some <p>text</p>", null));
+
     }
 
     @Test

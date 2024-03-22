@@ -11,7 +11,7 @@ import nl.vpro.util.TextUtil;
 
 public class NoHtmlValidator implements ConstraintValidator<NoHtml, Object> {
 
-    private boolean aggressive;
+    boolean aggressive = true;
 
     @Override
 	public void initialize(NoHtml annotation) {
