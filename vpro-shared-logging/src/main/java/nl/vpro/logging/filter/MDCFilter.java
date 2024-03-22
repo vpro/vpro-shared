@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.util.function.Function;
 
 import jakarta.servlet.*;
+import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
