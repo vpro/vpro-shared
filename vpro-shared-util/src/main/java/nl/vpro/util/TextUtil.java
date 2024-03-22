@@ -187,7 +187,7 @@ public class TextUtil {
             // we just reject if known tags are encountered after parsing.
             List<Node> parsed = Parser.parseFragment(input, Jsoup.parse("").body(), "http://localhost/");
             for (Node e : parsed) {
-                if (! isValid(e)) {
+                if (! jsoupNodeValid(e)) {
                     return false;
                 }
             }
@@ -196,14 +196,14 @@ public class TextUtil {
         }
     }
 
-    private static boolean isValid(Node n) {
+    private static boolean jsoupNodeValid(Node n) {
         if (n instanceof Element e) {
             if (ALL.contains(e.tagName().toLowerCase())) {
                 return false;
             }
             for (Node child : e.childNodes()) {
                 if (child instanceof Element ce) {
-                    if (!isValid(ce)) {
+                    if (!jsoupNodeValid(ce)) {
                         return false;
                     }
                 }
