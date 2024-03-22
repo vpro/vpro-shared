@@ -23,7 +23,7 @@ jobs:
       - name: Build with Maven
         run: mvn -ntp -fae -DskipITs=false -Dinteg.cluster.name=docker-elasticsearch -B  package
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.14.0
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
         if: always()
         with:
           junit_files: "**/target/surefire-reports/*.xml"
