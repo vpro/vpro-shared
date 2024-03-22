@@ -36,10 +36,12 @@ public class NoHtmlValidatorTest {
     @Test
     public void testIsValidShouldFailOnEntityNames() {
         assertFalse(validator.isValid("some &amp; text", null));
+        assertFalse(nonAggressive.isValid("some &amp; text", null));
     }
 
     @Test
     public void testIsValidShouldFailOnEntityNumbers() {
         assertFalse(validator.isValid("some&#20;text", null));
+        assertFalse(nonAggressive.isValid("some&#20;text", null));
     }
 }

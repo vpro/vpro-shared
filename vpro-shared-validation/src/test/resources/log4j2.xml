@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+<Configuration status="INFO">
+  <Appenders>
+    <Console name="stdout" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{ISO8601} %4.4p %C %M.%L %m (%t) %n"  charset="UTF-8"/>
+    </Console>
+  </Appenders>
 
-  <appender name="console" class="org.apache.log4j.ConsoleAppender">
-    <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d{ISO8601} %4.4p %c{1} %M.%L %m%n"/>
-    </layout>
-  </appender>
+  <Loggers>
 
-
-  <root>
-    <level value="DEBUG" />
-    <appender-ref ref="console"/>
-  </root>
-
-</log4j:configuration>
+    <Root level="DEBUG">
+      <AppenderRef ref="stdout"/>
+    </Root>
+  </Loggers>
+</Configuration>
