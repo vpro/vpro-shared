@@ -11,36 +11,47 @@ import nl.vpro.util.TextUtil;
 
 public class NoHtmlValidator implements ConstraintValidator<NoHtml, Object> {
 
+    private boolean aggressive;
+
+    @Override
+	public void initialize(NoHtml annotation) {
+        aggressive = annotation.aggressive();
+	}
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext constraintValidatorContext) {
-        if(value == null) {
+        if (value == null) {
             return true;
         }
 
-        if(value instanceof String) {
-            return TextUtil.isValid((String)value);
+
+        if (value instanceof CharSequence string) {
+            return TextUtil.isValid(string.toString(), aggressive);
         }
 
-        if(value instanceof String[]) {
-            for(String item : (String[])value) {
-                if(item != null && !TextUtil.isValid(item)) {
+
+        // support some iteables too.
+
+        if (value instanceof String[] strings) {
+            for(String item : strings) {
+                if(item != null && !TextUtil.isValid(item, aggressive)) {
                     return false;
                 }
             }
-        } else if(value instanceof Iterable<?> iterable) {
+        } else if (value instanceof Iterable<?> iterable) {
             for(Object item : iterable) {
                 if(item != null) {
-                    if(!(item instanceof String)) {
+                    if(!(item instanceof CharSequence string)) {
                         throw new UnsupportedOperationException("NoHtml validation only supports collections of strings. Got an " + item.getClass().getSimpleName());
                     }
 
-                    if(!TextUtil.isValid((String)item)) {
+                    if(!TextUtil.isValid(string.toString(), aggressive)) {
                         return false;
                     }
                 }
             }
         }
+        // all other types are considered valid
 
         return true;
     }

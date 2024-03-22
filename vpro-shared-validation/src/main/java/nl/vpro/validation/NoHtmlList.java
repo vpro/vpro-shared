@@ -15,6 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * @author Michiel Meeuwissen
  * @since 3.2
+ * @deprecated Just put @NoHtml on the list entries itself (List<@NoHtml String>)
  */
 
 
@@ -22,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = NoHtmlListValidator.class)
 @Documented
+@Deprecated
 public @interface NoHtmlList {
     String message() default "{nl.vpro.constraints.nohtml}";
 
