@@ -11,6 +11,7 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import nl.vpro.util.TextUtil;
 
+@Deprecated
 public class NoHtmlListValidator implements ConstraintValidator<NoHtmlList, Collection<String>> {
 
     @Override

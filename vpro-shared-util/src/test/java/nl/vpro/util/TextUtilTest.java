@@ -5,7 +5,8 @@
 package nl.vpro.util;
 
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -13,8 +14,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.vpro.util.TextUtil.*;
@@ -90,6 +90,31 @@ public class TextUtilTest {
     @Test
     public void testSanitizePreserveInputWithAmpersand() {
         assertThat(sanitize("a & b")).isEqualTo("a & b");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        // There are just by chance containing html like stuff.
+        "a < b",
+        "a & b",
+        "Contact: <sandwich@avrotros.nl>",
+        "&bla;"
+    })
+    public void permissiveValidation(String input) {
+        assertThat(isValid(input, false)).isTrue();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        // some string that are obviously meant as html, and should be rejected
+        "<p>foo</p>",
+        "&nbsp;",
+        "&lt;",
+        "<script>alert('hoi')</script>",
+        "<hacky><script>alert('hoi')</script></foobar"
+    })
+    public void permissiveInvalidation(String input) {
+        assertThat(isValid(input, false)).isFalse();
     }
 
     @Test
@@ -265,17 +290,18 @@ public class TextUtilTest {
     @Test
     public void unhtml() {
         String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdf\u0002asdf</p><p>Simsalabim</p><ol><li>1</li><li>2</li></ol><p>adsfasdf</p><p /><p>asdfsdf!asdf</p>";
-        assertThat(TextUtil.unhtml(example)).isEqualTo("Hokus pòkus\n" +
-            "\n" +
-            "bla  asdfasdf\n" +
-            "\n" +
-            "Simsalabim\n" +
-            "-1\n" +
-            "-2\n" +
-            "\n" +
-            "adsfasdf\n" +
-            "\n" +
-            "asdfsdf!asdf");
+        assertThat(TextUtil.unhtml(example)).isEqualTo("""
+            Hokus pòkus
+
+            bla  asdfasdf
+
+            Simsalabim
+            -1
+            -2
+
+            adsfasdf
+
+            asdfsdf!asdf""");
     }
 
     @Test
@@ -299,36 +325,37 @@ public class TextUtilTest {
         assertThat(isValid(unhtmled)).isTrue();
         assertThat(normalizeWhiteSpace(unhtmled)).isEqualTo(normalizeWhiteSpace(sanitize(unhtmled)));
 
-        assertThat(unhtmled).isEqualTo("Dit jaar is alweer de achtste editie van An Evening of Today, een showcase voor jonge nieuwe-muziekensembles en componisten. De avond biedt een zeer divers beeld van de muziek van nu. De verbeelding staat centraal: in eerdere edities verrasten de componisten met ongebruikelijke opstellingen, ballonnen, tafeltennis, video, nieuwe speeltechnieken, gerafelde nachtclubsferen, elektronica, nepnieuws, een rockband en 'visuele muziek' zonder geluid.\n" +
-            "\n" +
-            "An Evening of Today\n" +
-            "\n" +
-            "Chongliang Yu - Digital Doppelgänger\n" +
-            "\n" +
-            "Not the center: Cèlia Tort Pujol, Leonie Strecker, Myrthe Bokelmann, Roma Gavryliuk\n" +
-            "\n" +
-            "Creating ‘on the spot’\n" +
-            "\n" +
-            "Ensemble Resilience: Paolo Gorini (piano & Seaboard (MIDI-controller)), Marco Danesi (klarinet), Natalie Kulina (viool), Tomek Szczepaniak (Mater (hybride percussie-instrument) en Chimes tree (percussie-instrument)), Gerardo Gozzi (live compositie), Rubens Askenar (live compositie)\n" +
-            "\n" +
-            "David Ko 너랑나 — You and Me Song\n" +
-            "\n" +
-            "Frieda Gustavs (zang), Lautaro Hochman, Julek Warszawski, Siebren Smink (gitaar samples)\n" +
-            "\n" +
-            "David Ko 너랑나 —  Psalm Song\n" +
-            "\n" +
-            "Pietro Elia Barcellona (contrabas), Michele Mazzini (basklarinet), Kavid Do (keyboard)\n" +
-            "\n" +
-            "Apollonio Maiello - Typing…\n" +
-            "\n" +
-            "Katherine Weber (sopraan), Juho Myllylä (blokfluit & elektrisch gitaar), Hessel Moeselaar (altviool & MIDI-pedals), \n" +
-            "Francisco Martí Hernández (piano)\n" +
-            "\n" +
-            "Alberto Granados - Earwash\n" +
-            "\n" +
-            "Jesse Debille, Noemi Calzavara, Alberto Granados Reguilón, Irene Comesaña Aguilar (productie & artistiek regisseur)\n" +
-            "\n" +
-            "Rechtstreeks vanuit Muziekgebouw aan 't IJ, Amsterdam");
+        assertThat(unhtmled).isEqualTo("""
+            Dit jaar is alweer de achtste editie van An Evening of Today, een showcase voor jonge nieuwe-muziekensembles en componisten. De avond biedt een zeer divers beeld van de muziek van nu. De verbeelding staat centraal: in eerdere edities verrasten de componisten met ongebruikelijke opstellingen, ballonnen, tafeltennis, video, nieuwe speeltechnieken, gerafelde nachtclubsferen, elektronica, nepnieuws, een rockband en 'visuele muziek' zonder geluid.
+
+            An Evening of Today
+
+            Chongliang Yu - Digital Doppelgänger
+
+            Not the center: Cèlia Tort Pujol, Leonie Strecker, Myrthe Bokelmann, Roma Gavryliuk
+
+            Creating ‘on the spot’
+
+            Ensemble Resilience: Paolo Gorini (piano & Seaboard (MIDI-controller)), Marco Danesi (klarinet), Natalie Kulina (viool), Tomek Szczepaniak (Mater (hybride percussie-instrument) en Chimes tree (percussie-instrument)), Gerardo Gozzi (live compositie), Rubens Askenar (live compositie)
+
+            David Ko 너랑나 — You and Me Song
+
+            Frieda Gustavs (zang), Lautaro Hochman, Julek Warszawski, Siebren Smink (gitaar samples)
+
+            David Ko 너랑나 —  Psalm Song
+
+            Pietro Elia Barcellona (contrabas), Michele Mazzini (basklarinet), Kavid Do (keyboard)
+
+            Apollonio Maiello - Typing…
+
+            Katherine Weber (sopraan), Juho Myllylä (blokfluit & elektrisch gitaar), Hessel Moeselaar (altviool & MIDI-pedals),\s
+            Francisco Martí Hernández (piano)
+
+            Alberto Granados - Earwash
+
+            Jesse Debille, Noemi Calzavara, Alberto Granados Reguilón, Irene Comesaña Aguilar (productie & artistiek regisseur)
+
+            Rechtstreeks vanuit Muziekgebouw aan 't IJ, Amsterdam""");
     }
 
     @Test
@@ -336,6 +363,9 @@ public class TextUtilTest {
         String example = "<p>Hokus p&ograve;kus</p><p>bla&nbsp; asdfasdf</p><p>Simsalabim</p><p>asdf</p><p>adsfasdf</p><p>asdfsdf!asdf</p>";
         assertThat(TextUtil.stripHtml(example)).isEqualTo("Hokus pòkus bla&nbsp; asdfasdf Simsalabim asdf adsfasdf asdfsdf!asdf");
     }
+
+
+
 
     @ParameterizedTest
     @MethodSource("polyNullMethods")
