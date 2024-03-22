@@ -4,35 +4,29 @@
  */
 package nl.vpro.cors;
 
-import java.io.IOException;
-import java.util.*;
-
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.io.Serial;
+import java.util.Set;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
 
 /**
  * @author rico
  * @since 0.47
  */
-public class CorsFilter implements Filter {
+public class CorsFilter extends HttpFilter {
 
-    private static final List<String> METHODS = Collections.unmodifiableList(Arrays.asList("GET", "HEAD", "OPTIONS"));
+    private static final Set<String> METHODS = Set.of("GET", "HEAD", "OPTIONS");
 
-    @Override
-    public void init(FilterConfig filterConfig) {
-
-    }
+    @Serial
+    private static final long serialVersionUID = -6162772963452992019L;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
-            throw new ServletException("CorsFilter just supports HTTP requests");
-        }
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
+    public void doFilter(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain) throws IOException, ServletException {
         String origin = httpRequest.getHeader(CorsHeaders.ORIGIN);
         String method = httpRequest.getMethod();
         if (StringUtils.isNotEmpty(origin) && METHODS.contains(method)) {
@@ -44,8 +38,4 @@ public class CorsFilter implements Filter {
         chain.doFilter(httpRequest, httpResponse);
     }
 
-    @Override
-    public void destroy() {
-
-    }
 }
