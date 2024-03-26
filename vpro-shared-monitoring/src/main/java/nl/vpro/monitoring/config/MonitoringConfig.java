@@ -154,7 +154,7 @@ public class MonitoringConfig {
         }
 
 
-        if (properties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent()) {
+        if (properties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent() && classForName("org.hibernate.stat.HibernateStatistics").isPresent()) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
             if (sessionFactory.isPresent()) {
                 new HibernateMetrics(
