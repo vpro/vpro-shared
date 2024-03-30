@@ -210,7 +210,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
 
     @Override
-    public void setLocations(Resource @NonNull [] locations) {
+    public void setLocations(Resource @NonNull ... locations) {
         // this may happen before log4j initialization
         //Logger jul = Logger.getLogger(PropertiesUtil.class.getName());
 
