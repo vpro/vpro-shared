@@ -5,9 +5,6 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 
-import com.google.common.annotations.Beta;
-
-
 /**
 
  * @since 5.0
@@ -15,6 +12,5 @@ import com.google.common.annotations.Beta;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Import({CustomConversion.class})
-@Beta
 public @interface EnableCustomConversions {
 }

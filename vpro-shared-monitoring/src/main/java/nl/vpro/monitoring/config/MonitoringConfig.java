@@ -23,6 +23,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
 import java.io.File;
@@ -42,6 +44,7 @@ import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 
 @Configuration
 @Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class MonitoringConfig {
 
     public static PrometheusMeterRegistry meterRegistry;
