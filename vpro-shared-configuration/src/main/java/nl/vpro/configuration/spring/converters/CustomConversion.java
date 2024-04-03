@@ -16,9 +16,8 @@ public class CustomConversion {
 
     @Bean
     public ConversionServiceFactoryBean conversionService() {
-        ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
-
-        Set<?> set = Set.of(
+        var factory = new ConversionServiceFactoryBean();
+        var set = Set.of(
             new StringToDurationConverter(),
             new StringToTemporalAmountConverter(),
             new StringToIntegerListConverter(),
