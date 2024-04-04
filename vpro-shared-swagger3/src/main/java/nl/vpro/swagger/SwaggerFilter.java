@@ -1,6 +1,9 @@
 package nl.vpro.swagger;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.json.grep.Sed;
+import org.meeuw.json.grep.matching.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,9 +14,6 @@ import jakarta.servlet.http.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.meeuw.json.grep.Sed;
-import org.meeuw.json.grep.matching.*;
 
 import nl.vpro.web.HttpServletRequestUtils;
 
@@ -23,7 +23,7 @@ import nl.vpro.web.HttpServletRequestUtils;
  * @since 0.21
  */
 @Slf4j
-public class SwaggerFilter implements Filter {
+public class SwaggerFilter extends HttpFilter {
 
 
     boolean filterAlways = false;
@@ -37,10 +37,9 @@ public class SwaggerFilter implements Filter {
 
     @Override
     public void doFilter(
-        ServletRequest request,
-        ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        String accept = req.getHeader(HttpHeaders.ACCEPT);
+        HttpServletRequest request,
+        HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        String accept = request.getHeader(HttpHeaders.ACCEPT);
 
         boolean yaml = SwaggerListingResource.isYaml(parseAcceptHeader(accept));
 
@@ -51,18 +50,18 @@ public class SwaggerFilter implements Filter {
         }
         if (! filterAlways) {
             // only filter if path ends with .json
-            if (req.getPathInfo() == null || ! req.getPathInfo().endsWith(".json")) {
+            if (request.getPathInfo() == null || ! request.getPathInfo().endsWith(".json")) {
                 // not surely json. Just skip.
                 chain.doFilter(request, response);
                 return;
             }
         }
 
-        final PathMatcher matcher = getPathMatcher(req);
+        final PathMatcher matcher = getPathMatcher(request);
 
         final ServletOutputStream servletOutputStream = response.getOutputStream();
         final OutputStream out = transform(servletOutputStream, matcher);
-        final HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper((HttpServletResponse) response) {
+        final HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper(response) {
             @Override
             public ServletOutputStream getOutputStream() {
                 return new ServletOutputStream() {
