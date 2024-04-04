@@ -25,6 +25,7 @@ import jakarta.inject.Inject;
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
+import nl.vpro.util.TimeUtils;
 
 @Lazy(false)
 @RestController
@@ -87,8 +88,9 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() {
         log.debug("Polling health endpoint");
-        Duration unhealth = monitoringProperties.getUnhealthyThreshold();
-        Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
+        final Duration unhealth = TimeUtils.parseDurationOrThrow(monitoringProperties.getUnhealthyThreshold());
+        final Duration minThreadDumpInterval =  TimeUtils.parseDurationOrThrow(monitoringProperties.getMinThreadDumpInterval());
+        final Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
 
         Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
         boolean prometheusDown = unhealthy.test(prometheusDuration);
@@ -108,7 +110,7 @@ public class HealthController {
             }
             if (prometheusDown) {
                 synchronized (HealthController.class) {
-                    if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(monitoringProperties.getMinThreadDumpInterval()))) {
+                    if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(minThreadDumpInterval))) {
                         final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
                         new Thread(null, () -> {
                             log.info("Dumping threads to {} for later analysis", threadFile);
