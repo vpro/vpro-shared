@@ -17,6 +17,6 @@ public class StringToDurationConverter implements Converter<String, Duration> {
 
     @Override
     public Duration convert(@NonNull String s) {
-        return TimeUtils.parseDuration(s).orElseThrow(() -> new IllegalArgumentException("Cannot convert to duration " + s));
+        return TimeUtils.parseDurationOrThrow(s);
     }
 }
