@@ -105,6 +105,16 @@ public class TimeUtils {
     public static Optional<Duration> parseDuration(CharSequence d) {
         return parseDuration(d, null);
     }
+
+
+    /**
+     * @since 5.0
+     */
+    public static Duration parseDurationOrThrow(CharSequence d) {
+        return parseDuration(d).orElseThrow(() -> new IllegalArgumentException("Cannot convert to duration  " + d));
+    }
+
+
     public static Optional<Duration> parseDuration(CharSequence d, ZonedDateTime at) {
         return parseDuration(null, d, at);
     }
