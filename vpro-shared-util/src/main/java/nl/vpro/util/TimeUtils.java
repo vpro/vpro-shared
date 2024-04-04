@@ -110,8 +110,9 @@ public class TimeUtils {
     /**
      * @since 5.0
      */
-    public static Duration parseDurationOrThrow(CharSequence d) {
-        return parseDuration(d).orElseThrow(() -> new IllegalArgumentException("Cannot convert to duration  " + d));
+    @PolyNull
+    public static Duration parseDurationOrThrow(@PolyNull CharSequence d) {
+        return d == null ? null : parseDuration(d).orElseThrow(() -> new IllegalArgumentException("Cannot convert to duration  " + d));
     }
 
 
