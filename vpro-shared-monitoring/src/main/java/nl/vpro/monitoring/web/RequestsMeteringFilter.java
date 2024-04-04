@@ -1,6 +1,8 @@
 package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.meeuw.functional.Predicates;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,11 +11,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.meeuw.functional.Predicates;
 
 import com.google.common.net.MediaType;
 
@@ -45,7 +44,7 @@ import static nl.vpro.monitoring.config.MonitoringConfig.meterRegistry;
  *  The {@code prefixes} parameter defines a lists of recognized 'prefixes'. The path of the request is matched to those, and the first match will result a tag with this prefix value. (e.g. {@code path=/manage}). If none matched then the used tag will be {@code path=*}.
  */
 @Slf4j
-public class RequestsMeteringFilter implements Filter {
+public class RequestsMeteringFilter extends HttpFilter {
 
 
     public static abstract class Matcher implements Predicate<String> {
@@ -87,10 +86,7 @@ public class RequestsMeteringFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-
-        final HttpServletRequest request = (HttpServletRequest) req;
-        final HttpServletResponse response  = (HttpServletResponse) res;
+    public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         final String path =
             request.getRequestURI().substring(request.getContextPath().length());
 
@@ -104,12 +100,12 @@ public class RequestsMeteringFilter implements Filter {
 
         long nanoStart = System.nanoTime();
         try {
-            chain.doFilter(req, res);
+            chain.doFilter(request, response);
         } finally {
             String contentType = "?";
             {
-                if (res.getContentType() != null) {
-                    MediaType type = MediaType.parse(res.getContentType());
+                if (request.getContentType() != null) {
+                    MediaType type = MediaType.parse(request.getContentType());
                     contentType = type.withoutParameters().toString();
                 } else {
                     if (200 == response.getStatus()) {
