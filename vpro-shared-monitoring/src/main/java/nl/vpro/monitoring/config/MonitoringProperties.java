@@ -85,10 +85,10 @@ public class MonitoringProperties {
     String dataDir;
 
     @Value("${monitoring.unhealthyThreshold:10s}")
-    Duration unhealthyThreshold = Duration.ofSeconds(10);
+    String unhealthyThreshold = Duration.ofSeconds(10).toString();
 
 
     @Value("${monitoring.minThreadDumpInterval:1h}")
-    Duration minThreadDumpInterval = Duration.ofHours(1);
+    String minThreadDumpInterval = Duration.ofHours(1).toString();
 
 }
