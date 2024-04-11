@@ -6,12 +6,10 @@ package nl.vpro.hibernate.search6;
 
 import java.time.Instant;
 import java.util.Date;
-
+import nl.vpro.util.DateUtils;
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
-
-import nl.vpro.util.DateUtils;
 
 public class InstantToEpochMillisBridge implements ValueBridge<Object, Long>  {
 

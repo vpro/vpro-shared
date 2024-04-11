@@ -1,11 +1,9 @@
 package nl.vpro.hibernate.search6;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.document.Document;
-import org.hibernate.search.bridge.LuceneOptions;
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
-import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
 
 /**
@@ -15,13 +13,17 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValue
 public abstract class IterableToStringBridge<T> implements ValueBridge<Iterable<T>, List<String>> {
 
     @Override
-    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
+    public List<String> toIndexedValue(Iterable<T> value, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
         if (value != null) {
-            for (T object : (Iterable<T>) value) {
+            List<String> result = new ArrayList<>();
+            for (T object : value) {
                 if (object != null) {
-                    luceneOptions.addFieldToDocument(name, toString(object), document);
+                    result.add(toString(object));
                 }
             }
+            return result;
+        } else {
+            return null;
         }
     }
 

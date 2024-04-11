@@ -120,9 +120,7 @@
 
     <module>vpro-shared-hibernate</module>
     <module>vpro-shared-hibernate-search</module>
-    <!--
-        <module>vpro-shared-hibernate-search6</module>
-    -->
+    <module>vpro-shared-hibernate-search6</module>
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-logging</module>
     <module>vpro-shared-log4j2</module>

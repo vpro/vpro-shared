@@ -4,22 +4,24 @@
  */
 package nl.vpro.hibernate.search6;
 
-import java.util.Map;
-
-import org.hibernate.search.bridge.ParameterizedBridge;
-import org.hibernate.search.bridge.TwoWayStringBridge;
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
+import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
+import org.hibernate.search.mapper.pojo.common.annotation.Param;
 
 
 /**
  * @since 3.5
  */
+@Param(name = "class", value = "java.lang.String")
 public class EnumToLowerCaseBridge implements ValueBridge<Enum<?>, String> {
 
     private Class enumClazz;
 
+
     @Override
-    public Object stringToObject(String stringValue) {
+    public Enum<?> fromIndexedValue(String stringValue, ValueBridgeFromIndexedValueContext context) {
+
         if (stringValue == null) {
             return null;
         }
@@ -27,20 +29,19 @@ public class EnumToLowerCaseBridge implements ValueBridge<Enum<?>, String> {
     }
 
     @Override
-    public String objectToString(Object object) {
+    public String toIndexedValue(Enum<?> object, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
         if (object == null) {
             return null;
         }
         return String.valueOf(object).toLowerCase();
     }
 
-    @Override
-    public void setParameterValues(Map<String, String> parameters) {
+    public void setClass(String className) {
         try {
-            String className = parameters.get("class");
             enumClazz = Class.forName(className);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
+
 }
