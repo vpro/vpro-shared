@@ -18,7 +18,6 @@ import nl.vpro.monitoring.config.MonitoringProperties;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @EnableWebSecurity
 public class MonitoringWebSecurityConfiguration {
 
@@ -32,6 +31,7 @@ public class MonitoringWebSecurityConfiguration {
 
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.securityMatcher(antMatcher("/manage/**"));
         if (properties.isHealthPermitAll()) {
