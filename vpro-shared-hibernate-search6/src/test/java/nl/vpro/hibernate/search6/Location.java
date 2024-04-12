@@ -2,9 +2,7 @@ package nl.vpro.hibernate.search6;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import javax.xml.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
