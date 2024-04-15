@@ -1,15 +1,16 @@
 package nl.vpro.hibernate.search6;
 
-import java.util.HashMap;
-
-import javax.persistence.*;
-
 import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.postgresql.Driver;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.HashMap;
+
+import jakarta.persistence.*;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
