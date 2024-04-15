@@ -46,5 +46,23 @@
       <artifactId>vpro-shared-hibernate</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>1.19.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+      <version>1.19.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.3</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
