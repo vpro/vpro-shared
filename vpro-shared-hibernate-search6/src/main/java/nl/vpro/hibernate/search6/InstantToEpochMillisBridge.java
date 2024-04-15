@@ -4,32 +4,27 @@
  */
 package nl.vpro.hibernate.search6;
 
-import java.time.Instant;
-import java.util.Date;
-
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
 
-import nl.vpro.util.DateUtils;
+import java.time.Instant;
 
-public class InstantToEpochMillisBridge implements ValueBridge<Object, Long>  {
+public class InstantToEpochMillisBridge implements ValueBridge<Instant, Long>  {
 
 
 
     @Override
-	public Object fromIndexedValue(Long value, ValueBridgeFromIndexedValueContext context) {
+	public Instant fromIndexedValue(Long value, ValueBridgeFromIndexedValueContext context) {
         return Instant.ofEpochMilli(value);
 
     }
 
     @Override
-    public Long toIndexedValue(Object value, ValueBridgeToIndexedValueContext context) {
-        if (value != null) {
-            if (value instanceof Date) {
-                value = DateUtils.toInstant((Date) value);
-            }
-            Instant instance = (Instant) value;
+    public Long toIndexedValue(Instant instance, ValueBridgeToIndexedValueContext context) {
+        if (instance != null) {
+
+
             return instance.toEpochMilli();
         } else {
             return null;

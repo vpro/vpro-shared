@@ -14,13 +14,18 @@ import org.hibernate.search.mapper.pojo.common.annotation.Param;
  * @since 3.5
  */
 @Param(name = "class", value = "java.lang.String")
-public class EnumToLowerCaseBridge implements ValueBridge<Enum<?>, String> {
+public class EnumToLowerCaseBridge implements ValueBridge<Object, String> {
 
     private Class enumClazz;
 
 
+    public EnumToLowerCaseBridge(Class<? extends Enum<?>> enumClazz) {
+        this.enumClazz = enumClazz;
+    }
+
+
     @Override
-    public Enum<?> fromIndexedValue(String stringValue, ValueBridgeFromIndexedValueContext context) {
+    public Object fromIndexedValue(String stringValue, ValueBridgeFromIndexedValueContext context) {
 
         if (stringValue == null) {
             return null;
@@ -29,7 +34,7 @@ public class EnumToLowerCaseBridge implements ValueBridge<Enum<?>, String> {
     }
 
     @Override
-    public String toIndexedValue(Enum<?> object, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
+    public String toIndexedValue(Object object, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
         if (object == null) {
             return null;
         }

@@ -34,6 +34,7 @@ public class MonitoringWebSecurityConfiguration {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.securityMatcher(antMatcher("/manage/**"));
+
         if (properties.isHealthPermitAll()) {
             http.authorizeHttpRequests((authz) -> {
                 authz.requestMatchers(

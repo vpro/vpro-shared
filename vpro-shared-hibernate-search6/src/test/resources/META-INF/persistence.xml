@@ -11,7 +11,7 @@
 
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>nl.vpro.hibernate.search6.TestEntity</class>
+        <class>nl.vpro.hibernate.search6.domain.TestEntity</class>
 
         <properties>
 
@@ -20,6 +20,7 @@
             <property name="hibernate.hbm2ddl.auto"
                       value="update" />
         </properties>
+
 
     </persistence-unit>
 
