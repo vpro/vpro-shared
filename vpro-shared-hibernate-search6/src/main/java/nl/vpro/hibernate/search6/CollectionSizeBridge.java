@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Collection;
 
 import org.hibernate.search.engine.backend.document.DocumentElement;
-import org.hibernate.search.engine.backend.document.IndexFieldReference;
 import org.hibernate.search.engine.backend.types.*;
 import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
@@ -21,11 +20,9 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
 public class CollectionSizeBridge implements PropertyBridge<Collection> {
 
     private final String field;
-    private final IndexFieldReference<Integer> indexSchemaObjectField;
 
-    public CollectionSizeBridge(String field, IndexFieldReference<Integer> indexSchemaObjectField) {
+    public CollectionSizeBridge(String field) {
         this.field = field;
-        this.indexSchemaObjectField = indexSchemaObjectField;
     }
 
     @Override
@@ -47,7 +44,8 @@ public class CollectionSizeBridge implements PropertyBridge<Collection> {
             var type = context.typeFactory().asInteger().sortable(Sortable.YES).projectable(Projectable.YES).searchable(Searchable.YES);
             var field = context.indexSchemaElement().field(name , type);
             log.info("Defining field {} with type {}", name, type);
-            context.bridge(Collection.class, new CollectionSizeBridge(name, field.toReference()));
+            field.toReference();
+            context.bridge(Collection.class, new CollectionSizeBridge(name));
         }
     }
 
