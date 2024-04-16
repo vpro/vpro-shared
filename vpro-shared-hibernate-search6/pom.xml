@@ -10,6 +10,10 @@
 
   <artifactId>vpro-shared-hibernate-search6</artifactId>
 
+  <properties>
+    <vpro.shared.module.postfix>hibernate-search6</vpro.shared.module.postfix>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.hibernate</groupId>
@@ -49,13 +53,11 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>1.19.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
         <artifactId>postgresql</artifactId>
-      <version>1.19.7</version>
       <scope>test</scope>
     </dependency>
     <dependency>

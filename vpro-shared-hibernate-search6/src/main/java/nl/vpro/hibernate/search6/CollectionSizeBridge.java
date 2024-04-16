@@ -20,11 +20,9 @@ import java.util.Collection;
 public class CollectionSizeBridge implements PropertyBridge<Collection> {
 
     private final String field;
-    private final IndexFieldReference<Integer> indexSchemaObjectField;
 
     public CollectionSizeBridge(String field, IndexFieldReference<Integer> indexSchemaObjectField) {
         this.field = field;
-        this.indexSchemaObjectField = indexSchemaObjectField;
     }
 
     @Override

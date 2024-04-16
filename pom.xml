@@ -67,6 +67,8 @@
     <micrometer.version>1.12.4</micrometer.version>
     <flyway.version>10.11.0</flyway.version>
 
+    <testcontainers.version>1.19.7</testcontainers.version>
+
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
     <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
@@ -791,6 +793,20 @@
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
         <version>3.5.2</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${testcontainers.version}</version>
+
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>

@@ -47,7 +47,7 @@ public class IntegrationTest {
     static    EntityManager entityManager;
 
     @BeforeAll
-    static void startContainers() throws IOException, InterruptedException {
+    static void startContainers() throws IOException {
         postgres.withUsername("admin");
         postgres.withPassword("admin2k");
         postgres.withDatabaseName("CRM");
@@ -70,8 +70,6 @@ public class IntegrationTest {
         properties.put("hibernate.search.backend.analysis.configurer", MyEntityMapper.class.getName());
 
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("CRM", properties);
-
-
 
         entityManager = emf.createEntityManager();
 
@@ -149,7 +147,7 @@ public class IntegrationTest {
 
     @Test
     public void enumField() {
-        SearchSession searchSession = Search.session(entityManager);
+        var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
             .where(f ->
@@ -162,7 +160,7 @@ public class IntegrationTest {
 
     @Test
     public void instantField() {
-        SearchSession searchSession = Search.session(entityManager);
+        var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
             .where(f -> {
@@ -179,7 +177,7 @@ public class IntegrationTest {
 
     @Test
     public void size() {
-        SearchSession searchSession = Search.session(entityManager);
+        var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
             .where(f -> {
