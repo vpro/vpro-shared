@@ -80,16 +80,19 @@ public class IntegrationTest {
                 .myEnum(MyEnum.A)
                 .instant(clock.instant())
                 .list(List.of("a", "b", "c"))
+                .myBoolean(true)
             ,
             b -> b.text("Tot ziens aardes!")
                 .myEnum(MyEnum.B)
                 .instant(clock.instant())
                 .subObject(SubObject.builder().a("foo").build())
+                .myBoolean(false)
             ,
 
             b -> b.text("foobar")
                 .myEnum(MyEnum.C)
                 .instant(null)
+                .myBoolean(null)
         );
 
         tr.commit();
@@ -189,6 +192,24 @@ public class IntegrationTest {
             .fetchAll();
 
         assertThat(list.hits()).hasSize(1);
+        log.info("{}", list);
+    }
+
+
+    @Test
+    public void booleanField() {
+        var searchSession = Search.session(entityManager);
+        var list = searchSession.search(TestEntity.class)
+            .select(MyProjection.class)
+            .where(f -> {
+                return f.match().field("myBoolean")
+                    .matching(true);
+            })
+
+            .fetchAll();
+
+        assertThat(list.hits()).hasSize(1);
+
         log.info("{}", list);
     }
 

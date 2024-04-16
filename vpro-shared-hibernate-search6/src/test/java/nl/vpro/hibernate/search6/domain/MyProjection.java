@@ -5,5 +5,5 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Projection
 import java.time.Instant;
 
 @ProjectionConstructor
-public record MyProjection(Instant instant,  Object myEnum) {
+public record MyProjection(Instant instant,  MyEnum myEnum, Boolean myBoolean) {
 }

@@ -7,6 +7,7 @@ import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.orm.mapping.HibernateOrmMappingConfigurationContext;
 import org.hibernate.search.mapper.orm.mapping.HibernateOrmSearchMappingConfigurer;
+import org.hibernate.search.mapper.pojo.bridge.builtin.impl.DefaultBooleanBridge;
 
 
 import nl.vpro.hibernate.search6.domain.MyEnum;
@@ -28,7 +29,7 @@ public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , Luc
 
         testEntity.property("myEnum")
             .keywordField()
-            .valueBridge(new EnumToLowerCaseBridge(MyEnum.class))
+            .valueBridge(new EnumToLowerCaseBridge<>(MyEnum.class) {})
             .projectable(Projectable.YES)
         ;
         testEntity.property("instant")
@@ -45,6 +46,11 @@ public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , Luc
 
         testEntity.property("list")
             .binder(new CollectionSizeBridge.Binder());
+
+        testEntity.property("myBoolean")
+            .genericField()
+            .valueBridge(DefaultBooleanBridge.INSTANCE)
+            .projectable(Projectable.YES);
 
     }
 

@@ -37,5 +37,8 @@ public class TestEntity {
     @OneToOne
     private SubObject subObject;
 
+    @Column
+    private Boolean myBoolean;
+
 
 }
