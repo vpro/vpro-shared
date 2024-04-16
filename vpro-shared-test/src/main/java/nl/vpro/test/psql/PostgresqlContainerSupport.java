@@ -17,7 +17,7 @@ public class PostgresqlContainerSupport {
 
     @Bean("psqlcontainer")
     public PostgreSQLContainer<?> getPostgresqlContainer() {
-        PostgreSQLContainer<?> postgresDBContainer = new PostgreSQLContainer<>("postgres:13")
+        PostgreSQLContainer<?> postgresDBContainer = new PostgreSQLContainer<>("postgres:16")
             //.withStartupTimeout(Duration.ofSeconds(180L))
             ;
         postgresDBContainer.start();
