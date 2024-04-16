@@ -2,38 +2,48 @@ package nl.vpro.hibernate.search6;
 
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurationContext;
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurer;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.orm.mapping.HibernateOrmMappingConfigurationContext;
+import org.hibernate.search.mapper.orm.mapping.HibernateOrmSearchMappingConfigurer;
 
 
+import nl.vpro.hibernate.search6.domain.MyEnum;
 import nl.vpro.hibernate.search6.domain.TestEntity;
 
-public class MyEntityMapper implements org.hibernate.search.mapper.orm.mapping.HibernateOrmSearchMappingConfigurer , LuceneAnalysisConfigurer
+public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , LuceneAnalysisConfigurer
 {
 
     @Override
     public void configure(HibernateOrmMappingConfigurationContext context) {
 
         var mapping = context.programmaticMapping();
-        var test = mapping.type(TestEntity.class);
+        var testEntity = mapping.type(TestEntity.class);
 
-        test.indexed();
-
-        test.property("text")
+        testEntity.indexed();
+        testEntity.property("text")
             .fullTextField();
             //.analyzer("dutch");
 
-        test.property("myEnum")
+        testEntity.property("myEnum")
             .keywordField()
-            //.valueBinder(DefaultEnumBridge.Binder.INSTANCE)
-            //.valueBridge( new DefaultEnumBridge<MyEnum>(MyEnum.class))
-            //.valueBridge(new EnumToLowerCaseBridge(MyEnum.class))
+            .valueBridge(new EnumToLowerCaseBridge(MyEnum.class))
+            .projectable(Projectable.YES)
         ;
-        test.property("instant")
+        testEntity.property("instant")
             .genericField()
-            .valueBridge(new InstantToEpochMillisBridge());
+            .projectable(Projectable.YES)
+            .searchable(Searchable.YES)
+            ;
 
-        test.property("instant")
-            .genericField("instant2");
+
+        testEntity.property("subObject")
+            .binder(new TestBridge())
+            ;
+
+
+        testEntity.property("list")
+            .binder(new CollectionSizeBridge.Binder());
 
     }
 

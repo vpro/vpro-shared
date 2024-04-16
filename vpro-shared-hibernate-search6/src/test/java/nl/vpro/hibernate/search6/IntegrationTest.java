@@ -6,9 +6,11 @@ import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.meeuw.math.time.TestClock;
 import org.postgresql.Driver;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -16,15 +18,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 import jakarta.persistence.*;
 
 
-import nl.vpro.hibernate.search6.domain.MyEnum;
-import nl.vpro.hibernate.search6.domain.TestEntity;
+import nl.vpro.hibernate.search6.domain.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,6 +35,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ToString
 public class IntegrationTest {
 
+    static TestClock clock = new TestClock();
+    static {
+
+    }
+
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
         "postgres:16-alpine"
     );
@@ -41,7 +47,7 @@ public class IntegrationTest {
     static    EntityManager entityManager;
 
     @BeforeAll
-    static void startContainers() throws IOException {
+    static void startContainers() throws IOException, InterruptedException {
         postgres.withUsername("admin");
         postgres.withPassword("admin2k");
         postgres.withDatabaseName("CRM");
@@ -72,24 +78,33 @@ public class IntegrationTest {
         var tr = entityManager.getTransaction();
         tr.begin();
         add(b -> b
-            .text("Hello World")
-            .myEnum(MyEnum.A)
-            .instant(Instant.ofEpochSecond(100)),
+                .text("Hello World")
+                .myEnum(MyEnum.A)
+                .instant(clock.instant())
+                .list(List.of("a", "b", "c"))
+            ,
             b -> b.text("Goodbye Earth")
                 .myEnum(MyEnum.B)
-                .instant(Instant.ofEpochSecond(200)),
+                .instant(clock.instant())
+                .subObject(SubObject.builder().a("foo").build())
+            ,
+
             b -> b.text("foobar")
                 .myEnum(MyEnum.C)
                 .instant(null)
         );
 
         tr.commit();
-       /* SearchSession searchSession = Search.session( entityManager );
+
+        //fullIndex();
+    }
+
+    private static void fullIndex() throws InterruptedException {
+          SearchSession searchSession = Search.session( entityManager );
 
         MassIndexer indexer = searchSession.massIndexer( TestEntity.class )
-        .threadsToLoadObjects( 7 );
-
-        indexer.startAndWait();*/
+        .threadsToLoadObjects( 7);
+        indexer.startAndWait();
     }
 
     @SafeVarargs
@@ -97,7 +112,13 @@ public class IntegrationTest {
         for (Consumer<TestEntity.Builder> builderConsumer : builderConsumers) {
             TestEntity.Builder builder = TestEntity.builder();
             builderConsumer.accept(builder);
-            log.info("Merged {}", entityManager.merge(builder.build()));
+            var test = builder.build();
+            var sub = test.getSubObject();
+            if (sub != null) {
+                sub = entityManager.merge(sub);
+                test.setSubObject(sub);
+            }
+            log.info("Merged {}", entityManager.merge(test));
         }
     }
 
@@ -118,9 +139,9 @@ public class IntegrationTest {
 
         var list = searchSession.search(TestEntity.class)
             .where(f -> f.match().field("text").matching("world"))
-            .fetchHits(20);
+            .fetchAll();
 
-        assertThat(list).hasSize(1);
+        assertThat(list.hits()).hasSize(1);
         log.info("{}", list);
 
 
@@ -130,20 +151,49 @@ public class IntegrationTest {
     public void enumField() {
         SearchSession searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
-            .where(f -> f.match().field("myEnum").matching("a"))
-            .fetchHits(20);
+            .select(MyProjection.class)
+            .where(f ->
+                f.simpleQueryString().field("myEnum").matching("a"))
+            .fetchAll();
 
         log.info("{}", list);
+
     }
 
     @Test
     public void instantField() {
         SearchSession searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
-            .where(f -> f.match().field("instant").matching(Instant.ofEpochSecond(100)))
-            .fetchHits(20);
+            .select(MyProjection.class)
+            .where(f -> {
+                return f.match().field("instant")
+                    .matching(clock.instant());
+
+            })
+
+            .fetchAll();
 
         log.info("{}", list);
     }
+
+
+    @Test
+    public void size() {
+        SearchSession searchSession = Search.session(entityManager);
+        var list = searchSession.search(TestEntity.class)
+            .select(MyProjection.class)
+            .where(f -> {
+                return f.match().field("listSize")
+                    .matching(3);
+            })
+
+            .fetchAll();
+
+        assertThat(list.hits()).hasSize(1);
+        log.info("{}", list);
+    }
+
+
+
 
 }

@@ -40,7 +40,7 @@
 
     <hibernate.version>5.6.15.Final</hibernate.version>
 
-    <hibernate.search6.version>6.2.3.Final</hibernate.search6.version>
+    <hibernate.search6.version>6.2.4.Final</hibernate.search6.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.0.0</servlet.api.version>

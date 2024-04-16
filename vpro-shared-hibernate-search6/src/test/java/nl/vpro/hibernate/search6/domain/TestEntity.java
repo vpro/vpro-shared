@@ -3,6 +3,7 @@ package nl.vpro.hibernate.search6.domain;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 import jakarta.persistence.*;
 
@@ -14,8 +15,6 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 @lombok.Builder
 public class TestEntity {
-
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -31,6 +30,12 @@ public class TestEntity {
 
     @Column
     private Instant instant;
+
+    @ElementCollection
+    private List<String> list;
+
+    @OneToOne
+    private SubObject subObject;
 
 
 }

@@ -4,38 +4,49 @@
  */
 package nl.vpro.hibernate.search6;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.search.engine.backend.document.DocumentElement;
+import org.hibernate.search.engine.backend.document.IndexFieldReference;
+import org.hibernate.search.engine.backend.types.*;
+import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
+import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
+import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBinder;
+import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContext;
+
 import java.util.Collection;
-import java.util.function.Function;
 
-import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
-import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
+@SuppressWarnings("rawtypes")
+@Slf4j
+public class CollectionSizeBridge implements PropertyBridge<Collection> {
 
-public class CollectionSizeBridge<T> implements ValueBridge<Object, Long> {
-
-    private final Function<T, Collection<?>> collectionFunction;
     private final String field;
+    private final IndexFieldReference<Integer> indexSchemaObjectField;
 
-    public CollectionSizeBridge(Function<T, Collection<?>> collectionFunction, String field) {
-        this.collectionFunction = collectionFunction;
+    public CollectionSizeBridge(String field, IndexFieldReference<Integer> indexSchemaObjectField) {
         this.field = field;
-    }
-
-    public CollectionSizeBridge() {
-        this.collectionFunction = null;
-        this.field = null;
+        this.indexSchemaObjectField = indexSchemaObjectField;
     }
 
     @Override
-    public Long toIndexedValue(Object value, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
-        return getLong(value);
+    public void write(DocumentElement target, Collection bridgedElement, PropertyBridgeWriteContext context) {
+        if (bridgedElement != null) {
+            target.addValue(field, bridgedElement.size());
+        } else {
+            target.addValue(field, 0);
+        }
     }
 
 
-    protected long getLong(Object value) {
-        if (collectionFunction == null) {
-            return ((Collection) value).size();
-        } else {
-            return collectionFunction.apply((T) value).size();
+    public static class Binder implements PropertyBinder {
+
+        @Override
+        public void bind(PropertyBindingContext context) {
+            context.dependencies().useRootOnly();
+            var name = context.bridgedElement().name() + "Size";
+            var type = context.typeFactory().asInteger().sortable(Sortable.YES).projectable(Projectable.YES).searchable(Searchable.YES);
+            var field = context.indexSchemaElement().field(name , type);
+            log.info("Defining field {} with type {}", name, type);
+            context.bridge(Collection.class, new CollectionSizeBridge(name, field.toReference()));
         }
     }
 
