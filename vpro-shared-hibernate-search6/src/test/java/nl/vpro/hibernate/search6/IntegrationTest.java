@@ -5,8 +5,7 @@ import java.util.HashMap;
 import javax.persistence.*;
 
 import org.hibernate.dialect.PostgreSQL10Dialect;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.postgresql.Driver;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -14,8 +13,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+/**
+ * Testing happens in main. Ignore this.
+ */
 @Testcontainers
-
+@Disabled
 public class IntegrationTest {
 
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
