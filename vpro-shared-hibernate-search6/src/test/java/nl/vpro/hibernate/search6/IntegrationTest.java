@@ -76,12 +76,12 @@ public class IntegrationTest {
         var tr = entityManager.getTransaction();
         tr.begin();
         add(b -> b
-                .text("Hello World")
+                .text("Hallo Werelden")
                 .myEnum(MyEnum.A)
                 .instant(clock.instant())
                 .list(List.of("a", "b", "c"))
             ,
-            b -> b.text("Goodbye Earth")
+            b -> b.text("Tot ziens aardes!")
                 .myEnum(MyEnum.B)
                 .instant(clock.instant())
                 .subObject(SubObject.builder().a("foo").build())
@@ -124,7 +124,7 @@ public class IntegrationTest {
     public void test() {
         TestEntity test = entityManager.find(TestEntity.class, 1L);
         assertThat(test.getId()).isNotNull();
-        assertThat(test.getText()).isEqualTo("Hello World");
+        assertThat(test.getText()).isEqualTo("Hallo Werelden");
 
         SearchSession searchSession = Search.session(entityManager);
 
@@ -136,7 +136,8 @@ public class IntegrationTest {
 
 
         var list = searchSession.search(TestEntity.class)
-            .where(f -> f.match().field("text").matching("world"))
+            .where(f -> f.match().field("text")
+                .matching("wereld")) // wont' work without dutch analyzer
             .fetchAll();
 
         assertThat(list.hits()).hasSize(1);

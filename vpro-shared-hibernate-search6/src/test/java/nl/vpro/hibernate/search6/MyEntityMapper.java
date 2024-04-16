@@ -1,5 +1,6 @@
 package nl.vpro.hibernate.search6;
 
+import org.apache.lucene.analysis.nl.DutchAnalyzer;
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurationContext;
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurer;
 import org.hibernate.search.engine.backend.types.Projectable;
@@ -49,8 +50,7 @@ public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , Luc
 
     @Override
     public void configure(LuceneAnalysisConfigurationContext context) {
-        context.analyzer( "dutch" ).custom()
-                .tokenizer( "standard" );
+        context.analyzer( "default" ).instance(new DutchAnalyzer());
 
     }
 }
