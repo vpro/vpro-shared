@@ -37,10 +37,21 @@ public class CollectionSizeBridge implements PropertyBridge<Collection> {
 
     public static class Binder implements PropertyBinder {
 
+        private final String name;
+
+        public Binder(String name) {
+            this.name = name;
+        }
+
+        public Binder() {
+            this.name = null;
+        }
+
+
         @Override
         public void bind(PropertyBindingContext context) {
             context.dependencies().useRootOnly();
-            var name = context.bridgedElement().name() + "Size";
+            var name = this.name == null ? context.bridgedElement().name() + "Size" : this.name;
             var type = context.typeFactory().asInteger().sortable(Sortable.YES).projectable(Projectable.YES).searchable(Searchable.YES);
             var field = context.indexSchemaElement().field(name , type);
             log.info("Defining field {} with type {}", name, type);
