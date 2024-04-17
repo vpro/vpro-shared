@@ -8,11 +8,12 @@ import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.meeuw.math.time.TestClock;
 import org.postgresql.Driver;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
@@ -26,32 +27,31 @@ import jakarta.persistence.*;
 
 
 import nl.vpro.hibernate.search6.domain.*;
+import nl.vpro.test.psql.PostgresqlContainerSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @Log4j2
 @ToString
+@Isolated
 public class IntegrationTest {
-
     static TestClock clock = new TestClock();
-    static {
 
-    }
 
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-        "postgres:16-alpine"
-    );
+    @Container
+    static PostgreSQLContainer<?> postgres = PostgresqlContainerSupport.newContainer()
+        .withDatabaseName("CRM");
 
     static    EntityManager entityManager;
 
+    @AfterAll
+    static void shutdown() {
+        postgres.close();
+    }
     @BeforeAll
-    static void startContainers() throws IOException {
-        postgres.withUsername("admin");
-        postgres.withPassword("admin2k");
-        postgres.withDatabaseName("CRM");
-        postgres.start();
+    static void setUpEntityManager() throws IOException {
 
         var properties = new HashMap<String, String>();
         properties.put("jakarta.persistence.jdbc.driver", Driver.class.getName());
