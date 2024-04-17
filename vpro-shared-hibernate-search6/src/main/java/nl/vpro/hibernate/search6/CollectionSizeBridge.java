@@ -25,7 +25,7 @@ public class CollectionSizeBridge implements PropertyBridge<Collection> {
 
     private final Function<Collection, Integer> sizeFunction;
 
-    private  CollectionSizeBridge(String field, Function<Collection, Integer> sizeFunction) {
+    public CollectionSizeBridge(String field, Function<Collection, Integer> sizeFunction) {
         this.field = field;
         this.sizeFunction = sizeFunction;
     }
