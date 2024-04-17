@@ -195,6 +195,22 @@ public class IntegrationTest {
         log.info("{}", list);
     }
 
+    @Test
+    public void filteredSize() {
+        var searchSession = Search.session(entityManager);
+        var list = searchSession.search(TestEntity.class)
+            .select(MyProjection.class)
+            .where(f -> {
+                return f.match().field("filteredSize")
+                    .matching(1);
+            })
+
+            .fetchAll();
+
+        assertThat(list.hits()).hasSize(1);
+        log.info("{}", list);
+    }
+
 
     @Test
     public void booleanField() {

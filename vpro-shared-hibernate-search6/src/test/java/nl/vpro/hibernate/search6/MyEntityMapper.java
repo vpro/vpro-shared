@@ -45,7 +45,12 @@ public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , Luc
 
 
         testEntity.property("list")
-            .binder(new CollectionSizeBridge.Binder());
+            .binder(new CollectionSizeBridge.Binder<String>());
+
+        testEntity.property("list")
+            .binder(new CollectionSizeBridge.Binder<String>()
+                .withName("filteredSize")
+                .withCollectionFilter(c -> c.startsWith("a")));
 
         testEntity.property("myBoolean")
             .genericField()
