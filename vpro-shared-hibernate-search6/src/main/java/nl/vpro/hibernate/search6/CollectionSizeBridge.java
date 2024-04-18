@@ -67,7 +67,7 @@ public class CollectionSizeBridge implements PropertyBridge<Collection> {
             var name = this.name == null ? context.bridgedElement().name() + "Size" : this.name;
             var type = context.typeFactory().asInteger().sortable(Sortable.YES).projectable(Projectable.YES).searchable(Searchable.YES);
             var field = context.indexSchemaElement().field(name , type);
-            log.info("Defining field {} with type {}", name, type);
+            log.debug("Defining field {} with type {}", name, type);
             field.toReference();
             Function<Collection, Integer> size = collectionFilter == null ? Collection::size : c -> (int) (c.stream().filter(collectionFilter).count());
             context.bridge(Collection.class, new CollectionSizeBridge( name, size));
