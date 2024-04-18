@@ -25,12 +25,9 @@ public class JsonBridgeTest {
         String string = "[{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/320x180_180.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/640x360_1000.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/854x480_1500.m4v\"}]\n"
             ;
 
-        try (JsonBridge bridge = new JsonBridge()) {
+        try (JsonBridge<Location[]> bridge = new JsonBridge<>(Location[].class)) {
 
-
-            bridge.setClass(Location[].class.getName());
-
-            Location[] o = (Location[]) bridge.fromIndexedValue(string, null);
+            Location[] o = bridge.fromIndexedValue(string, null);
 
 
             Jackson2TestUtil.roundTripAndSimilar(o, string);
@@ -42,9 +39,7 @@ public class JsonBridgeTest {
     public void testObjectToStringWithDuration() {
         String string = "[{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/320x180_180.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/640x360_1000.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/854x480_1500.m4v\"}]\n";
 
-        try (JsonBridge bridge = new JsonBridge()) {
-
-            bridge.setClass(LocationWithDurationField[].class.getName());
+        try (JsonBridge<LocationWithDurationField[]> bridge = new JsonBridge<>(LocationWithDurationField[].class)) {
 
             LocationWithDurationField[] o = (LocationWithDurationField []) bridge.fromIndexedValue(string, null);
 
@@ -59,7 +54,7 @@ public class JsonBridgeTest {
         String[] array = new String[1000];
         Arrays.fill(array, LONG_STRING);
 
-        try (JsonBridge bridge = new JsonBridge()) {
+        try (JsonBridge<String[]> bridge = new JsonBridge<>(String[].class)) {
             String ret = bridge.toIndexedValue(array, null);
             /* Result will be anywhere between MAX_LENGTH +/- LONG_STRING.length() characters */
             assertTrue(ret.length() >= JsonBridge.MAX_LENGTH - LONG_STRING.length());
@@ -73,7 +68,7 @@ public class JsonBridgeTest {
         String[] array = new String[100];
         Arrays.fill(array, LONG_STRING);
 
-        try (JsonBridge bridge = new JsonBridge()) {
+        try (JsonBridge<String[]> bridge = new JsonBridge<>(String[].class)) {
             String ret = bridge.toIndexedValue(array, null);
             /* Prefix '[' + 100 * ('"' + string length + '",') - last comma + ']' */
             assertEquals(1 + array.length * (LONG_STRING.length() + 3) - 1 + 1, ret.length());
@@ -83,7 +78,7 @@ public class JsonBridgeTest {
     @Test
     public void testOKArray1() {
         /* Array with 1 element of  100 chars long, can serialize to JSON to store in Lucene */
-        try (JsonBridge bridge = new JsonBridge()) {
+        try (JsonBridge<String[]> bridge = new JsonBridge<>(String[].class)) {
             String ret = bridge.toIndexedValue(new String[]{LONG_STRING}, null);
             /* Prefix '["' + string length + '"]' */
             assertEquals(1 + (LONG_STRING.length() + 2) + 1, ret.length());
@@ -98,7 +93,7 @@ public class JsonBridgeTest {
             buf.append(LONG_STRING);
         }
 
-        try (JsonBridge bridge = new JsonBridge()) {
+        try (JsonBridge<String> bridge = new JsonBridge<>(String.class)) {
             String ret = bridge.toIndexedValue(buf.toString(), null);
             assertEquals("{}", ret);
         }
@@ -112,7 +107,7 @@ public class JsonBridgeTest {
             buf.append(LONG_STRING);
         }
 
-        try (JsonBridge bridge = new JsonBridge()) {
+        try (JsonBridge<String[]> bridge = new JsonBridge<>(String[].class)) {
             String ret = bridge.toIndexedValue(new String[]{buf.toString()}, null);
             assertEquals("[]", ret);
         }

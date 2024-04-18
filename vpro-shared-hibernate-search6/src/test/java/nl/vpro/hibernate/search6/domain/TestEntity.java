@@ -37,8 +37,16 @@ public class TestEntity {
     @OneToOne
     private SubObject subObject;
 
+    @OneToMany
+    private List<SubObject> subObjects;
+
     @Column
     private Boolean myBoolean;
+
+
+
+
+
 
 
 }

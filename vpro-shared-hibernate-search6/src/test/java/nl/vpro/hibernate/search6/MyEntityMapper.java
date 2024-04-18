@@ -10,8 +10,7 @@ import org.hibernate.search.mapper.orm.mapping.HibernateOrmSearchMappingConfigur
 import org.hibernate.search.mapper.pojo.bridge.builtin.impl.DefaultBooleanBridge;
 
 
-import nl.vpro.hibernate.search6.domain.MyEnum;
-import nl.vpro.hibernate.search6.domain.TestEntity;
+import nl.vpro.hibernate.search6.domain.*;
 
 public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , LuceneAnalysisConfigurer
 {
@@ -42,6 +41,16 @@ public class MyEntityMapper implements HibernateOrmSearchMappingConfigurer , Luc
         testEntity.property("subObject")
             .binder(new TestBridge())
             ;
+
+        testEntity.property("subObject")
+            .genericField("subObjectJson")
+            .valueBinder(new JsonBridge.Binder<>(SubObject.class))
+            .projectable(Projectable.YES);
+
+        testEntity.property("subObjects")
+            .genericField("subObjectsJson")
+            .valueBinder(new JsonBridge.Binder<>(SubObject.class))
+            .projectable(Projectable.YES);
 
 
         testEntity.property("list")

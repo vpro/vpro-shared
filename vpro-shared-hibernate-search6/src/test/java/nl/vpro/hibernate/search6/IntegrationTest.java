@@ -19,8 +19,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 import jakarta.persistence.*;
@@ -86,6 +85,11 @@ public class IntegrationTest {
                 .myEnum(MyEnum.B)
                 .instant(clock.instant())
                 .subObject(SubObject.builder().a("foo").build())
+                .subObjects(List.of(
+                    SubObject.builder().a("foo").build(),
+                    SubObject.builder().a("bar").build()
+
+                ))
                 .myBoolean(false)
             ,
 
@@ -118,6 +122,13 @@ public class IntegrationTest {
             if (sub != null) {
                 sub = entityManager.merge(sub);
                 test.setSubObject(sub);
+            }
+            if (test.getSubObjects() != null) {
+                List<SubObject> subObjects = new ArrayList<>();
+                for (SubObject subObject : test.getSubObjects()) {
+                    subObjects.add(entityManager.merge(subObject));
+                }
+                test.setSubObjects(subObjects);
             }
             log.info("Merged {}", entityManager.merge(test));
         }
@@ -225,6 +236,27 @@ public class IntegrationTest {
             .fetchAll();
 
         assertThat(list.hits()).hasSize(1);
+
+        log.info("{}", list);
+    }
+
+    @Test
+    public void jsonProjection() {
+        var searchSession = Search.session(entityManager);
+        var list = searchSession.search(TestEntity.class)
+            .select(MyProjection.class)
+            .where(f -> {
+                return f.match().field("myEnum")
+                    .matching(MyEnum.B);
+            })
+
+            .fetchAll();
+
+        assertThat(list.hits()).hasSize(1);
+
+        assertThat(list.hits().get(0).subObject().getA()).isEqualTo("foo");
+
+        assertThat(list.hits().get(0).subObjects().get(0).getA()).isEqualTo("foo");
 
         log.info("{}", list);
     }
