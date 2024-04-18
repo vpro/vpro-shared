@@ -20,8 +20,10 @@ public class CollectionPropertyBridge<T> implements PropertyBridge<Collection> {
 
     @Override
     public void write(DocumentElement target, Collection bridgedElements, PropertyBridgeWriteContext context) {
-        for (Object bridgedElement : bridgedElements) {
-            this.single.write(target, (T) bridgedElement, context);
+        if (bridgedElements != null) {
+            for (Object bridgedElement : bridgedElements) {
+                this.single.write(target, (T) bridgedElement, context);
+            }
         }
     }
 }
