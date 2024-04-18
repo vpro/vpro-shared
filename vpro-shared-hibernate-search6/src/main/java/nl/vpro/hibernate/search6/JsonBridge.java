@@ -6,17 +6,17 @@ package nl.vpro.hibernate.search6;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.ValueBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.ValueBinder;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
 import org.hibernate.search.mapper.pojo.common.annotation.Param;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -101,6 +101,7 @@ public class JsonBridge<T> implements ValueBridge<T, String> {
             throw new RuntimeException(e);
         }
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
