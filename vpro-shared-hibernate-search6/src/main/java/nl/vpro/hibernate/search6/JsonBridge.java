@@ -4,7 +4,7 @@
  */
 package nl.vpro.hibernate.search6;
 
-import lombok.Getter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.hibernate.search.mapper.pojo.bridge.ValueBridge;
+import org.hibernate.search.mapper.pojo.bridge.binding.ValueBindingContext;
+import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.ValueBinder;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeFromIndexedValueContext;
 import org.hibernate.search.mapper.pojo.bridge.runtime.ValueBridgeToIndexedValueContext;
 import org.hibernate.search.mapper.pojo.common.annotation.Param;
@@ -28,20 +30,23 @@ import nl.vpro.jackson2.Jackson2Mapper;
 @Getter
 @Slf4j
 @Param(name = "class", value = "java.lang.String")
-public class JsonBridge  implements ValueBridge<Object, String> {
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+public class JsonBridge<T> implements ValueBridge<T, String> {
 
     public final static int MAX_LENGTH = 32000;
 
-    private Class<?> type;
+    private Class<T> type;
+
+    private static final Jackson2Mapper mapper = Jackson2Mapper.getLenientInstance();
 
 
     @Override
-    public Object fromIndexedValue(String stringValue, ValueBridgeFromIndexedValueContext context) {
+    public T fromIndexedValue(String stringValue, ValueBridgeFromIndexedValueContext context) {
         if (stringValue == null) {
             return null;
         }
         try {
-            return Jackson2Mapper.getLenientInstance().readValue(stringValue, type);
+            return mapper.readValue(stringValue, type);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -50,12 +55,17 @@ public class JsonBridge  implements ValueBridge<Object, String> {
     }
 
     @Override
-    public String toIndexedValue(Object object, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
+    public String parse(String stringValue) {
+        return fromIndexedValue(stringValue, null).toString();
+    }
+
+    @Override
+    public String toIndexedValue(T object, ValueBridgeToIndexedValueContext valueBridgeToIndexedValueContext) {
         if (object == null) {
             return null;
         }
         try {
-            String ret = Jackson2Mapper.getInstance().writeValueAsString(object);
+            String ret = mapper.writeValueAsString(object);
 
             int len = ret.length();
             if (len > MAX_LENGTH) {
@@ -71,7 +81,7 @@ public class JsonBridge  implements ValueBridge<Object, String> {
                     int size = array.length;
                     while (len > MAX_LENGTH && array.length > 0) {
                         array = Arrays.copyOfRange(array, 0, --size);
-                        ret = Jackson2Mapper.getInstance().writeValueAsString(array);
+                        ret = mapper.writeValueAsString(array);
                         len = ret.length();
                     }
                     if (size == 0) {
@@ -92,11 +102,34 @@ public class JsonBridge  implements ValueBridge<Object, String> {
         }
     }
 
-    public void setClass(String className) {
-        try {
-            type = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonBridge<?> that = (JsonBridge<?>) o;
+        return type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode();
+    }
+
+    public static class Binder<T> implements ValueBinder {
+        private final Class<T> type;
+
+        public Binder(Class<T> type) {
+            this.type = type;
+        }
+
+
+        @Override
+        public void bind(ValueBindingContext<?> context) {
+          /*  var t = context.typeFactory().as(type);
+            t.projectable(Projectable.YES);*/
+
+            context.bridge(type, new JsonBridge<>(type));
         }
     }
 
