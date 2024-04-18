@@ -101,6 +101,19 @@ public class JsonBridge<T> implements ValueBridge<T, String> {
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonBridge<?> that = (JsonBridge<?>) o;
+        return type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode();
+    }
 
     public static class Binder<T> implements ValueBinder {
         private final Class<T> type;
