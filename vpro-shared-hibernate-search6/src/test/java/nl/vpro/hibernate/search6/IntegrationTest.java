@@ -2,7 +2,7 @@ package nl.vpro.hibernate.search6;
 
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.dialect.PostgreSQL10Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
 import org.hibernate.search.mapper.orm.Search;
@@ -57,7 +57,7 @@ public class IntegrationTest {
         properties.put("jakarta.persistence.jdbc.url", postgres.getJdbcUrl());
         properties.put("jakarta.persistence.jdbc.user", postgres.getUsername());
         properties.put("jakarta.persistence.jdbc.password", postgres.getPassword());
-        properties.put("hibernate.dialect", PostgreSQL10Dialect.class.getName());
+        properties.put("hibernate.dialect", PostgreSQLDialect.class.getName());
         properties.put("hibernate.show-sql", "true");
         properties.put("hibernate.hbm2ddl.auto", "create-drop");
         File index = Files.createTempDirectory(IntegrationTest.class.getSimpleName()).toFile();

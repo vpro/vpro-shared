@@ -38,9 +38,8 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>5.6.15.Final</hibernate.version>
-
-    <hibernate.search6.version>6.2.4.Final</hibernate.search6.version>
+    <hibernate.version>6.5.0.Final</hibernate.version>
+    <hibernate.search.version>7.1.1.Final</hibernate.search.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.0.0</servlet.api.version>
@@ -485,29 +484,24 @@
         <version>3.4.4</version>
       </dependency>
       <dependency>
-        <groupId>org.hibernate</groupId>
-        <artifactId>hibernate-core-jakarta</artifactId>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-core</artifactId>
         <version>${hibernate.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.hibernate</groupId>
+        <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-micrometer</artifactId>
         <version>${hibernate.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate.search</groupId>
-        <artifactId>hibernate-search-mapper-orm-jakarta</artifactId>
-        <version>${hibernate.search6.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.search</groupId>
         <artifactId>hibernate-search-mapper-orm</artifactId>
-        <version>${hibernate.search6.version}</version>
+        <version>${hibernate.search.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate.search</groupId>
         <artifactId>hibernate-search-backend-lucene</artifactId>
-        <version>${hibernate.search6.version}</version>
+        <version>${hibernate.search.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>

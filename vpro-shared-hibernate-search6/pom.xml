@@ -11,17 +11,17 @@
   <artifactId>vpro-shared-hibernate-search6</artifactId>
 
   <properties>
-    <vpro.shared.module.postfix>hibernate-search6</vpro.shared.module.postfix>
+    <vpro.shared.module.postfix>hibernate_search6</vpro.shared.module.postfix>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core-jakarta</artifactId>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate.search</groupId>
-      <artifactId>hibernate-search-mapper-orm-jakarta</artifactId>
+      <artifactId>hibernate-search-mapper-orm</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate.search</groupId>
@@ -55,7 +55,7 @@
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-        <artifactId>postgresql</artifactId>
+      <artifactId>postgresql</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

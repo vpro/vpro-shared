@@ -16,8 +16,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core-jakarta</artifactId>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
     </dependency>
   <!-- dependency breaks mockito?
     <dependency>
