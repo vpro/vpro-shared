@@ -18,13 +18,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 @Slf4j
-public class CollectionSizeBridge implements PropertyBridge<Collection> {
+public class CollectionSizeBridge<E> implements PropertyBridge<Collection<E>> {
 
     private final String field;
 
-    private final Function<Collection, Integer> sizeFunction;
+    private final Function<Collection<E>, Integer> sizeFunction;
 
-    private  CollectionSizeBridge(String field, Function<Collection, Integer> sizeFunction) {
+    public CollectionSizeBridge(String field, Function<Collection<E>, Integer> sizeFunction) {
         this.field = field;
         this.sizeFunction = sizeFunction;
     }
@@ -68,7 +68,16 @@ public class CollectionSizeBridge implements PropertyBridge<Collection> {
             var field = context.indexSchemaElement().field(name , type);
             log.debug("Defining field {} with type {}", name, type);
             field.toReference();
-            Function<Collection, Integer> size = collectionFilter == null ? Collection::size : c -> (int) (c.stream().filter(collectionFilter).count());
+            Function<Collection<E>, Integer> size = collectionFilter == null ? Collection::size : c -> (int) (c.stream()
+                .filter(e -> {
+                    if (e == null) {
+                        log.warn("Null element in collection {}", c);
+                        return false;
+                    }
+                    return collectionFilter.test(e);
+                })
+                .filter(collectionFilter)
+                .count());
             context.bridge(Collection.class, new CollectionSizeBridge( name, size));
         }
     }
