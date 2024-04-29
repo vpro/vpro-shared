@@ -61,12 +61,16 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 | 4.3-SNAPHOT
 | This is the branch for javax compatiblity. From this minor release can/will be made. Possible it can be merged to 4.4 if needed
   This would be done manually, since release branches are normally made from main
-| february 2024
+| February 2024
 
 
 | 5.x
 | javax -> jakarta
-| february 2024
+| February 2024
+
+| 5.1
+| hibernate orm 6, hibernate search 7
+| May 2024
 
 | 6.x >
 | java 21 (released in sep. 2023)
