@@ -1,12 +1,14 @@
 package nl.vpro.hibernate;
 
-import java.net.URI;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-import org.hibernate.dialect.Dialect;
+import org.hibernate.metamodel.mapping.*;
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
-import org.hibernate.type.DiscriminatorType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.descriptor.sql.VarcharTypeDescriptor;
+import org.hibernate.type.BasicType;
+import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
+
+import java.net.URI;
 
 /**
  * A type that maps between {@link java.sql.Types#VARCHAR VARCHAR} and {@link java.net.URI}
@@ -16,7 +18,7 @@ import org.hibernate.type.descriptor.sql.VarcharTypeDescriptor;
 public class URIType extends AbstractSingleColumnStandardBasicType<URI> implements DiscriminatorType<URI> {
 
     public URIType() {
-        super(VarcharTypeDescriptor.INSTANCE, URITypeDescriptor.INSTANCE);
+        super(VarcharJdbcType.INSTANCE, URITypeDescriptor.INSTANCE);
     }
 
     @Override
@@ -25,22 +27,29 @@ public class URIType extends AbstractSingleColumnStandardBasicType<URI> implemen
     }
 
     @Override
+    public DiscriminatorConverter<URI, CharSequence> getValueConverter() {
+        return new MappedDiscriminatorConverter<URI, CharSequence>(null, null, null) {
+            @Override
+            public URI toDomainValue(CharSequence relationalValue) {
+                return URI.create((String) relationalValue);
+            }
+
+            @Override
+            public CharSequence toRelationalValue(URI domainValue) {
+                return domainValue.toString();
+            }
+        };
+    }
+
+    @Override
+    public BasicType<?> getUnderlyingJdbcMapping() {
+        return new URIType();
+    }
+
+    @Override
     protected boolean registerUnderJavaType() {
         return true;
     }
 
-    @Override
-    public String toString(URI value) {
-        return URITypeDescriptor.INSTANCE.toString(value);
-    }
 
-    @Override
-    public String objectToSQLString(URI value, Dialect dialect) throws Exception {
-        return StringType.INSTANCE.objectToSQLString(toString(value), dialect);
-    }
-
-    @Override
-    public URI stringToObject(String xml) {
-        return URITypeDescriptor.INSTANCE.fromString(xml);
-    }
 }

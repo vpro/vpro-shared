@@ -1,18 +1,18 @@
 package nl.vpro.hibernate;
 
-import java.io.Serializable;
-import java.sql.*;
-import java.time.Instant;
-
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
+
+import java.io.Serializable;
+import java.sql.*;
+import java.time.Instant;
 
 /**
  * @author Michiel Meeuwissen
  * @since 0.36
  */
-public class InstantToTimestampType implements UserType {
+public class InstantToTimestampType implements UserType<Instant> {
 
     public static final InstantToTimestampType INSTANCE = new InstantToTimestampType();
 
@@ -21,18 +21,19 @@ public class InstantToTimestampType implements UserType {
         super();
     }
 
+
     @Override
-    public int[] sqlTypes() {
-        return new int[]{Types.TIMESTAMP};
+    public int getSqlType() {
+        return Types.TIMESTAMP;
     }
 
     @Override
-    public Class returnedClass() {
+    public Class<Instant> returnedClass() {
         return Instant.class;
     }
 
     @Override
-    public boolean equals(Object x, Object y) throws HibernateException {
+    public boolean equals(Instant x, Instant y) throws HibernateException {
         if (x == null) {
             return y == null;
         }
@@ -41,26 +42,25 @@ public class InstantToTimestampType implements UserType {
     }
 
     @Override
-    public int hashCode(Object x) throws HibernateException {
+    public int hashCode(Instant x) throws HibernateException {
         if (x == null) {
             return 0;
         }
         return x.hashCode();
     }
 
-
-
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
-        Timestamp ts = rs.getTimestamp(names[0]);
+    public Instant nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+        Timestamp ts = rs.getTimestamp(position);
         if (ts == null) {
             return null;
         }
         return ts.toInstant();
     }
 
+
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Instant value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             st.setNull(index, Types.TIMESTAMP);
         } else {
@@ -69,7 +69,7 @@ public class InstantToTimestampType implements UserType {
     }
 
     @Override
-    public Object deepCopy(Object value) throws HibernateException {
+    public Instant deepCopy(Instant value) throws HibernateException {
         return value;
     }
 
@@ -79,17 +79,17 @@ public class InstantToTimestampType implements UserType {
     }
 
     @Override
-    public Serializable disassemble(Object value) throws HibernateException {
-        return (Serializable) value;
+    public Serializable disassemble(Instant value) throws HibernateException {
+        return value;
     }
 
     @Override
-    public Object assemble(Serializable cached, Object owner) throws HibernateException {
-        return cached;
+    public Instant assemble(Serializable cached, Object owner) throws HibernateException {
+        return (Instant) cached;
     }
 
     @Override
-    public Object replace(Object original, Object target, Object owner) throws HibernateException {
+    public Instant replace(Instant original, Instant target, Object owner) throws HibernateException {
         return original;
     }
 }

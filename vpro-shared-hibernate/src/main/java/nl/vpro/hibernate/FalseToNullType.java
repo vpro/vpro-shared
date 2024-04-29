@@ -1,20 +1,17 @@
 package nl.vpro.hibernate;
 
-import java.io.Serializable;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
+
+import java.io.Serializable;
+import java.sql.*;
 
 /**
  *
  * @author Michiel Meeuwissen
  */
-public class FalseToNullType implements UserType {
+public class FalseToNullType implements UserType<Boolean> {
 
     public static final FalseToNullType INSTANCE = new FalseToNullType();
 
@@ -23,18 +20,19 @@ public class FalseToNullType implements UserType {
         super();
     }
 
+
     @Override
-    public int[] sqlTypes() {
-        return new int[]{Types.BOOLEAN};
+    public int getSqlType() {
+        return Types.BOOLEAN;
     }
 
     @Override
-    public Class returnedClass() {
+    public Class<Boolean> returnedClass() {
         return Boolean.class;
     }
 
     @Override
-    public boolean equals(Object x, Object y) throws HibernateException {
+    public boolean equals(Boolean x, Boolean y) throws HibernateException {
         if(x == null) {
             x = Boolean.FALSE;
         }
@@ -46,19 +44,21 @@ public class FalseToNullType implements UserType {
     }
 
     @Override
-    public int hashCode(Object x) throws HibernateException {
+    public int hashCode(Boolean x) throws HibernateException {
         return 0;
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
-        Boolean result = rs.getBoolean(names[0]);
+    public Boolean nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+        Boolean result = rs.getBoolean(position);
         if (result == null || !result) return null;
         return result;
     }
 
+
+
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Boolean value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             st.setBoolean(index, false);
         } else {
@@ -67,7 +67,7 @@ public class FalseToNullType implements UserType {
     }
 
     @Override
-    public Object deepCopy(Object value) throws HibernateException {
+    public Boolean deepCopy(Boolean value) throws HibernateException {
         return value;
     }
 
@@ -77,17 +77,18 @@ public class FalseToNullType implements UserType {
     }
 
     @Override
-    public Serializable disassemble(Object value) throws HibernateException {
-        return (Serializable) value;
+    public Serializable disassemble(Boolean value) throws HibernateException {
+        return value;
     }
 
     @Override
-    public Object assemble(Serializable cached, Object owner) throws HibernateException {
-        return cached;
+    public Boolean assemble(Serializable cached, Object owner) {
+        return (Boolean) cached;
     }
 
+
     @Override
-    public Object replace(Object original, Object target, Object owner) throws HibernateException {
+    public Boolean replace(Boolean original, Boolean target, Object owner) throws HibernateException {
         return original;
     }
 }

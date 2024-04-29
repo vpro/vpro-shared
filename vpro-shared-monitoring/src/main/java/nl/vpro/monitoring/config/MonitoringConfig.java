@@ -1,6 +1,8 @@
 package nl.vpro.monitoring.config;
 
-import io.micrometer.core.instrument.*;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.binder.cache.JCacheMetrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
@@ -40,6 +42,7 @@ import nl.vpro.logging.simple.Level;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
+import static io.micrometer.core.instrument.Gauge.builder;
 import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
 
 @Configuration
@@ -264,7 +267,7 @@ public class MonitoringConfig {
                 .description("The total number of locked objects until now")
                 .register(registry);
 
-            Gauge.builder("locks.average_acquiretime",
+            builder("locks.average_acquiretime",
                     () -> JMX_INSTANCE.getAverageLockAcquireTime().getWindowValue().optionalDoubleMean().orElse(0d)
                 )
                 .description("The average time in ms to acquire a lock (in " + JMX_INSTANCE.getAverageLockAcquireTime().getTotalDuration() + ")")
