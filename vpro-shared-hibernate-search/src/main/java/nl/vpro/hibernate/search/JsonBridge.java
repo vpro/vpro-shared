@@ -41,7 +41,7 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
             return null;
         }
         try {
-            return Jackson2Mapper.getLenientInstance().readValue(stringValue, type);
+            return Jackson2Mapper.LENIENT.readValue(stringValue, type);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -55,7 +55,7 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
             return null;
         }
         try {
-            String ret = Jackson2Mapper.getInstance().writeValueAsString(object);
+            String ret = Jackson2Mapper.INSTANCE.writeValueAsString(object);
 
             int len = ret.length();
             if (len > MAX_LENGTH) {
@@ -71,7 +71,7 @@ public class JsonBridge implements TwoWayStringBridge, ParameterizedBridge {
                     int size = array.length;
                     while (len > MAX_LENGTH && array.length > 0) {
                         array = Arrays.copyOfRange(array, 0, --size);
-                        ret = Jackson2Mapper.getInstance().writeValueAsString(array);
+                        ret = Jackson2Mapper.INSTANCE.writeValueAsString(array);
                         len = ret.length();
                     }
                     if (size == 0) {
