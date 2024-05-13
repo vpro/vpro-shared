@@ -35,6 +35,7 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Level;
+import nl.vpro.monitoring.binder.JvmMaxDirectMemorySize;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
@@ -148,6 +149,7 @@ public class MonitoringConfig {
         }
         if (properties.isMeterJvmMemory()) {
             new JvmMemoryMetrics().bindTo(registry);
+            new JvmMaxDirectMemorySize().bindTo(registry);
         }
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
