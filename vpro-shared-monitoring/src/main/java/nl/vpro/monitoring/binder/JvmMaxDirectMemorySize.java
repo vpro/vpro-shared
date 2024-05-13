@@ -30,7 +30,7 @@ public class JvmMaxDirectMemorySize implements MeterBinder {
     @Override
     public void bindTo(MeterRegistry registry) {
         AtomicLong size = getMaxDirectMemorySize();
-        Iterable<Tag> tagsWithId = Tags.concat(tags, "id", MAX_DIRECT_MEMORY_SIZE);
+        Iterable<Tag> tagsWithId = Tags.concat(tags, "id", "direct");
 
         Gauge.builder("jvm.buffer.memory.max.bytes", size, AtomicLong::get)
             .tags(tagsWithId)
