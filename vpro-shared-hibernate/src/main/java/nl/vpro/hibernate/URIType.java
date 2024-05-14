@@ -1,8 +1,5 @@
 package nl.vpro.hibernate;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import org.hibernate.metamodel.mapping.*;
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
 import org.hibernate.type.BasicType;
@@ -28,7 +25,7 @@ public class URIType extends AbstractSingleColumnStandardBasicType<URI> implemen
 
     @Override
     public DiscriminatorConverter<URI, CharSequence> getValueConverter() {
-        return new MappedDiscriminatorConverter<URI, CharSequence>(null, null, null) {
+        return new MappedDiscriminatorConverter<URI, CharSequence>(null, null, null, null) {
             @Override
             public URI toDomainValue(CharSequence relationalValue) {
                 return URI.create((String) relationalValue);
