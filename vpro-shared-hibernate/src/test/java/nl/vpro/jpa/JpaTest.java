@@ -1,8 +1,6 @@
 package nl.vpro.jpa;
 
-import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -29,7 +27,9 @@ public class JpaTest {
     }
 
     @Test
+    @Disabled("Use test containers.")
     public void testHsql() {
+
         testManager(setupHsql());
     }
 
@@ -48,7 +48,7 @@ public class JpaTest {
         return  createFactory(dataSource, properties);
     }
     public EntityManagerFactory setupHsql() {
-
+/*
         JDBCDataSource dataSource = new JDBCDataSource();
         dataSource.setUrl("jdbc:hsqldb:mem:testDB");
         dataSource.setUser("sa");
@@ -58,7 +58,8 @@ public class JpaTest {
         properties.put("hibernate.dialect", HSQLDialect.class);
         properties.put("hibernate.connection.driver_class", org.hsqldb.jdbc.JDBCDriver.class);
         properties.put("hibernate.hbm2ddl.auto", "create");
-        return createFactory(dataSource, properties);
+        return createFactory(dataSource, properties);*/
+        return null;
 
 
     }
