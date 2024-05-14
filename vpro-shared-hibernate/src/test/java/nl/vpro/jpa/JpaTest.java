@@ -21,7 +21,7 @@ public class JpaTest {
 
 
     @Test
-    @Disabled("Requires a postgresql instance")
+    @Disabled("TODO: Requires a postgresql instance")
     public void testPostgresql() {
         testManager(setupPostgresql());
     }
