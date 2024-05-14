@@ -4,7 +4,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>4.3.2-SNAPSHOT</version>
+  <version>4.3.2</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -106,7 +106,7 @@
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>REL-4.3-SNAPSHOT</tag>
+    <tag>REL-4.3.2</tag>
   </scm>
 
   <modules>
