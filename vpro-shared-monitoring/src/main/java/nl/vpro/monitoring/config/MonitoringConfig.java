@@ -1,8 +1,6 @@
 package nl.vpro.monitoring.config;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.cache.JCacheMetrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
@@ -39,6 +37,7 @@ import jakarta.annotation.PreDestroy;
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Level;
+import nl.vpro.monitoring.binder.JvmMaxDirectMemorySize;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
@@ -154,6 +153,7 @@ public class MonitoringConfig {
         }
         if (properties.isMeterJvmMemory()) {
             new JvmMemoryMetrics().bindTo(registry);
+            new JvmMaxDirectMemorySize().bindTo(registry);
         }
         if (properties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
