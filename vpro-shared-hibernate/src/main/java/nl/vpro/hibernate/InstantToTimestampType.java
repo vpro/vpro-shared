@@ -64,7 +64,7 @@ public class InstantToTimestampType implements UserType<Instant> {
         if (value == null) {
             st.setNull(index, Types.TIMESTAMP);
         } else {
-            st.setTimestamp(index, Timestamp.from((Instant) value));
+            st.setTimestamp(index, Timestamp.from(value));
         }
     }
 
