@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>nl.vpro.shared</groupId>
@@ -8,7 +10,7 @@
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
-  <description>Description These are various shared utility modules which are used on several places in VPRO artifacts.</description>
+  <description>These are various shared utility modules which are used on several places in VPRO artifacts.</description>
   <url>https://github.com/vpro/vpro-shared</url>
 
 
