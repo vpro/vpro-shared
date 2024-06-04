@@ -68,6 +68,7 @@ public class IntegrationTest {
         properties.put("hibernate.search.mapping.configurer", MyEntityMapper.class.getName());
         properties.put("hibernate.search.backend.analysis.configurer", MyEntityMapper.class.getName());
 
+        // picks up classpath:/META-INF/persistence.xml
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("CRM", properties);
 
         entityManager = emf.createEntityManager();
