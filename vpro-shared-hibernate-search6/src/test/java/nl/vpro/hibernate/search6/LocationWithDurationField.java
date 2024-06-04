@@ -1,12 +1,14 @@
 package nl.vpro.hibernate.search6;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Duration;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.*;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -21,6 +23,7 @@ import nl.vpro.xml.bind.DurationXmlAdapter;
  */
 
 
+@Getter
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "locationType",
     propOrder = {
@@ -57,6 +60,7 @@ public class LocationWithDurationField {
 
 
 
+    @Setter
     @Column(nullable = true)
     @XmlTransient
     protected Long neboId;
@@ -70,28 +74,15 @@ public class LocationWithDurationField {
     }
 
 
-
-    public String getProgramUrl() {
-        return programUrl;
-    }
-
     public LocationWithDurationField setProgramUrl(String url) {
         this.programUrl = url == null ? null : url.trim();
         return this;
     }
 
 
-    public String getSubtitles() {
-        return subtitles;
-    }
-
     public LocationWithDurationField setSubtitles(String subtitles) {
         this.subtitles = subtitles;
         return this;
-    }
-
-    public Duration getOffset() {
-        return offset;
     }
 
     public LocationWithDurationField setOffset(Duration offset) {
@@ -99,17 +90,9 @@ public class LocationWithDurationField {
         return this;
     }
 
-    public Duration getDuration() {
-        return duration;
-    }
-
     public LocationWithDurationField setDuration(Duration duration) {
         this.duration = duration;
         return this;
-    }
-
-    public boolean isCeresUpdate() {
-        return ceresUpdate;
     }
 
     public void setCeresUpdate(Boolean ceresUpdate) {
@@ -124,14 +107,6 @@ public class LocationWithDurationField {
         int result = super.hashCode();
         result = 31 * result + (this.programUrl != null ? this.programUrl.hashCode() : 0);
         return result;
-    }
-
-    public Long getNeboId() {
-        return neboId;
-    }
-
-    public void setNeboId(Long neboId) {
-        this.neboId = neboId;
     }
 
     @Override
