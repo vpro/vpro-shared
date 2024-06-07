@@ -18,8 +18,8 @@ public interface AsyncESClientFactory extends ESClientFactory {
 
     /**
      * Returns a client. The client may be cached by the factory.
+     * @see #clientAsync(String, Consumer)
      */
-
     @Override
     default RestClient client(String logName, Consumer<RestClient> callback) {
         try {
@@ -36,7 +36,9 @@ public interface AsyncESClientFactory extends ESClientFactory {
     }
 
     /**
-     * Returns client, after that checks (e.g. on clustername) are performed asynchronously.
+     * Gets a client, if it was not yet created  checks (e.g. on clustername) are performed asynchronously first.
+     * @param logName A name for the client, used for logging, and as a key for caching
+     * @param callback A callback which is called with the client when it is available
      */
     Future<RestClient> clientAsync(String logName, Consumer<RestClient> callback);
 
