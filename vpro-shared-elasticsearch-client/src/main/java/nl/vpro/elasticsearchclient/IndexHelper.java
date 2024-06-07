@@ -176,6 +176,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Cached by {@link ESClientFactory#client(String, Consumer)}.
+     * @see #clientAsync(Consumer)
+     */
     @Override
     public RestClient client() {
         try {
@@ -205,8 +211,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (indexNameSupplier != null) {
             name += "." + indexNameSupplier.get();
         }
-        if (clientFactory instanceof AsyncESClientFactory) {
-            return ((AsyncESClientFactory) clientFactory).clientAsync(name, callback);
+        if (clientFactory instanceof AsyncESClientFactory asyncESClientFactory) {
+            return asyncESClientFactory.clientAsync(name, callback);
         } else {
             RestClient client = clientFactory.client(name, callback);
             return CompletableFuture.completedFuture(client);

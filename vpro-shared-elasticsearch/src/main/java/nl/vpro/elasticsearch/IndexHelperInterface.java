@@ -43,6 +43,9 @@ public interface IndexHelperInterface<C> {
         return createIndexIfNotExists(CreateIndex.DEFAULT);
     }
 
+    /**
+     * Get an  associated elasticsearch client. This will mostly be the same (cached) instance.
+     */
     C client();
 
 
