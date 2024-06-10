@@ -46,6 +46,7 @@ public class DirectoryWatcher implements AutoCloseable {
         this.consumer = consumer;
         this.filter = filter == null ? (p) -> true : filter;
         this.future = useWatchService();
+
     }
 
     private WatchKey register(Path path, WatchService watcher) throws IOException {
@@ -130,6 +131,9 @@ public class DirectoryWatcher implements AutoCloseable {
 
         if (Files.isSymbolicLink(file)) {
             Path resolve = Files.readSymbolicLink(file);
+            if (! resolve.isAbsolute()) {
+                resolve = file.getParent().resolve(resolve);
+            }
             watchedTargetFiles.put(resolve, file);
             if (!watchedTargetDirectories.contains(resolve.getParent())) {
                 register(resolve.getParent(), watcher);
