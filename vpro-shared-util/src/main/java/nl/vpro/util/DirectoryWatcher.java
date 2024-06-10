@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,8 +24,11 @@ import nl.vpro.jmx.MBeans;
 
 /**
  * A utility to harnas {@link WatchService} to watch a directory for set of files. Supporting symlinks and those kind of things.
- *
+ * <p>
  * Targeted at watching openshift config maps, which can be provided as a list of files, which are all symlinks to the actual files in subdirectories.
+ *
+ * @since 5.2
+ * @author Michiel Meeuwissen
  */
 @Slf4j
 public class DirectoryWatcher implements AutoCloseable {
@@ -44,7 +48,7 @@ public class DirectoryWatcher implements AutoCloseable {
     final Map<Path, Path> watchedTargetFiles = new HashMap<>();
 
     final AtomicInteger counter = new AtomicInteger();
-
+    private Instant last = null;
 
 
     public DirectoryWatcher(@NonNull Path directory, @NonNull Consumer<Path> consumer, @Nullable Predicate<Path> filter) throws IOException {
@@ -74,6 +78,7 @@ public class DirectoryWatcher implements AutoCloseable {
     private Future<?> useWatchService() {
         register(directory, watcher);
 
+        // check initial set of file for existing symlinks to follow the targets of.
         try (Stream<Path> p = Files.list(directory).filter(filter)) {
             p.forEach(file -> checkSymlink(file, StandardWatchEventKinds.ENTRY_CREATE));
         }
@@ -120,6 +125,7 @@ public class DirectoryWatcher implements AutoCloseable {
                         }
                         for (Path p : events) {
                             counter.incrementAndGet();
+                            last = Instant.now();
                             consumer.accept(p);
                         }
 
@@ -190,12 +196,19 @@ public class DirectoryWatcher implements AutoCloseable {
         public int getCount() {
             return counter.get();
         }
+
+        @Override
+        public String lastEvent() {
+            return String.valueOf(last);
+        }
     }
     public interface AdminMXBean {
         int getWatchedTargetFiles();
         int getWatchedTargetDirectories();
 
         int getCount();
+
+        String lastEvent();
 
     }
 
