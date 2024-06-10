@@ -29,7 +29,7 @@ class DirectoryWatcherTest {
     public void test() throws IOException {
         Path f1 = Files.createFile(dir.resolve("test-1.xml"));
         Path tarf5 = Files.createFile(subDir.resolve("test-5-target.xml"));
-        Path symf5 = Files.createSymbolicLink(dir.resolve("test-5.xml"), tarf5);
+        Path symf5 = Files.createSymbolicLink(dir.resolve("test-5.xml"), Path.of("subdir/test-5-target.xml"));// relative!
         Path tarf3 = Files.createFile(subDir.resolve("test-3-target.xml"));
         Path tarf3_2 = Files.createFile(subDir.resolve("test-3-target-2.xml"));
 

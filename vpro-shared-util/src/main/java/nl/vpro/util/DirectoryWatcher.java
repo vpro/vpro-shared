@@ -8,17 +8,23 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import nl.vpro.jmx.MBeans;
 
 
 /**
- * An utility to harnass {@link WatchService} to watch a directory for set of files. Supporting symlinks and those kind of things.
+ * A utility to harnas {@link WatchService} to watch a directory for set of files. Supporting symlinks and those kind of things.
  *
- * Targeted at watching openshift config maps.
+ * Targeted at watching openshift config maps, which can be provided as a list of files, which are all symlinks to the actual files in subdirectories.
  */
 @Slf4j
 public class DirectoryWatcher implements AutoCloseable {
@@ -37,6 +43,8 @@ public class DirectoryWatcher implements AutoCloseable {
     final Set<Path> watchedTargetDirectories = new HashSet<>();
     final Map<Path, Path> watchedTargetFiles = new HashMap<>();
 
+    final AtomicInteger counter = new AtomicInteger();
+
 
 
     public DirectoryWatcher(@NonNull Path directory, @NonNull Consumer<Path> consumer, @Nullable Predicate<Path> filter) throws IOException {
@@ -46,6 +54,15 @@ public class DirectoryWatcher implements AutoCloseable {
         this.consumer = consumer;
         this.filter = filter == null ? (p) -> true : filter;
         this.future = useWatchService();
+
+
+
+
+        try {
+            MBeans.registerBean(new ObjectName("nl.vpro:name=watcher,directory="  + directory), new Admin());
+        } catch (MalformedObjectNameException mfoe) {
+            // ignored, the objectname _is_ not malformed
+        }
 
     }
 
@@ -102,6 +119,7 @@ public class DirectoryWatcher implements AutoCloseable {
                             log.info("Not a path {}", key.watchable());
                         }
                         for (Path p : events) {
+                            counter.incrementAndGet();
                             consumer.accept(p);
                         }
 
@@ -153,6 +171,32 @@ public class DirectoryWatcher implements AutoCloseable {
 
     public Set<Path> getWatchedTargetDirectories() {
         return Collections.unmodifiableSet(watchedTargetDirectories);
+    }
+
+    public class Admin implements AdminMXBean {
+
+
+        @Override
+        public int getWatchedTargetFiles() {
+            return watchedTargetFiles.size();
+        }
+
+        @Override
+        public int getWatchedTargetDirectories() {
+            return watchedTargetDirectories.size();
+        }
+
+        @Override
+        public int getCount() {
+            return counter.get();
+        }
+    }
+    public interface AdminMXBean {
+        int getWatchedTargetFiles();
+        int getWatchedTargetDirectories();
+
+        int getCount();
+
     }
 
 }
