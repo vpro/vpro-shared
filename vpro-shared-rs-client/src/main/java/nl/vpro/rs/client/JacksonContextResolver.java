@@ -17,15 +17,15 @@ public class JacksonContextResolver extends JacksonXmlBindJsonProvider implement
     private final ObjectMapper mapper;
 
     public JacksonContextResolver() {
-        this(Jackson2Mapper.getLenientInstance());
+        this(null);
     }
     public JacksonContextResolver(ObjectMapper mapper) {
-        this.mapper = mapper;
+        this.mapper = mapper == null ? Jackson2Mapper.getLenientInstance() : mapper;
     }
 
     @Override
     public ObjectMapper getContext(Class<?> objectType) {
-        return mapper == null ? Jackson2Mapper.getLenientInstance() : mapper;
+        return mapper;
     }
 }
 
