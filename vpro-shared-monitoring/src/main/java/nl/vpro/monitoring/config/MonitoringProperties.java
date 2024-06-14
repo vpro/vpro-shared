@@ -45,7 +45,7 @@ public class MonitoringProperties {
     private boolean meterJvmThread;
 
 
-    @Value("${monitoring.camel:true}")
+    @Value("${monitoring.camel.enabled:true}")
     private boolean meterCamel;
 
     @Value("${monitoring.hibernate.enabled:true}")
