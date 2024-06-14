@@ -1,7 +1,7 @@
 package nl.vpro.monitoring.config;
 
 import io.micrometer.core.instrument.ImmutableTag;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Arrays;
