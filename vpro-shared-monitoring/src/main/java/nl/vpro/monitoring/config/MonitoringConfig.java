@@ -8,10 +8,18 @@ import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
 import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
 import io.micrometer.core.instrument.binder.system.*;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusConfig;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.File;
+import java.util.*;
+
+import javax.cache.CacheManager;
+import javax.sql.DataSource;
+import jakarta.annotation.PreDestroy;
+
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.HibernateMetrics;
@@ -26,14 +34,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.jmx.export.annotation.ManagedOperation;
-
-import java.io.File;
-import java.util.*;
-
-import javax.cache.CacheManager;
-import javax.sql.DataSource;
-import jakarta.annotation.PreDestroy;
-
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Level;

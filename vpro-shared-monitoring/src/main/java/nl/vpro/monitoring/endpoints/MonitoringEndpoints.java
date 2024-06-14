@@ -1,6 +1,6 @@
 package nl.vpro.monitoring.endpoints;
 
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.util.Collections;
 
