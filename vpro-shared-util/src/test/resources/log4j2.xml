@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <Configuration status="INFO">
   <Appenders>
     <Console name="stdout" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} %4.4p %C{1} %M.%L %m (%t) %n"  charset="UTF-8"/>
+      <PatternLayout pattern="%d{ISO8601} %4.4p %C{1} %M.%L %m %n"  charset="UTF-8"/>
     </Console>
   </Appenders>
   <Loggers>
