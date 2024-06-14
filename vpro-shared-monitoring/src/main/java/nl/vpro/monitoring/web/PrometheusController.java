@@ -1,20 +1,20 @@
 package nl.vpro.monitoring.web;
 
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.meeuw.math.statistics.StatisticalLong;
-import org.meeuw.math.windowed.WindowedStatisticalLong;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.io.OutputStream;
 import java.time.Duration;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.meeuw.math.statistics.StatisticalLong;
+import org.meeuw.math.windowed.WindowedStatisticalLong;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.*;
 
 import nl.vpro.logging.Slf4jHelper;
 
@@ -57,13 +57,13 @@ public class PrometheusController {
         response.setContentType(TextFormat.CONTENT_TYPE_004);
         try (
             WindowedStatisticalLong.RunningDuration measure = duration.measure();
-            Writer writer = response.getWriter()) {
+            OutputStream writer = response.getOutputStream()) {
 
             Duration took = scrape(writer);
             Slf4jHelper.debugOrInfo(log, took.compareTo(Duration.ofSeconds(2)) > 0, "Scraping Prometheus metrics took {}", took);
         }
     }
-    protected Duration scrape(Writer writer) throws IOException {
+    protected Duration scrape(OutputStream writer) throws IOException {
         long start = System.nanoTime();
         registry.scrape(writer);
         writer.flush();
