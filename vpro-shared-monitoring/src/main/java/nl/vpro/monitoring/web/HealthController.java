@@ -1,14 +1,6 @@
 package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.output.NullWriter;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.*;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -21,6 +13,14 @@ import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.io.output.NullOutputStream;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.monitoring.config.MonitoringProperties;
@@ -98,7 +98,7 @@ public class HealthController {
         if (prometheusDown) {
             prometheusDownCount.incrementAndGet();
             try {
-                Duration secondPrometheusDuration = prometheusController.scrape(NullWriter.INSTANCE);
+                Duration secondPrometheusDuration = prometheusController.scrape(NullOutputStream.INSTANCE);
                 prometheusDown = unhealthy.test(secondPrometheusDuration);
                 if (prometheusDown) {
                     log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
