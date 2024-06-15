@@ -55,7 +55,7 @@ jobs:
       - name: Build and ${{ matrix.target }} with Maven
         run: "mvn -ntp -fae -DskipITs=false -DskipTests=${skipTests} -Dinteg.cluster.name=docker-elasticsearch -B -P'deploy,sonatype' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
-          SONATYPE_USERNAME: vpro
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
