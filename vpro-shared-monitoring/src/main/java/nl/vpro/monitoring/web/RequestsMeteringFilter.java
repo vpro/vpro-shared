@@ -1,10 +1,9 @@
 package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.meeuw.functional.Predicates;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,8 @@ import java.util.function.Predicate;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 
+import org.apache.commons.lang3.StringUtils;
+import org.meeuw.functional.Predicates;
 
 import com.google.common.net.MediaType;
 
@@ -46,6 +47,8 @@ import static nl.vpro.monitoring.config.MonitoringConfig.meterRegistry;
 @Slf4j
 public class RequestsMeteringFilter extends HttpFilter {
 
+    @Serial
+    private static final long serialVersionUID = 9121689985264979972L;
 
     public static abstract class Matcher implements Predicate<String> {
 
