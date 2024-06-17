@@ -107,8 +107,8 @@ public class RequestsMeteringFilter extends HttpFilter {
         } finally {
             String contentType = "?";
             {
-                if (request.getContentType() != null) {
-                    MediaType type = MediaType.parse(request.getContentType());
+                if (response.getContentType() != null) {
+                    MediaType type = MediaType.parse(response.getContentType());
                     contentType = type.withoutParameters().toString();
                 } else {
                     if (200 == response.getStatus()) {
