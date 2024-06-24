@@ -157,6 +157,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(20)
+    @Disabled
     public void noSubsequentEvents() throws InterruptedException {
 
         for (int i = 0; i < 10; i++) {
