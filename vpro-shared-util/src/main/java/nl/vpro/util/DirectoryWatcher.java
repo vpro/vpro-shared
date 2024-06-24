@@ -176,14 +176,18 @@ public class DirectoryWatcher implements AutoCloseable {
         Thread.currentThread().setName("Watcher for " + directory);
         while (true) {
             try {
-                WatchKey key = watcher.take();
-                // collect events, so we could report
-                List<WatcherEvent> events = new ArrayList<>();
+                final WatchKey key = watcher.take();
+                // collect events, so we could report them all at once, comparing lastModified
+                final List<WatcherEvent> events = new ArrayList<>();
                 try {
                     if (key.watchable() instanceof Path d) {
-                        for (WatchEvent<?> event : key.pollEvents()) {
+                        for (final WatchEvent<?> event : key.pollEvents()) {
                             if (event.count() > 1) {
                                 log.info("Repeated event {} {}", event.kind(), event.context());
+                                continue;
+                            }
+                            if (event.kind() == null){
+                                log.info("Null kind event {}", event.context());
                                 continue;
                             }
                             if (event.context() instanceof Path eventPath) {
@@ -214,11 +218,11 @@ public class DirectoryWatcher implements AutoCloseable {
                                     }
                                 }
                             } else {
-                                log.info("Not a path {}", event.context());
+                                log.info("Context not a path {}", event.context());
                             }
                         }
                     } else {
-                        log.info("Not a path {}", key.watchable());
+                        log.info("Watchable not a path {}", key.watchable());
                     }
 
 
