@@ -192,7 +192,7 @@ public class DirectoryWatcher implements AutoCloseable {
                                     log.debug("{}", file);
                                     if (filter.test(file)) {
                                         var watcherEvent = new WatcherEvent(file, file, WatcherEventType.of(event.kind()), instant(file, file));
-                                        log.info(event.kind() + " " + event.context());
+                                        log.debug(event.kind() + " " + event.context());
                                         events.add(watcherEvent);
                                         checkSymlink(file, event.kind());
                                         if (event.kind() == ENTRY_DELETE) {
@@ -227,9 +227,8 @@ public class DirectoryWatcher implements AutoCloseable {
                         final Instant time = e.instant;
                         if (time.isAfter(previous)) {
                             handleEvent(e);
-
                         } else {
-                            log.info("Ignoring {} because {} <= {}", e, time, previous);
+                            log.debug("Ignoring {} because {} <= {}", e, time, previous);
                         }
                     }
 
