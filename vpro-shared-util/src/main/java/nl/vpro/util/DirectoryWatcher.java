@@ -311,9 +311,8 @@ public class DirectoryWatcher implements AutoCloseable {
         return Collections.unmodifiableMap(lastModified);
     }
 
+
     public class Admin implements AdminMXBean {
-
-
         @Override
         public int getWatchedTargetFiles() {
             return watchedTargetFiles.size();
