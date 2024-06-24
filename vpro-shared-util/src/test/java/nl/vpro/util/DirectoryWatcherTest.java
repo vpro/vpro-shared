@@ -15,10 +15,12 @@ import org.junit.jupiter.api.*;
 
 import static nl.vpro.logging.Log4j2Helper.debugOrInfo;
 import static org.assertj.core.api.Assertions.assertThat;
+
 @Log4j2
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DirectoryWatcherTest {
+
 
     private final Path dir = Files.createTempDirectory(DirectoryWatcherTest.class.getSimpleName());
     private final Path subDir = Files.createDirectory(dir.resolve("subdir"));
@@ -167,6 +169,19 @@ class DirectoryWatcherTest {
         w.poll();
     }
 
+    private void touch(Path p, Instant now) throws IOException {
+        Files.setLastModifiedTime(p, FileTime.from(now));
+    }
+    private void tickAndTouch(Path p) throws IOException {
+        touch(p, tick());
+    }
+
+    @SneakyThrows
+    private Instant tick() {
+        Thread.sleep(1);
+        return Instant.now();
+
+    }
 
     private void wait(Path... paths) throws InterruptedException {
         int size = paths.length;
@@ -191,7 +206,8 @@ class DirectoryWatcherTest {
         }
 
         for (Path p : paths) {
-            assertThat(events.poll()).isEqualTo(p);
+            log.info("Waiting for " + p);
+            assertThat(events.poll().resolved()).isEqualTo(p);
         }
     }
 

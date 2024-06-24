@@ -24,6 +24,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import nl.vpro.jmx.MBeans;
 
+import static java.nio.file.StandardWatchEventKinds.*;
+
 
 /**
  * A utility to harnas {@link WatchService} to watch a directory for set of files. Supporting symlinks and those kind of things.
@@ -48,6 +50,7 @@ public class DirectoryWatcher implements AutoCloseable {
 
     final Set<Path> watchedTargetDirectories = new HashSet<>();
     final Map<Path, Path> watchedTargetFiles = new HashMap<>();
+    final Map<Path, Instant> lastModified = new HashMap<>();
 
     final AtomicInteger counter = new AtomicInteger();
     private Instant last = null;
@@ -91,7 +94,7 @@ public class DirectoryWatcher implements AutoCloseable {
     }
 
     private WatchKey register(Path path, WatchService watcher) throws IOException {
-        return path.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
+        return path.register(watcher, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
     }
 
 
@@ -102,7 +105,20 @@ public class DirectoryWatcher implements AutoCloseable {
 
         // check initial set of file for existing symlinks to follow the targets of.
         try (Stream<Path> p = Files.list(directory).filter(filter)) {
-            p.forEach(file -> checkSymlink(file, StandardWatchEventKinds.ENTRY_CREATE));
+            p.forEach(file -> {
+                checkSymlink(file, ENTRY_CREATE).ifPresent(resolved -> {
+                    try {
+                        lastModified.put(resolved, Files.getLastModifiedTime(resolved).toInstant());
+                    } catch (IOException e) {
+                        log.warn(e.getMessage(), e);
+                    }
+                });
+                try {
+                    lastModified.put(file, Files.getLastModifiedTime(file).toInstant());
+                } catch (IOException e) {
+                    log.warn(e.getMessage(), e);
+                }
+            });
         }
 
         Callable<Void> callable = () -> {this.watchLoop(); return null;};
@@ -240,8 +256,8 @@ public class DirectoryWatcher implements AutoCloseable {
     }
 
     @SneakyThrows
-    private void checkSymlink(Path file, WatchEvent.Kind<?> kind) {
-        if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+    private Optional<Path> checkSymlink(Path file, WatchEvent.Kind<?> kind) {
+        if (kind == ENTRY_DELETE) {
             if (watchedTargetFiles.containsValue(file)) {
                 if (watchedTargetFiles.entrySet().removeIf(e -> e.getValue().equals(file))) {
                     log.info("Removed source {}", file);
@@ -269,6 +285,9 @@ public class DirectoryWatcher implements AutoCloseable {
                 register(resolve.getParent(), watcher);
                 watchedTargetDirectories.add(resolve.getParent());
             }
+            return Optional.of(resolve);
+        } else {
+            return Optional.empty();
         }
     }
 
