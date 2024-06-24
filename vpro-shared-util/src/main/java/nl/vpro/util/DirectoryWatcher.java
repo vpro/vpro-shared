@@ -183,7 +183,7 @@ public class DirectoryWatcher implements AutoCloseable {
                     if (key.watchable() instanceof Path d) {
                         for (WatchEvent<?> event : key.pollEvents()) {
                             if (event.count() > 1) {
-                                log.info("Repeated event {}", event);
+                                log.info("Repeated event {} {}", event.kind(), event.context());
                                 continue;
                             }
                             if (event.context() instanceof Path eventPath) {
