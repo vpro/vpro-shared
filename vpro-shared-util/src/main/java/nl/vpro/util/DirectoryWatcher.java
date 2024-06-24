@@ -132,7 +132,11 @@ public class DirectoryWatcher implements AutoCloseable {
      * @param type The type of event
      * @param instant Associated time.
      */
-    public record WatcherEvent(@NonNull Path file, @NonNull Path resolved, @With @NonNull WatcherEventType type, @NonNull Instant instant) {
+    public record WatcherEvent(
+        @NonNull Path file,
+        @NonNull Path resolved,
+        @With @NonNull WatcherEventType type,
+        @NonNull Instant instant) {
 
 
     }
@@ -195,7 +199,8 @@ public class DirectoryWatcher implements AutoCloseable {
                                 if (d.equals(directory)) {
                                     log.debug("{}", file);
                                     if (filter.test(file)) {
-                                        var watcherEvent = new WatcherEvent(file, file, WatcherEventType.of(event.kind()), instant(file, file));
+                                        var watcherEvent = new WatcherEvent(
+                                            file, file, WatcherEventType.of(event.kind()), instant(file, file));
                                         log.debug(event.kind() + " " + event.context());
                                         events.add(watcherEvent);
                                         checkSymlink(file, event.kind());
