@@ -1,14 +1,18 @@
 package nl.vpro.configuration.spring.converters;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Set;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
-import java.util.Set;
-
+/**
+ * Registers all converters in {@link nl.vpro.configuration.spring.converters}.
+ */
 @Configuration(proxyBeanMethods = true)
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
