@@ -85,7 +85,7 @@ public class DirectoryWatcher implements AutoCloseable {
 
         try {
             MBeans.registerBean(
-                new ObjectName("nl.vpro:name=watcher,directory="  + directory),
+                new ObjectName("nl.vpro.util.watcher:directory="  + directory),
                 new Admin()
             );
         } catch (MalformedObjectNameException ignored) {
