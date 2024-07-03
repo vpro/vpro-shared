@@ -15,6 +15,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  * @since 2.1
  * @deprecated
  */
+@Deprecated
 public class SecondsToDateAdapter extends XmlAdapter<String, Date> {
 
     private static final Pattern PATTERN = Pattern.compile("(\\d+)(?:\\.(\\d{1,3})(?:\\d*))?");
