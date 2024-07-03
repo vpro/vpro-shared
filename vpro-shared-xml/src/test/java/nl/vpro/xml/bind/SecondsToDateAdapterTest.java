@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Roelof Jan Koekoek
  * @since 2.1
  */
-@SuppressWarnings("deprecation")
+@Deprecated
 public class SecondsToDateAdapterTest {
 
     @Test
