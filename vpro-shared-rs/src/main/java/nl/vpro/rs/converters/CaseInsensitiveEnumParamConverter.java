@@ -16,7 +16,7 @@ import jakarta.ws.rs.ext.ParamConverter;
 public class CaseInsensitiveEnumParamConverter<T extends Enum<T>> implements ParamConverter<T> {
 
 
-    public static <S extends Enum<S>> CaseInsensitiveEnumParamConverter getInstant(Class<S> enumClass) {
+    public static <S extends Enum<S>> CaseInsensitiveEnumParamConverter<S> getInstant(Class<S> enumClass) {
         return new CaseInsensitiveEnumParamConverter<>(enumClass);
     }
 
