@@ -14,7 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * A displayable has a {@link #getDisplayName()} method, to display the object as a single string (in {@link Locales#getDefault()}) to the user.
+ * A displayable has a {@link #getDisplayName()} method, to display the object as a single string (in{@link Locales#getDefault() the default locale}) to the user.
  * <p>
  * This interface contains only default methods, which call each other.
  * Implementations must override at least one, either {@link #getDisplayName()} if no localization is necessary or {@link #getDisplayName(Locale)} if it is.
@@ -52,7 +52,6 @@ public interface Displayable {
         return LocalizedString.of(getDisplayName(), Locales.getDefault());
     }
 
-
     /**
      * Returns the plural of the display name, if implemented. Otherwise {@link Optional#empty()}
      * @since 5.11
@@ -61,7 +60,6 @@ public interface Displayable {
     default Optional<LocalizedString> getPluralDisplayName(Locale locale) {
         return Optional.empty();
     }
-
 
     /**
      * Returns {@link #getDisplayName(Locale)} for the default locale {@link Locales#getDefault()}
@@ -79,6 +77,7 @@ public interface Displayable {
     default Optional<URI> getIcon() {
         return Optional.empty();
     }
+
     /**
      * An url for an icon associated with this displayable object.
      * <p>
@@ -89,8 +88,10 @@ public interface Displayable {
     }
 
     /**
-     * Sometimes displayable values are deprecated or experimental. Their value is possible but they should not be
-     * displayed in situations where the value is not yet present. Then this can return false.
+     * Sometimes displayable values are deprecated or experimental.
+     * <p>
+     * Their value is possible, but they should not be displayed in situations where the value is not yet
+     * present. For these instances this can return {@code false}.
      */
     @JsonIgnore
     default boolean display() {
