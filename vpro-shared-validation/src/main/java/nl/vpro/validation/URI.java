@@ -26,10 +26,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Repeatable(URI.List.class)
 public @interface URI {
+    /**
+     * @return the error message template
+     */
     String message() default "{nl.vpro.constraints.URI}";
 
     /**
-     * If true the URI must have a scheme.
+     * @return {@code true} the URI must have a scheme.
      */
     boolean mustHaveScheme() default false;
 
@@ -46,7 +49,7 @@ public @interface URI {
     String[] hosts() default {};
 
     /**
-     * If set, pattern mattching too.
+     * If set, pattern matching too.
      */
     String[] patterns() default {};
 
@@ -55,8 +58,14 @@ public @interface URI {
      */
     String[] schemes() default {};
 
+    /**
+     * @return the groups the constraint belongs to
+     */
     Class<?>[] groups() default {};
 
+    /**
+     * @return the payload associated to the constraint
+     */
     Class<? extends Payload>[] payload() default {};
 
     /**
@@ -64,18 +73,19 @@ public @interface URI {
      */
     boolean lenient() default false;
 
+
     boolean allowEmptyString() default false;
 
 
-	/**
-	 * Defines several {@code @URI} constraints on the same element.
-	 *
-	 * @see URI
-	 */
-	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
-	@Retention(RUNTIME)
-	@Documented
+    /**
+     * Defines several {@code @URI} constraints on the same element.
+     *
+     * @see URI
+     */
+    @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
+    @Retention(RUNTIME)
+    @Documented
     @interface List {
-		URI[] value();
-	}
+        URI[] value();
+    }
 }
