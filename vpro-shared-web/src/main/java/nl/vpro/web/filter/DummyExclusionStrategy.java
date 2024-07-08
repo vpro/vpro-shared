@@ -10,10 +10,12 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class DummyExclusionStrategy implements ExclusionStrategy {
 
+    @Override
     public boolean exclude(HttpServletRequest request) {
         return false;
     }
 
+    @Override
     public void setServletContext(ServletContext servletContext) {
     }
 

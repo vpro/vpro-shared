@@ -31,12 +31,12 @@ public class WrappedServletOutputStream extends ServletOutputStream {
     }
 
     @Override
-    public void write(@NonNull byte[] b) throws IOException {
+    public void write(byte @NonNull [] b) throws IOException {
         stream.write(b);
     }
 
     @Override
-    public void write(@NonNull byte[] b, int off, int len) throws IOException {
+    public void write(byte @NonNull [] b, int off, int len) throws IOException {
         stream.write(b, off, len);
     }
 

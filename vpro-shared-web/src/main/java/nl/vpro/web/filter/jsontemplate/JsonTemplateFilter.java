@@ -33,7 +33,7 @@ public class JsonTemplateFilter implements Filter {
     @Override
     public void init(FilterConfig config) {
         String template = config.getInitParameter(PROPERTY);
-        if(template != null && !template.equals("")) {
+        if(template != null && !template.isEmpty()) {
             this.property = template;
         } else {
             this.property = PROPERTY;
@@ -68,9 +68,6 @@ public class JsonTemplateFilter implements Filter {
         }
     }
 
-    @Override
-    public void destroy() {
-    }
 
 
     private boolean isJsonpRequest(ServletRequest request) {

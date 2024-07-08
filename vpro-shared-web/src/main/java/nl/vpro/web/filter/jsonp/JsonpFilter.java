@@ -30,7 +30,7 @@ public class JsonpFilter implements Filter {
     @Override
     public void init(FilterConfig config) {
         String callback = config.getInitParameter("callback");
-        if(callback != null && !callback.equals("")) {
+        if(callback != null && !callback.isEmpty()) {
             this.callback = callback;
         } else {
             this.callback = CALLBACK;
@@ -42,7 +42,7 @@ public class JsonpFilter implements Filter {
         if(isJsonpRequest(request)) {
             String callback = request.getParameter(this.callback);
 
-            if(callback.equals("")) {
+            if(callback.isEmpty()) {
                 callback = CALLBACK;
             }
 
@@ -61,10 +61,6 @@ public class JsonpFilter implements Filter {
         } else {
             chain.doFilter(request, response);
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
     private boolean isJsonpRequest(ServletRequest request) {

@@ -4,14 +4,15 @@
  */
 package nl.vpro.web.filter.jsontemplate;
 
-import nl.vpro.web.support.WrappedServletOutputStream;
+import java.io.*;
+import java.nio.charset.Charset;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
-import java.io.*;
-import java.nio.charset.Charset;
+
+import nl.vpro.web.support.WrappedServletOutputStream;
 
 
 /**
@@ -103,9 +104,7 @@ class ResponseWrapper extends HttpServletResponseWrapper {
                 if((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F') || (ch >= '\u2000' && ch <= '\u20FF')) {
                     String hex = Integer.toHexString(ch);
                     sb.append("\\u");
-                    for(int k = 0; k < 4 - hex.length(); k++) {
-                        sb.append('0');
-                    }
+                    sb.append("0".repeat(4 - hex.length()));
                     sb.append(hex.toUpperCase());
                 } else {
                     sb.append(ch);

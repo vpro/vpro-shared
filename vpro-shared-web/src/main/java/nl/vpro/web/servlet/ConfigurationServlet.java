@@ -1,9 +1,5 @@
 package nl.vpro.web.servlet;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.*;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +7,9 @@ import java.util.*;
 import java.util.function.Function;
 
 import javax.naming.*;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -44,6 +43,8 @@ import com.fasterxml.jackson.core.*;
 public class ConfigurationServlet extends HttpServlet {
 
     private static final String ATTRIBUTE_NAME = ConfigurationServlet.class.getName() + ".configuration";
+    @Serial
+    private static final long serialVersionUID = -7383715931441589356L;
 
 
     protected enum Environment {
@@ -68,7 +69,7 @@ public class ConfigurationServlet extends HttpServlet {
     public void init() {
         ServletConfig config = getServletConfig();
         String name = config.getInitParameter("name");
-        if(name == null || name.length() == 0) {
+        if(name == null || name.isEmpty()) {
             throw new IllegalArgumentException(String.format("Must provide a valid configuration name, got: %s", name));
         }
 
@@ -260,6 +261,9 @@ public class ConfigurationServlet extends HttpServlet {
         final Map<String, String> keys = new LinkedHashMap<>();
         if(is != null) {
             Properties props = new Properties() {
+                @Serial
+                private static final long serialVersionUID = 7878865540057187698L;
+
                 @Override
                 public synchronized Object put(Object key, Object value) {
                     keys.put((String)key, (String)value);

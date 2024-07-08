@@ -25,12 +25,12 @@ public class ResponseHeaderFilter implements Filter {
 
     FilterConfig filterConfig;
 
-    @SuppressWarnings("unchecked")
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse)res;
         // set the provided HTTP response parameters
-        for(Enumeration e = filterConfig.getInitParameterNames(); e.hasMoreElements(); ) {
-            String headerName = (String)e.nextElement();
+        for(Enumeration<String> e = filterConfig.getInitParameterNames(); e.hasMoreElements(); ) {
+            String headerName = e.nextElement();
             String headerValue = filterConfig.getInitParameter(headerName);
             if(log.isDebugEnabled()) {
                 log.debug(String.format("setting header %s, value=%s", headerName, headerValue));
@@ -50,11 +50,11 @@ public class ResponseHeaderFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    @Override
     public void init(FilterConfig filterConfig) {
         log.info("starting");
         this.filterConfig = filterConfig;
     }
 
-    public void destroy() {
-    }
+
 }
