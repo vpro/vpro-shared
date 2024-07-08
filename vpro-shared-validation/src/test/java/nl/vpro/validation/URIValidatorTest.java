@@ -119,6 +119,7 @@ public class URIValidatorTest {
     @CsvSource(textBlock = """
         https://radioimages.npox.nl//carl_johan_1200x675[1276847].jpg, false, true
         https://radioimages.npox.nl/carl_johan_1200x675[1276847].jpg, false, true
+        https://radioimages.npox.nl/carl_johan_1200x675%5B1276847%5D.jpg, true, true
         """
     )
     public void validInvalid(String uri, boolean valid, boolean lenientlyValid) {
