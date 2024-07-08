@@ -122,16 +122,14 @@ public class URIValidatorTest {
         https://radioimages.npox.nl/carl_johan_1200x675%5B1276847%5D.jpg, true, true
         """
     )
+    // 'Ik had ook nog een andere vraag. MMI heeft een POMS error onderschept en zij trekken daar de conclusie uit dat POMS de URL niet accepteert vanwege de backets [ ] in de file name. Klopt deze aanname?'
     public void validInvalid(String uri, boolean valid, boolean lenientlyValid) {
-
         A astrict = new A(uri);
         assertThat(validator.validate(astrict)).hasSize(valid ? 0 : 1);
 
 
         Lenient alenient = new Lenient(uri);
         assertThat(validator.validate(alenient)).hasSize(lenientlyValid ? 0 : 1);
-
-
     }
 
 
