@@ -117,12 +117,31 @@ public class URIValidatorTest {
 
     @ParameterizedTest
     @CsvSource(textBlock = """
+        https://radioimages.npox.nl//carl_johan_1200x675[1276847].jpg, false, true
+        https://radioimages.npox.nl/carl_johan_1200x675[1276847].jpg, false, true
+        """
+    )
+    public void validInvalid(String uri, boolean valid, boolean lenientlyValid) {
+
+        A astrict = new A(uri);
+        assertThat(validator.validate(astrict)).hasSize(valid ? 0 : 1);
+
+
+        Lenient alenient = new Lenient(uri);
+        assertThat(validator.validate(alenient)).hasSize(lenientlyValid ? 0 : 1);
+
+
+    }
+
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
         http://data.beeldengeluid.nl/gtaa/241892, true
         https://data.beeldengeluid.nl/gtaa/241892, false
         http://dataa.beeldengeluid.nl/gtaa/241892, false
         http://data.beeldengeluid.nl/gtab/241892, false
         http://data.beeldengeluid.nl/gtaa/aaaa, false
-         //data.beeldengeluid.nl/gtaa/1234, false
+        //data.beeldengeluid.nl/gtaa/1234, false
         """
     )
     public void gtaa(String uri, boolean valid) throws URISyntaxException, NoSuchFieldException, MalformedURLException {
@@ -141,8 +160,6 @@ public class URIValidatorTest {
             assertThat(valid).isFalse();
         }
         assertThat(uriValidator.validateURI(java.net.URI.create(uri))).isEqualTo(valid);
-
-
     }
 
 }
