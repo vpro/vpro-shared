@@ -45,7 +45,7 @@ public class MBeans {
     }
 
 
-    public static Future<String>  cancel(final String key){
+    public static Future<String> cancel(final String key){
         LockValue future = locks.get(key);
         if (future == null) {
             return Futures.immediateFuture("Not running");
