@@ -17,15 +17,15 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.1.10</spring.version>
+    <spring.version>6.1.11</spring.version>
     <spring-security.version>6.3.1</spring-security.version>
-    <jackson2.version>2.17.1</jackson2.version>
+    <jackson2.version>2.17.2</jackson2.version>
 
     <junit.version>5.10.2</junit.version>
     <mockito.version>5.12.0</mockito.version>
-    <assertj.version>3.26.0</assertj.version>
+    <assertj.version>3.26.3</assertj.version>
     <resteasy.version>6.2.7.Final</resteasy.version>
-    <bytebuddy.version>1.14.17</bytebuddy.version>
+    <bytebuddy.version>1.14.18</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
     <guava.version>33.2.1-jre</guava.version>
@@ -53,7 +53,7 @@
 
     <swagger.version>2.2.22</swagger.version>
 
-    <lombok.version>1.18.32</lombok.version>
+    <lombok.version>1.18.34</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
 
@@ -63,10 +63,10 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.13.1</micrometer.version>
-    <flyway.version>10.15.0</flyway.version>
+    <micrometer.version>1.13.2</micrometer.version>
+    <flyway.version>10.17.0</flyway.version>
 
-    <testcontainers.version>1.19.8</testcontainers.version>
+    <testcontainers.version>1.20.1</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -539,7 +539,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.14.0</version>
+        <version>3.15.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -710,7 +710,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.17.2</version>
+        <version>1.18.1</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -786,7 +786,7 @@
       <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
-        <version>3.6.0</version>
+        <version>3.9.1</version>
         <scope>test</scope>
       </dependency>
 
@@ -897,7 +897,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.44.0</version>
+      <version>3.46.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
