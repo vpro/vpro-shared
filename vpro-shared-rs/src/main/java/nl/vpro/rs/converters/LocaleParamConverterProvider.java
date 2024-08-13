@@ -14,6 +14,7 @@ import jakarta.ws.rs.ext.Provider;
  */
 @Provider
 public class LocaleParamConverterProvider implements ParamConverterProvider {
+    @SuppressWarnings("unchecked")
     @Override
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (Locale.class.isAssignableFrom(rawType)) {
@@ -21,6 +22,5 @@ public class LocaleParamConverterProvider implements ParamConverterProvider {
         }
 
         return null;
-
     }
 }

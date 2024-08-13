@@ -20,6 +20,7 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 @Slf4j
 public class DateParamConverterProvider implements ParamConverterProvider {
+    @SuppressWarnings("unchecked")
     @Override
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (annotations != null) {

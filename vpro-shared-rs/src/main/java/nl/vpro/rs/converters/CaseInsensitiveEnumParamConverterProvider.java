@@ -14,7 +14,7 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class CaseInsensitiveEnumParamConverterProvider implements ParamConverterProvider {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (Enum.class.isAssignableFrom(rawType)) {

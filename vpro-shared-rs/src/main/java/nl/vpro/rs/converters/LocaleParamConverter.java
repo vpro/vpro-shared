@@ -17,7 +17,7 @@ public class LocaleParamConverter implements ParamConverter<Locale> {
 
     @Override
     public Locale fromString(String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         String[] split = value.split("[_-]", 3);
@@ -28,8 +28,6 @@ public class LocaleParamConverter implements ParamConverter<Locale> {
         } else {
             return new Locale(split[0], split[1], split[2]);
         }
-
-
     }
 
     @Override

@@ -18,7 +18,7 @@ public class DateParamConverter implements ParamConverter<Date> {
 
     @Override
     public Date fromString(String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         return DatatypeConverter.parseDateTime(value).getTime();

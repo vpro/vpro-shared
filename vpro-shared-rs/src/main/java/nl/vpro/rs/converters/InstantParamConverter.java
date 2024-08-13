@@ -24,7 +24,7 @@ public class InstantParamConverter implements ParamConverter<Instant> {
 
     @Override
     public Instant fromString(String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         // zo kunnen we het gewoon op de URL copy/pasten. + -> " " -> +....

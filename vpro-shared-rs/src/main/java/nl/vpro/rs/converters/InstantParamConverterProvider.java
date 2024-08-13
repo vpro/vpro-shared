@@ -14,6 +14,7 @@ import jakarta.ws.rs.ext.Provider;
  */
 @Provider
 public class InstantParamConverterProvider implements ParamConverterProvider {
+    @SuppressWarnings("unchecked")
     @Override
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
         if (Instant.class.isAssignableFrom(rawType)) {

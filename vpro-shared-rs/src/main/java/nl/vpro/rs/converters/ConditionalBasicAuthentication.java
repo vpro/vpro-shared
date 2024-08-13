@@ -35,8 +35,6 @@ public class ConditionalBasicAuthentication  implements ClientRequestFilter {
     }
 
     private static String createBasicAuthenticationHeader(String username, String password) {
-        StringBuilder buf = new StringBuilder(username);
-        buf.append(':').append(password);
-        return "Basic " + Base64.getEncoder().encodeToString(buf.toString().getBytes(StandardCharsets.UTF_8));
+        return "Basic " + Base64.getEncoder().encodeToString((username + ':' + password).getBytes(StandardCharsets.UTF_8));
     }
 }

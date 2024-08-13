@@ -15,12 +15,10 @@ public class LocalDateParamConverter implements ParamConverter<LocalDate> {
 
     @Override
     public LocalDate fromString(String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         return LocalDate.parse(value);
-
-
     }
 
     @Override

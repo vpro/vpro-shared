@@ -29,9 +29,10 @@ public class CaseInsensitiveEnumParamConverter<T extends Enum<T>> implements Par
 
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public T fromString(String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         try {
