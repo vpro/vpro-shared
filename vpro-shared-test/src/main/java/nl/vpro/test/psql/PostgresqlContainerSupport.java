@@ -1,14 +1,15 @@
 package nl.vpro.test.psql;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.sql.DataSource;
+import jakarta.inject.Inject;
+
 import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import javax.sql.DataSource;
-import jakarta.inject.Inject;
 
 /**
  * Will set up a postgresql container bean for using spring, which can be injected in (spring based) tests like so:
@@ -54,13 +55,16 @@ public class PostgresqlContainerSupport {
         source.setUser(postgresDBContainer.getUsername());
         log.info("{} : {} ({})", postgresDBContainer.getUsername(), postgresDBContainer.getPassword(), postgresDBContainer.getJdbcUrl());
 
-
-        Flyway flyway = Flyway.configure()
-            .table("schema_version")
-            .dataSource(source)
-            .validateMigrationNaming(true)
-            .load();
-        flyway.migrate();
+        try {
+            Flyway flyway = Flyway.configure()
+                .table("schema_version")
+                .dataSource(source)
+                .validateMigrationNaming(true)
+                .load();
+            flyway.migrate();
+        } catch (NoClassDefFoundError t) {
+            log.info(t.getMessage());
+        }
         return source;
 
     }
