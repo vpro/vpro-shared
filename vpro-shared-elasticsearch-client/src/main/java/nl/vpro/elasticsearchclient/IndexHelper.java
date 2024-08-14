@@ -282,7 +282,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         request.set("mappings", mappingJson);
         HttpEntity entity = entity(request);
 
-        log.info("Creating index {} with mapping {}: {}", indexName, mapping, request.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("Creating index {} with mapping {}: {}", indexName, mapping, request.toString());
+        } else {
+            log.info("Creating index {}: ", indexName, request.toString());
+        }
         Request req = new Request(PUT, "/" + indexName);
         req.setEntity(entity);
         ObjectNode response = read(client().performRequest(req));
