@@ -1,6 +1,5 @@
 package nl.vpro.elasticsearchclient;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -79,10 +79,18 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
     }
 
     @Override
+    public void setHosts(HttpHost... hosts) {
+        this.hosts = hosts;
+        invalidate();
+    }
+
+    @Override
     public String invalidate() {
         String keys = clients.keySet().toString();
         clients.clear();
         shutdown();
+        clientBuilder = null;
+        client = null;
         return "Cleared " + keys;
     }
 

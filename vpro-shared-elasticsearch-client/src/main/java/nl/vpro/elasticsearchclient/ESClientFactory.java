@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 
 /**
@@ -14,6 +15,10 @@ import org.elasticsearch.client.RestClient;
 @FunctionalInterface
 public interface ESClientFactory extends AutoCloseable, Supplier<RestClient> {
 
+
+    default void setHosts(HttpHost... hosts) {
+
+    }
     /**
      * Returns a client. The client may be cached by the factory.
      */
