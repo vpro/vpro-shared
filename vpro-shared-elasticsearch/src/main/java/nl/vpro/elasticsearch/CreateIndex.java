@@ -50,6 +50,7 @@ public class CreateIndex {
         .createAliases(false)
         .useNumberPostfix(false)
         .numberOfReplicas(0)
+        .forReindex(false)
         .shards(1)
         .build();
 
