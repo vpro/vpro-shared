@@ -39,6 +39,7 @@ import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.*;
 import nl.vpro.util.*;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToObjectNode;
@@ -1569,35 +1570,40 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         }
     }
 
-    public void waitForHealth() throws InterruptedException {
+    public void waitForHealth()  {
         waitForHealth(client(), log);
     }
 
-    public static void waitForHealth(RestClient client, SimpleLogger log) throws InterruptedException {
+    public static void waitForHealth(RestClient client, SimpleLogger log) {
         while (true) {
             try {
-                Request request = new Request(GET, "/_cat/health");
+                Request request = new Request(GET, "/_cluster/health");
                 request.setOptions(request.getOptions()
                     .toBuilder()
+                    .addParameter("wait_for_status", "green")
+                    .addParameter("timeout", "50s")
                     .addHeader("accept", "application/json"));
 
                 Response response = client.performRequest(request);
-                ArrayNode health = Jackson2Mapper.getLenientInstance()
-                    .readerFor(ArrayNode.class)
+                JsonNode clusterHealth = Jackson2Mapper.getLenientInstance()
+                    .readerFor(JsonNode.class)
                     .readValue(response.getEntity().getContent());
 
-                String status = health.get(0).get("status").textValue();
+                String status = clusterHealth.get("status").textValue();
                 log.info("status {}", status);
                 boolean serviceIsUp = "green".equals(status) || "yellow".equals(status);
                 if (serviceIsUp) {
                     break;
+                } else {
+                    log.warn("Not green? Trying again.");
                 }
+                SECONDS.sleep(2);
             } catch (RuntimeException ee) {
                 throw ee;
             } catch (Exception e){
                 log.info(e.getMessage());
             }
-            TimeUnit.SECONDS.sleep(2);
+
         }
     }
 
