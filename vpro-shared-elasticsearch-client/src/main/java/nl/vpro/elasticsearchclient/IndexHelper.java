@@ -457,14 +457,22 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     /**
      * Issue a 'refresh' command, so we can be sure that index operations are handled.
-     * Must used in test cases.
+     * Must be used in test cases.
      */
     public boolean refresh() {
 
         try {
-            Response response = client().performRequest(new Request(GET, "/_refresh"));
+
+            var refresh = new Request(POST, "/_all/_refresh");
+            Response response = client().performRequest(refresh);
             JsonNode read = read(response);
-            return read != null;
+
+            if (read == null) {
+                return false;
+            }
+            log.info("refresh response {}", read);
+
+            return read.get("failed").intValue() == 0;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return false;
