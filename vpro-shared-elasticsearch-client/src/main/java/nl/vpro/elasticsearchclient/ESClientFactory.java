@@ -17,7 +17,7 @@ public interface ESClientFactory extends AutoCloseable, Supplier<RestClient> {
 
 
     default void setHosts(HttpHost... hosts) {
-
+        throw new UnsupportedOperationException();
     }
     /**
      * Returns a client. The client may be cached by the factory.

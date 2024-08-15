@@ -35,7 +35,7 @@ public class ElasticSearchIndex {
     public static final BiConsumer<Distribution, ObjectNode> DEFAULT_MAPPER = new BiConsumer<Distribution, ObjectNode>() {
         @Override
         public void accept(Distribution distribution, ObjectNode jsonNode) {
-            ObjectNode properties =  jsonNode.with(PROPERTIES);
+            ObjectNode properties =  jsonNode.withObject(PROPERTIES);
             List<Consumer<ObjectNode>> runnable = new ArrayList<>();
             properties.fieldNames().forEachRemaining(f -> {
                 String[] split = f.split("\\|", 2);
