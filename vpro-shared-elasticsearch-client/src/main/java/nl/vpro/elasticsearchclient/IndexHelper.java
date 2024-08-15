@@ -472,7 +472,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             log.info("refresh response {}", read);
 
-            return read.get("failed").intValue() == 0;
+            return read.get("_shards").get("failed").intValue() == 0;
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return false;
