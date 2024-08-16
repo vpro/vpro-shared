@@ -81,7 +81,7 @@ public class MonitoringProperties {
     @Value("${monitoring.health.permitAll:true}")
     private boolean healthPermitAll;
 
-    @Value("${data.dir}")
+    @Value("${data.dir:/data}")
     String dataDir;
 
     @Value("${monitoring.unhealthyThreshold:10s}")

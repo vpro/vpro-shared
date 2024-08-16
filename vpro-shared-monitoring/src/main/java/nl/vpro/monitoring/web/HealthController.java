@@ -1,5 +1,6 @@
 package nl.vpro.monitoring.web;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -109,27 +110,31 @@ public class HealthController {
                 log.warn(ioa.getMessage());
             }
             if (prometheusDown) {
-                synchronized (HealthController.class) {
-                    if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(minThreadDumpInterval))) {
-                        final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
-                        new Thread(null, () -> {
-                            log.info("Dumping threads to {} for later analysis", threadFile);
-                            StringBuilder builder = new StringBuilder();
+                if (StringUtils.isBlank(monitoringProperties.getDataDir())) {
+                    log.warn("No data dir, cant dump threads");
+                } else {
+                    synchronized (HealthController.class) {
+                        if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(minThreadDumpInterval))) {
+                            final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
+                            new Thread(null, () -> {
+                                log.info("Dumping threads to {} for later analysis", threadFile);
+                                StringBuilder builder = new StringBuilder();
 
-                            for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
-                                builder.append(threadInfo.toString());
-                                builder.append('\n');
-                            }
-                            try {
-                                Files.writeString(threadFile, builder.toString());
-                            } catch (IOException e) {
-                                log.warn(e.getMessage(), e);
-                            }
+                                for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
+                                    builder.append(threadInfo.toString());
+                                    builder.append('\n');
+                                }
+                                try {
+                                    Files.writeString(threadFile, builder.toString());
+                                } catch (IOException e) {
+                                    log.warn(e.getMessage(), e);
+                                }
 
-                        }, "Dumping threads").start();
-                        threadsDumped = Instant.now();
-                    } else {
-                        log.info("Skipping thread dump, because it was done recently");
+                            }, "Dumping threads").start();
+                            threadsDumped = Instant.now();
+                        } else {
+                            log.info("Skipping thread dump, because it was done recently");
+                        }
                     }
                 }
             }
