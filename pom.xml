@@ -17,15 +17,15 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.1.11</spring.version>
+    <spring.version>6.1.12</spring.version>
     <spring-security.version>6.3.1</spring-security.version>
     <jackson2.version>2.17.2</jackson2.version>
 
-    <junit.version>5.10.3</junit.version>
+    <junit.version>5.11.0</junit.version>
     <mockito.version>5.12.0</mockito.version>
     <assertj.version>3.26.3</assertj.version>
     <resteasy.version>6.2.7.Final</resteasy.version>
-    <bytebuddy.version>1.14.18</bytebuddy.version>
+    <bytebuddy.version>1.14.19</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
     <guava.version>33.2.1-jre</guava.version>
@@ -49,7 +49,7 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.6.0</camel.version>
+    <camel.version>4.7.0</camel.version>
 
     <swagger.version>2.2.22</swagger.version>
 
@@ -539,7 +539,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.15.0</version>
+        <version>3.16.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
