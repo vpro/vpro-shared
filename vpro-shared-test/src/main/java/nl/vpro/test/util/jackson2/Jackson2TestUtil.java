@@ -6,17 +6,18 @@ package nl.vpro.test.util.jackson2;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.api.AbstractObjectAssert;
-import org.assertj.core.api.Fail;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.Fail;
+import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.*;
@@ -55,7 +56,8 @@ public class Jackson2TestUtil {
         }
     }
 
-    public static CharSequence prettify(CharSequence test) {
+    @PolyNull
+    public static String prettify(@PolyNull CharSequence test) {
         if (test == null) {
             return null;
         }
@@ -67,6 +69,7 @@ public class Jackson2TestUtil {
             throw new RuntimeException(e);
         }
     }
+
 
     public static void assertJsonEquals(CharSequence expected, CharSequence actual) {
         assertJsonEquals("", expected, actual);
