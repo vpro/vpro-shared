@@ -28,7 +28,7 @@
     <bytebuddy.version>1.14.19</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
-    <guava.version>33.2.1-jre</guava.version>
+    <guava.version>33.3.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.0</xmlunit.version>
@@ -38,8 +38,8 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>6.4.7.Final</hibernate.version>
-    <hibernate.search.version>7.1.1.Final</hibernate.search.version>
+    <hibernate.version>6.6.0.Final</hibernate.version>
+    <hibernate.search.version>7.2.0.Final</hibernate.search.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.0.0</servlet.api.version>
@@ -801,6 +801,11 @@
         <artifactId>postgresql</artifactId>
         <version>${testcontainers.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.3</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
