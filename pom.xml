@@ -25,6 +25,13 @@
     <mockito.version>5.12.0</mockito.version>
     <assertj.version>3.26.3</assertj.version>
     <resteasy.version>7.0.0.Alpha3</resteasy.version>
+
+    <!--
+    seems to be in use by both resteasy and hibernate-search
+    version must be compatible with both.
+    -->
+    <jboss-logging.version>3.6.0.Final</jboss-logging.version>
+
     <bytebuddy.version>1.14.19</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
@@ -517,7 +524,7 @@
       <dependency>
         <groupId>org.jboss.logging</groupId>
         <artifactId>jboss-logging</artifactId>
-        <version>3.6.0.Final</version>
+        <version>${jboss-logging.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
