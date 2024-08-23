@@ -261,6 +261,13 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     /**
+     * @since 5.3
+     */
+    default SimpleLogger prefixedWith(String prefix) {
+        return withMessageConverter(c -> prefix + c);
+    }
+    /**
+     *
      * @since 4.1
      */
     default SimpleLogger withMessageConverter(UnaryOperator<CharSequence> messageConverter, boolean applyToBlank) {

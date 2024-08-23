@@ -1581,7 +1581,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public void waitForHealth()  {
-        waitForHealth(client(), log);
+        waitForHealth(client(), log.prefixedWith(" " + clientFactory + ": " + toString()));
     }
 
     public static void waitForHealth(RestClient client, SimpleLogger log) {
@@ -1620,7 +1620,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             } catch (RuntimeException ee) {
                 throw ee;
             } catch (Exception e){
-                log.info("For {}: {} {}" + client, client.getClass(), e.getMessage());
+                log.info("For {}: {} {}", client, client.getClass(), e.getMessage());
                 sleepSeconds(2);
             }
 
