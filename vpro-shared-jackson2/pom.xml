@@ -40,12 +40,7 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-util</artifactId>
     </dependency>
-    <!--  <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-avro</artifactId>
-      <version>${jackson2.version}</version>
-    </dependency>-->
-     <dependency>
+    <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
        <scope>test</scope>
