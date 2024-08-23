@@ -175,7 +175,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.1.1</version>
         <configuration>
           <branchName>REL-${project.version}</branchName>
           <tagNameFormat>REL-@{project.version}</tagNameFormat>
@@ -203,7 +203,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.11</version>
+        <version>0.8.12</version>
         <executions>
           <execution>
             <goals>
@@ -235,7 +235,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.4.0</version>
         <configuration>
           <argLine>${EXTRA_TEST_OPTS}</argLine>
           <systemPropertyVariables>
@@ -252,7 +252,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.4.0</version>
         <configuration>
           <skipITs>${skipITs}</skipITs>
           <includes>
@@ -279,7 +279,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.4.1</version>
+          <version>3.8.0</version>
           <configuration>
             <!-- javadoc met java 8 is anders een absolute ramp, zeker met de oude zooi in dit project -->
             <doclint>none</doclint>
@@ -289,7 +289,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.12.1</version>
+          <version>3.13.0</version>
           <inherited>true</inherited>
           <configuration>
             <source>${java.version}</source>
@@ -321,7 +321,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.8.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
@@ -330,7 +330,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>properties-maven-plugin</artifactId>
-          <version>1.1.0</version>
+          <version>1.2.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -1002,9 +1002,8 @@
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.3.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -1015,9 +1014,8 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.5</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
