@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
 
+import org.apache.http.HttpHost;
 import org.elasticsearch.client.*;
 
 import nl.vpro.elasticsearchclient.*;
@@ -24,6 +25,12 @@ public class HighLevelClientFactory  implements ESClientFactory  {
     @Inject
     public HighLevelClientFactory(ClientElasticSearchFactory lowLevelFactory) {
         this.lowLevelFactory = lowLevelFactory;
+    }
+
+    @Override
+    public void setHosts(HttpHost... hosts) {
+        this.lowLevelFactory.setHosts(hosts);
+        invalidate();
     }
 
     @Override
