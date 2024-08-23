@@ -15,7 +15,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 
 /**
- *<p>A very simplified Logger. This can e.g. be used as messaging system. It was made to use in conjuction with {@link ChainedSimpleLogger} to be able to programmaticly 'tee' logging.</p>
+ *<p>A very simplified Logger. This can e.g. be used as messaging system. It was made to use in conjunction with {@link ChainedSimpleLogger} to be able to programmatically 'tee' logging.</p>
  *
  * <p>The goal was to log to slf4j but also send corresponding messages to users via websockets.</p>
  *
@@ -261,13 +261,15 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     /**
+     * Straight-forward application of {@link #withMessageConverter(UnaryOperator, boolean)}, just prefixing all messages with the same string (and a space).
      * @since 5.3
      */
     default SimpleLogger prefixedWith(String prefix) {
-        return withMessageConverter(c -> prefix + c);
+        return withMessageConverter(c -> prefix + " " + c);
     }
     /**
-     *
+     * Created a new Logger wrapping the current one, every message is first processed by the given 'messageConverter'
+     * @param messageConverter Every message will be fed through this, before the result is passed to  the wrapped SimpleLogger.
      * @since 4.1
      */
     default SimpleLogger withMessageConverter(UnaryOperator<CharSequence> messageConverter, boolean applyToBlank) {

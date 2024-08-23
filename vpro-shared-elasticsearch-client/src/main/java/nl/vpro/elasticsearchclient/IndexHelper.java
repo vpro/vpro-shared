@@ -1581,7 +1581,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public void waitForHealth()  {
-        waitForHealth(client(), log.prefixedWith(" " + clientFactory + ": " + toString()));
+        waitForHealth(client(), log.prefixedWith(clientFactory + ": " + toString()));
     }
 
     public static void waitForHealth(RestClient client, SimpleLogger log) {
