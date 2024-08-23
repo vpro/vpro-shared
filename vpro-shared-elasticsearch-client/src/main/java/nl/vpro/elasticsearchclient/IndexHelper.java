@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -62,6 +63,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
+    private static final Jackson2Mapper LENIENT = Jackson2Mapper.getLenientInstance();
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
     private Supplier<ObjectNode> settings;
@@ -653,7 +655,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 } else {
                     log.error("{}: {}", requestDescription, exception.getMessage(), exception);
                     future.completeExceptionally(exception);
-                    ObjectNode error  = new ObjectNode(Jackson2Mapper.getLenientInstance().getNodeFactory());
+                    ObjectNode error  = new ObjectNode(LENIENT.getNodeFactory());
                     error.put("errors", true);
                     error.putArray("items");
                     error.put("message", exception.getMessage());
@@ -898,7 +900,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         try {
             HttpEntity entity = response.getEntity();
             try (InputStream inputStream = entity.getContent()) {
-                return Jackson2Mapper.getLenientInstance()
+                return LENIENT
                     .readerFor(clazz)
                     .readValue(inputStream);
             } finally {
@@ -1224,7 +1226,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 try (InputStream inputStream = response.getEntity().getContent()) {
-                    ObjectNode jsonNode = (ObjectNode) Jackson2Mapper.getLenientInstance().readTree(inputStream);
+                    ObjectNode jsonNode = (ObjectNode) LENIENT.readTree(inputStream);
                     String clusterName = jsonNode.get("cluster_name").textValue();
                     String name = jsonNode.get("name").textValue();
                     JsonNode version = jsonNode.withObject("/version");
@@ -1583,7 +1585,16 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public static void waitForHealth(RestClient client, SimpleLogger log) {
+        waitForHealth(client, log, Duration.ofMinutes(1));
+    }
+
+    public static void waitForHealth(RestClient client, SimpleLogger log, Duration timeOut) {
+        int count = 1;
+        Instant start = Instant.now();
         while (true) {
+            if (Instant.now().isAfter(start.plus(timeOut))) {
+                throw new RuntimeException("%s not healthy after %s".formatted(client, timeOut));
+            }
             try {
                 Request request = new Request(GET, "/_cluster/health");
                 request.setOptions(request.getOptions()
@@ -1593,7 +1604,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     .addHeader("accept", "application/json"));
 
                 Response response = client.performRequest(request);
-                JsonNode clusterHealth = Jackson2Mapper.getLenientInstance()
+                JsonNode clusterHealth = LENIENT
                     .readerFor(JsonNode.class)
                     .readValue(response.getEntity().getContent());
 
@@ -1605,15 +1616,25 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 } else {
                     log.warn("Not green? Trying again.");
                 }
-                SECONDS.sleep(2);
+                sleepSeconds(2);
             } catch (RuntimeException ee) {
                 throw ee;
             } catch (Exception e){
-                log.info(e.getMessage());
+                log.info("For {}: {} {}" + client, client.getClass(), e.getMessage());
+                sleepSeconds(2);
             }
 
         }
     }
+
+    private static void sleepSeconds(int seconds) {
+        try {
+            SECONDS.sleep(seconds);
+        } catch (InterruptedException e) {
+
+        }
+    }
+
 
     @Getter
     public static class RoutedId {
