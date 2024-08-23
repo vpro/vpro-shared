@@ -10,7 +10,8 @@ import jakarta.inject.Inject;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.*;
 
-import nl.vpro.elasticsearchclient.*;
+import nl.vpro.elasticsearchclient.ClientElasticSearchFactory;
+import nl.vpro.elasticsearchclient.ESClientFactory;
 
 /**
  */
@@ -55,6 +56,11 @@ public class HighLevelClientFactory  implements ESClientFactory  {
             throw new IllegalStateException();
         }
         return new RestHighLevelClient(builder);
+    }
+
+    @Override
+    public String toString() {
+        return "highlevel["+ lowLevelFactory + "]";
     }
 
 }
