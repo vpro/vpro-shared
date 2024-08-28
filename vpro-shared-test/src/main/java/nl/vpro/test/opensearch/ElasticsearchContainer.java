@@ -2,6 +2,7 @@ package nl.vpro.test.opensearch;
 
 import java.util.List;
 
+import org.apache.http.HttpHost;
 import org.testcontainers.containers.GenericContainer;
 
 public class ElasticsearchContainer extends GenericContainer<ElasticsearchContainer> {
@@ -11,11 +12,10 @@ public class ElasticsearchContainer extends GenericContainer<ElasticsearchContai
         if (start) {
             start();
         }
-
     }
 
-    public String getUnicastHosts() {
-        return getHost() + ":" + getMappedPort();
+    public  HttpHost getHttpHost() {
+        return new HttpHost(getHost(), getMappedPort());
     }
 
     public int getMappedPort() {

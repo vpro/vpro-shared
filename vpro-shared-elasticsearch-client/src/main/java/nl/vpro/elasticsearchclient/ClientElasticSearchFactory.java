@@ -84,6 +84,11 @@ public class ClientElasticSearchFactory implements AsyncESClientFactory, ClientE
         invalidate();
     }
 
+    public void setHost(HttpHost host) {
+        this.hosts = new HttpHost[] {host};
+        invalidate();
+    }
+
     @Override
     public String invalidate() {
         String keys = clients.keySet().toString();
