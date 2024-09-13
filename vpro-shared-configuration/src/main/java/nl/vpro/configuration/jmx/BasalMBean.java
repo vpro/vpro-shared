@@ -1,11 +1,11 @@
 package nl.vpro.configuration.jmx;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.jmx.export.annotation.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-
 
 import nl.vpro.util.CommandExecutorImpl;
 
@@ -41,6 +41,23 @@ public class BasalMBean {
             } else {
                 return "Could not delete " + f;
             }
+        }
+    }
+
+
+    @ManagedOperation(description = "Create a simple file. Using oc rsync is a bit cumbersome from scripts")
+    @ManagedOperationParameters({
+        @ManagedOperationParameter(name = "file", description = "Path to file or directory to remove"),
+        @ManagedOperationParameter(name = "contents", description = "Contents of the file"),
+    })
+    public String create(String fileName, String contents) throws IOException {
+        File file = new File(fileName);
+        if (file.exists()) {
+            throw new IllegalArgumentException("Already exists " + file);
+        }
+        try(FileOutputStream fileOutputStream = new FileOutputStream(file)){
+            fileOutputStream.write(contents.getBytes(StandardCharsets.UTF_8));
+            return "Created new " + file + " " + file.length() + " bytes";
         }
     }
 
