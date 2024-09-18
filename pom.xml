@@ -18,11 +18,11 @@
     <java.version>17</java.version>
 
     <spring.version>6.1.13</spring.version>
-    <spring-security.version>6.3.2</spring-security.version>
+    <spring-security.version>6.3.3</spring-security.version>
     <jackson2.version>2.17.2</jackson2.version>
 
     <junit.version>5.11.0</junit.version>
-    <mockito.version>5.12.0</mockito.version>
+    <mockito.version>5.13.0</mockito.version>
     <assertj.version>3.26.3</assertj.version>
     <resteasy.version>7.0.0.Alpha3</resteasy.version>
 
@@ -32,7 +32,7 @@
     -->
     <jboss-logging.version>3.6.0.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.14.19</bytebuddy.version>
+    <bytebuddy.version>1.15.1</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
     <guava.version>33.3.0-jre</guava.version>
@@ -46,7 +46,7 @@
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
     <hibernate.version>6.6.0.Final</hibernate.version>
-    <hibernate.search.version>7.2.0.Final</hibernate.search.version>
+    <hibernate.search.version>7.2.1.Final</hibernate.search.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.0.0</servlet.api.version>
@@ -56,9 +56,9 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.7.0</camel.version>
+    <camel.version>4.8.0</camel.version>
 
-    <swagger.version>2.2.22</swagger.version>
+    <swagger.version>2.2.23</swagger.version>
 
     <lombok.version>1.18.34</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -70,8 +70,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.13.3</micrometer.version>
-    <flyway.version>10.17.1</flyway.version>
+    <micrometer.version>1.13.4</micrometer.version>
+    <flyway.version>10.18.0</flyway.version>
 
     <testcontainers.version>1.20.1</testcontainers.version>
 
@@ -551,7 +551,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.16.0</version>
+        <version>3.17.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -817,7 +817,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.3</version>
+        <version>42.7.4</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
@@ -867,13 +867,13 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.7.4</version> <!-- 1.8.0 requires some work ('net.jqwik.api.CannotFindArbitraryException's -->
+        <version>1.9.0</version> <!-- 1.8.0 requires some work ('net.jqwik.api.CannotFindArbitraryException's -->
       </dependency>
 
       <dependency>
         <groupId>org.meeuw</groupId>
         <artifactId>mihxil-json-grep</artifactId>
-        <version>0.10</version>
+        <version>0.11</version>
       </dependency>
       <dependency>
         <groupId>org.ehcache</groupId>
@@ -914,7 +914,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.46.0</version>
+      <version>3.47.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
