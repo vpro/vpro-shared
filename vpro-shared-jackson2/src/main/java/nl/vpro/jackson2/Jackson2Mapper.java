@@ -6,12 +6,12 @@ package nl.vpro.jackson2;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.event.Level;
 
 import java.io.Serial;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.slf4j.event.Level;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
@@ -86,6 +86,8 @@ public class Jackson2Mapper extends ObjectMapper {
         Jackson2Mapper lenient = new Jackson2Mapper("lenient");
         lenient.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         lenient.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        lenient.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+        lenient.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         lenient.setConfig(lenient.getSerializationConfig().withView(Views.Forward.class));
         lenient.setConfig(lenient.getDeserializationConfig().withView(Views.Forward.class));
         return lenient;
