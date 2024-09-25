@@ -1,14 +1,14 @@
 package nl.vpro.elasticsearchclient;
 
 
-import lombok.Lombok;
-
 import java.net.ConnectException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.elasticsearch.client.RestClient;
+
+import nl.vpro.util.ExceptionUtils;
 
 /**
  * @author Michiel Meeuwissen
@@ -26,12 +26,12 @@ public interface AsyncESClientFactory extends ESClientFactory {
             return clientAsync(logName, callback).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw Lombok.sneakyThrow(e);
+            throw ExceptionUtils.sneakyThrow(e);
         }  catch (ExecutionException e) {
             if (e.getCause() instanceof ConnectException) {
                 invalidate();
             }
-            throw Lombok.sneakyThrow(e.getCause());
+            throw ExceptionUtils.sneakyThrow(e.getCause());
         }
     }
 
