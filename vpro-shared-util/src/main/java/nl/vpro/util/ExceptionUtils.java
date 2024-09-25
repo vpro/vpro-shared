@@ -28,7 +28,7 @@ public class ExceptionUtils {
             try {
                 return b.call();
             } catch (Throwable t) {
-                throw Lombok.sneakyThrow(t);
+                throw sneakyThrow(t);
             }
         };
     }
@@ -42,7 +42,7 @@ public class ExceptionUtils {
             try {
                 return f.apply(a);
             } catch (Throwable t) {
-                throw Lombok.sneakyThrow(t);
+                throw sneakyThrow(t);
             }
         };
     }
@@ -96,6 +96,19 @@ public class ExceptionUtils {
         }
 
         R applyWithException(A a) throws E;
+    }
+
+    /**
+     * Exactly like {@link Lombok#sneakyThrow(Throwable)}, but without the lombok dependencyh
+     */
+    public static RuntimeException sneakyThrow(Throwable t) {
+        if (t == null) throw new NullPointerException("t");
+        return sneakyThrow0(t);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Throwable> T sneakyThrow0(Throwable t) throws T {
+        throw (T)t;
     }
 
 }
