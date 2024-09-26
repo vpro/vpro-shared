@@ -48,9 +48,9 @@ public class DirectoryWatcher implements AutoCloseable {
 
     private final Future<?> future;
 
-    final Set<Path> watchedTargetDirectories = new HashSet<>();
-    final Map<Path, Path> watchedTargetFiles = new HashMap<>();
-    final Map<Path, Instant> lastModified = new HashMap<>();
+    final Set<Path> watchedTargetDirectories = new ConcurrentSkipListSet<>();
+    final Map<Path, Path> watchedTargetFiles = new ConcurrentHashMap<>();
+    final Map<Path, Instant> lastModified = new ConcurrentHashMap<>();
 
     final AtomicInteger counter = new AtomicInteger();
     private Instant last = null;
