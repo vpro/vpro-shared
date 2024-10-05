@@ -16,11 +16,9 @@ public class RandomStream extends InputStream {
         this(new Random(seed), "seed: " + seed, size);
     }
 
-
     public RandomStream(Random random, int size) {
         this(random, "random: " + random, size);
     }
-
 
     private RandomStream(Random random, String toString, int size) {
         this.random = random;

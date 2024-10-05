@@ -1,7 +1,6 @@
 package nl.vpro.logging.simple;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Queue;
 
 /**
@@ -45,30 +44,4 @@ public abstract class QueueSimpleLogger<E extends nl.vpro.logging.simple.Event> 
     }
 
 
-    @Override
-    @Deprecated
-    protected Event createEvent(Level level, CharSequence message, Throwable t, Clock clock) {
-        return  Event.builder()
-            .level(level)
-            .message(message)
-            .throwable(t)
-            .timeStamp(clock.instant())
-            .build();
-    }
-    /**
-     * @deprecated Just use {@link nl.vpro.logging.simple.Event}
-     */
-    @Deprecated
-    public static class Event  extends nl.vpro.logging.simple.Event {
-
-        @lombok.Builder
-        protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
-            super(level, message, throwable, timeStamp);
-        }
-
-        public static class Builder extends nl.vpro.logging.simple.Event.Builder {
-
-        }
-
-    }
 }
