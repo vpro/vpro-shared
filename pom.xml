@@ -21,7 +21,7 @@
     <spring-security.version>6.3.3</spring-security.version>
     <jackson2.version>2.18.0</jackson2.version>
 
-    <junit.version>5.11.1</junit.version>
+    <junit.version>5.11.2</junit.version>
     <mockito.version>5.14.2</mockito.version>
     <assertj.version>3.26.3</assertj.version>
     <resteasy.version>7.0.0.Alpha3</resteasy.version>
@@ -73,7 +73,7 @@
     <micrometer.version>1.13.6</micrometer.version>
     <flyway.version>10.20.0</flyway.version>
 
-    <testcontainers.version>1.20.1</testcontainers.version>
+    <testcontainers.version>1.20.2</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
