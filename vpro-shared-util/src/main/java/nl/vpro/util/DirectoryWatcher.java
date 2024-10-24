@@ -48,9 +48,9 @@ public class DirectoryWatcher implements AutoCloseable {
 
     private final Future<?> future;
 
-    final Set<Path> watchedTargetDirectories = new ConcurrentSkipListSet<>();
-    final Map<Path, Path> watchedTargetFiles = new ConcurrentHashMap<>();
-    final Map<Path, Instant> lastModified = new ConcurrentHashMap<>();
+    final Set<String> watchedTargetDirectories = new ConcurrentSkipListSet<>();
+    final Map<String, Path> watchedTargetFiles = new ConcurrentHashMap<>();
+    final Map<String, Instant> lastModified = new ConcurrentHashMap<>();
 
     final AtomicInteger counter = new AtomicInteger();
     private Instant last = null;
@@ -108,13 +108,13 @@ public class DirectoryWatcher implements AutoCloseable {
             p.forEach(file -> {
                 checkSymlink(file, ENTRY_CREATE).ifPresent(resolved -> {
                     try {
-                        lastModified.put(resolved, Files.getLastModifiedTime(resolved).toInstant());
+                        lastModified.put(pathToKey(resolved), Files.getLastModifiedTime(resolved).toInstant());
                     } catch (IOException e) {
                         log.warn(e.getMessage(), e);
                     }
                 });
                 try {
-                    lastModified.put(file, Files.getLastModifiedTime(file).toInstant());
+                    lastModified.put(pathToKey(file), Files.getLastModifiedTime(file).toInstant());
                 } catch (IOException e) {
                     log.warn(e.getMessage(), e);
                 }
@@ -201,22 +201,22 @@ public class DirectoryWatcher implements AutoCloseable {
                                     if (filter.test(file)) {
                                         var watcherEvent = new WatcherEvent(
                                             file, file, WatcherEventType.of(event.kind()), instant(file, file));
-                                        log.debug(event.kind() + " " + event.context());
+                                        log.debug("{} {}", event.kind(), event.context());
                                         events.add(watcherEvent);
                                         checkSymlink(file, event.kind());
                                         if (event.kind() == ENTRY_DELETE) {
-                                            lastModified.remove(file);
+                                            lastModified.remove(pathToKey(file));
 
                                         }
                                     } else {
                                         log.debug("Ignored {} {}", event.kind(), event.context());
                                     }
                                 } else {
-                                    Path resolved = watchedTargetFiles.get(file);
+                                    Path resolved = watchedTargetFiles.get(pathToKey(file));
                                     if (resolved != null) {
                                         events.add(new WatcherEvent(file, resolved, WatcherEventType.of(event.kind()), instant(file, resolved)));
                                         if (event.kind() == ENTRY_DELETE) {
-                                            lastModified.remove(file);
+                                            lastModified.remove(pathToKey(file));
                                         }
                                     } else {
                                         log.debug("Not a watched file {}", resolved);
@@ -232,7 +232,7 @@ public class DirectoryWatcher implements AutoCloseable {
 
 
                     for (WatcherEvent e : events) {
-                        final Instant previous = lastModified.getOrDefault(e.resolved, Instant.EPOCH);
+                        final Instant previous = lastModified.getOrDefault(pathToKey(e.resolved), Instant.EPOCH);
                         final Instant time = e.instant;
                         if (time.isAfter(previous)) {
                             handleEvent(e);
@@ -259,7 +259,7 @@ public class DirectoryWatcher implements AutoCloseable {
         last = clock.instant();
         consumer.accept(e);
         if (e.type != WatcherEventType.DELETE) {
-            lastModified.put(e.resolved, e.instant);
+            lastModified.put(pathToKey(e.resolved), e.instant);
         }
     }
 
@@ -272,11 +272,11 @@ public class DirectoryWatcher implements AutoCloseable {
                 }
             }
             // if it was a symlink, then stop watching the target too.
-            Path target = watchedTargetFiles.remove(file);
+            Path target = watchedTargetFiles.remove(pathToKey(file));
             if (target != null) {
                 log.info("Removed target {}", target);
             }
-            if (lastModified.remove(file) != null) {
+            if (lastModified.remove(pathToKey(file)) != null) {
                 log.info("Removed lastModified {}", file);
 
             }
@@ -287,11 +287,11 @@ public class DirectoryWatcher implements AutoCloseable {
                 resolve = file.getParent().resolve(resolve);
             }
             watchedTargetFiles.entrySet().removeIf(e -> e.getValue().equals(file));
-            watchedTargetFiles.put(resolve, file);
+            watchedTargetFiles.put(pathToKey(resolve), file);
 
-            if (!watchedTargetDirectories.contains(resolve.getParent())) {
+            if (!watchedTargetDirectories.contains(pathToKey(resolve.getParent()))) {
                 register(resolve.getParent(), watcher);
-                watchedTargetDirectories.add(resolve.getParent());
+                watchedTargetDirectories.add(pathToKey(resolve.getParent()));
             }
             return Optional.of(resolve);
         } else {
@@ -304,15 +304,15 @@ public class DirectoryWatcher implements AutoCloseable {
         future.cancel(true);
     }
 
-    public Map<Path, Path> getWatchedTargetFiles() {
+    public Map<String, Path> getWatchedTargetFiles() {
         return Collections.unmodifiableMap(watchedTargetFiles);
     }
 
-    public Set<Path> getWatchedTargetDirectories() {
+    public Set<String> getWatchedTargetDirectories() {
         return Collections.unmodifiableSet(watchedTargetDirectories);
     }
 
-    public Map<Path, Instant> getWatchedLastModifieds() {
+    public Map<String, Instant> getWatchedLastModifieds() {
         return Collections.unmodifiableMap(lastModified);
     }
 
@@ -349,6 +349,10 @@ public class DirectoryWatcher implements AutoCloseable {
 
         String lastEvent();
 
+    }
+
+    public static String pathToKey(Path path) {
+        return path.toAbsolutePath().toString();
     }
 
 }
