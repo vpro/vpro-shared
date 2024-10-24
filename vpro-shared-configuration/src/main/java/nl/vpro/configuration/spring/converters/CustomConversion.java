@@ -27,7 +27,8 @@ public class CustomConversion {
             new StringToIntegerListConverter(),
             new StringToLocalTimeConverter(),
             new StringToInstantConverter(),
-            new StringToLocalDateTimeConverter()
+            new StringToLocalDateTimeConverter(),
+            new StringToLocalDateConverter()
         );
         factory.setConverters(set);
         log.info("Installed custom conversion {}" ,set);
