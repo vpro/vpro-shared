@@ -14,6 +14,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.*;
 
 import static nl.vpro.logging.Log4j2Helper.debugOrInfo;
+import static nl.vpro.util.DirectoryWatcher.pathToKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
@@ -57,8 +58,8 @@ class DirectoryWatcherTest {
             ).build();
 
 
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(tarf5);
-        assertThat(watcher.getWatchedTargetDirectories()).containsExactlyInAnyOrder(subDir);
+        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf5));
+        assertThat(watcher.getWatchedTargetDirectories()).containsExactlyInAnyOrder(pathToKey(subDir));
     }
 
     @Test
@@ -99,7 +100,7 @@ class DirectoryWatcherTest {
         wait(symf6);
 
         assertThat(events).isEmpty();
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(tarf3, tarf5);
+        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf3), pathToKey(tarf5));
     }
 
     @Test
@@ -109,10 +110,10 @@ class DirectoryWatcherTest {
 
         wait(symf3);
 
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(tarf5);
+        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf5));
 
         // symf3 has been deleted.
-        assertThat(watcher.getWatchedLastModifieds().keySet()).containsExactlyInAnyOrder(f1, f2, tarf5, symf6, symf5);
+        assertThat(watcher.getWatchedLastModifieds().keySet()).containsExactlyInAnyOrder(pathToKey(f1), pathToKey(f2), pathToKey(tarf5), pathToKey(symf6), pathToKey(symf5));
 
 
     }
@@ -126,7 +127,7 @@ class DirectoryWatcherTest {
 
         wait(symf3);
 
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(tarf3_2, tarf5);
+        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf3_2), pathToKey(tarf5));
     }
 
 
@@ -149,7 +150,7 @@ class DirectoryWatcherTest {
 
 
 
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(tarf3, tarf5);
+        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf3), pathToKey( tarf5));
 
 
 
