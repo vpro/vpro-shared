@@ -18,10 +18,10 @@
     <java.version>17</java.version>
 
     <spring.version>6.1.14</spring.version>
-    <spring-security.version>6.3.3</spring-security.version>
+    <spring-security.version>6.3.4</spring-security.version>
     <jackson2.version>2.18.0</jackson2.version>
 
-    <junit.version>5.11.2</junit.version>
+    <junit.version>5.11.3</junit.version>
     <mockito.version>5.14.2</mockito.version>
     <assertj.version>3.26.3</assertj.version>
     <resteasy.version>7.0.0.Alpha3</resteasy.version>
@@ -32,7 +32,7 @@
     -->
     <jboss-logging.version>3.6.0.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.15.5</bytebuddy.version>
+    <bytebuddy.version>1.15.7</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
     <guava.version>33.3.1-jre</guava.version>
@@ -56,7 +56,7 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.8.0</camel.version>
+    <camel.version>4.8.1</camel.version>
 
     <swagger.version>2.2.25</swagger.version>
 
@@ -71,9 +71,9 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.13.6</micrometer.version>
-    <flyway.version>10.20.0</flyway.version>
+    <flyway.version>10.20.1</flyway.version>
 
-    <testcontainers.version>1.20.2</testcontainers.version>
+    <testcontainers.version>1.20.3</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -798,7 +798,7 @@
       <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
-        <version>3.9.1</version>
+        <version>3.9.2</version>
         <scope>test</scope>
       </dependency>
 
@@ -867,7 +867,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.9.0</version> <!-- 1.8.0 requires some work ('net.jqwik.api.CannotFindArbitraryException's -->
+        <version>1.9.1</version> <!-- 1.8.0 requires some work ('net.jqwik.api.CannotFindArbitraryException's -->
       </dependency>
 
       <dependency>
