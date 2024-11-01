@@ -94,13 +94,12 @@ public final class ThreadPools {
                 false,
                 Thread.NORM_PRIORITY));
 
-
-	public static void shutdown() {
+    public static void shutdown() {
         log.info("Shutting down thread pools");
         copyExecutor.shutdown();
         startUpExecutor.shutdown();
         backgroundExecutor.shutdown();
         longBackgroundExecutor.shutdown();
-	}
+    }
 }
 
