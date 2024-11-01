@@ -19,7 +19,7 @@
 
     <spring.version>6.1.14</spring.version>
     <spring-security.version>6.3.4</spring-security.version>
-    <jackson2.version>2.18.0</jackson2.version>
+    <jackson2.version>2.18.1</jackson2.version>
 
     <junit.version>5.11.3</junit.version>
     <mockito.version>5.14.2</mockito.version>
