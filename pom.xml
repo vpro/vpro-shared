@@ -45,7 +45,7 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>6.6.0.Final</hibernate.version>
+    <hibernate.version>6.6.1.Final</hibernate.version>
     <hibernate.search.version>7.2.1.Final</hibernate.search.version>
 
     <!-- jakarta versions -->
