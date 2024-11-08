@@ -4,17 +4,18 @@
  */
 package nl.vpro.util;
 
-import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.stream.Stream;
-
 import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
+
+import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.stream.Stream;
+
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.vpro.util.TextUtil.*;

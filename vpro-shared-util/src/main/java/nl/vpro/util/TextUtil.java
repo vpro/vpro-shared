@@ -196,6 +196,21 @@ public class TextUtil {
         }
     }
 
+    public static final Pattern VALID_XML = Pattern.compile("[^\\x09\\x0A\\x0D\\x20-\\xD7FF\\xE000-\\xFFFD\\x10000-x10FFFF]*");
+
+    @PolyNull
+    public static String makeValidXmlText(@PolyNull String input) {
+        if (input == null) {
+            return null;
+        }
+
+        return input.replaceAll("[\\x{0}-\\x{8}]|[\\x{B}-\\x{C}]|[\\x{E}-\\x{1F}]|[\\x{D800}-\\x{DFFF}]|[\\x{FFFE}-\\x{FFFF}]", "");
+    }
+
+    public static boolean isValidXmlText(String input) {
+        return VALID_XML.matcher(input).matches();
+    }
+
     private static boolean jsoupNodeValid(Node n) {
         if (n instanceof Element e) {
             if (ALL.contains(e.tagName().toLowerCase())) {
