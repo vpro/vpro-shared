@@ -30,7 +30,7 @@
     seems to be in use by both resteasy and hibernate-search
     version must be compatible with both.
     -->
-    <jboss-logging.version>3.6.0.Final</jboss-logging.version>
+    <jboss-logging.version>3.6.1.Final</jboss-logging.version>
 
     <bytebuddy.version>1.15.10</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
