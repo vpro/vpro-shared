@@ -167,6 +167,7 @@ public abstract class OpenAPIApplication {
     }
 
     protected void fixDocumentation(OpenAPI api) {
+        fixDocumentation(api.getExternalDocs());
         if (api.getTags() != null) {
             api.getTags().forEach(t -> {
                 fixDocumentation(t.getExternalDocs());
