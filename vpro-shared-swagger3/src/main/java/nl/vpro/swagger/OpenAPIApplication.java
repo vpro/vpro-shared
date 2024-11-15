@@ -66,7 +66,7 @@ public abstract class OpenAPIApplication {
     URI documentationBaseUrl;
 
 
-    @Value("${documentation.parameters}")
+    @Value("${documentation.parameters:}")
     Map<String, String> documentationParameters;
 
 
