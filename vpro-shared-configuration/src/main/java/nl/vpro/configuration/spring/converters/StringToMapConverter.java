@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalConverter;
@@ -20,7 +21,10 @@ public class StringToMapConverter implements ConditionalConverter, Converter<Str
     public static final StringToMapConverter INSTANCE = new StringToMapConverter();
 
     @Override
-    public Map<String, String> convert(String string) {
+    public Map<String, String> convert(@NonNull String string) {
+        if (StringUtils.isBlank(string)) {
+            return Map.of();
+        }
         return Arrays.stream(string.split("\\s*,\\s*"))
             .map(s -> {
                 return s.split("=", 2);
