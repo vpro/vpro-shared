@@ -347,6 +347,7 @@ public class ObjectLocker {
     }
 
     /**
+     * The lock(s) the current thread is holding.
      * @since 2.34
      */
     public static List<LockHolder<? extends Serializable>> currentLocks() {
