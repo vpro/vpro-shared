@@ -17,7 +17,7 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.1.14</spring.version>
+    <spring.version>6.2.0</spring.version>
     <spring-security.version>6.3.4</spring-security.version>
     <jackson2.version>2.18.1</jackson2.version>
 
@@ -60,7 +60,7 @@
 
     <swagger.version>2.2.25</swagger.version>
 
-    <lombok.version>1.18.34</lombok.version>
+    <lombok.version>1.18.36</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
 
@@ -70,7 +70,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.14.0</micrometer.version>
+    <micrometer.version>1.14.1</micrometer.version>
     <flyway.version>10.21.0</flyway.version>
 
     <testcontainers.version>1.20.3</testcontainers.version>
