@@ -16,6 +16,7 @@
         <bean class="nl.vpro.configuration.spring.converters.StringToLocalTimeConverter" />
         <bean class="nl.vpro.configuration.spring.converters.StringToInstantConverter" />
         <bean class="nl.vpro.configuration.spring.converters.StringToLocalDateTimeConverter" />
+        <bean class="nl.vpro.configuration.spring.converters.StringToMapConverter" />
       </list>
     </property>
   </bean>

@@ -115,18 +115,30 @@ public class SwaggerFilter extends HttpFilter {
         return getPathMatcher(basePath, host);
     }
 
+
+    private String substituteParameters(String in) {
+        return StringSubstitutor.replace(in, parameters, "${", "}");
+    }
+
     PathMatcher getPathMatcher(String basePath, String host) {
         return new PathMatcherOrChain(
             new PathMatcherAndChain(
                 new SinglePathMatcher(new PreciseMatch("servers"), new ArrayEntryMatch(), new PreciseMatch("url")),
                 new ScalarEqualsMatcher("${api.basePath}", host + basePath)
             ),
+            // The job of replacing ${baseUrl} can actually also be done by nl.vpro.swagger.OpenAPIApplication.fixDocumentation(io.swagger.v3.oas.models.ExternalDocumentation)
             new PathMatcherAndChain(
-                new SinglePathMatcher(new PreciseMatch("externalDocs"),  new PreciseMatch("url")),
-                new ReplaceScalarMatcher((in) -> StringSubstitutor.replace(in, parameters, "${", "}"))
-
-
-
+                new SinglePathMatcher(
+                    new PreciseMatch("externalDocs"),
+                    new PreciseMatch("url")),
+                new ReplaceScalarMatcher(this::substituteParameters)
+            ),
+            new PathMatcherAndChain(
+                new SinglePathMatcher(true,
+                    new PreciseMatch("tags"),
+                    new PreciseMatch("externalDocs"),
+                    new PreciseMatch("url")),
+                new ReplaceScalarMatcher(this::substituteParameters)
             )
         );
     }

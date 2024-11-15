@@ -30,6 +30,15 @@ public class SwaggerFilterTest {
                 {
                   "url": "${api.basePath}"
                 }
+              ],
+              "tags": [
+                  {
+                    "name": "media",
+                    "externalDocs": {
+                      "description": "wiki",
+                      "url": "${baseUrl}/pages/3904471886/Media-+and+Schedule-API"
+                    }
+                  }
               ]
             }""";
 
@@ -75,7 +84,15 @@ public class SwaggerFilterTest {
               },
               "servers" : [ {
                 "url" : "rs.poms.omroep.nl/v3/api"
-              } ]
+              } ],
+              "tags" : [ {
+                    "name" : "media",
+                    "externalDocs" : {
+                      "description" : "wiki",
+                      "url" : "https://wiki.publiekeomroep.nl/display/npoapi//pages/3904471886/Media-+and+Schedule-API"
+                    }
+                  }
+              ]
             }""");
 
 

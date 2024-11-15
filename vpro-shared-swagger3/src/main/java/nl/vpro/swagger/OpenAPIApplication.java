@@ -17,19 +17,21 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.PreDestroy;
 
+import org.apache.commons.text.StringSubstitutor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
@@ -60,8 +62,14 @@ public abstract class OpenAPIApplication {
     @Value("${swagger.maxAge:PT1H}")
     Duration cacheTTL;
 
-    @Value("${documentation.baseUrl}")
+    @Value("${documentation.baseUrl:#{null}}")
     URI documentationBaseUrl;
+
+
+    @Value("${documentation.parameters}")
+    Map<String, String> documentationParameters;
+
+
 
     @Value("${documentation.email}")
     String email;
@@ -169,14 +177,22 @@ public abstract class OpenAPIApplication {
     @SneakyThrows
     protected void fixDocumentation(io.swagger.v3.oas.models.ExternalDocumentation documentation) {
         if (documentation != null) {
-            URI url = URI.create(documentation.getUrl());
-            URI newUri = new URI(
-                documentationBaseUrl.getScheme(),
-                documentationBaseUrl.getAuthority(),
-                url.getPath(),
-                url.getQuery(),
-                url.getFragment());
-            documentation.setUrl(newUri.toString());
+            String url = StringSubstitutor.replace(documentation.getUrl(), this.documentationParameters, "${", "}");
+            documentation.setUrl(url);
+            if (documentationBaseUrl != null) {
+                try {
+                    URI uri = URI.create(url);
+                    URI newUri = new URI(
+                        documentationBaseUrl.getScheme(),
+                        documentationBaseUrl.getAuthority(),
+                        uri.getPath(),
+                        uri.getQuery(),
+                        uri.getFragment());
+                    documentation.setUrl(newUri.toString());
+                } catch (Exception uriSyntaxException) {
+                    log.info("{} -> {} (ignored)", documentation.getUrl(), uriSyntaxException.getMessage());
+                }
+            }
         }
     }
 
