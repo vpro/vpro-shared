@@ -4,6 +4,16 @@ package nl.vpro.configuration.spring;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import jakarta.inject.Provider;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -15,15 +25,6 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.PropertyPlaceholderHelper;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import jakarta.inject.Provider;
 
 /**
  * An extension of {@link PropertyPlaceholderConfigurer} that can do:
@@ -122,7 +123,9 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
             log.debug("{}", getMap());
         } else {
             PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
-                placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
+                placeholderPrefix, placeholderSuffix, valueSeparator,
+//                '\\',
+                ignoreUnresolvablePlaceholders);
 
             ExpressionParser parser = new SpelExpressionParser();
             PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("#{", "}");
@@ -257,7 +260,9 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         p.putAll(props);
 
         PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
-            placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders);
+            placeholderPrefix, placeholderSuffix, valueSeparator,
+            //'\\',
+            ignoreUnresolvablePlaceholders);
 
 
         propertiesMap = new HashMap<>();
@@ -275,19 +280,29 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 }
             }
             try {
-                String v = helper.replacePlaceholders(value, p);
-                String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
-                    try {
-                        Expression exp = parser.parseExpression(placeholderName);
-                        return (String) exp.getValue();
-                    } catch (org.springframework.expression.spel.SpelEvaluationException e) {
-                        log.debug(e.getMessage());
-                        return placeholderName;
+
+                String replaced;
+                // I seems that in spring >= 6.2 we need to do this recursively to resolve variables in variables?
+                while(true) {
+                    String v = helper.replacePlaceholders(value, p);
+                    String elV = propertyPlaceholderHelper.replacePlaceholders(v, placeholderName -> {
+                        try {
+                            Expression exp = parser.parseExpression(placeholderName);
+                            return (String) exp.getValue();
+                        } catch (org.springframework.expression.spel.SpelEvaluationException e) {
+                            log.debug(e.getMessage());
+                            return placeholderName;
+                        }
+                    });
+                    if (elV.equals(value)) {
+                        replaced = elV;
+                        break;
                     }
-                });
-                Object prevValue = propertiesMap.put(keyStr, elV);
+                    value = elV;
+                }
+                Object prevValue = propertiesMap.put(keyStr, replaced);
                 if (prevValue != null) {
-                    log.debug("Replaced {}: {} -> {}", keyStr, prevValue, elV);
+                    log.debug("Replaced {}: {} -> {}", keyStr, prevValue, replaced);
                 }
             } catch (Exception e) {
                 log.info("Error replacing placeholders in " + keyStr + "=" + value + " " + e.getMessage());
