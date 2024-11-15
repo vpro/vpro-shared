@@ -1,9 +1,6 @@
 package nl.vpro.swagger;
 
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.meeuw.json.grep.Sed;
-import org.meeuw.json.grep.matching.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -14,6 +11,10 @@ import jakarta.servlet.http.*;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 
+import org.apache.commons.text.StringSubstitutor;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.json.grep.Sed;
+import org.meeuw.json.grep.matching.*;
 
 import nl.vpro.web.HttpServletRequestUtils;
 
@@ -28,9 +29,16 @@ public class SwaggerFilter extends HttpFilter {
 
     boolean filterAlways = false;
     String restPrefix = "/";
+    Map<String, String> parameters = Map.of();
     @Override
     public void init(FilterConfig filterConfig) {
         filterAlways = "true".equals(filterConfig.getInitParameter("filterAlways"));
+
+        Map<String, String> map = new HashMap<>();
+        filterConfig.getInitParameterNames().asIterator().forEachRemaining((parameter) ->
+            map.put(parameter, filterConfig.getInitParameter(parameter))
+        );
+        parameters = Collections.unmodifiableMap(map);
         restPrefix = Optional.ofNullable(filterConfig.getServletContext().getInitParameter("resteasy.servlet.mapping.prefix")).orElse(restPrefix);
 
     }
@@ -112,6 +120,13 @@ public class SwaggerFilter extends HttpFilter {
             new PathMatcherAndChain(
                 new SinglePathMatcher(new PreciseMatch("servers"), new ArrayEntryMatch(), new PreciseMatch("url")),
                 new ScalarEqualsMatcher("${api.basePath}", host + basePath)
+            ),
+            new PathMatcherAndChain(
+                new SinglePathMatcher(new PreciseMatch("externalDocs"),  new PreciseMatch("url")),
+                new ReplaceScalarMatcher((in) -> StringSubstitutor.replace(in, parameters, "${", "}"))
+
+
+
             )
         );
     }
@@ -132,7 +147,5 @@ public class SwaggerFilter extends HttpFilter {
         }
         return result;
     }
-
-
 
 }
