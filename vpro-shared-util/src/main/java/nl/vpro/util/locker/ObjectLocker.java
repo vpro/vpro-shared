@@ -63,7 +63,7 @@ public class ObjectLocker {
      */
     static final Map<Serializable, LockHolder<Serializable>> LOCKED_OBJECTS    = new ConcurrentHashMap<>();
 
-
+    public static final BiPredicate<Serializable, Serializable> CLASS_EQUALS = (o1, o2) -> Objects.equals(o1.getClass(), o2.getClass());
     static boolean strictlyOne;
     static boolean monitor;
 
@@ -129,7 +129,7 @@ public class ObjectLocker {
         Serializable id,
         @NonNull String reason,
         @NonNull Callable<T> callable) {
-        return withObjectLock(id, reason, callable, ObjectLocker.LOCKED_OBJECTS, (o1, o2) -> Objects.equals(o1.getClass(), o2.getClass()));
+        return withObjectLock(id, reason, callable, ObjectLocker.LOCKED_OBJECTS, CLASS_EQUALS);
     }
 
     public static <T> T withKeyLock(
@@ -143,7 +143,7 @@ public class ObjectLocker {
             consumer,
             callable,
             ObjectLocker.LOCKED_OBJECTS,
-            (o1, o2) -> Objects.equals(o1.getClass(), o2.getClass())
+            CLASS_EQUALS
         );
     }
 
@@ -156,6 +156,8 @@ public class ObjectLocker {
             return null;
         });
     }
+
+
 
 
     /**
@@ -194,10 +196,16 @@ public class ObjectLocker {
         }
     }
 
+    public static <K extends Serializable> LockHolderCloser<Serializable> acquireLock(
+        final Serializable key,
+        final @NonNull String reason,
+        final @NonNull Map<Serializable, LockHolder<Serializable>> locks) throws InterruptedException {
+        return acquireLock(key, reason, locks, CLASS_EQUALS);
+    }
 
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static  <K extends Serializable> LockHolderCloser<K> acquireLock(
+    public static  <K extends Serializable> LockHolderCloser<K> acquireLock(
         final  K key,
         final @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
@@ -443,7 +451,7 @@ public class ObjectLocker {
         }
     }
 
-    private static class LockHolderCloser<K extends Serializable> implements AutoCloseable {
+    public static class LockHolderCloser<K extends Serializable> implements AutoCloseable {
         @Getter
         final LockHolder<K> lockHolder;
 
