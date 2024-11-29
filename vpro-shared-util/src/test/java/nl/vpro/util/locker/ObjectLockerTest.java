@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import java.util.concurrent.*;
 
 import org.junit.jupiter.api.*;
@@ -220,6 +220,19 @@ public class ObjectLockerTest {
                 });
             });
         }).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    public void delayedClose() throws InterruptedException, ExecutionException {
+        CompletableFuture<Void> voidCompletableFuture;
+        try (var closer = ObjectLocker.acquireLock("bla", "test", ObjectLocker.LOCKED_OBJECTS)) {
+            Thread.sleep(100);
+            log.info("DelayClosing");
+            voidCompletableFuture = closer.delayedClose(Duration.ofSeconds(10));
+        }
+        log.info("going ahhead..");
+        voidCompletableFuture.get();
+
     }
 
 
