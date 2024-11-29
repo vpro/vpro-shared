@@ -28,6 +28,8 @@ import nl.vpro.logging.Slf4jHelper;
 @Slf4j
 public class ObjectLocker {
 
+
+
     public static BiPredicate<StackTraceElement, AtomicInteger> summaryBiPredicate =
         (e, count) -> {
             boolean match = e.getClassName().startsWith("nl.vpro") &&
@@ -205,7 +207,7 @@ public class ObjectLocker {
 
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public static  <K extends Serializable> LockHolderCloser<K> acquireLock(
+    private static  <K extends Serializable> LockHolderCloser<K> acquireLock(
         final  K key,
         final @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
@@ -227,7 +229,7 @@ public class ObjectLocker {
                         locks.remove(key);
                         continue;
                     }
-                    closer = new LockHolderCloser<>(nanoStart, locks, holder, true);
+                    closer = new LockHolderCloser<>(nanoStart, locks, holder, comparable);
                     if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
                         log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
                         alreadyWaiting = true;
@@ -324,16 +326,13 @@ public class ObjectLocker {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private static  <K extends Serializable> void releaseLock(
         final long nanoStart,
-        final @NonNull K key,
-        final @NonNull  String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
-        final @NonNull LockHolder<K> lock,
-        final boolean checkIfCurrentThread) {
+        final @NonNull LockHolder<K> lock) {
         synchronized (locks) {
             if (lock.lock.getHoldCount() == 1) {
                 if (!lock.lock.hasQueuedThreads()) {
-                    log.trace("Removed {}", key);
-                    locks.remove(key);
+                    log.trace("Removed {}", lock.key);
+                    locks.remove(lock.key);
                 }
                 final Duration duration = Duration.ofNanos(System.nanoTime() - nanoStart);
                 for (Listener listener : LISTENERS) {
@@ -341,14 +340,15 @@ public class ObjectLocker {
                 }
 
                 Slf4jHelper.log(log, duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG,
-                    "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
+                    "Released lock for {} ({}) in {}", lock.key, lock.reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
-            if (! checkIfCurrentThread || lock.lock.isHeldByCurrentThread()) { // MSE-4946
+            if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
                 HOLDS.get().remove(lock);
                 lock.lock.unlock();
             } else {
                 // can happen if 'continuing without lock'
-                log.warn("Current lock {} not hold by current thread {} but by {}", lock, Thread.currentThread().getName(), Optional.ofNullable(lock.thread.get()).map(Thread::getName).orElse(null));
+                Thread currentThread = Thread.currentThread();
+                log.warn("Current lock {} not hold by current thread {} ({}) but by {} ({})", lock, currentThread.getName(), currentThread, Optional.ofNullable(lock.thread.get()).map(Thread::getName).orElse(null), lock.thread.get(), new Exception());
             }
 
             locks.notifyAll();
@@ -383,6 +383,7 @@ public class ObjectLocker {
         @Setter
         private Duration warnTime = ObjectLocker.defaultWarnTime;
 
+
         LockHolder(K k, String reason, ReentrantLock lock) {
             this.key = k;
             this.lock = lock;
@@ -390,6 +391,8 @@ public class ObjectLocker {
             this.thread = new WeakReference<>(Thread.currentThread());
             this.reason = reason;
         }
+
+
 
         @SuppressWarnings("rawtypes")
         @Override
@@ -457,25 +460,83 @@ public class ObjectLocker {
 
         final long nanoStart;
 
-        @With
-        final boolean checkIfCurrentThread;
-
         final @NonNull Map<K, LockHolder<K>> locks;
+
+        final BiPredicate<Serializable, K> comparable;
+        boolean closed = false;
 
         private LockHolderCloser(
             final long nanoStart,
             @NonNull Map<K, LockHolder<K>> locks,
             @NonNull LockHolder<K> lockHolder,
-            final boolean checkIfCurrentThread) {
+            BiPredicate<Serializable, K> comparable
+            ) {
             this.nanoStart = nanoStart;
             this.locks = locks;
             this.lockHolder = lockHolder;
-            this.checkIfCurrentThread = checkIfCurrentThread;
+            this.comparable = comparable;
+        }
+
+        public CompletableFuture<LockHolderCloser<K>> forTransfer() {
+            close();
+            CompletableFuture<LockHolderCloser<K>> future = new CompletableFuture<>();
+
+
+            future.thenAccept((o) -> {
+                if (log.isDebugEnabled()) {
+                    log.debug("Completed transfer {} ({}) -> {} ({})", LockHolderCloser.this, LockHolderCloser.this.lockHolder.thread.get(), o, o.lockHolder.thread.get());
+                }
+            });
+            log.debug("Future to use {}", future);
+            return future;
+        }
+
+        public LockHolderCloser<K> transfer(CompletableFuture<LockHolderCloser<K>> future) {
+            synchronized (locks) {
+                try {
+
+                    LockHolderCloser<K> closer = acquireLock(lockHolder.key, lockHolder.reason, locks, comparable);
+                    future.complete(closer);
+                    return closer;
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        }
+        public CompletableFuture<Void> delayedClose(Duration duration) {
+            CompletableFuture<Void> ready = new CompletableFuture<>();
+            final CompletableFuture<LockHolderCloser<K>> future = forTransfer();
+            ForkJoinPool.commonPool().execute(() -> {
+
+                try (var closer = transfer(future)) {
+                    log.debug("{} Starting delay", lockHolder.key);
+                    Thread.sleep(duration.toMillis());
+                    log.info("{} Ready after delay {}", lockHolder.key, duration);
+                    ready.complete(null);
+                } catch (InterruptedException e) {
+                    log.warn(e.getMessage(), e);
+                } finally {
+
+                }
+            });
+            return  ready;
         }
 
         @Override
         public void close() {
-            releaseLock(nanoStart, lockHolder.key, lockHolder.reason, locks, lockHolder, checkIfCurrentThread);
+            synchronized (locks) {
+                if (!closed) {
+                    releaseLock(nanoStart, locks, lockHolder);
+                } else {
+                    log.debug("Closed already");
+                }
+                closed = true;
+            }
+        }
+
+        @Override
+        public  String toString() {
+            return lockHolder + (closed ? " (closed)" : "");
         }
     }
 
