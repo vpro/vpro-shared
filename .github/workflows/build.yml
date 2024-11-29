@@ -15,7 +15,7 @@ on:
 env:
   skipTests: false
 
-
+jobs:
   build:
     strategy:
       matrix:
@@ -32,10 +32,9 @@ env:
             java: 17
             target: 'deploy'
 
-  permissions:
-    checks: write
-    pull-requests: write
-  jobs:
+    permissions:
+      checks: write
+      pull-requests: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Cancel previous Action
