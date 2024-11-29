@@ -207,7 +207,7 @@ public class ObjectLocker {
 
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private static  <K extends Serializable> LockHolderCloser<K> acquireLock(
+    public static  <K extends Serializable> LockHolderCloser<K> acquireLock(
         final  K key,
         final @NonNull String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
