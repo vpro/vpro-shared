@@ -227,7 +227,7 @@ public class ObjectLocker {
                         locks.remove(key);
                         continue;
                     }
-                    closer = new LockHolderCloser<>(nanoStart, locks, holder);
+                    closer = new LockHolderCloser<>(nanoStart, locks, holder, true);
                     if (holder.lock.isLocked() && !holder.lock.isHeldByCurrentThread()) {
                         log.debug("There are already threads ({}) for {}, waiting", holder.lock.getQueueLength(), key);
                         alreadyWaiting = true;
@@ -327,7 +327,8 @@ public class ObjectLocker {
         final @NonNull K key,
         final @NonNull  String reason,
         final @NonNull Map<K, LockHolder<K>> locks,
-        final @NonNull LockHolder<K> lock) {
+        final @NonNull LockHolder<K> lock,
+        final boolean checkIfCurrentThread) {
         synchronized (locks) {
             if (lock.lock.getHoldCount() == 1) {
                 if (!lock.lock.hasQueuedThreads()) {
@@ -342,7 +343,7 @@ public class ObjectLocker {
                 Slf4jHelper.log(log, duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG,
                     "Released lock for {} ({}) in {}", key, reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
-            if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
+            if (! checkIfCurrentThread || lock.lock.isHeldByCurrentThread()) { // MSE-4946
                 HOLDS.get().remove(lock);
                 lock.lock.unlock();
             } else {
@@ -456,19 +457,25 @@ public class ObjectLocker {
 
         final long nanoStart;
 
+        @With
+        final boolean checkIfCurrentThread;
+
         final @NonNull Map<K, LockHolder<K>> locks;
+
         private LockHolderCloser(
             final long nanoStart,
             @NonNull Map<K, LockHolder<K>> locks,
-            @NonNull LockHolder<K> lockHolder) {
+            @NonNull LockHolder<K> lockHolder,
+            final boolean checkIfCurrentThread) {
             this.nanoStart = nanoStart;
             this.locks = locks;
             this.lockHolder = lockHolder;
+            this.checkIfCurrentThread = checkIfCurrentThread;
         }
 
         @Override
         public void close() {
-            releaseLock(nanoStart, lockHolder.key, lockHolder.reason, locks, lockHolder);
+            releaseLock(nanoStart, lockHolder.key, lockHolder.reason, locks, lockHolder, checkIfCurrentThread);
         }
     }
 
