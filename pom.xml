@@ -58,7 +58,7 @@
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <camel.version>4.8.1</camel.version>
 
-    <swagger.version>2.2.25</swagger.version>
+    <swagger.version>2.2.26</swagger.version>
 
     <lombok.version>1.18.36</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
