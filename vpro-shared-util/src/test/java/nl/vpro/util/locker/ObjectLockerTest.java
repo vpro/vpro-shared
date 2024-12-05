@@ -2,19 +2,23 @@ package nl.vpro.util.locker;
 
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import nl.vpro.logging.simple.*;
+import nl.vpro.util.ThreadPools;
+
+import static nl.vpro.util.locker.ObjectLocker.LOCKED_OBJECTS;
 import static nl.vpro.util.locker.ObjectLocker.withKeyLock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author Michiel Meeuwissen
  */
-@Slf4j
+@Log4j2
 @Execution(ExecutionMode.SAME_THREAD)
 public class ObjectLockerTest {
 
@@ -224,14 +228,76 @@ public class ObjectLockerTest {
 
     @Test
     public void delayedClose() throws InterruptedException, ExecutionException {
-        CompletableFuture<Void> voidCompletableFuture;
-        try (var closer = ObjectLocker.acquireLock("bla", "test", ObjectLocker.LOCKED_OBJECTS)) {
-            Thread.sleep(100);
-            log.info("DelayClosing");
-            voidCompletableFuture = closer.delayedClose(Duration.ofSeconds(10));
+        //TestClock testClock = TestClock.twentyTwenty();
+        //ObjectLocker.clock = testClock;
+        //ObjectLocker.sleeper = d -> testClock.sleep(d.toMillis());
+
+        List<Event> events = Collections.synchronizedList(new ArrayList<>());
+        SimpleLogger logger = Log4j2SimpleLogger.of(log).chain(QueueSimpleLogger.of(events::add));
+
+        CompletableFuture<Void> voidCompletableFuture = new CompletableFuture<>();
+        try (var closer = ObjectLocker.acquireLock("bla", "initiallock", ObjectLocker.LOCKED_OBJECTS, Duration.ofSeconds(5))) {
+            ThreadPools.backgroundExecutor.execute(() -> {
+                logger.info("Concurrent: waiting for lock");
+                ObjectLocker.withKeyLock("bla", "concurrent lock", () -> {
+                    logger.info("Concurrent: acquired lock");
+                    sleep(100);
+                    logger.info("Concurrent: about to release lock");
+                });
+                logger.info("Concurrent released lock. Completing proceess now.");
+                voidCompletableFuture.complete(null);
+
+            });
+            sleep(100);
+            logger.info("DelayClosing");
         }
-        log.info("going ahhead..");
+
+        logger.info("going ahead..");
         voidCompletableFuture.get();
+        logger.info("ready");
+        assertThat(LOCKED_OBJECTS).isEmpty();
+        assertThat(events.stream().map(Event::getMessage)).containsExactly(
+            "Concurrent: waiting for lock",
+            "DelayClosing",
+            "going ahead..",
+            "Concurrent: acquired lock",
+            "Concurrent: about to release lock",
+            "Concurrent released lock. Completing proceess now.",
+            "ready"
+        );
+    }
+
+
+    @Test
+    public void delayedClose2() throws InterruptedException, ExecutionException {
+        List<Event> events = Collections.synchronizedList(new ArrayList<>());
+        SimpleLogger logger = Log4j2SimpleLogger.of(log).chain(QueueSimpleLogger.of(events::add));
+        CompletableFuture<Void> voidCompletableFuture = new CompletableFuture<>();
+        try (var closer = ObjectLocker.acquireLock("bla", "initiallock", ObjectLocker.LOCKED_OBJECTS, Duration.ofSeconds(10))) {
+            Thread.sleep(100);
+            logger.info("DelayClosing");
+        }
+
+        logger.info("going ahead..");
+        ObjectLocker.withKeyLock("bla", "concurrent lock", () -> {
+            logger.info("Concurrent: acquired lock");
+            sleep(100);
+            logger.info("Concurrent: about to release lock");
+        });
+        logger.info("Concurrent released lock. Completing proceess now.");
+        voidCompletableFuture.complete(null);
+
+        voidCompletableFuture.get();
+        logger.info("ready");
+        assertThat(LOCKED_OBJECTS).isEmpty();
+        assertThat(events.stream().map(Event::getMessage)).containsExactly(
+            "DelayClosing",
+            "going ahead..",
+            "Concurrent: acquired lock",
+            "Concurrent: about to release lock",
+            "Concurrent released lock. Completing proceess now.",
+            "ready"
+        );
 
     }
 
@@ -239,7 +305,7 @@ public class ObjectLockerTest {
 
     @SneakyThrows
     private static void sleep(long duration) {
-        Thread.sleep(duration);
+        ObjectLocker.sleeper.accept(Duration.ofMillis(duration));
     }
 
     static  ForkJoinTask<?>  submit(Runnable runnable) {
