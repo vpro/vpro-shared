@@ -249,10 +249,12 @@ public class ObjectLocker {
                 holder.lock.lock();
             }
 
+            Duration delaying = null;
             if (holder.availableAfter != null) {
                 Instant now = clock.instant();
                 if (holder.availableAfter.isAfter(now)) {
-                    sleeper.accept(Duration.between(now, holder.availableAfter));
+                    delaying = Duration.between(now, holder.availableAfter);
+                    sleeper.accept(delaying);
                 }
                 log.debug("Acquired and waited until {}", holder.availableAfter);
                 holder.availableAfter = null;
@@ -268,7 +270,10 @@ public class ObjectLocker {
 
 
             if (holder.lock.getHoldCount() == 1) {
-                Slf4jHelper.log(log, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG, "Acquired lock for {} ({}) in {}", holder, reason, acquireTime);
+                Slf4jHelper.log(log, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG,
+                    "Acquired lock for {} ({}) after {}{}", holder, reason, acquireTime,
+                    delaying == null ? "" : (" (including a requested delay of " + delaying + ")")
+                );
             }
 
             for (Listener listener : LISTENERS) {
