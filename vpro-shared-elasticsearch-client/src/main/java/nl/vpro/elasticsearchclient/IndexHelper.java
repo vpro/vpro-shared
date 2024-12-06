@@ -1587,8 +1587,12 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public static void waitForHealth(RestClient client, SimpleLogger log) {
         waitForHealth(client, log, Duration.ofMinutes(1));
     }
-
     public static void waitForHealth(RestClient client, SimpleLogger log, Duration timeOut) {
+        waitForHealth(client, log, timeOut, "green");
+    }
+
+
+    public static void waitForHealth(RestClient client, SimpleLogger log, Duration timeOut, String waitForStatus) {
         int count = 1;
         Instant start = Instant.now();
         while (true) {
@@ -1596,25 +1600,39 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 throw new RuntimeException("%s not healthy after %s".formatted(client, timeOut));
             }
             try {
+                try {
+                    Request request = new Request(GET, "/_cluster/health");
+                    request.setOptions(request.getOptions()
+                    .toBuilder()
+                    .addParameter("wait_for_status", waitForStatus)
+                    .addParameter("timeout", "10s")
+                    .addHeader("accept", "application/json"));
+
+
+                    Response response = client.performRequest(request);
+                    JsonNode clusterHealth = LENIENT
+                        .readerFor(JsonNode.class)
+                        .readValue(response.getEntity().getContent());
+                } catch (ResponseException re) {
+                    log.warn(re.getMessage());
+                }
+
                 Request request = new Request(GET, "/_cluster/health");
                 request.setOptions(request.getOptions()
                     .toBuilder()
-                    .addParameter("wait_for_status", "green")
-                    .addParameter("timeout", "50s")
                     .addHeader("accept", "application/json"));
 
                 Response response = client.performRequest(request);
                 JsonNode clusterHealth = LENIENT
                     .readerFor(JsonNode.class)
                     .readValue(response.getEntity().getContent());
-
                 String status = clusterHealth.get("status").textValue();
                 log.info("status {}", status);
-                boolean serviceIsUp = "green".equals(status) || "yellow".equals(status);
+                boolean serviceIsUp = waitForStatus.equals(status);
                 if (serviceIsUp) {
                     break;
                 } else {
-                    log.warn("Not green? Trying again.");
+                    log.warn("Not green? Trying again. ({})", status);
                 }
                 sleepSeconds(2);
             } catch (RuntimeException ee) {
