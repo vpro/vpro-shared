@@ -566,10 +566,25 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     @SafeVarargs
-    public final ObjectNode postEntity(String path, HttpEntity entity, Consumer<Request>... consumers) {
+    public final ObjectNode put(String path, ObjectNode request, Consumer<Request>... consumers) {
+        return putEntity(path, entity(request), consumers);
+    }
+
+    public final ObjectNode postEntity(String path, HttpEntity entity, Consumer<Request>... consumers)
+    {
+        return sendEntity(POST, path, entity, consumers);
+    }
+
+     public final ObjectNode putEntity(String path, HttpEntity entity, Consumer<Request>... consumers)
+    {
+        return sendEntity(PUT, path, entity, consumers);
+    }
+
+    @SafeVarargs
+    public final ObjectNode sendEntity(String method, String path, HttpEntity entity, Consumer<Request>... consumers) {
         try {
 
-            Request req = new Request(POST, path);
+            Request req = new Request(method, path);
             req.setEntity(entity);
             for (Consumer<Request> c : consumers) {
                 c.accept(req);
@@ -679,7 +694,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public ObjectNode index(String id, Object o, Consumer<ObjectNode> sourceConsumer) {
         ObjectNode jsonNode = objectMapper.valueToTree(o);
         sourceConsumer.accept(jsonNode);
-        return post(indexPath(id), jsonNode);
+        return put(indexPath(id), jsonNode);
     }
 
 
