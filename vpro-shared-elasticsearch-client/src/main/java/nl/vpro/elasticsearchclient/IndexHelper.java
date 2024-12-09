@@ -811,7 +811,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             ArrayNode docs = objectNode.withArray("docs");
 
             for (JsonNode n : docs) {
-                boolean found = n.get("found").asBoolean();
+                boolean found = n.has("found") && n.get("found").asBoolean();
                 if (found) {
                     result.add(Optional.of(n));
                 } else {

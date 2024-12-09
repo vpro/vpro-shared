@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Slf4j
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class IndexHelperITest {
+public class IndexHelperContainerTest {
 
     ElasticsearchContainer es = new ElasticsearchContainer(true);
 

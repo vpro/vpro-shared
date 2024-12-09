@@ -6,15 +6,16 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
 import nl.vpro.elasticsearch.CreateIndex;
+import nl.vpro.test.opensearch.ElasticsearchContainer;
 import nl.vpro.util.MaxOffsetIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 0.47
  */
 @Slf4j
-public class ElasticSearchIteratorITest {
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ElasticSearchIteratorContainerTest {
+
+
+
+    ElasticsearchContainer es = new ElasticsearchContainer(true);
+
 
     static int ID  = 0;
     public static class A {
@@ -48,7 +56,7 @@ public class ElasticSearchIteratorITest {
     public void setup() {
 
         client = RestClient.builder(
-            new HttpHost("localhost", 9200, "http"))
+            es.getHttpHost())
             .build();
 
         helper = IndexHelper.builder()

@@ -16,7 +16,7 @@ import nl.vpro.test.opensearch.ElasticsearchContainer;
 @Slf4j
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class IndexHelper2ITest {
+public class IndexHelper2ContainerTest {
     ElasticsearchContainer es = new ElasticsearchContainer(true);
 
 
