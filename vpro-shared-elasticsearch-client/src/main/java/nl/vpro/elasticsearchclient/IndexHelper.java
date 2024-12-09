@@ -688,7 +688,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode index(String id, byte[] o) {
         HttpEntity entity = entity(o);
-        return postEntity(indexPath(id), entity(o));
+        return putEntity(indexPath(id), entity(o));
     }
 
     public ObjectNode index(String id, Object o, Consumer<ObjectNode> sourceConsumer) {
@@ -701,7 +701,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     /**
      */
     public ObjectNode indexWithRouting(String id, byte[] o, String routing) {
-        return postEntity(indexPath(id), entity(o), req -> req.addParameter(ROUTING, routing));
+        return putEntity(indexPath(id), entity(o), req -> req.addParameter(ROUTING, routing));
     }
 
     /**

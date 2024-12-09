@@ -2,9 +2,11 @@ package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import nl.vpro.test.opensearch.ElasticsearchContainer;
 
 
 /**
@@ -12,8 +14,10 @@ import org.junit.jupiter.api.*;
  * @since 1.75
  */
 @Slf4j
-@Disabled
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IndexHelper2ITest {
+    ElasticsearchContainer es = new ElasticsearchContainer(true);
 
 
     RestClient client;
@@ -21,8 +25,7 @@ public class IndexHelper2ITest {
     @BeforeEach
     public void setup() {
 
-        client = RestClient.builder(
-            new HttpHost("localhost", 9200, "http"))
+        client = RestClient.builder(es.getHttpHost())
             .build();
 
         helper = IndexHelper.builder()

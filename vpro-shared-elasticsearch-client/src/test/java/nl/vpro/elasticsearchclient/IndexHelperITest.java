@@ -1,10 +1,6 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.junit.jupiter.api.*;
-import org.slf4j.event.Level;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +9,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.client.RestClient;
+import org.junit.jupiter.api.*;
+import org.slf4j.event.Level;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.simple.*;
+import nl.vpro.test.opensearch.ElasticsearchContainer;
 
+import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,8 +32,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 1.75
  */
 @Slf4j
-@Disabled("Needs a running elasticsearch")
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IndexHelperITest {
+
+    ElasticsearchContainer es = new ElasticsearchContainer(true);
 
 
     RestClient client;
@@ -43,8 +48,7 @@ public class IndexHelperITest {
     @BeforeEach
     public void setup() {
         events.clear();
-        client = RestClient.builder(
-            new HttpHost("localhost", 9200, "http"))
+        client = RestClient.builder(es.getHttpHost())
             .build();
 
         helper = IndexHelper.builder()
@@ -151,20 +155,31 @@ public class IndexHelperITest {
     }
 
     @Test
-    public void indexAndGet() {
+    public void indexAndGetAndUpdateAndDelete() {
         helper.refresh();
         long before = helper.count();
         TestObject test = new TestObject();
         test.setId("https://www-acc.vpro.nl/speel~WO_VPRO_442926~interview-frédérik-ruys~.html");
         test.setTitle("ok");
-        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(test);
-        helper.index(test.getId(), jsonNode);
+
+        helper.index(test.getId(), test);
 
         helper.refresh();
         log.info("CReading indexing");
         Optional<JsonNode> jsonNode1 = helper.get(test.getId());
         assertThat(jsonNode1).isPresent();
         log.info("{}", jsonNode1);
+
+        helper.refresh();
+        test.setTitle("ok2");;
+        helper.index(test.getId(), test);
+        helper.refresh();
+        log.info("CReading indexing");
+        Optional<JsonNode> got2 = helper.get(test.getId());
+        assertThat(got2).isPresent();
+        log.info("{}", got2);
+        assertThat(got2.get().get(SOURCE).get("title").asText()).isEqualTo("ok2");
+
 
 
         helper.delete(test.getId());
