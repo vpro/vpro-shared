@@ -570,11 +570,13 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return putEntity(path, entity(request), consumers);
     }
 
+    @SafeVarargs
     public final ObjectNode postEntity(String path, HttpEntity entity, Consumer<Request>... consumers)
     {
         return sendEntity(POST, path, entity, consumers);
     }
 
+     @SafeVarargs
      public final ObjectNode putEntity(String path, HttpEntity entity, Consumer<Request>... consumers)
     {
         return sendEntity(PUT, path, entity, consumers);
