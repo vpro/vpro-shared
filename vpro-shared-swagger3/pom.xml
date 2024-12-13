@@ -5,10 +5,10 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.3.4-SNAPSHOT</version>
+    <version>5.3.4</version>
   </parent>
   <artifactId>vpro-shared-swagger3</artifactId>
-  <version>5.3.4-SNAPSHOT</version>
+  <version>5.3.4</version>
 
   <properties>
     <swagger.ui.version>5.17.14</swagger.ui.version>
