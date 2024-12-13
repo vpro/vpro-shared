@@ -590,7 +590,10 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 c.accept(req);
             }
             log.debug("Posting to {}", path);
-            return read(client().performRequest(req));
+
+            var response = client().performRequest(req);
+
+            return read(response);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -688,7 +691,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode index(String id, byte[] o) {
         HttpEntity entity = entity(o);
-        return putEntity(indexPath(id), entity(o));
+        return putEntity(indexPath(id), entity);
     }
 
     public ObjectNode index(String id, Object o, Consumer<ObjectNode> sourceConsumer) {
@@ -734,7 +737,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     protected String _indexPath(String type, @Nullable String id, @Nullable String parent) {
-        String path = getIndexName() + "/" + type + (id == null ? "" : ("/" + encode(id)));
+        String path = '/' + getIndexName() + "/" + type + (id == null ? "" : ("/" + encode(id)));
         if (parent != null) {
             path += "?parent=" + parent;
         }
@@ -1112,7 +1115,11 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     static protected String saveToString(JsonNode jsonNode) {
         String value = jsonNode.toString();
         return value.replaceAll("\\p{Cc}", "");
+    }
 
+    @SneakyThrows
+    static protected byte[]  saveToArray(JsonNode jsonNode)  {
+        return LENIENT.writer().writeValueAsBytes(jsonNode);
     }
 
     @Override
