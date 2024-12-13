@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/REL-')
+    permissions:
+      contents: write
     env:
       MAVEN_OPTS: -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     steps:
@@ -23,7 +25,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
-      - uses: oleksiyrudenko/gha-git-credentials@v2.1.1
+      - uses: oleksiyrudenko/gha-git-credentials@v2.1.2
         with:
           global: true
           name: 'github'
