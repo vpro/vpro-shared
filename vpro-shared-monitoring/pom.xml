@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>vpro-shared-parent</artifactId>
-    <version>5.3.4</version>
+    <version>5.3.5-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-monitoring</artifactId>
 
