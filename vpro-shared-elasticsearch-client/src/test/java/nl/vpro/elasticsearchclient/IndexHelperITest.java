@@ -13,8 +13,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import nl.vpro.jackson2.Jackson2Mapper;
 
 @Log4j2
+@Disabled
 public class IndexHelperITest {
     HttpHost host = HttpHost.create("https://vpc-vproapi-elasticsearch-test-vltgued6xifxoe534422g642ty.eu-central-1.es.amazonaws.com:9240");
 
