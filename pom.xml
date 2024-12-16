@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>nl.vpro.shared</groupId>
@@ -40,7 +42,7 @@
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.0</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <theories.version>0.13.0</theories.version>
+    <theories.version>0.14.0</theories.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
@@ -856,7 +858,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.9.1</version> <!-- 1.8.0 requires some work ('net.jqwik.api.CannotFindArbitraryException's -->
+        <version>1.9.2</version>
       </dependency>
 
       <dependency>
