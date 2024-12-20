@@ -19,13 +19,13 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.0</spring.version>
-    <spring-security.version>6.3.4</spring-security.version>
-    <jackson2.version>2.18.1</jackson2.version>
+    <spring.version>6.2.1</spring.version>
+    <spring-security.version>6.4.2</spring-security.version>
+    <jackson2.version>2.18.2</jackson2.version>
 
-    <junit.version>5.11.3</junit.version>
+    <junit.version>5.11.4</junit.version>
     <mockito.version>5.14.2</mockito.version>
-    <assertj.version>3.26.3</assertj.version>
+    <assertj.version>3.27.0</assertj.version>
     <resteasy.version>7.0.0.Alpha4</resteasy.version>
 
     <!--
@@ -34,10 +34,10 @@
     -->
     <jboss-logging.version>3.6.1.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.15.10</bytebuddy.version>
+    <bytebuddy.version>1.15.11</bytebuddy.version>
     <slf4j.version>2.0.11</slf4j.version>
     <log4j2.version>2.22.1</log4j2.version>
-    <guava.version>33.3.1-jre</guava.version>
+    <guava.version>33.4.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.0</xmlunit.version>
@@ -60,7 +60,7 @@
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <camel.version>4.9.0</camel.version>
 
-    <swagger.version>2.2.26</swagger.version>
+    <swagger.version>2.2.27</swagger.version>
 
     <lombok.version>1.18.36</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -72,10 +72,10 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.14.1</micrometer.version>
-    <flyway.version>10.21.0</flyway.version>
+    <micrometer.version>1.14.2</micrometer.version>
+    <flyway.version>11.1.0</flyway.version>
 
-    <testcontainers.version>1.20.3</testcontainers.version>
+    <testcontainers.version>1.20.4</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -548,7 +548,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.17.0</version>
+        <version>2.18.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -558,7 +558,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
-        <version>1.12.0</version>
+        <version>1.13.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -719,7 +719,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.18.1</version>
+        <version>1.18.3</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -795,7 +795,7 @@
       <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
-        <version>3.9.2</version>
+        <version>3.10.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -820,7 +820,7 @@
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-iso-639</artifactId>
-        <version>3.6</version>
+        <version>3.7</version>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
@@ -853,7 +853,7 @@
       <dependency>
         <groupId>io.github.java-diff-utils</groupId>
         <artifactId>java-diff-utils</artifactId>
-        <version>4.12</version>
+        <version>4.15</version>
       </dependency>
       <dependency>
         <groupId>net.jqwik</groupId>
@@ -905,7 +905,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.48.2</version>
+      <version>3.48.3</version>
       <optional>true</optional>
     </dependency>
     <dependency>
