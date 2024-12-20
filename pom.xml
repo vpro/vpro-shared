@@ -58,7 +58,7 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.8.1</camel.version>
+    <camel.version>4.9.0</camel.version>
 
     <swagger.version>2.2.26</swagger.version>
 
