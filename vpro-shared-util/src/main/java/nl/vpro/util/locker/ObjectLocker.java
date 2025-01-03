@@ -18,6 +18,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.functional.Predicates;
 import org.meeuw.functional.ThrowingConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -27,6 +29,9 @@ import nl.vpro.logging.Slf4jHelper;
  */
 @Slf4j
 public class ObjectLocker {
+
+    public static final Logger LOCKER_LOG = LoggerFactory.getLogger(ObjectLocker.class.getName() + ".LOCKER");
+
     public static Clock clock = Clock.systemUTC();
     public static ThrowingConsumer<Duration, InterruptedException> sleeper = (d) -> {
         Thread.sleep(d.toMillis());
@@ -258,7 +263,6 @@ public class ObjectLocker {
                 }
                 log.debug("Acquired and waited until {}", holder.availableAfter);
                 holder.availableAfter = null;
-
             }
 
             if (alreadyWaiting) {
@@ -270,7 +274,7 @@ public class ObjectLocker {
 
 
             if (holder.lock.getHoldCount() == 1) {
-                Slf4jHelper.log(log, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG,
+                Slf4jHelper.log(LOCKER_LOG, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG,
                     "Acquired lock for {} ({}) after {}{}", holder, reason, acquireTime,
                     delaying == null ? "" : (" (including a requested delay of " + delaying + ")")
                 );
@@ -363,7 +367,7 @@ public class ObjectLocker {
                     listener.unlock(lock, duration);
                 }
 
-                Slf4jHelper.log(log, duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG,
+                Slf4jHelper.log(LOCKER_LOG, duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG,
                     "Released lock for {} ({}) in {}", lock.key, lock.reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             if (lock.lock.isHeldByCurrentThread()) { // MSE-4946
