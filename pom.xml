@@ -24,8 +24,8 @@
     <jackson2.version>2.18.2</jackson2.version>
 
     <junit.version>5.11.4</junit.version>
-    <mockito.version>5.14.2</mockito.version>
-    <assertj.version>3.27.0</assertj.version>
+    <mockito.version>5.15.2</mockito.version>
+    <assertj.version>3.27.1</assertj.version>
     <resteasy.version>7.0.0.Alpha4</resteasy.version>
 
     <!--
@@ -58,7 +58,7 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.9.0</camel.version>
+    <camel.version>4.8.2</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.27</swagger.version>
 
@@ -905,7 +905,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.48.3</version>
+      <version>3.48.4</version>
       <optional>true</optional>
     </dependency>
     <dependency>
