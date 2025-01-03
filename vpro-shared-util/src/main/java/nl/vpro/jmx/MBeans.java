@@ -317,6 +317,14 @@ public class MBeans {
         return "String".equals(string) || StringUtils.isBlank(string);
     }
 
+
+    /**
+     * @since 5.4
+     */
+    public static String asString(String string, String defaultValue) {
+        return isBlank(string) ? defaultValue : string;
+    }
+
     /**
      * @since 4.0
      */
