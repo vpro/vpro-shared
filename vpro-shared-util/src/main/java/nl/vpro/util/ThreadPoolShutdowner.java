@@ -15,13 +15,17 @@ import org.junit.platform.launcher.TestPlan;
 @Log4j2
 public class ThreadPoolShutdowner implements TestExecutionListener {
 
+    @SuppressWarnings("resource")
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
 
         ThreadPools.shutdown();
-        log.info("Waiting for ForkJoinPool.commonPool() too");
+        log.debug("Waiting for ForkJoinPool.commonPool() too");
         // commonPool cannot be shut down. But you can wait for tasks
         boolean b = ForkJoinPool.commonPool().awaitQuiescence(100, TimeUnit.SECONDS);
+        if (! b) {
+            log.info("Awaiting common pool took too long");
+        }
 
     }
 
