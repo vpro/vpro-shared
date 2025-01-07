@@ -386,6 +386,25 @@ public class JAXBTestUtil {
             return myself;
         }
 
+        /**
+         * @since 5.4
+         */
+        @SuppressWarnings({"CatchMayIgnoreException"})
+        public S isSimilarTo(InputStream expected) {
+            if (roundTrip) {
+                try {
+                    rounded = roundTripAndSimilar(actual, expected);
+                } catch (Exception e) {
+                    Fail.fail(e.getMessage(), e);
+                }
+            } else {
+                String xml = marshal(actual);
+                similar(xml, expected);
+            }
+            return myself;
+        }
+
+
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S containsSimilar(String expected) {
             try {
@@ -425,6 +444,14 @@ public class JAXBTestUtil {
         }
 
         public XMLStringAssert isSimilarTo(String expected) {
+            similar(String.valueOf(actual), expected);
+            return myself;
+        }
+
+        /**
+         * @since 5.4
+         */
+        public XMLStringAssert isSimilarTo(InputStream expected) {
             similar(String.valueOf(actual), expected);
             return myself;
         }
