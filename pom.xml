@@ -25,7 +25,7 @@
 
     <junit.version>5.11.4</junit.version>
     <mockito.version>5.15.2</mockito.version>
-    <assertj.version>3.27.1</assertj.version>
+    <assertj.version>3.27.2</assertj.version>
     <resteasy.version>7.0.0.Alpha4</resteasy.version>
 
     <!--
@@ -73,7 +73,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.14.2</micrometer.version>
-    <flyway.version>11.1.0</flyway.version>
+    <flyway.version>11.1.1</flyway.version>
 
     <testcontainers.version>1.20.4</testcontainers.version>
 
