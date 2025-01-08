@@ -5,13 +5,17 @@
 Related to monitoring.
 
 This basically adds endpoints:
+
+[source]
+----
 /manage/health
 /manage/metrics
+----
 
 to a spring application.
 
-Normally just taking the dependency should suffice.
+Normally just taking the dependency should suffice. It can be configured with spring properties (`monitoring.*`, see link:src/main/java/nl/vpro/monitoring/config/MonitoringConfig.java[`MonitoringProperties`]), which the most important one may be
 
-TODO: test/document this a bit better?
+All have defaults, or can be set via system properties (such as for example the username/password for the monitoring endpoint)
 
 Used in spring openshift applications of VPRO and POMS

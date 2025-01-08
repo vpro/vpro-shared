@@ -19,8 +19,12 @@ places in VPRO artifacts.
 * link:vpro-shared-elasticsearch-client[vpro-shared-elasticsearch-client]: Related to elasticsearch low level client
 * link:vpro-shared-elasticsearch-high-level-client[vpro-shared-elasticsearch-high-level-client]: Related to elasticsearch high level client
 * link:vpro-shared-swagger3[vpro-shared-swagger3]: Some utilities related to swagger frontend and openapi. Depends on webjars to provide the actuall swagger frontend too
+
+* link:vpro-shared-monitoring[vpro-shared-monitoring]: Kind of like spring-actuator, for non-springboot applications. Providing the monitoring endpoints which can be used by openshift for example.
 * link:archived/vpro-shared-couchdb-util[vpro-shared-couchdb-util]: Lightweight and streaming couchdb clients
 * link:archived/vpro-shared-swagger[vpro-shared-swagger]: Some utilities related to swagger frontend. Depends on webjars.
+
+ r frontend. Depends on webjars.
 * ..
 
 == Builds
@@ -74,7 +78,7 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 
 | 5.4
 |
-| January 2025 
+| January 2025
 
 
 | 6.x >
