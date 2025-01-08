@@ -72,9 +72,14 @@ Release builds will be provided via https://search.maven.org/search?q=g:nl.vpro.
 | hibernate orm 6, hibernate search 7
 | May 2024
 
+| 5.4
+|
+| January 2025 
+
+
 | 6.x >
 | java 21 (released in sep. 2023)
-| 2024?
+| 2025?
 
 
 |===

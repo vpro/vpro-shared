@@ -3,7 +3,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.4-SNAPSHOT</version>
+    <version>5.5-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-bom</artifactId>
   <packaging>pom</packaging>
