@@ -693,7 +693,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public ObjectNode index(String id, byte[] o) {
         HttpEntity entity = entity(o);
-        return putEntity(indexPath(id), entity);
+        return postEntity(indexPath(id), entity);
     }
 
     public ObjectNode index(String id, Object o, Consumer<ObjectNode> sourceConsumer) {
