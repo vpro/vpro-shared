@@ -85,6 +85,19 @@ public class JAXBTestUtilTest {
     }
 
     @Test
+    public void testContainsFluentResult() {
+        Result<A> result = assertThatXml(new A()).containsSimilar("""
+            <b xmlns="urn:test:1234" i='1' j='2'>
+                        <value>bb</value>
+                           <c>cc</c>
+                     </b>""").getResult();
+        assertThat(result.rounded().getB().getJ()).isEqualTo(2);
+        assertThatXml(result.xml()).isSimilarTo("""
+            <a xmlns="urn:test:1234"><value>aa</value><b i="1" j="2"><value>bb</value><c>cc</c></b></a>
+            """);
+    }
+
+    @Test
     public void testContainsFluent() {
         A rounded = assertThatXml(new A()).containsSimilar("""
             <b xmlns="urn:test:1234" i='1' j='2'>
