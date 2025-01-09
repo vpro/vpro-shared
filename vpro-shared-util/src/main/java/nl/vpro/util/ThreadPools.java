@@ -95,7 +95,7 @@ public final class ThreadPools {
                 Thread.NORM_PRIORITY));
 
     public static void shutdown() {
-        log.info("Shutting down thread pools");
+        log.debug("Shutting down thread pools");
         copyExecutor.shutdown();
         startUpExecutor.shutdown();
         backgroundExecutor.shutdown();
