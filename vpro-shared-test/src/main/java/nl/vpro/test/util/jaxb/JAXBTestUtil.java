@@ -4,9 +4,8 @@
  */
 package nl.vpro.test.util.jaxb;
 
-import jakarta.xml.bind.*;
-import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -14,7 +13,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -26,6 +25,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.*;
+import jakarta.xml.bind.*;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
@@ -33,6 +34,8 @@ import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 import org.w3c.dom.Element;
 import org.w3c.dom.*;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.*;
 import org.xmlunit.XMLUnitException;
 import org.xmlunit.builder.DiffBuilder;
@@ -49,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Roelof Jan Koekoek
  * @since 1.6
  */
+@Slf4j
 public class JAXBTestUtil {
 
     private static final String LOCAL_URI = "uri:local";
@@ -61,7 +65,6 @@ public class JAXBTestUtil {
         marshal(object, (o) -> JAXB.marshal(o, writer));
         return writer.toString();
     }
-
     public static <T> Element marshalToElement(T object) {
         DOMResult writer = new DOMResult();
         marshal(object, (o) -> JAXB.marshal(o, writer));
@@ -133,15 +136,12 @@ public class JAXBTestUtil {
         return (T)JAXB.unmarshal(new StringReader(xml), input.getClass());
     }
 
-    /**
-     * Checks whether the
-     *
-     * @since 2.7
-     */
-    @SuppressWarnings("unchecked")
+
     @SneakyThrows
-    public static  <T> T roundTripContains(T input, boolean namespaceAware, String... contains) {
+    @SuppressWarnings("unchecked")
+    public static  <T> Result<T> roundTripAndSimilarResult(T input, boolean namespaceAware, String... contains) {
         Element xml = marshalToElement(input);
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(namespaceAware);
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -153,7 +153,7 @@ public class JAXBTestUtil {
             } catch (SAXException | IOException se) {
                 throw new RuntimeException(se);
             }
-            }).collect(Collectors.toList());
+        }).toList();
         for (Element elementToFind : elementsToFind) {
             NodeList elementsByTagName = xml.getElementsByTagName(elementToFind.getTagName());
             boolean found = false;
@@ -176,8 +176,34 @@ public class JAXBTestUtil {
                 assertThat(writer.toString()).contains(contains);
             }
         }
-        return (T)JAXB.unmarshal(new DOMSource(xml), input.getClass());
+
+
+        return new Result<>((T)JAXB.unmarshal(new DOMSource(xml), input.getClass()), () -> {
+            String str;
+            try {
+                DOMImplementationLS lsImpl = (DOMImplementationLS) xml.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
+                LSSerializer serializer = lsImpl.createLSSerializer();
+                serializer.getDomConfig().setParameter("xml-declaration", false);
+                str = serializer.writeToString(xml);
+            } catch (Exception e){
+                log.warn(e.getMessage());
+                str = marshal(input);
+            }
+            return str;
+        });
     }
+
+    /**
+     * Checks whether the
+     *
+     * @since 2.7
+     */
+
+    public static  <T> T roundTripContains(T input, boolean namespaceAware, String... contains) {
+        return roundTripAndSimilarResult(input, namespaceAware, contains).rounded();
+    }
+
+
     /**
      * Checks whether marshalled version of an object contains a certain piece of xml.
      *
@@ -186,6 +212,11 @@ public class JAXBTestUtil {
      public static  <T> T roundTripContains(T input, String... contains) {
          return roundTripContains(input, true, contains);
      }
+
+    public static  <T> Result<T> roundTripContainsResult(T input, String... contains) {
+        return roundTripAndSimilarResult(input, true, contains);
+    }
+
 
 
     @SafeVarargs
@@ -207,8 +238,16 @@ public class JAXBTestUtil {
      * Marshalls input and checks if it is similar to given string.
      * Then unmarshals it, and marshalls it another time. The result XMl should still be similar.
      */
-    @SuppressWarnings({"DuplicatedCode", "unchecked"})
+    @SuppressWarnings({"DuplicatedCode"})
     public static <T> T roundTripAndSimilar(T input, String expected) {
+        return roundTripAndSimilarResult(input, expected).rounded();
+    }
+
+    /**
+     * @since 5.4
+     */
+    @SuppressWarnings({"DuplicatedCode", "unchecked"})
+    public static <T> Result<T> roundTripAndSimilarResult(T input, String expected) {
         String xml = marshal(input);
         similar(xml, expected);
         Class<? extends T> clazz = (Class<? extends T>) input.getClass();
@@ -216,7 +255,7 @@ public class JAXBTestUtil {
         /// make sure unmarshalling worked too, by marshalling the result again.
         String xmlAfter = marshal(result);
         similar(xmlAfter, xml);
-        return result;
+        return new Result<>(result, xml);
     }
 
     public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, InputStream expected) throws IOException, SAXException {
@@ -250,13 +289,16 @@ public class JAXBTestUtil {
         }
     }
     public static <T> T roundTripAndSimilar(T input, InputStream expected) throws IOException {
-
         StringWriter writer = new StringWriter();
         IOUtils.copy(expected, writer, UTF_8);
         return roundTripAndSimilar(input, writer.toString());
     }
 
-
+    public static <T> Result<T> roundTripAndSimilarResult(T input, InputStream expected) throws IOException {
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(expected, writer, UTF_8);
+        return roundTripAndSimilarResult(input, writer.toString());
+    }
 
 
     public static <T> T roundTripAndSimilarAndEquals(T input, String expected) {
@@ -340,7 +382,7 @@ public class JAXBTestUtil {
         return new XMLObjectAssert<>(o);
     }
 
-    public static JAXBTestUtil.XMLStringAssert assertThatXml(String o) {
+    public static JAXBTestUtil.XMLStringAssert assertThatXml(CharSequence o) {
         return new XMLStringAssert(o);
     }
 
@@ -359,6 +401,8 @@ public class JAXBTestUtil {
 
         A rounded;
 
+        String xml;
+
         boolean roundTrip = true;
 
 
@@ -375,12 +419,15 @@ public class JAXBTestUtil {
         public S isSimilarTo(String expected) {
             if (roundTrip) {
                 try {
-                    rounded = roundTripAndSimilar(actual, expected);
+
+                    Result<A> result = roundTripAndSimilarResult(actual, expected);
+                    rounded = result.rounded();
+                    xml = result.xml();
                 } catch (Exception e) {
                     Fail.fail(e.getMessage(), e);
                 }
             } else {
-                String xml = marshal(actual);
+                xml = marshal(actual);
                 similar(xml, expected);
             }
             return myself;
@@ -393,12 +440,15 @@ public class JAXBTestUtil {
         public S isSimilarTo(InputStream expected) {
             if (roundTrip) {
                 try {
-                    rounded = roundTripAndSimilar(actual, expected);
+
+                    Result<A> result =  roundTripAndSimilarResult(actual, expected);
+                    rounded = result.rounded();
+                    xml = result.xml();
                 } catch (Exception e) {
                     Fail.fail(e.getMessage(), e);
                 }
             } else {
-                String xml = marshal(actual);
+                xml = marshal(actual);
                 similar(xml, expected);
             }
             return myself;
@@ -408,19 +458,20 @@ public class JAXBTestUtil {
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S containsSimilar(String expected) {
             try {
-                rounded = roundTripContains(actual, expected);
+                Result<A> result = roundTripContainsResult(actual, expected);
+                rounded = result.rounded;
+                xml = result.xml();
             } catch (Exception e) {
                 Fail.fail(e.getMessage(), e);
             }
             return myself;
-
         }
 
+        /**
+         * As {@code assertThat(}{@link #get()}{@code )}
+         */
         public AbstractObjectAssert<?, A> andRounded() {
-            if (rounded == null) {
-                throw new IllegalStateException("No similation was done already.");
-            }
-            return assertThat(rounded);
+            return assertThat(get());
         }
 
         public S isValid (javax.xml.validation.Validator validator) throws SAXException, IOException {
@@ -428,12 +479,34 @@ public class JAXBTestUtil {
             return myself;
         }
 
+        /**
+         * Returns the object as it is after marshalling/unmarshalling
+         * @return The object after a round trip
+         *
+         */
         public A get() {
             if (rounded == null) {
                 throw new IllegalStateException("No similation was done already.");
             }
             return rounded;
         }
+
+        /**
+         * Returns the object as it is after marshalling/unmarshalling
+         * @return The object after a round trip
+         *
+         */
+        public String xml() {
+            if (xml == null) {
+                throw new IllegalStateException("No marshalling was done already.");
+            }
+            return xml;
+        }
+
+        public Result<A> getResult() {
+            return new Result(rounded, xml);
+        }
+
 
     }
 
@@ -456,6 +529,22 @@ public class JAXBTestUtil {
             return myself;
         }
     }
+
+    /**
+     * @since 5.4
+     */
+    public record Result<A>(A rounded, Supplier<String> xmlSupplier) {
+
+        public Result(A rounded, String xml) {
+            this(rounded, () -> xml);
+        }
+
+        public String xml() {
+            return xmlSupplier.get();
+        }
+
+    }
+
 
     protected static void assertNoDifferences(Diff diff, byte[] input, byte[] expected) {
         if (diff.hasDifferences()) {

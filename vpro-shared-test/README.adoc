@@ -1,0 +1,24 @@
+= Test related utilities
+:toc:
+
+== Assertj
+
+- xml related assertions
+- json related assertions
+- serialization related assertions
+
+== Testcontainers
+
+(optional dependencies)
+
+- postgresql
+- elasticsearch
+
+== Jupiter/Junit5
+
+Some extension like
+
+- AbortOnException
+- DoAfterException
+- TestMDC
+- TimingExtension
