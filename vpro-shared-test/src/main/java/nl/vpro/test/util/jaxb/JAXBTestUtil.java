@@ -342,7 +342,7 @@ public class JAXBTestUtil {
             Diff diff = builder.build();
             assertNoDifferences(diff, input, expected);
         } catch (XMLUnitException xue) {
-            throw new AssertionError(xue.getMessage() + ": expected:\n" + new String(expected, UTF_8) + "\nactual:\n" + new String(input, UTF_8));
+            Fail.fail(xue.getMessage() + ": expected:\n" + new String(expected, UTF_8) + "\nactual:\n" + new String(input, UTF_8));
         }
     }
 
@@ -474,8 +474,12 @@ public class JAXBTestUtil {
             return assertThat(get());
         }
 
-        public S isValid (javax.xml.validation.Validator validator) throws SAXException, IOException {
-            validator.validate(new StreamSource(new StringReader(marshal(rounded))));
+        public S isValid(javax.xml.validation.Validator validator)  {
+            try {
+                validator.validate(new StreamSource(new StringReader(marshal(rounded))));
+            } catch (SAXException | IOException e) {
+                Fail.fail(e.getMessage(), e);
+            }
             return myself;
         }
 
