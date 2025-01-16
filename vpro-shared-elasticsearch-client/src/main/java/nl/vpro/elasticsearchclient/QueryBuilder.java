@@ -40,13 +40,13 @@ public class QueryBuilder {
     }
 
     public static ObjectNode must(ObjectNode query) {
-        ObjectNode bool = query.with(BOOL);
+        ObjectNode bool = query.withObject(P_BOOL);
         ArrayNode must = bool.withArray(MUST);
         ObjectNode clause = must.addObject();
         return clause;
     }
     public static ObjectNode filter(ObjectNode query) {
-        ObjectNode bool = query.with(BOOL);
+        ObjectNode bool = query.withObject(P_BOOL);
         ArrayNode must = bool.withArray(FILTER);
         ObjectNode clause = must.addObject();
         return clause;
@@ -54,27 +54,27 @@ public class QueryBuilder {
 
     public static ObjectNode mustTerm(ObjectNode query, String field, String value) {
         ObjectNode clause = must(query);
-        ObjectNode term = clause.with(TERM);
+        ObjectNode term = clause.withObject(P_TERM);
         term.put(field, value);
         return clause;
     }
 
     public static ObjectNode mustWildcard(ObjectNode query, String field, String value) {
         ObjectNode clause = must(query);
-        ObjectNode term = clause.with(WILDCARD);
+        ObjectNode term = clause.withObject(P_WILDCARD);
         term.put(field, value);
         return clause;
     }
 
     public static ObjectNode filterTerm(ObjectNode query, String field, String value) {
         ObjectNode clause = filter(query);
-        ObjectNode term = clause.with(TERM);
+        ObjectNode term = clause.withObject(P_TERM);
         term.put(field, value);
         return clause;
     }
 
     public static ObjectNode should(ObjectNode query) {
-        ObjectNode bool = query.with(BOOL);
+        ObjectNode bool = query.withObject(P_BOOL);
         ArrayNode must = bool.withArray(SHOULD);
         ObjectNode clause = must.addObject();
         return clause;
@@ -82,7 +82,7 @@ public class QueryBuilder {
 
     public static ObjectNode shouldTerm(ObjectNode query, String field, String value) {
         ObjectNode clause = should(query);
-        ObjectNode term = clause.with(TERM);
+        ObjectNode term = clause.withObject(P_TERM);
         term.put(field, value);
         return clause;
     }
@@ -92,8 +92,8 @@ public class QueryBuilder {
     }
 
     public static ObjectNode range(ObjectNode query, String field, Long start, Long stop) {
-        ObjectNode range = query.with(RANGE);
-        ObjectNode fieldObject = range.with(field);
+        ObjectNode range = query.withObject(P_RANGE);
+        ObjectNode fieldObject = range.withObject("/" + field);
         if (start != null) {
             fieldObject.put("gte", start);
         }
