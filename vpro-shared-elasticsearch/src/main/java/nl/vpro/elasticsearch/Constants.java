@@ -54,6 +54,7 @@ public class Constants {
         public static final String TERM = "term";
         public static final String P_TERM = "/" + TERM;
         public static final String WILDCARD = "wildcard";
+        public static final String P_WILDCARD = "/" + WILDCARD;
         public static final String TERMS = "terms";
         public static final String P_TERMS = "/" + TERMS;
         public static final String PREFIX = "prefix";
