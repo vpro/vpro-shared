@@ -68,6 +68,7 @@
     <dependency>
       <groupId>net.jqwik</groupId>
       <artifactId>jqwik</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -78,6 +79,7 @@
       <groupId>org.meeuw.math</groupId>
       <artifactId>mihxil-theories</artifactId>
       <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
