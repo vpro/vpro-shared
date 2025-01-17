@@ -163,6 +163,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         return result;
     }
 
+
+
     private Supplier<String> getBinary(List<File> executables, boolean optional) {
         Optional<File> f = getExecutable(executables);
         if (f.isEmpty()) {
@@ -170,11 +172,12 @@ public class CommandExecutorImpl implements CommandExecutor {
                 throw new RuntimeException("None of " + executables + " can be executed");
             } else {
                 //log.debug("None of {} can be executed", executables);
-                return new Supplier<String>() {
+                return new Supplier<>() {
                     @Override
                     public String get() {
                         return getExecutable(executables).map(File::getAbsolutePath).orElse(null);
                     }
+
                     @Override
                     public String toString() {
                         return String.valueOf(executables);
@@ -330,7 +333,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         final List<String> command = new ArrayList<>();
         final String b = binary.get();
         if (b == null) {
-            throw new IllegalStateException("No binary found");
+            throw new IllegalStateException("No binary found (%s)".formatted(binary));
         }
         command.add(binary.get());
         final ProcessBuilder pb = new ProcessBuilder(command);

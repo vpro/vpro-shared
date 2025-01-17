@@ -390,6 +390,7 @@ public class MBeans {
     }
 
     /**
+     * Created a new object name.
      * @since 2.10
      */
     public static ObjectName getObjectName(String prefix, Object object) {

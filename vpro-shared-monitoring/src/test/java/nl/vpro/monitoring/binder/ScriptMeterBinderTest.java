@@ -37,7 +37,7 @@ class ScriptMeterBinderTest {
     @Test
     public void test() {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        ScriptMeterBinder binder = new ScriptMeterBinder(commandExecutor, "/data/logs", "NATTY:1 week before now");
+        ScriptMeterBinder binder = new ScriptMeterBinder("test", commandExecutor, "/data/logs", "NATTY:1 week before now");
         binder.bindTo(registry);
         binder.run();
         assertThat(registry.getMetersAsString()).isEqualTo("""

@@ -95,7 +95,11 @@ public class MonitoringProperties {
     @Value("${monitoring.gaugeScript.enabled:true}")
     boolean meterGaugeScript;
 
-    @Value("${monitoring.gaugeScript:/parse_access_logs.pl,/parse_tomcat_access_logs.pl\t/data/logs\tNATTY:1 week before now}")
+    @Value("""
+    ${monitoring.gaugeScript:
+      /tmp/parse_access_logs.pl\t/data/logs\tNATTY:1 week before now
+      /tmp/parse_tomcat_access_logs.pl\t/data/logs\tNATTY:1 week before now
+    }""")
     String gaugeScript;
 
 }
