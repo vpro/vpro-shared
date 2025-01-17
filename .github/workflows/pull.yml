@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MAVEN_ARGS: '--no-transfer-progress'
     steps:
       - name: Cancel previous Action
         uses: styfle/cancel-workflow-action@0.12.1
@@ -21,7 +23,7 @@ jobs:
          distribution: 'temurin'
          java-version: 17
       - name: Build with Maven
-        run: mvn -ntp -fae -DskipITs=false -Dinteg.cluster.name=docker-elasticsearch -B  package
+        run: mvn  -fae -DskipITs=false -Dinteg.cluster.name=docker-elasticsearch -B  package
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2.16.1
         if: always()
