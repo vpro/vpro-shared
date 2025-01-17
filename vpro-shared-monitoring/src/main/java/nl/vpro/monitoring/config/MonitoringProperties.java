@@ -91,4 +91,11 @@ public class MonitoringProperties {
     @Value("${monitoring.minThreadDumpInterval:1h}")
     String minThreadDumpInterval = Duration.ofHours(1).toString();
 
+
+    @Value("${monitoring.gaugeScript.enabled:true}")
+    boolean meterGaugeScript;
+
+    @Value("${monitoring.gaugeScript:/parse_access_logs.pl,/parse_tomcat_access_logs.pl\t/data/logs\tNATTY:1 week before now}")
+    String gaugeScript;
+
 }
