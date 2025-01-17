@@ -295,10 +295,12 @@ public class MonitoringConfig {
 
         }
         if (properties.meterGaugeScript) {
-            String[] split = properties.gaugeScript.split("\t");
-
-            new ScriptMeterBinder(split[0].split(","),
-                Arrays.copyOfRange(split, 1, split.length)).bindTo(registry);
+            String[] lines = properties.gaugeScript.trim().split("\n");
+            for (String l : lines) {
+                String[] split = l.trim().split("\t");
+                new ScriptMeterBinder(split[0].split(","),
+                    Arrays.copyOfRange(split, 1, split.length)).bindTo(registry);
+            }
         }
     }
 
