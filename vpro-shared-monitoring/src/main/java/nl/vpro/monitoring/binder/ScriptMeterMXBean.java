@@ -7,4 +7,8 @@ public interface ScriptMeterMXBean {
     @Description("run")
     void run();
 
+    @Description("duration")
+    String getDuration();
+
+    void setDuration(String duration);
 }
