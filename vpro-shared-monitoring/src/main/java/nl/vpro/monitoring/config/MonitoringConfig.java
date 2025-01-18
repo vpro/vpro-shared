@@ -298,9 +298,11 @@ public class MonitoringConfig {
             String[] lines = properties.gaugeScript.trim().split("\n");
             for (String l : lines) {
                 String[] split = l.trim().split("\t");
-                new ScriptMeterBinder(split[0].split(","),
-                    split[1],
-                    Arrays.copyOfRange(split, 2, split.length)).bindTo(registry);
+                new ScriptMeterBinder(
+                    split[0],
+                    split[1].split(","),
+                    split[2],
+                    Arrays.copyOfRange(split, 3, split.length)).bindTo(registry);
             }
         }
     }
