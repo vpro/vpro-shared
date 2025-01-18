@@ -299,7 +299,8 @@ public class MonitoringConfig {
             for (String l : lines) {
                 String[] split = l.trim().split("\t");
                 new ScriptMeterBinder(split[0].split(","),
-                    Arrays.copyOfRange(split, 1, split.length)).bindTo(registry);
+                    split[1],
+                    Arrays.copyOfRange(split, 2, split.length)).bindTo(registry);
             }
         }
     }
