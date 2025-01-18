@@ -230,7 +230,7 @@ public interface CommandExecutor {
 
             }, args);
             submit.whenComplete((i, t) -> {
-                if (t != null && !(t instanceof CancellationException)) {
+                if (t != null && !(t instanceof CancellationException) && ! (t instanceof CommandExecutorImpl.NoBinaryFound)) {
                     if (t.getMessage() != null) {
                         getLogger().error(t.getMessage());
                     } else {

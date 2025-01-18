@@ -1,15 +1,13 @@
 package nl.vpro.monitoring.binder;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.natty.Parser;
@@ -29,6 +27,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     private Duration duration;
     private String[] arguments;
     private MeterRegistry meterRegistry;
+    private final Set<Meter.Id> registered = new CopyOnWriteArraySet<>();
 
     ScriptMeterBinder(String name, CommandExecutor commandExecutor, Duration duration, String... arguments) {
         this.commandExecutor = commandExecutor;
@@ -49,7 +48,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
                     .optional(true)
                     .build();
             }
-        }, Duration.parse(duration), arguments);
+        }, TimeUtils.parseDuration(duration).orElse(Duration.ofDays(1)), arguments);
     }
 
     @Override
@@ -69,21 +68,43 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
             args[0] = String.valueOf(duration.toMinutes());
             System.arraycopy(this.arguments, 0, args, 1, this.arguments.length);
             log.info("Executing {} with {}", commandExecutor.getBinary(), Arrays.asList(args));
-            commandExecutor.lines(args).forEach(l -> {
-                    ScriptGauge gauge = ScriptGauge.parse(l);
-                    AtomicDouble atomic = CACHE.computeIfAbsent(gauge.key(), (k) -> {
-                        Gauge.builder(gauge.name(), CACHE, c -> c.get(k).doubleValue())
-                            .tags(gauge.tags())
-                            .baseUnit(BaseUnits.EVENTS + "/" + duration)
-                            .description("Number of events per week")
-                            .register(meterRegistry);
-                        return new AtomicDouble(0);
-                    });
-                    atomic.set(gauge.value());
-                }
-            );
+            if (commandExecutor.getBinary().get() != null) {
+                commandExecutor.lines(args).forEach(l -> {
+                        log.info(l);
+                        ScriptGauge gauge = ScriptGauge.parse(l);
+                        AtomicDouble atomic = CACHE.computeIfAbsent(gauge.key(), (k) -> {
+                            Gauge numberOfEventsPerPeriod = Gauge.builder(gauge.name(), CACHE, c -> c.get(k).doubleValue())
+                                .tags(gauge.tags())
+                                .baseUnit(BaseUnits.EVENTS + "/" + duration)
+                                .description("Number of events per " + duration)
+                                .register(meterRegistry);
+                            registered.add(numberOfEventsPerPeriod.getId());
+                            return new AtomicDouble(0);
+                        });
+
+                        atomic.set(gauge.value());
+                    }
+                );
+                log.debug("done");
+            } else {
+                log.debug("Skipped {}", commandExecutor.getBinary());
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public String getDuration() {
+        return duration.toString();
+    }
+
+    @Override
+    public void setDuration(String duration) {
+        Duration parsed = Duration.parse(duration);
+        if (! parsed.equals(this.duration)) {
+            this.duration = parsed;
+            this.registered.forEach(i -> meterRegistry.remove(i));
         }
     }
 }
