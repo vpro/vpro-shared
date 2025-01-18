@@ -33,12 +33,13 @@ class ScriptMeterBinderTest {
             "methods	14	method=GET,api=pages",
             "api	100	api=pages"
         ));
+        when(commandExecutor.getBinary()).thenReturn(() -> "foobar");
     }
 
     @Test
     public void test() {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        ScriptMeterBinder binder = new ScriptMeterBinder("test", commandExecutor, Duration.ofDays(7), "/data/logs");
+        ScriptMeterBinder binder = new ScriptMeterBinder("test", Duration.ofHours(1), commandExecutor, Duration.ofDays(7), "/data/logs");
         binder.bindTo(registry);
         binder.run();
 

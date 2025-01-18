@@ -11,4 +11,9 @@ public interface ScriptMeterMXBean {
     String getDuration();
 
     void setDuration(String duration);
+
+    @Description("interval")
+    String getScheduleInterval();
+
+    void setScheduleInterval(String duration);
 }

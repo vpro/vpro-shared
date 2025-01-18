@@ -22,24 +22,28 @@ import nl.vpro.util.*;
 public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBean {
 
 
-    private final Map<String, AtomicDouble> CACHE = new ConcurrentHashMap<>();
+    private final Map<String, AtomicDouble> cache = new ConcurrentHashMap<>();
     private final CommandExecutor commandExecutor;
     private Duration duration;
     private String[] arguments;
     private MeterRegistry meterRegistry;
+    private ScheduledFuture<?> scheduledFuture;
+    private Duration interval;
     private final Set<Meter.Id> registered = new CopyOnWriteArraySet<>();
 
-    ScriptMeterBinder(String name, CommandExecutor commandExecutor, Duration duration, String... arguments) {
+    ScriptMeterBinder(String name, Duration interval, CommandExecutor commandExecutor, Duration duration, String... arguments) {
         this.commandExecutor = commandExecutor;
+        this.interval = interval;
         this.duration = duration;
         this.arguments = arguments;
         MBeans.registerBean(MBeans.getObjectNameWithName(this, name), this);
     }
 
 
-    public ScriptMeterBinder(String[] executables,  String duration, String... arguments) {
+    public ScriptMeterBinder(String interval, String[] executables,  String duration, String... arguments) {
         this(
             String.join(",", executables),
+            TimeUtils.parseDuration(interval).orElse(Duration.ofHours(1)),
             new AbstractCommandExecutorWrapper() {
             @Override
             protected CommandExecutor getWrapped() {
@@ -54,8 +58,16 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     @Override
     public void bindTo(@NotNull MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
-        ThreadPools.backgroundExecutor.scheduleAtFixedRate(this, 0, 1, TimeUnit.HOURS);
+        this.schedule();
     }
+
+    private void schedule() {
+        if (this.scheduledFuture != null) {
+            this.scheduledFuture.cancel(false);
+        }
+        this.scheduledFuture = ThreadPools.backgroundExecutor.scheduleAtFixedRate(this, 0, interval.getSeconds(), TimeUnit.SECONDS);
+    }
+
 
 
     private static final Parser PARSER = new Parser(TimeZone.getTimeZone(BindingUtils.DEFAULT_ZONE));
@@ -67,13 +79,13 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
             String[] args = new String[this.arguments.length + 1];
             args[0] = String.valueOf(duration.toMinutes());
             System.arraycopy(this.arguments, 0, args, 1, this.arguments.length);
-            log.info("Executing {} with {}", commandExecutor.getBinary(), Arrays.asList(args));
             if (commandExecutor.getBinary().get() != null) {
+                log.info("Executing {} with {}", commandExecutor.getBinary(), Arrays.asList(args));
                 commandExecutor.lines(args).forEach(l -> {
                         log.info(l);
                         ScriptGauge gauge = ScriptGauge.parse(l);
-                        AtomicDouble atomic = CACHE.computeIfAbsent(gauge.key(), (k) -> {
-                            Gauge numberOfEventsPerPeriod = Gauge.builder(gauge.name(), CACHE, c -> c.get(k).doubleValue())
+                        AtomicDouble atomic = cache.computeIfAbsent(gauge.key(), (k) -> {
+                            Gauge numberOfEventsPerPeriod = Gauge.builder(gauge.name(), cache, c -> c.get(k).doubleValue())
                                 .tags(gauge.tags())
                                 .baseUnit(BaseUnits.EVENTS + "/" + duration)
                                 .description("Number of events per " + duration)
@@ -87,7 +99,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
                 );
                 log.debug("done");
             } else {
-                log.debug("Skipped {}", commandExecutor.getBinary());
+                log.info("Skipped {}", commandExecutor.getBinary());
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -101,11 +113,26 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
 
     @Override
     public void setDuration(String duration) {
-        Duration parsed = Duration.parse(duration);
+        Duration parsed = TimeUtils.parseDuration(duration).orElse(this.duration);
         if (! parsed.equals(this.duration)) {
             this.duration = parsed;
             this.registered.forEach(i -> meterRegistry.remove(i));
-            CACHE.clear();
+            cache.clear();
         }
     }
+
+    @Override
+    public String getScheduleInterval() {
+        return interval.toString();
+    }
+
+    @Override
+    public void setScheduleInterval(String duration) {
+        Duration parsed = TimeUtils.parseDuration(duration).orElse(this.interval);
+        if (! parsed.equals(this.interval)) {
+            this.interval = parsed;
+            schedule();
+        }
+
+        }
 }
