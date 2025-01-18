@@ -587,10 +587,4 @@ public class CommandExecutorImpl implements CommandExecutor {
                 .collect(Collectors.joining(" ")));
     }
 
-    public static class NoBinaryFound extends IllegalStateException {
-
-        public NoBinaryFound(String s) {
-            super(s);
-        }
-    }
 }
