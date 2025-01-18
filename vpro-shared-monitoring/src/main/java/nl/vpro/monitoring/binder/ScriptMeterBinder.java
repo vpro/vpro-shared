@@ -6,10 +6,10 @@ import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.natty.Parser;
@@ -26,17 +26,19 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
 
     private final Map<String, AtomicDouble> CACHE = new ConcurrentHashMap<>();
     private final CommandExecutor commandExecutor;
-    private final String[] arguments;
+    private Duration duration;
+    private String[] arguments;
     private MeterRegistry meterRegistry;
 
-    ScriptMeterBinder(String name, CommandExecutor commandExecutor, String... arguments) {
+    ScriptMeterBinder(String name, CommandExecutor commandExecutor, Duration duration, String... arguments) {
         this.commandExecutor = commandExecutor;
+        this.duration = duration;
         this.arguments = arguments;
         MBeans.registerBean(MBeans.getObjectNameWithName(this, name), this);
     }
 
 
-    public ScriptMeterBinder(String[] executables,  String... arguments) {
+    public ScriptMeterBinder(String[] executables,  String duration, String... arguments) {
         this(
             String.join(",", executables),
             new AbstractCommandExecutorWrapper() {
@@ -47,7 +49,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
                     .optional(true)
                     .build();
             }
-        }, arguments);
+        }, Duration.parse(duration), arguments);
     }
 
     @Override
@@ -63,19 +65,17 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     @ManagedOperation
     public synchronized void run() {
         try {
-            String[] args = Stream.of(arguments).map(a -> {
-                if (a.startsWith("NATTY:")) {
-                    a = DateUtils.toInstant(PARSER.parse(a.substring("NATTY:".length())).get(0).getDates().get(0)).toString();
-                }
-                return a;
-            }).toArray(String[]::new);
+            String[] args = new String[this.arguments.length + 1];
+            args[0] = String.valueOf(duration.toMinutes());
+            System.arraycopy(this.arguments, 0, args, 1, this.arguments.length);
             log.info("Executing {} with {}", commandExecutor.getBinary(), Arrays.asList(args));
             commandExecutor.lines(args).forEach(l -> {
                     ScriptGauge gauge = ScriptGauge.parse(l);
                     AtomicDouble atomic = CACHE.computeIfAbsent(gauge.key(), (k) -> {
                         Gauge.builder(gauge.name(), CACHE, c -> c.get(k).doubleValue())
                             .tags(gauge.tags())
-                            .baseUnit(BaseUnits.EVENTS)
+                            .baseUnit(BaseUnits.EVENTS + "/" + duration)
+                            .description("Number of events per week")
                             .register(meterRegistry);
                         return new AtomicDouble(0);
                     });
