@@ -105,6 +105,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
         if (! parsed.equals(this.duration)) {
             this.duration = parsed;
             this.registered.forEach(i -> meterRegistry.remove(i));
+            CACHE.clear();
         }
     }
 }
