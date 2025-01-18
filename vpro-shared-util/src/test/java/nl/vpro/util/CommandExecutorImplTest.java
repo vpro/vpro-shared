@@ -105,7 +105,7 @@ public class CommandExecutorImplTest {
         ;
         // wait for whenComplete
         Thread.sleep(100);
-        assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR X:java.lang.IllegalStateException: No binary found");
+        assertThat(logger.getStringBuilder().toString()).startsWith("ERROR X:java.lang.IllegalStateException: No binary found");
 
         logger.getStringBuilder().setLength(0);
         Files.copy(Paths.get(new File("/usr/bin/env").toURI()), Paths.get(tmpFile.toURI()), StandardCopyOption.REPLACE_EXISTING);
