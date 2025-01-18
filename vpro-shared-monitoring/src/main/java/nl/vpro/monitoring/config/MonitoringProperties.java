@@ -97,8 +97,10 @@ public class MonitoringProperties {
 
     @Value("""
     ${monitoring.gaugeScript:
-      1h\t/tmp/parse_access_logs.pl\t7d
-      1h\t/tmp/parse_tomcat_access_logs.pl\t7d
+       1h\t/tmp/parse_access_logs.pl\t7d
+       5m\t/tmp/parse_access_logs.pl\t1h
+       1h\t/tmp/parse_tomcat_access_logs.pl\t7d
+       5m\t/tmp/parse_tomcat_access_logs.pl\t1h
     }""")
     String gaugeScript;
 
