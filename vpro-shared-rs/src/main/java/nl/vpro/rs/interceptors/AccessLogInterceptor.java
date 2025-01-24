@@ -3,8 +3,7 @@ package nl.vpro.rs.interceptors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,6 +18,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
+import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.mdc.MDCConstants;
 import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.util.*;
@@ -98,5 +98,19 @@ public class AccessLogInterceptor implements ContainerRequestFilter {
     @ManagedAttribute
     public void setTruncateAfter(int truncateAfter) {
         this.truncateAfter = truncateAfter;
+    }
+
+    @ManagedAttribute
+    public String getFilesPath() {
+        return filesPath == null ? null : filesPath.toString();
+    }
+
+    @ManagedAttribute
+    public void setFilesPath(String string) {
+        if (MBeans.isBlank(string)) {
+            filesPath = null;
+        } else {
+            filesPath = Paths.get(string);
+        }
     }
 }
