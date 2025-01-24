@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.*;
+import java.util.function.BiConsumer;
+
+import org.meeuw.functional.Consumers;
 
 
 /**
@@ -15,10 +18,17 @@ public class FileInputStreamTee extends TruncatedObservableInputStream {
 
     private final OutputStream fileOutputStream;
 
-    public FileInputStreamTee(OutputStream fileOutputStream, InputStream wrapped) {
+    private final BiConsumer<Long, Boolean> consumer;
+
+    public FileInputStreamTee(OutputStream fileOutputStream, InputStream wrapped, BiConsumer<Long, Boolean> consumer) {
         super(wrapped);
         this.fileOutputStream = fileOutputStream;
+        this.consumer = consumer;
     }
+    public FileInputStreamTee(OutputStream fileOutputStream, InputStream wrapped) {
+        this(fileOutputStream, wrapped, Consumers.biNop());
+    }
+
 
     @Override
     void write(byte[] buffer, int offset, int effectiveLength) throws IOException {
@@ -34,6 +44,7 @@ public class FileInputStreamTee extends TruncatedObservableInputStream {
     @Override
     void closed(long count, boolean truncated) throws IOException {
         fileOutputStream.close();
+        this.consumer.accept(count, truncated);
     }
 
 }
