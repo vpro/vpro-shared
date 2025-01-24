@@ -67,6 +67,7 @@ public class AccessLogInterceptor implements ContainerRequestFilter {
                         inputStream = new LoggingInputStream(Slf4jSimpleLogger.slf4j(log), requestContext.getEntityStream());
                     } else {
                         Path file = filesPath.resolve(user + "-" + count + ".log");
+                        log.info("Writing request body to file {}", file);
                         inputStream = new FileInputStreamTee(Files.newOutputStream(file), requestContext.getEntityStream());
                     }
                     inputStream.setTruncateAfter(truncateAfter);
