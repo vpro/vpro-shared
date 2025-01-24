@@ -81,12 +81,16 @@ public class AccessLogInterceptor implements ContainerRequestFilter {
 
     @ManagedAttribute
     public String getForUser() {
-        return forUser.pattern();
+        return forUser == null ? null : forUser.pattern();
     }
 
     @ManagedAttribute
     public void setForUser(String pattern) {
-        this.forUser = Pattern.compile(pattern);
+        if (MBeans.isBlank(pattern)) {
+            this.forUser = null;
+        } else {
+            this.forUser = Pattern.compile(pattern);
+        }
     }
 
     @ManagedAttribute
