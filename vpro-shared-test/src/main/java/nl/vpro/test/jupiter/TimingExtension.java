@@ -20,6 +20,8 @@ import nl.vpro.logging.Log4j2Helper;
  * Simple extension that times every individual test in the class.
  * <p >
  * It will be reported after each test, and again after all tests of the class have run. There is also a duration reported for all tests together then.
+ * <p>
+ *  If the test is {@link RepeatedTest repeated}, then the <em>average</em> duration will be reported.
  * @since 5.2
  */
 @SuppressWarnings("unchecked")
