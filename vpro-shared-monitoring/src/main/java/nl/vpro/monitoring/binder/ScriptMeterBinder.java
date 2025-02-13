@@ -25,7 +25,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     private final Map<String, AtomicDouble> cache = new ConcurrentHashMap<>();
     private final CommandExecutor commandExecutor;
     private Duration duration;
-    private String[] arguments;
+    private final String[] arguments;
     private MeterRegistry meterRegistry;
     private ScheduledFuture<?> scheduledFuture;
     private Duration interval;
@@ -99,7 +99,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
                 );
                 log.debug("done");
             } else {
-                log.info("Skipped {}", commandExecutor.getBinary());
+                log.info("Skipped {} {}", commandExecutor.getBinary(), Arrays.asList(args));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
