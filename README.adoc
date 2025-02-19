@@ -23,8 +23,6 @@ places in VPRO artifacts.
 * link:vpro-shared-monitoring[vpro-shared-monitoring]: Kind of like spring-actuator, for non-springboot applications. Providing the monitoring endpoints which can be used by openshift for example.
 * link:archived/vpro-shared-couchdb-util[vpro-shared-couchdb-util]: Lightweight and streaming couchdb clients
 * link:archived/vpro-shared-swagger[vpro-shared-swagger]: Some utilities related to swagger frontend. Depends on webjars.
-
- r frontend. Depends on webjars.
 * ..
 
 == Builds
