@@ -1612,11 +1612,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         waitForHealth(client, log, Duration.ofMinutes(1));
     }
     public static void waitForHealth(RestClient client, SimpleLogger log, Duration timeOut) {
-        waitForHealth(client, log, timeOut, "green");
+        waitForHealth(client, log, timeOut, Status.green);
     }
 
-
+    @Deprecated
     public static void waitForHealth(RestClient client, SimpleLogger log, Duration timeOut, String waitForStatus) {
+        waitForHealth(client, log, timeOut, Status.valueOf(waitForStatus));
+    }
+
+    public static void waitForHealth(RestClient client, SimpleLogger log, Duration timeOut, Status waitForStatus) {
         int count = 1;
         Instant start = Instant.now();
         while (true) {
@@ -1628,7 +1632,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     Request request = new Request(GET, "/_cluster/health");
                     request.setOptions(request.getOptions()
                     .toBuilder()
-                    .addParameter("wait_for_status", waitForStatus)
+                    .addParameter("wait_for_status", waitForStatus.name())
                     .addParameter("timeout", "10s")
                     .addHeader("accept", "application/json"));
 
@@ -1650,9 +1654,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 JsonNode clusterHealth = LENIENT
                     .readerFor(JsonNode.class)
                     .readValue(response.getEntity().getContent());
-                String status = clusterHealth.get("status").textValue();
+                Status status = Status.valueOf(clusterHealth.get("status").textValue());
                 log.info("status {}", status);
-                boolean serviceIsUp = waitForStatus.equals(status);
+                boolean serviceIsUp = status.compareTo(waitForStatus) >= 0;
                 if (serviceIsUp) {
                     break;
                 } else {
