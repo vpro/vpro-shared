@@ -108,12 +108,12 @@ public class BatchedReceiverTest {
 
 
 
-     @Test
+    @Test
     public void testWithTokens() {
         AtomicInteger offset = new AtomicInteger(0);
         BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
-                .<WithToken>initialAndResumption(
+                .initialAndResumption(
                     () -> WithToken.forToken(null),
                     (withToken) -> WithToken.forToken(withToken.token),
                     (withToken) -> withToken.result.iterator())
