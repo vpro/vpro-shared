@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.function.*;
 
 /**
- * Given some API which supplies only 'batched' retrieval (so with offset and max/batchsize parameters),
+ * Given some API which supplies only 'batched' retrieval (so e.g. with offset and max/batchsize parameters),
  * access such an API as an iterator to visit all elements.
  * <p>
  * If an API provides access to huge set of elements, they often do it with some paging mechanism, or by some 'resumption token' formalism. With {@link BatchedReceiver} this can be morphed into a simple {@link java.util.Iterator}.
@@ -30,6 +30,7 @@ import java.util.function.*;
  * }</pre>
  * <h3>Resumption token formalism</h3>
  * You simply provide a {@link java.util.function.Supplier}. A lambda would probably not suffice because you might need the previous result the get the next one. E.g. this (using olingo code)
+ * <h4>Just use a supplier</h4>
  * <pre>
  * {@code
  *    public Iterator<ClientEntity> iterate(URIBuilder ub) {
@@ -50,6 +51,33 @@ import java.util.function.*;
  *     }
  * }
  * </pre>
+ * <h4>An initial supplier and a 'next page'</h4>
+ * This case could actually be simplified like so
+ * <pre>
+ *  {@code
+ *      public Iterator<ClientEntity> iterate(URIBuilder ub) {
+ *           return BatchedReceiver.<ClientEntity>builder()
+ *               .initialAndResumption(
+ *                     () -> query(ub),
+ *                     (result) -> query(result.getNext()),
+ *                     (result) -> result.getEntities().iterator()
+ *               .build();
+ *       }
+ *   }
+ * </pre>
+ * If the result is an {@link Iterable} itself, it can be
+ * <pre>
+ * @{code
+ *  public Iterator<ClientEntity> iterate(URIBuilder ub) {
+ *             return BatchedReceiver.<ClientEntity>builder()
+ *                 .initialAndResumption(
+ *                       () -> query(ub),
+ *                       (result) -> query(result.getNext())
+ *                 .build();
+ * }
+ * </pre>
+ *
+ *
  *
  * @author Michiel Meeuwissen
  * @since 1.68
@@ -90,6 +118,18 @@ public class BatchedReceiver<T> implements Iterator<T> {
         private BatchType batchType = null;
 
 
+        /**
+         * For paging with 'resumption tokens' it is convenient to have
+         * multiple paths.
+         * <p>
+         * See {@link #initialAndResumption(Supplier, UnaryOperator)} if the received objects are iterable themselves,
+         * in which case two parameter suffice.
+         *
+         * @param initial A supplier to get the object representing the first batch
+         * @param resumption A function to get the next batch from the previous one
+         * @param getter A function to get the iterator from the object representing the batch
+         * @since 5.6
+         */
         public <X> Builder<T> initialAndResumption(
             Supplier<X> initial,
             UnaryOperator<X> resumption,
@@ -110,6 +150,21 @@ public class BatchedReceiver<T> implements Iterator<T> {
                     return  getter.apply(x);
                 }
             });
+        }
+
+        /**
+         * @param initial A supplier to get the {@link Iterable} representing the first batch
+         * @param resumption A function to get the next batch from the previous one
+         * @see #initialAndResumption(Supplier, UnaryOperator, Function)
+         * @since 5.6
+         */
+        public <X extends Iterable<T>> Builder<T> initialAndResumption(
+            Supplier<X> initial,
+            UnaryOperator<X> resumption) {
+            return initialAndResumption(
+                initial,
+                resumption,
+                Iterable::iterator);
         }
 
 

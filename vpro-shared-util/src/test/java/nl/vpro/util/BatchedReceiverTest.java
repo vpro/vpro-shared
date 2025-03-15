@@ -83,13 +83,18 @@ public class BatchedReceiverTest {
     }
 
     @Getter
-    static class WithToken {
+    static class WithToken implements Iterable<String> {
         final List<String> result;
         final Integer token;
 
         WithToken(List<String> result, Integer token) {
             this.result = result;
             this.token = token;
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return result.iterator();
         }
 
         static WithToken forToken(Integer token) {
@@ -115,11 +120,11 @@ public class BatchedReceiverTest {
             BatchedReceiver.<String>builder()
                 .initialAndResumption(
                     () -> WithToken.forToken(null),
-                    (withToken) -> WithToken.forToken(withToken.token),
-                    (withToken) -> withToken.result.iterator())
+                    (withToken) -> WithToken.forToken(withToken.token))
                 .build();
 
-        assertThat(i).toIterable().containsExactly("0", "a", "a1", "b1", "a2", "b2", "a3", "b3", "a4", "b4", "a5", "b5", "a6", "b6", "a7", "b7", "a8", "b8", "a9", "b9");
+        assertThat(i).toIterable().containsExactly(
+            "0", "a", "a1", "b1", "a2", "b2", "a3", "b3", "a4", "b4", "a5", "b5", "a6", "b6", "a7", "b7", "a8", "b8", "a9", "b9");
 
 
 
