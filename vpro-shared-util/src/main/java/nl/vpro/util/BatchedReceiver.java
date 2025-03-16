@@ -3,8 +3,7 @@ package nl.vpro.util;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.*;
 
 /**
@@ -86,120 +85,41 @@ import java.util.function.*;
 @Slf4j
 public class BatchedReceiver<T> implements Iterator<T> {
 
-    final Integer batchSize;
+    /**
+     * Supplies the next iterator.
+     */
+    final Supplier<Optional<Iterator<T>>> supplier;
 
-    final BiFunction<Long, Integer, Iterator<T>> batchGetter;
-
+    /**
+     * The count in the current batch
+     */
     long subCount = 0;
+
+    /**
+     * The current offset
+     */
     long offset;
+
+    /**
+     * The currently active iterator
+     */
     Iterator<T> subIterator;
+
     Boolean hasNext;
     T next;
 
 
-    @lombok.Builder(builderClassName = "Builder", buildMethodName = "_build")
-    public BatchedReceiver(
-        Integer batchSize,
+    @lombok.Builder(
+        builderClassName = "Builder",
+        buildMethodName = "_build")
+    private BatchedReceiver(
         Long offset,
-        BiFunction<Long, Integer, Iterator<T>> _batchGetter) {
-        this.batchSize = batchSize;
-        this.batchGetter = _batchGetter;
+        Supplier<Optional<Iterator<T>>> supplier) {
+        this.supplier = supplier;
         this.offset = offset == null ? 0L : offset;
     }
 
-    private enum BatchType {
-        BIFUNCTION,
-        SUPPLIER
-    }
 
-
-    public static class Builder<T> {
-
-        private BatchType batchType = null;
-
-
-        /**
-         * For paging with 'resumption tokens' it is convenient to have
-         * multiple paths.
-         * <p>
-         * See {@link #initialAndResumption(Supplier, UnaryOperator)} if the received objects are iterable themselves,
-         * in which case two parameter suffice.
-         *
-         * @param initial A supplier to get the object representing the first batch
-         * @param resumption A function to get the next batch from the previous one
-         * @param getter A function to get the iterator from the object representing the batch
-         * @since 5.6
-         */
-        public <X> Builder<T> initialAndResumption(
-            Supplier<X> initial,
-            UnaryOperator<X> resumption,
-            Function<X, Iterator<T>> getter) {
-            return batchGetter(new Supplier<Iterator<T>>() {
-                X x = null;
-
-                @Override
-                public Iterator<T> get() {
-                    if (x == null) {
-                        x = initial.get();
-                    } else {
-                        x = resumption.apply(x);
-                        if (x == null) {
-                            return null;
-                        }
-                    }
-                    return  getter.apply(x);
-                }
-            });
-        }
-
-        /**
-         * @param initial A supplier to get the {@link Iterable} representing the first batch
-         * @param resumption A function to get the next batch from the previous one
-         * @see #initialAndResumption(Supplier, UnaryOperator, Function)
-         * @since 5.6
-         */
-        public <X extends Iterable<T>> Builder<T> initialAndResumption(
-            Supplier<X> initial,
-            UnaryOperator<X> resumption) {
-            return initialAndResumption(
-                initial,
-                resumption,
-                Iterable::iterator);
-        }
-
-
-        /**
-         * @param batchGetter A function to get the next batch, the parameters are the current necessary offset, and batch size
-         */
-        public Builder<T> batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
-            batchType = BatchType.BIFUNCTION;
-            return _batchGetter(batchGetter);
-        }
-
-        /**
-         * @param batchGetter For 'resumption token' like functionality, the offset and max argument can be irrelevant.
-         */
-        public Builder<T> batchGetter(final Supplier<Iterator<T>> batchGetter) {
-            batchType = BatchType.SUPPLIER;
-            return _batchGetter((offset, max) -> batchGetter.get());
-        }
-
-        public BatchedReceiver<T> build() {
-            if (_batchGetter == null) {
-                throw new IllegalStateException("No batch getter defined");
-            }
-            if (batchType == BatchType.BIFUNCTION && batchSize == null) {
-                log.debug("Specified a bifunction, and nobatch size. The batch size is implicetely set to 100");
-                batchSize(100);
-            }
-            if (batchType == BatchType.SUPPLIER && batchSize != null) {
-                log.warn("Specified a supplier, and a batch size. The batch size is ignored", new Exception());
-                batchSize(null);
-            }
-            return _build();
-        }
-
-    }
 
 
     @Override
@@ -219,38 +139,146 @@ public class BatchedReceiver<T> implements Iterator<T> {
     }
 
     protected void findNext() {
-        if (hasNext == null) {
+        while (hasNext == null) {
             if (subIterator == null) {
-                subIterator = batchGetter.apply(offset, batchSize);
+                Optional<Iterator<T>> optionalNewIterator = supplier.get();
                 subCount = 0;
-                if (subIterator == null) {
+                if (optionalNewIterator.isEmpty()) {
                     hasNext = false;
                     return;
+                } else {
+                    subIterator = optionalNewIterator.get();
                 }
             }
             if (subIterator.hasNext()) {
                 next = subIterator.next();
                 subCount++;
+                offset++;
                 hasNext = true;
+                return;
             } else {
-                offset += subCount;
-                if (batchSize == null || subCount == batchSize) {
-                    subIterator = batchGetter.apply(offset, batchSize);
-                } else {
-                    subIterator = null;
-                }
-                subCount = 0;
-                if (subIterator == null) {
-                    hasNext = false;
-                    return;
-                }
-                hasNext = subIterator.hasNext();
-                if (hasNext) {
-                    next = subIterator.next();
-                    subCount++;
-                }
+                hasNext = null;
+                subIterator = null;
             }
         }
     }
+
+    public static class Builder<T> {
+
+        private Integer batchSize = null;
+        private BiFunction<Long, Integer, Iterator<T>> batchGetter;
+
+
+        /**
+         * For paging with 'resumption tokens' it is convenient to have
+         * multiple paths.
+         * <p>
+         * See {@link #initialAndResumption(Supplier, UnaryOperator)} if the received objects are iterable themselves,
+         * in which case two parameter suffice.
+         *
+         * @param initial A supplier to get the object representing the first batch
+         * @param resumption A function to get the next batch from the previous one
+         * @param getter A function to get the iterator from the object representing the batch
+         * @since 5.6
+         */
+        public <X> Builder<T> initialAndResumption(
+            Supplier<X> initial,
+            Function<X, Optional<X>> resumption,
+            Function<X, Iterator<T>> getter) {
+
+            return supplier(new Supplier<>() {
+                X holder = null;
+
+                @Override
+                public Optional<Iterator<T>> get() {
+                    if (holder == null) {
+                        holder = initial.get();
+                    } else {
+                        holder = resumption.apply(holder).orElse(null);
+                        if (holder == null) {
+                            return Optional.empty();
+                        }
+                    }
+                    return Optional.of(getter.apply(holder));
+                }
+            });
+        }
+
+        /**
+         * @param initial A supplier to get the {@link Iterable} representing the first batch
+         * @param resumption A function to get the next batch from the previous one
+         * @see #initialAndResumption(Supplier, Function, Function)
+         * @since 5.6
+         */
+        public <X extends Iterable<T>> Builder<T> initialAndResumption(
+            Supplier<X> initial,
+            Function<X, Optional<X>> resumption) {
+            return initialAndResumption(
+                initial,
+                resumption,
+                Iterable::iterator);
+        }
+
+
+        /**
+         * @param batchGetter A function to get the next batch, the parameters are the current necessary offset, and batch size
+         */
+        public Builder<T> batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
+            this.batchGetter = batchGetter;
+            return this;
+        }
+
+        /**
+         * @param batchGetter For 'resumption token' like functionality, the offset and max argument can be irrelevant.
+         */
+        public Builder<T> batchGetter(final Supplier<Iterator<T>> batchGetter) {
+            return batchGetter((offset, max) -> batchGetter.get());
+        }
+
+        public Builder<T> batchSize(int batchSize) {
+            this.batchSize = batchSize;
+            return this;
+        }
+
+        public BatchedReceiver<T> build() {
+            if (batchGetter != null) {
+                if (supplier != null) {
+                    throw new IllegalStateException("Both batchGetter and supplier are defined");
+                }
+                if (batchSize == null) {
+                    log.debug("Specified a bifunction, and no batch size. The batch size is implicitly set to 100");
+                    batchSize(100);
+                }
+
+                Supplier<Iterator<T>> supplier = new Supplier<Iterator<T>>() {
+                    long offset = Builder.this.offset == null ? 0L: Builder.this.offset;
+                    Iterator<T> it = null;
+                    @Override
+                    public Iterator<T> get() {
+                        if (it != null) {
+                            offset += batchSize;
+                        }
+                        it = batchGetter.apply(offset, batchSize);
+                        if (!it.hasNext()) {
+                            return null;
+                        }
+                        return it;
+                    }
+                };
+                return
+                    supplier(() -> Optional.ofNullable(supplier.get())
+                    )._build();
+            }
+            if (batchSize != null) {
+                 throw new IllegalStateException("Specifying batch size only makes sense with a batchGetter");
+            }
+            if (supplier == null) {
+                throw new IllegalStateException("No supplier defined");
+            }
+            return _build();
+        }
+
+    }
+
 
 }

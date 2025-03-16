@@ -5,10 +5,12 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
@@ -17,12 +19,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Log4j2
 public class BatchedReceiverTest {
 
+    @Test
+    public void illegalConstruction() {
+        assertThatThrownBy(() ->
+            BatchedReceiver.builder().build()).isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() ->
+            BatchedReceiver.builder()
+                .supplier(Optional::empty)
+                .batchGetter((offset, max) -> Collections.emptyIterator())
+                .build()).isInstanceOf(IllegalStateException.class);
+    }
 
     @Test
-    public void test() {
+    public void testWithOffsetBatchGetter() {
         final List<String> result = new ArrayList<>();
         for (int i = 0; i < 23; i++) {
-            result.add("a" + i);
+            result.add(String.valueOf((char) ('a' + i)));
         }
         BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
@@ -35,6 +48,7 @@ public class BatchedReceiverTest {
 
         assertThat(i).toIterable().containsExactly(result.toArray(new String[0]));
 
+        assertThatThrownBy(i::next).isInstanceOf(NoSuchElementException.class);
     }
 
 
@@ -61,7 +75,7 @@ public class BatchedReceiverTest {
 
 
     @Test
-    public void testWithoutBatch() {
+    public void testWithoutBatchSize() {
         final List<String> result = new ArrayList<>();
         for (int i = 0; i < 23; i++) {
             result.add("a" + i);
@@ -96,30 +110,25 @@ public class BatchedReceiverTest {
         public Iterator<String> iterator() {
             return result.iterator();
         }
-
-        static WithToken forToken(Integer token) {
-            if (token == null) {
+        static WithToken initial() {
                 return new WithToken(List.of("0", "a"), 1);
-            } else {
-                if (token < 10) {
-                    return new WithToken(List.of("a" + token , "b" + token), token + 1);
-                } else {
-                    return null;
-                }
+        }
 
+        static Optional<WithToken> forToken(Integer token) {
+            if (token < 10) {
+                return Optional.of(new WithToken(List.of("a" + token , "b" + token), token + 1));
+            } else {
+                return Optional.empty();
             }
         }
     }
 
 
-
     @Test
     public void testWithTokens() {
-        AtomicInteger offset = new AtomicInteger(0);
         BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
-                .initialAndResumption(
-                    () -> WithToken.forToken(null),
+                .initialAndResumption(WithToken::initial,
                     (withToken) -> WithToken.forToken(withToken.token))
                 .build();
 
@@ -128,6 +137,31 @@ public class BatchedReceiverTest {
 
 
 
+    }
+
+     @Test
+    public void testWithSupplier() {
+         Supplier<Optional<Iterator<String>>> supplier = new Supplier<>() {
+             int i = 10;
+             @Override
+             public Optional<Iterator<String>> get() {
+                 if (i-- > 0 ) {
+                     if (i % 2 == 0) {
+                         return Optional.of(Collections.emptyIterator());
+                     }
+                     return Optional.of(List.of(String.valueOf((char) ('a' + i)), "x" + i).iterator());
+                 } else {
+                     return Optional.empty();
+                 }
+             }
+         };
+         BatchedReceiver<String> i =
+            BatchedReceiver.<String>builder()
+                .supplier(supplier)
+                .build();
+
+        assertThat(i).toIterable().containsExactly(
+            "j", "x9", "h", "x7", "f", "x5", "d", "x3", "b", "x1");
     }
 
 }
