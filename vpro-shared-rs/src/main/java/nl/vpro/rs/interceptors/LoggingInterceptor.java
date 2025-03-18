@@ -3,8 +3,6 @@ package nl.vpro.rs.interceptors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.MDC;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -12,11 +10,15 @@ import java.nio.charset.StandardCharsets;
 import jakarta.ws.rs.container.*;
 import jakarta.ws.rs.ext.Provider;
 
+import org.apache.commons.io.IOUtils;
+import org.slf4j.MDC;
 
 import nl.vpro.logging.mdc.MDCConstants;
 
 /**
+ * An {@link ContainerRequestFilter} which puts on {@link MDC} the (first part) of the POST or PUT body of request.
  * @author Michiel Meeuwissen
+ * @see AccessLogInterceptor For a more sophisticated version of this.
  * @since 1.79
  */
 @Getter

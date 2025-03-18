@@ -1,23 +1,19 @@
 package nl.vpro.monitoring.binder;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
-
-import jakarta.validation.constraints.NotNull;
-
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
-
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.natty.Parser;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
+import com.google.common.util.concurrent.AtomicDouble;
 
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.*;
@@ -60,7 +56,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     }
 
     @Override
-    public void bindTo(@NotNull MeterRegistry meterRegistry) {
+    public void bindTo(@NonNull MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         this.schedule();
     }

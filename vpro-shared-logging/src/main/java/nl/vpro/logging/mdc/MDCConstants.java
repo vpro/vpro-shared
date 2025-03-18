@@ -17,7 +17,9 @@ public class MDCConstants {
     public static final String REMOTE_ADDR  = "remoteAddr";
     public static final String USER_AGENT   = "userAgent";
     public static final String BODY         = "body";
+
     public static final String HEADERS      = "headers";
+    public static final String USER_COUNT      = "userCount";
 
 
     public static void onBehalfOf(String user) {
