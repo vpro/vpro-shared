@@ -38,7 +38,6 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Level;
 import nl.vpro.monitoring.binder.JvmMaxDirectMemorySize;
-import nl.vpro.monitoring.binder.ScriptMeterBinder;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
@@ -293,17 +292,6 @@ public class MonitoringConfig {
                 .description("The maximum number of locked objects in the same thread")
                 .register(registry);
 
-        }
-        if (properties.meterGaugeScript) {
-            String[] lines = properties.gaugeScript.trim().split("\n");
-            for (String l : lines) {
-                String[] split = l.trim().split("\t");
-                new ScriptMeterBinder(
-                    split[0],
-                    split[1].split(","),
-                    split[2],
-                    Arrays.copyOfRange(split, 3, split.length)).bindTo(registry);
-            }
         }
     }
 

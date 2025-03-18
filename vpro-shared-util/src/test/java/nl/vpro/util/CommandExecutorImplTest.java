@@ -105,7 +105,7 @@ public class CommandExecutorImplTest {
         ;
         // wait for whenComplete
         Thread.sleep(100);
-        assertThat(logger.getStringBuilder().toString()).startsWith("ERROR X:nl.vpro.util.NoBinaryFound: No binary found");
+        assertThat(logger.getStringBuilder().toString()).isEqualTo("ERROR X:java.lang.IllegalStateException: No binary found");
 
         logger.getStringBuilder().setLength(0);
         Files.copy(Paths.get(new File("/usr/bin/env").toURI()), Paths.get(tmpFile.toURI()), StandardCopyOption.REPLACE_EXISTING);
@@ -113,7 +113,7 @@ public class CommandExecutorImplTest {
         find.lines(".")
             .limit(20)
             .forEach(log::info);
-        assertThat(logger.getStringBuilder().toString()).doesNotContain("ERROR nl.vpro.util.NoBinaryFound");
+        assertThat(logger.getStringBuilder().toString()).doesNotContain("ERROR java.lang.IllegalStateException");
     }
 
     @Test
@@ -168,10 +168,10 @@ public class CommandExecutorImplTest {
     @Test
     public void invalidConstruction() throws IOException {
         new File("/tmp/foobar").delete();
-        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/foobar"), null)).isInstanceOf(NoBinaryFound.class);
-        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/"), null)).isInstanceOf(NoBinaryFound.class);
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/foobar"), null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/"), null)).isInstanceOf(IllegalArgumentException.class);
         new File("/tmp/pietjepuk").createNewFile();
-        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/pietjepuk"), null)).isInstanceOf(NoBinaryFound.class);
+        assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/pietjepuk"), null)).isInstanceOf(IllegalArgumentException.class);
     }
 
 

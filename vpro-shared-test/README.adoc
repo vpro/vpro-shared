@@ -7,13 +7,6 @@
 - json related assertions
 - serialization related assertions
 
-E.g.
-[source, java]
-----
-----
-
-
-
 == Testcontainers
 
 (optional dependencies)
