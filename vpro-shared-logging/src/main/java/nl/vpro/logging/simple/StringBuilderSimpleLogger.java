@@ -11,9 +11,9 @@ import java.util.function.Function;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
+@Getter
 public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger implements StringSupplierSimpleLogger {
 
-    @Getter
     final StringBuilder stringBuilder;
 
 
@@ -31,9 +31,29 @@ public class StringBuilderSimpleLogger extends AbstractStringBuilderSimpleLogger
         this(null, null, null, null);
     }
 
+    /**
+     * Convenience method to get the length of the underlying {@link #getStringBuilder() StringBuilder}
+     * @since 5.5
+     */
     @Override
-    int getLength() {
+    public int getLength() {
         return stringBuilder.length();
+    }
+
+    /**
+     * Convenience method to set the length of the underlying {@link #getStringBuilder() StringBuilder}
+     * @since 5.5
+     */
+    public void setLength(int newLength) {
+        stringBuilder.setLength(newLength);
+    }
+
+    /**
+     * Convenience method to empty the underlying {@link #getStringBuilder() StringBuilder}
+     * @since 5.5
+     */
+    public void empty() {
+        setLength(0);
     }
 
     @Override
