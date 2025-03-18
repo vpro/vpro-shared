@@ -109,9 +109,6 @@ public class BatchedReceiver<T> implements Iterator<T> {
     T next;
 
 
-    /**
-     * @param offset The initial offset, defaults to 0
-     */
     @lombok.Builder(
         builderClassName = "Builder",
         buildMethodName = "_build")
@@ -176,7 +173,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
          * For paging with 'resumption tokens' it is convenient to have
          * multiple paths.
          * <p>
-         * See {@link #initialAndResumption(Supplier, Function)} if the received objects are iterable themselves,
+         * See {@link #initialAndResumption(Supplier, UnaryOperator)} if the received objects are iterable themselves,
          * in which case two parameter suffice.
          *
          * @param initial A supplier to get the object representing the first batch
@@ -224,7 +221,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
 
 
         /**
-         * @param batchGetter A function to get the next batch by offset and batch size, the parameters are the current necessary offset, and batch size
+         * @param batchGetter A function to get the next batch, the parameters are the current necessary offset, and batch size
          */
         public Builder<T> batchGetter(BiFunction<Long, Integer, Iterator<T>> batchGetter) {
             this.batchGetter = batchGetter;
@@ -254,9 +251,13 @@ public class BatchedReceiver<T> implements Iterator<T> {
                 }
 
                 Supplier<Iterator<T>> supplier = new Supplier<Iterator<T>>() {
+                    long offset = Builder.this.offset == null ? 0L: Builder.this.offset;
                     Iterator<T> it = null;
                     @Override
                     public Iterator<T> get() {
+                        if (it != null) {
+                            offset += batchSize;
+                        }
                         it = batchGetter.apply(offset, batchSize);
                         if (!it.hasNext()) {
                             return null;
@@ -264,7 +265,6 @@ public class BatchedReceiver<T> implements Iterator<T> {
                         return it;
                     }
                 };
-
                 return
                     supplier(() -> Optional.ofNullable(supplier.get())
                     )._build();

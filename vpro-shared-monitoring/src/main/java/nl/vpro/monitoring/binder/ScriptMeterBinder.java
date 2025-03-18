@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.natty.Parser;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
@@ -56,7 +56,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     }
 
     @Override
-    public void bindTo(@NonNull MeterRegistry meterRegistry) {
+    public void bindTo(@NotNull MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         this.schedule();
     }

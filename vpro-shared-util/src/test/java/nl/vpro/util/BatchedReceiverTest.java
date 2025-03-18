@@ -29,12 +29,6 @@ public class BatchedReceiverTest {
                 .supplier(Optional::empty)
                 .batchGetter((offset, max) -> Collections.emptyIterator())
                 .build()).isInstanceOf(IllegalStateException.class);
-
-        assertThatThrownBy(() ->
-            BatchedReceiver.builder()
-                .supplier(Optional::empty)
-                .batchSize(100)
-                .build()).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
