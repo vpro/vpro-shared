@@ -96,13 +96,13 @@ public class CommandExecutorImpl implements CommandExecutor {
     public CommandExecutorImpl(File f, File workdir) {
         this(f.getAbsolutePath(), workdir);
         if (!f.exists()) {
-            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " not found!");
+            throw new NoBinaryFound("Executable " + f.getAbsolutePath() + " not found!");
         }
         if (f.isDirectory()) {
-            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " is a directory");
+            throw new NoBinaryFound("Executable " + f.getAbsolutePath() + " is a directory");
         }
         if (! f.canExecute()) {
-            throw new IllegalArgumentException("Executable " + f.getAbsolutePath() + " is a directory");
+            throw new NoBinaryFound("Executable " + f.getAbsolutePath() + " is a directory");
         }
     }
 
@@ -163,6 +163,8 @@ public class CommandExecutorImpl implements CommandExecutor {
         return result;
     }
 
+
+
     private Supplier<String> getBinary(List<File> executables, boolean optional) {
         Optional<File> f = getExecutable(executables);
         if (f.isEmpty()) {
@@ -170,11 +172,12 @@ public class CommandExecutorImpl implements CommandExecutor {
                 throw new RuntimeException("None of " + executables + " can be executed");
             } else {
                 //log.debug("None of {} can be executed", executables);
-                return new Supplier<String>() {
+                return new Supplier<>() {
                     @Override
                     public String get() {
                         return getExecutable(executables).map(File::getAbsolutePath).orElse(null);
                     }
+
                     @Override
                     public String toString() {
                         return String.valueOf(executables);
@@ -330,7 +333,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         final List<String> command = new ArrayList<>();
         final String b = binary.get();
         if (b == null) {
-            throw new IllegalStateException("No binary found");
+            throw new NoBinaryFound("No binary found (%s)".formatted(binary));
         }
         command.add(binary.get());
         final ProcessBuilder pb = new ProcessBuilder(command);
