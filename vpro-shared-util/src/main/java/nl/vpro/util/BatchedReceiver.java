@@ -250,16 +250,17 @@ public class BatchedReceiver<T> implements Iterator<T> {
                     batchSize(100);
                 }
 
-                Supplier<Iterator<T>> supplier = new Supplier<Iterator<T>>() {
-                    long offset = Builder.this.offset == null ? 0L: Builder.this.offset;
+                Supplier<Iterator<T>> supplier = new Supplier<>() {
+                    long offset = Builder.this.offset == null ? 0L : Builder.this.offset;
                     Iterator<T> it = null;
+
                     @Override
                     public Iterator<T> get() {
                         if (it != null) {
                             offset += batchSize;
                         }
                         it = batchGetter.apply(offset, batchSize);
-                        if (!it.hasNext()) {
+                        if (it == null || !it.hasNext()) {
                             return null;
                         }
                         return it;
