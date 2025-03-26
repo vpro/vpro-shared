@@ -31,23 +31,7 @@ public class Slf4jHelper {
 
     public static void log(Logger logger, Level level, String txt) {
         if (logger != null && level != null) {
-            switch (level) {
-            case TRACE:
-                logger.trace(txt);
-                break;
-            case DEBUG:
-                logger.debug(txt);
-                break;
-            case INFO:
-                logger.info(txt);
-                break;
-            case WARN:
-                logger.warn(txt);
-                break;
-            case ERROR:
-                logger.error(txt);
-                break;
-            }
+            logger.atLevel(level).log(txt);
         }
     }
 
@@ -61,27 +45,9 @@ public class Slf4jHelper {
      * If the "level" is null, nothing is logged. If the "format" or the "argArray"
      * are null, behaviour depends on the SLF4J-backing implementation.
      */
-
-    @SuppressWarnings("Duplicates")
     public static void log(Logger logger, Level level, String format, Object... argArray) {
         if (logger != null && level != null) {
-            switch (level) {
-            case TRACE:
-                logger.trace(format, argArray);
-                break;
-            case DEBUG:
-                logger.debug(format, argArray);
-                break;
-            case INFO:
-                logger.info(format, argArray);
-                break;
-            case WARN:
-                logger.warn(format, argArray);
-                break;
-            case ERROR:
-                logger.error(format, argArray);
-                break;
-            }
+            logger.atLevel(level).log(format, argArray);
         }
     }
 
@@ -105,41 +71,12 @@ public class Slf4jHelper {
     @SuppressWarnings("Duplicates")
     public static void log(Logger logger, Level level, String txt, Throwable throwable) {
         if (logger != null && level != null) {
-            switch (level) {
-            case TRACE:
-                logger.trace(txt, throwable);
-                break;
-            case DEBUG:
-                logger.debug(txt, throwable);
-                break;
-            case INFO:
-                logger.info(txt, throwable);
-                break;
-            case WARN:
-                logger.warn(txt, throwable);
-                break;
-            case ERROR:
-                logger.error(txt, throwable);
-                break;
-            }
+            logger.atLevel(level).log(txt, throwable);
         }
     }
 
     public static boolean isEnabled(@NonNull Logger logger, @NonNull Level level) {
-        switch (level) {
-            case TRACE:
-                return logger.isTraceEnabled();
-            case DEBUG:
-                return logger.isDebugEnabled();
-            case INFO:
-                return logger.isInfoEnabled();
-            case WARN:
-                return logger.isWarnEnabled();
-            case ERROR:
-                return logger.isErrorEnabled();
-            default:
-                return true;
-        }
+        return logger.isEnabledForLevel(level);
     }
 
 
