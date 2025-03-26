@@ -65,7 +65,7 @@ public class WellKnownController {
         // Get scheme - check forwarded headers first
         String scheme = request.getHeader("X-Forwarded-Proto");
         if (scheme == null) {
-        scheme = request.getScheme();
+            scheme = request.getScheme();
         }
 
         // Get host
