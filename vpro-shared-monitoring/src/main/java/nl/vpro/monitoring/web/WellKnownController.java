@@ -2,6 +2,10 @@ package nl.vpro.monitoring.web;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatusCode;
@@ -21,8 +25,14 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 public class WellKnownController {
 
+    Path file = Path.of("/well-known/security.txt");
+
     @GetMapping("/security.txt")
-    public String securityText() {
+    public String securityText() throws IOException {
+
+        if (Files.isReadable(file)) {
+            return Files.readString(file);
+        }
         String securityTxt = System.getenv("SECURITY_TXT");
         if (StringUtils.isNotBlank(securityTxt)) {
             return securityTxt;
