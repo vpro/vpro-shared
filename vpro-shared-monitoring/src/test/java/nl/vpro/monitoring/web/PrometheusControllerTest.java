@@ -3,7 +3,8 @@ package nl.vpro.monitoring.web;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -16,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-@ContextConfiguration(value = "/manage-servlet.xml")
+@ContextConfiguration(classes = Setup.class)
 class PrometheusControllerTest {
 
     @Autowired

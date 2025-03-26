@@ -55,8 +55,9 @@ public class MeterRegistryConfiguration {
 
     public static PrometheusMeterRegistry meterRegistry;
 
-    @Autowired(required = false)
-    public MonitoringProperties properties = new MonitoringProperties();
+
+    MonitoringProperties monitoringProperties = new MonitoringProperties();
+
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -77,7 +78,7 @@ public class MeterRegistryConfiguration {
     }
     @Bean
     public MonitoringProperties monitoringProperties() {
-        return new MonitoringProperties();
+        return monitoringProperties;
     }
 
 
@@ -127,14 +128,14 @@ public class MeterRegistryConfiguration {
 
     @SuppressWarnings("unchecked")
     protected void configure(MeterRegistry registry) {
-        if (properties.getCommonTags() != null) {
-            registry.config().commonTags(properties.getCommonTags().toArray(new String[0]));
+        if (monitoringProperties.getCommonTags() != null) {
+            registry.config().commonTags(monitoringProperties.getCommonTags().toArray(new String[0]));
         }
-        if (properties.isMeterClassloader()) {
+        if (monitoringProperties.isMeterClassloader()) {
             new ClassLoaderMetrics().bindTo(registry);
         }
 
-        if (properties.isMeterLog4j()) {
+        if (monitoringProperties.isMeterLog4j()) {
             if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
 
                 Log4j2Metrics metrics = new Log4j2Metrics();
@@ -144,37 +145,37 @@ public class MeterRegistryConfiguration {
         }
 
         final Optional<?> cacheManager = getCacheManager();
-        if (properties.isMeterJCache() && cacheManager.isPresent()) {
+        if (monitoringProperties.isMeterJCache() && cacheManager.isPresent()) {
             CacheManager manager = (CacheManager) cacheManager.get();
             manager.getCacheNames().forEach(cacheName -> {
                 new JCacheMetrics<>(manager.getCache(cacheName), Tags.empty()).bindTo(registry);
             });
         }
-        if (properties.isMeterJvmHeap()) {
+        if (monitoringProperties.isMeterJvmHeap()) {
             JvmHeapPressureMetrics metrics = new JvmHeapPressureMetrics();
             metrics.bindTo(registry);
             closables.add(metrics);
         }
-        if (properties.isMeterJvmGc()) {
+        if (monitoringProperties.isMeterJvmGc()) {
             JvmGcMetrics metrics = new JvmGcMetrics();
             metrics.bindTo(registry);
             closables.add(metrics);
         }
-        if (properties.isMeterJvmMemory()) {
+        if (monitoringProperties.isMeterJvmMemory()) {
             new JvmMemoryMetrics().bindTo(registry);
             new JvmMaxDirectMemorySize().bindTo(registry);
         }
-        if (properties.isMeterJvmThread()) {
+        if (monitoringProperties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
         }
 
 
-        if (properties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent() && classForName("org.hibernate.stat.Statistics").isPresent()) {
+        if (monitoringProperties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent() && classForName("org.hibernate.stat.Statistics").isPresent()) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
             if (sessionFactory.isPresent()) {
                 new HibernateMetrics(
                     sessionFactory.get(),
-                    properties.getMeterHibernateName(),
+                    monitoringProperties.getMeterHibernateName(),
                     Tags.empty()
                 ).bindTo(registry);
 
@@ -182,22 +183,22 @@ public class MeterRegistryConfiguration {
                 warn("No session factory to monitor (hibernate)");
             }
         }
-        if (properties.isMeterHibernateQuery() && classForName("org.hibernate.SessionFactory").isPresent()) {
+        if (monitoringProperties.isMeterHibernateQuery() && classForName("org.hibernate.SessionFactory").isPresent()) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
             if (sessionFactory.isPresent()) {
-                new HibernateQueryMetrics(sessionFactory.get(), properties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
+                new HibernateQueryMetrics(sessionFactory.get(), monitoringProperties.getMeterHibernateName(), Tags.empty()).bindTo(registry);
             } else {
                 warn("No session factory to monitor (hibernate query)");
             }
         }
 
         try {
-            if (properties.isMeterPostgres()) {
+            if (monitoringProperties.isMeterPostgres()) {
                 final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
                 if (dataSource.isPresent()) {
-                    if (properties.getPostgresDatabaseName() != null) {
-                        new PostgreSQLDatabaseMetrics(dataSource.get(), properties.getPostgresDatabaseName()).bindTo(registry);
+                    if (monitoringProperties.getPostgresDatabaseName() != null) {
+                        new PostgreSQLDatabaseMetrics(dataSource.get(), monitoringProperties.getPostgresDatabaseName()).bindTo(registry);
                     } else {
                         log.error("For metering postgres one should provide an existing database name");
                     }
@@ -208,11 +209,11 @@ public class MeterRegistryConfiguration {
         } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
             warn(String.format("No hibernate postgresql metrics. Missing class %s", noClassDefFoundError.getMessage()));
         }
-        if (properties.isMeterProcessor()) {
+        if (monitoringProperties.isMeterProcessor()) {
             new ProcessorMetrics().bindTo(registry);
         }
 
-        if (properties.isMeterCamel()) {
+        if (monitoringProperties.isMeterCamel()) {
             try {
                 if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
                     Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
@@ -240,17 +241,17 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (properties.isMeterTomcat() && getManager().isPresent()) {
+        if (monitoringProperties.isMeterTomcat() && getManager().isPresent()) {
             final Optional<Manager> manager = (Optional<Manager>) getManager();
             TomcatMetrics metrics = new TomcatMetrics(manager.get(), Tags.empty());
             metrics.bindTo(registry);
             closables.add(metrics);
         }
-        if (properties.isMeterUptime()) {
+        if (monitoringProperties.isMeterUptime()) {
             new UptimeMetrics().bindTo(registry);
         }
-        if (properties.getMeterVolumes() != null) {
-            for (String folder : properties.getMeterVolumes()) {
+        if (monitoringProperties.getMeterVolumes() != null) {
+            for (String folder : monitoringProperties.getMeterVolumes()) {
                 File dir = new File(folder);
                 if (dir.exists()) {
                     new DiskSpaceMetrics(dir).bindTo(registry);
@@ -259,7 +260,7 @@ public class MeterRegistryConfiguration {
                 }
             }
         }
-        if (properties.isMeterLocks()) {
+        if (monitoringProperties.isMeterLocks()) {
             ObjectLocker.listen((type, holder, duration) -> {
                 Object key = holder.key;
                 String keyType = key instanceof ObjectLocker.DefinesType ? String.valueOf(((ObjectLocker.DefinesType) key).getType()) : key.getClass().getSimpleName();
@@ -302,8 +303,8 @@ public class MeterRegistryConfiguration {
                 .register(registry);
 
         }
-        if (properties.meterGaugeScript) {
-            String[] lines = properties.gaugeScript.trim().split("\n");
+        if (monitoringProperties.meterGaugeScript) {
+            String[] lines = monitoringProperties.gaugeScript.trim().split("\n");
             for (String l : lines) {
                 String[] split = l.trim().split("\t");
                 new ScriptMeterBinder(
