@@ -66,10 +66,10 @@ It can be much simpler now, because newer servlet versions support 'web-fragment
 ----
 
  <absolute-ordering>
-    ...
+     <!-- other fragments -->
     <name>monitoring_endpoints</name>
   </absolute-ordering>
 ----
 All above stuff is arranged in vpro-shared-monitoring.jar itself.
 
-This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the environment variable `SECURITY_TXT` if set).
+This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the file /well-known/security.txt).
