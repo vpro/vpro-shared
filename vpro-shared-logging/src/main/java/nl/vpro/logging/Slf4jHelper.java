@@ -20,7 +20,7 @@ public class Slf4jHelper {
 
 
     public static void log(Logger logger, nl.vpro.logging.simple.Level level, String txt) {
-        log(logger, Level.valueOf(level.name()), txt);
+        logger.atLevel(Level.valueOf(level.name())).log(txt);
     }
 
     /**
@@ -28,7 +28,7 @@ public class Slf4jHelper {
      * If the "level" is null, nothing is logged. If the "txt" is null,
      * behaviour depends on the SLF4J implementation.
      */
-
+    @Deprecated
     public static void log(Logger logger, Level level, String txt) {
         if (logger != null && level != null) {
             logger.atLevel(level).log(txt);
@@ -37,7 +37,7 @@ public class Slf4jHelper {
 
 
     public static void log(Logger logger, nl.vpro.logging.simple.Level level, String format, Object... argArray) {
-        log(logger, Level.valueOf(level.name()), format, argArray);
+        logger.atLevel(Level.valueOf(level.name())).log(format, argArray);
     }
 
     /**
@@ -45,6 +45,7 @@ public class Slf4jHelper {
      * If the "level" is null, nothing is logged. If the "format" or the "argArray"
      * are null, behaviour depends on the SLF4J-backing implementation.
      */
+    @Deprecated
     public static void log(Logger logger, Level level, String format, Object... argArray) {
         if (logger != null && level != null) {
             logger.atLevel(level).log(format, argArray);
@@ -57,7 +58,7 @@ public class Slf4jHelper {
 
 
     public static void log(Logger logger, nl.vpro.logging.simple.Level level, String txt, Throwable throwable) {
-        log(logger, Level.valueOf(level.name()), txt, throwable);
+        logger.atLevel(Level.valueOf(level.name())).log(txt, throwable);
     }
 
 
@@ -69,12 +70,14 @@ public class Slf4jHelper {
      */
 
     @SuppressWarnings("Duplicates")
+    @Deprecated
     public static void log(Logger logger, Level level, String txt, Throwable throwable) {
         if (logger != null && level != null) {
             logger.atLevel(level).log(txt, throwable);
         }
     }
 
+    @Deprecated
     public static boolean isEnabled(@NonNull Logger logger, @NonNull Level level) {
         return logger.isEnabledForLevel(level);
     }
