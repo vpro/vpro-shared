@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.BadRequestException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -25,21 +25,26 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 public class WellKnownController {
 
-    Path file = Path.of("/well-known/security.txt");
 
-    @GetMapping("/security.txt")
-    public String securityText() throws IOException {
+    //if you need to test in macos, use /etc/synthetic.conf (/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t)
 
+    Path dir = Path.of("/well-known");
+
+    @GetMapping("/{file}")
+    public String securityText(@PathVariable(name="file") String fileName) throws IOException {
+
+        Path file = dir.resolve(Path.of(fileName));
+
+        if (!file.toAbsolutePath().normalize().startsWith(dir.toAbsolutePath().normalize())) {
+            throw new BadRequestException();
+        }
         if (Files.isReadable(file)) {
             return Files.readString(file);
         }
-        String securityTxt = System.getenv("SECURITY_TXT");
-        if (StringUtils.isNotBlank(securityTxt)) {
-            return securityTxt;
-        } else {
-            throw new ResponseStatusException(
-                HttpStatusCode.valueOf(404),
-                "No security.txt found");
-        }
+
+        throw new ResponseStatusException(
+            HttpStatusCode.valueOf(404),
+            "No %s found".formatted(fileName));
+
     }
 }
