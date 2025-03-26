@@ -1,0 +1,70 @@
+package nl.vpro.monitoring.config;
+
+import jakarta.inject.Inject;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
+@Configuration
+@EnableWebSecurity
+public class MonitoringWebSecurityConfiguration {
+
+    private final MonitoringProperties properties;
+
+    @Inject
+    public MonitoringWebSecurityConfiguration(MonitoringProperties properties, AuthenticationManagerBuilder auth) throws Exception {
+        this.properties = properties;
+        configure(auth);
+    }
+
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher(new OrRequestMatcher(
+            antMatcher("/manage/**"),
+            antMatcher("/.well-known/**")
+            )
+        );
+
+        if (properties.isHealthPermitAll()) {
+            http.authorizeHttpRequests((authz) -> {
+                authz.requestMatchers(
+                    antMatcher("/manage/health"),
+                    antMatcher("/.well-known/**")
+                ).permitAll();
+            });
+        }
+        http.authorizeHttpRequests((authz) -> {
+            authz.
+                requestMatchers(antMatcher("/manage/**"))
+                .hasRole("MANAGER");
+        }).httpBasic(
+            httpBasic -> httpBasic.realmName("manager"));
+        return http.build();
+    }
+
+
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        auth.inMemoryAuthentication()
+            .passwordEncoder(encoder)
+            .withUser(properties.getUser())
+            .password(encoder.encode(properties.getPassword()))
+            .roles("MANAGER")
+        ;
+    }
+
+
+}

@@ -1,9 +1,9 @@
 package nl.vpro.monitoring.web;
 
-import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.time.*;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,12 +43,7 @@ class HealthControllerTest {
     @BeforeEach
     public void setup() {
         this.healthController.clock = clock;
-        this.healthController.prometheusController = new PrometheusController(new PrometheusMeterRegistry(new PrometheusConfig() {
-            @Override
-            public String get(String s) {
-                return null;
-            }
-        }));
+        this.healthController.prometheusController = new PrometheusController(Optional.of(new PrometheusMeterRegistry(s -> null)));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         this.healthController.markReady(null);
     }

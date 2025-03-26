@@ -8,15 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
+import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.math.windowed.WindowedStatisticalLong;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
-import nl.vpro.logging.Slf4jHelper;
+import static nl.vpro.logging.Slf4jHelper.debugOrInfo;
 
 @Lazy(false)
 @RestController
@@ -26,10 +28,11 @@ public class PrometheusController {
     @Getter
     private final WindowedStatisticalLong duration = createDuration();
 
+    @Nullable
     private final PrometheusMeterRegistry registry;
 
-    public PrometheusController(PrometheusMeterRegistry registry) {
-        this.registry = registry;
+    public PrometheusController(Optional<PrometheusMeterRegistry> registry) {
+        this.registry = registry.orElse(null);
     }
 
     /**
@@ -60,7 +63,7 @@ public class PrometheusController {
             OutputStream writer = response.getOutputStream()) {
 
             Duration took = scrape(writer);
-            Slf4jHelper.debugOrInfo(log, took.compareTo(Duration.ofSeconds(2)) > 0, "Scraping Prometheus metrics took {}", took);
+            debugOrInfo(log, took.compareTo(Duration.ofSeconds(2)) > 0, "Scraping Prometheus metrics took {}", took);
         }
     }
     protected Duration scrape(OutputStream writer) throws IOException {

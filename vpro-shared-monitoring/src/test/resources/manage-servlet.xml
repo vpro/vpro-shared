@@ -10,7 +10,7 @@
 
   <bean class="nl.vpro.monitoring.config.MonitoringProperties" />
 
-  <bean class="nl.vpro.monitoring.config.MonitoringConfig"/>
+  <bean class="nl.vpro.monitoring.config.MeterRegistryConfiguration"/>
 
   <bean class="nl.vpro.monitoring.endpoints.MonitoringEndpoints"/>
 

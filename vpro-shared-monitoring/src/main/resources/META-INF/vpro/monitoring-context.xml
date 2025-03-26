@@ -13,6 +13,6 @@
 
   <context:annotation-config/>
 
-  <context:component-scan base-package="nl.vpro.monitoring.config"/>
+  <bean class="nl.vpro.monitoring.config.MeterRegistryConfiguration" />
 
 </beans>

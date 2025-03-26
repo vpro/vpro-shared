@@ -1,11 +1,8 @@
 package nl.vpro.monitoring.config;
 
-import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.*;
 
-
-import nl.vpro.monitoring.endpoints.MonitoringWebSecurityConfiguration;
+import org.springframework.context.annotation.Import;
 
 
 /**
