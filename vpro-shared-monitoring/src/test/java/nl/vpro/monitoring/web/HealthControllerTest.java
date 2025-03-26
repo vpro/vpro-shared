@@ -26,8 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-@ContextConfiguration("/manage-servlet.xml")
+@ContextConfiguration(classes = Setup.class)
 class HealthControllerTest {
+
+
 
     @Autowired
     private HealthController healthController;
