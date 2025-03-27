@@ -39,6 +39,10 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-test</artifactId>
     </dependency>
+     <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-web</artifactId>
+    </dependency>
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
@@ -46,7 +50,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
-      <version>10.1.34</version>
+      <version>10.1.39</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

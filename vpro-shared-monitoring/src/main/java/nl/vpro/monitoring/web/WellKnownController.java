@@ -9,18 +9,31 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import nl.vpro.web.HttpServletRequestUtils;
+
 
 /**
- * Support for /.well-known/security.txt. Picks up 'SECURITY_TXT' environment variable, and if set, services it out on /.well-known/security.txt.
+ * Support for files under /.well-known/ Noticeably <a href="https://securitytxt.org/">security.txt<a>
+ * <p>
+ * These files are just served from the directory '/well-known'. The idea is to mount a config map there (asuming kubernetes)
+ * <p>
+ * e.g. a file like 'security.txt' can be mounted
+ * <pre>
+ * Contact: mailto:poms@omreop.nl
+ * Expires: 2025-12-31T23:59:59+00:00
+ * Preferred-Languages: en,nl
+ * Canonical: ${REQUEST}
+ * </pre>
  *
  * @since 5.6
  */
@@ -31,23 +44,29 @@ import org.springframework.web.server.ResponseStatusException;
 public class WellKnownController {
 
 
-    @Inject
+    @Autowired
     HttpServletRequest request;
+
+    @Inject
+    HttpServletResponse response;
+
+
     //if you need to test in macos, use /etc/synthetic.conf (/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t)
 
-    Path dir = Path.of("/well-known");
+    final static Path DIR = Path.of("/well-known");
 
     @GetMapping("/{file}")
-    public String securityText(@PathVariable(name="file") String fileName) throws IOException {
+    public String wellKnownFile(@PathVariable(name="file") String fileName) throws IOException {
 
-        Path file = dir.resolve(Path.of(fileName));
+        Path file = DIR.resolve(Path.of(fileName));
 
-        if (!file.toAbsolutePath().normalize().startsWith(dir.toAbsolutePath().normalize())) {
+        if (!file.toAbsolutePath().normalize().startsWith(DIR)) {
             throw new BadRequestException();
         }
         if (Files.isReadable(file)) {
+            response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
             var placeHolders = Map.of(
-                "REQUEST", getOriginalRequestURL(request)
+                "REQUEST", HttpServletRequestUtils.getOriginalRequestURL(request)
             );
             StringSubstitutor substitutor = new StringSubstitutor(placeHolders);
             return substitutor.replace(Files.readString(file));
@@ -60,44 +79,5 @@ public class WellKnownController {
     }
 
 
-    private static  String getOriginalRequestURL(HttpServletRequest request) {
 
-        // Get scheme - check forwarded headers first
-        String scheme = request.getHeader("X-Forwarded-Proto");
-        if (scheme == null) {
-            scheme = request.getScheme();
-        }
-
-        // Get host
-        String host = request.getHeader("X-Forwarded-Host");
-        if (host == null) {
-            host = request.getServerName();
-        }
-
-        // Get port
-        int port = request.getServerPort();
-        String portHeader = request.getHeader("X-Forwarded-Port");
-        if (portHeader != null) {
-            try {
-                port = Integer.parseInt(portHeader);
-            } catch (NumberFormatException e) {
-                // Use default port if header is invalid
-            }
-        }
-
-        // Build URL with port only if non-standard
-        StringBuilder url = new StringBuilder();
-        url.append(scheme).append("://").append(host);
-        if (!((scheme.equals("http") && port == 80) || (scheme.equals("https") && port == 443))) {
-            url.append(":").append(port);
-        }
-
-        // Add path and query string
-        url.append(request.getRequestURI());
-        if (request.getQueryString() != null) {
-            url.append("?").append(request.getQueryString());
-    }
-
-        return url.toString();
-    }
 }
