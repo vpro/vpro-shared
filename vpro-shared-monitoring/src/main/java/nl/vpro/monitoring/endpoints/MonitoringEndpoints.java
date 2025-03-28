@@ -8,20 +8,17 @@ import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import nl.vpro.jackson2.DateModule;
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.monitoring.config.*;
+import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.web.HealthController;
 import nl.vpro.monitoring.web.PrometheusController;
 
 @Configuration
-@EnableWebSecurity
-@EnableMonitoringWebSecurity
 public class MonitoringEndpoints {
 
 
