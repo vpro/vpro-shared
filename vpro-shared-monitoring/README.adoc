@@ -72,4 +72,6 @@ It can be much simpler now, because newer servlet versions support 'web-fragment
 ----
 All above stuff is arranged in vpro-shared-monitoring.jar itself.
 
+Not that this does require the jar to be included in 'jarsToScan' of tomcat. The ghcr.io/vpro/tomcat is ok in version >= 10.26
+
 This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the file /well-known/security.txt).
