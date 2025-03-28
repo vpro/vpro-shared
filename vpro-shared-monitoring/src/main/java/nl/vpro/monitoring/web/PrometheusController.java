@@ -116,10 +116,15 @@ public class PrometheusController {
             .build();
     }
 
+
+    private boolean authenticate() throws IOException {
+        return authenticate(request, response, properties);
+    }
+
     /**
      * We used to do this via spring security, but that's all pretty cumbersome, and some applications (e.g. image frontend does not even need spring security).
      */
-    private boolean authenticate() throws IOException {
+    static boolean authenticate(HttpServletRequest request, HttpServletResponse response, MonitoringProperties properties) throws IOException {
         String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (auth == null || !auth.startsWith("Basic ")) {
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"manager\"");

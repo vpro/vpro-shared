@@ -2,6 +2,8 @@ package nl.vpro.monitoring.web;
 
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
+import java.io.IOException;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +47,7 @@ class PrometheusControllerTest {
     }
 
     @Test
-    void initialValues() {
+    void initialValues() throws IOException {
         // Pragmatic testing of initial values. Using #wac and #mockMvc is more or less impossible.
         HealthController healthController = new HealthController();
         healthController.monitoringProperties = new MonitoringProperties();

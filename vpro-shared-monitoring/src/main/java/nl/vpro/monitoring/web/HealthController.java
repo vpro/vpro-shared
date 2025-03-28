@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.output.NullOutputStream;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -55,6 +57,11 @@ public class HealthController {
 
     protected AtomicLong prometheusDownCount = new AtomicLong(0);
 
+    @Inject
+    private HttpServletRequest request;
+    @Inject
+    private HttpServletResponse response;
+
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
      */
@@ -87,80 +94,84 @@ public class HealthController {
     }
 
     @GetMapping
-    public ResponseEntity<Health> health() {
+    public ResponseEntity<Health> health() throws IOException {
         log.debug("Polling health endpoint");
-        final Duration unhealth = TimeUtils.parseDurationOrThrow(monitoringProperties.getUnhealthyThreshold());
-        final Duration minThreadDumpInterval =  TimeUtils.parseDurationOrThrow(monitoringProperties.getMinThreadDumpInterval());
-        final Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
+        if (monitoringProperties.isHealthPermitAll() || PrometheusController.authenticate(request, response, monitoringProperties)) {
+            final Duration unhealth = TimeUtils.parseDurationOrThrow(monitoringProperties.getUnhealthyThreshold());
+            final Duration minThreadDumpInterval = TimeUtils.parseDurationOrThrow(monitoringProperties.getMinThreadDumpInterval());
+            final Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
 
-        Duration prometheusDuration =  prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
-        boolean prometheusDown = unhealthy.test(prometheusDuration);
+            Duration prometheusDuration = prometheusController == null ? Duration.ZERO : prometheusController.getDuration().getWindowValue().optionalDurationValue().orElse(Duration.ZERO);
+            boolean prometheusDown = unhealthy.test(prometheusDuration);
 
-        if (prometheusDown) {
-            prometheusDownCount.incrementAndGet();
-            try {
-                Duration secondPrometheusDuration = prometheusController.scrape(NullOutputStream.INSTANCE);
-                prometheusDown = unhealthy.test(secondPrometheusDuration);
-                if (prometheusDown) {
-                    log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
-                } else {
-                    log.debug("Prometheus is up again");
-                }
-            } catch (IOException ioa) {
-                log.warn(ioa.getMessage());
-            }
             if (prometheusDown) {
-                if (StringUtils.isBlank(monitoringProperties.getDataDir())) {
-                    log.warn("No data dir, cant dump threads");
-                } else {
-                    synchronized (HealthController.class) {
-                        if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(minThreadDumpInterval))) {
-                            final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
-                            new Thread(null, () -> {
-                                log.info("Dumping threads to {} for later analysis", threadFile);
-                                StringBuilder builder = new StringBuilder();
+                prometheusDownCount.incrementAndGet();
+                try {
+                    Duration secondPrometheusDuration = prometheusController.scrape(NullOutputStream.INSTANCE);
+                    prometheusDown = unhealthy.test(secondPrometheusDuration);
+                    if (prometheusDown) {
+                        log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
+                    } else {
+                        log.debug("Prometheus is up again");
+                    }
+                } catch (IOException ioa) {
+                    log.warn(ioa.getMessage());
+                }
+                if (prometheusDown) {
+                    if (StringUtils.isBlank(monitoringProperties.getDataDir())) {
+                        log.warn("No data dir, cant dump threads");
+                    } else {
+                        synchronized (HealthController.class) {
+                            if (threadsDumped == null || threadsDumped.isBefore(Instant.now().minus(minThreadDumpInterval))) {
+                                final Path threadFile = Path.of(monitoringProperties.getDataDir(), "threads-" + Instant.now().toString().replace(':', '-') + ".txt");
+                                new Thread(null, () -> {
+                                    log.info("Dumping threads to {} for later analysis", threadFile);
+                                    StringBuilder builder = new StringBuilder();
 
-                                for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
-                                    builder.append(threadInfo.toString());
-                                    builder.append('\n');
-                                }
-                                try {
-                                    Files.writeString(threadFile, builder.toString());
-                                } catch (IOException e) {
-                                    log.warn(e.getMessage(), e);
-                                }
+                                    for (ThreadInfo threadInfo : ManagementFactory.getThreadMXBean().dumpAllThreads(true, true)) {
+                                        builder.append(threadInfo.toString());
+                                        builder.append('\n');
+                                    }
+                                    try {
+                                        Files.writeString(threadFile, builder.toString());
+                                    } catch (IOException e) {
+                                        log.warn(e.getMessage(), e);
+                                    }
 
-                            }, "Dumping threads").start();
-                            threadsDumped = Instant.now();
-                        } else {
-                            log.info("Skipping thread dump, because it was done recently");
+                                }, "Dumping threads").start();
+                                threadsDumped = Instant.now();
+                            } else {
+                                log.info("Skipping thread dump, because it was done recently");
+                            }
                         }
                     }
                 }
+
+            } else {
+                if (prometheusDownCount.get() > 0) {
+                    log.info("Prometheus seems up again");
+                    prometheusDownCount.set(0);
+                }
             }
 
+            Status effectiveStatus = prometheusDown ? Status.UNHEALTHY : this.status;
+            Slf4jHelper.debugOrInfo(log, effectiveStatus != Status.READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
+
+            return ResponseEntity
+                .status(effectiveStatus.code)
+                .body(
+                    Health.builder()
+                        .status(effectiveStatus.code)
+                        .message(effectiveStatus.message)
+                        .startTime(ready == null ? null : ready)
+                        .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
+                        .prometheusCallDuration(prometheusDuration)
+                        .prometheusDownCount(prometheusDownCount.get() == 0 ? null : prometheusDownCount.get())
+                        .build()
+                );
         } else {
-            if (prometheusDownCount.get() > 0){
-                log.info("Prometheus seems up again");
-                prometheusDownCount.set(0);
-            }
+            return ResponseEntity.status(401).build();
         }
-
-        Status effectiveStatus =  prometheusDown ? Status.UNHEALTHY : this.status;
-        Slf4jHelper.debugOrInfo(log, effectiveStatus != Status.READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
-
-        return  ResponseEntity
-            .status(effectiveStatus.code)
-            .body(
-                Health.builder()
-                    .status(effectiveStatus.code)
-                    .message(effectiveStatus.message)
-                    .startTime(ready == null ? null : ready)
-                    .upTime(ready == null ? null : Duration.between(ready, clock.instant()))
-                    .prometheusCallDuration(prometheusDuration)
-                    .prometheusDownCount(prometheusDownCount.get() == 0 ? null : prometheusDownCount.get())
-                    .build()
-            );
 
     }
 
