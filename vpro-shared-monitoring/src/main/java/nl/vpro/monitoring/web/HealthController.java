@@ -96,7 +96,7 @@ public class HealthController {
     @GetMapping
     public ResponseEntity<Health> health() throws IOException {
         log.debug("Polling health endpoint");
-        if (monitoringProperties.isHealthPermitAll() || PrometheusController.authenticate(request, response, monitoringProperties)) {
+        if (monitoringProperties.isHealthPermitAll() || Authentication.basic(request, response, monitoringProperties)) {
             final Duration unhealth = TimeUtils.parseDurationOrThrow(monitoringProperties.getUnhealthyThreshold());
             final Duration minThreadDumpInterval = TimeUtils.parseDurationOrThrow(monitoringProperties.getMinThreadDumpInterval());
             final Predicate<Duration> unhealthy = d -> d.compareTo(unhealth) > 0;
