@@ -25,7 +25,7 @@ import nl.vpro.web.HttpServletRequestUtils;
 /**
  * Support for files under /.well-known/ Noticeably <a href="https://securitytxt.org/">security.txt<a>
  * <p>
- * These files are just served from the directory '/well-known'. The idea is to mount a config map there (asuming kubernetes)
+ * These files are just served from the directory '/well-known'. The idea is to mount a config map there (assuming kubernetes)
  * <p>
  * e.g. a file like 'security.txt' can be mounted
  * <pre>
@@ -36,6 +36,7 @@ import nl.vpro.web.HttpServletRequestUtils;
  * </pre>
  *
  * @since 5.6
+ * @author Michiel Meeuwissen
  */
 @Lazy(false)
 @RestController
