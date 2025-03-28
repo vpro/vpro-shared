@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import nl.vpro.jackson2.DateModule;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.monitoring.config.EnableMonitoringWebSecurity;
+import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.web.HealthController;
 import nl.vpro.monitoring.web.PrometheusController;
 
@@ -45,8 +46,8 @@ public class MonitoringEndpoints {
     }
 
     @Bean
-    public PrometheusController prometheusController(Optional<PrometheusMeterRegistry> registry) {
-        return new PrometheusController(registry);
+    public PrometheusController prometheusController(Optional<PrometheusMeterRegistry> registry, MonitoringProperties properties) {
+        return new PrometheusController(registry, properties);
     }
 
 }
