@@ -58,9 +58,9 @@ public class HealthController {
     protected AtomicLong prometheusDownCount = new AtomicLong(0);
 
     @Inject
-    private HttpServletRequest request;
+    HttpServletRequest request;
     @Inject
-    private HttpServletResponse response;
+    HttpServletResponse response;
 
     /**
      * This is only triggered if you call ConfigurableApplicationContext#start, which we probably don't.
