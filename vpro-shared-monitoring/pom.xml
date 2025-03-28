@@ -13,10 +13,10 @@
   </properties>
   <description>This modules contains utilities and endpoints for application deployments and monitoring.</description>
   <dependencies>
-   <dependency>
+    <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus-simpleclient</artifactId>
-    </dependency>
+   </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
@@ -136,8 +136,6 @@
     <dependency>
       <groupId>io.github.natty-parser</groupId>
       <artifactId>natty</artifactId>
-      <scope>compile</scope>
     </dependency>
-
   </dependencies>
 </project>
