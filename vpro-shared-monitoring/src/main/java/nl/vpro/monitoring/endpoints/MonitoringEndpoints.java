@@ -14,12 +14,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import nl.vpro.jackson2.DateModule;
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.monitoring.config.EnableMonitoringWebSecurity;
 import nl.vpro.monitoring.web.HealthController;
 import nl.vpro.monitoring.web.PrometheusController;
 
 @Configuration
-@EnableMonitoringWebSecurity
 public class MonitoringEndpoints {
 
 

@@ -11,12 +11,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
-@Configuration
 @EnableWebSecurity
+@Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class MonitoringWebSecurityConfiguration {
 
     private final MonitoringProperties properties;
@@ -30,24 +30,27 @@ public class MonitoringWebSecurityConfiguration {
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new OrRequestMatcher(
+    public SecurityFilterChain monitoringWebSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatchers(config -> config.requestMatchers(
             antMatcher("/manage/**"),
             antMatcher("/.well-known/**")
             )
         );
 
-        if (properties.isHealthPermitAll()) {
-            http.authorizeHttpRequests((authz) -> {
-                authz.requestMatchers(
-                    antMatcher("/manage/health"),
-                    antMatcher("/.well-known/**")
-                ).permitAll();
-            });
-        }
+
         http.authorizeHttpRequests((authz) -> {
+            if (properties.isHealthPermitAll()) {
+
+                authz.requestMatchers(
+                    antMatcher("/manage/health")
+                ).permitAll();
+            }
+            authz.requestMatchers(
+                antMatcher("/.well-known/**")
+            ).permitAll();
             authz.
-                requestMatchers(antMatcher("/manage/**"))
+                requestMatchers(
+                    antMatcher("/manage/**"))
                 .hasRole("MANAGER");
         }).httpBasic(
             httpBasic -> httpBasic.realmName("manager"));
