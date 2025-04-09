@@ -33,6 +33,12 @@ E.g. our index page is normally implemented something like so:
 
 ----
 
+It will look e.g. like so:
+image:swagger.png[swagger interface]
+
+The tags are completely implemented via link:src/main/resources/META-INF/tags/swagger[tag files], and are best documented by just looking at them.
+
+
 == Open API Generation
 
 The class `nl.vpro.swagger.OpenAPIApplication` is a wrapper around `io.swagger.v3.core.util.Json` which can be used to generate the openapi.json from java annotated rest-classes.
