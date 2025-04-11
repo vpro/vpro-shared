@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.*;
 import java.time.Duration;
 import java.util.OptionalLong;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static java.net.http.HttpRequest.BodyPublishers.noBody;
@@ -34,22 +35,47 @@ public class HttpConnectionUtils {
         .connectTimeout(Duration.ofSeconds(3))
         .build();
 
-
     /**
      * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
+     *
      * @since 4.1
      * @return an optional with the size in bytes of the resource represented by the given url.
      */
     public static OptionalLong getOptionalByteSize(String locationUrl) {
 
+        return getOptionalByteSize(locationUrl, (response, exception) -> {
+            if (exception != null) {
+                log.warn("For {}: {} {}", locationUrl, exception.getClass().getName(), exception.getMessage());
+            }
+            if (response != null && response.statusCode() != 200) {
+                log.warn("HEAD {} returned {}", locationUrl, response.statusCode());
+            }
+        });
+    }
+
+    /**
+     * Executes a HEAD request to determine the bytes size of given URL. For mp3's and such.
+     *
+     * @since 5.8
+     * @return an optional with the size in bytes of the resource represented by the given url.
+     */
+    public static OptionalLong getOptionalByteSize(String locationUrl, BiConsumer<HttpResponse<Void>, Exception> consumer) {
         return headRequest(locationUrl, (response, exception) -> {
-           if (response != null && response.statusCode() == 200) {
-               return response.headers().firstValueAsLong("Content-Length");
-           } else {
+            consumer.accept(response, exception);
+            if (response != null) {
+                if (response.statusCode() == 200) {
+                    return response.headers().firstValueAsLong("Content-Length");
+                } else {
+                    return OptionalLong.empty();
+                }
+            } else {
                return OptionalLong.empty();
            }
         });
     }
+
+
+
 
     public static <R> R headRequest(String locationUrl, BiFunction<HttpResponse<Void>, Exception, R> consumer) {
         if (locationUrl == null || ! ENABLED.get()) {
@@ -66,9 +92,7 @@ public class HttpConnectionUtils {
                 .method("HEAD", noBody())
                 .build(); // .HEAD() in java 18
             final HttpResponse<Void> send = CLIENT.send(head, discarding());
-            if (send.statusCode() != 200) {
-                log.warn("HEAD {} returned {}", locationUrl, send.statusCode());
-            }
+            log.debug("HEAD {} returned {}", locationUrl, send.statusCode());
             return consumer.apply(send, null);
         } catch (IOException | InterruptedException | IllegalArgumentException e) {
             log.warn("For {}: {} {}", locationUrl, e.getClass().getName(), e.getMessage());
