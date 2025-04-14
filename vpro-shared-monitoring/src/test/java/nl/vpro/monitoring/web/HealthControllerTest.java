@@ -1,9 +1,9 @@
 package nl.vpro.monitoring.web;
 
-import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.time.*;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import nl.vpro.monitoring.config.MonitoringProperties;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -26,8 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-@ContextConfiguration("/manage-servlet.xml")
+@ContextConfiguration(classes = Setup.class)
 class HealthControllerTest {
+
+
 
     @Autowired
     private HealthController healthController;
@@ -43,12 +47,7 @@ class HealthControllerTest {
     @BeforeEach
     public void setup() {
         this.healthController.clock = clock;
-        this.healthController.prometheusController = new PrometheusController(new PrometheusMeterRegistry(new PrometheusConfig() {
-            @Override
-            public String get(String s) {
-                return null;
-            }
-        }));
+        this.healthController.prometheusController = new PrometheusController(Optional.of(new PrometheusMeterRegistry(s -> null)), new MonitoringProperties());
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         this.healthController.markReady(null);
     }

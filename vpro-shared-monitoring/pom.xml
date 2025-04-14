@@ -4,7 +4,7 @@
   <parent>
     <groupId>nl.vpro.shared</groupId>
     <artifactId>vpro-shared-parent</artifactId>
-    <version>5.7-SNAPSHOT</version>
+    <version>5.8-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-monitoring</artifactId>
 
@@ -13,10 +13,10 @@
   </properties>
   <description>This modules contains utilities and endpoints for application deployments and monitoring.</description>
   <dependencies>
-   <dependency>
+    <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus-simpleclient</artifactId>
-    </dependency>
+   </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
@@ -39,6 +39,10 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-test</artifactId>
     </dependency>
+     <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-web</artifactId>
+    </dependency>
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
@@ -46,7 +50,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
-      <version>10.1.34</version>
+      <version>10.1.39</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -114,10 +118,12 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-config</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
@@ -130,9 +136,6 @@
     <dependency>
       <groupId>io.github.natty-parser</groupId>
       <artifactId>natty</artifactId>
-      <version>1.0.1</version>
-      <scope>compile</scope>
     </dependency>
-
   </dependencies>
 </project>

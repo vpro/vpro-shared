@@ -1,15 +1,15 @@
 package nl.vpro.monitoring.config;
 
-import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.*;
+
+import org.springframework.context.annotation.Import;
 
 
 /**
- *This annotation can be used to bootstrap monitoring configuration as defined in {@link MonitoringConfig}
+ *This annotation can be used to bootstrap monitoring configuration as defined in {@link MeterRegistryConfiguration}
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({MonitoringConfig.class})
+@Import({MeterRegistryConfiguration.class})
 public @interface EnableMonitoring {
 }

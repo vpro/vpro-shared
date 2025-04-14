@@ -19,3 +19,59 @@ Normally just taking the dependency should suffice. It can be configured with sp
 All have defaults, or can be set via system properties (such as for example the username/password for the monitoring endpoint)
 
 Used in spring openshift applications of VPRO and POMS
+
+
+== Changes in 5.7
+
+=== BEFORE
+In versions prior to 5.7, there were also the following changes in web.xml:
+
+[source,xml]
+.fragments from web.xml
+----
+<servlet>
+    <servlet-name>manage</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>3</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+  <servlet-name>manage</servlet-name>
+ <url-pattern>/manage/*</url-pattern>
+</servlet-mapping>
+
+----
+And a `manage-servlet.xml` like this:
+[source,xml]
+----
+<?xml version="1.0" ?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+  <context:annotation-config/>
+
+  <bean class="nl.vpro.monitoring.endpoints.MonitoringEndpoints"/>
+
+</beans>
+
+----
+=== AFTER
+
+It can be much simpler now, because newer servlet versions support 'web-fragment' files, which can be used to add servlets and filters without the need for a web.xml.
+[source,xml]
+.fragments from web.xml
+----
+
+ <absolute-ordering>
+     <!-- other fragments -->
+    <name>monitoring_endpoints</name>
+  </absolute-ordering>
+----
+All above stuff is arranged in vpro-shared-monitoring.jar itself.
+
+Not that this does require the jar to be included in 'jarsToScan' of tomcat. The ghcr.io/vpro/tomcat is ok in version >= 10.26
+
+This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the file /well-known/security.txt).

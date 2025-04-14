@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-bom</artifactId>
-  <version>5.7-SNAPSHOT</version>
+  <version>5.8-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
   <description>Bill of Materials of modules in vpro shared</description>

@@ -17,7 +17,7 @@ import org.meeuw.functional.Predicates;
 
 import com.google.common.net.MediaType;
 
-import static nl.vpro.monitoring.config.MonitoringConfig.meterRegistry;
+import static nl.vpro.monitoring.config.MeterRegistryConfiguration.meterRegistry;
 
 
 /**

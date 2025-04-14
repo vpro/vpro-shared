@@ -5,13 +5,13 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.7-SNAPSHOT</version>
+    <version>5.8-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-swagger3</artifactId>
-  <version>5.7-SNAPSHOT</version>
+  <version>5.8-SNAPSHOT</version>
 
   <properties>
-    <swagger.ui.version>5.18.2</swagger.ui.version>
+    <swagger.ui.version>5.20.7</swagger.ui.version>
     <vpro.shared.module.postfix>swagger</vpro.shared.module.postfix>
 
   </properties>

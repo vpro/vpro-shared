@@ -57,4 +57,48 @@ public class HttpServletRequestUtils {
         return ":" + port;
 
     }
+
+    /**
+     * @since 5.7
+     */
+    public static  String getOriginalRequestURL(HttpServletRequest request) {
+
+        // Get scheme - check forwarded headers first
+        String scheme = request.getHeader("X-Forwarded-Proto");
+        if (scheme == null) {
+            scheme = request.getScheme();
+        }
+
+        // Get host
+        String host = request.getHeader("X-Forwarded-Host");
+        if (host == null) {
+            host = request.getServerName();
+        }
+
+        // Get port
+        int port = request.getServerPort();
+        String portHeader = request.getHeader("X-Forwarded-Port");
+        if (portHeader != null) {
+            try {
+                port = Integer.parseInt(portHeader);
+            } catch (NumberFormatException e) {
+                // Use default port if header is invalid
+            }
+        }
+
+        // Build URL with port only if non-standard
+        StringBuilder url = new StringBuilder();
+        url.append(scheme).append("://").append(host);
+        if (!((scheme.equals("http") && port == 80) || (scheme.equals("https") && port == 443))) {
+            url.append(":").append(port);
+        }
+
+        // Add path and query string
+        url.append(request.getRequestURI());
+        if (request.getQueryString() != null) {
+            url.append("?").append(request.getQueryString());
+        }
+
+        return url.toString();
+    }
 }

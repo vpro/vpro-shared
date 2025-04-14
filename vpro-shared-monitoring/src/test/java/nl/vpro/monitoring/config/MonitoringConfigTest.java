@@ -26,7 +26,7 @@ class MonitoringConfigTest {
     private ApplicationContext applicationContext;
 
     @InjectMocks
-    private MonitoringConfig config;
+    private MeterRegistryConfiguration config;
 
       @BeforeEach
     public  void findOffset() {
