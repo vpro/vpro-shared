@@ -39,7 +39,12 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
     private final StringBuilderWriter writer = new StringBuilderWriter();
     private final WriterAppender writerAppender;
 
+
     public CaptureStringFromLogger() {
+        this("%msg%n");
+    }
+
+    public CaptureStringFromLogger(String pattern) {
         UUID uuid = UUID.randomUUID();
         threadLocal.set(true);
         writerAppender = WriterAppender.newBuilder()
@@ -52,7 +57,9 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
                 }
             })
             .setFollow(true)
-            .setLayout(PatternLayout.newBuilder().withPattern("%msg%n").build())
+            .setLayout(PatternLayout.newBuilder()
+                .withPattern(pattern)
+                .build())
             .setName("" + uuid)
             .build();
         if (LogManager.getRootLogger() instanceof Logger logger) {
@@ -74,6 +81,6 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
     @Override
     public String get() {
         writer.flush();
-        return writer.toString().strip();
+        return writer.toString();
     }
 }

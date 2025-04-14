@@ -17,7 +17,7 @@ class CaptureStringFromLoggerTest {
             log.info("foo");
             log.info("bar");
 
-            assertEquals("foo\nbar", capture.get());
+            assertEquals("foo\nbar\n", capture.get());
         }
     }
 
