@@ -11,6 +11,10 @@ public class HttpServletRequestUtils {
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
 
+    public static final String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+    public static final String X_FORWARDED_HOST = "X-Forwarded-Host";
+    public static final String X_FORWARDED_PORT = "X-Forwarded-Port";
+
     private HttpServletRequestUtils() {
         // utility class
     }
@@ -31,7 +35,7 @@ public class HttpServletRequestUtils {
     }
 
     public static String getScheme(ServletRequest req) {
-        String scheme = (req instanceof HttpServletRequest httpServletRequest) ? httpServletRequest.getHeader("X-Forwarded-Proto") : null;
+        String scheme = (req instanceof HttpServletRequest httpServletRequest) ? httpServletRequest.getHeader(X_FORWARDED_PROTO) : null;
         if (scheme == null) {
             scheme = req.getScheme();
         }
@@ -39,7 +43,7 @@ public class HttpServletRequestUtils {
     }
 
     public static String getServerName(ServletRequest req) {
-        String serverName = (req instanceof HttpServletRequest httpServletRequest) ? httpServletRequest.getHeader("X-Forwarded-Host") : null;
+        String serverName = (req instanceof HttpServletRequest httpServletRequest) ? httpServletRequest.getHeader(X_FORWARDED_HOST) : null;
 
         if (serverName == null) {
             serverName = req.getServerName();
@@ -49,7 +53,7 @@ public class HttpServletRequestUtils {
 
     public static int getServerPort(ServletRequest request) {
         int port = request.getServerPort();
-        String portHeader = (request instanceof HttpServletRequest httpServletRequest) ? httpServletRequest.getHeader("X-Forwarded-Port") : null;
+        String portHeader = (request instanceof HttpServletRequest httpServletRequest) ? httpServletRequest.getHeader(X_FORWARDED_PORT) : null;
         if (portHeader != null) {
             try {
                 port = Integer.parseInt(portHeader);
@@ -77,16 +81,19 @@ public class HttpServletRequestUtils {
 
     }
 
+    public static String getPortPostFixIfNeeded(HttpServletRequest request) {
+        StringBuilder build = new StringBuilder();
+        appendPortPostFixIfNeeded(build, getScheme(request), getServerPort(request));
+        return build.toString();
+    }
+
     /**
      * @since 5.7
      */
     public static  String getOriginalRequestURL(HttpServletRequest request) {
 
-        // Get scheme - check forwarded headers first
         String scheme = getScheme(request);
-        // Get host
         String host = getServerName(request);
-        // Get port
         int port = getServerPort(request);
 
         // Build URL with port only if non-standard
