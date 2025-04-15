@@ -22,6 +22,22 @@ class HttpServletRequestUtilsTest {
     }
 
     @Test
+    public void getContextURLBehindProxy() {
+        HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
+
+        when(mock.getHeader("X-Forwarded-Host")).thenReturn("foo");
+        when(mock.getHeader("X-Forwarded-Proto")).thenReturn("https");
+        when(mock.getHeader("X-Forwarded-Port")).thenReturn("443");
+
+        when(mock.getServerName()).thenReturn("bla");
+        when(mock.getServerPort()).thenReturn(80);
+        when(mock.getScheme()).thenReturn("http");
+        when(mock.getContextPath()).thenReturn("/context");
+
+        assertThat(HttpServletRequestUtils.getContextURL(mock)).isEqualToIgnoringCase("https://foo/context");
+    }
+
+    @Test
     public void getContextURL2() {
         HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         when(mock.getServerName()).thenReturn("foo");
