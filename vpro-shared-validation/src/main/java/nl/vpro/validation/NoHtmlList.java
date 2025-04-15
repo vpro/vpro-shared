@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * @author Michiel Meeuwissen
  * @since 3.2
- * @deprecated Just put @NoHtml on the list entries itself (List<@NoHtml String>)
+ * @deprecated Just put @NoHtml on the list entries itself ({@code List<@NoHtml String>})
  */
 
 
