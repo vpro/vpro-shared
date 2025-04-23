@@ -31,12 +31,12 @@
     <dependency>
       <groupId>org.meeuw.math</groupId>
       <artifactId>mihxil-statistics</artifactId>
-      <version>0.12.0</version>
+      <version>0.14.0</version>
     </dependency>
     <dependency>
       <groupId>org.meeuw.util</groupId>
       <artifactId>mihxil-functional</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

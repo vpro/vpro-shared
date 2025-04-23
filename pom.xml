@@ -18,13 +18,13 @@
     <java.version>17</java.version>
 
     <spring.version>6.2.2</spring.version>
-    <spring-security.version>6.4.4</spring-security.version>
+    <spring-security.version>6.4.5</spring-security.version>
     <jackson2.version>2.18.3</jackson2.version>
 
-    <junit.version>5.12.1</junit.version>
+    <junit.version>5.12.2</junit.version>
     <mockito.version>5.17.0</mockito.version>
     <assertj.version>3.27.2</assertj.version>
-    <resteasy.version>7.0.0.Alpha4</resteasy.version>
+    <resteasy.version>7.0.0.Beta1</resteasy.version>
 
     <!--
     seems to be in use by both resteasy and hibernate-search
@@ -34,7 +34,7 @@
 
     <bytebuddy.version>1.17.5</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <log4j2.version>2.22.1</log4j2.version>
+    <log4j2.version>2.24.3</log4j2.version>
     <guava.version>33.4.8-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
@@ -70,7 +70,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.14.3</micrometer.version>
+    <micrometer.version>1.14.6</micrometer.version>
     <flyway.version>11.7.2</flyway.version>
 
     <testcontainers.version>1.20.6</testcontainers.version>
@@ -734,7 +734,7 @@
       <dependency>
         <groupId>info.picocli</groupId>
         <artifactId>picocli</artifactId>
-        <version>4.7.6</version>
+        <version>4.7.7</version>
       </dependency>
       <dependency>
         <groupId>io.github.java-diff-utils</groupId>
