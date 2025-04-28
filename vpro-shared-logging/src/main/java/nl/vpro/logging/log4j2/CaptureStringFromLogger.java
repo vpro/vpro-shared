@@ -34,18 +34,18 @@ import java.util.function.Supplier;
 @Log4j2
 public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> {
 
-    static final ThreadLocal<Boolean> threadLocal = ThreadLocal.withInitial(() -> false);
+    static final ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
 
     private final StringBuilderWriter writer = new StringBuilderWriter();
     private final WriterAppender writerAppender;
 
 
     public CaptureStringFromLogger() {
-        this("%msg%n");
+        this("%d{ISO8601}{Europe/Amsterdam}\t%msg%n", Level.INFO);
     }
 
-    public CaptureStringFromLogger(String pattern) {
-        UUID uuid = UUID.randomUUID();
+    public CaptureStringFromLogger(String pattern, Level level) {
+        final UUID uuid = UUID.randomUUID();
         threadLocal.set(true);
         writerAppender = WriterAppender.newBuilder()
             .setTarget(writer)
@@ -53,7 +53,7 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
             .setFilter(new AbstractFilter() {
                 @Override
                 public Result filter(LogEvent event) {
-                    return threadLocal.get()  ? Result.NEUTRAL : Result.DENY;
+                    return uuid.equals(threadLocal.get())  && (event.getLevel().isMoreSpecificThan(level)) ? Result.NEUTRAL : Result.DENY;
                 }
             })
             .setFollow(true)
