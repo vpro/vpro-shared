@@ -2,6 +2,10 @@ package nl.vpro.logging.log4j2;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.util.UUID;
+import java.util.function.Supplier;
+
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
@@ -9,9 +13,6 @@ import org.apache.logging.log4j.core.appender.WriterAppender;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.StringBuilderWriter;
-
-import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * Simple setup using log4j2 to temporary capture logging and collect it to a String.
@@ -46,7 +47,7 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
 
     public CaptureStringFromLogger(String pattern, Level level) {
         final UUID uuid = UUID.randomUUID();
-        threadLocal.set(true);
+        threadLocal.set(uuid);
         writerAppender = WriterAppender.newBuilder()
             .setTarget(writer)
             .setIgnoreExceptions(false)
