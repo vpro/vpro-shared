@@ -19,7 +19,7 @@
 
     <spring.version>6.2.6</spring.version>
     <spring-security.version>6.4.5</spring-security.version>
-    <jackson2.version>2.18.3</jackson2.version>
+    <jackson2.version>2.19.0</jackson2.version>
 
     <junit.version>5.12.2</junit.version>
     <mockito.version>5.17.0</mockito.version>
@@ -71,9 +71,9 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.14.6</micrometer.version>
-    <flyway.version>11.7.2</flyway.version>
+    <flyway.version>11.8.1</flyway.version>
 
-    <testcontainers.version>1.20.6</testcontainers.version>
+    <testcontainers.version>1.21.0</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -605,7 +605,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.19.1</version>
+        <version>1.20.1</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -791,7 +791,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.49.2</version>
+      <version>3.49.3</version>
       <optional>true</optional>
     </dependency>
     <dependency>
