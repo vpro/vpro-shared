@@ -15,7 +15,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.StringBuilderWriter;
 
 /**
- * Simple setup using log4j2 to temporary capture logging and collect it to a String.
+ * Simple setup using log4j2 to temporarily capture logging and collect it to a String.
  * <p>
  * usage
  * <pre>{@code
