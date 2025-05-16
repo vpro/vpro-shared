@@ -22,8 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-import nl.vpro.logging.Slf4jHelper;
-
 /**
  * @author Michiel Meeuwissen
  */
@@ -274,7 +272,7 @@ public class ObjectLocker {
 
 
             if (holder.lock.getHoldCount() == 1) {
-                Slf4jHelper.log(LOCKER_LOG, acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG,
+                LOCKER_LOG.atLevel(acquireTime.compareTo(minWaitTime) > 0 ? Level.INFO : Level.DEBUG).log(
                     "Acquired lock for {} ({}) after {}{}", holder, reason, acquireTime,
                     delaying == null ? "" : (" (including a requested delay of " + delaying + ")")
                 );
@@ -367,7 +365,7 @@ public class ObjectLocker {
                     listener.unlock(lock, duration);
                 }
 
-                Slf4jHelper.log(LOCKER_LOG, duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG,
+                LOCKER_LOG.atLevel(duration.compareTo(lock.warnTime)> 0 ? Level.WARN :  Level.DEBUG).log(
                     "Released lock for {} ({}) in {}", lock.key, lock.reason, Duration.ofNanos(System.nanoTime() - nanoStart));
             }
             if (lock.lock.isHeldByCurrentThread()) { // MSE-4946

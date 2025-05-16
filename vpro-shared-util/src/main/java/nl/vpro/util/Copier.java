@@ -132,7 +132,7 @@ public class Copier implements Runnable, Closeable {
             log.warn(t.getMessage());
             exception = t;
         } finally {
-            log.debug("finally" + name);
+            log.debug("finally {}", name);
             afterRun();
 
         }

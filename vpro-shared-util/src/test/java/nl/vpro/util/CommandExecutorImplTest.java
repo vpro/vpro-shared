@@ -228,8 +228,7 @@ public class CommandExecutorImplTest {
     byte[] getZip() throws IOException {
          ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
-        try (
-            ZipOutputStream zip = new ZipOutputStream(bytes);) {
+        try (ZipOutputStream zip = new ZipOutputStream(bytes)) {
 
             ZipEntry a = new ZipEntry("a");
             a.setComment("first entry");

@@ -206,8 +206,9 @@ public class FileCachingInputStreamTest {
         int slows = 10;
         int bytearrays = 4;
         int total = bytearrays + slows;
-        return new Iterator<Object[]>() {
+        return new Iterator<>() {
             int count = 0;
+
             @Override
             public boolean hasNext() {
                 return count < total;
@@ -222,9 +223,9 @@ public class FileCachingInputStreamTest {
                     RANDOM.nextBytes(bytes);
                 }
                 if (count++ < slows) {
-                    return new Object[] {new ByteArrayInputStream(bytes), expectedSize};
+                    return new Object[]{new ByteArrayInputStream(bytes), expectedSize};
                 } else {
-                    return new Object[] {new SlowInputStream(5, bytes), expectedSize};
+                    return new Object[]{new SlowInputStream(5, bytes), expectedSize};
 
                 }
             }

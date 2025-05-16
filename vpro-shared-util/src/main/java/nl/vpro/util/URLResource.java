@@ -20,7 +20,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.slf4j.event.Level;
 
 import nl.vpro.jmx.MBeans;
-import nl.vpro.logging.Slf4jHelper;
 
 /**
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
@@ -360,7 +359,7 @@ public class URLResource<T> implements URLResourceMXBean, Supplier<T> {
                 lastModified = null;
                 errorCount++;
                 expires = Instant.now().plus(errorCache);
-                Slf4jHelper.log(log, code == SC_SERVICE_UNAVAILABLE ? Level.INFO : Level.WARN,
+                log.atLevel(code == SC_SERVICE_UNAVAILABLE ? Level.INFO : Level.WARN).log(
                     "{}:{}: (caching until {})", code, url, expires);
         }
     }

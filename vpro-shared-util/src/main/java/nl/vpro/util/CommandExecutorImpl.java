@@ -462,7 +462,7 @@ public class CommandExecutorImpl implements CommandExecutor {
         }
         StringBuilder category = new StringBuilder(CommandExecutorImpl.class.getName());
         for (int i = split.length - 1; i >= 0; i--) {
-            if (split[i].length() > 0) {
+            if (!split[i].isEmpty()) {
                 category.append('.').append(split[i]);
             }
         }
@@ -524,7 +524,7 @@ public class CommandExecutorImpl implements CommandExecutor {
     static String toString(Iterable<String> args) {
         StringBuilder builder = new StringBuilder();
         for (String a : args) {
-            if (builder.length() > 0) builder.append(' ');
+            if (!builder.isEmpty()) builder.append(' ');
             boolean needsQuotes = a.indexOf(' ') >= 0 || a.indexOf('|') > 0;
             if (needsQuotes) builder.append('"');
             builder.append(StringEscapeUtils.escapeJava(a));
@@ -533,18 +533,13 @@ public class CommandExecutorImpl implements CommandExecutor {
         return builder.toString();
     }
 
-    private static class ProcessTimeoutHandle {
-        private final ProcessTimeoutTask task;
-
-        protected ProcessTimeoutHandle(ProcessTimeoutTask task) {
-            this.task = task;
-        }
+    private record ProcessTimeoutHandle(ProcessTimeoutTask task) {
 
         public void cancel() {
-            task.cancel();
-            PROCESS_MONITOR.purge();
+                task.cancel();
+                PROCESS_MONITOR.purge();
+            }
         }
-    }
 
     @Slf4j
     private static class ProcessTimeoutTask extends TimerTask {
