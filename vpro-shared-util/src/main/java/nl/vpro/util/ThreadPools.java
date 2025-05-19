@@ -22,7 +22,6 @@ public final class ThreadPools {
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup(ThreadPools.class.getName());
 
 
-
     public static ThreadFactory createThreadFactory(final String namePrefix, final boolean daemon, final int priority) {
         return createThreadFactory(THREAD_GROUP, namePrefix, daemon, priority);
     }
@@ -33,6 +32,7 @@ public final class ThreadPools {
             @Override
             public Thread newThread(@NonNull Runnable r) {
                 Thread thread = new Thread(threadGroup, r);
+                thread.setContextClassLoader(ThreadPools.class.getClassLoader());
                 thread.setDaemon(daemon);
                 thread.setPriority(priority);
                 thread.setName(namePrefix +
@@ -52,7 +52,7 @@ public final class ThreadPools {
     public static final ThreadPoolExecutor copyExecutor =
         new ThreadPoolExecutor(2, 2000, 60, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
-            ThreadPools.createThreadFactory(
+            createThreadFactory(
                 "nl.vpro.util.threadpools-Copier",
                 false,
                 Thread.NORM_PRIORITY));
@@ -67,7 +67,7 @@ public final class ThreadPools {
     public static final ThreadPoolExecutor longBackgroundExecutor =
         new ThreadPoolExecutor(2, 100, 60, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
-            ThreadPools.createThreadFactory(
+            createThreadFactory(
                 "nl.vpro.util.threadpools-LongBackground",
                 false,
                 Thread.NORM_PRIORITY));
@@ -77,7 +77,7 @@ public final class ThreadPools {
      */
     public static final ScheduledExecutorService backgroundExecutor =
         Executors.newScheduledThreadPool(5,
-            ThreadPools.createThreadFactory(
+            createThreadFactory(
                 "nl.vpro.util.threadpools-Background",
                 true,
                 Thread.MIN_PRIORITY));
@@ -89,7 +89,7 @@ public final class ThreadPools {
     public static final ThreadPoolExecutor startUpExecutor =
         new ThreadPoolExecutor(0, 20, 60, TimeUnit.SECONDS,
             new LinkedBlockingDeque<>(),
-            ThreadPools.createThreadFactory(
+            createThreadFactory(
                 "nl.vpro-util-StartUp",
                 false,
                 Thread.NORM_PRIORITY));
