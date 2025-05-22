@@ -14,7 +14,7 @@
 
     <init-param>
       <param-name>contextConfigLocation</param-name>
-      <param-value>classpath:/META-INF/wellknown-servlet.xml</param-value>
+      <param-value>classpath:/META-INF/well-known-servlet.xml</param-value>
     </init-param>
     <load-on-startup>99</load-on-startup>
   </servlet>
