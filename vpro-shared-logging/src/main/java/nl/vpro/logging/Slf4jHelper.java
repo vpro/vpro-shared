@@ -27,6 +27,7 @@ public class Slf4jHelper {
      * Log at the specified level. If the "logger" is null, nothing is logged.
      * If the "level" is null, nothing is logged. If the "txt" is null,
      * behaviour depends on the SLF4J implementation.
+     * @deprecated Just use {@link Logger#atLevel(Level)}.{@link org.slf4j.spi.LoggingEventBuilder#log(String) log}
      */
     @Deprecated
     public static void log(Logger logger, Level level, String txt) {
