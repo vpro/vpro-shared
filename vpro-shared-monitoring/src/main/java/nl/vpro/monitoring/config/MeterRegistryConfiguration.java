@@ -14,16 +14,17 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
-import javax.cache.CacheManager;
-import javax.sql.DataSource;
 import jakarta.annotation.PreDestroy;
 
 import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.HibernateMetrics;
 import org.hibernate.stat.HibernateQueryMetrics;
+import org.slf4j.event.Level;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -35,15 +36,20 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
-import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.Level;
+
 import nl.vpro.monitoring.binder.JvmMaxDirectMemorySize;
 import nl.vpro.monitoring.binder.ScriptMeterBinder;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
 
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.sql.DataSource;
+
 import static io.micrometer.core.instrument.Gauge.builder;
 import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
+import static org.slf4j.event.Level.DEBUG;
+import static org.slf4j.event.Level.WARN;
 
 /**
  * Sets up Prometheus {@link MeterRegistry}.
@@ -144,12 +150,25 @@ public class MeterRegistryConfiguration {
             }
         }
 
+
         final Optional<?> cacheManager = getCacheManager();
         if (monitoringProperties.isMeterJCache() && cacheManager.isPresent()) {
-            CacheManager manager = (CacheManager) cacheManager.get();
-            manager.getCacheNames().forEach(cacheName -> {
-                new JCacheMetrics<>(manager.getCache(cacheName), Tags.empty()).bindTo(registry);
-            });
+            try {
+                Object manager = cacheManager.get();
+                Method m = manager.getClass().getMethod("getCacheNames");
+                Method getCache = manager.getClass().getMethod("getCache", String.class);
+
+                ((List) m.invoke(manager)).forEach(cacheName -> {
+                    try {
+                        Object cache = getCache.invoke(manager, cacheName);
+                        new JCacheMetrics<>((javax.cache.Cache) cache, Tags.empty()).bindTo(registry);
+                    } catch (InvocationTargetException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
         if (monitoringProperties.isMeterJvmHeap()) {
             JvmHeapPressureMetrics metrics = new JvmHeapPressureMetrics();
@@ -170,7 +189,7 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (monitoringProperties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent() && classForName("org.hibernate.stat.Statistics").isPresent()) {
+        if (monitoringProperties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent() && classForName("org.hibernate.stat.Statistics").isPresent() && classForName("org.hibernate.stat.HibernateMetrics").isPresent()) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
             if (sessionFactory.isPresent()) {
                 new HibernateMetrics(
@@ -195,10 +214,10 @@ public class MeterRegistryConfiguration {
 
         try {
             if (monitoringProperties.isMeterPostgres()) {
-                final Optional<DataSource> dataSource = (Optional<DataSource>) getDataSource();
+                final Optional<Object> dataSource = (Optional<Object>) getDataSource();
                 if (dataSource.isPresent()) {
                     if (monitoringProperties.getPostgresDatabaseName() != null) {
-                        new PostgreSQLDatabaseMetrics(dataSource.get(), monitoringProperties.getPostgresDatabaseName()).bindTo(registry);
+                        new PostgreSQLDatabaseMetrics((DataSource) dataSource.get(), monitoringProperties.getPostgresDatabaseName()).bindTo(registry);
                     } else {
                         log.error("For metering postgres one should provide an existing database name");
                     }
@@ -209,6 +228,8 @@ public class MeterRegistryConfiguration {
         } catch (java.lang.NoClassDefFoundError noClassDefFoundError) {
             warn(String.format("No hibernate postgresql metrics. Missing class %s", noClassDefFoundError.getMessage()));
         }
+
+
         if (monitoringProperties.isMeterProcessor()) {
             new ProcessorMetrics().bindTo(registry);
         }
@@ -334,7 +355,7 @@ public class MeterRegistryConfiguration {
     }
 
     private Optional<?> getManager() {
-        Optional<?> manager = classForName("org.apache.catalina.Manager", Level.DEBUG)
+        Optional<?> manager = classForName("org.apache.catalina.Manager", DEBUG)
             .flatMap(this::getBean);
         if (manager.isEmpty()) {
             log.info("No tomcat manager found");
@@ -343,7 +364,7 @@ public class MeterRegistryConfiguration {
     }
 
     private Optional<Class<?>> classForName(String name) {
-        return classForName(name, Level.WARN);
+        return classForName(name, WARN);
     }
 
 
@@ -358,11 +379,11 @@ public class MeterRegistryConfiguration {
     }
 
     private void warn(String warn){
-        warn(warn, Level.WARN);
+        warn(warn, WARN);
     }
 
     private void warn(String warn, Level level){
-        Slf4jHelper.log(log, level,warn);
+        log.atLevel(level).log(warn);
         warnings.add(warn);
     }
 

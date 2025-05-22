@@ -2,6 +2,11 @@ package nl.vpro.monitoring.web;
 
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
+
+import jakarta.inject.Inject;
+
+import jakarta.inject.Named;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +23,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.math.windowed.WindowedStatisticalLong;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
@@ -37,10 +43,7 @@ public class PrometheusController {
     @Nullable
     private final PrometheusMeterRegistry registry;
 
-
-    @Autowired
     private final MonitoringProperties properties;
-
 
     @Autowired
     HttpServletResponse response;
@@ -48,7 +51,11 @@ public class PrometheusController {
     @Autowired
     HttpServletRequest request;
 
-    public PrometheusController(Optional<PrometheusMeterRegistry> registry, MonitoringProperties properties) {
+
+
+
+    @Inject
+    public PrometheusController(Optional<PrometheusMeterRegistry> registry, @Value("endpointMonitoringProperties") MonitoringProperties properties) {
         this.registry = registry.orElse(null);
         this.properties = properties;
     }
@@ -83,8 +90,6 @@ public class PrometheusController {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-            String credentials = new String(Base64.getDecoder().decode(auth.substring(6))); // Remove "Basic "
-
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(TextFormat.CONTENT_TYPE_004);
@@ -98,10 +103,15 @@ public class PrometheusController {
         }
     }
     protected Duration scrape(OutputStream writer) throws IOException {
-        long start = System.nanoTime();
-        registry.scrape(writer);
-        writer.flush();
-        return Duration.ofNanos(System.nanoTime() - start);
+        if (registry == null) {
+            log.warn("No prometheus registry available");
+            return Duration.ZERO;
+        } else {
+            long start = System.nanoTime();
+            registry.scrape(writer);
+            writer.flush();
+            return Duration.ofNanos(System.nanoTime() - start);
+        }
     }
 
     public void reset() {

@@ -1,6 +1,9 @@
 package nl.vpro.monitoring.web;
 
 import io.micrometer.common.util.StringUtils;
+
+import jakarta.inject.*;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -12,7 +15,6 @@ import java.time.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -50,7 +52,9 @@ public class HealthController {
     @Inject
     PrometheusController prometheusController;
 
+
     @Inject
+    @Named("endpointMonitoringProperties")
     MonitoringProperties monitoringProperties;
 
     private Instant threadsDumped = null;
