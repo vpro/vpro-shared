@@ -161,7 +161,7 @@ public class MeterRegistryConfiguration {
                         log.info("Metering {}", cache);
                         new JCacheMetrics<>((javax.cache.Cache) cache, Tags.empty()).bindTo(registry);
                     } catch (InvocationTargetException | IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                        throw new MetricsConfigurationException(e.getMessage(), e);
                     }
                 });
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException e) {
@@ -211,7 +211,7 @@ public class MeterRegistryConfiguration {
         }
 
         try {
-            if (monitoringProperties.isMeterPostgres()) {
+            if (monitoringProperties.isMeterPostgres() && classForName("org.postgresql.Driver").isPresent()) {
                 final Optional<Object> dataSource = (Optional<Object>) getDataSource();
                 if (dataSource.isPresent()) {
                     if (monitoringProperties.getPostgresDatabaseName() != null) {
