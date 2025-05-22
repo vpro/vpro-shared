@@ -11,9 +11,11 @@ import org.springframework.http.HttpHeaders;
 import nl.vpro.monitoring.config.MonitoringProperties;
 
 /**
+ * Just provides  {@link #basic(HttpServletRequest, HttpServletResponse, MonitoringProperties) basic authentication} for the /manage/ endpoints.
+ * It is just called from within
  * @since 5.7
  */
-class Authentication {
+public class Authentication {
 
     private Authentication() {
         // no instances
