@@ -5,8 +5,8 @@ import io.micrometer.core.instrument.binder.cache.JCacheMetrics;
 import io.micrometer.core.instrument.binder.db.PostgreSQLDatabaseMetrics;
 import io.micrometer.core.instrument.binder.jvm.*;
 import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
-import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
 import io.micrometer.core.instrument.binder.system.*;
+import io.micrometer.core.instrument.binder.system.DiskSpaceMetrics;
 import io.micrometer.core.instrument.binder.tomcat.TomcatMetrics;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import javax.sql.DataSource;
 import jakarta.annotation.PreDestroy;
 
 import org.apache.catalina.Manager;
@@ -36,15 +37,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
-
 import nl.vpro.monitoring.binder.JvmMaxDirectMemorySize;
 import nl.vpro.monitoring.binder.ScriptMeterBinder;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
-
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.sql.DataSource;
 
 import static io.micrometer.core.instrument.Gauge.builder;
 import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
@@ -155,19 +151,21 @@ public class MeterRegistryConfiguration {
         if (monitoringProperties.isMeterJCache() && cacheManager.isPresent()) {
             try {
                 Object manager = cacheManager.get();
-                Method m = manager.getClass().getMethod("getCacheNames");
-                Method getCache = manager.getClass().getMethod("getCache", String.class);
 
-                ((List) m.invoke(manager)).forEach(cacheName -> {
+                Method getCacheNames = Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCacheNames");
+                Method getCache =  Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCache", String.class);
+
+                ((List) getCacheNames.invoke(manager)).forEach(cacheName -> {
                     try {
                         Object cache = getCache.invoke(manager, cacheName);
+                        log.info("Metering {}", cache);
                         new JCacheMetrics<>((javax.cache.Cache) cache, Tags.empty()).bindTo(registry);
                     } catch (InvocationTargetException | IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
                 });
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException e) {
+                 log.warn(e.getMessage(), e);
             }
         }
         if (monitoringProperties.isMeterJvmHeap()) {
