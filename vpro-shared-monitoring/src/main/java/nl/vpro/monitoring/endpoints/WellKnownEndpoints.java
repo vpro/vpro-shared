@@ -5,8 +5,12 @@ import org.springframework.context.annotation.Configuration;
 
 import nl.vpro.monitoring.web.WellKnownController;
 
+
+/**
+ * Just configures {@link WellKnownController} as a Spring bean.
+ */
 @Configuration
-public class WellknownEndpoints {
+public class WellKnownEndpoints {
 
     @Bean
     public WellKnownController wellKnownController() {
