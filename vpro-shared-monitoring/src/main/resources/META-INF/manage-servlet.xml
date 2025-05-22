@@ -6,6 +6,8 @@
        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
 ">
   <context:annotation-config/>
+
+  <bean id="endpointMonitoringProperties" class="nl.vpro.monitoring.config.MonitoringProperties" />
   <bean class="nl.vpro.monitoring.endpoints.MonitoringEndpoints"/>
 
 </beans>
