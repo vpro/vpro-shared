@@ -5,6 +5,8 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import java.util.Collections;
 import java.util.Optional;
 
+import jakarta.inject.Named;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -42,7 +44,7 @@ public class MonitoringEndpoints {
     }
 
     @Bean
-    public PrometheusController prometheusController(Optional<PrometheusMeterRegistry> registry, MonitoringProperties properties) {
+    public PrometheusController prometheusController(Optional<PrometheusMeterRegistry> registry, @Named("endpointMonitoringProperties") MonitoringProperties properties) {
         return new PrometheusController(registry, properties);
     }
 
