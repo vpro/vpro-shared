@@ -6,6 +6,6 @@
        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
 ">
   <context:annotation-config/>
-  <bean class="nl.vpro.monitoring.endpoints.WellknownEndpoints"/>
+  <bean class="nl.vpro.monitoring.endpoints.WellKnownEndpoints"/>
 
 </beans>
