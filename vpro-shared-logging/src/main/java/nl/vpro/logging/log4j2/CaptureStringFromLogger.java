@@ -37,17 +37,23 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
 
     static final ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
 
-    private final StringBuilderWriter writer = new StringBuilderWriter();
+
+    private final StringBuilderWriter writer;
     private final WriterAppender writerAppender;
 
 
     public CaptureStringFromLogger() {
         this("%d{ISO8601}{Europe/Amsterdam}\t%msg%n", Level.INFO);
     }
-
     public CaptureStringFromLogger(String pattern, Level level) {
+        this(pattern, level, null);
+    }
+
+    @lombok.Builder
+    private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder) {
         final UUID uuid = UUID.randomUUID();
         threadLocal.set(uuid);
+        this.writer = new StringBuilderWriter(builder);
         writerAppender = WriterAppender.newBuilder()
             .setTarget(writer)
             .setIgnoreExceptions(false)
@@ -77,6 +83,10 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
         if (LogManager.getRootLogger() instanceof Logger logger) {
             logger.removeAppender(writerAppender);
         }
+    }
+
+    public StringBuilder getBuilder() {
+        return writer.getBuilder();
     }
 
     @Override
