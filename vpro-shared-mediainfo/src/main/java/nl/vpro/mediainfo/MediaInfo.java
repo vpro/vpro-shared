@@ -1,6 +1,7 @@
 package nl.vpro.mediainfo;
 
 import lombok.extern.slf4j.Slf4j;
+import net.mediaarea.mediainfo.MediaType;
 import net.mediaarea.mediainfo.TrackType;
 
 import java.io.*;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 
 import jakarta.xml.bind.JAXB;
 
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.event.Level;
 
@@ -99,18 +101,19 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
             return Duration.ofMillis(Math.round(1000L * general().getDuration().doubleValue()));
         }
 
-
-
         public double bitRate() {
             return general().getOverallBitRate();
         }
-
 
         public boolean success() {
             return status == 0;
         }
         public boolean vertical() {
             return containingRectangle().map(Rectangle::vertical).orElse(false);
+        }
+
+        public String name() {
+            return mediaInfo.getMedias().stream().map(MediaType::getRef).filter(StringUtils::isNotBlank).findFirst().orElse("<no name>");
         }
 
         public OptionalDouble rotation() {
@@ -143,7 +146,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
 
         @Override
         public @NonNull String toString() {
-            return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + containingRectangle().get().aspectRatio() + ")" :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+            return (success() ? "" : "FAIL:") + name() + (video().isPresent() ? " (video " + containingRectangle().get().aspectRatio() + ")" :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
 
         }
     }

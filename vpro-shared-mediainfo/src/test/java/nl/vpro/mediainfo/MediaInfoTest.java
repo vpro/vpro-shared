@@ -2,8 +2,9 @@ package nl.vpro.mediainfo;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Path;
+import java.nio.file.*;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.when;
 class MediaInfoTest {
 
     @Test
-    public void testMediaInfo() {
+    public void testMediaInfo() throws IOException {
         CommandExecutor mock = mock(CommandExecutor.class);
         when(mock.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
             .thenAnswer(new Answer<Integer>() {
@@ -40,9 +41,10 @@ class MediaInfoTest {
 
 
 
-     void testMediaInfo(MediaInfo mediaInfoCaller) {
-
-        MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
+    void testMediaInfo(MediaInfo mediaInfoCaller) throws IOException {
+        Path test = Files.createTempFile("test", ".mp4");
+        //MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
+        MediaInfo.Result info = mediaInfoCaller.apply(test);
 
         log.info("MediaInfo: {}", info);
         assertThat(info.containingRectangle().get().aspectRatio()).isEqualTo("9:16");
