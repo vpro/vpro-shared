@@ -11,6 +11,9 @@ import java.util.function.Function;
 
 import jakarta.xml.bind.JAXB;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.slf4j.event.Level;
+
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.util.CommandExecutor;
 import nl.vpro.util.CommandExecutorImpl;
@@ -49,14 +52,13 @@ public class MediaInfoCaller implements Function<Path, MediaInfoCaller.Result> {
     public Result apply(Path path) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int status = mediainfo.execute(outputStream, STDERR, path.toAbsolutePath().toString());
-        if (status != 0) {
-            log.warn("Mediainfo returned with status " + status);
-        }
+        log.atLevel(status == 0 ? Level.DEBUG : Level.WARN).log("Mediainfo returned with status {}", status);
 
-        return new Result(JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()), MediaInfo.class), status);
+
+        return new Result(path, JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()), MediaInfo.class), status);
     }
 
-    record Result(MediaInfo mediaInfo, int status) {
+    public record Result(Path path, MediaInfo mediaInfo, int status) {
 
         Optional<TrackType> video() {
             return mediaInfo.getMedias().stream()
@@ -66,6 +68,14 @@ public class MediaInfoCaller implements Function<Path, MediaInfoCaller.Result> {
         }
         Optional<String> displayAspectRatio() {
             return video().map(MediaInfoCaller::getAspectRatio);
+        }
+
+        public boolean success() {
+            return status == 0;
+        }
+        @Override
+        public @NonNull String toString() {
+            return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + displayAspectRatio().get() + ")" :  " (no video track)");
         }
     }
 
