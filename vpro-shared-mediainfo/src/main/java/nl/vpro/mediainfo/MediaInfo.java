@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 
 import jakarta.xml.bind.JAXB;
@@ -17,8 +18,6 @@ import org.slf4j.event.Level;
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.util.CommandExecutor;
 import nl.vpro.util.CommandExecutorImpl;
-
-import static org.meeuw.math.IntegerUtils.gcd;
 
 /**
  * Wrapper around the command line tools 'mediainfo'
@@ -79,28 +78,48 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
                 .filter(t -> "Video".equals(t.getTrackType()))
                 .findFirst();
         }
-        Optional<String> displayAspectRatio() {
-            return video().map(MediaInfo::getAspectRatio);
-        }
+
 
         public boolean success() {
             return status == 0;
         }
         public boolean vertical() {
-            return video().map(t -> t.getHeight().intValue() > t.getWidth().intValue()).orElse(false);
+            return containingRectangle().map(Rectangle::vertical).orElse(false);
+        }
+
+        OptionalDouble rotation() {
+            return video()
+                .map(TrackType::getRotation)
+                .stream()
+                .mapToDouble(Double::parseDouble)
+                .findFirst();
+        }
+
+        Optional<Rectangle> containingRectangle() {
+            TrackType trackType = video().orElse(null);
+
+            if (trackType != null) {
+                double rotated = trackType.getRotation() == null ? 0 : Math.PI * Double.parseDouble(trackType.getRotation()) / 180.0;
+
+                double sin = Math.sin(rotated);
+                double cos = Math.cos(rotated);
+                double width = trackType.getWidth().doubleValue();
+                double height = trackType.getHeight().doubleValue();
+                Rectangle rectangle = new Rectangle(
+                    (int) Math.round(Math.abs(width * cos) + Math.abs(height * sin)),
+                    (int) Math.round(Math.abs(width * sin) + Math.abs(height * cos))
+                );
+                return Optional.of(rectangle);
+            } else {
+                return Optional.empty();
+            }
         }
 
         @Override
         public @NonNull String toString() {
-            return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + displayAspectRatio().get() + ")" :  " (no video track)");
+            return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + containingRectangle().get().aspectRatio() + ")" :  " (no video track)");
         }
     }
 
-    public static String getAspectRatio(TrackType trackType) {
-        int height = trackType.getHeight().intValue();
-        int width = trackType.getWidth().intValue();
-        int ggcd = gcd(height, width);
-        return String.format("%d:%d", height / ggcd, width / ggcd);
-    }
 
 }

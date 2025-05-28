@@ -44,8 +44,9 @@ class MediaInfoTest {
 
         MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
 
-        log.info("MediaInfo: {}", info.displayAspectRatio());
-        assertThat(info.displayAspectRatio()).contains("9:16");
+        log.info("MediaInfo: {}", info);
+        assertThat(info.containingRectangle().get().aspectRatio()).isEqualTo("9:16");
+
     }
 
 }
