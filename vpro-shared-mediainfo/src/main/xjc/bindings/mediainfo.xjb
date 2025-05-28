@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<bindings   xmlns="https://jakarta.ee/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            version="3.0">
+  <bindings schemaLocation="../schema/mediainfo_2_0.xsd">
+
+    <schemaBindings>
+
+
+    </schemaBindings>
+    <globalBindings>
+      <xjc:simple />
+
+    </globalBindings>
+    <bindings node="//xsd:complexType[@name='trackType']/xsd:attribute[@name='type']">
+      <property name="trackType"/>
+    </bindings>
+    <bindings node="//xsd:complexType[@name='trackType']/xsd:all/xsd:element[@name='Bits-Pixel_Frame']">
+      <property name="BitsPixelFrameDeprecated" />
+    </bindings>
+     <bindings node="//xsd:complexType[@name='trackType']/xsd:all/xsd:element[@name='OriginalNetworkName']">
+      <property name="OriginalNetworkNameDeprecated" />
+    </bindings>
+  </bindings>
+</bindings>
+
+
+

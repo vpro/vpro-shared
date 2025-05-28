@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 httsp://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>vpro-shared-parent</artifactId>
+    <groupId>nl.vpro.shared</groupId>
+    <version>5.10-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>vpro-shared-mediainfo</artifactId>
+
+  <properties>
+    <vpro.shared.module.postfix>mediainfo</vpro.shared.module.postfix>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-util</artifactId>
+    </dependency>
+     <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>4.0.5</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+    <plugin>
+        <groupId>org.jvnet.jaxb</groupId>
+        <artifactId>jaxb-maven-plugin</artifactId>
+        <version>4.0.8</version>
+        <executions>
+          <execution>
+            <id>default-cli</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <bindingDirectory>${project.basedir}/src/main/xjc/bindings</bindingDirectory>
+              <bindingIncludes>
+                <include>mediainfo.xjb</include>
+              </bindingIncludes>
+              <schemaDirectory>${project.basedir}/src/main/xjc/schema</schemaDirectory>
+              <schemaIncludes>
+                <include>mediainfo_2_0.xsd</include>
+              </schemaIncludes>
+              <removeOldOutput>false</removeOldOutput>
+              <extension>true</extension>
+              <strict>false</strict>
+              <packageLevelAnnotations>false</packageLevelAnnotations>
+              <generateDirectory>${project.build.directory}/generated-sources/mediainfo</generateDirectory>
+            </configuration>
+          </execution>
+        </executions>
+ </plugin>
+    </plugins>
+
+  </build>
+</project>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaInfo
+    xmlns="https://mediaarea.net/mediainfo"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://mediaarea.net/mediainfo https://mediaarea.net/mediainfo/mediainfo_2_0.xsd"
+    version="2.0">
+<creatingLibrary version="25.04" url="https://mediaarea.net/MediaInfo">MediaInfoLib</creatingLibrary>
+<media /><media ref="/Users/michiel/samples/portrait.mp4">
+<track type="General">
+<VideoCount>1</VideoCount>
+<AudioCount>1</AudioCount>
+<OtherCount>1</OtherCount>
+<FileExtension>mp4</FileExtension>
+<Format>MPEG-4</Format>
+<Format_Profile>Base Media</Format_Profile>
+<CodecID>isom</CodecID>
+<CodecID_Compatible>isom/iso2/mp41</CodecID_Compatible>
+<FileSize>125352337</FileSize>
+<Duration>50.072</Duration>
+<OverallBitRate>20027534</OverallBitRate>
+<FrameRate>30.056</FrameRate>
+<FrameCount>1505</FrameCount>
+<StreamSize>247096</StreamSize>
+<HeaderSize>28</HeaderSize>
+<DataSize>125310855</DataSize>
+<FooterSize>41454</FooterSize>
+<IsStreamable>No</IsStreamable>
+<Encoded_Date>2025-05-04 18:29:03 UTC</Encoded_Date>
+<Tagged_Date>2025-05-04 18:29:03 UTC</Tagged_Date>
+<File_Modified_Date>2025-05-28 08:03:30 UTC</File_Modified_Date>
+<File_Modified_Date_Local>2025-05-28 10:03:30</File_Modified_Date_Local>
+<Recorded_Location>+53.3029+5.0523/</Recorded_Location>
+<Encoded_Hardware_CompanyName>Google</Encoded_Hardware_CompanyName>
+<Encoded_Hardware_Name>Pixel 5</Encoded_Hardware_Name>
+</track>
+<track type="Video">
+<StreamOrder>2</StreamOrder>
+<ID>3</ID>
+<Format>HEVC</Format>
+<Format_Profile>Main</Format_Profile>
+<Format_Level>5.1</Format_Level>
+<Format_Tier>Main</Format_Tier>
+<CodecID>hvc1</CodecID>
+<Duration>50.072</Duration>
+<BitRate>19795697</BitRate>
+<Width>1920</Width>
+<Height>1080</Height>
+<Stored_Height>1088</Stored_Height>
+<Sampled_Width>1920</Sampled_Width>
+<Sampled_Height>1080</Sampled_Height>
+<PixelAspectRatio>1.000</PixelAspectRatio>
+<DisplayAspectRatio>1.778</DisplayAspectRatio>
+<Rotation>90.000</Rotation>
+<FrameRate_Mode>VFR</FrameRate_Mode>
+<FrameRate>30.056</FrameRate>
+<FrameRate_Minimum>29.990</FrameRate_Minimum>
+<FrameRate_Maximum>30.100</FrameRate_Maximum>
+<FrameRate_Real>30.000</FrameRate_Real>
+<FrameCount>1505</FrameCount>
+<Standard>NTSC</Standard>
+<ColorSpace>YUV</ColorSpace>
+<ChromaSubsampling>4:2:0</ChromaSubsampling>
+<BitDepth>8</BitDepth>
+<StreamSize>123904231</StreamSize>
+<Title>VideoHandle</Title>
+<Language>en</Language>
+<Encoded_Date>2025-05-04 18:29:03 UTC</Encoded_Date>
+<Tagged_Date>2025-05-04 18:29:03 UTC</Tagged_Date>
+<colour_description_present>Yes</colour_description_present>
+<colour_description_present_Source>Container / Stream</colour_description_present_Source>
+<colour_range>Full</colour_range>
+<colour_range_Source>Container / Stream</colour_range_Source>
+<colour_primaries>BT.601 PAL</colour_primaries>
+<colour_primaries_Source>Container / Stream</colour_primaries_Source>
+<transfer_characteristics>BT.709</transfer_characteristics>
+<transfer_characteristics_Source>Container</transfer_characteristics_Source>
+<transfer_characteristics_Original>BT.601</transfer_characteristics_Original>
+<transfer_characteristics_Original_Source>Stream</transfer_characteristics_Original_Source>
+<matrix_coefficients>BT.601</matrix_coefficients>
+<matrix_coefficients_Source>Container</matrix_coefficients_Source>
+<matrix_coefficients_Original>BT.470 System B/G</matrix_coefficients_Original>
+<matrix_coefficients_Original_Source>Stream</matrix_coefficients_Original_Source>
+<extra>
+<CodecConfigurationBox>hvcC</CodecConfigurationBox>
+</extra>
+</track>
+<track type="Audio">
+<StreamOrder>1</StreamOrder>
+<ID>2</ID>
+<Format>AAC</Format>
+<Format_AdditionalFeatures>LC</Format_AdditionalFeatures>
+<CodecID>mp4a-40-2</CodecID>
+<Duration>50.054</Duration>
+<BitRate_Mode>CBR</BitRate_Mode>
+<BitRate>192000</BitRate>
+<Channels>2</Channels>
+<ChannelPositions>Front: L R</ChannelPositions>
+<ChannelLayout>L R</ChannelLayout>
+<SamplesPerFrame>1024</SamplesPerFrame>
+<SamplingRate>48000</SamplingRate>
+<SamplingCount>2402592</SamplingCount>
+<FrameRate>46.875</FrameRate>
+<FrameCount>2346</FrameCount>
+<Compression_Mode>Lossy</Compression_Mode>
+<StreamSize>1201010</StreamSize>
+<Title>SoundHandle</Title>
+<Language>en</Language>
+<Encoded_Date>2025-05-04 18:29:03 UTC</Encoded_Date>
+<Tagged_Date>2025-05-04 18:29:03 UTC</Tagged_Date>
+</track>
+<track type="Other">
+<StreamOrder>0</StreamOrder>
+<ID>1</ID>
+<Type>meta</Type>
+<Format>mett-application/meta</Format>
+<CodecID>mett-application/meta</CodecID>
+<Duration>50.072</Duration>
+<BitRate_Mode>VBR</BitRate_Mode>
+<FrameCount>1505</FrameCount>
+<Title>MetaHandle</Title>
+<Language>en</Language>
+<extra>
+<Encoded_Date>2025-05-04 18:29:03 UTC</Encoded_Date>
+<Tagged_Date>2025-05-04 18:29:03 UTC</Tagged_Date>
+</extra>
+</track>
+</media>
+</MediaInfo>
+
