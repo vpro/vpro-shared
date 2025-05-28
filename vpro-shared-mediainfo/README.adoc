@@ -1,11 +1,20 @@
 
 = Simple wrapper around mediainfo
 
-The 'mediainfo' command line tool is a powerful utility for reading media file metadata.
+https://mediaarea.net/en/MediaInfo[The 'mediainfo' command line tool is a powerful utility for reading media file metadata]
 
-This package provides a simple wrapper around the 'mediainfo' command line tool, allowing you to easily access media file metadata in your java applications.
+This package provides a simple wrapper around  this command line tool, allowing you to easily access media file metadata in your java applications.
+
 
 == Usage
 [source,java]
 ----
+MediaInfo mediaInfo = new MediaInfo(mock);
+MediaInfo.Result result = mediaInfo.apply("/path/to/media/file.mp4");
 ----
+
+=== Implementation
+
+This is implemented using link:../vpro-shared-util/src/main/java/nl/vpro/util/Comman.java:[CommandExecutor] to execute the 'mediainfo' command line tool. It uses the `--output=XML` option, and the resulting XML is parsed to java classes generated from the https://mediaarea.net/mediainfo/mediainfo_2_0.xsd:[XSD schema provided by MediaInfo].
+
+This unmarshalled result is available via `MediaInfo.Result#mediaInfo()`, and a bunch of convenience methods are provided to access the metadata in a more user-friendly way.
