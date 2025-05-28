@@ -44,8 +44,11 @@ public class MediaInfoCaller implements Function<Path, MediaInfoCaller.Result> {
          this.mediainfo = mediainfo;
     }
 
-     public MediaInfoCaller() {
-        this( "/opt/homebrew/bin/mediainfo");
+    public MediaInfoCaller() {
+        this(
+            "/usr/bin/mediainfo", // ubuntu
+            "/opt/homebrew/bin/mediainfo"       // brew on macOS
+        );
     }
 
     @Override
