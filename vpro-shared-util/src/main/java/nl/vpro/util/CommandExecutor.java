@@ -104,7 +104,7 @@ public interface CommandExecutor {
 
 
     /**
-     * Executes the command .
+     * Executes the command.
      * @param parameters The parameters for doing this wrapped in a {@link Parameters} object.
      */
     int execute(Parameters parameters);
