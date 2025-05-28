@@ -6,6 +6,7 @@ import net.mediaarea.mediainfo.TrackType;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Function;
@@ -72,11 +73,36 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
      */
     public record Result(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, int status) {
 
-        Optional<TrackType> video() {
+        public Optional<TrackType> video() {
             return mediaInfo.getMedias().stream()
                 .flatMap(m -> m.getTracks().stream())
                 .filter(t -> "Video".equals(t.getTrackType()))
                 .findFirst();
+        }
+
+        public Optional<TrackType> audio() {
+            return mediaInfo.getMedias().stream()
+                .flatMap(m -> m.getTracks().stream())
+                .filter(t -> "Audio".equals(t.getTrackType()))
+                .findFirst();
+        }
+
+        public TrackType general() {
+            return mediaInfo.getMedias().stream()
+                .flatMap(m -> m.getTracks().stream())
+                .filter(t -> "General".equals(t.getTrackType()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No General track found in media info for " + path));
+        }
+
+        public Duration duration() {
+            return Duration.ofMillis(Math.round(1000L * general().getDuration().doubleValue()));
+        }
+
+
+
+        public double bitRate() {
+            return general().getOverallBitRate();
         }
 
 
@@ -87,7 +113,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
             return containingRectangle().map(Rectangle::vertical).orElse(false);
         }
 
-        OptionalDouble rotation() {
+        public OptionalDouble rotation() {
             return video()
                 .map(TrackType::getRotation)
                 .stream()
@@ -95,7 +121,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
                 .findFirst();
         }
 
-        Optional<Rectangle> containingRectangle() {
+        public Optional<Rectangle> containingRectangle() {
             TrackType trackType = video().orElse(null);
 
             if (trackType != null) {
@@ -117,7 +143,8 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
 
         @Override
         public @NonNull String toString() {
-            return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + containingRectangle().get().aspectRatio() + ")" :  " (no video track)");
+            return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + containingRectangle().get().aspectRatio() + ")" :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+
         }
     }
 

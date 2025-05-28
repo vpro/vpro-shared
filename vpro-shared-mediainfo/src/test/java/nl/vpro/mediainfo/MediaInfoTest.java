@@ -47,6 +47,9 @@ class MediaInfoTest {
         log.info("MediaInfo: {}", info);
         assertThat(info.containingRectangle().get().aspectRatio()).isEqualTo("9:16");
 
+         assertThat(info.toString()).isEqualTo("/Users/michiel/samples/portrait.mp4 (video 9:16), bitrate: 19558.138671875 kbps, duration: PT50.072S");
+
+
     }
 
 }
