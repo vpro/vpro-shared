@@ -76,6 +76,10 @@ public class MediaInfoCaller implements Function<Path, MediaInfoCaller.Result> {
         public boolean success() {
             return status == 0;
         }
+        public boolean vertical() {
+            return video().map(t -> t.getHeight().intValue() > t.getWidth().intValue()).orElse(false);
+        }
+
         @Override
         public @NonNull String toString() {
             return (success() ? "" : "FAIL:") + path() + (video().isPresent() ? " (video " + displayAspectRatio().get() + ")" :  " (no video track)");
