@@ -1,10 +1,10 @@
 package nl.vpro.mediainfo;
 
 import lombok.extern.slf4j.Slf4j;
-import net.mediaarea.mediainfo.MediaInfo;
 import net.mediaarea.mediainfo.TrackType;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
@@ -26,42 +26,52 @@ import static org.meeuw.math.IntegerUtils.gcd;
  * @since 3.1
  */
 @Slf4j
-public class MediaInfoCaller implements Function<Path, MediaInfoCaller.Result> {
+public class MediaInfo implements Function<Path, MediaInfo.Result> {
 
     private static final OutputStream STDERR = LoggerOutputStream
         .error(log, true);
 
     private final CommandExecutor mediainfo;
 
-    public MediaInfoCaller(String... executablesPaths) {
+    public MediaInfo(String... executablesPaths) {
          this(CommandExecutorImpl.builder()
              .executablesPaths(executablesPaths)
              .commonArg("-c", "--Output=XML")
              .build());
     }
 
-    protected MediaInfoCaller(CommandExecutor mediainfo) {
+    protected MediaInfo(CommandExecutor mediainfo) {
          this.mediainfo = mediainfo;
     }
 
-    public MediaInfoCaller() {
+    public MediaInfo() {
         this(
             "/usr/bin/mediainfo", // ubuntu
             "/opt/homebrew/bin/mediainfo"       // brew on macOS
         );
     }
 
+    /**
+     *
+     */
     @Override
     public Result apply(Path path) {
+        assert Files.exists(path) : "File does not exist: " + path;
+        assert Files.isRegularFile(path) : "File is not a regular file: " + path;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int status = mediainfo.execute(outputStream, STDERR, path.toAbsolutePath().toString());
         log.atLevel(status == 0 ? Level.DEBUG : Level.WARN).log("Mediainfo returned with status {}", status);
 
 
-        return new Result(path, JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()), MediaInfo.class), status);
+        return new Result(path, JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()), net.mediaarea.mediainfo.MediaInfo.class), status);
     }
 
-    public record Result(Path path, MediaInfo mediaInfo, int status) {
+    /**
+     * @param path the path to the file to get information about
+     * @param mediaInfo The unmarshalled result of the call to {@code mediainfo}
+     * @param status the exit status of the mediainfo command (0 for success, non-zero for failure)
+     */
+    public record Result(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, int status) {
 
         Optional<TrackType> video() {
             return mediaInfo.getMedias().stream()
@@ -70,7 +80,7 @@ public class MediaInfoCaller implements Function<Path, MediaInfoCaller.Result> {
                 .findFirst();
         }
         Optional<String> displayAspectRatio() {
-            return video().map(MediaInfoCaller::getAspectRatio);
+            return video().map(MediaInfo::getAspectRatio);
         }
 
         public boolean success() {

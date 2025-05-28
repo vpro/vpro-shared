@@ -18,12 +18,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Log4j2
-class MediaInfoCallerTest {
-
-
+class MediaInfoTest {
 
     @Test
-    public void getMediaInfo() {
+    public void testMediaInfo() {
         CommandExecutor mock = mock(CommandExecutor.class);
         when(mock.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
             .thenAnswer(new Answer<Integer>() {
@@ -35,8 +33,16 @@ class MediaInfoCallerTest {
             });
         when(mock.execute(any(), any(), any(), any())).thenReturn(0);
 
-        MediaInfoCaller mediaInfoCaller = new MediaInfoCaller();
-        MediaInfoCaller.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
+        MediaInfo mediaInfoCaller = new MediaInfo(mock);
+
+        testMediaInfo(mediaInfoCaller);
+    }
+
+
+
+     void testMediaInfo(MediaInfo mediaInfoCaller) {
+
+        MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
 
         log.info("MediaInfo: {}", info.displayAspectRatio());
         assertThat(info.displayAspectRatio()).contains("9:16");

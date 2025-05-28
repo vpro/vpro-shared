@@ -1,0 +1,11 @@
+
+= Simple wrapper around mediainfo
+
+The 'mediainfo' command line tool is a powerful utility for reading media file metadata.
+
+This package provides a simple wrapper around the 'mediainfo' command line tool, allowing you to easily access media file metadata in your java applications.
+
+== Usage
+[source,java]
+----
+----
