@@ -1,6 +1,9 @@
 
 = Simple wrapper around mediainfo
 
+image:http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-mediainfo.svg?color=blue[javadoc,link=https://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-mediainfo/latest/index.html]
+
+
 https://mediaarea.net/en/MediaInfo[The 'mediainfo' command line tool is a powerful utility for reading media file metadata]
 
 This package provides a simple wrapper around  this command line tool, allowing you to easily access media file metadata in your java applications.

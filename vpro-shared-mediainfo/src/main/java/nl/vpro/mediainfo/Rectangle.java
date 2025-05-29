@@ -1,15 +1,20 @@
 package nl.vpro.mediainfo;
 
+import jakarta.validation.constraints.Min;
+
 import static org.meeuw.math.IntegerUtils.gcd;
 
-public record Rectangle(int width, int height) {
+public record Rectangle(
+    @Min(0) int width,
+    @Min(0) int height)  {
+
 
     boolean vertical() {
         return width < height;
     }
 
     public String aspectRatio() {
-        int ggcd = gcd(height, width);
-        return String.format("%d:%d", width / ggcd, height / ggcd);
+        int gcd = gcd(width, height);
+        return String.format("%d:%d", width / gcd, height / gcd);
     }
 }
