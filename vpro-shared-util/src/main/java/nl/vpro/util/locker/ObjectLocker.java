@@ -390,6 +390,7 @@ public class ObjectLocker {
      * The lock(s) the current thread is holding.
      * @since 2.34
      */
+    @NonNull
     public static List<LockHolder<? extends Serializable>> currentLocks() {
         return Collections.unmodifiableList(new ArrayList<>(HOLDS.get()));
     }
