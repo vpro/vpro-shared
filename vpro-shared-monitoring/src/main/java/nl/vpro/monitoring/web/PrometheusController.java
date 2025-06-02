@@ -48,8 +48,6 @@ public class PrometheusController {
     HttpServletRequest request;
 
 
-
-
     @Inject
     public PrometheusController(Optional<PrometheusMeterRegistry> registry, @Value("endpointMonitoringProperties") MonitoringProperties properties) {
         this.registry = registry.orElse(null);
