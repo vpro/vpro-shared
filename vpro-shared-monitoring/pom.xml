@@ -11,35 +11,58 @@
   <properties>
     <vpro.shared.module.postfix>monitoring</vpro.shared.module.postfix>
   </properties>
-  <description>This modules contains utilities and endpoints for application deployments and monitoring.</description>
+  <description>
+    This module contains utilities and endpoints for application deployments and monitoring.</description>
   <dependencies>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-registry-prometheus-simpleclient</artifactId>
-   </dependency>
+
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
     </dependency>
+
+    <!-- endpoint is implemented with spring mvc -->
     <dependency>
-      <groupId>org.ehcache</groupId>
-      <artifactId>ehcache</artifactId>
-      <classifier>jakarta</classifier>
-      <scope>provided</scope>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
     </dependency>
     <dependency>
-      <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-     <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-web</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>jakarta.servlet</groupId>
-      <artifactId>jakarta.servlet-api</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
+
+    <!-- health endpoints are json -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+
+    <!-- wiring by spring -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+
+
+    <!-- compile time only -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+
+    <!--
+     optional dependencies
+    -->
+
+    <!-- mostly for some metrics this module recognizes -->
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
@@ -47,23 +70,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
+      <groupId>org.ehcache</groupId>
+      <artifactId>ehcache</artifactId>
+      <classifier>jakarta</classifier>
+      <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
+     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-micrometer</artifactId>
       <optional>true</optional>
@@ -73,35 +85,10 @@
       <artifactId>hibernate-core</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
+      <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-micrometer</artifactId>
       <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path-assert</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
@@ -113,9 +100,33 @@
       <artifactId>spring-security-web</artifactId>
       <optional>true</optional>
     </dependency>
+
+
     <dependency>
-      <groupId>jakarta.annotation</groupId>
-      <artifactId>jakarta.annotation-api</artifactId>
+      <groupId>io.github.natty-parser</groupId>
+      <artifactId>natty</artifactId>
+      <optional>true</optional> <!-- only for ScriptMeterBinder, to parse a date parameter -->
+    </dependency>
+
+
+    <dependency>
+      <!-- validation annotations can optionally be used -->
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+     <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
@@ -123,17 +134,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.github.natty-parser</groupId>
-      <artifactId>natty</artifactId>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-test</artifactId>
+      <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>jakarta.validation</groupId>
-      <artifactId>jakarta.validation-api</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
+
+
   </dependencies>
 </project>

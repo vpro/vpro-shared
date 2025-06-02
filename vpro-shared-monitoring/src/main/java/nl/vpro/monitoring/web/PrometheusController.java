@@ -1,21 +1,15 @@
 package nl.vpro.monitoring.web;
 
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-import io.prometheus.client.exporter.common.TextFormat;
-
-import jakarta.inject.Inject;
-
-import jakarta.inject.Named;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
-import java.util.Base64;
 import java.util.Optional;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -36,6 +30,8 @@ import static nl.vpro.logging.Slf4jHelper.debugOrInfo;
 @RestController
 @Slf4j
 public class PrometheusController {
+
+    public static final String CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8";
 
     @Getter
     private final WindowedStatisticalLong duration = createDuration();
@@ -67,7 +63,7 @@ public class PrometheusController {
      */
     @RequestMapping(
         method = RequestMethod.GET,
-        value = "/metrics", produces = TextFormat.CONTENT_TYPE_004)
+        value = "/metrics", produces = CONTENT_TYPE)
 
     public void metrics() throws IOException {
         prometheus();
@@ -79,7 +75,7 @@ public class PrometheusController {
      */
     @RequestMapping(
         method = RequestMethod.GET,
-        value = "/prometheus", produces = TextFormat.CONTENT_TYPE_004)
+        value = "/prometheus", produces = CONTENT_TYPE)
     public synchronized void prometheus() throws IOException {
         if (authenticate()) {
 
@@ -92,7 +88,7 @@ public class PrometheusController {
             }
 
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(TextFormat.CONTENT_TYPE_004);
+            response.setContentType(CONTENT_TYPE);
             try (
                 WindowedStatisticalLong.RunningDuration measure = duration.measure();
                 OutputStream writer = response.getOutputStream()) {
