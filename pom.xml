@@ -56,7 +56,7 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.10.4</camel.version> <!-- limit to LTS (I think even majors) -->
+    <camel.version>4.12.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.32</swagger.version>
 
@@ -73,7 +73,7 @@
     <micrometer.version>1.15.0</micrometer.version>
     <flyway.version>11.8.2</flyway.version>
 
-    <testcontainers.version>1.21.0</testcontainers.version>
+    <testcontainers.version>1.21.1</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -237,7 +237,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>3.5.3</version>
         <configuration>
           <argLine>${EXTRA_TEST_OPTS}</argLine>
           <systemPropertyVariables>
@@ -254,7 +254,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>3.5.3</version>
         <configuration>
           <skipITs>${skipITs}</skipITs>
           <includes>
@@ -897,7 +897,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.5</version>
+            <version>3.2.7</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
