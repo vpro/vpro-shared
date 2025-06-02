@@ -1,9 +1,8 @@
 package nl.vpro.monitoring.web;
 
 import io.micrometer.common.util.StringUtils;
-
-import jakarta.inject.*;
-
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -15,6 +14,8 @@ import java.time.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -38,6 +39,8 @@ import nl.vpro.util.TimeUtils;
 @Slf4j
 public class HealthController {
 
+    @Getter
+    @Setter
     private Status status = Status.STARTING;
 
     @MonotonicNonNull
@@ -94,7 +97,7 @@ public class HealthController {
     @EventListener
     public void onApplicationStoppedEvent(ContextStoppedEvent stoppedEvent) {
         status = Status.STOPPING;
-        log.info("Status {} at {}", status, Instant.now());
+        log.info("Status {} at {}", status, clock.instant());
     }
 
     @GetMapping
@@ -143,7 +146,7 @@ public class HealthController {
                                     }
 
                                 }, "Dumping threads").start();
-                                threadsDumped = Instant.now();
+                                threadsDumped = clock.instant();
                             } else {
                                 log.info("Skipping thread dump, because it was done recently");
                             }
@@ -179,7 +182,7 @@ public class HealthController {
 
     }
 
-    private enum Status {
+    public enum Status {
         STARTING(503, "Application starting"),
         READY(200, "Application ready"),
         STOPPING(503, "Application shutdown"),

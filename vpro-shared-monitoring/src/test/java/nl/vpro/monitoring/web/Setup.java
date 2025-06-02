@@ -8,6 +8,5 @@ import nl.vpro.monitoring.config.EnableMonitoring;
 @Configuration
 @EnableMonitoring
 @ImportResource("classpath:/META-INF/manage-servlet.xml")
-
 public class Setup {
 }
