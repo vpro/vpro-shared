@@ -21,8 +21,8 @@
     <spring-security.version>6.4.5</spring-security.version>
     <jackson2.version>2.19.0</jackson2.version>
 
-    <junit.version>5.12.2</junit.version>
-    <mockito.version>5.17.0</mockito.version>
+    <junit.version>5.13.0</junit.version>
+    <mockito.version>5.18.0</mockito.version>
     <assertj.version>3.27.2</assertj.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
 
@@ -38,7 +38,7 @@
     <guava.version>33.4.8-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.10.0</xmlunit.version>
+    <xmlunit.version>2.10.2</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <theories.version>0.14.0</theories.version>
 
@@ -56,9 +56,9 @@
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-    <camel.version>4.10.3</camel.version> <!-- limit to LTS (I think even majors) -->
+    <camel.version>4.10.4</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.30</swagger.version>
+    <swagger.version>2.2.32</swagger.version>
 
     <lombok.version>1.18.38</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -70,8 +70,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.14.6</micrometer.version>
-    <flyway.version>11.8.1</flyway.version>
+    <micrometer.version>1.15.0</micrometer.version>
+    <flyway.version>11.8.2</flyway.version>
 
     <testcontainers.version>1.21.0</testcontainers.version>
 
@@ -151,6 +151,7 @@
     <module>vpro-shared-i18n</module>
     <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
+
 
     <!--
         <module>vpro-shared-swagger</module>
@@ -694,12 +695,12 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.5</version>
+        <version>42.7.6</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-regions-bom</artifactId>
-        <version>2.3.1</version>
+        <version>2.4.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
