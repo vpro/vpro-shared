@@ -1,5 +1,7 @@
 package nl.vpro.monitoring.endpoints;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.util.Collections;
@@ -12,10 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import nl.vpro.jackson2.DateModule;
-import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.web.HealthController;
 import nl.vpro.monitoring.web.PrometheusController;
@@ -23,17 +21,17 @@ import nl.vpro.monitoring.web.PrometheusController;
 @Configuration
 public class MonitoringEndpoints {
 
-
     @Bean
     public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
         final RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+        ObjectMapper om = new ObjectMapper() {
+            @Override
+            public String toString() {
+                return "ObjectMapper(monitoring)";
+            }
+        };
         adapter.setMessageConverters(
-            Collections.singletonList(new MappingJackson2HttpMessageConverter(
-                Jackson2Mapper.create("monitoring", m -> !(m instanceof DateModule), om -> {
-                    om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                    om.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
-                })
-            )));
+            Collections.singletonList(new MappingJackson2HttpMessageConverter(om)));
 
         return adapter;
     }
