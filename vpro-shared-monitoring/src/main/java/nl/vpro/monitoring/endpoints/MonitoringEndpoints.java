@@ -2,6 +2,8 @@ package nl.vpro.monitoring.endpoints;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.util.Collections;
@@ -30,6 +32,7 @@ public class MonitoringEndpoints {
                 return "ObjectMapper(monitoring)";
             }
         };
+        om.registerModule(new JavaTimeModule());
         adapter.setMessageConverters(
             Collections.singletonList(new MappingJackson2HttpMessageConverter(om)));
 
