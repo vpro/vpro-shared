@@ -16,6 +16,7 @@ import jakarta.xml.bind.JAXB;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.math.shapes.IntRectangle;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -143,7 +144,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
          * Whether the media file seems to represent a vertical video (i.e., the height of {@link #containingRectangle()}} is greater than the width).
          */
         public boolean vertical() {
-            return containingRectangle().map(Rectangle::vertical).orElse(false);
+            return containingRectangle().map(IntRectangle::vertical).orElse(false);
         }
 
 
@@ -167,15 +168,15 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
          * Returns a rectangle that contains the video track, taking into account any rotation.
          * The rectangle's width and height are adjusted based on the rotation of the video track.
          *
-         * @return an {@link Optional} containing a {@link Rectangle} that represents the containing rectangle of the video track, or empty if no video track is present
+         * @return an {@link Optional} containing a {@link IntRectangle} that represents the containing rectangle of the video track, or empty if no video track is present
          */
-        public Optional<Rectangle> containingRectangle() {
+        public Optional<IntRectangle> containingRectangle() {
             TrackType trackType = video().orElse(null);
 
             if (trackType != null) {
                 double rotated = trackType.getRotation() == null ? 0 : Double.parseDouble(trackType.getRotation());
 
-                return Optional.of(new Rectangle(
+                return Optional.of(new IntRectangle(
                     trackType.getWidth().intValue(),
                     trackType.getHeight().intValue())
                     .rotateDegrees(rotated));
