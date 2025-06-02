@@ -69,8 +69,7 @@ class HealthControllerTest {
                    "message" : "Application ready",
                    "startTime" : "2021-07-06T00:00:00Z",
                    "upTime" : "PT0.05S",
-                   "prometheusCallDuration" : "PT0S",
-                   "prometheusDownCount" : null
+                   "prometheusCallDuration" : "PT0S"
                  }
             """);
     }
@@ -90,8 +89,7 @@ class HealthControllerTest {
                          "message" : "Application shutdown",
                          "startTime" : "2021-07-06T00:00:00Z",
                          "upTime" : "PT0.5S",
-                         "prometheusCallDuration" : "PT0S",
-                         "prometheusDownCount" : null
+                         "prometheusCallDuration" : "PT0S"
                        }
             """);
 

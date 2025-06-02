@@ -1,9 +1,5 @@
 package nl.vpro.monitoring.endpoints;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.util.Collections;
@@ -15,6 +11,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.web.HealthController;
@@ -33,6 +33,8 @@ public class MonitoringEndpoints {
             }
         };
         om.registerModule(new JavaTimeModule());
+        om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
         adapter.setMessageConverters(
             Collections.singletonList(new MappingJackson2HttpMessageConverter(om)));
 
