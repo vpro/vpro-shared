@@ -1,5 +1,7 @@
 package nl.vpro.jmx;
 
+import com.google.common.util.concurrent.Futures;
+
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,12 +15,14 @@ import java.util.function.Supplier;
 
 import javax.management.*;
 
+import nl.vpro.util.ImmediateFuture;
+
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import com.google.common.util.concurrent.Futures;
+
 
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.*;
@@ -48,7 +52,7 @@ public class MBeans {
     public static Future<String> cancel(final String key){
         LockValue future = locks.get(key);
         if (future == null) {
-            return Futures.immediateFuture("Not running");
+            return new ImmediateFuture<>("Not running");
         }
         future.cancel();
         // should not be needed, because happening in finally, but if the called code does refuse to shut down properly, then simply abandon it.
