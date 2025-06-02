@@ -54,20 +54,37 @@ public record Rectangle(
         return (long) width * height;
     }
 
+    /**
+     * Calculates the perimeter of the rectangle by summing twice the width and twice the height.
+     * The result is returned as a long to accommodate larger values.
+     *
+     * @return the perimeter of the rectangle
+     */
     long perimeter() {
         return (long) 2 * width + (long) 2 * height;
     }
+    /**
+     * Calculates the diagonal length of the rectangle using the Pythagorean theorem.
+     * The diagonal is computed as the square root of the sum of the squares of the width and height.
+     *
+     * @return the length of the diagonal
+     */
     double diagonal() {
         return Math.sqrt(width * width + height * height);
     }
 
+    /**
+     * Checks if the rectangle is a square, meaning its width and height are equal.
+     *
+     * @return true if the rectangle is a square, false otherwise
+     */
     boolean isSquare() {
         return width == height;
     }
 
     /**
      * Returns the aspect ratio of the rectangle in the format "width:height".
-     * The values are reduced to their simplest form using the greatest common divisor (GCD).
+     * The values are reduced to their simplest form using the greatest common divisor ({@link org.meeuw.math.IntegerUtils#gcd(int, int) GCD}).
      *
      * @return a string representing the aspect ratio
      */
