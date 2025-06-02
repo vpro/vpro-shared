@@ -173,17 +173,12 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
             TrackType trackType = video().orElse(null);
 
             if (trackType != null) {
-                double rotated = trackType.getRotation() == null ? 0 : Math.PI * Double.parseDouble(trackType.getRotation()) / 180.0;
+                double rotated = trackType.getRotation() == null ? 0 : Double.parseDouble(trackType.getRotation());
 
-                double sin = Math.sin(rotated);
-                double cos = Math.cos(rotated);
-                double width = trackType.getWidth().doubleValue();
-                double height = trackType.getHeight().doubleValue();
-                Rectangle rectangle = new Rectangle(
-                    (int) Math.round(Math.abs(width * cos) + Math.abs(height * sin)),
-                    (int) Math.round(Math.abs(width * sin) + Math.abs(height * cos))
-                );
-                return Optional.of(rectangle);
+                return Optional.of(new Rectangle(
+                    trackType.getWidth().intValue(),
+                    trackType.getHeight().intValue())
+                    .rotateDegrees(rotated));
             } else {
                 return Optional.empty();
             }
