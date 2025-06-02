@@ -34,6 +34,8 @@ public record Rectangle(
         );
     }
 
+
+
     /**
      * A convenience method to {@link #rotate(double)} the rectangle by a given angle in degrees (using {@link Math#toRadians(double)}).
      */
@@ -44,6 +46,24 @@ public record Rectangle(
         return rotate(Math.toRadians(angle));
     }
 
+    /**
+     *
+     * Calculates the area of the rectangle by multiplying its width and height.
+     */
+    long area() {
+        return (long) width * height;
+    }
+
+    long perimeter() {
+        return (long) 2 * width + (long) 2 * height;
+    }
+    double diagonal() {
+        return Math.sqrt(width * width + height * height);
+    }
+
+    boolean isSquare() {
+        return width == height;
+    }
 
     /**
      * Returns the aspect ratio of the rectangle in the format "width:height".
