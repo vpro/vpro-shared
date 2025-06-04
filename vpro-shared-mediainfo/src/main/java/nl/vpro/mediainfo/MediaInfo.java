@@ -16,12 +16,15 @@ import jakarta.xml.bind.JAXB;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.meeuw.math.shapes.IntRectangle;
+import org.meeuw.math.shapes.dim2.Rectangle;
+import org.meeuw.math.uncertainnumbers.field.UncertainReal;
 import org.slf4j.event.Level;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.util.CommandExecutor;
 import nl.vpro.util.CommandExecutorImpl;
+
+import static org.meeuw.math.uncertainnumbers.field.UncertainRealField.element;
 
 /**
  * Wrapper around the command line tools 'mediainfo'
@@ -141,10 +144,10 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
         }
 
         /**
-         * Whether the media file seems to represent a vertical video (i.e., the height of {@link #containingRectangle()}} is greater than the width).
+         * Whether the media file seems to represent a vertical video (i.e., the height of {@link #circumscribedRectangle()}} is greater than the width).
          */
         public boolean vertical() {
-            return containingRectangle().map(IntRectangle::vertical).orElse(false);
+            return circumscribedRectangle().map(Rectangle::vertical).orElse(false);
         }
 
 
@@ -153,7 +156,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
         }
 
         /**
-         * Media can have a 'rotation' (in degrees). For 'portrait' video this is often 90 or 270 degrees.
+         * Media can have a 'rotation' (in degrees). For a 'portrait' video this is often 90 or 270 degrees.
          *
          */
         public OptionalDouble rotation() {
@@ -168,18 +171,19 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
          * Returns a rectangle that contains the video track, taking into account any rotation.
          * The rectangle's width and height are adjusted based on the rotation of the video track.
          *
-         * @return an {@link Optional} containing a {@link IntRectangle} that represents the containing rectangle of the video track, or empty if no video track is present
+         * @return an {@link Optional} containing a {@link Rectangle} that represents the containing rectangle of the video track, or empty if no video track is present
          */
-        public Optional<IntRectangle> containingRectangle() {
+        public Optional<Rectangle<UncertainReal>> circumscribedRectangle() {
             TrackType trackType = video().orElse(null);
 
             if (trackType != null) {
                 double rotated = trackType.getRotation() == null ? 0 : Double.parseDouble(trackType.getRotation());
 
-                return Optional.of(new IntRectangle(
-                    trackType.getWidth().intValue(),
-                    trackType.getHeight().intValue())
-                    .rotateDegrees(rotated));
+                return Optional.of(new Rectangle<>(element(
+                    trackType.getWidth().doubleValue()),
+                    element(trackType.getHeight().doubleValue()))
+                    .circumscribedRectangle(
+                        element(Math.toRadians(rotated))));
             } else {
                 return Optional.empty();
             }
@@ -187,7 +191,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
 
         @Override
         public @NonNull String toString() {
-            return (success() ? "" : "FAIL:") + name() + (video().isPresent() ? " (video " + containingRectangle().get().aspectRatio() + ")" :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+            return (success() ? "" : "FAIL:") + name() + (video().isPresent() ? " (video " + circumscribedRectangle().get().aspectRatio() + ")" :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
 
         }
     }

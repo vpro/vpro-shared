@@ -40,7 +40,7 @@
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.2</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <theories.version>0.14.0</theories.version>
+    <math.version>0.15-SNAPSHOT</math.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
@@ -588,8 +588,14 @@
       </dependency>
       <dependency>
         <groupId>org.meeuw.math</groupId>
+        <artifactId>mihxil-shapes</artifactId>
+        <version>${math.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.meeuw.math</groupId>
         <artifactId>mihxil-theories</artifactId>
-        <version>${theories.version}</version>
+        <version>${math.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>

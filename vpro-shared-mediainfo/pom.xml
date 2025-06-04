@@ -19,6 +19,10 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-util</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.meeuw.math</groupId>
+      <artifactId>mihxil-shapes</artifactId>
+    </dependency>
      <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -33,6 +37,11 @@
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.meeuw.math</groupId>
+      <artifactId>mihxil-shapes</artifactId>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
   <build>
