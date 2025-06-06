@@ -34,22 +34,22 @@ class MediaInfoTest {
             });
         when(mock.execute(any(), any(), any(), any())).thenReturn(0);
 
-        MediaInfo mediaInfoCaller = new MediaInfo(mock);
+        MediaInfoService mediaInfoCaller = new MediaInfoService(mock);
 
         testMediaInfo(mediaInfoCaller);
     }
 
 
 
-    void testMediaInfo(MediaInfo mediaInfoCaller) throws IOException {
+    void testMediaInfo(MediaInfoService mediaInfoCaller) throws IOException {
         Path test = Files.createTempFile("test", ".mp4");
         //MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
-        MediaInfo.Result info = mediaInfoCaller.apply(test);
+        MediaInfo info = mediaInfoCaller.apply(test);
 
         log.info("MediaInfo: {}", info);
         assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("9:16");
 
-         assertThat(info.toString()).isEqualTo("/Users/michiel/samples/portrait.mp4 (video 9:16), bitrate: 19558.138671875 kbps, duration: PT50.072S");
+         assertThat(info.toString()).isEqualTo("video 9:16, bitrate: 19558.138671875 kbps, duration: PT50.072S");
 
 
     }
