@@ -71,7 +71,11 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
         log.atLevel(status == 0 ? Level.DEBUG : Level.WARN).log("Mediainfo returned with status {}", status);
 
 
-        return new Result(path, JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()), net.mediaarea.mediainfo.MediaInfo.class), status);
+        return new Result(path,
+            JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()),
+                net.mediaarea.mediainfo.MediaInfo.class),
+            status
+        );
     }
 
     /**
@@ -152,7 +156,12 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
 
 
         public String name() {
-            return mediaInfo.getMedias().stream().map(MediaType::getRef).filter(StringUtils::isNotBlank).findFirst().orElse("<no name>");
+            return mediaInfo.getMedias().stream()
+                .map(MediaType::getRef)
+                .filter(StringUtils::isNotBlank)
+                .findFirst()
+                .map( n -> new File(n).getName())
+                .orElse("<no name>");
         }
 
         /**
@@ -191,7 +200,7 @@ public class MediaInfo implements Function<Path, MediaInfo.Result> {
 
         @Override
         public @NonNull String toString() {
-            return (success() ? "" : "FAIL:") + name() + (video().isPresent() ? " (video " + circumscribedRectangle().get().aspectRatio() + ")" :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+            return (success() ? "" : "FAIL:") + (video().isPresent() ? (", video " + circumscribedRectangle().get().aspectRatio()) :  " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
 
         }
     }

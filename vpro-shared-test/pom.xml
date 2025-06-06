@@ -8,7 +8,7 @@
   </parent>
   <artifactId>vpro-shared-test</artifactId>
   <packaging>jar</packaging>
-  <description>Contains some functionality which can be used by JUnit tests</description>
+  <description>Contains some functionality that can be used by JUnit tests</description>
 
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
