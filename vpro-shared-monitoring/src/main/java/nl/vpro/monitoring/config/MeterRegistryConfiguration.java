@@ -323,14 +323,18 @@ public class MeterRegistryConfiguration {
 
         }
         if (monitoringProperties.meterGaugeScript) {
-            String[] lines = monitoringProperties.gaugeScript.trim().split("\n");
-            for (String l : lines) {
-                String[] split = l.trim().split("\t");
-                new ScriptMeterBinder(
-                    split[0],
-                    split[1].split(","),
-                    split[2],
-                    Arrays.copyOfRange(split, 3, split.length)).bindTo(registry);
+            try {
+                String[] lines = monitoringProperties.gaugeScript.trim().split("\n");
+                for (String l : lines) {
+                    String[] split = l.trim().split("\t");
+                    new ScriptMeterBinder(
+                        split[0],
+                        split[1].split(","),
+                        split[2],
+                        Arrays.copyOfRange(split, 3, split.length)).bindTo(registry);
+                }
+            } catch (NoClassDefFoundError noClassDefFoundError) {
+                log.info("No gauge script metrics. Missing class {}",noClassDefFoundError.getMessage());
             }
         }
     }
