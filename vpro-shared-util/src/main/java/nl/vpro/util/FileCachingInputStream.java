@@ -82,6 +82,7 @@ public class FileCachingInputStream extends InputStream {
      * @param progressLogging Whether progress logging must be done (every batch)
      * @param progressLoggingBatch every this many batches a progress logging will be issued (unused progressLogging is explicitly false)
      * @param deleteTempFile Whether the intermediate temporary file must be deleted immediately on closing of this stream
+     * @param initialBuffer The initial buffer size to use, defaults to 8192 bytes. If this is larger than the input stream, no temporary file will be created.
      */
     @lombok.Builder(builderClassName = "Builder")
     @SneakyThrows(IOException.class)
