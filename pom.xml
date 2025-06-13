@@ -21,7 +21,7 @@
     <spring-security.version>6.5.0</spring-security.version>
     <jackson2.version>2.19.0</jackson2.version>
 
-    <junit.version>5.13.0</junit.version>
+    <junit.version>5.13.1</junit.version>
     <mockito.version>5.18.0</mockito.version>
     <assertj.version>3.27.2</assertj.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
@@ -58,7 +58,7 @@
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <camel.version>4.12.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.32</swagger.version>
+    <swagger.version>2.2.33</swagger.version>
 
     <lombok.version>1.18.38</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -70,8 +70,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.15.0</micrometer.version>
-    <flyway.version>11.9.0</flyway.version>
+    <micrometer.version>1.15.1</micrometer.version>
+    <flyway.version>11.9.1</flyway.version>
 
     <testcontainers.version>1.21.1</testcontainers.version>
 
@@ -709,7 +709,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.6</version>
+        <version>42.7.7</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
