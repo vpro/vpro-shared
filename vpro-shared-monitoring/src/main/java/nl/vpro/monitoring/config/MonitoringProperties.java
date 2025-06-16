@@ -75,7 +75,7 @@ public class MonitoringProperties {
     @Value("${monitoring.volumes:#{null}}")
     private List<String> meterVolumes;
 
-    @Value("${monitoring.locks:false}")
+    @Value("${monitoring.locks.enabled:false}")
     private boolean meterLocks;
 
     @Value("${monitoring.health.permitAll:true}")
