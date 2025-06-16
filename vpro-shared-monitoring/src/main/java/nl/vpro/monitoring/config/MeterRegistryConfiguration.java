@@ -319,16 +319,26 @@ public class MeterRegistryConfiguration {
                 .register(registry);
 
         }
-        if (monitoringProperties.meterGaugeScript) {
+        if (isActive("meter gauge scripts", monitoringProperties.getMeterGaugeScript())) {
             try {
                 String[] lines = monitoringProperties.gaugeScript.trim().split("\n");
                 for (String l : lines) {
                     String[] split = l.trim().split("\t");
-                    new ScriptMeterBinder(
+                    ScriptMeterBinder binder = new ScriptMeterBinder(
                         split[0],
                         split[1].split(","),
                         split[2],
-                        Arrays.copyOfRange(split, 3, split.length)).bindTo(registry);
+                        Arrays.copyOfRange(split, 3, split.length));
+                    boolean implicit = binder.getCommandExecutor().getBinary().get() == null;
+                    if (binder.getCommandExecutor().getBinary().get() == null) {
+                        log.atLevel(implicit ? DEBUG : WARN)
+                            .log("No binary found for {}", binder.getCommandExecutor().getBinary().get());
+                        if (implicit) {
+                            // No binary found, just implicitly requested, so don't even bind then.
+                            return;
+                        }
+                    }
+                    binder.bindTo(registry);
                 }
             } catch (NoClassDefFoundError noClassDefFoundError) {
                 log.info("No gauge script metrics. Missing class {}",noClassDefFoundError.getMessage());

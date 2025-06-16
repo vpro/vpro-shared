@@ -6,14 +6,13 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
-
-import org.natty.Parser;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -26,6 +25,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
 
 
     private final Map<String, AtomicDouble> cache = new ConcurrentHashMap<>();
+    @Getter
     private final CommandExecutor commandExecutor;
     private Duration duration;
     private final String[] arguments;
@@ -72,8 +72,6 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
     }
 
 
-
-    private static final Parser PARSER = new Parser(TimeZone.getTimeZone(BindingUtils.DEFAULT_ZONE));
 
     @Override
     @ManagedOperation

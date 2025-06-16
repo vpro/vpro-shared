@@ -92,8 +92,8 @@ public class MonitoringProperties {
     String minThreadDumpInterval = Duration.ofHours(1).toString();
 
 
-    @Value("${monitoring.gaugeScript.enabled:${MONITORING_HAS_SCRIPTS:false}}")
-    boolean meterGaugeScript;
+    @Value("${monitoring.gaugeScript.enabled:${MONITORING_HAS_SCRIPTS:#{null}}")
+    Boolean meterGaugeScript;
 
     @Value("""
     ${monitoring.gaugeScript:
