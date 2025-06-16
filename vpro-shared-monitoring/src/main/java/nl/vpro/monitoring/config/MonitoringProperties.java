@@ -29,8 +29,8 @@ public class MonitoringProperties {
     @Value("${monitoring.classloader.enabled:true}")
     private boolean meterClassloader;
 
-    @Value("${monitoring.jcache.enabled:true}")
-    private boolean meterJCache;
+    @Value("${monitoring.jcache.enabled:#{null}}")
+    private Boolean meterJCache;
 
     @Value("${monitoring.jvm.heap.enabled:true}")
     private boolean meterJvmHeap;
@@ -45,20 +45,20 @@ public class MonitoringProperties {
     private boolean meterJvmThread;
 
 
-    @Value("${monitoring.camel.enabled:true}")
-    private boolean meterCamel;
+    @Value("${monitoring.camel.enabled:#{null}}")
+    private Boolean meterCamel;
 
-    @Value("${monitoring.hibernate.enabled:true}")
-    private boolean meterHibernate;
+    @Value("${monitoring.hibernate.enabled:#{null}}")
+    private Boolean meterHibernate;
 
     @Value("${monitoring.hibernate.name:hibernate}")
     private String meterHibernateName;
 
-    @Value("${monitoring.hibernate.query.enabled:false}") // ''Be aware of the potential for high cardinality of unique Hibernate queries executed by your application'
-    private boolean meterHibernateQuery;
+    @Value("${monitoring.hibernate.query.enabled:#{null}") // ''Be aware of the potential for high cardinality of unique Hibernate queries executed by your application'
+    private Boolean meterHibernateQuery;
 
-    @Value("${monitoring.postgres.enabled:true}")
-    private boolean meterPostgres;
+    @Value("${monitoring.postgres.enabled:#{null}}")
+    private Boolean meterPostgres;
 
     @Value("${monitoring.postgres.database.name:#{null}}")
     private String postgresDatabaseName;

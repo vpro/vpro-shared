@@ -147,25 +147,29 @@ public class MeterRegistryConfiguration {
         }
 
 
-        final Optional<?> cacheManager = getCacheManager();
-        if (monitoringProperties.isMeterJCache() && cacheManager.isPresent()) {
-            try {
-                Object manager = cacheManager.get();
 
-                Method getCacheNames = Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCacheNames");
-                Method getCache =  Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCache", String.class);
+        if (isActive(monitoringProperties.getMeterJCache(), "javax.cache.CacheManager"))  {
+            final Optional<?> cacheManager = getCacheManager();
+            if (cacheManager.isPresent()) {
+                try {
+                    Object manager = cacheManager.get();
 
-                ((List) getCacheNames.invoke(manager)).forEach(cacheName -> {
-                    try {
-                        Object cache = getCache.invoke(manager, cacheName);
-                        log.info("Metering {}", cache);
-                        new JCacheMetrics<>((javax.cache.Cache) cache, Tags.empty()).bindTo(registry);
-                    } catch (InvocationTargetException | IllegalAccessException e) {
-                        throw new MetricsConfigurationException(e.getMessage(), e);
-                    }
-                });
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | ClassNotFoundException e) {
-                 log.warn(e.getMessage(), e);
+                    Method getCacheNames = Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCacheNames");
+                    Method getCache = Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCache", String.class);
+
+                    ((List) getCacheNames.invoke(manager)).forEach(cacheName -> {
+                        try {
+                            Object cache = getCache.invoke(manager, cacheName);
+                            log.info("Metering {}", cache);
+                            new JCacheMetrics<>((javax.cache.Cache) cache, Tags.empty()).bindTo(registry);
+                        } catch (InvocationTargetException | IllegalAccessException e) {
+                            throw new MetricsConfigurationException(e.getMessage(), e);
+                        }
+                    });
+                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                         ClassNotFoundException e) {
+                    log.warn(e.getMessage(), e);
+                }
             }
         }
         if (monitoringProperties.isMeterJvmHeap()) {
@@ -187,7 +191,7 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (monitoringProperties.isMeterHibernate() && classForName("org.hibernate.SessionFactory").isPresent() && classForName("org.hibernate.stat.Statistics").isPresent() && classForName("org.hibernate.stat.HibernateMetrics").isPresent()) {
+        if (isActive(monitoringProperties.getMeterHibernate(), "org.hibernate.SessionFactory", "org.hibernate.stat.Statistics", "org.hibernate.stat.HibernateMetrics")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
             if (sessionFactory.isPresent()) {
                 new HibernateMetrics(
@@ -200,7 +204,7 @@ public class MeterRegistryConfiguration {
                 warn("No session factory to monitor (hibernate)");
             }
         }
-        if (monitoringProperties.isMeterHibernateQuery() && classForName("org.hibernate.SessionFactory").isPresent()) {
+        if (isActive(monitoringProperties.getMeterHibernateQuery(), "org.hibernate.SessionFactory")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
             if (sessionFactory.isPresent()) {
@@ -211,7 +215,7 @@ public class MeterRegistryConfiguration {
         }
 
         try {
-            if (monitoringProperties.isMeterPostgres() && classForName("org.postgresql.Driver").isPresent()) {
+            if (isActive(monitoringProperties.getMeterPostgres(), "org.postgresql.Driver")) {
                 final Optional<Object> dataSource = (Optional<Object>) getDataSource();
                 if (dataSource.isPresent()) {
                     if (monitoringProperties.getPostgresDatabaseName() != null) {
@@ -232,31 +236,29 @@ public class MeterRegistryConfiguration {
             new ProcessorMetrics().bindTo(registry);
         }
 
-        if (monitoringProperties.isMeterCamel()) {
+        if (isActive(monitoringProperties.getMeterCamel(), "org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory")) {
             try {
-                if (classForName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory").isPresent()) {
-                    Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
-                    Object factory = factoryClass.getDeclaredConstructor().newInstance();
-                    factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
-                    Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
-                    Object camelContext;
-                    try {
-                        camelContext = applicationContext.getBean(camelContextClass);
-                    } catch (BeansException e) {
-                        camelContext = null;
-                    }
-                    if (camelContext == null) {
-                        log.warn("No camel context found in {}", applicationContext);
-                    } else {
-                        camelContextClass.getMethod("addRoutePolicyFactory", Class.forName("org.apache.camel.spi.RoutePolicyFactory")).invoke(camelContext, factory);
-                        log.info("Set up {}", factory);
-                    }
-                } else {
-                    log.info("No camel micrometer route policy factory found");
+                Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
+                Object factory = factoryClass.getDeclaredConstructor().newInstance();
+                factoryClass.getMethod("setMeterRegistry", MeterRegistry.class).invoke(factory, meterRegistry);
+                Class<?> camelContextClass = Class.forName("org.apache.camel.CamelContext");
+                Object camelContext;
+                try {
+                    camelContext = applicationContext.getBean(camelContextClass);
+                } catch (BeansException e) {
+                    camelContext = null;
                 }
+                if (camelContext == null) {
+                    log.warn("No camel context found in {}", applicationContext);
+                } else {
+                    camelContextClass.getMethod("addRoutePolicyFactory", Class.forName("org.apache.camel.spi.RoutePolicyFactory")).invoke(camelContext, factory);
+                    log.info("Set up {}", factory);
+                }
+
             } catch (Exception e) {
                 log.warn(e.getClass() + ":" + e.getMessage(), e);
             }
+
         }
 
 
@@ -338,6 +340,21 @@ public class MeterRegistryConfiguration {
             }
         }
     }
+
+
+    private boolean isActive(Boolean active, String... clazzes) {
+        if (active == null || active) {
+            for (String clazz : clazzes) {
+                if (!classForName(clazz, active == null ? DEBUG : WARN).isPresent()) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     // With a datasource argument instead of the generic wildcard, application startup
     // will fail when this DataSource class is not available
