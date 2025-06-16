@@ -28,8 +28,15 @@ class MonitoringConfigTest {
     @InjectMocks
     private MeterRegistryConfiguration config;
 
-      @BeforeEach
+    @BeforeEach
     public  void findOffset() {
+        properties.setMeterCamel(false);
+        properties.setMeterHibernate(false);
+        properties.setMeterHibernateQuery(false);
+        properties.setMeterPostgres(false);
+        properties.setMeterLog4j(false);
+
+
         config.init(null);
         config.getGlobalMeterRegistry().clear();
     }
@@ -139,5 +146,13 @@ class MonitoringConfigTest {
             .get(registry.getMeters().size() - 1).getId().getTags()).contains(new ImmutableTag("tag", "value"));
 
         log.info("Found meters {}", registry.getMeters());
+    }
+
+
+    @Test
+    void isMeterLog4j() {
+        properties.setMeterLog4j(null);
+        final PrometheusMeterRegistry registry = config.configure();
+        assertThat(registry.getMeters()).hasSizeGreaterThanOrEqualTo(6);
     }
 }

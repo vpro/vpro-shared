@@ -319,7 +319,7 @@ public class MeterRegistryConfiguration {
                 .register(registry);
 
         }
-        if (isActive("meter gauge scripts", monitoringProperties.getMeterGaugeScript())) {
+        if (isActive("meter gauge scripts", monitoringProperties.getMeterGaugeScript()) && monitoringProperties.gaugeScript != null)  {
             try {
                 String[] lines = monitoringProperties.gaugeScript.trim().split("\n");
                 for (String l : lines) {
@@ -352,7 +352,9 @@ public class MeterRegistryConfiguration {
             List<String> missing = new ArrayList<>();
             for (String clazz : clazzes) {
                 if (!classForName(clazz, active == null ? DEBUG : WARN).isPresent()) {
+
                     missing.add(clazz);
+
                 }
             }
             if (missing.isEmpty()) {
@@ -403,7 +405,9 @@ public class MeterRegistryConfiguration {
             final Class<?> aClass = Class.forName(name, true, this.getClass().getClassLoader());
             return Optional.of(aClass);
         } catch (ClassNotFoundException e) {
-            warn("class not found: " + name + ":" + e.getMessage(), level);
+            if (level == WARN) {
+                warn("class not found: " + name + ":" + e.getMessage(), level);
+            }
             return Optional.empty();
         }
     }
