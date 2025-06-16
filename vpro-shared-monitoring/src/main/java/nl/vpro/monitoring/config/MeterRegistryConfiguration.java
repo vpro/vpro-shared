@@ -137,18 +137,13 @@ public class MeterRegistryConfiguration {
             new ClassLoaderMetrics().bindTo(registry);
         }
 
-        if (monitoringProperties.isMeterLog4j()) {
-            if (classForName("org.apache.logging.log4j.core.config.Configuration").isPresent()) {
-
-                Log4j2Metrics metrics = new Log4j2Metrics();
-                metrics.bindTo(registry);
-                closables.add(metrics);
-            }
+        if (isActive("meter logj", monitoringProperties.getMeterLog4j(), "org.apache.logging.log4j.core.config.Configuration")) {
+            Log4j2Metrics metrics = new Log4j2Metrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
 
-
-
-        if (isActive(monitoringProperties.getMeterJCache(), "javax.cache.CacheManager"))  {
+        if (isActive("meter jcache", monitoringProperties.getMeterJCache(), "javax.cache.CacheManager"))  {
             final Optional<?> cacheManager = getCacheManager();
             if (cacheManager.isPresent()) {
                 try {
@@ -191,7 +186,7 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (isActive(monitoringProperties.getMeterHibernate(), "org.hibernate.SessionFactory", "org.hibernate.stat.Statistics", "org.hibernate.stat.HibernateMetrics")) {
+        if (isActive("meter hibernate", monitoringProperties.getMeterHibernate(), "org.hibernate.SessionFactory", "org.hibernate.stat.Statistics", "org.hibernate.stat.HibernateMetrics")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
             if (sessionFactory.isPresent()) {
                 new HibernateMetrics(
@@ -204,7 +199,7 @@ public class MeterRegistryConfiguration {
                 warn("No session factory to monitor (hibernate)");
             }
         }
-        if (isActive(monitoringProperties.getMeterHibernateQuery(), "org.hibernate.SessionFactory", "org.hibernate.stat.HibernateQueryMetrics")) {
+        if (isActive("meter hibernate query", monitoringProperties.getMeterHibernateQuery(), "org.hibernate.SessionFactory", "org.hibernate.stat.HibernateQueryMetrics")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
             if (sessionFactory.isPresent()) {
@@ -215,7 +210,7 @@ public class MeterRegistryConfiguration {
         }
 
         try {
-            if (isActive(monitoringProperties.getMeterPostgres(), "org.postgresql.Driver")) {
+            if (isActive("meter postgresql", monitoringProperties.getMeterPostgres(), "org.postgresql.Driver")) {
                 final Optional<Object> dataSource = (Optional<Object>) getDataSource();
                 if (dataSource.isPresent()) {
                     if (monitoringProperties.getPostgresDatabaseName() != null) {
@@ -236,7 +231,7 @@ public class MeterRegistryConfiguration {
             new ProcessorMetrics().bindTo(registry);
         }
 
-        if (isActive(monitoringProperties.getMeterCamel(), "org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory")) {
+        if (isActive("meter camel", monitoringProperties.getMeterCamel(), "org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory")) {
             try {
                 Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
                 Object factory = factoryClass.getDeclaredConstructor().newInstance();
@@ -256,7 +251,7 @@ public class MeterRegistryConfiguration {
                 }
 
             } catch (Exception e) {
-                log.warn(e.getClass() + ":" + e.getMessage(), e);
+                log.warn("{}:{}", e.getClass(), e.getMessage(), e);
             }
 
         }
@@ -342,14 +337,20 @@ public class MeterRegistryConfiguration {
     }
 
 
-    private boolean isActive(Boolean active, String... clazzes) {
+    private boolean isActive(String description, Boolean active, String... clazzes) {
         if (active == null || active) {
+            List<String> missing = new ArrayList<>();
             for (String clazz : clazzes) {
                 if (!classForName(clazz, active == null ? DEBUG : WARN).isPresent()) {
-                    return false;
+                    missing.add(clazz);
                 }
             }
-            return true;
+            if (missing.isEmpty()) {
+                return true;
+            } else {
+                log.info("Not activating {} because the following classes are not available: {}", description, String.join(", ", missing));
+                return false;
+            }
         } else {
             return false;
         }
