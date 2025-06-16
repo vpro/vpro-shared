@@ -103,13 +103,6 @@
 
 
     <dependency>
-      <groupId>io.github.natty-parser</groupId>
-      <artifactId>natty</artifactId>
-      <optional>true</optional> <!-- only for ScriptMeterBinder, to parse a date parameter -->
-    </dependency>
-
-
-    <dependency>
       <!-- validation annotations can optionally be used -->
       <groupId>jakarta.validation</groupId>
       <artifactId>jakarta.validation-api</artifactId>
