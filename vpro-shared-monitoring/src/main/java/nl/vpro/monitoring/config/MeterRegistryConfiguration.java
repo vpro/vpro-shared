@@ -204,7 +204,7 @@ public class MeterRegistryConfiguration {
                 warn("No session factory to monitor (hibernate)");
             }
         }
-        if (isActive(monitoringProperties.getMeterHibernateQuery(), "org.hibernate.SessionFactory")) {
+        if (isActive(monitoringProperties.getMeterHibernateQuery(), "org.hibernate.SessionFactory", "org.hibernate.stat.HibernateQueryMetrics")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
             if (sessionFactory.isPresent()) {
