@@ -23,7 +23,7 @@ public class MonitoringProperties {
     @Value("${monitoring.tags:#{null}}")
     private List<String> commonTags;
 
-    @Value("${monitoring.log4j.enabled:#{null}}}")
+    @Value("${monitoring.log4j.enabled:#{null}}")
     private Boolean meterLog4j;
 
     @Value("${monitoring.classloader.enabled:true}")
