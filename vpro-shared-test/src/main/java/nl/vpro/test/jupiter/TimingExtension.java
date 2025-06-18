@@ -25,12 +25,11 @@ import nl.vpro.logging.Log4j2Helper;
  *  If the test is {@link RepeatedTest repeated}, then the <em>average</em> duration will be reported.
  * @since 5.2
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "LoggingSimilarMessage"})
 @Log4j2
 public class TimingExtension implements
     BeforeTestExecutionCallback, BeforeAllCallback,
     AfterTestExecutionCallback, AfterAllCallback {
-
 
     private static final String START_All_TIME = "ALL";
     private static final String START_TIMES = "START_TIMES";
@@ -38,15 +37,14 @@ public class TimingExtension implements
     private static final String REPETITIONS = "REPETITIONS";
 
 
-
     @Override
-    public void beforeTestExecution(ExtensionContext context) throws Exception {
+    public void beforeTestExecution(ExtensionContext context) {
         ExtensionContext.Store store = getStore(context);
         store.get(START_TIMES, Map.class).put(getKey(context), System.nanoTime());
     }
 
     @Override
-    public void afterTestExecution(ExtensionContext context) throws Exception {
+    public void afterTestExecution(ExtensionContext context) {
         ExtensionContext.Store store = getStore(context);
         Optional<RepeatedTest> repeated = isRepeatedTest(context);
         if (context.getExecutionException().isPresent()) {
@@ -77,7 +75,7 @@ public class TimingExtension implements
     }
 
     @Override
-    public void beforeAll(ExtensionContext context) throws Exception {
+    public void beforeAll(ExtensionContext context) {
         ExtensionContext.Store store = getStore(context);
         store.put(START_All_TIME, System.nanoTime());
         store.put(START_TIMES, Collections.synchronizedMap(new HashMap<>()));
@@ -87,7 +85,7 @@ public class TimingExtension implements
     }
 
     @Override
-    public void afterAll(ExtensionContext context) throws Exception {
+    public void afterAll(ExtensionContext context) {
         ExtensionContext.Store store = getStore(context);
         long startTime = store.remove(START_All_TIME, long.class);
         Duration duration = Duration.ofNanos(System.nanoTime() - startTime);
@@ -125,10 +123,12 @@ public class TimingExtension implements
     }
 
 
+    @SuppressWarnings("ConstantValue")
     protected Optional<RepeatedTest> isRepeatedTest(ExtensionContext context)  {
         return context.getTestMethod()
             .map(m -> m.getAnnotation(RepeatedTest.class))
-            .filter(Objects::nonNull);
+            .filter(Objects::nonNull)
+            ;
 
     }
 }
