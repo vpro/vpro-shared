@@ -132,7 +132,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
                 trackType.getWidth().doubleValue()),
                 element(trackType.getHeight().doubleValue()))
                 .circumscribedRectangle(
-                    element(Math.toRadians(rotated))));
+                    element(Math.toRadians(rotated))).shape());
         } else {
             return Optional.empty();
         }
