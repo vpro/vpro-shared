@@ -33,15 +33,16 @@ public class Authentication {
             return false;
         }
         String credentials = new String(Base64.getDecoder().decode(auth.substring(6))); // Remove "Basic "
-        String[] values = credentials.split(":");
-        String username = values[0];
-        String password = values[1];
-        if (properties.getUser().equals(username) && password.equals(properties.getPassword())) {
-            return true;
-        } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return false;
+        String[] values = credentials.split(":", 2);
+        if (values.length == 2) {
+            String username = values[0];
+            String password = values[1];
+            if (properties.getUser().equals(username) && password.equals(properties.getPassword())) {
+                return true;
+            }
         }
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return false;
 
     }
 }
