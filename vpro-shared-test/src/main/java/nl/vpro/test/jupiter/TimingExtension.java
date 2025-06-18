@@ -10,7 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.*;
 import org.meeuw.math.statistics.StatisticalLong;
-import org.meeuw.math.temporal.UncertainTemporal;
+import org.meeuw.math.statistics.time.UncertainJavaTime;
+
 import org.opentest4j.TestAbortedException;
 
 import nl.vpro.logging.Log4j2Helper;
@@ -68,7 +69,7 @@ public class TimingExtension implements
             String rk = getRepetitionKey(context, annotation);
             Map<String, Object> repetitionsMap = store.get(REPETITIONS, Map.class);
 
-            StatisticalLong statisticalLong = (StatisticalLong) repetitionsMap.computeIfAbsent(rk, (kk) -> new StatisticalLong(UncertainTemporal.Mode.DURATION));
+            StatisticalLong statisticalLong = (StatisticalLong) repetitionsMap.computeIfAbsent(rk, (kk) -> new StatisticalLong(UncertainJavaTime.Mode.DURATION));
             statisticalLong.enter(duration);
         });
 
