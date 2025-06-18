@@ -316,6 +316,7 @@ public class TextUtil {
         ) : null;
     }
 
+
     /**
      * Strips html like tags from the input. All content between tags, even non-html content is being removed.
      *
@@ -336,8 +337,22 @@ public class TextUtil {
         jsoupDoc.select("br").before(" ");
         jsoupDoc.select("li").before(" ");
         jsoupDoc.select("p").before(" ");
+
+        // Replace iframes with a div containing the html of the iframe.
+        // The div is unsafe, so will be replaced by its content.
+        // This seems to be the way it was working in jsoup < 1.20
+        // So added this for backwards compatibility.
+        jsoupDoc.select("iframe").replaceAll(e -> {
+                Element element = new Element("div");
+                element.html(e.html());
+                return element;
+            }
+
+
+        );
         String str = jsoupDoc.html();
-        String strWithNewLines = Jsoup.clean(str, "", Safelist.none(), outputSettings);
+        String strWithNewLines = Jsoup.clean(str, "",
+            Safelist.none(), outputSettings);
         return strWithNewLines.replaceAll(" +", " ").trim();
     }
 
