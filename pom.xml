@@ -959,8 +959,20 @@
             <configuration>
               <sourcepath>
                 ${delombok.output};
-                ${project.build.directory}/generated-sources/apt
+                ${project.build.directory}/generated-sources/apt;
+                ${project.build.directory}/generated-sources/xjb
               </sourcepath>
+              <!-- something like this, but doesn't seem to work
+              <links>
+
+                <link>https://static.javadoc.io/doc/org.meeuw.math/mihxil-math/${math.version}/</link>
+                <link>https://static.javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.version}/</link>
+                <link>https://static.javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.version}/</link>
+                <link>https://static.javadoc.io/doc/jakarta.validation/jakarta.validation-api/${validation.api.version}/</link>
+              </links>
+              <detectLinks />
+              <detectJavaApiLink />
+              -->
             </configuration>
           </plugin>
         </plugins>

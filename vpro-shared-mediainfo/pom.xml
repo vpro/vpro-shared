@@ -38,11 +38,6 @@
       <artifactId>jakarta.validation-api</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.meeuw.math</groupId>
-      <artifactId>mihxil-shapes</artifactId>
-      <scope>compile</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -69,7 +64,7 @@
               <extension>true</extension>
               <strict>false</strict>
               <packageLevelAnnotations>false</packageLevelAnnotations>
-              <generateDirectory>${project.build.directory}/generated-sources/mediainfo</generateDirectory>
+              <generateDirectory>${project.build.directory}/generated-sources/xjb</generateDirectory>
             </configuration>
           </execution>
         </executions>

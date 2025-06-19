@@ -18,6 +18,6 @@ MediaInfo.Result result = mediaInfo.apply("/path/to/media/file.mp4");
 
 === Implementation
 
-This is implemented using link:../vpro-shared-util/src/main/java/nl/vpro/util/Comman.java:[CommandExecutor] to execute the 'mediainfo' command line tool. It uses the `--output=XML` option, and the resulting XML is parsed to java classes generated from the https://mediaarea.net/mediainfo/mediainfo_2_0.xsd:[XSD schema provided by MediaInfo].
+This is implemented using link:../vpro-shared-util/src/main/java/nl/vpro/util/CommandExecutor.java:[CommandExecutor] to execute the 'mediainfo' command line tool. It uses the `--output=XML` option, and the resulting XML is parsed to java classes generated from the https://mediaarea.net/mediainfo/mediainfo_2_0.xsd:[XSD schema provided by MediaInfo].
 
 This unmarshalled result is available via `MediaInfo.Result#mediaInfo()`, and a bunch of convenience methods are provided to access the metadata in a more user-friendly way.
