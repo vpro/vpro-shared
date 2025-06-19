@@ -970,7 +970,12 @@
                 <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-math/${math.javadoc.version}/</link>
                 <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.javadoc.version}/</link>
                 <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.javadoc.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-statistics/${math.javadoc.version}/</link>
+
                 <link>https://www.javadoc.io/doc/jakarta.validation/jakarta.validation-api/${validation.api.version}/</link>
+                <link>https://picocli.info/apidocs/</link>
+                <link>https://javadoc.io/doc/io.micrometer/micrometer-registry-prometheus/${micrometer.version}/</link>
+                <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
               </links>
               <detectLinks />
               <detectJavaApiLink />

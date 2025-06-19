@@ -55,7 +55,7 @@ public class PrometheusController {
     }
 
     /**
-     * As {@link #prometheus())}. TODO: spring boot actuator does something different.
+     * As {@link #prometheus()}. TODO: spring boot actuator does something different.
      * It give s json with all metric names for /metrics.
      * May be we could conform?
      */
