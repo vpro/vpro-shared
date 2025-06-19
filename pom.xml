@@ -40,8 +40,7 @@
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.2</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <math.version>0.16-SNAPSHOT</math.version>
-    <math.javadoc.version>0.15.0</math.javadoc.version>
+    <math.version>0.16.0</math.version>
     <checker.version>3.49.4</checker.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
@@ -967,11 +966,10 @@
 
               <links>
                 <link>https://www.javadoc.io/doc/org.checkerframework/checker-qual/${checker.version}/</link>
-                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-math/${math.javadoc.version}/</link>
-                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.javadoc.version}/</link>
-                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.javadoc.version}/</link>
-                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-statistics/${math.javadoc.version}/</link>
-
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-math/${math.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-statistics/${math.version}/</link>
                 <link>https://www.javadoc.io/doc/jakarta.validation/jakarta.validation-api/${validation.api.version}/</link>
                 <link>https://picocli.info/apidocs/</link>
                 <link>https://javadoc.io/doc/io.micrometer/micrometer-registry-prometheus/${micrometer.version}/</link>
@@ -980,8 +978,6 @@
                 <link>https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/${jackson2.version}/</link>
                 <link>https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-annotations/${jackson2.version}/</link>
                 <link>https://www.javadoc.io/doc/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/${jackson2.version}/</link>
-
-
               </links>
               <detectLinks />
               <detectJavaApiLink />
