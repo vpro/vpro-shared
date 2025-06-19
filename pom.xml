@@ -976,6 +976,12 @@
                 <link>https://picocli.info/apidocs/</link>
                 <link>https://javadoc.io/doc/io.micrometer/micrometer-registry-prometheus/${micrometer.version}/</link>
                 <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
+                <link>https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-core/${jackson2.version}/</link>
+                <link>https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/${jackson2.version}/</link>
+                <link>https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-annotations/${jackson2.version}/</link>
+                <link>https://www.javadoc.io/doc/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/${jackson2.version}/</link>
+
+
               </links>
               <detectLinks />
               <detectJavaApiLink />
