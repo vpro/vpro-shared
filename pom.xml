@@ -41,6 +41,8 @@
     <xmlunit.version>2.10.2</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <math.version>0.16-SNAPSHOT</math.version>
+    <math.javadoc.version>0.15.0</math.javadoc.version>
+    <checker.version>3.49.4</checker.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
@@ -797,7 +799,7 @@
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
-      <version>3.49.4</version>
+      <version>${checker.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -962,17 +964,16 @@
                 ${project.build.directory}/generated-sources/apt;
                 ${project.build.directory}/generated-sources/xjb
               </sourcepath>
-              <!-- something like this, but doesn't seem to work
-              <links>
 
-                <link>https://static.javadoc.io/doc/org.meeuw.math/mihxil-math/${math.version}/</link>
-                <link>https://static.javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.version}/</link>
-                <link>https://static.javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.version}/</link>
-                <link>https://static.javadoc.io/doc/jakarta.validation/jakarta.validation-api/${validation.api.version}/</link>
+              <links>
+                <link>https://www.javadoc.io/doc/org.checkerframework/checker-qual/${checker.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-math/${math.javadoc.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.javadoc.version}/</link>
+                <link>https://www.javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.javadoc.version}/</link>
+                <link>https://www.javadoc.io/doc/jakarta.validation/jakarta.validation-api/${validation.api.version}/</link>
               </links>
               <detectLinks />
               <detectJavaApiLink />
-              -->
             </configuration>
           </plugin>
         </plugins>
