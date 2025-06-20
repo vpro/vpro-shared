@@ -40,7 +40,7 @@
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.2</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <math.version>0.16.0</math.version>
+    <math.version>0.17.0</math.version>
     <checker.version>3.49.4</checker.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>

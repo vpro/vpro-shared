@@ -131,8 +131,8 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
             return Optional.of(new Rectangle<>(element(
                 trackType.getWidth().doubleValue()),
                 element(trackType.getHeight().doubleValue()))
-                .circumscribedRectangle(
-                    element(Math.toRadians(rotated))).shape());
+                    .rotate(element(Math.toRadians(rotated)))
+                .circumscribedRectangle().shape());
         } else {
             return Optional.empty();
         }
