@@ -1,0 +1,22 @@
+---
+name: build
+on:
+  push:
+    paths:
+    - pom.xml
+    branches: ['**']
+  workflow_dispatch:
+
+
+jobs:
+  touch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: touch
+        run: |
+          for u in `mvn help:effective-pom | grep  "link>https://javadoc.io" | sed -E 's/.*<link>(.*)<\/link>.*/\1/g'`
+            do
+                echo "Touching $u"
+                curl -s -A 'gitlab/vpro/vpro-shared/ toucher' -o /dev/null -w "%{http_code}\n" -L $u
+            done
+
