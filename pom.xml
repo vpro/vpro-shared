@@ -18,8 +18,8 @@
     <java.version>17</java.version>
 
     <spring.version>6.2.8</spring.version>
-    <spring-security.version>6.5.0</spring-security.version>
-    <jackson2.version>2.19.0</jackson2.version>
+    <spring-security.version>6.5.1</spring-security.version>
+    <jackson2.version>2.19.1</jackson2.version>
 
     <junit.version>5.13.1</junit.version>
     <mockito.version>5.18.0</mockito.version>
@@ -32,13 +32,13 @@
     -->
     <jboss-logging.version>3.6.1.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.17.5</bytebuddy.version>
+    <bytebuddy.version>1.17.6</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
     <log4j2.version>2.24.3</log4j2.version>
     <guava.version>33.4.8-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.10.2</xmlunit.version>
+    <xmlunit.version>2.10.3</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <math.version>0.17.0</math.version>
     <checker.version>3.49.4</checker.version>
@@ -59,7 +59,7 @@
     <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
     <camel.version>4.12.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.33</swagger.version>
+    <swagger.version>2.2.34</swagger.version>
 
     <lombok.version>1.18.38</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -72,9 +72,9 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.15.1</micrometer.version>
-    <flyway.version>11.9.1</flyway.version>
+    <flyway.version>11.9.2</flyway.version>
 
-    <testcontainers.version>1.21.1</testcontainers.version>
+    <testcontainers.version>1.21.2</testcontainers.version>
 
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -688,7 +688,7 @@
       <dependency>
         <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
-        <version>3.13.0</version>
+        <version>3.13.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -751,7 +751,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.9.2</version>
+        <version>1.9.3</version>
       </dependency>
 
       <dependency>
