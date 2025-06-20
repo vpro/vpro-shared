@@ -11,9 +11,15 @@ on:
 jobs:
   touch:
     runs-on: ubuntu-latest
-    container:
-      image: 'maven:3.9.9-eclipse-temurin-11-alpine'
+    env:
+      MAVEN_ARGS: '--no-transfer-progress'
     steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: maven
       - name: touch
         run: |
           for u in `mvn help:effective-pom | grep  "link>https://javadoc.io" | sed -E 's/.*<link>(.*)<\/link>.*/\1/g'`
