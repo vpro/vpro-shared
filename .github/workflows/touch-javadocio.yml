@@ -14,6 +14,7 @@ jobs:
     env:
       MAVEN_ARGS: '--no-transfer-progress'
     steps:
+      - uses: actions/checkout@v4.1.2
       - name: Set up JDK
         uses: actions/setup-java@v4.2.1
         with:
