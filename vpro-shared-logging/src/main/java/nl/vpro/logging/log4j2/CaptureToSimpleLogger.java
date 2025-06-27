@@ -35,9 +35,14 @@ public class CaptureToSimpleLogger implements AutoCloseable {
 
     static final ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
 
-    private final SimpleLogger logger;
     private final AbstractAppender appender;
 
+
+    public static CaptureToSimpleLogger of(SimpleLogger simpleLogger) {
+        return CaptureToSimpleLogger.builder()
+            .simpleLogger(simpleLogger)
+            .build();
+    }
 
     @lombok.Builder
     private CaptureToSimpleLogger(
@@ -45,7 +50,6 @@ public class CaptureToSimpleLogger implements AutoCloseable {
         final String name) {
         final UUID uuid = UUID.randomUUID();
         threadLocal.set(uuid);
-        this.logger = simpleLogger;
         appender = new AbstractAppender(uuid.toString(), new AbstractFilter() {
                 @Override
                 public Result filter(LogEvent event) {
@@ -63,16 +67,11 @@ public class CaptureToSimpleLogger implements AutoCloseable {
                 );
             }
         };
-        if (LogManager.getRootLogger() instanceof Logger logger) {
-            synchronized (CaptureToSimpleLogger.class) {
-
-
-                appender.start();
-                assert appender.isStarted() : "Appender is not sarted";
-                logger.addAppender(appender);
-                logger.getContext().updateLoggers(); // ensure the logger is updated with the new appender
-                }
-
+        if (LogManager.getRootLogger() instanceof Logger log4j) {
+            appender.start();
+            assert appender.isStarted() : "Appender is not sarted";
+            log4j.addAppender(appender);
+            log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
         } else {
             log.info("Current logging implementation is not log4j2-core");
         }
@@ -81,13 +80,10 @@ public class CaptureToSimpleLogger implements AutoCloseable {
     @Override
     public void close() {
         threadLocal.remove();
-        if (LogManager.getRootLogger() instanceof Logger logger) {
-            synchronized (CaptureToSimpleLogger.class) {
-
-                logger.removeAppender(appender);
-                logger.getContext().updateLoggers(); // ensure the logger is updated with the new appender
-            }
-
+        if (LogManager.getRootLogger() instanceof Logger log4j) {
+            log4j.removeAppender(appender);
+            log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
+            appender.stop();
         }
     }
 
