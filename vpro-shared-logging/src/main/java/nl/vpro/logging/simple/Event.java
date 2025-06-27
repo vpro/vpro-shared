@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.slf4j.MDC;
 
+
 /**
  * A representation of a log event
  */
@@ -16,7 +17,7 @@ public class Event {
     private final Level level;
     private final CharSequence message;
     private final Throwable throwable;
-    private final Map<String, String> mdc = MDC.getCopyOfContextMap();
+    private final Map<String, String> mdc;
     private final int levelInt;
 
     @lombok.Builder
@@ -26,6 +27,16 @@ public class Event {
         this.throwable = throwable;
         this.levelInt = level.toInt();
         this.timeStamp = timeStamp;
+        this.mdc = getMdc();
+    }
+
+    static Map<String, String> getMdc() {
+        try {
+            Map<String, String> mdc = MDC.getCopyOfContextMap();
+            return mdc == null ? Map.of() : mdc;
+        } catch (Throwable e) {
+            return Map.of();
+        }
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 /**
  * A {@link SimpleLogger} wraps a consumer for every log  {@link Event}'s (or possibly extensions thereof)
- *
+ * <p>
  * It is abstract because you need to implement how to instantiate a new {@link Event} extension  via {@link #createEvent(Level, CharSequence, Throwable)}
  * If you have no need for that, you can instantiate via {@link #of(Consumer)}, or use {@link #createEvent(Level, CharSequence, Throwable, Clock)}
  *

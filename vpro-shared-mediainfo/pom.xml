@@ -41,7 +41,7 @@
   </dependencies>
   <build>
     <plugins>
-    <plugin>
+      <plugin>
         <groupId>org.jvnet.jaxb</groupId>
         <artifactId>jaxb-maven-plugin</artifactId>
         <version>4.0.8</version>
@@ -68,7 +68,7 @@
             </configuration>
           </execution>
         </executions>
- </plugin>
+      </plugin>
     </plugins>
 
   </build>
