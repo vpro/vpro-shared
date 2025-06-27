@@ -13,12 +13,12 @@ import nl.vpro.logging.simple.Level;
 import nl.vpro.logging.simple.SimpleLogger;
 
 /**
- * Simple setup using log4j2 to temporarily capture logging and collect it to a String.
+ * Simple setup using log4j2 to temporarily capture logging and collect it to a SimpleLogger.
  * <p>
  * usage
  * <pre>{@code
  *
- *   try (CaptureStringFromLogger capture = new CaptureStringFromLogger()) {
+ *   try (CaptureToSimpleLogger capture = CaptureToSimpleLogger.of(simpleLogger)) {
  *
  *       stuff, which might log some things (as long as in same thread!)
  *
@@ -29,6 +29,7 @@ import nl.vpro.logging.simple.SimpleLogger;
  *
  *
  * @author Michiel Meeuwissen
+ * @since 5.11
  */
 @Log4j2
 public class CaptureToSimpleLogger implements AutoCloseable {

@@ -31,6 +31,7 @@ import org.apache.logging.log4j.core.util.StringBuilderWriter;
  *
  *
  * @author Michiel Meeuwissen
+ * @since 5.10
  */
 @Log4j2
 public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> {
