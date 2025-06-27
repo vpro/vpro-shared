@@ -57,9 +57,8 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>org.meeuw.math</groupId>
-      <artifactId>mihxil-math</artifactId>
-      <version>0.12.0</version>
+      <groupId>org.meeuw</groupId>
+      <artifactId>mihxil-time</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
