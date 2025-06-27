@@ -10,7 +10,7 @@ import org.apache.commons.io.input.ObservableInputStream;
 
 
 /**
- * A wrapper for an {@link InputStream} that observes it's first bytes.
+ * A wrapper for an {@link InputStream} that observes its first bytes.
  * @since 5.5
  * @author Michiel Meeuwissen
  */

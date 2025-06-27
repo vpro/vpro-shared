@@ -41,6 +41,7 @@
     <xmlunit.version>2.10.3</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <math.version>0.17.0</math.version>
+    <meeuw.util.version>1.12</meeuw.util.version>
     <checker.version>3.49.4</checker.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
@@ -595,6 +596,11 @@
         <version>${math.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.meeuw.util</groupId>
+        <artifactId>mihxil-functional</artifactId>
+        <version>${meeuw.util.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.skyscreamer</groupId>
         <artifactId>jsonassert</artifactId>
         <version>1.5.1</version>
@@ -970,6 +976,7 @@
                 <link>https://javadoc.io/doc/org.meeuw.math/mihxil-algebra/${math.version}/</link>
                 <link>https://javadoc.io/doc/org.meeuw.math/mihxil-shapes/${math.version}/</link>
                 <link>https://javadoc.io/doc/org.meeuw.math/mihxil-statistics/${math.version}/</link>
+                <link>https://javadoc.io/doc/org.meeuw.util/mihxil-functional/${meeuw.util.version}/</link>
                 <link>https://javadoc.io/doc/jakarta.validation/jakarta.validation-api/${validation.api.version}/</link>
                 <link>https://picocli.info/apidocs/</link>
                 <link>https://javadoc.io/doc/io.micrometer/micrometer-registry-prometheus/${micrometer.version}/</link>
