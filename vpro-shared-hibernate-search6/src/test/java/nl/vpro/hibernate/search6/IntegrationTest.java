@@ -2,19 +2,6 @@ package nl.vpro.hibernate.search6;
 
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.dialect.PostgreSQLDialect;
-import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
-import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.parallel.Isolated;
-import org.meeuw.math.time.TestClock;
-import org.postgresql.Driver;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +11,19 @@ import java.util.function.Consumer;
 
 import jakarta.persistence.*;
 
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
+import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Isolated;
+import org.meeuw.time.TestClock;
+import org.postgresql.Driver;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import nl.vpro.hibernate.search6.domain.*;
 import nl.vpro.test.psql.PostgresqlContainerSupport;

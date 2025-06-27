@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.*;
 import org.meeuw.math.statistics.StatisticalLong;
-import org.meeuw.math.statistics.time.UncertainJavaTime;
+import org.meeuw.time.UncertainJavaTime;
 
 import org.opentest4j.TestAbortedException;
 
