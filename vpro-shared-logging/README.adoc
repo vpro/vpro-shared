@@ -1,6 +1,6 @@
 = VPRO Shared logging
 
-image:http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-logging.svg?color=blue[javadoc,link=http://www.javadoc.io/doc/nl.vpro.shared/vpro-shared-logging]
+image:https://javadoc.io/badge/nl.vpro.shared/vpro-shared-logging.svg?color=blue[javadoc,link=https://javadoc.io/doc/nl.vpro.shared/vpro-shared-logging]
 
 Some utilities related to logging.
 
