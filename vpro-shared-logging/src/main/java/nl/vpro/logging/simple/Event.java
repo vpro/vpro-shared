@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.time.Instant;
 import java.util.Map;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.MDC;
 
 
@@ -35,7 +36,11 @@ public class Event {
             Map<String, String> mdc = MDC.getCopyOfContextMap();
             return mdc == null ? Map.of() : mdc;
         } catch (Throwable e) {
-            return Map.of();
+            try {
+                return ThreadContext.getImmutableContext();
+            } catch (Throwable e2) {
+                return Map.of();
+            }
         }
     }
 
