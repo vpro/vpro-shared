@@ -2,8 +2,6 @@ package nl.vpro.logging.log4j2;
 
 import lombok.extern.log4j.Log4j2;
 
-import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
@@ -32,9 +30,10 @@ import org.apache.logging.log4j.core.util.StringBuilderWriter;
  * @since 5.10
  */
 @Log4j2
-public class CaptureStringFromLogger extends AbstractCaptureLogger<CaptureStringFromLogger.AppenderAndWriter> implements Supplier<String> {
+public class CaptureStringFromLogger extends AbstractCaptureLogger implements Supplier<String> {
 
-    StringBuilderWriter writer;
+    private final StringBuilderWriter writer;
+    private final WriterAppender appender;
 
     public CaptureStringFromLogger() {
         this("%d{ISO8601}{Europe/Amsterdam}\t%msg%n", Level.INFO);
@@ -46,27 +45,21 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger<CaptureString
 
     @lombok.Builder
     private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder) {
-        super(createConsumer(pattern, level, builder));
-        this.writer = consumer.writer();
-
-    }
-
-
-    private static AppenderAndWriter createConsumer(String pattern, Level level, StringBuilder builder) {
-        if (builder == null) {
-            builder = new StringBuilder();
-        }
-        StringBuilderWriter writer = new StringBuilderWriter(builder);
-        WriterAppender appender = WriterAppender.newBuilder()
+        this.writer = new StringBuilderWriter(builder == null ? new StringBuilder() : builder);
+        this.appender = WriterAppender.newBuilder()
             .setTarget(writer)
             .setIgnoreExceptions(false)
             .setFollow(true)
-            .setName(UUID.randomUUID().toString())
+            .setName(uuid.toString())
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
                 .build())
             .build();
-        return new AppenderAndWriter(appender, writer);
+    }
+
+    @Override
+    public void accept(LogEvent logEvent) {
+        appender.append(logEvent);
     }
 
     public StringBuilder getBuilder() {
@@ -77,16 +70,5 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger<CaptureString
     public String get() {
         writer.flush();
         return writer.toString();
-    }
-
-    record AppenderAndWriter(WriterAppender appender, StringBuilderWriter writer) implements Consumer<LogEvent> {
-        public AppenderAndWriter(WriterAppender appender, StringBuilder builder) {
-            this(appender, new StringBuilderWriter(builder));
-        }
-
-        @Override
-        public void accept(LogEvent logEvent) {
-            appender.append(logEvent);
-        }
     }
 }

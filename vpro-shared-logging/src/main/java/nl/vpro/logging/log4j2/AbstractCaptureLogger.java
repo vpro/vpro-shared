@@ -20,14 +20,14 @@ import org.apache.logging.log4j.core.filter.AbstractFilter;
  * @since 5.11
  */
 @Log4j2
-public abstract  class AbstractCaptureLogger<T extends Consumer<LogEvent>> implements AutoCloseable {
+public abstract  class AbstractCaptureLogger  implements AutoCloseable, Consumer<LogEvent> {
     static final ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
 
     static final Map<UUID, Consumer<LogEvent>> LOGGERS = new ConcurrentHashMap<>();
 
     static AbstractAppender appender ;
 
-    static private  synchronized void  checkAppend() {
+    static private  synchronized void checkAppend() {
         if (appender == null) {
             if (LogManager.getRootLogger() instanceof Logger log4j) {
                 appender = new AbstractAppender(AbstractCaptureLogger.class.getName(), new AbstractFilter() {
@@ -60,14 +60,13 @@ public abstract  class AbstractCaptureLogger<T extends Consumer<LogEvent>> imple
     }
 
 
-    protected final T consumer;
+    protected final UUID uuid;
 
-    AbstractCaptureLogger(T consumer) {
-        final UUID uuid = UUID.randomUUID();
+    AbstractCaptureLogger() {
+        this.uuid = UUID.randomUUID();
         threadLocal.set(uuid);
-        LOGGERS.put(uuid, consumer);
+        LOGGERS.put(uuid, this);
         checkAppend();
-        this.consumer = consumer;
     }
 
     @Override

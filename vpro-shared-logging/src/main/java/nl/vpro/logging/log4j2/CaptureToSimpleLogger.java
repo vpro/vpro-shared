@@ -1,7 +1,5 @@
 package nl.vpro.logging.log4j2;
 
-import java.util.function.Consumer;
-
 import org.apache.logging.log4j.core.LogEvent;
 
 import nl.vpro.logging.simple.Level;
@@ -26,23 +24,25 @@ import nl.vpro.logging.simple.SimpleLogger;
  * @author Michiel Meeuwissen
  * @since 5.11
  */
-public class CaptureToSimpleLogger extends AbstractCaptureLogger<Consumer<LogEvent>> {
+public class CaptureToSimpleLogger extends AbstractCaptureLogger {
 
 
     public static CaptureToSimpleLogger of(SimpleLogger simpleLogger) {
         return new CaptureToSimpleLogger(simpleLogger);
     }
 
+    private final SimpleLogger simpleLogger;
     private CaptureToSimpleLogger(SimpleLogger simpleLogger) {
-        super(  event -> {
-                String m = event.getMessage().getFormattedMessage();
-                simpleLogger.accept(
-                    Level.valueOf(event.getLevel().name()),
-                    m,
-                    event.getThrown()
-                );
-            }
-        );
+        this.simpleLogger = simpleLogger;
     }
 
+    @Override
+    public void accept(LogEvent event) {
+         String m = event.getMessage().getFormattedMessage();
+        simpleLogger.accept(
+            Level.valueOf(event.getLevel().name()),
+            m,
+            event.getThrown()
+        );
+    }
 }
