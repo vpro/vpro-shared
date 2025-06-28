@@ -58,7 +58,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     @Override
-    public void accept(LogEvent logEvent) {
+    protected void accept(LogEvent logEvent) {
         appender.append(logEvent);
     }
 

@@ -26,7 +26,6 @@ import nl.vpro.logging.simple.SimpleLogger;
  */
 public class CaptureToSimpleLogger extends AbstractCaptureLogger {
 
-
     public static CaptureToSimpleLogger of(SimpleLogger simpleLogger) {
         return new CaptureToSimpleLogger(simpleLogger);
     }
@@ -37,7 +36,7 @@ public class CaptureToSimpleLogger extends AbstractCaptureLogger {
     }
 
     @Override
-    public void accept(LogEvent event) {
+    protected void accept(LogEvent event) {
          String m = event.getMessage().getFormattedMessage();
         simpleLogger.accept(
             Level.valueOf(event.getLevel().name()),
