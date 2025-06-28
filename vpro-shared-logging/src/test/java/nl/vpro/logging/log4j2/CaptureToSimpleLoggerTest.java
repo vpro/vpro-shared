@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Log4j2
 
 class CaptureToSimpleLoggerTest {
-    ExecutorService service = Executors.newCachedThreadPool();
+    static final ExecutorService service = Executors.newCachedThreadPool();
 
     @Test
     public void log() {

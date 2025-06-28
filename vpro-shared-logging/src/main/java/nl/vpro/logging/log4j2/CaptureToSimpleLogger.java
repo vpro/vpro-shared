@@ -3,9 +3,11 @@ package nl.vpro.logging.log4j2;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.UUID;
+import java.util.concurrent.*;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.*;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
 
@@ -33,6 +35,8 @@ import nl.vpro.logging.simple.SimpleLogger;
  */
 @Log4j2
 public class CaptureToSimpleLogger implements AutoCloseable {
+    protected static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
+
 
     static final ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
 
@@ -50,8 +54,9 @@ public class CaptureToSimpleLogger implements AutoCloseable {
         SimpleLogger simpleLogger,
         final String name) {
         final UUID uuid = UUID.randomUUID();
-        threadLocal.set(uuid);
-        appender = new AbstractAppender(uuid.toString(), new AbstractFilter() {
+        var n = name == null ? uuid.toString() : name;
+
+        appender = new AbstractAppender(name == null ? uuid.toString() : name, new AbstractFilter() {
                 @Override
                 public Result filter(LogEvent event) {
                     boolean inThread = uuid.equals(threadLocal.get());
@@ -67,11 +72,12 @@ public class CaptureToSimpleLogger implements AutoCloseable {
                     event.getThrown()
                 );
             }
+
         };
         if (LogManager.getRootLogger() instanceof Logger log4j) {
             synchronized (CaptureToSimpleLogger.class) {
+                threadLocal.set(uuid);
                 appender.start();
-                assert appender.isStarted() : "Appender is not started";
                 log4j.addAppender(appender);
                 log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
             }
@@ -82,12 +88,14 @@ public class CaptureToSimpleLogger implements AutoCloseable {
 
     @Override
     public void close() {
-        threadLocal.remove();
         if (LogManager.getRootLogger() instanceof Logger log4j) {
             synchronized (CaptureToSimpleLogger.class) {
                 log4j.removeAppender(appender);
                 log4j.getContext().updateLoggers();
-                appender.stop();
+                EXECUTOR.schedule(() -> appender.stop(), 100, TimeUnit.MILLISECONDS
+                );
+                threadLocal.remove();
+
             }
         }
     }
