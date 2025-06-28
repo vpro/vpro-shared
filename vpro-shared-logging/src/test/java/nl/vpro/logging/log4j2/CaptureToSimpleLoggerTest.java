@@ -28,10 +28,7 @@ class CaptureToSimpleLoggerTest {
         for (int i = 0; i < 10; i++) {
             final int j = i;
             futures.add(service.submit(() -> {
-                try (CaptureToSimpleLogger capture = CaptureToSimpleLogger.builder()
-                    .name("logger " + j)
-                    .simpleLogger(logger)
-                    .build()) {
+                try (CaptureToSimpleLogger capture = CaptureToSimpleLogger.of(logger)) {
 
                     log.info("foo" + j);
                     log.info("bar" + j);

@@ -3,14 +3,12 @@ package nl.vpro.logging.log4j2;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.WriterAppender;
-import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.StringBuilderWriter;
 
@@ -34,56 +32,41 @@ import org.apache.logging.log4j.core.util.StringBuilderWriter;
  * @since 5.10
  */
 @Log4j2
-public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> {
+public class CaptureStringFromLogger extends AbstractCaptureLogger<CaptureStringFromLogger.AppenderAndWriter> implements Supplier<String> {
 
-    static final ThreadLocal<UUID> threadLocal = ThreadLocal.withInitial(() -> null);
-
-
-    private final StringBuilderWriter writer;
-    private final WriterAppender writerAppender;
-
+    StringBuilderWriter writer;
 
     public CaptureStringFromLogger() {
         this("%d{ISO8601}{Europe/Amsterdam}\t%msg%n", Level.INFO);
     }
+
     public CaptureStringFromLogger(String pattern, Level level) {
-        this(pattern, level, null);
+        this(pattern, level, new StringBuilder());
     }
 
     @lombok.Builder
     private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder) {
-        final UUID uuid = UUID.randomUUID();
-        threadLocal.set(uuid);
-        this.writer = new StringBuilderWriter(builder);
-        writerAppender = WriterAppender.newBuilder()
+        super(createConsumer(pattern, level, builder));
+        this.writer = consumer.writer();
+
+    }
+
+
+    private static AppenderAndWriter createConsumer(String pattern, Level level, StringBuilder builder) {
+        if (builder == null) {
+            builder = new StringBuilder();
+        }
+        StringBuilderWriter writer = new StringBuilderWriter(builder);
+        WriterAppender appender = WriterAppender.newBuilder()
             .setTarget(writer)
             .setIgnoreExceptions(false)
-            .setFilter(new AbstractFilter() {
-                @Override
-                public Result filter(LogEvent event) {
-                    return uuid.equals(threadLocal.get())  && (event.getLevel().isMoreSpecificThan(level)) ? Result.NEUTRAL : Result.DENY;
-                }
-            })
             .setFollow(true)
+            .setName(UUID.randomUUID().toString())
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
                 .build())
-            .setName("" + uuid)
             .build();
-        if (LogManager.getRootLogger() instanceof Logger logger) {
-            writerAppender.start();
-            logger.addAppender(writerAppender);
-        } else {
-            log.info("Current logging implementation is not log4j2-core");
-        }
-    }
-
-    @Override
-    public void close() {
-        threadLocal.remove();
-        if (LogManager.getRootLogger() instanceof Logger logger) {
-            logger.removeAppender(writerAppender);
-        }
+        return new AppenderAndWriter(appender, writer);
     }
 
     public StringBuilder getBuilder() {
@@ -94,5 +77,16 @@ public class CaptureStringFromLogger implements AutoCloseable, Supplier<String> 
     public String get() {
         writer.flush();
         return writer.toString();
+    }
+
+    record AppenderAndWriter(WriterAppender appender, StringBuilderWriter writer) implements Consumer<LogEvent> {
+        public AppenderAndWriter(WriterAppender appender, StringBuilder builder) {
+            this(appender, new StringBuilderWriter(builder));
+        }
+
+        @Override
+        public void accept(LogEvent logEvent) {
+            appender.append(logEvent);
+        }
     }
 }
