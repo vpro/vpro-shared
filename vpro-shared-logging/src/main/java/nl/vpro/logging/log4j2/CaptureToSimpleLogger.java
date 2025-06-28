@@ -69,7 +69,7 @@ public class CaptureToSimpleLogger implements AutoCloseable {
             }
         };
         if (LogManager.getRootLogger() instanceof Logger log4j) {
-            synchronized (LogManager.class) {
+            synchronized (CaptureToSimpleLogger.class) {
                 appender.start();
                 assert appender.isStarted() : "Appender is not started";
                 log4j.addAppender(appender);
@@ -84,7 +84,7 @@ public class CaptureToSimpleLogger implements AutoCloseable {
     public void close() {
         threadLocal.remove();
         if (LogManager.getRootLogger() instanceof Logger log4j) {
-            synchronized (LogManager.class) {
+            synchronized (CaptureToSimpleLogger.class) {
                 log4j.removeAppender(appender);
                 log4j.getContext().updateLoggers();
                 appender.stop();
