@@ -8,8 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import nl.vpro.util.ExceptionUtils.ThrowingFunction;
+import org.meeuw.functional.ThrowingFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +54,7 @@ class InputStreamChunkTest {
 
     @ParameterizedTest
     @MethodSource("testers")
-    public void test(ThrowingFunction<InputStreamChunk, byte[], IOException> tester) throws IOException {
+    public void test(org.meeuw.functional.ThrowingFunction<InputStreamChunk, byte[], IOException> tester) throws IOException {
         RandomStream stream = new RandomStream(0, 2_000_123);
         {
             InputStreamChunk chunk = new InputStreamChunk(1_000_000, stream);
