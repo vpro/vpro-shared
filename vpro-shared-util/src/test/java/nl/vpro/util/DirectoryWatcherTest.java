@@ -133,7 +133,6 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(6)
-
     public void newDestinationOfSymlink2() throws IOException, InterruptedException {
         tick();
 
@@ -148,9 +147,9 @@ class DirectoryWatcherTest {
             events.clear();
         }
 
-
-
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf3), pathToKey( tarf5));
+        var keys = watcher.getWatchedTargetFiles().keySet();
+        assertThat(keys)
+            .containsExactlyInAnyOrder(pathToKey(tarf3), pathToKey( tarf5));
 
 
 
