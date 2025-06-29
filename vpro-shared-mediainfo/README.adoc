@@ -10,10 +10,19 @@ This package provides a simple wrapper around  this command line tool, allowing 
 
 
 == Usage
+
 [source,java]
 ----
-MediaInfo mediaInfo = new MediaInfo(mock);
-MediaInfo.Result result = mediaInfo.apply("/path/to/media/file.mp4");
+import java.nio.file.Path;
+
+MediaInfoService mediaInfoService = new MediaInfoService();
+
+Path test = Path.of("test.mp4");
+MediaInfo info = mediaInfoCaller.apply(test);
+
+log.info("MediaInfo: {}", info);
+assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("9:16");
+
 ----
 
 === Implementation

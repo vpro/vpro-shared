@@ -28,6 +28,10 @@ public class MediaInfoService implements Function<Path, MediaInfo> {
 
     private final CommandExecutor mediainfo;
 
+    /**
+     * Constructor that allows you to specify the path to the mediainfo executable.
+     * @param executablesPaths paths to the mediainfo executable
+     */
     public MediaInfoService(String... executablesPaths) {
          this(CommandExecutorImpl.builder()
              .executablesPaths(executablesPaths)
@@ -35,10 +39,17 @@ public class MediaInfoService implements Function<Path, MediaInfo> {
              .build());
     }
 
+    /**
+     * Constructor that allows you to specify a custom {@link CommandExecutor} for executing the mediainfo command. This can easily be mocked, and is useful for testing purposes.
+     */
     protected MediaInfoService(CommandExecutor mediainfo) {
          this.mediainfo = mediainfo;
     }
 
+    /**
+     * Default constructor, configured with some well known locations of the mediainfo executable.
+     * @see MediaInfoService#MediaInfoService(String...)
+     */
     public MediaInfoService() {
         this(
             "/usr/bin/mediainfo", // ubuntu
