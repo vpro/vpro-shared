@@ -88,7 +88,9 @@ public class ExceptionUtils {
      */
     public static RuntimeException sneakyThrow(Throwable t) {
 
-        if (t == null) throw new NullPointerException("t");
+        if (t == null) {
+            throw new NullPointerException("t");
+        }
         return sneakyThrow0(t);
     }
 
