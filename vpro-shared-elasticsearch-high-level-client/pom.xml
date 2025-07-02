@@ -49,5 +49,10 @@
       <artifactId>jakarta.annotation-api</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

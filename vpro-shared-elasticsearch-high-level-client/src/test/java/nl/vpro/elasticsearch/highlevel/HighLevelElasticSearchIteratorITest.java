@@ -10,6 +10,7 @@ import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.jupiter.api.*;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -18,6 +19,7 @@ import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ClientElasticSearchFactory;
 import nl.vpro.elasticsearchclient.IndexHelper;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+import nl.vpro.test.opensearch.ElasticsearchContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,8 +29,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 2.22
  */
 @Slf4j
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HighLevelElasticSearchIteratorITest {
 
+
+    static ElasticsearchContainer es = new ElasticsearchContainer(true);
 
     static HighLevelClientFactory highLevelClientFactory;
     static IndexHelper helper;

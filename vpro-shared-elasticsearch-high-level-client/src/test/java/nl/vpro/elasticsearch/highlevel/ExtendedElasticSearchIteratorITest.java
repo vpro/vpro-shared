@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.jupiter.api.*;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ClientElasticSearchFactory;
 import nl.vpro.elasticsearchclient.IndexHelper;
 import nl.vpro.logging.simple.StringBuilderSimpleLogger;
+import nl.vpro.test.opensearch.ElasticsearchContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,15 +20,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  */
 @Slf4j
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ExtendedElasticSearchIteratorITest {
+    static ElasticsearchContainer es = new ElasticsearchContainer(true);
 
 
     static HighLevelClientFactory highLevelClientFactory;
     static IndexHelper helper;
     static {
         ClientElasticSearchFactory clientElasticSearchFactory = new ClientElasticSearchFactory();
-        clientElasticSearchFactory.setHosts("localhost:9200");
-        clientElasticSearchFactory.setClusterName(System.getProperty("integ.cluster.name", "elasticsearch"));
+        clientElasticSearchFactory.setHosts(es.getHttpHost());
+        clientElasticSearchFactory.setClusterName(es.getClusterName());
         highLevelClientFactory = new HighLevelClientFactory(clientElasticSearchFactory);
 
         helper = IndexHelper.builder()
