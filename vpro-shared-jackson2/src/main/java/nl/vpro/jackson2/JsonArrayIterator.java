@@ -267,15 +267,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    protected void finalize() {
-        if (! callBackHasRun && callback != null) {
-            logger.warn("Callback not run in finalize. Did you not close the iterator?");
-            callback.run();
-        }
-    }
-
     protected void callback() {
         if (! callBackHasRun) {
             if (callback != null) {
@@ -284,7 +275,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             callBackHasRun = true;
         }
     }
-
 
     /**
      * Write the entire stream to an output stream
@@ -390,6 +380,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
 
     public static class ValueReadException extends RuntimeException {
+
+        @Serial
+        private static final long serialVersionUID = 6976771876437440576L;
 
         public ValueReadException(JsonProcessingException e) {
             super(e);
