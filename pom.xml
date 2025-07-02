@@ -884,7 +884,7 @@
             <version>1.7.0</version>
             <extensions>true</extensions>
             <configuration>
-              <serverId>vpro-ossrh</serverId>
+              <serverId>central</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
