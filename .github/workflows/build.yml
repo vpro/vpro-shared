@@ -12,6 +12,11 @@ on:
         required: true
         default: 'false'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+
 env:
   skipTests: false
 
@@ -39,13 +44,6 @@ jobs:
     env:
       MAVEN_ARGS: '--no-transfer-progress'
     steps:
-      - name: Cancel previous Action
-        uses: styfle/cancel-workflow-action@0.12.1
-        if: github.ref == 'refs/heads/main'
-      - uses: getong/elasticsearch-action@v1.3
-        with:
-          elasticsearch version: '7.9.0'
-        if: runner.os == 'Linux'
       - uses: actions/checkout@v4.1.2
       - name: Set up JDK
         uses: actions/setup-java@v4.2.1
