@@ -30,9 +30,9 @@ public @interface NoHtml {
     Class<? extends Payload>[] payload() default {};
 
     /**
-     * If 'aggressive' no html is set, then all kind of even remotely like html are rejected. This is the original behaviour.
+     * If 'aggressive' no HTML is set, then all kind of even remotely like HTML are rejected. This is the original behavior.
      * <p>
-     * When this is false, the checking will be more subtle, and things like 'email: <foo@gmail.com>' will be accepted. Basically text is only invalid, if jsoup succeeds finding html tags or entities.
+     * When this is false, the checking will be more subtle, and things like 'email: &lt;foo@gmail.com&gt;' will be accepted. Basically, a text is only invalid if jsoup succeeds in finding HTML tags or entities.
      * @since 4.3
      */
     boolean aggressive() default true;
