@@ -104,7 +104,7 @@ public class JsonArrayIteratorTest {
 
         assertThat(it.hasNext()).isFalse();
         assertThatThrownBy(it::next).isInstanceOf(NoSuchElementException.class);
-        it.finalize();
+        it.close();
     }
 
     @Test
