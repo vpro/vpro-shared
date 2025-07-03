@@ -39,9 +39,10 @@ class HighLevelElasticSearchIteratorITest {
     static HighLevelClientFactory highLevelClientFactory;
     static IndexHelper helper;
     static {
+
         ClientElasticSearchFactory clientElasticSearchFactory = new ClientElasticSearchFactory();
-        clientElasticSearchFactory.setHosts("localhost:9200");
-        clientElasticSearchFactory.setClusterName(System.getProperty("integ.cluster.name", "elasticsearch"));
+        clientElasticSearchFactory.setHosts(es.getHttpHost());
+        clientElasticSearchFactory.setClusterName(es.getClusterName());
         highLevelClientFactory = new HighLevelClientFactory(clientElasticSearchFactory);
 
         helper = IndexHelper.builder()
