@@ -35,6 +35,17 @@ import static org.springframework.http.HttpStatusCode.valueOf;
  * Preferred-Languages: en,nl
  * Canonical: ${REQUEST}
  * </pre>
+ * <p>
+ *  So, this supposes that the directory '/well-known' is available in the filesystem. The idea is that can just make it if you need to test this on
+ *  localhost for some reason
+ *  <p>
+ *  if you need to test in macos, make /etc/synthetic.conf (followed by /System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t) and it could e.g. looke like this:
+ *  <pre>
+ *    cat /etc/synthetic.conf
+ *    data	Users/michiel/data
+ *    share	Users/michiel/share
+ *    well-known	Users/michiel/well-known
+ *   </pre>
  *
  * @since 5.6
  * @author Michiel Meeuwissen
@@ -52,19 +63,6 @@ public class WellKnownController {
     @Inject
     HttpServletResponse response;
 
-    /**
-     *  This supposes that the directory '/well-known' is available in the filesystem. The idea is that can just make it if you need to test this on
-     *  localhost for some reason
-     *  <p>
-     *  if you need to test in macos, use /etc/synthetic.conf (/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t)
-     * e.g.:
-     * <pre>
-     * cat /etc/synthetic.conf
-     * data	Users/michiel/data
-     * share	Users/michiel/share
-     * well-known	Users/michiel/well-known
-     * </pre>
-     */
 
     final static Path DIR = Path.of("/well-known");
 
