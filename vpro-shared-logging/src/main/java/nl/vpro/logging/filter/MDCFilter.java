@@ -49,12 +49,19 @@ public class  MDCFilter extends HttpFilter {
     Function<String, Level> accessLevel =
         s -> s.startsWith("/manage/") ? Level.TRACE : Level.DEBUG;
 
+    @Getter
+    @Setter
+    static Function<Authentication, String> principal =
+        s -> SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+
     @Override
     public void init(FilterConfig filterConfig) {
         if (filterConfig.getInitParameter("clear") != null) {
             clear = Boolean.parseBoolean(filterConfig.getInitParameter("clear"));
         }
     }
+
+
 
     @Override
     public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -65,7 +72,7 @@ public class  MDCFilter extends HttpFilter {
             try {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null) {
-                    String name = auth.getName();
+                    String name = principal.apply(auth);
                     MDC.put(USER_NAME, name);
                 }
             } catch (Exception e) {
