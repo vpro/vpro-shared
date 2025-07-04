@@ -71,4 +71,4 @@ jobs:
         if: always() && runner.os == 'Linux'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
-          junit_files: "**/target/surefire-reports/*.xml"
+          files: "**/target/surefire-reports/*.xml"
