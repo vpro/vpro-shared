@@ -26,7 +26,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
 
     static AbstractAppender appender ;
 
-    static private  synchronized void checkAppender() {
+    static private synchronized void checkAppender() {
         if (appender == null) {
             if (LogManager.getRootLogger() instanceof Logger log4j) {
                 appender = new AbstractAppender(AbstractCaptureLogger.class.getName(), new AbstractFilter() {
@@ -49,7 +49,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
                 appender.start();
                 log4j.addAppender(appender);
                 log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
-
+                log.info("Added appender {} to {} to arrange log capturing", appender.getName(), log4j.getName());
             } else {
                 log.info("Current logging implementation is not log4j2-core");
             }

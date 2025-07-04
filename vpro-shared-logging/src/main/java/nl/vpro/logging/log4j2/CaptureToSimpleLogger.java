@@ -37,7 +37,7 @@ public class CaptureToSimpleLogger extends AbstractCaptureLogger {
 
     @Override
     protected void accept(LogEvent event) {
-         String m = event.getMessage().getFormattedMessage();
+        String m = event.getMessage().getFormattedMessage();
         simpleLogger.accept(
             Level.valueOf(event.getLevel().name()),
             m,
