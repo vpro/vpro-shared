@@ -23,7 +23,6 @@ jobs:
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_USERNAME
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
-          gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
       - uses: oleksiyrudenko/gha-git-credentials@v2.1.2
         with:
@@ -36,4 +35,4 @@ jobs:
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_USERNAME }}
-          GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}

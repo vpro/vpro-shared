@@ -54,14 +54,13 @@ jobs:
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
-          gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
           cache: maven
       - name: Build and ${{ matrix.target }} with Maven
         run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests}  -B -P'deploy,sonatype' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-          GPG_SECRET_KEY_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
       - name: Publish to codecov
         uses: codecov/codecov-action@v4
