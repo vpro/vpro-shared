@@ -6,7 +6,9 @@ image:https://github.com/vpro/vpro-shared/workflows/build/badge.svg?[Build Statu
 image:https://img.shields.io/maven-central/v/nl.vpro.shared/vpro-shared-parent.svg[MavenCentral,link=https://search.maven.org/search?q=g:%22nl.vpro.shared%22]
 image:http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-parent.svg?color=blue[javadoc,link=http://www.javadoc.io/doc/nl.vpro.shared]
 image:https://codecov.io/gh/vpro/vpro-shared/branch/main/graph/badge.svg[codecov,link=https://codecov.io/gh/vpro/vpro-shared]
-image:https://img.shields.io/nexus/s/https/oss.sonatype.org/nl.vpro.shared/vpro-shared-parent.svg[snapshots,link=https://oss.sonatype.org/content/repositories/snapshots/nl/vpro/shared/]
+
+// As of june 30, 2025 uploadibng to oss.sonatype.org is not longer supported. I arranged uploading to central.sonatype.org, but I cannot find batches or directory listings for that.
+//image:https://img.shields.io/nexus/s/https/oss.sonatype.org/nl.vpro.shared/vpro-shared-parent.svg[snapshots,link=https://oss.sonatype.org/content/repositories/snapshots/nl/vpro/shared/]
 
 These are various shared utility modules which are used on several
 places in VPRO artifacts.
