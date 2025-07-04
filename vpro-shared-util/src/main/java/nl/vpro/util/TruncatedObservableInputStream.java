@@ -47,7 +47,7 @@ public abstract class TruncatedObservableInputStream extends ObservableInputStre
 
             @Override
             public void closed() throws IOException {
-                TruncatedObservableInputStream.this.closed(count, true);
+                TruncatedObservableInputStream.this.closed(count, truncated);
             }
         });
     }

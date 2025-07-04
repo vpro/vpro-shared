@@ -43,7 +43,7 @@ public class LoggingInputStream  extends TruncatedObservableInputStream {
 
     }
       @Override
-      void closed(long count, boolean truncated) throws IOException {
+      void closed(long count, boolean truncated) {
           logger.log(level, "body of {} bytes{}:\n{}{}\n", count, truncated ? " (truncated)" : "", bytes.toString(StandardCharsets.UTF_8), truncated ? "..." : "");
       }
 }
