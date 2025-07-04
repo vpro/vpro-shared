@@ -1,5 +1,6 @@
 package nl.vpro.logging.log4j2;
 
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
@@ -57,13 +58,27 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
     }
 
 
-    protected final UUID uuid = UUID.randomUUID();
+    @Getter
+    protected final UUID uuid;
 
-    AbstractCaptureLogger() {
+    AbstractCaptureLogger(UUID uuid) {
         checkAppender();
-        THREAD_LOCAL.set(uuid);
+        this.uuid = uuid;
+        associateWithCurrentThread();
         LOGGERS.put(uuid, this);
     }
+
+    AbstractCaptureLogger() {
+        this(UUID.randomUUID());
+    }
+
+    /**
+     * Associates this logger with the current thread. This happens automatically in the constructor, but you can call it again if the instance happens to be used in a different thread later.
+     */
+    public void associateWithCurrentThread() {
+        THREAD_LOCAL.set(uuid);
+    }
+
 
     protected abstract void accept(LogEvent event);
 

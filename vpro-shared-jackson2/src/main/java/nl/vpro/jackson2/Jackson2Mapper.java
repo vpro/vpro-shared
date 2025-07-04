@@ -7,7 +7,9 @@ package nl.vpro.jackson2;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.io.Serial;
+import java.net.http.HttpResponse;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -287,4 +289,25 @@ public class Jackson2Mapper extends ObjectMapper {
     public String toString() {
         return Jackson2Mapper.class.getSimpleName() + " (" + toString + ")";
     }
+
+    public <T> HttpResponse.BodyHandler<T> asBodyHandler(Class<T> type) {
+        return new HttpResponse.BodyHandler<T>() {
+            @Override
+            public HttpResponse.BodySubscriber<T> apply(HttpResponse.ResponseInfo responseInfo) {
+                return HttpResponse.BodySubscribers.mapping(
+                    HttpResponse.BodySubscribers.ofInputStream(),
+                    body -> {
+                        try {
+                            return readValue(body, type);
+                        } catch (IOException e) {
+                            log.warn(e.getMessage(), e);
+                            return null;
+                        }
+                    });
+            }
+        };
+
+    }
 }
+
+

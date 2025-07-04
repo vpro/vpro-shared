@@ -30,10 +30,13 @@ public class CaptureToSimpleLogger extends AbstractCaptureLogger {
         return new CaptureToSimpleLogger(simpleLogger);
     }
 
+
     private final SimpleLogger simpleLogger;
     private CaptureToSimpleLogger(SimpleLogger simpleLogger) {
+        super();
         this.simpleLogger = simpleLogger;
     }
+
 
     @Override
     protected void accept(LogEvent event) {
