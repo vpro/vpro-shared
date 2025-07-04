@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.text.StringSubstitutor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
@@ -62,7 +61,7 @@ public class WellKnownController {
         Path file = DIR.resolve(Path.of(fileName));
 
         if (!file.toAbsolutePath().normalize().startsWith(DIR)) {
-            throw new BadRequestException();
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400));
         }
         if (Files.isReadable(file)) {
             response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
