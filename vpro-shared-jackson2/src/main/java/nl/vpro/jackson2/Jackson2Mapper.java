@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.PropertyFilter;
@@ -290,6 +290,10 @@ public class Jackson2Mapper extends ObjectMapper {
         return Jackson2Mapper.class.getSimpleName() + " (" + toString + ")";
     }
 
+    /**
+     * Returns a {@link HttpResponse.BodyHandler} that reads the body as a value of the given type, using this ObjectMapper.
+     * @since 5.11
+     */
     public <T> HttpResponse.BodyHandler<T> asBodyHandler(Class<T> type) {
         return new HttpResponse.BodyHandler<T>() {
             @Override
