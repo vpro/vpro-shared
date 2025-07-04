@@ -30,7 +30,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
 import com.google.common.annotations.Beta;
 
-import nl.vpro.logging.Slf4jHelper;
+import nl.vpro.logging.simple.SimpleLogger;
+import nl.vpro.util.LoggingInputStream;
+
+import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
  * TODO: Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
@@ -227,7 +230,7 @@ public class Jackson2Mapper extends ObjectMapper {
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
 
         } catch (NoClassDefFoundError noClassDefFoundError) {
-            Slf4jHelper.log(log,  loggedAboutFallback ? Level.DEBUG : Level.WARN, noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
+            log.atLevel(  loggedAboutFallback ? Level.DEBUG : Level.WARN).log( noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
             loggedAboutFallback = true;
 
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
@@ -295,6 +298,15 @@ public class Jackson2Mapper extends ObjectMapper {
      * @since 5.11
      */
     public <T> HttpResponse.BodyHandler<T> asBodyHandler(Class<T> type) {
+        return asBodyHandler(type, nl.vpro.logging.simple.Level.DEBUG);
+    }
+
+    /**
+     * Returns a {@link HttpResponse.BodyHandler} that reads the body as a value of the given type, using this ObjectMapper.
+     * @since 5.11
+     */
+    public <T> HttpResponse.BodyHandler<T> asBodyHandler(Class<T> type, nl.vpro.logging.simple.Level level) {
+
         return new HttpResponse.BodyHandler<T>() {
             @Override
             public HttpResponse.BodySubscriber<T> apply(HttpResponse.ResponseInfo responseInfo) {
@@ -302,7 +314,12 @@ public class Jackson2Mapper extends ObjectMapper {
                     HttpResponse.BodySubscribers.ofInputStream(),
                     body -> {
                         try {
+                            SimpleLogger simple = slf4j(log);
+                            if (simple.isEnabled(level)) {
+                                body = new LoggingInputStream(simple, body, level);
+                            }
                             return readValue(body, type);
+
                         } catch (IOException e) {
                             log.warn(e.getMessage(), e);
                             return null;
@@ -310,7 +327,6 @@ public class Jackson2Mapper extends ObjectMapper {
                     });
             }
         };
-
     }
 }
 

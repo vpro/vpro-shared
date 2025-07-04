@@ -6,6 +6,7 @@ import lombok.Setter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import nl.vpro.logging.simple.Level;
 import nl.vpro.logging.simple.SimpleLogger;
 
 
@@ -19,10 +20,16 @@ public class LoggingInputStream  extends TruncatedObservableInputStream {
 
     private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     private final SimpleLogger logger;
+    private final Level level;
 
-    public LoggingInputStream(SimpleLogger log, InputStream wrapped) {
+    public LoggingInputStream(SimpleLogger log, InputStream wrapped, Level level) {
         super(wrapped);
         this.logger = log;
+        this.level = level;
+    }
+
+     public LoggingInputStream(SimpleLogger log, InputStream wrapped) {
+        this(log, wrapped, Level.INFO);
     }
 
     @Override
@@ -37,6 +44,6 @@ public class LoggingInputStream  extends TruncatedObservableInputStream {
     }
       @Override
       void closed(long count, boolean truncated) throws IOException {
-          logger.info("body of {} bytes{}:\n{}{}\n", count, truncated ? " (truncated)" : "", bytes.toString(StandardCharsets.UTF_8), truncated ? "..." : "");
+          logger.log(level, "body of {} bytes{}:\n{}{}\n", count, truncated ? " (truncated)" : "", bytes.toString(StandardCharsets.UTF_8), truncated ? "..." : "");
       }
 }
