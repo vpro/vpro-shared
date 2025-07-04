@@ -60,9 +60,9 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
     protected final UUID uuid = UUID.randomUUID();
 
     AbstractCaptureLogger() {
+        checkAppender();
         THREAD_LOCAL.set(uuid);
         LOGGERS.put(uuid, this);
-        checkAppender();
     }
 
     protected abstract void accept(LogEvent event);
