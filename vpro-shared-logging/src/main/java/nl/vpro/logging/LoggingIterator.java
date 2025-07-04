@@ -1,10 +1,11 @@
 package nl.vpro.logging;
 
 
+import java.util.Iterator;
+
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
-
-import java.util.Iterator;
+import org.slf4j.spi.LoggingEventBuilder;
 
 
 /**
@@ -17,19 +18,18 @@ import java.util.Iterator;
  */
 public class LoggingIterator<T> implements Iterator<T> {
 
-	private final Logger logger;
-    private final Level level;
-	private long count = 0;
-	private final int interval;
-	private final Iterator<T> wrapped;
+    private final LoggingEventBuilder levelLogger;
+    private long count = 0;
+    private final int interval;
+    private final Iterator<T> wrapped;
 
-	@lombok.Builder
+    @lombok.Builder
     public LoggingIterator(Iterator<T> wrapped, Logger logger, Level level, int interval) {
         this.wrapped = wrapped;
-		this.logger = new LoggerWrapper(logger, logger.getName());
-        this.level = level;
-		this.interval = interval;
-	}
+        Logger wrapper = new LoggerWrapper(logger, logger.getName());
+        this.levelLogger = logger.atLevel(level);
+        this.interval = interval;
+    }
 
     public LoggingIterator(Iterator<T> wrapped, Logger logger, int interval) {
         this(wrapped, logger, Level.INFO, interval);
@@ -41,14 +41,14 @@ public class LoggingIterator<T> implements Iterator<T> {
     }
 
     @Override
-	public T next() {
-		T next = wrapped.next();
-		if (++count % interval == 0 || ! wrapped.hasNext()) {
-            Slf4jHelper.log(logger, level, "{}: {}", count, next);
+    public T next() {
+        T next = wrapped.next();
+        if (++count % interval == 0 || ! wrapped.hasNext()) {
+            levelLogger.log( "{}: {}", count, next);
         }
-		return next;
+        return next;
 
-	}
+    }
 
     @Override
     public void remove() {

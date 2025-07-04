@@ -27,6 +27,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
 import org.slf4j.*;
 import org.slf4j.event.Level;
+import org.slf4j.spi.LoggingEventBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +37,6 @@ import com.google.common.base.Suppliers;
 
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.*;
 import nl.vpro.util.*;
 
@@ -45,7 +45,6 @@ import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToObjectNode;
 import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
-import static nl.vpro.logging.Slf4jHelper.log;
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
@@ -1433,7 +1432,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             for (JsonNode n : items) {
                 ObjectNode on = (ObjectNode) n;
                 if (singleVerbose) {
-                    log(logger, singleLevel.get(), "{}", on);
+                    logger.atLevel(singleLevel.get()).log("{}", on);
                 }
                 if (on.has(DELETE)) {
                     final ObjectNode delete = on.withObject(P_DELETE);
@@ -1443,7 +1442,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     String logEntry = handleResponse(delete, type, id);
                     deleted.add(logEntry);
                     if (! singleVerbose) {
-                        log(logger, singleLevel.get(), "delete:{}", logEntry);
+                        logger.atLevel( singleLevel.get()).log("delete:{}", logEntry);
                     }
                     continue;
                 }
@@ -1455,7 +1454,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     String logEntry = handleResponse(indexResponse, type, id);
                     indexed.add(logEntry);
                     if (! singleVerbose) {
-                        log(logger, singleLevel.get(), "indexed:{}", logEntry);
+                        logger.atLevel(singleLevel.get()).log("indexed:{}", logEntry);
                     }
                     continue;
                 }
@@ -1467,7 +1466,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                     String logEntry = handleResponse(indexResponse, type, id);
                     indexed.add(logEntry);
                     if (! singleVerbose) {
-                        log(logger, singleLevel.get(), "updated:{}", logEntry);
+                        logger.atLevel( singleLevel.get()).log("updated:{}", logEntry);
                     }
                     continue;
                 }
@@ -1475,17 +1474,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
             }
 
-            if (Slf4jHelper.isEnabled(logger, combinedLevel.get())) {
+
+            if (logger.isEnabledForLevel(combinedLevel.get())) {
+                LoggingEventBuilder combinedLogger = logger.atLevel(combinedLevel.get());
                 if (!indexed.isEmpty()) {
                     if (!deleted.isEmpty()) {
-                        log(logger, combinedLevel.get(), "{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
+                        combinedLogger.log("{} {} indexed: {}, revoked: {}", clientFactory.logString(), index, indexed, deleted);
                     } else {
-                        log(logger, combinedLevel.get(), "{} {} indexed: {}", clientFactory.logString(), index, indexed);
+                        combinedLogger.log("{} {} indexed: {}", clientFactory.logString(), index, indexed);
                     }
                 } else if (!deleted.isEmpty()) {
-                    log(logger, combinedLevel.get(), "{} {} revoked: {}", clientFactory.logString(), index, deleted);
+                    combinedLogger.log( "{} {} revoked: {}", clientFactory.logString(), index, deleted);
                 } else {
-                    log(logger, combinedLevel.get(), "{} {} bulk request didn't yield result", clientFactory.logString(), index);
+                    combinedLogger.log( "{} {} bulk request didn't yield result", clientFactory.logString(), index);
                 }
             }
         };

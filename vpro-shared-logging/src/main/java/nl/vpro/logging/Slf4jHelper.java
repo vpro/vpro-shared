@@ -68,6 +68,7 @@ public class Slf4jHelper {
      * nothing is logged. If the "level" is null, nothing is logged. If the "format" or
      * the "argArray" or the "throwable" are null, behaviour depends on the SLF4J-backing
      * implementation.
+     * @deprecated Just use {@link Logger#atLevel(Level)}
      */
 
     @SuppressWarnings("Duplicates")
@@ -78,6 +79,9 @@ public class Slf4jHelper {
         }
     }
 
+    /***
+     * @deprecated Use {@link Logger#isEnabledForLevel(Level)} instead.
+     */
     @Deprecated
     public static boolean isEnabled(@NonNull Logger logger, @NonNull Level level) {
         return logger.isEnabledForLevel(level);
