@@ -82,7 +82,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <scope>test</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>
