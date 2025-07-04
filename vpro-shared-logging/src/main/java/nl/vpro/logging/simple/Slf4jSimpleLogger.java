@@ -4,8 +4,6 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.vpro.logging.Slf4jHelper;
-
 /**
  * Wraps an SLF4J {@link Logger}
 
@@ -51,7 +49,7 @@ public class Slf4jSimpleLogger implements SimpleLogger {
 
     @Override
     public boolean isEnabled(Level level) {
-        return level.toInt() >= threshold.toInt() && Slf4jHelper.isEnabled(logger, org.slf4j.event.Level.valueOf(level.name()));
+        return level.toInt() >= threshold.toInt() && logger.isEnabledForLevel(org.slf4j.event.Level.valueOf(level.name()));
     }
 
     @Override
@@ -63,9 +61,7 @@ public class Slf4jSimpleLogger implements SimpleLogger {
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
         if (isEnabled(level)) {
-            Slf4jHelper.log(logger,
-                org.slf4j.event.Level.valueOf(level.name()),
-                message == null ? null : message.toString(), t);
+            logger.atLevel(org.slf4j.event.Level.valueOf(level.name())).log(message == null ? null : message.toString(), t);
         }
     }
 
