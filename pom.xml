@@ -880,17 +880,6 @@
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.7.0</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>central</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-          <plugin>
             <artifactId>maven-source-plugin</artifactId>
             <version>3.3.1</version>
             <executions>
@@ -904,7 +893,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.7</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -914,12 +903,6 @@
                 </goals>
               </execution>
             </executions>
-            <configuration>
-              <gpgArguments>
-                <arg>--pinentry-mode</arg>
-                <arg>loopback</arg>
-              </gpgArguments>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.projectlombok</groupId>
