@@ -20,6 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import nl.vpro.web.HttpServletRequestUtils;
 
+import static org.springframework.http.HttpStatusCode.valueOf;
+
 
 /**
  * Support for files under /.well-known/ Noticeably <a href="https://securitytxt.org/">security.txt<a>
@@ -50,8 +52,19 @@ public class WellKnownController {
     @Inject
     HttpServletResponse response;
 
-
-    //if you need to test in macos, use /etc/synthetic.conf (/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t)
+    /**
+     *  This supposes that the directory '/well-known' is available in the filesystem. The idea is that can just make it if you need to test this on
+     *  localhost for some reason
+     *  <p>
+     *  if you need to test in macos, use /etc/synthetic.conf (/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t)
+     * e.g.:
+     * <pre>
+     * cat /etc/synthetic.conf
+     * data	Users/michiel/data
+     * share	Users/michiel/share
+     * well-known	Users/michiel/well-known
+     * </pre>
+     */
 
     final static Path DIR = Path.of("/well-known");
 
@@ -61,7 +74,7 @@ public class WellKnownController {
         Path file = DIR.resolve(Path.of(fileName));
 
         if (!file.toAbsolutePath().normalize().startsWith(DIR)) {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400));
+            throw new ResponseStatusException(valueOf(400));
         }
         if (Files.isReadable(file)) {
             response.setHeader(HttpHeaders.CACHE_CONTROL, "max-age=3600");
@@ -72,9 +85,7 @@ public class WellKnownController {
             return substitutor.replace(Files.readString(file));
         }
 
-        throw new ResponseStatusException(
-            HttpStatusCode.valueOf(404),
-            "No %s found".formatted(fileName));
+        throw new ResponseStatusException(valueOf(404), "No %s found".formatted(fileName));
 
     }
 
