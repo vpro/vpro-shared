@@ -283,7 +283,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.11.2</version>
           <configuration>
             <!-- javadoc met java 8 is anders een absolute ramp, zeker met de oude zooi in dit project -->
             <doclint>none</doclint>
