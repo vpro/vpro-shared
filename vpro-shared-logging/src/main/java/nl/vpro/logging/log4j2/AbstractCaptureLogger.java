@@ -51,7 +51,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
                 log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
                 log.info("Added appender {} to {} to arrange log capturing", appender.getName(), log4j.getName());
             } else {
-                log.info("Current logging implementation is not log4j2-core");
+                log.warn("Current logging implementation is not log4j2-core");
             }
         }
     }
