@@ -303,6 +303,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
     /**
      * Returns a {@link HttpResponse.BodyHandler} that reads the body as a value of the given type, using this ObjectMapper.
+     * Note that if logging is enabled at the given level commons-io must be available.
      * @since 5.11
      */
     public <T> HttpResponse.BodyHandler<T> asBodyHandler(Class<T> type, nl.vpro.logging.simple.Level level) {
