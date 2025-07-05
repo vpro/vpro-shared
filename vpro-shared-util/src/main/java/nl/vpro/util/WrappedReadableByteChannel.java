@@ -10,12 +10,14 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.function.LongConsumer;
 
+import org.meeuw.functional.Unwrappable;
+
 /**
  * Wraps a {@link ReadableByteChannel}. Records the number of channelled bytes. Also, it can have a consumer, which is called every batchsize bytes.
  * @since 4.2
  */
 @Log4j2
-public class WrappedReadableByteChannel implements ReadableByteChannel {
+public class WrappedReadableByteChannel implements ReadableByteChannel, Unwrappable<ReadableByteChannel> {
 
     @Getter
     long total = 0;
@@ -70,6 +72,11 @@ public class WrappedReadableByteChannel implements ReadableByteChannel {
         if (prevBatch > 0) {
             consume();
         }
+    }
+
+    @Override
+    public ReadableByteChannel unwrap() {
+        return delegate;
     }
 
     private void consume() {

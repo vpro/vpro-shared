@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 
+import org.meeuw.functional.Unwrappable;
+
 
 /**
  * Filtering, or Transforming iterator.
@@ -18,7 +20,7 @@ import java.util.function.Predicate;
  * @since 1.3
  */
 @Slf4j
-public class FilteringIterator<T> implements CloseableIterator<T> {
+public class FilteringIterator<T> implements CloseableIterator<T>, Unwrappable<Iterator<? extends T>> {
 
     private final Iterator<? extends T> wrapped;
 
@@ -93,6 +95,11 @@ public class FilteringIterator<T> implements CloseableIterator<T> {
     @Override
     public void remove() {
         wrapped.remove();
+    }
+
+    @Override
+    public Iterator<? extends T> unwrap() {
+        return wrapped;
     }
 
     private void findNext() {

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.meeuw.functional.Unwrappable;
+
 
 /**
  * Wraps an iterator, to add zero or more elements at the start of it.
@@ -13,7 +15,7 @@ import java.util.function.Function;
  * @since 1.72
  */
 @Slf4j
-public class HeadAdder<T> implements Iterator<T> {
+public class HeadAdder<T> implements Iterator<T>, Unwrappable<Iterator<T>> {
 
     private final Function<T, T>[] adder;
 
@@ -71,6 +73,11 @@ public class HeadAdder<T> implements Iterator<T> {
             return result;
         }
         return wrapped.next();
+    }
+
+    @Override
+    public Iterator<T> unwrap() {
+        return wrapped;
     }
 
     private void findNextFromAdder() {

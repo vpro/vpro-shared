@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.function.Supplier;
 
+import org.meeuw.functional.Unwrappable;
+
 import nl.vpro.logging.simple.SimpleLogger;
 
 /**
@@ -10,12 +12,13 @@ import nl.vpro.logging.simple.SimpleLogger;
  * can be instantiated with {@link CommandExecutorImpl#builder()}
  * @since 5.4
  */
-public abstract class AbstractCommandExecutorWrapper implements CommandExecutor {
+public abstract class AbstractCommandExecutorWrapper implements CommandExecutor, Unwrappable<CommandExecutor> {
 
 
     public AbstractCommandExecutorWrapper() {
 
     }
+
 
     protected abstract CommandExecutor getWrapped();
 
@@ -37,5 +40,10 @@ public abstract class AbstractCommandExecutorWrapper implements CommandExecutor 
     @Override
     public Supplier<String> getBinary() {
         return getWrapped().getBinary();
+    }
+
+    @Override
+    public CommandExecutor unwrap() {
+        return getWrapped();
     }
 }

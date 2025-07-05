@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.functional.Unwrappable;
 
 import static nl.vpro.util.FileCachingInputStream.EOF;
 
@@ -15,7 +16,7 @@ import static nl.vpro.util.FileCachingInputStream.EOF;
  * @author Michiel Meeuwissen
  * @since 3.4
  */
-public class InputStreamChunk extends InputStream implements Counted {
+public class InputStreamChunk extends InputStream implements Counted, Unwrappable<InputStream> {
 
     private final InputStream wrapped;
     private long count = 0;
@@ -78,5 +79,10 @@ public class InputStreamChunk extends InputStream implements Counted {
     @Override
     public void close() {
         // nothing to do
+    }
+
+    @Override
+    public InputStream unwrap() {
+        return wrapped;
     }
 }

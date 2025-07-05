@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.functional.Unwrappable;
 
 /**
  * An iterator that can call a callback function when its iteration is finished.
@@ -11,7 +12,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * It simply wraps another iterator, which is one iteration ahead on call of 'hasNext'.
  * @author Michiel Meeuwissen
  */
-public class CallbackIterator<T> implements CountedIterator<T> {
+public class CallbackIterator<T> implements CountedIterator<T>, Unwrappable<CloseableIterator<T>> {
 
     private final CloseableIterator<T> wrapped;
     private final Runnable callback;
@@ -43,6 +44,11 @@ public class CallbackIterator<T> implements CountedIterator<T> {
     @Override
     public void remove() {
         wrapped.remove();
+    }
+
+    @Override
+    public CloseableIterator<T> unwrap() {
+        return wrapped;
     }
 
     protected boolean findNext() {

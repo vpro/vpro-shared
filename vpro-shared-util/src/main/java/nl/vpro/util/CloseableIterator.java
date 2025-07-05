@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.meeuw.functional.Unwrappable;
+
 import com.google.common.collect.PeekingIterator;
 
 /**
@@ -58,10 +60,10 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> CloseableIterator<T> of(final Iterator<T> iterator) {
-        if (iterator instanceof CloseableIterator) {
-            return (CloseableIterator) iterator;
-        } else if (iterator instanceof PeekingIterator) {
-            return new WrappedPeekingCloseableIterator<>((PeekingIterator<T>) iterator);
+        if (iterator instanceof CloseableIterator closeableIterator) {
+            return closeableIterator;
+        } else if (iterator instanceof PeekingIterator peekingIterator) {
+            return new WrappedPeekingCloseableIterator<>(peekingIterator);
         } else {
             return new WrappedCloseableIterator<>(iterator);
         }
@@ -91,7 +93,7 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
         return new CloseablePeekingIteratorImpl<>(this);
     }
 
-    class WrappedCloseableIterator<S> implements CloseableIterator<S> {
+    class WrappedCloseableIterator<S> implements CloseableIterator<S>, Unwrappable<Iterator<S>> {
         protected final Iterator<S> iterator;
 
         protected WrappedCloseableIterator(Iterator<S> iterator) {
@@ -120,6 +122,11 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
         public String toString() {
             return "Closeable[" + iterator + "]";
         }
+
+        @Override
+        public Iterator<S> unwrap() {
+            return iterator;
+        }
     }
 
     class WrappedPeekingCloseableIterator<S> extends WrappedCloseableIterator<S> implements PeekingIterator<S> {
@@ -132,6 +139,7 @@ public interface CloseableIterator<T> extends Iterator<T>, AutoCloseable {
         public S peek() {
             return ((PeekingIterator<S>) iterator).peek();
         }
+
     }
 
 }

@@ -2,6 +2,8 @@ package nl.vpro.util;
 
 import java.util.Iterator;
 
+import org.meeuw.functional.Unwrappable;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -9,7 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Michiel Meeuwissen
  * @since 5.1
  */
-class CloseablePeekingIteratorImpl<T> implements  CloseablePeekingIterator<T> {
+class CloseablePeekingIteratorImpl<T> implements CloseablePeekingIterator<T>, Unwrappable<CloseableIterator<? extends T>> {
     protected final CloseableIterator<? extends T> iterator;
     private boolean hasPeeked;
     private T peekedElement;
@@ -54,5 +56,9 @@ class CloseablePeekingIteratorImpl<T> implements  CloseablePeekingIterator<T> {
         iterator.close();
     }
 
+    @Override
+    public CloseableIterator<? extends T> unwrap() {
+        return iterator;
+    }
 }
 

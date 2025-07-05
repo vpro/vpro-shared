@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.functional.Unwrappable;
 
 /**
  * @author Michiel Meeuwissen
  * @since 0.29
  */
-public class WrappedInputStream  extends InputStream {
+public class WrappedInputStream  extends InputStream implements Unwrappable<InputStream> {
 
     private final InputStream wrapped;
 
@@ -68,4 +69,8 @@ public class WrappedInputStream  extends InputStream {
         return wrapped.markSupported();
     }
 
+    @Override
+    public InputStream unwrap() {
+        return wrapped;
+    }
 }

@@ -8,13 +8,14 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.functional.Unwrappable;
 
 /**
  * Wraps a supplier around an iterator. This way you can delay the instantiation of the actual iterator until the first call
  * of hasNext() or next().
  * @author Michiel Meeuwissen
  */
-public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T> {
+public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T>, Unwrappable<Supplier<Iterator<T>>> {
 
     private final Supplier<Iterator<T>> supplier;
     private Iterator<T> iterator;
@@ -41,6 +42,11 @@ public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T>
         T n = getSupplied().next();
         count++;
         return n;
+    }
+
+    @Override
+    public Supplier<Iterator<T>> unwrap() {
+        return supplier;
     }
 
     private Iterator<T> getSupplied() {

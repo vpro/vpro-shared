@@ -4,12 +4,13 @@ import java.util.Iterator;
 import java.util.Optional;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.functional.Unwrappable;
 
 /**
  * @author Michiel Meeuwissen
  * @since 1.3
  */
-public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
+public  abstract class WrappedIterator<T, S> implements CountedIterator<S>, Unwrappable<CloseableIterator<T>> {
 
     protected final CloseableIterator<T> wrapped;
 
@@ -67,6 +68,11 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S> {
     @Override
     public void close() throws Exception {
         wrapped.close();
+    }
+
+    @Override
+    public CloseableIterator<T> unwrap() {
+        return wrapped;
     }
 
 

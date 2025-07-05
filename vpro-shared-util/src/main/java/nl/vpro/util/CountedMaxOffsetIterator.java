@@ -8,12 +8,13 @@ import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.Unwrappable;
 
 /**
  * @author Michiel Meeuwissen
  * @since 2.23
  */
-public class CountedMaxOffsetIterator<T>  extends MaxOffsetIterator<T>  implements CountedIterator<T> {
+public class CountedMaxOffsetIterator<T>  extends MaxOffsetIterator<T>  implements CountedIterator<T>, Unwrappable<CountedIterator<T>> {
 
     private final CountedIterator<T> wrappedCountedIterator;
 
@@ -44,5 +45,10 @@ public class CountedMaxOffsetIterator<T>  extends MaxOffsetIterator<T>  implemen
     @Override
     public @NonNull Optional<Long> getTotalSize() {
         return wrappedCountedIterator.getTotalSize();
+    }
+
+    @Override
+    public CountedIterator<T> unwrap() {
+        return wrappedCountedIterator;
     }
 }
