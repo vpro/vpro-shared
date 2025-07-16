@@ -17,8 +17,6 @@ import org.slf4j.event.Level;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 
-import nl.vpro.logging.Slf4jHelper;
-
 /**
  * These can be used in conjunction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
  * (this is what we normally do)
@@ -69,7 +67,7 @@ public class StringInstantToJsonTimestamp {
                     log.debug("Natty didn't match");
                 }
             } catch (NoClassDefFoundError classNotFoundException) {
-                Slf4jHelper.log(log, warnedNatty ? Level.DEBUG : Level.WARN, "No natty?: " + classNotFoundException.getMessage());
+                log.atLevel(warnedNatty ? Level.DEBUG : Level.WARN).log("No natty?: " + classNotFoundException.getMessage());
                 warnedNatty  = true;
             } catch (Throwable e) {
                 log.debug("Natty couldn't parse {}: {}", value, e.getMessage());
