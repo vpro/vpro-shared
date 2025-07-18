@@ -19,6 +19,7 @@ public class Constants {
         public static final String ROUTING = "_routing";
         public static final String PARENT  = "_parent";
         public static final String SOURCE  = "_source";
+        public static final String P_SOURCE  = "/" + SOURCE;
         public static final String VERSION  = "_version";
         public static final String SCORE = "_score";
         public static final String ERROR = "error";
