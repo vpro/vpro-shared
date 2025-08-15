@@ -43,6 +43,6 @@ public class StringsTest {
                 .containsExactly("a", "b", "c", "d", "f1", "f2");
 
 
-	}
+    }
 
 }

@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.type.SimpleType;
  */
 public class EnumModelConverter implements ModelConverter {
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-	public Schema resolve(
+    public Schema resolve(
         AnnotatedType type,
         ModelConverterContext context,
         Iterator<ModelConverter> chain) {
@@ -40,5 +40,5 @@ public class EnumModelConverter implements ModelConverter {
         }
         return chain.hasNext() ? chain.next().resolve(type, context, chain) : null;
 
-	}
+    }
 }

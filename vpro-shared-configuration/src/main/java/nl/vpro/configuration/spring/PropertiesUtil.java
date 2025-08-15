@@ -251,8 +251,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
     @Override
     public void setSearchSystemEnvironment(boolean searchSystemEnvironment) {
         super.setSearchSystemEnvironment(searchSystemEnvironment);
-		this.searchSystemEnvironment = searchSystemEnvironment;
-	}
+        this.searchSystemEnvironment = searchSystemEnvironment;
+    }
     private void initMap(Properties props) {
 
         Properties p = new Properties();

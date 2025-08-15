@@ -13,13 +13,13 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class RootOnlyStrategy implements ExclusionStrategy {
 
-	@Override
+    @Override
     public boolean exclude(HttpServletRequest request) {
-		String requestURI = request.getRequestURI();
-		return !requestURI.equals("/");
-	}
+        String requestURI = request.getRequestURI();
+        return !requestURI.equals("/");
+    }
 
-	@Override
+    @Override
     public void setServletContext(ServletContext servletContext) {
-	}
+    }
 }

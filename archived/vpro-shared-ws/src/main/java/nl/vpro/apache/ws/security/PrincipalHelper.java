@@ -10,19 +10,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
  *
  */
 public class PrincipalHelper {
-	/**
-	 * returns the current thread's principal
-	 */
-	public static String getPrincipal() {
-		SecurityContext ctx = SecurityContextHolder.getContext();
-		if (ctx != null) {
-			Authentication auth = ctx.getAuthentication();
-			if (auth != null) {
-				return auth.getName();
-			}
-		}
-		// not set (no project specific system exception available, so throw RuntimeException)
-		throw new RuntimeException("No security principal set");
-	}
-	
+    /**
+     * returns the current thread's principal
+     */
+    public static String getPrincipal() {
+        SecurityContext ctx = SecurityContextHolder.getContext();
+        if (ctx != null) {
+            Authentication auth = ctx.getAuthentication();
+            if (auth != null) {
+                return auth.getName();
+            }
+        }
+        // not set (no project specific system exception available, so throw RuntimeException)
+        throw new RuntimeException("No security principal set");
+    }
+
 }

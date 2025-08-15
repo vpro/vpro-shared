@@ -22,7 +22,7 @@ public class PostfixingMetadataNamingStrategy extends MetadataNamingStrategy {
 
     @NonNull
     @Override
-	public ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException {
+    public ObjectName getObjectName(Object managedBean, @Nullable String beanKey) throws MalformedObjectNameException {
         ObjectName name = super.getObjectName(managedBean, beanKey);
         return ObjectNameManager.getInstance(name.getDomain() + "." + postfix, name.getKeyPropertyList());
     }

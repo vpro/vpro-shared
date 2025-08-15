@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.type.SimpleType;
  */
 public class LocaleModelConverter implements ModelConverter {
 
-	@SuppressWarnings({"rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     @Override
-	public Schema resolve(
+    public Schema resolve(
         AnnotatedType type,
         ModelConverterContext context,
         Iterator<ModelConverter> chain) {
@@ -34,5 +34,5 @@ public class LocaleModelConverter implements ModelConverter {
         }
         return chain.hasNext() ? chain.next().resolve(type, context, chain) : null;
 
-	}
+    }
 }

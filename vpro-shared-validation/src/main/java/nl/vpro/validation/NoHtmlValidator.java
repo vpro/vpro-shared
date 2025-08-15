@@ -14,9 +14,9 @@ public class NoHtmlValidator implements ConstraintValidator<NoHtml, Object> {
     boolean aggressive = true;
 
     @Override
-	public void initialize(NoHtml annotation) {
+    public void initialize(NoHtml annotation) {
         aggressive = annotation.aggressive();
-	}
+    }
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext constraintValidatorContext) {

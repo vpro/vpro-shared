@@ -16,19 +16,19 @@ import com.google.common.collect.Maps;
 public class Utils {
 
 
-	@SuppressWarnings("unchecked")
-	public static MapDifference<String, Object> flattenedDifference(
-			JsonNode j1, JsonNode j2)  {
-		ObjectMapper mapper = Jackson2Mapper.getPublisherInstance();
-		Map<String, Object> map1 = mapper.convertValue(j1, Map.class);
-		Map<String, Object> flatten1= flatten(map1);
-		Map<String, Object> map2 = mapper.convertValue(j2, Map.class);
-		Map<String, Object> flatten2 = flatten(map2);
+    @SuppressWarnings("unchecked")
+    public static MapDifference<String, Object> flattenedDifference(
+            JsonNode j1, JsonNode j2)  {
+        ObjectMapper mapper = Jackson2Mapper.getPublisherInstance();
+        Map<String, Object> map1 = mapper.convertValue(j1, Map.class);
+        Map<String, Object> flatten1= flatten(map1);
+        Map<String, Object> map2 = mapper.convertValue(j2, Map.class);
+        Map<String, Object> flatten2 = flatten(map2);
 
-		return Maps.difference(flatten1, flatten2);
-	}
+        return Maps.difference(flatten1, flatten2);
+    }
 
-	static Map<String, Object> flatten(Map<String, Object> map) {
+    static Map<String, Object> flatten(Map<String, Object> map) {
         return map.entrySet().stream()
                 .flatMap(Utils::flatten)
                 .collect(LinkedHashMap::new, (m, e) -> m.put("/" + e.getKey(), e.getValue()), LinkedHashMap::putAll);
