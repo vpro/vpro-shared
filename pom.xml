@@ -52,12 +52,12 @@
 
     <!-- jakarta versions -->
     <servlet.api.version>6.0.0</servlet.api.version>
-    <validation.api.version>3.0.2</validation.api.version>
+    <validation.api.version>3.1.1</validation.api.version>
     <persistence.api.version>3.1.0</persistence.api.version>
     <annotation.api.version>2.1.1</annotation.api.version>
     <xml-bind.api.version>4.0.2</xml-bind.api.version>
 
-    <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
+    <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
     <camel.version>4.12.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.35</swagger.version>
