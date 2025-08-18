@@ -17,13 +17,13 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.8</spring.version>
-    <spring-security.version>6.5.1</spring-security.version>
+    <spring.version>6.2.10</spring.version>
+    <spring-security.version>6.5.3</spring-security.version>
     <jackson2.version>2.19.2</jackson2.version>
 
-    <junit.version>5.13.1</junit.version>
-    <mockito.version>5.18.0</mockito.version>
-    <assertj.version>3.27.2</assertj.version>
+    <junit.version>5.13.4</junit.version>
+    <mockito.version>5.19.0</mockito.version>
+    <assertj.version>3.27.4</assertj.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
 
     <!--
@@ -32,9 +32,9 @@
     -->
     <jboss-logging.version>3.6.1.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.17.6</bytebuddy.version>
+    <bytebuddy.version>1.17.7</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <log4j2.version>2.24.3</log4j2.version>
+    <log4j2.version>2.25.1</log4j2.version>
     <guava.version>33.4.8-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
@@ -60,7 +60,7 @@
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
     <camel.version>4.12.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.35</swagger.version>
+    <swagger.version>2.2.36</swagger.version>
 
     <lombok.version>1.18.38</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -72,7 +72,7 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.15.1</micrometer.version>
+    <micrometer.version>1.15.3</micrometer.version>
     <flyway.version>11.11.0</flyway.version>
 
     <testcontainers.version>1.21.3</testcontainers.version>
@@ -277,6 +277,14 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.18.0</version>
+        <configuration>
+          <rulesUri>file:///${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
+        </configuration>
       </plugin>
     </plugins>
     <pluginManagement>
@@ -603,7 +611,7 @@
       <dependency>
         <groupId>org.skyscreamer</groupId>
         <artifactId>jsonassert</artifactId>
-        <version>1.5.1</version>
+        <version>1.5.3</version>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
@@ -719,7 +727,7 @@
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-iso-639</artifactId>
-        <version>3.9</version>
+        <version>3.10</version>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
@@ -971,6 +979,7 @@
               <detectLinks />
               <detectJavaApiLink />
             </configuration>
+
           </plugin>
         </plugins>
       </build>
