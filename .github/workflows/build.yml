@@ -56,7 +56,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
       - name: Build and ${{ matrix.target }} with Maven
-        run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests}  -B -P'deploy,central' ${{ matrix.target }}  -Dgpg.skip=false"
+        run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D"maven.test.failure.ignore=true" -B -P'deploy,central' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
@@ -72,3 +72,5 @@ jobs:
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
+      - uses: mmprogrami/after-maven-action@v1
+
