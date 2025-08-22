@@ -42,7 +42,7 @@ public class MediaInfoService implements Function<Path, MediaInfo> {
     /**
      * Constructor that allows you to specify a custom {@link CommandExecutor} for executing the mediainfo command. This can easily be mocked, and is useful for testing purposes.
      */
-    protected MediaInfoService(CommandExecutor mediainfo) {
+    public MediaInfoService(CommandExecutor mediainfo) {
          this.mediainfo = mediainfo;
     }
 
