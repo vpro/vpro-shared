@@ -100,7 +100,7 @@ public class URIValidatorTest {
     }
 
     @Test
-    public void emptyString() throws URISyntaxException {
+    public void emptyString() {
         A a1 = new A("");
         A a2 = new A(null);
 
@@ -143,7 +143,7 @@ public class URIValidatorTest {
         //data.beeldengeluid.nl/gtaa/1234, false
         """
     )
-    public void gtaa(String uri, boolean valid) throws URISyntaxException, NoSuchFieldException, MalformedURLException {
+    public void gtaa(String uri, boolean valid) throws NoSuchFieldException {
 
         Gtaa a1 = new Gtaa(uri);
         assertThat(validator.validate(a1)).hasSize(valid ? 0 : 1);
