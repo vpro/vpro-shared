@@ -7,6 +7,8 @@
     <version>5.12-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-test</artifactId>
+  <name>vpro-shared-test</name>
+
   <packaging>jar</packaging>
   <description>Contains some functionality that can be used by JUnit tests</description>
 

@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-jcache</artifactId>
+  <name>vpro-shared-jcache</name>
+
 
 
   <properties>

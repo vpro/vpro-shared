@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-guice</artifactId>
+  <name>vpro-shared-guice</name>
+
   <properties>
     <guice.version>7.0.0</guice.version>
     <vpro.shared.module.postfix>guice</vpro.shared.module.postfix>
