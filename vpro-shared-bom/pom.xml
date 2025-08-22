@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-bom</artifactId>
-  <version>5.11.0-SNAPSHOT</version>
+  <version>5.12-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
   <description>Bill of Materials of modules in vpro shared</description>
@@ -40,7 +40,7 @@
     <connection>scm:git:git://git@github.com/vpro/vpro-shared.git</connection>
     <developerConnection>scm:git:git@github.com:vpro/vpro-shared.git</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>REL-5.11-SNAPSHOT</tag>
+    <tag>HEAD</tag>
   </scm>
 
 
