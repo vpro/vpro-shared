@@ -8,6 +8,8 @@
     <version>5.11.1-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-rs</artifactId>
+  <name>vpro-shared-rs</name>
+
 
   <properties>
     <vpro.shared.module.postfix>rs</vpro.shared.module.postfix>

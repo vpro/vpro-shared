@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
+  <name>vpro-shared-elasticsearch-high-level-client</name>
+
 
   <properties>
     <elasticsearch.version>${elasticsearch7.version}</elasticsearch.version>

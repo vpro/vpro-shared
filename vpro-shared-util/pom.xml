@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-util</artifactId>
+  <name>vpro-shared-util</name>
+
 
   <properties>
     <vpro.shared.module.postfix>util</vpro.shared.module.postfix>

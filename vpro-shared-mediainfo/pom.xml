@@ -9,6 +9,7 @@
   </parent>
 
   <artifactId>vpro-shared-mediainfo</artifactId>
+  <name>vpro-shared-mediainfo</name>
 
   <properties>
     <vpro.shared.module.postfix>mediainfo</vpro.shared.module.postfix>

@@ -8,12 +8,11 @@
     <version>5.11.1-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-swagger3</artifactId>
-  <version>5.11.1-SNAPSHOT</version>
+  <name>vpro-shared-swagger3</name>
 
   <properties>
     <swagger.ui.version>5.27.1</swagger.ui.version>
     <vpro.shared.module.postfix>swagger</vpro.shared.module.postfix>
-
   </properties>
 
 

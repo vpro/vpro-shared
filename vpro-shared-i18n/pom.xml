@@ -7,6 +7,8 @@
     <version>5.11.1-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-i18n</artifactId>
+  <name>vpro-shared-i18n</name>
+
 
 
   <properties>

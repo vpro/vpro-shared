@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-logging</artifactId>
+  <name>vpro-shared-logging</name>
+
 
   <properties>
     <vpro.shared.module.postfix>logging</vpro.shared.module.postfix>

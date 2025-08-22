@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-persistence</artifactId>
+  <name>vpro-shared-persistence</name>
+
 
   <properties>
     <vpro.shared.module.postfix>persistence</vpro.shared.module.postfix>

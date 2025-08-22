@@ -8,6 +8,8 @@
     <version>5.11.1-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-configuration</artifactId>
+  <name>vpro-shared-configuration</name>
+
   <properties>
     <vpro.shared.module.postfix>configuration</vpro.shared.module.postfix>
   </properties>

@@ -9,6 +9,8 @@
   </parent>
 
   <artifactId>vpro-shared-xml</artifactId>
+  <name>vpro-shared-xml</name>
+
 
   <properties>
     <vpro.shared.module.postfix>xml</vpro.shared.module.postfix>
