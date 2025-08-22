@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 /**
  * @author Michiel Meeuwissen
@@ -18,21 +19,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BatchedReceiverSpliteratorTest {
 
     @Test
-   public void test() {
-      final List<String> result = new ArrayList<>();
-      for (int i = 0; i < 23; i++) {
-         result.add("a" + i);
-      }
-      BatchedReceiverSpliterator<String> i =
-          BatchedReceiverSpliterator.<String>builder()._build().<String>builder()
-              .batchGetter((offset, max) ->
-                  result.subList(
+    public void test() {
+        final List<String> result = new ArrayList<>();
+        for (int i = 0; i < 23; i++) {
+            result.add("a" + i);
+        }
+        BatchedReceiverSpliterator<String> i =
+            BatchedReceiverSpliterator.<String>builder()
+                .batchGetter((offset, max) ->
+                    result.subList(
                         Math.min(offset.intValue(), result.size()),
-                      Math.min(offset.intValue() + max, result.size())).iterator())
-            .batchSize(6)
-              .build();
+                        Math.min(offset.intValue() + max, result.size())).iterator())
+                .batchSize(6)
+                .build();
 
-        assertThat(i).asList().containsExactly(result.toArray(new String[0]));
+        assertThat(i).asInstanceOf(LIST).containsExactly(result.toArray(new String[0]));
 
    }
 
