@@ -59,7 +59,6 @@ class HttpConnectionUtilsTest {
                 assertThat(response.statusCode()).isEqualTo(451);
 
             })).isEmpty();
-
     }
 
 
@@ -79,18 +78,31 @@ class HttpConnectionUtilsTest {
 
     }
 
+     @Test
+    public void goaway(WireMockRuntimeInfo info) {
+
+        assertThat(HttpConnectionUtils.getOptionalByteSize(info.getHttpBaseUrl() + "/goaway")).isEmpty();
+
+
+        assertThat(HttpConnectionUtils.getOptionalByteSize(
+            info.getHttpBaseUrl() + "/goaway",
+            (response, e) -> {
+                assertThat(response.statusCode()).isEqualTo(500);
+
+            })).isEmpty();
+
+    }
+
 
     @Test
     public void connection(WireMockRuntimeInfo info) {
         assertThat(HttpConnectionUtils.getByteSize("http://localhost:9999")).isNull();
-
     }
 
 
     @Test
     public void protocol(WireMockRuntimeInfo info) {
         assertThat(HttpConnectionUtils.getByteSize("mailto:foo@mail.com")).isNull();
-
     }
 
 
