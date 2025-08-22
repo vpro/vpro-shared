@@ -12,12 +12,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Filter to set headers on all matching requests, the following example sets headers to avoid caching:
- * <p/>
- * <filter> <filter-name>PrivateResponseHeaderFilter</filter-name>
- * <filter-class>nl.vpro.dvt.communities.web.ResponseHeaderFilter</filter-class> <init-param>
- * <param-name>Cache-Control</param-name> <param-value>private,no-cache,no-store</param-value> </init-param>
- * <init-param> <param-name>Pragma</param-name> <param-value>no-cache</param-value> </init-param> </filter>
- *
+ * <p>
+ * <pre>{@code
+ * <filter>
+ *   <filter-name>PrivateResponseHeaderFilter</filter-name>
+ *   <filter-class>nl.vpro.web.filter.ResponseHeaderFilter</filter-class>
+ *   <init-param>
+ *    <param-name>Cache-Control</param-name>
+ *    <param-value>private,no-cache,no-store</param-value>
+ *   </init-param>
+ *   <init-param>
+ *     <param-name>Pragma</param-name>
+ *     <param-value>no-cache</param-value>
+ *    </init-param>
+ *  </filter>
+ * }</pre>
  * @author Peter Maas <peter.maas@finalist.com>
  */
 public class ResponseHeaderFilter implements Filter {
