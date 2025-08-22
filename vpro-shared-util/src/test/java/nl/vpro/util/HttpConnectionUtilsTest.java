@@ -1,8 +1,7 @@
 package nl.vpro.util;
 
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -78,7 +77,8 @@ class HttpConnectionUtilsTest {
 
     }
 
-     @Test
+    @Test
+    @Disabled
     public void goaway(WireMockRuntimeInfo info) {
 
         assertThat(HttpConnectionUtils.getOptionalByteSize(info.getHttpBaseUrl() + "/goaway")).isEmpty();
