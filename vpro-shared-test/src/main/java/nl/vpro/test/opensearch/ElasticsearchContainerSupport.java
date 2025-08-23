@@ -18,7 +18,8 @@ import org.springframework.context.annotation.Configuration;
  *
  * @Inject
  * private DataSoure dataSource;
- *
+ *}
+ * }
  * </pre>
  */
 @Configuration

@@ -21,12 +21,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import javax.cache.Cache;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.net.ssl.SSLContext;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.ws.rs.core.MediaType;
 
 import org.apache.http.*;
@@ -985,13 +985,6 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     @PreDestroy
     public void shutdown() {
         close();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected void finalize() throws Throwable {
-        shutdown();
-        super.finalize();
     }
 
     static String methodToString(Method m) {

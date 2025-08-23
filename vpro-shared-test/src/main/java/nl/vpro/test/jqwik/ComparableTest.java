@@ -26,14 +26,14 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
         assertThat(pair.getFirst().compareTo(pair.getSecond())).isEqualTo(0);
     }
 
-    @SuppressWarnings({"ResultOfMethodCallIgnored", "ConstantConditions"})
+    @SuppressWarnings({"ConstantConditions"})
     @Property
     default void compareToNull(@ForAll(NONNULL_DATAPOINTS) E x) {
         assertThatThrownBy(() -> x.compareTo(null)).isInstanceOf(NullPointerException.class);
     }
 
     /**
-     * The implementor must ensure sgn(x.compareTo(y)) == -sgn(y.compareTo(x)) for all x and y.
+     * The implementor must ensure {@code sgn(x.compareTo(y)) == -sgn(y.compareTo(x))} for all x and y.
      */
     @Property
     default void compareToIsAntiCommutative(@ForAll(NONNULL_DATAPOINTS) E x, @ForAll(NONNULL_DATAPOINTS) E y) {
@@ -41,7 +41,7 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
 
     }
     /**
-     * The implementor must also ensure that the relation is transitive: (x.compareTo(y)>0 && y.compareTo(z)>0) implies x.compareTo(z)>0.
+     * The implementor must also ensure that the relation is transitive: (x.compareTo(y)&gt;0 && y.compareTo(z)&gt;0) implies x.compareTo(z)&gt;0.
      */
     @Property(maxDiscardRatio = 1000)
     default void compareToIsTransitiveBigger(
