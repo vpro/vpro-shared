@@ -43,10 +43,10 @@
 
     window.onload = function() {
       window.ui = SwaggerUIBundle({
-        url: "\${swaggerjson}",
+        url: "${swaggerjson}",
         dom_id: '#swagger-ui',
-        deepLinking: '\${empty deepLinking ? true : deepLinking}',
-        filter: '\${empty escapedFilter ? false : escapedFilter}',
+        deepLinking: '${empty deepLinking ? true : deepLinking}',
+        filter: '${empty escapedFilter ? false : escapedFilter}',
         operationsSorter: '${empty escapedOperationSorter ? "alpha": escapedOperationSorter}',
         presets: [
           SwaggerUIBundle.presets.apis

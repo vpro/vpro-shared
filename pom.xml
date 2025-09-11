@@ -143,6 +143,8 @@
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
     <module>vpro-shared-swagger3</module>
+    <module>vpro-shared-swagger3-taglib</module>
+
 
     <module>vpro-shared-test</module>
     <module>vpro-shared-util</module>

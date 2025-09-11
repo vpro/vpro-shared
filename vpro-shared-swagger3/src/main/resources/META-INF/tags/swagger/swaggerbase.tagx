@@ -1,7 +1,0 @@
-<jsp:root
-    xmlns:jsp="http://java.sun.com/JSP/Page"
-    version="2.0"
-    >
-    <jsp:scriptlet>request.setAttribute("webjars", request.getContextPath() + "/webjars");</jsp:scriptlet>
-    <jsp:scriptlet>request.setAttribute("swaggerbase", request.getAttribute("webjars") + "/swagger-ui/${swagger.ui.version}");</jsp:scriptlet>
-</jsp:root>

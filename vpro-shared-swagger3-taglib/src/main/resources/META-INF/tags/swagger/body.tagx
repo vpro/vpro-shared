@@ -33,10 +33,10 @@
       <jsp:text> </jsp:text>
     </div>
     <swagger:javascript
-      url="\${url}"
-      deepLinking="\${deepLinking}"
-      filter="\${filter}"
-      operationsSorter="\${operationsSorter}"
+      url="${url}"
+      deepLinking="${deepLinking}"
+      filter="${filter}"
+      operationsSorter="${operationsSorter}"
     />
   </body>
 
