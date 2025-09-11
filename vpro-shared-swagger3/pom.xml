@@ -58,7 +58,10 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-rs</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-swagger3-taglib</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-core-jakarta</artifactId>

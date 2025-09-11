@@ -1,0 +1,8 @@
+<jsp:root
+    xmlns:jsp="http://java.sun.com/JSP/Page"
+    version="2.0"
+    >
+  <jsp:directive.tag import="nl.vpro.swagger.taglib.Versions"/>
+  <jsp:scriptlet>request.setAttribute("webjars", request.getContextPath() + "/webjars");</jsp:scriptlet>
+    <jsp:scriptlet>request.setAttribute("swaggerbase", request.getAttribute("webjars") + "/swagger-ui/" + Versions.getSwaggerUIVersion());</jsp:scriptlet>
+</jsp:root>

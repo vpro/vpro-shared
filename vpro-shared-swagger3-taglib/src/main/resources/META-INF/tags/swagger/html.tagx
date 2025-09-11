@@ -36,15 +36,15 @@
 
   <html lang="${empty lang ? 'en': lang}">
     <head>
-      <title>\${title}</title>
+      <title>${title}</title>
       <jsp:invoke fragment="head" />
       <swagger:head-links />
     </head>
     <swagger:body
-      url="\${url}"
-      deepLinking="\${deepLinking}"
-      filter="\${filter}"
-      operationsSorter="\${operationsSorter}"
+      url="${url}"
+      deepLinking="${deepLinking}"
+      filter="${filter}"
+      operationsSorter="${operationsSorter}"
     >
       <swagger:logo />
       <jsp:doBody />
