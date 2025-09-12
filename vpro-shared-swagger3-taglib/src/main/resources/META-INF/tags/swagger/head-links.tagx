@@ -20,6 +20,8 @@
     if (css == null) {
   </jsp:scriptlet>
   <link href='${webjars}/swagger-ui/override.css' rel='stylesheet' type='text/css'/>
+  <jsp:scriptlet>} else if (! css.endsWith(".css")) {</jsp:scriptlet>
+  <link href='${webjars}/swagger-ui/${css}.css' rel='stylesheet' type='text/css'/>
   <jsp:scriptlet>} else {</jsp:scriptlet>
   <link href='${css}' rel='stylesheet' type='text/css'/>
   <jsp:scriptlet>}</jsp:scriptlet>

@@ -1,15 +1,5 @@
 #header a {
   float: right;
+  margin-left: 10px;
 }
 
-/* hide server selector (won't work because of authentication) */
-.scheme-container {
-  display: none;
-}
-
-/**
- Hardly useful for XML
- */
-.swagger-ui .models {
-  display: none;
-}
