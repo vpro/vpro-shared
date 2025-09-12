@@ -30,9 +30,12 @@ jobs:
           - os: ubuntu-latest
             java: 21
             target: 'test'
-          # os: windows-latest
-          #  java: 17
-          #  target: 'test'
+          - os: ubuntu-latest
+            java: 25-ea
+            target: 'test'
+          - os: windows-latest
+            java: 17
+            target: 'test'
           - os: ubuntu-latest
             java: 17
             target: 'deploy'
