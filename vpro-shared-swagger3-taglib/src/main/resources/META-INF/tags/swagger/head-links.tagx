@@ -9,7 +9,7 @@
   <jsp:directive.attribute
       name="css"
       rtexprvalue="true"
-      type="java.lang.String" description="extra css to load" required="false" />
+      type="java.lang.String" description="extra css to load." required="false" />
 
   <swagger:swaggerbase />
 

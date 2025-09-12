@@ -33,12 +33,18 @@
       name="operationsSorter"
       rtexprvalue="true"
       type="java.lang.String"  required="false" />
+   <jsp:directive.attribute
+      name="css"
+      rtexprvalue="true"
+      type="java.lang.String"
+      description="extra css to add"
+      required="false" />
 
   <html lang="${empty lang ? 'en': lang}">
     <head>
       <title>${title}</title>
       <jsp:invoke fragment="head" />
-      <swagger:head-links />
+      <swagger:head-links css="${css}" />
     </head>
     <swagger:body
       url="${url}"
