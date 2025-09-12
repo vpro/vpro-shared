@@ -57,7 +57,7 @@ jobs:
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
-          cache: maven-${{matrix.os}}
+          cache: maven
       - name: Build and ${{ matrix.target }} with Maven
         run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy,central' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
