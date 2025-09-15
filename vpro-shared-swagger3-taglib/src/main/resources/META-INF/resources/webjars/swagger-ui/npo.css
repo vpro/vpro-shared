@@ -1,12 +1,4 @@
-#header a {
-  float: right;
-  margin-left: 10px;
-}
-/* hide server selector (won't work because of authentication) */
-.scheme-container {
-  display: none;
-}
-
+@import "override.css";
 /**
  Hardly useful for XML
  */
