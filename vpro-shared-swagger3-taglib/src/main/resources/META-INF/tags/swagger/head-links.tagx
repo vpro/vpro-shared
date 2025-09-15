@@ -17,7 +17,7 @@
   <link rel="stylesheet" type="text/css" href="${swaggerbase}/index.css" />
 
   <jsp:scriptlet>
-    if (css == null) {
+    if (css == null || css.isEmpty()) {
   </jsp:scriptlet>
   <link href='${webjars}/swagger-ui/override.css' rel='stylesheet' type='text/css'/>
   <jsp:scriptlet>} else if (! css.endsWith(".css")) {</jsp:scriptlet>
