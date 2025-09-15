@@ -24,7 +24,6 @@ jobs:
   build:
     strategy:
       matrix:
-        #  Unable to parse command line options: Unrecognized option: -inputFormat -> I don't get it, lets skip windows builds for now
         #  os: [ ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
