@@ -3,3 +3,8 @@
   margin-left: 10px;
 }
 
+/* hide server selector, just use current server only  */
+.scheme-container {
+  display: none;
+}
+
