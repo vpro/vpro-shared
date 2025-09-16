@@ -18,7 +18,7 @@
     <java.version>17</java.version>
 
     <spring.version>6.2.10</spring.version>
-    <spring-security.version>6.5.3</spring-security.version>
+    <spring-security.version>6.5.4</spring-security.version>
     <jackson2.version>2.19.2</jackson2.version>
 
     <junit.version>5.13.4</junit.version>
