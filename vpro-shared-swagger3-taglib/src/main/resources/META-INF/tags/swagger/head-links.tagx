@@ -14,7 +14,7 @@
   <jsp:directive.attribute
     name="favicon"
     rtexprvalue="true"
-    type="java.lang.String" description="favicon" required="false" />
+    type="java.lang.Boolean" description="whether the swagger favicon should be included." required="false" />
 
   <swagger:swaggerbase />
 
@@ -22,7 +22,7 @@
   <link rel="stylesheet" type="text/css" href="${swaggerbase}/index.css" />
 
   <jsp:scriptlet>
-    if (favicon == null || favicon.isEmpty() || "default".equals(favicon)) {
+    if (favicon == null || favicon) {
   </jsp:scriptlet>
   <link rel="icon" type="image/png" href="${swaggerbase}/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="${swaggerbase}/favicon-16x16.png" sizes="16x16" />
