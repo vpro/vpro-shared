@@ -11,10 +11,24 @@
       rtexprvalue="true"
       type="java.lang.String" description="extra css to load." required="false" />
 
+  <jsp:directive.attribute
+    name="favicon"
+    rtexprvalue="true"
+    type="java.lang.String" description="favicon" required="false" />
+
   <swagger:swaggerbase />
 
   <link rel="stylesheet" type="text/css" href="${swaggerbase}/swagger-ui.css" />
   <link rel="stylesheet" type="text/css" href="${swaggerbase}/index.css" />
+
+  <jsp:scriptlet>
+    if (favicon == null || favicon.isEmpty() || "default".equals(favicon)) {
+  </jsp:scriptlet>
+  <link rel="icon" type="image/png" href="${swaggerbase}/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="${swaggerbase}/favicon-16x16.png" sizes="16x16" />
+  <jsp:scriptlet>
+    }
+  </jsp:scriptlet>
 
   <jsp:scriptlet>
     if (css == null || css.isEmpty()) {
@@ -27,5 +41,6 @@
   <jsp:scriptlet>}</jsp:scriptlet>
   <script src="${swaggerbase}/swagger-ui-bundle.js" charset="UTF-8"><jsp:text> </jsp:text></script>
   <script src="${swaggerbase}/swagger-ui-standalone-preset.js" charset="UTF-8"><jsp:text> </jsp:text></script>
+
 
 </jsp:root>
