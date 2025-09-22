@@ -1392,15 +1392,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 ObjectNode on = (ObjectNode) n;
                 boolean recognized = false;
                 if (on.has(DELETE)) {
-                    deletes.accept(on.withObject(P_DELETE));
+                    deletes.accept(on.with(DELETE));
                     recognized = true;
                 }
                 if (n.has(INDEX)) {
-                    indexes.accept(on.withObject(P_INDEX));
+                    indexes.accept(on.with(INDEX));
                     recognized = true;
                 }
                 if (n.has(UPDATE)) {
-                    updates.accept(on.withObject(P_UPDATE));
+                    updates.accept(on.with(UPDATE));
                     recognized = true;
                 }
                 if (! recognized) {
