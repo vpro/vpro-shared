@@ -33,7 +33,7 @@
   <jsp:scriptlet>
     if (css == null || css.isEmpty()) {
   </jsp:scriptlet>
-  <link href='${webjars}/swagger-ui/override.css' rel='stylesheet' type='text/css'/>
+  <link href='${webjars}/override.css' rel='stylesheet' type='text/css'/>
   <jsp:scriptlet>} else if (! css.endsWith(".css")) {</jsp:scriptlet>
   <link href='${webjars}/swagger-ui/${css}.css' rel='stylesheet' type='text/css'/>
   <jsp:scriptlet>} else {</jsp:scriptlet>
