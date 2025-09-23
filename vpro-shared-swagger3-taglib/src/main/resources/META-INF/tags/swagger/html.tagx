@@ -24,14 +24,17 @@
     <jsp:directive.attribute
       name="deepLinking"
       rtexprvalue="true"
+      description="the option of SwaggerUIBundle"
       type="java.lang.Boolean"  required="false" />
   <jsp:directive.attribute
       name="filter"
       rtexprvalue="true"
+      description="the option of SwaggerUIBundle"
       type="java.lang.String"  required="false" />
   <jsp:directive.attribute
       name="operationsSorter"
       rtexprvalue="true"
+      description="the option of SwaggerUIBundle"
       type="java.lang.String"  required="false" />
   <jsp:directive.attribute
       name="css"
