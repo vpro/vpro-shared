@@ -39,12 +39,17 @@
       type="java.lang.String"
       description="extra css to add"
       required="false" />
+  <jsp:directive.attribute
+    name="favicon"
+    rtexprvalue="true"
+    type="java.lang.Boolean" description="whether the swagger favicon should be included."
+    required="false" />
 
   <html lang="${empty lang ? 'en': lang}">
     <head>
       <title>${title}</title>
       <jsp:invoke fragment="head" />
-      <swagger:head-links css="${css}" />
+      <swagger:head-links css="${css}" favicon="${favicon}"/>
     </head>
     <swagger:body
       url="${url}"
