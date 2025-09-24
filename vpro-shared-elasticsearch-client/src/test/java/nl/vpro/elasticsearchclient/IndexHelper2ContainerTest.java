@@ -14,7 +14,7 @@ import nl.vpro.test.opensearch.ElasticsearchContainer;
  * @since 1.75
  */
 @Slf4j
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IndexHelper2ContainerTest {
     ElasticsearchContainer es = new ElasticsearchContainer(true);
