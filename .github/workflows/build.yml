@@ -27,6 +27,9 @@ jobs:
         #  os: [ ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
+            java: 17
+          - target: 'deploy'
+          - os: ubuntu-latest
             java: 21
             target: 'test'
           - os: ubuntu-latest
@@ -35,10 +38,6 @@ jobs:
           - os: windows-latest
             java: 21
             target: 'test'
-          - os: ubuntu-latest
-            java: 17
-            target: 'deploy'
-
     permissions:
       checks: write
       pull-requests: write
