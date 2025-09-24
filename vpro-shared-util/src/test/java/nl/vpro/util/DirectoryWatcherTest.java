@@ -46,7 +46,7 @@ class DirectoryWatcherTest {
     }
 
     @BeforeAll
-    public void setup() throws IOException {
+    public void setup() throws IOException, InterruptedException {
         watcher = DirectoryWatcher.builder()
             .directory(dir)
             .eventConsumer(
@@ -60,8 +60,10 @@ class DirectoryWatcherTest {
                 path -> path.getFileName().toString().endsWith(".xml")
             ).build();
 
+        Thread.sleep(100);
 
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf5));
+        Set<String> keyset = new HashSet<>(watcher.getWatchedTargetFiles().keySet());
+        assertThat(keyset).containsExactlyInAnyOrder(pathToKey(tarf5));
         assertThat(watcher.getWatchedTargetDirectories()).containsExactlyInAnyOrder(pathToKey(subDir));
     }
 
