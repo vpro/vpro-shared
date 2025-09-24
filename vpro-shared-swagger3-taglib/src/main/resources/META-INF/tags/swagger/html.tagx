@@ -10,8 +10,8 @@
     description="This creates html for swagger." />
   <jsp:directive.attribute name="head" fragment="true"  required="false"/>
   <jsp:directive.attribute
-    name="title"
-    rtexprvalue="true"
+      name="title"
+      rtexprvalue="true"
       type="java.lang.String" description="extra css to load" required="true" />
   <jsp:directive.attribute
       name="url"
@@ -24,27 +24,36 @@
     <jsp:directive.attribute
       name="deepLinking"
       rtexprvalue="true"
+      description="the option of SwaggerUIBundle"
       type="java.lang.Boolean"  required="false" />
-   <jsp:directive.attribute
+  <jsp:directive.attribute
       name="filter"
       rtexprvalue="true"
+      description="the option of SwaggerUIBundle"
       type="java.lang.String"  required="false" />
-   <jsp:directive.attribute
+  <jsp:directive.attribute
       name="operationsSorter"
       rtexprvalue="true"
+      description="the option of SwaggerUIBundle"
       type="java.lang.String"  required="false" />
-   <jsp:directive.attribute
+  <jsp:directive.attribute
       name="css"
       rtexprvalue="true"
       type="java.lang.String"
       description="extra css to add"
+      required="false" />
+  <jsp:directive.attribute
+      name="favicon"
+      rtexprvalue="true"
+      type="java.lang.Boolean"
+      description="whether the swagger favicon should be included."
       required="false" />
 
   <html lang="${empty lang ? 'en': lang}">
     <head>
       <title>${title}</title>
       <jsp:invoke fragment="head" />
-      <swagger:head-links css="${css}" />
+      <swagger:head-links css="${css}" favicon="${favicon}"/>
     </head>
     <swagger:body
       url="${url}"
