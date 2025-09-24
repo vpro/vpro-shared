@@ -288,6 +288,16 @@
           <rulesUri>file:///${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.9.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <autoPublish>true</autoPublish>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -830,21 +840,12 @@
     </dependency>
   </dependencies>
 
+
   <profiles>
     <profile>
       <id>deploy</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.sonatype.central</groupId>
-            <artifactId>central-publishing-maven-plugin</artifactId>
-            <version>0.9.0</version>
-            <extensions>true</extensions>
-            <configuration>
-              <publishingServerId>central</publishingServerId>
-              <autoPublish>true</autoPublish>
-            </configuration>
-          </plugin>
           <plugin>
             <artifactId>maven-source-plugin</artifactId>
             <version>3.3.1</version>
