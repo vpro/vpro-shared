@@ -28,7 +28,7 @@ jobs:
         include:
           - os: ubuntu-latest
             java: 17
-          - target: 'deploy'
+            target: 'deploy'
           - os: ubuntu-latest
             java: 21
             target: 'test'
