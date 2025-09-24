@@ -703,7 +703,7 @@ public class FileCachingInputStreamTest {
             .initialBuffer(HELLO.length)
             .build()) {
 
-            assertThat(new File("/tmp/bestaatniet")).exists();
+            assertThat( new File(System.getProperty("java.io.tmpdir"), "bestaatniet")).exists();
         }
     }
 
