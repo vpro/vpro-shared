@@ -152,6 +152,7 @@ class DirectoryWatcherTest {
             log.warn(ae.getMessage());
             events.clear();
         }
+        Thread.sleep(100);
 
         var keys = new HashSet<>(watcher.getWatchedTargetFiles().keySet());
         assertThat(keys)
