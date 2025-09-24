@@ -11,8 +11,7 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -182,6 +181,7 @@ public class URLResourceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"", "-acc", "-test"})
+    @Disabled("This connect to real server")
     public void broadcastersReal(String env) {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create(String.format("https://poms%s.omroep.nl/broadcasters/", env)));
         broadcasters.setMinAge(Duration.ZERO);
