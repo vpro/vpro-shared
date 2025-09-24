@@ -21,7 +21,7 @@ jobs:
           java-version: 17
           server-id: central
           server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
       - uses: oleksiyrudenko/gha-git-credentials@v2.1.2
@@ -34,5 +34,5 @@ jobs:
         run: mvn  -Pdeploy,central --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
