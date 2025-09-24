@@ -37,7 +37,7 @@ jobs:
             java: 21
             target: 'test'
           - os: ubuntu-latest
-            java: 25-ea
+            java: 25
             target: 'test'
     permissions:
       checks: write
