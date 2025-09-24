@@ -193,11 +193,11 @@ public class URLResourceTest {
             assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
             broadcasters.get();
 
-            if (!"".equals(env)) { // TODO remove this in >= 7.1
-                assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-                assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
-                assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-            }
+
+            assertThat(broadcasters.getChangesCount()).isEqualTo(1);
+            assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
+            assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
+
         } else {
             log.info("Skipping because code = {}", broadcasters.getCode());
         }
