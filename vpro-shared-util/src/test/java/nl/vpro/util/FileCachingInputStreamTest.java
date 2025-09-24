@@ -123,6 +123,7 @@ public class FileCachingInputStreamTest {
     /**
      * Tests what happens if the producing inputstream is fast, but we consume it slowly.
      */
+    @SuppressWarnings("BusyWait")
     @Test
     public void slowConsume() throws IOException, InterruptedException {
 
@@ -693,11 +694,11 @@ public class FileCachingInputStreamTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void createPath() throws IOException {
-        new File("/tmp/bestaatniet").delete();
+        new File(System.getProperty("java.io.tmpdir"), "bestaatniet").delete();
         try (FileCachingInputStream ignored = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(1)
-            .tempDir("/tmp/bestaatniet")
+            .tempPath(Paths.get(System.getProperty("java.io.tmpdir"), "bestaatniet"))
             .input(new ByteArrayInputStream(HELLO))
             .initialBuffer(HELLO.length)
             .build()) {
@@ -718,7 +719,7 @@ public class FileCachingInputStreamTest {
 
 
         // copy a huge stream using file caching input stream
-        File fileCachingDestination = new File("/tmp/fileCaching.bytes");
+        File fileCachingDestination = new File(System.getProperty("java.io.tmpdir"), "fileCaching.bytes");
         fileCachingDestination.deleteOnExit();
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
@@ -760,6 +761,7 @@ public class FileCachingInputStreamTest {
 
     @Test
     public void performanceBenchmarkAndVerifyIOUtils() throws IOException {
+
         log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
