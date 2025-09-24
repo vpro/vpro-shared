@@ -175,7 +175,7 @@ public class HealthController {
                 }
             }
 
-            Status effectiveStatus = prometheusDown ? Status.UNHEALTHY : this.status;
+            Status effectiveStatus = prometheusDownCount.get() > monitoringProperties.getUnhealthyCount() ? Status.UNHEALTHY : this.status;
             Slf4jHelper.debugOrInfo(log, effectiveStatus != Status.READY, "Effective status {} (prometheus down: {})", effectiveStatus, prometheusDown);
 
             return ResponseEntity
