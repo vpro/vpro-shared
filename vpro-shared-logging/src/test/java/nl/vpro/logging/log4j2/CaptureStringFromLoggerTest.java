@@ -26,7 +26,7 @@ class CaptureStringFromLoggerTest {
                     log.info("foo" + j);
                     log.info("bar" + j);
 
-                    assertThat(capture.get()).isEqualTo("foo%d\nbar%d\n", j, j);
+                    assertThat(capture.get()).isEqualTo("foo%d\nbar%d%s", j, j, System.lineSeparator());
                 }
             }));
         }
