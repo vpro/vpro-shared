@@ -463,7 +463,7 @@ public class FileCachingInputStreamTest {
                 .batchSize(3)
                 .input(new ByteArrayInputStream(HELLO))
                 .initialBuffer(HELLO.length)
-                .tempDir("file://tmp/test")
+                .tempDir(Paths.get(System.getProperty("java.io.tmpdir"), "test").toString())
                 .build();
             ByteArrayOutputStream out = new ByteArrayOutputStream()
         ) {
@@ -764,7 +764,8 @@ public class FileCachingInputStreamTest {
         final int bufferSize = 8192;
 
         // compare with a normal implementation using used buffered streams.
-        File normalDestination = new File("/tmp/normal.bytes");
+        File normalDestination = new File(Paths.get(System.getProperty("java.io.tmpdir"), "normal.bytes").toString());
+
         normalDestination.deleteOnExit();
         try (
             InputStream inputStream = new BufferedInputStream(randomStream(SIZE_OF_HUGE_STREAM), bufferSize);

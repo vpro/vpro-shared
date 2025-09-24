@@ -15,6 +15,8 @@ import java.util.zip.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +38,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Timeout(value = 10, unit = TimeUnit.SECONDS)
 @Isolated
 @Execution(SAME_THREAD)
+@DisabledOnOs(OS.WINDOWS) // using some binaries not available on windows
 public class CommandExecutorImplTest {
 
     @BeforeEach
