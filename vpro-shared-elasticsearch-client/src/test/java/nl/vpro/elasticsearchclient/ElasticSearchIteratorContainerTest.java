@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 0.47
  */
 @Slf4j
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ElasticSearchIteratorContainerTest {
+ public class ElasticSearchIteratorContainerTest {
 
 
 
