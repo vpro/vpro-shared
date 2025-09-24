@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
 
@@ -26,7 +26,7 @@ class CaptureStringFromLoggerTest {
                     log.info("foo" + j);
                     log.info("bar" + j);
 
-                    assertEquals("foo%d\nbar%d\n".formatted(j, j), capture.get());
+                    assertThat(capture.get()).isEqualTo("foo%d\nbar%d\n", j, j);
                 }
             }));
         }
