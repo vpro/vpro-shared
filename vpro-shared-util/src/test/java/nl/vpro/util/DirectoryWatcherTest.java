@@ -12,6 +12,8 @@ import java.util.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static nl.vpro.logging.Log4j2Helper.debugOrInfo;
 import static nl.vpro.util.DirectoryWatcher.pathToKey;
@@ -20,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Log4j2
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisabledOnOs(OS.WINDOWS)
 class DirectoryWatcherTest {
 
 
@@ -127,7 +130,8 @@ class DirectoryWatcherTest {
 
         wait(symf3);
 
-        assertThat(watcher.getWatchedTargetFiles().keySet()).containsExactlyInAnyOrder(pathToKey(tarf3_2), pathToKey(tarf5));
+        assertThat(watcher.getWatchedTargetFiles().keySet())
+            .containsExactlyInAnyOrder(pathToKey(tarf3_2), pathToKey(tarf5));
     }
 
 
