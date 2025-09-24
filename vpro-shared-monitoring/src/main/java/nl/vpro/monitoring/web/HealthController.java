@@ -11,6 +11,8 @@ import java.lang.management.ThreadInfo;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
@@ -38,6 +40,8 @@ import nl.vpro.util.TimeUtils;
 @RequestMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class HealthController {
+
+    static final ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
 
     @Getter
     @Setter
@@ -114,14 +118,24 @@ public class HealthController {
             if (prometheusDown) {
                 prometheusDownCount.incrementAndGet();
                 try {
-                    Duration secondPrometheusDuration = prometheusController.scrape(NullOutputStream.INSTANCE);
-                    prometheusDown = unhealthy.test(secondPrometheusDuration);
-                    if (prometheusDown) {
-                        log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
-                    } else {
-                        log.debug("Prometheus is up again");
+                    // Run scrape in background thread with timeout
+                    Future<Duration> future = executor.submit(() -> prometheusController.scrape(NullOutputStream.INSTANCE));
+                    try {
+                        Duration secondPrometheusDuration = future.get(unhealth.getSeconds(), java.util.concurrent.TimeUnit.SECONDS); // 5s timeout
+                        prometheusDown = unhealthy.test(secondPrometheusDuration);
+                        if (prometheusDown) {
+                            log.warn("Prometheus call took {} > {}. Considering DOWN", secondPrometheusDuration, unhealth);
+                        } else {
+                            log.debug("Prometheus is up again");
+                        }
+                    } catch (java.util.concurrent.TimeoutException te) {
+                        prometheusDown = true;
+                        log.warn("Prometheus scrape timed out after " + unhealth);
+                    } catch (Exception e) {
+                        prometheusDown = true;
+                        log.warn("Prometheus scrape failed: {}", e.getMessage());
                     }
-                } catch (IOException ioa) {
+                } catch (Exception ioa) {
                     log.warn(ioa.getMessage());
                 }
                 if (prometheusDown) {
