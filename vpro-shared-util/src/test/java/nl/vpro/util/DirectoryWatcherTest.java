@@ -153,7 +153,7 @@ class DirectoryWatcherTest {
             events.clear();
         }
 
-        var keys = watcher.getWatchedTargetFiles().keySet();
+        var keys = new HashSet<>(watcher.getWatchedTargetFiles().keySet());
         assertThat(keys)
             .containsExactlyInAnyOrder(pathToKey(tarf3), pathToKey( tarf5));
 
