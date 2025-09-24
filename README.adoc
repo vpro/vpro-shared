@@ -20,7 +20,7 @@ places in VPRO artifacts.
 * link:archived/vpro-shared-elasticsearch7[vpro-shared-elasticsearch7]: Related to elasticsearch7 (archived)
 * link:vpro-shared-elasticsearch-client[vpro-shared-elasticsearch-client]: Related to elasticsearch low level client
 * link:vpro-shared-elasticsearch-high-level-client[vpro-shared-elasticsearch-high-level-client]: Related to elasticsearch high level client
-* link:vpro-shared-swagger3[vpro-shared-swagger3]: Some utilities related to swagger frontend and openapi. Depends on webjars to provide the actuall swagger frontend too
+* link:vpro-shared-swagger3[vpro-shared-swagger3], link:vpro-shared-swagger3-taglib[vpro-shared-swagger3-tglib]: Some utilities related to swagger frontend and openapi. Depends on webjars to provide the actuall swagger frontend too
 
 * link:vpro-shared-monitoring[vpro-shared-monitoring]: Kind of like spring-actuator, for non-springboot applications. Providing the monitoring endpoints which can be used by openshift for example.
 * link:archived/vpro-shared-couchdb-util[vpro-shared-couchdb-util]: Lightweight and streaming couchdb clients
