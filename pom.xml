@@ -9,7 +9,7 @@
 
   <name>vpro-shared-parent</name>
   <description>These are various shared utility modules which are used on several places in VPRO artifacts.</description>
-  <url>https://github.com/vpro/vpro-shared</url>
+  <url>https://github.com/vpro/vpro-shared/tree/main/</url>
 
 
   <properties>
