@@ -3,7 +3,7 @@
 
 //image:https://travis-ci.com/vpro/vpro-shared.svg[BuildStatus,link=https://travis-ci.com/vpro/vpro-shared]
 image:https://github.com/vpro/vpro-shared/workflows/build/badge.svg?[Build Status,link=https://github.com/vpro/vpro-shared/actions?query=workflow%3Abuild]
-image:https://img.shields.io/maven-central/v/nl.vpro.shared/vpro-shared-parent.svg[MavenCentral,link=https://search.maven.org/search?q=g:%22nl.vpro.shared%22]
+image:https://img.shields.io/maven-central/v/nl.vpro.shared/vpro-shared-parent.svg[MavenCentral,link=https://central.sonatype.com/search?q=g%3Anl.vpro.shared]
 image:http://www.javadoc.io/badge/nl.vpro.shared/vpro-shared-parent.svg?color=blue[javadoc,link=http://www.javadoc.io/doc/nl.vpro.shared]
 image:https://codecov.io/gh/vpro/vpro-shared/branch/main/graph/badge.svg[codecov,link=https://codecov.io/gh/vpro/vpro-shared]
 
