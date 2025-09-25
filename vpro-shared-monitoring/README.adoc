@@ -14,7 +14,7 @@ This basically adds endpoints:
 
 to a spring application.
 
-Normally just taking the dependency should suffice. It can be configured with spring properties (`monitoring.*`, see link:src/main/java/nl/vpro/monitoring/config/MonitoringConfig.java[`MonitoringProperties`]), which the most important one may be
+Normally just taking the dependency should suffice. It can be configured with spring properties (`monitoring.*`, see link:src/main/java/nl/vpro/monitoring/config/MonitoringProperties.java[`MonitoringProperties`]).
 
 All have defaults, or can be set via system properties (such as for example the username/password for the monitoring endpoint)
 
