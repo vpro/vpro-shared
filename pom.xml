@@ -17,13 +17,13 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.10</spring.version>
-    <spring-security.version>6.5.4</spring-security.version>
-    <jackson2.version>2.19.2</jackson2.version>
+    <spring.version>6.2.11</spring.version>
+    <spring-security.version>6.5.5</spring-security.version>
+    <jackson2.version>2.20.0</jackson2.version>
 
     <junit.version>5.13.4</junit.version>
-    <mockito.version>5.19.0</mockito.version>
-    <assertj.version>3.27.4</assertj.version>
+    <mockito.version>5.20.0</mockito.version>
+    <assertj.version>3.27.6</assertj.version>
     <resteasy.version>6.2.12.Final</resteasy.version>
 
     <!--
@@ -34,15 +34,15 @@
 
     <bytebuddy.version>1.17.7</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <log4j2.version>2.25.1</log4j2.version>
-    <guava.version>33.4.8-jre</guava.version>
+    <log4j2.version>2.25.2</log4j2.version>
+    <guava.version>33.5.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.10.3</xmlunit.version>
+    <xmlunit.version>2.10.4</xmlunit.version>
     <hamcrest.version>2.2</hamcrest.version>
     <math.version>0.18.1</math.version>
-    <meeuw.util.version>1.14</meeuw.util.version>
-    <checker.version>3.49.5</checker.version>
+    <meeuw.util.version>1.15</meeuw.util.version>
+    <checker.version>3.51.0</checker.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
@@ -55,14 +55,14 @@
     <validation.api.version>3.1.1</validation.api.version>
     <persistence.api.version>3.1.0</persistence.api.version>
     <annotation.api.version>2.1.1</annotation.api.version>
-    <xml-bind.api.version>4.0.2</xml-bind.api.version>
+    <xml-bind.api.version>4.0.4</xml-bind.api.version>
 
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
     <camel.version>4.14.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.36</swagger.version>
+    <swagger.version>2.2.37</swagger.version>
 
-    <lombok.version>1.18.38</lombok.version>
+    <lombok.version>1.18.42</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
 
 
@@ -72,8 +72,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.15.3</micrometer.version>
-    <flyway.version>11.11.2</flyway.version>
+    <micrometer.version>1.15.4</micrometer.version>
+    <flyway.version>11.13.0</flyway.version>
 
     <testcontainers.version>1.21.3</testcontainers.version>
 
@@ -470,7 +470,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.18.0</version>
+        <version>3.19.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -639,7 +639,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.21.1</version>
+        <version>1.21.2</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
@@ -728,12 +728,12 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.7</version>
+        <version>42.7.8</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-regions-bom</artifactId>
-        <version>2.5.1</version>
+        <version>2.5.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -763,7 +763,7 @@
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.6</version>
       </dependency>
       <dependency>
         <groupId>info.picocli</groupId>
@@ -790,7 +790,7 @@
         <groupId>org.ehcache</groupId>
         <artifactId>ehcache</artifactId>
         <classifier>jakarta</classifier>
-        <version>3.11.0</version>
+        <version>3.11.1</version>
       </dependency>
       <dependency>
         <groupId>org.flywaydb</groupId>
