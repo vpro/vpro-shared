@@ -152,7 +152,7 @@ public class MeterRegistryConfiguration {
                     Method getCacheNames = Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCacheNames");
                     Method getCache = Class.forName("javax.cache.CacheManager").getDeclaredMethod("getCache", String.class);
 
-                    ((List) getCacheNames.invoke(manager)).forEach(cacheName -> {
+                    ((Iterable<Object>) getCacheNames.invoke(manager)).forEach(cacheName -> {
                         try {
                             Object cache = getCache.invoke(manager, cacheName);
                             log.info("Metering {}", cache);
