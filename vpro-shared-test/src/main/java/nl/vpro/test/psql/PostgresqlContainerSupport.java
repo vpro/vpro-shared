@@ -14,24 +14,22 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * Will set up a postgresql container bean for using spring, which can be injected in (spring based) tests like so:
  * <pre>
- * {@code
- * @ExtendWith(SpringExtension.class)
- * @ContextConfiguration(classes = {
+ * &#64;ExtendWith(SpringExtension.class)
+ * &#64;ContextConfiguration(classes = {
  *     PostgresqlContainerSupport.class,
  * })
  * public class MyTest {
- * ...
- *
- * @Inject
- * private DataSoure dataSource;
- *
+ *     ...
+ *     &#64;Inject
+ *     private DataSource dataSource;
+ * }
  * </pre>
  */
 @Configuration
 @Slf4j
 public class PostgresqlContainerSupport {
 
-    public static final String POSTGRESQL_IMAGE = "postgres:16-alpine";
+    public static final String POSTGRESQL_IMAGE = "postgres:18-alpine";
 
     public static PostgreSQLContainer<?> newContainer() {
         return new PostgreSQLContainer<>(POSTGRESQL_IMAGE);

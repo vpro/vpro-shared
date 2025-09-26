@@ -41,7 +41,7 @@ public interface ComparableTest<E extends Comparable<E>> extends BasicObjectTest
 
     }
     /**
-     * The implementor must also ensure that the relation is transitive: (x.compareTo(y)&gt;0 && y.compareTo(z)&gt;0) implies x.compareTo(z)&gt;0.
+     * The implementor must also ensure that the relation is transitive: (x.compareTo(y)&gt;0 &amp;&amp; y.compareTo(z)&gt;0) implies x.compareTo(z)&gt;0.
      */
     @Property(maxDiscardRatio = 1000)
     default void compareToIsTransitiveBigger(
