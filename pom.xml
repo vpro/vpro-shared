@@ -21,10 +21,10 @@
     <spring-security.version>6.5.5</spring-security.version>
     <jackson2.version>2.20.0</jackson2.version>
 
-    <junit.version>5.13.4</junit.version>
+    <junit.version>6.0.0</junit.version>
     <mockito.version>5.20.0</mockito.version>
     <assertj.version>3.27.6</assertj.version>
-    <resteasy.version>6.2.12.Final</resteasy.version>
+    <resteasy.version>7.0.0.Final</resteasy.version>
 
     <!--
     seems to be in use by both resteasy and hibernate-search
@@ -39,7 +39,7 @@
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.10.4</xmlunit.version>
-    <hamcrest.version>2.2</hamcrest.version>
+    <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.18.1</math.version>
     <meeuw.util.version>1.15</meeuw.util.version>
     <checker.version>3.51.0</checker.version>
@@ -60,7 +60,7 @@
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
     <camel.version>4.14.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.37</swagger.version>
+    <swagger.version>2.2.38</swagger.version>
 
     <lombok.version>1.18.42</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -73,7 +73,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.15.4</micrometer.version>
-    <flyway.version>11.13.0</flyway.version>
+    <flyway.version>11.13.2</flyway.version>
 
     <testcontainers.version>1.21.3</testcontainers.version>
 
@@ -241,7 +241,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.4</version>
         <configuration>
           <argLine>${EXTRA_TEST_OPTS}</argLine>
           <systemPropertyVariables>
@@ -258,7 +258,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.4</version>
         <configuration>
           <skipITs>${skipITs}</skipITs>
           <includes>
@@ -283,7 +283,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.18.0</version>
+        <version>2.19.1</version>
         <configuration>
           <rulesUri>file:///${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
         </configuration>
@@ -303,7 +303,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.11.2</version>
+          <version>3.12.0</version>
           <configuration>
             <!-- javadoc met java 8 is anders een absolute ramp, zeker met de oude zooi in dit project -->
             <doclint>none</doclint>
@@ -313,7 +313,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <version>3.14.1</version>
           <inherited>true</inherited>
           <configuration>
             <source>${java.version}</source>
@@ -342,11 +342,11 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.2.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.8.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
