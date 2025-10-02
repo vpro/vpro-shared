@@ -536,10 +536,10 @@ public class CommandExecutorImpl implements CommandExecutor {
     private record ProcessTimeoutHandle(ProcessTimeoutTask task) {
 
         public void cancel() {
-                task.cancel();
-                PROCESS_MONITOR.purge();
-            }
+            task.cancel();
+            PROCESS_MONITOR.purge();
         }
+    }
 
     @Slf4j
     private static class ProcessTimeoutTask extends TimerTask {
