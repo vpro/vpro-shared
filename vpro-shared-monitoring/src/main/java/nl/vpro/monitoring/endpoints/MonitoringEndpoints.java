@@ -33,7 +33,7 @@ public class MonitoringEndpoints {
             }
         };
         om.registerModule(new JavaTimeModule());
-        om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        om.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
 
         adapter.setMessageConverters(
             Collections.singletonList(new MappingJackson2HttpMessageConverter(om)));
