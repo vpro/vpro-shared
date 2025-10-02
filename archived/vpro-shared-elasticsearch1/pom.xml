@@ -11,7 +11,7 @@
   <artifactId>vpro-shared-elasticsearch</artifactId>
 
   <properties>
-    <elasticsearch.version>1.1.0</elasticsearch.version><!-- tied to server version -->
+    <elasticsearch.version>8.16.2</elasticsearch.version><!-- tied to server version -->
     <lucene.elasticsearch.version>4.7.0</lucene.elasticsearch.version>
   </properties>
 
