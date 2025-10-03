@@ -13,9 +13,8 @@
   <version>5.12-SNAPSHOT</version>
 
   <properties>
-    <swagger.ui.version>5.28.1</swagger.ui.version>
+    <swagger.ui.version>5.29.2</swagger.ui.version>
     <vpro.shared.module.postfix>swagger</vpro.shared.module.postfix>
-
   </properties>
 
 
