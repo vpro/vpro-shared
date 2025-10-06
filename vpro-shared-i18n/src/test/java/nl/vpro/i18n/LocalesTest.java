@@ -8,14 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.meeuw.i18n.countries.Country;
 import org.meeuw.i18n.regions.RegionService;
 
-import com.neovisionaries.i18n.LanguageAlpha3Code;
-
-import static com.neovisionaries.i18n.LanguageAlpha3Code.afh;
-import static com.neovisionaries.i18n.LanguageAlpha3Code.dut;
 import static java.time.DayOfWeek.MONDAY;
 import static java.util.Locale.US;
 import static nl.vpro.i18n.Locales.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.meeuw.i18n.languages.ISO_639.iso639;
 
 /**
  * @author Michiel Meeuwissen
@@ -29,43 +26,53 @@ class LocalesTest {
     }
 
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     public void ofAlpha3() {
-        assertThat(Locales.of(dut, RegionService.getInstance().getByCode("NL", Country.class).orElse(null))).isEqualTo(new Locale("nl", "NL"));
+        assertThat(Locales.of(iso639("dut"), RegionService.getInstance().getByCode("NL", Country.class).orElse(null))).isEqualTo(new Locale("nl", "NL"));
 
-        assertThat(Locales.of(afh, RegionService.getInstance().getByCode("KE", Country.class).orElse(null))).isEqualTo(new Locale("afh", "KE"));
+        assertThat(Locales.of(iso639("afh"), RegionService.getInstance().getByCode("KE", Country.class).orElse(null))).isEqualTo(new Locale("afh", "KE"));
     }
 
     @Test
     public void getCountryName() {
         assertThat(Locales.getCountryName(
-            RegionService.getInstance().getByCode("NL", Country.class).orElseThrow(IllegalStateException::new), Locales.of(LanguageAlpha3Code.nld))).isEqualTo("Nederland");
+            RegionService.getInstance().getByCode("NL", Country.class).orElseThrow(IllegalStateException::new), Locales.of(iso639("nld")))).isEqualTo("Nederland");
     }
 
 
     @Test
-    public void findBestMatch() {
+    public void findBestMatchDutch() {
         assertThat(Locales.findBestMatch(DUTCH, Stream.of(
             new Locale("en"),
             new Locale("nl", "BE"),
             new Locale("nl", "NL"),
             new Locale("nl")
-            ))).contains(new Locale("nl"));
+        ))).contains(new Locale("nl"));
+    }
 
-        assertThat(Locales.findBestMatch(DUTCH_U, Stream.of(
-            new Locale("en"),
-            new Locale("nl", "BE"),
-            new Locale("nl", "NL"),
-            new Locale("nl")
-            ))).contains(new Locale("nl"));
+     @Test
+    public void findBestMatchDutchU() {
+         assertThat(Locales.findBestMatch(DUTCH_U, Stream.of(
+             new Locale("en"),
+             new Locale("nl", "BE"),
+             new Locale("nl", "NL"),
+             new Locale("nl")
+         ))).contains(new Locale("nl"));
+     }
 
-
+    @Test
+    public void findBestMatchFlemish() {
         assertThat(Locales.findBestMatch(FLEMISH, Stream.of(
             new Locale("en"),
             new Locale("nl", "BE"),
             new Locale("nl", "NL"),
             new Locale("nl")
-            ))).contains(new Locale("nl", "BE"));
+        ))).contains(new Locale("nl", "BE"));
+    }
+
+    @Test
+    public void findBestMatchNoMatch() {
 
         assertThat(Locales.findBestMatch(new Locale("fr"), Stream.of(
             new Locale("en"),
@@ -73,15 +80,19 @@ class LocalesTest {
             new Locale("nl", "NL"),
             new Locale("nl"),
             null
-            ))).isNotPresent();
+        ))).isNotPresent();
 
         assertThat(Locales.findBestMatch(null, Stream.of(
             new Locale("en"),
             new Locale("nl", "BE"),
             new Locale("nl", "NL"),
             new Locale("nl")
-            ))).isNotPresent();
+        ))).isNotPresent();
 
+    }
+
+    @Test
+    public void findBestMatchInformalDutch() {
 
           assertThat(Locales.findBestMatch(new Locale("nl", "NL", "informal"), Stream.of(
             new Locale("en"),

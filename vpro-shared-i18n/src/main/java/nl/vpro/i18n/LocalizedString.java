@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,9 +17,11 @@ import jakarta.xml.bind.annotation.*;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.meeuw.i18n.languages.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.neovisionaries.i18n.LanguageCode;
 
 import static nl.vpro.i18n.Locales.score;
 
@@ -170,8 +170,13 @@ public class LocalizedString implements CharSequence, Serializable {
             return null;
         }
         String[] split = v.split("[_-]", 3);
-        LanguageCode languageCode = LanguageCode.getByCode(split[0], false);
-        String language = languageCode == null ? split[0] : languageCode.name().toLowerCase();
+        String language;
+        try {
+            ISO_639_Code languageCode = ISO_639.lenientIso639(split[0]);
+            language = languageCode == null ? split[0] : languageCode.code().toLowerCase();
+        } catch (LanguageNotFoundException languageNotFoundException) {
+            language = split[0];
+        }
 
         return switch (split.length) {
             case 1 -> new Locale(language);

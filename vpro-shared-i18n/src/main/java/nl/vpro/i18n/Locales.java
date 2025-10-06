@@ -4,13 +4,14 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import org.meeuw.i18n.countries.Country;
+import org.meeuw.i18n.countries.codes.CountryCode;
+import org.meeuw.i18n.languages.ISO_639;
+import org.meeuw.i18n.languages.ISO_639_Code;
 import org.meeuw.i18n.regions.Region;
 
-import com.neovisionaries.i18n.*;
-
-import static com.neovisionaries.i18n.CountryCode.*;
-import static com.neovisionaries.i18n.LanguageCode.ar;
-import static com.neovisionaries.i18n.LanguageCode.nl;
+import static org.meeuw.i18n.countries.codes.CountryCode.*;
+import static org.meeuw.i18n.languages.ISO_639_1_Code.ar;
+import static org.meeuw.i18n.languages.ISO_639_1_Code.nl;
 
 /**
  * @author Michiel Meeuwissen
@@ -53,9 +54,9 @@ public final class Locales {
     public static final Locale FLEMISH       = of(nl, BE);
 
     /**
-     * The locale representing and 'undetermined' language {@link LanguageAlpha3Code#und}
+     * The locale representing the 'undetermined' language {@link LanguageAlpha3Code#und}
      */
-    public static final Locale UNDETERMINED  = of(LanguageAlpha3Code.und);
+    public static final Locale UNDETERMINED  = of(ISO_639.iso639("und"), UNDEFINED);
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
 
@@ -95,34 +96,16 @@ public final class Locales {
         }
     }
 
-    public static Locale of(LanguageCode lc, Country  code) {
-        return new Locale(lc.name(), code.getCode());
+    public static Locale of(ISO_639_Code lc, Country  code) {
+        return new Locale(lc.code(), code.getCode());
     }
 
-    public static Locale of(LanguageCode lc, CountryCode  code) {
+    public static Locale of(ISO_639_Code lc, CountryCode code) {
         return of(lc, Country.of(code));
     }
 
-    public static Locale of(LanguageCode lc) {
-        return new Locale(lc.name());
-    }
-
-    public static Locale of(LanguageAlpha3Code lc) {
-        LanguageCode alpha2 = lc.getAlpha2();
-        if (alpha2 != null){
-            return of(alpha2);
-        } else {
-            return new Locale(lc.name());
-        }
-    }
-
-    public static Locale of(LanguageAlpha3Code lc, Country code) {
-        LanguageCode alpha2 = lc.getAlpha2();
-        if (alpha2 != null){
-            return of(alpha2, code);
-        } else {
-            return new Locale(lc.name(), code.getCode());
-        }
+    public static Locale of(ISO_639_Code lc) {
+        return new Locale(lc.code());
     }
 
     public static Locale ofString(String s) {
@@ -160,10 +143,10 @@ public final class Locales {
     }
 
     private static boolean countryScoreEquals(String country1, String country2) {
-        if (UNDEFINED.name().equals(country1)) {
+        if ("UNDEFINED".equals(country1)) {
             country1 = "";
         }
-        if (UNDEFINED.name().equals(country2)) {
+        if ("UNDEFINED".equals(country2)) {
             country2 = "";
         }
         return Objects.equals(country1, country2);
@@ -204,7 +187,7 @@ public final class Locales {
     }
 
     private static boolean isNotEmpty(String s){
-        return s != null && s.length() > 0;
+        return s != null && !s.isEmpty();
     }
 
 }
