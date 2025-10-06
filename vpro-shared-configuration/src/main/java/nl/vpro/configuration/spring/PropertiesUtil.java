@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -218,21 +218,29 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
         //jul.log(Level.CONFIG, "Configuring with");
         System.out.println("Configuring with");
-
+        List<Resource> actual = new ArrayList<>();
         for (Resource location : locations) {
-            try {
+            try (InputStream is = location.getInputStream()) {
                 if (location != null) {
                     File file = location.getFile();
                     System.out.println(location + " -> " + file + " (" + (file.canRead() ? "can be read" : "not readable") + ")");
 
                     //jul.log(Level.CONFIG, location + " -> " + file + " (" + (file.canRead() ? "can be read" : "not readable") + ")");
+                } else {
+                    System.out.println("null?");
                 }
+
+            } catch (MalformedURLException malformedURLException) {
+                log.warn("Malformed URL in {} skipping", location);
+                continue;
             } catch (IOException ioe) {
                 System.out.println(location);
                 //jul.warning(location.toString() + ":" + ioe.getMessage());
+
             }
+            actual.add(location);
         }
-        super.setLocations(locations);
+        super.setLocations(actual.toArray(Resource[]::new));
     }
 
     private int  putSystemPropertiesIfNeeded(Properties p) {
