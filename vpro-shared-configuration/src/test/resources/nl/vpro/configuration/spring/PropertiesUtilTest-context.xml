@@ -11,6 +11,7 @@
       <list>
         <value>classpath:1.properties</value>
         <value>classpath:2.properties</value>
+        <value>file://conf/errornous.path</value>
       </list>
     </property>
     <property name="ignoreUnresolvablePlaceholders" value="false"/>

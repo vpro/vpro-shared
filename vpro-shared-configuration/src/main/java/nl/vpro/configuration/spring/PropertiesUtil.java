@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -231,6 +232,16 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 }
 
             } catch (MalformedURLException malformedURLException) {
+                if (location instanceof FileUrlResource fileUrlResource) {
+                    try {
+                        FileUrlResource f = new FileUrlResource(fileUrlResource.getFile().toURI().toURL());
+                        actual.add(f);
+                        log.info("corrected {} -> {}", fileUrlResource, f);
+                        continue;
+                    } catch (IOException e) {
+                        log.warn(e.getMessage(), e);
+                    }
+                }
                 log.warn("Malformed URL in {} skipping", location);
                 continue;
             } catch (IOException ioe) {
