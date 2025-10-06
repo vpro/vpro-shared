@@ -125,7 +125,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
         } else {
             PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
                 placeholderPrefix, placeholderSuffix, valueSeparator,
-//                '\\',
+                null, //'\\',
                 ignoreUnresolvablePlaceholders);
 
             ExpressionParser parser = new SpelExpressionParser();
@@ -282,7 +282,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
 
         PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper(
             placeholderPrefix, placeholderSuffix, valueSeparator,
-            //'\\',
+            null, //'\\',
             ignoreUnresolvablePlaceholders);
 
 
