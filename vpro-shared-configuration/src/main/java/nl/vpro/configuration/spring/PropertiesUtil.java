@@ -236,6 +236,8 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                     try {
                         FileUrlResource f = new FileUrlResource(fileUrlResource.getFile().toURI().toURL());
                         actual.add(f);
+                        // file:${user.home}/conf/test.properties
+                        // will fail otherwise if user.home = / (e.g. in docker)
                         log.info("corrected {} -> {}", fileUrlResource, f);
                         continue;
                     } catch (IOException e) {
