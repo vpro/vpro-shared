@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.math.windowed.WindowedStatisticalLong;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
-import nl.vpro.monitoring.config.MonitoringProperties;
+import nl.vpro.monitoring.config.*;
 
 import static nl.vpro.logging.Slf4jHelper.debugOrInfo;
 
@@ -36,8 +35,7 @@ public class PrometheusController {
     @Getter
     private final WindowedStatisticalLong duration = createDuration();
 
-    @Nullable
-    private final PrometheusMeterRegistry registry;
+    private final Optional<PrometheusMeterRegistry> registry;
 
     private final MonitoringProperties properties;
 
@@ -50,7 +48,7 @@ public class PrometheusController {
 
     @Inject
     public PrometheusController(Optional<PrometheusMeterRegistry> registry, @Value("endpointMonitoringProperties") MonitoringProperties properties) {
-        this.registry = registry.orElse(null);
+        this.registry = registry;
         this.properties = properties;
     }
 
@@ -97,12 +95,14 @@ public class PrometheusController {
         }
     }
     protected Duration scrape(OutputStream writer) throws IOException {
-        if (registry == null) {
+        if (registry.isEmpty()) {
             log.warn("No prometheus registry available");
+            writer.write("# No prometheus registry available. Please use %s or %s (or some other way) to register a PrometheusRegistry in your spring application context\n".formatted(EnableMonitoring.class, MeterRegistryConfiguration.class).getBytes());
+            writer.flush();
             return Duration.ZERO;
         } else {
             long start = System.nanoTime();
-            registry.scrape(writer);
+            registry.get().scrape(writer);
             writer.flush();
             return Duration.ofNanos(System.nanoTime() - start);
         }
