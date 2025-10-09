@@ -23,8 +23,7 @@ public class MonitoringWebSecurityConfiguration {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain monitoringWebSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatchers(config -> config.requestMatchers(
-            antMatcher("/manage/**"),
-            antMatcher("/.well-known/**")
+            "/manage/**", "/.well-known/**"
             )
         );
         http.authorizeHttpRequests(config ->
