@@ -32,7 +32,7 @@
     -->
     <jboss-logging.version>3.6.1.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.17.7</bytebuddy.version>
+    <bytebuddy.version>1.17.8</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
     <log4j2.version>2.25.2</log4j2.version>
     <guava.version>33.5.0-jre</guava.version>
@@ -73,7 +73,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.15.4</micrometer.version>
-    <flyway.version>11.13.3</flyway.version>
+    <flyway.version>11.14.0</flyway.version>
 
     <testcontainers.version>1.21.3</testcontainers.version>
 
@@ -740,7 +740,7 @@
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-iso-639</artifactId>
-        <version>3.10</version>
+        <version>3.11</version>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
