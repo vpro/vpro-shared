@@ -7,12 +7,13 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 @EnableWebSecurity
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MonitoringWebSecurityConfiguration {
-
 
     /**
      * Just permits on the /manage endpoints and /.well-known paths. Metrics call is security by itself.
@@ -20,13 +21,14 @@ public class MonitoringWebSecurityConfiguration {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain monitoringWebSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatchers(config -> config.requestMatchers(
-            "/manage/**", "/.well-known/**"
-            )
-        );
-        http.authorizeHttpRequests(config ->
-            config.anyRequest().permitAll());
-
+        http
+            .securityMatcher( new OrRequestMatcher(
+                PathPatternRequestMatcher.withDefaults().matcher("/manage/**"),
+                PathPatternRequestMatcher.withDefaults().matcher("/.well-known/**")
+            ))
+            .authorizeHttpRequests(config -> config
+                .anyRequest().permitAll()
+            );
         return http.build();
     }
 

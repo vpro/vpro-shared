@@ -1,10 +1,5 @@
 package nl.vpro.monitoring.endpoints;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -13,12 +8,14 @@ import jakarta.inject.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 
-import nl.vpro.monitoring.domain.Health;
-import nl.vpro.monitoring.web.*;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import nl.vpro.monitoring.domain.Health;
+import nl.vpro.monitoring.web.*;
 
 /**
  * There are a lot of spring projects out there that simply capture the entire servlet context. This breaks the idea of adding just a few servlets. Therefore, the 'managements' endpoints are done via this Filter.
@@ -65,16 +62,13 @@ public class ManageFilter extends HttpFilter {
             ResponseEntity<Health> entity = healthController.get().health();
             writeResponseEntity(entity, response, MediaType.APPLICATION_JSON);
             return;
-        }
-        if (metrics != null && metrics.equals(servletPath)) {
+        } else if (metrics != null && metrics.equals(servletPath)) {
             prometheusController.get().metrics(request, response);
             return;
-        }
-        if (prometheus != null && prometheus.equals(servletPath)) {
+        } else if (prometheus != null && prometheus.equals(servletPath)) {
             prometheusController.get().prometheus(request, response);
             return;
-        }
-        if (wellknown && servletPath.startsWith("/.well-known/")) {
+        } else if (wellknown && servletPath.startsWith("/.well-known/")) {
             String fileName = servletPath.substring("/.well-known/".length());
             String f = wellKnownController.get().wellKnownFile(fileName, request, response);
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
@@ -109,7 +103,7 @@ public class ManageFilter extends HttpFilter {
                 objectMapper.writeValue(response.getOutputStream(), entity.getBody());
                 return;
             } else {
-                response.setContentType(headers.getContentType() != null ? headers.getContentType().toString() : "text/plain");
+                response.setContentType(contentType.toString());
                 response.getWriter().write(body.toString());
             }
         }
