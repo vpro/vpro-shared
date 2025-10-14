@@ -58,6 +58,7 @@ public class MeterRegistryConfiguration {
     public static PrometheusMeterRegistry meterRegistry;
 
 
+    // create a 'monitoring' properites in this context too.
     MonitoringProperties monitoringProperties = new MonitoringProperties();
 
 
@@ -68,6 +69,7 @@ public class MeterRegistryConfiguration {
 
     @Getter
     private final List<String> warnings = new ArrayList<>();
+
 
     @Bean("globalMeterRegistry")
     public PrometheusMeterRegistry createMeterRegistry() {

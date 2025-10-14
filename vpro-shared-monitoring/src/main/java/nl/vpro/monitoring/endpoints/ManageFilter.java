@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.*;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 
 import org.springframework.http.*;
@@ -58,13 +56,25 @@ public class ManageFilter extends HttpFilter {
     private boolean wellknown = true;
 
     @Override
-    @PostConstruct
-    public void init() {
+    public void init(FilterConfig filterConfig) throws ServletException {
+        super.init(filterConfig);
+
         health = monitoringProperties.getHealth();
         metrics = monitoringProperties.getMetrics();
         prometheus = monitoringProperties.getPrometheus();
-        wellknown = monitoringProperties.isWellknown();
+        if (monitoringProperties.getWellknown() == null) {
+            wellknown = "".equals(filterConfig.getServletContext().getContextPath());
+            if (wellknown) {
+                log.debug("Since this runs on /, .well-known is default enabled");
+            } else {
+                log.debug("Since this does not run on /, .well-known is default disabled");
+            }
+        } else {
+            wellknown = monitoringProperties.getWellknown();
+        }
     }
+
+
 
 
 

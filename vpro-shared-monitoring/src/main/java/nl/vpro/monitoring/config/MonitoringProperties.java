@@ -116,7 +116,7 @@ public class MonitoringProperties {
     @Value("${monitoring.endpoints.prometheus:/manage/prometheus}")
     private String prometheus = "/manage/prometheus";
 
-    @Value("${monitoring.endpoints.wellknown:true}")
-    private boolean wellknown = true;
+    @Value("${monitoring.endpoints.wellknown:#{null}}")
+    private Boolean wellknown = null;
 
 }

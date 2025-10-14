@@ -7,11 +7,10 @@ import java.util.List;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 
-import nl.vpro.monitoring.endpoints.ManageFilter;
-import nl.vpro.monitoring.endpoints.Setup;
-
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+
+import nl.vpro.monitoring.endpoints.Setup;
 
 /**
  *
@@ -22,15 +21,16 @@ public class MonitoringBootstrapListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
-        ctx.setConfigLocation(Setup.class.getName());
-        ctx.setServletContext(sce.getServletContext());
-
         // Set parent context if available
         WebApplicationContext rootCtx = (WebApplicationContext)
             sce.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
         if (rootCtx != null) {
             ctx.setParent(rootCtx);
         }
+        ctx.setConfigLocation(Setup.class.getName());
+        ctx.setServletContext(sce.getServletContext());
+
+
         ctx.refresh();
         sce.getServletContext().setAttribute("monitoringContext", ctx);
 
