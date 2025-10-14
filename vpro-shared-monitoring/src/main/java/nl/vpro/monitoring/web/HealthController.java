@@ -36,8 +36,6 @@ import nl.vpro.monitoring.domain.Health;
 import nl.vpro.util.TimeUtils;
 
 @Lazy(false)
-@RestController
-@RequestMapping(value = "/health", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class HealthController {
 

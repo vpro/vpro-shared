@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
  * @deprecated Not defining any beans anymore. Authentication is now arranged without spring security, just from the calls in {@link nl.vpro.monitoring.web.HealthController} and {@link nl.vpro.monitoring.web.PrometheusController} themselves.
  * @see Authentication
  */
-@Configuration
 @Deprecated
 public class MonitoringWebSecurityConfiguration {
 

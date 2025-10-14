@@ -30,8 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = Setup.class)
 class HealthControllerTest {
 
-
-
     @Autowired
     private HealthController healthController;
 
@@ -47,7 +45,7 @@ class HealthControllerTest {
     public void setup() {
         this.healthController.clock = clock;
         this.healthController.setStatus(HealthController.Status.STARTING);
-        this.healthController.prometheusController = new PrometheusController(Optional.of(new PrometheusMeterRegistry(s -> null)), new MonitoringProperties());
+        this.healthController.prometheusController = new PrometheusController(() -> new PrometheusMeterRegistry(s -> null), new MonitoringProperties());
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
         this.healthController.markReady(null);
     }

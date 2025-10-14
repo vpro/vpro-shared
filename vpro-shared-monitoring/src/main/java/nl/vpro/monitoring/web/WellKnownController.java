@@ -51,23 +51,19 @@ import static org.springframework.http.HttpStatusCode.valueOf;
  * @author Michiel Meeuwissen
  */
 @Lazy(false)
-@RestController
-@RequestMapping(produces = MediaType.TEXT_PLAIN_VALUE)
 @Slf4j
 public class WellKnownController {
 
 
-    @Autowired
-    HttpServletRequest request;
-
-    @Inject
-    HttpServletResponse response;
 
 
     final static Path DIR = Path.of("/well-known");
 
-    @GetMapping("/{file}")
-    public String wellKnownFile(@PathVariable(name="file") String fileName) throws IOException {
+
+    public String wellKnownFile(
+        String fileName,
+        HttpServletRequest request,
+        HttpServletResponse response) throws IOException {
 
         Path file = DIR.resolve(Path.of(fileName));
 

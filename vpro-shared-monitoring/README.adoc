@@ -41,7 +41,7 @@ In versions prior to 5.7, there were also the following changes in web.xml:
 </servlet-mapping>
 
 ----
-And a `manage-servlet.xml` like this:
+And a `monitoring-context.xml` like this:
 [source,xml]
 ----
 <?xml version="1.0" ?>

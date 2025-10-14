@@ -5,36 +5,28 @@
 	version="5.0" metadata-complete="true">
   <name>monitoring_endpoints</name>
 
-  <display-name>Spring implemented .well-known (security.txt) and manage endpoints</display-name>
+  <display-name>Filter implemented .well-known (security.txt) and manage endpoints</display-name>
   <distributable />
+  <listener>
+    <listener-class>nl.vpro.monitoring.web.MonitoringBootstrapListener</listener-class>
+  </listener>
 
-  <servlet>
-    <servlet-name>wellknown</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-
+  <filter>
+    <filter-name>manageFilter</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>classpath:/META-INF/well-known-servlet.xml</param-value>
+      <param-name>targetBeanName</param-name>
+      <param-value>manageFilter</param-value>
     </init-param>
-    <load-on-startup>99</load-on-startup>
-  </servlet>
+    <init-param>
+      <param-name>contextAttribute</param-name>
+      <param-value>monitoringContext</param-value>
+    </init-param>
+  </filter>
   <!-- Must be the last one to finish -->
-  <servlet>
-    <servlet-name>manage</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <init-param>
-      <param-name>contextConfigLocation</param-name>
-      <param-value>classpath:/META-INF/manage-servlet.xml</param-value>
-    </init-param>
-    <load-on-startup>100</load-on-startup>
-  </servlet>
+  <filter-mapping>
+    <filter-name>manageFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
-  <servlet-mapping>
-    <servlet-name>wellknown</servlet-name>
-    <url-pattern>/.well-known/*</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>manage</servlet-name>
-    <url-pattern>/manage/*</url-pattern>
-  </servlet-mapping>
 </web-fragment>
