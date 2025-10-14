@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -50,14 +51,13 @@ import static org.springframework.http.HttpStatusCode.valueOf;
  * @since 5.6
  * @author Michiel Meeuwissen
  */
-@Lazy(false)
+@Lazy(true)
 @Slf4j
 public class WellKnownController {
 
 
-
-
-    final static Path DIR = Path.of("/well-known");
+    @Value("${monitoring.endpoints.wellknown_files:/well-known}")
+    Path DIR = Path.of("/well-known");
 
 
     public String wellKnownFile(

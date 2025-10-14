@@ -16,23 +16,29 @@ import jakarta.servlet.http.*;
 import nl.vpro.monitoring.domain.Health;
 import nl.vpro.monitoring.web.*;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-
+/**
+ * There are a lot of spring projects out there that simply capture the entire servlet context. This breaks the idea of adding just a few servlets. Therefore, the 'managements' endpoints are done via this Filter.
+ *
+ * @since 5.12
+ */
 public class ManageFilter extends HttpFilter {
 
-    @Getter
-    @Setter
+    @Value("${monitoring.endpoints.health:/manage/health}")
     private String health = "/manage/health";
 
-    @Getter
-    @Setter
+    @Value("${monitoring.endpoints.metrics:/manage/metrics}")
     private String metrics = "/manage/metrics";
 
-    @Getter
-    @Setter
+    @Value("${monitoring.endpoints.prometheus:/manage/prometheus}")
     private String prometheus = "/manage/prometheus";
+
+    @Value("${monitoring.endpoints.welknown:true}")
+    private boolean wellknown = true;
+
 
     @Inject
     Provider<PrometheusController> prometheusController;
@@ -55,21 +61,22 @@ public class ManageFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String servletPath = request.getServletPath();
-        if (health.equals(servletPath)) {
+        if (health != null && health.equals(servletPath)) {
             ResponseEntity<Health> entity = healthController.get().health();
             writeResponseEntity(entity, response, MediaType.APPLICATION_JSON);
             return;
         }
-        if (metrics.equals(servletPath)) {
+        if (metrics != null && metrics.equals(servletPath)) {
             prometheusController.get().metrics(request, response);
             return;
         }
-        if (prometheus.equals(servletPath)) {
+        if (prometheus != null && prometheus.equals(servletPath)) {
             prometheusController.get().prometheus(request, response);
             return;
         }
-        if (servletPath.startsWith("/.well-known/")) {
-            String f = wellKnownController.get().wellKnownFile(servletPath, request, response);
+        if (wellknown && servletPath.startsWith("/.well-known/")) {
+            String fileName = servletPath.substring("/.well-known/".length());
+            String f = wellKnownController.get().wellKnownFile(fileName, request, response);
             response.setContentType(MediaType.TEXT_PLAIN_VALUE);
             response.getWriter().write(f);
             return;

@@ -1,7 +1,6 @@
 package nl.vpro.monitoring.endpoints;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 
 import nl.vpro.monitoring.web.WellKnownController;
 
@@ -13,6 +12,7 @@ import nl.vpro.monitoring.web.WellKnownController;
 public class WellKnownEndpoints {
 
     @Bean
+    @Lazy
     public WellKnownController wellKnownController() {
         return new WellKnownController();
     }
