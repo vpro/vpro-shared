@@ -23,7 +23,6 @@
       <param-value>monitoringContext</param-value>
     </init-param>
   </filter>
-  <!-- Must be the last one to finish -->
   <filter-mapping>
     <filter-name>manageFilter</filter-name>
     <url-pattern>/*</url-pattern>

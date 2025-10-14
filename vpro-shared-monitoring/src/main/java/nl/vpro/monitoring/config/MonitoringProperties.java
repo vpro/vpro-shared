@@ -107,4 +107,16 @@ public class MonitoringProperties {
     }""")
     String gaugeScript;
 
+    @Value("${monitoring.endpoints.health:/manage/health}")
+    private String health = "/manage/health";
+
+    @Value("${monitoring.endpoints.metrics:/manage/metrics}")
+    private String metrics = "/manage/metrics";
+
+    @Value("${monitoring.endpoints.prometheus:/manage/prometheus}")
+    private String prometheus = "/manage/prometheus";
+
+    @Value("${monitoring.endpoints.wellknown:true}")
+    private boolean wellknown = true;
+
 }

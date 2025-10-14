@@ -1,19 +1,25 @@
 package nl.vpro.monitoring.endpoints;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.*;
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 import nl.vpro.monitoring.web.*;
 
@@ -22,19 +28,11 @@ import nl.vpro.monitoring.web.*;
  *
  * @since 5.12
  */
+@Slf4j
+@Component
+@Getter
+@Setter
 public class ManageFilter extends HttpFilter {
-
-    @Value("${monitoring.endpoints.health:/manage/health}")
-    private String health = "/manage/health";
-
-    @Value("${monitoring.endpoints.metrics:/manage/metrics}")
-    private String metrics = "/manage/metrics";
-
-    @Value("${monitoring.endpoints.prometheus:/manage/prometheus}")
-    private String prometheus = "/manage/prometheus";
-
-    @Value("${monitoring.endpoints.welknown:true}")
-    private boolean wellknown = true;
 
 
     @Inject
@@ -48,12 +46,27 @@ public class ManageFilter extends HttpFilter {
     @Named("monitoringObjectMapper")
     ObjectMapper objectMapper;
 
+    @Inject
+    MonitoringProperties monitoringProperties;
+
+    private String health = "/manage/health";
+
+    private String metrics = "/manage/metrics";
+
+    private String prometheus = "/manage/prometheus";
+
+    private boolean wellknown = true;
+
     @Override
-    public void init(FilterConfig filterConfig)  {
-        SpringBeanAutowiringSupport
-            .processInjectionBasedOnServletContext(this,
-                filterConfig.getServletContext());
+    @PostConstruct
+    public void init() {
+        health = monitoringProperties.getHealth();
+        metrics = monitoringProperties.getMetrics();
+        prometheus = monitoringProperties.getPrometheus();
+        wellknown = monitoringProperties.isWellknown();
     }
+
+
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
