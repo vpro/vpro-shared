@@ -4,12 +4,15 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.io.IOException;
 
+import jakarta.servlet.FilterChain;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -23,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
+import nl.vpro.monitoring.endpoints.ManageFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,20 +35,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = Setup.class)
+@ContextConfiguration(classes = TestSetup.class)
 class PrometheusControllerTest {
 
     @Autowired
     private PrometheusMeterRegistry meterRegistry;
 
     @Autowired
-    private WebApplicationContext wac;
+    ManageFilter manageFilter;
 
-    private MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+
         meterRegistry.counter("test").increment();
     }
 
@@ -59,7 +62,7 @@ class PrometheusControllerTest {
         healthController.request = new MockHttpServletRequest();
         healthController.response = new MockHttpServletResponse();
         ResponseEntity<Health> response = healthController.health();
-        assertThat(response.getStatusCodeValue()).isEqualTo(503);
+        assertThat(response.getStatusCode().value()).isEqualTo(503);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().status()).isEqualTo(503);
         assertThat(response.getBody().message()).isEqualTo("Application starting");
@@ -69,16 +72,24 @@ class PrometheusControllerTest {
     @ValueSource(strings = {"/prometheus", "/metrics"})
     void statusReady(String endpoint) throws Exception {
 
-        mockMvc.perform(
-            get(endpoint)
-                .header("Authorization", "Basic bWFuYWdlcjphZG1pbjJr")
-                .accept("text/plain")
-        ).andExpect(status().is(200))
-            .andExpect(content().contentType("text/plain; version=0.0.4; charset=utf-8"))
-            .andExpect(content().string(Matchers.containsString(
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Basic bWFuYWdlcjphZG1pbjJr");
+        request.setContentType("text/plain");
+        request.setServletPath("/manage" + endpoint);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = Mockito.mock(FilterChain.class);
+
+
+        manageFilter.doFilter(request, response, chain);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getContentType()).isEqualTo("text/plain; version=0.0.4; charset=utf-8");
+
+        assertThat(response.getContentAsString()).contains(
                 """
                     # HELP test_total \s
                     # TYPE test_total counter
-                    test_total\s""")));
+                    test_total\s""");
     }
 }
