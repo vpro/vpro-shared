@@ -76,5 +76,6 @@ Not that this does require the jar to be included in 'jarsToScan' of tomcat. The
 
 This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the file /well-known/security.txt).
 
-    public PrometheusMeterRegistry getGlobalMeterRegistry() {
-There must be an autowireable `
+For `/manage/metrics` to work, you also need a `MeterRegistry` in the spring context.  This can be done, with `@EnabledMonitoring` on a configuration class, or otherwise registering a `MeterRegistry` bean.
+
+Since 5.12 all endpoints are handled by the `ManageFilter` rather than different servlets. Because as it turns out, some  spring applications just map `/\*` to the DispatcherServlet, and then that hides the servlets from the web fragments. This is circumvented this way, the filter also matches everything, and just chains everything it can't handle. An extra advantage is that the ManageFilter can also be configured to use other paths. E.g. if you prefer `/manage/health` it can also be set to `/health` or `/admin/health` or whatever you like. See `monitoring.endpoints.*` properties.
