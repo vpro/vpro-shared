@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.12.0</version>
+    <version>5.12.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-hibernate-search6</artifactId>
