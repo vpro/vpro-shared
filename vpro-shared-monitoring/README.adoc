@@ -18,13 +18,13 @@ Normally just taking the dependency should suffice. It can be configured with sp
 
 All have defaults, or can be set via system properties (such as for example the username/password for the monitoring endpoint)
 
-Used in spring openshift applications of VPRO and POMS
+Used in several spring openshift applications.
 
 
 == Changes in 5.7
 
 === BEFORE
-In versions prior to 5.7, there were also the following changes in web.xml:
+In versions prior to 5.7, there were also the following required changes in web.xml:
 
 [source,xml]
 .fragments from web.xml
@@ -70,12 +70,12 @@ It can be much simpler now, because newer servlet versions support 'web-fragment
     <name>monitoring_endpoints</name>
   </absolute-ordering>
 ----
-All above stuff is arranged in vpro-shared-monitoring.jar itself.
+And even that is optional. The required changes to the servlet environment are then arranged in vpro-shared-monitoring.jar itself.
 
-Not that this does require the jar to be included in 'jarsToScan' of tomcat. The ghcr.io/vpro/tomcat is ok in version >= 10.26
+Not that this does require the jar to be included in 'jarsToScan' of tomcat. That defaults to all jars, but to speed up start up times it is recommended to limit it, but this one should be included then.   The ghcr.io/vpro/tomcat is ok in version >= 10.26
 
 This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the file /well-known/security.txt).
 
-For `/manage/metrics` to work, you also need a `MeterRegistry` in the spring context.  This can be done, with `@EnabledMonitoring` on a configuration class, or otherwise registering a `MeterRegistry` bean.
+For `/manage/metrics` to work, you also need a `MeterRegistry` in the spring context.  This can be done, with `@EnabledMonitoring` on a configuration class, or otherwise registering a `MeterRegistry` bean. It should be in the root the root context. This endpoint is also protected with basic security. The default name password is admin/admin2k, but this can be set by spring properties or environment variables.
 
-Since 5.12 all endpoints are handled by the `ManageFilter` rather than different servlets. Because as it turns out, some  spring applications just map `/\*` to the DispatcherServlet, and then that hides the servlets from the web fragments. This is circumvented this way, the filter also matches everything, and just chains everything it can't handle. An extra advantage is that the ManageFilter can also be configured to use other paths. E.g. if you prefer `/manage/health` it can also be set to `/health` or `/admin/health` or whatever you like. See `monitoring.endpoints.*` properties.
+Since 5.12 all endpoints are handled by the `ManageFilter` rather than different servlets. Because as it turns out, some  spring applications just map `/\*` to the DispatcherServlet, and then that hides the servlets from the web fragments. This is circumvented this way, the filter also matches everything, and just chains everything it can't handle. An extra advantage is that the ManageFilter can also be configured to use other paths. E.g. if you prefer `/manage/health` can also be set to `/health` or `/admin/health` or whatever you like. See `monitoring.endpoints.*` properties.
