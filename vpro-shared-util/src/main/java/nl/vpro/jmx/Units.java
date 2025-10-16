@@ -12,15 +12,15 @@ import static java.lang.annotation.ElementType.*;
 
 /**
  * This annotation can be used to add a unit to some numeric value in a mx bean (annotation with {@link MXBean}.
- *
+ * <p>
  * E.g.
  *<pre>
  *{@code
  *
- *@literal @MXBean
+ * @MXBean
  * public interface CounterMXBean {
- *    @literal @Description("Current event rate averaged over a period")
- *    @literal @Units("events/minute")
+ *     @Description("Current event rate averaged over a period")
+ *     @Units("events/minute")
  *     double getRate();
  *     ...
  * }
