@@ -259,9 +259,9 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (monitoringProperties.isMeterTomcat() && getManager().isPresent()) {
+        if (isActive("tomcat", monitoringProperties.isMeterTomcat(), "org.apache.catalina.startup.Tomcat")) {
             final Optional<Manager> manager = (Optional<Manager>) getManager();
-            TomcatMetrics metrics = new TomcatMetrics(manager.get(), Tags.empty());
+            TomcatMetrics metrics = new TomcatMetrics(manager.orElse(null), Tags.empty());
             metrics.bindTo(registry);
             closables.add(metrics);
         }
