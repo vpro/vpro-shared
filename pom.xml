@@ -17,8 +17,8 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.11</spring.version>
-    <spring-security.version>6.5.5</spring-security.version>
+    <spring.version>6.2.12</spring.version>
+    <spring-security.version>6.5.6</spring-security.version>
     <jackson2.version>2.20.0</jackson2.version>
 
     <junit.version>6.0.0</junit.version>
@@ -60,7 +60,7 @@
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
     <camel.version>4.14.1</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.38</swagger.version>
+    <swagger.version>2.2.39</swagger.version>
 
     <lombok.version>1.18.42</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -72,8 +72,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.15.4</micrometer.version>
-    <flyway.version>11.14.0</flyway.version>
+    <micrometer.version>1.15.5</micrometer.version>
+    <flyway.version>11.14.1</flyway.version>
 
     <testcontainers.version>1.21.3</testcontainers.version>
 
