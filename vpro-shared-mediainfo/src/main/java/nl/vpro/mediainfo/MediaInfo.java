@@ -14,6 +14,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.meeuw.math.shapes.dim2.Rectangle;
 import org.meeuw.math.uncertainnumbers.field.UncertainReal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import static org.meeuw.math.uncertainnumbers.field.UncertainRealField.element;
 
 /**
@@ -30,6 +33,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return an {@link Optional} containing the first video track, or empty if no video track is found
      */
+    @JsonIgnore
     public Optional<TrackType> video() {
         return mediaInfo.getMedias().stream()
             .flatMap(m -> m.getTracks().stream())
@@ -37,11 +41,13 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
             .findFirst();
     }
 
+
     /**
      * Returns the first audio track, if any.
      *
      * @return an {@link Optional} containing the first audio track, or empty if no audio track is found
      */
+    @JsonIgnore
     public Optional<TrackType> audio() {
         return mediaInfo.getMedias().stream()
             .flatMap(m -> m.getTracks().stream())
@@ -54,6 +60,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @throws IllegalStateException if no General track is found
      */
+    @JsonIgnore
     public TrackType general() {
         return mediaInfo.getMedias().stream()
             .flatMap(m -> m.getTracks().stream())
@@ -67,6 +74,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return the duration of the media file
      */
+    @JsonIgnore
     public Duration duration() {
         return Duration.ofMillis(Math.round(1000L * general().getDuration().doubleValue()));
     }
@@ -76,14 +84,26 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return the overall bit rate of the media file
      */
+    @JsonIgnore
     public double bitRate() {
         return general().getOverallBitRate();
+    }
+
+
+    @JsonIgnore
+    public boolean isVideo() {
+        return video().isPresent();
+    }
+
+    @JsonIgnore
+    public String aspectRatio() {
+        return circumscribedRectangle().map(Rectangle::aspectRatio).orElse(null);
     }
 
     /**
      * @return whether the call to the mediainfo was successful, i.e. the exit code status  was 0.
      */
-
+    @JsonIgnore
     public boolean success() {
         return status == 0;
     }
@@ -91,11 +111,13 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
     /**
      * Whether the media file seems to represent a vertical video (i.e., the height of {@link #circumscribedRectangle()}} is greater than the width).
      */
+    @JsonIgnore
     public boolean vertical() {
         return circumscribedRectangle().map(Rectangle::vertical).orElse(false);
     }
 
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public String name() {
         return mediaInfo.getMedias().stream()
             .map(MediaType::getRef)
@@ -144,6 +166,6 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
     }
 
     public BasicMediaInfo basic() {
-        return new BasicMediaInfoImpl(vertical(), duration());
+        return new BasicMediaInfoImpl(name(), duration(), isVideo(), vertical(), aspectRatio());
     }
 }

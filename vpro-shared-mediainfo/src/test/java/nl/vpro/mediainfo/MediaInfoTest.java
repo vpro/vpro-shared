@@ -54,10 +54,15 @@ class MediaInfoTest {
 
         assertThat(info.toString()).isEqualTo("video 9:16, bitrate: 19558.138671875 kbps, duration: PT50.072S");
 
-        assertThatJson(info.basic()).isSimilarTo("{\n" +
-            "  \"vertical\" : true,\n" +
-            "  \"duration\" : 50072\n" +
-            "}");
+        assertThatJson(info.basic()).isSimilarTo("""
+            {
+              "name" : "portrait.mp4",
+              "duration" : 50072,
+              "isVideo" : true,
+              "vertical" : true,
+              "aspectRatio" : "9:16"
+            }
+            """);
 
 
         assertThatJson(info)
@@ -194,7 +199,8 @@ class MediaInfoTest {
                 } ],
                 "version" : "2.0"
               },
-              "status" : 0
+              "status" : 0,
+              "name" : "portrait.mp4"
             }
             """);
 

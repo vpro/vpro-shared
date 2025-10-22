@@ -8,9 +8,15 @@ import java.time.Duration;
  */
 public interface BasicMediaInfo {
 
-    boolean vertical();
+    String name();
 
     Duration duration();
+
+    boolean isVideo();
+
+    boolean vertical();
+
+    String aspectRatio();
 
 
 }
