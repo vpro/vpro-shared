@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.IOUtils;
@@ -19,8 +20,11 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.test.util.TestClass;
@@ -42,8 +46,21 @@ public class Jackson2TestUtil {
     private static final ObjectReader JSON_READER = MAPPER.readerFor(JsonNode.class).with(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION);
 
 
-    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual) {
+    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonPointer... ignores) {
         try {
+            if (ignores.length > 0) {
+                JsonNode actualJson = MAPPER.readTree(actual.toString());
+                for (JsonPointer ignore : ignores){
+                    JsonNode parent = actualJson.at(ignore.head());
+                    JsonNode at = actualJson.at(ignore);
+                    if (parent instanceof ObjectNode parentNode) {
+                        parentNode.remove(ignore.getMatchingProperty());
+                    } else if (parent instanceof ArrayNode parentArray) {
+                        parentArray.remove(ignore.getMatchingIndex());
+                    }
+                }
+                actual = MAPPER.writeValueAsString(actualJson);
+            }
 
             JSONAssert.assertEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual), JSONCompareMode.STRICT);
 
@@ -71,8 +88,8 @@ public class Jackson2TestUtil {
     }
 
 
-    public static void assertJsonEquals(CharSequence expected, CharSequence actual) {
-        assertJsonEquals("", expected, actual);
+    public static void assertJsonEquals(CharSequence expected, CharSequence actual, JsonPointer... ignores) {
+        assertJsonEquals("", expected, actual, ignores);
     }
 
 
@@ -110,9 +127,15 @@ public class Jackson2TestUtil {
         return roundTripAndSimilar(MAPPER, input, expected);
     }
 
-    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, boolean remarshall)  {
-        return roundTripAndSimilar(mapper, input, expected,
-            mapper.getTypeFactory().constructType(input.getClass()), remarshall);
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, boolean remarshall, JsonPointer... ignores)  {
+        return roundTripAndSimilar(
+            mapper,
+            input,
+            expected,
+            mapper.getTypeFactory().constructType(input.getClass()),
+            remarshall,
+            ignores
+        );
     }
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected)  {
         return roundTripAndSimilar(mapper, input, expected, true);
@@ -179,8 +202,8 @@ public class Jackson2TestUtil {
     }
 
     @SneakyThrows
-    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference, boolean remarshall) {
-        String marshalled = marshallAndSimilar(mapper, input, expected);
+    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference, boolean remarshall, JsonPointer... ignores) {
+        String marshalled = marshallAndSimilar(mapper, input, expected, ignores);
 
         T unmarshalled =  mapper.readValue(marshalled, typeReference);
         if (remarshall) {
@@ -189,18 +212,18 @@ public class Jackson2TestUtil {
             String remarshalled = remarshal.toString();
             log.debug("Comparing {} with expected {}", remarshalled, expected);
 
-            assertJsonEquals("REMARSHALLED", expected, remarshalled);
+            assertJsonEquals("REMARSHALLED", expected, remarshalled, ignores);
         }
         return unmarshalled;
     }
 
-    protected static <T> String marshallAndSimilar(ObjectMapper mapper, T input, String expected) throws IOException {
+    protected static <T> String marshallAndSimilar(ObjectMapper mapper, T input, String expected, JsonPointer... ignores) throws IOException {
         StringWriter originalWriter = new StringWriter();
         mapper.writeValue(originalWriter, input);
         String marshalled = originalWriter.toString();
 
         log.debug("Comparing {} with expected {}", marshalled, expected);
-        assertJsonEquals(expected, marshalled);
+        assertJsonEquals(expected, marshalled, ignores);
         return marshalled;
     }
 
@@ -250,6 +273,8 @@ public class Jackson2TestUtil {
 
         private boolean checkRemarshal = true;
 
+        private List<JsonPointer> ignores = new ArrayList<>();
+
         protected JsonObjectAssert(A actual) {
             super(actual, JsonObjectAssert.class);
             this.mapper = MAPPER;
@@ -272,6 +297,17 @@ public class Jackson2TestUtil {
             this.mapper = mapper;
         }
 
+        public JsonObjectAssert<S, A> ignore(JsonPointer... jsonPointers) {
+            ignores.addAll(Arrays.asList(jsonPointers));
+            return this;
+        }
+
+        public JsonObjectAssert<S, A> ignore(String... jsonPointers) {
+            Arrays.stream(jsonPointers).map(JsonPointer::compile).forEach(jp -> ignores.add(jp));
+            return this;
+        }
+
+
 
         protected static <A> A read(ObjectMapper mapper, Class<A> actual, String string) {
             try {
@@ -285,7 +321,7 @@ public class Jackson2TestUtil {
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
             try {
-                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal);
+                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal, ignores.toArray(i -> new JsonPointer[i]));
             } catch (Exception e) {
                 Fail.fail(e.getMessage(), e);
             }

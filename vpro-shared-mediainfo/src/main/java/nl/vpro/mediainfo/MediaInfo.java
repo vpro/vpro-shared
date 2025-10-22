@@ -23,7 +23,7 @@ import static org.meeuw.math.uncertainnumbers.field.UncertainRealField.element;
  * @param mediaInfo The unmarshalled result of the call to {@code mediainfo}
  * @param status    the exit status of the mediainfo command (0 for success, non-zero for failure)
  */
-public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, int status) {
+public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, int status) implements BasicMediaInfo{
 
     /**
      * Returns the first video track, if any. {@code video().isPresent()} would be a way to check whether the media file is video.
@@ -141,6 +141,9 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
     @Override
     public @NonNull String toString() {
         return (success() ? "" : "FAIL:") + (video().isPresent() ? ("video " + circumscribedRectangle().get().aspectRatio()) : " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+    }
 
+    public BasicMediaInfo basic() {
+        return new BasicMediaInfoImpl(vertical(), duration());
     }
 }
