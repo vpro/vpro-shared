@@ -431,17 +431,27 @@ public class Jackson2TestUtil {
 
         public JsonStringAssert containsKeys(String... keys) {
             actualJson();
+            List<String> notFound = new ArrayList<>();
             for (String key : keys) {
-                assertThat(actualJson.get(key)).withFailMessage("No key " + key + " found").isNotNull();
+                if (actualJson.get(key) == null) {
+                    notFound.add(key);
+                }
             }
+            assertThat(notFound).withFailMessage("Keys " + notFound + " found (in " + actualJson + ")").isEmpty();
             return myself;
         }
 
         public JsonStringAssert doesNotContainKeys(String... keys) {
             actualJson();
+            List<String> found = new ArrayList<>();
+
             for (String key : keys) {
-                assertThat(actualJson.get(key)).withFailMessage("Key " + key + " found").isNull();
+                if (actualJson.get(key) != null) {
+                    found.add(key);
+                }
+
             }
+            assertThat(found).withFailMessage("Unexpected keys" + found + " found (in "+ actualJson + ")").isEmpty();
             return myself;
         }
 
