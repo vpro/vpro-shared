@@ -50,15 +50,7 @@ public class Jackson2TestUtil {
         try {
             if (ignores.length > 0) {
                 JsonNode actualJson = MAPPER.readTree(actual.toString());
-                for (JsonPointer ignore : ignores){
-                    JsonNode parent = actualJson.at(ignore.head());
-                    JsonNode at = actualJson.at(ignore);
-                    if (parent instanceof ObjectNode parentNode) {
-                        parentNode.remove(ignore.getMatchingProperty());
-                    } else if (parent instanceof ArrayNode parentArray) {
-                        parentArray.remove(ignore.getMatchingIndex());
-                    }
-                }
+                remove(actualJson, ignores);
                 actual = MAPPER.writeValueAsString(actualJson);
             }
 
@@ -70,6 +62,33 @@ public class Jackson2TestUtil {
         } catch (Exception e) {
             log.error(e.getMessage());
             assertThatJson(actual).isEqualTo(prettify(expected));
+        }
+    }
+
+    @SneakyThrows
+    public static void assertJsonEquals(String pref, CharSequence expected, JsonNode actualJson, JsonPointer... ignores) {
+        String actual = null;
+        try {
+            remove(actualJson, ignores);
+            actual = MAPPER.writeValueAsString(actualJson);
+
+            JSONAssert.assertEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual), JSONCompareMode.STRICT);
+
+        } catch (AssertionError fail) {
+            log.info(fail.getMessage());
+            assertThat(prettify(actual)).isEqualTo(prettify(expected));
+        }
+    }
+
+    public static void remove(JsonNode actualJson, JsonPointer... ignores) {
+        for (JsonPointer ignore : ignores){
+            JsonNode parent = actualJson.at(ignore.head());
+            JsonNode at = actualJson.at(ignore);
+            if (parent instanceof ObjectNode parentNode) {
+                parentNode.remove(ignore.getMatchingProperty());
+            } else if (parent instanceof ArrayNode parentArray) {
+                parentArray.remove(ignore.getMatchingIndex());
+            }
         }
     }
 
@@ -248,6 +267,11 @@ public class Jackson2TestUtil {
     public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(T o) {
         return new JsonObjectAssert<>(o);
     }
+
+
+    public static JsonStringAssert assertThatJson(byte[] o) {
+        return assertThatJson(new String(o, StandardCharsets.UTF_8));
+    }
     public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(ObjectMapper mapper, T o) {
         return new JsonObjectAssert<>(mapper, o);
     }
@@ -394,13 +418,38 @@ public class Jackson2TestUtil {
 
     public static class JsonStringAssert extends AbstractObjectAssert<JsonStringAssert, CharSequence> {
 
+        private JsonNode actualJson;
+
         protected JsonStringAssert(CharSequence actual) {
             super(actual, JsonStringAssert.class);
         }
 
-        public JsonStringAssert isSimilarTo(String expected) {
-            assertJsonEquals("", expected, actual);
+        public JsonStringAssert isSimilarTo(String expected, JsonPointer... ignores) {
+            assertJsonEquals("", expected, actual, ignores);
             return myself;
+        }
+
+        public JsonStringAssert containsKeys(String... keys) {
+            actualJson();
+            for (String key : keys) {
+                assertThat(actualJson.get(key)).withFailMessage("No key " + key + " found").isNotNull();
+            }
+            return myself;
+        }
+
+        public JsonStringAssert doesNotContainKeys(String... keys) {
+            actualJson();
+            for (String key : keys) {
+                assertThat(actualJson.get(key)).withFailMessage("Key " + key + " found").isNull();
+            }
+            return myself;
+        }
+
+        @SneakyThrows
+        protected void actualJson() {
+            if (actualJson == null) {
+                actualJson = MAPPER.readTree(actual.toString());
+            }
         }
 
         public JsonStringAssert isSimilarToResource(String resource) {
