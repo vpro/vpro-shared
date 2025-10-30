@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+s<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -38,7 +38,7 @@
     <guava.version>33.5.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.10.4</xmlunit.version>
+    <xmlunit.version>2.11.0</xmlunit.version>
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.18.1</math.version>
     <meeuw.util.version>1.15</meeuw.util.version>
@@ -60,7 +60,7 @@
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
     <camel.version>4.14.1</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.39</swagger.version>
+    <swagger.version>2.2.40</swagger.version>
 
     <lombok.version>1.18.42</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
