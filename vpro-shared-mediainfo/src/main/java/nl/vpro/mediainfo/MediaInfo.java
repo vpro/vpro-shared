@@ -1,5 +1,6 @@
 package nl.vpro.mediainfo;
 
+import lombok.extern.slf4j.Slf4j;
 import net.mediaarea.mediainfo.MediaType;
 import net.mediaarea.mediainfo.TrackType;
 
@@ -26,6 +27,7 @@ import static org.meeuw.math.uncertainnumbers.field.UncertainRealField.element;
  * @param mediaInfo The unmarshalled result of the call to {@code mediainfo}
  * @param status    the exit status of the mediainfo command (0 for success, non-zero for failure)
  */
+@Slf4j
 public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, int status) implements BasicMediaInfo{
 
     /**
@@ -66,7 +68,9 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
             .flatMap(m -> m.getTracks().stream())
             .filter(t -> "General".equals(t.getTrackType()))
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException("No General track found in media info for " + path));
+            .orElseThrow(() ->
+                new IllegalStateException("No General track found in media info for " + path)
+            );
     }
 
     /**
@@ -74,9 +78,15 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return the duration of the media file
      */
+    @Override
     @JsonIgnore
     public Duration duration() {
-        return Duration.ofMillis(Math.round(1000L * general().getDuration().doubleValue()));
+        try {
+            return Duration.ofMillis(Math.round(1000L * general().getDuration().doubleValue()));
+        } catch (IllegalStateException ise) {
+            log.warn(ise.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -90,11 +100,13 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
     }
 
 
+    @Override
     @JsonIgnore
     public boolean isVideo() {
         return video().isPresent();
     }
 
+    @Override
     @JsonIgnore
     public String aspectRatio() {
         return circumscribedRectangle().map(Rectangle::aspectRatio).orElse(null);
@@ -111,12 +123,14 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
     /**
      * Whether the media file seems to represent a vertical video (i.e., the height of {@link #circumscribedRectangle()}} is greater than the width).
      */
+    @Override
     @JsonIgnore
     public boolean vertical() {
         return circumscribedRectangle().map(Rectangle::vertical).orElse(false);
     }
 
 
+    @Override
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public String name() {
         return mediaInfo.getMedias().stream()
@@ -162,10 +176,16 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
 
     @Override
     public @NonNull String toString() {
-        return (success() ? "" : "FAIL:") + (video().isPresent() ? ("video " + circumscribedRectangle().get().aspectRatio()) : " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+        return (success() ? "" : "FAIL:") + (video().isPresent() ? ("video " + circumscribedRectangle().map(Rectangle::aspectRatio).orElse("?")) : " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
     }
 
     public BasicMediaInfo basic() {
-        return new BasicMediaInfoImpl(name(), duration(), isVideo(), vertical(), aspectRatio());
+        return new BasicMediaInfoImpl(
+            name(),
+            duration(),
+            isVideo(),
+            vertical(),
+            aspectRatio()
+        );
     }
 }
