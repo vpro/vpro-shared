@@ -21,7 +21,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.meeuw.time.TestClock;
 import org.postgresql.Driver;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -40,7 +40,7 @@ public class IntegrationTest {
 
 
     @Container
-    static PostgreSQLContainer<?> postgres = PostgresqlContainerSupport.newContainer()
+    static PostgreSQLContainer postgres = PostgresqlContainerSupport.newContainer()
         .withDatabaseName("CRM");
 
     static    EntityManager entityManager;
