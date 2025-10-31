@@ -9,7 +9,7 @@ import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Will set up a postgresql container bean for using spring, which can be injected in (spring based) tests like so:
@@ -31,12 +31,12 @@ public class PostgresqlContainerSupport {
 
     public static final String POSTGRESQL_IMAGE = "postgres:18-alpine";
 
-    public static PostgreSQLContainer<?> newContainer() {
-        return new PostgreSQLContainer<>(POSTGRESQL_IMAGE);
+    public static PostgreSQLContainer newContainer() {
+        return new PostgreSQLContainer(POSTGRESQL_IMAGE);
     }
 
     @Bean("psqlcontainer")
-    public PostgreSQLContainer<?> getPostgresqlContainer() {
+    public PostgreSQLContainer getPostgresqlContainer() {
         var postgresDBContainer = newContainer();
             //.withStartupTimeout(Duration.ofSeconds(180L))
             ;
@@ -46,7 +46,7 @@ public class PostgresqlContainerSupport {
 
     @Bean("dataSource")
     @Inject
-    public DataSource getDataSource(PostgreSQLContainer<?> postgresDBContainer) {
+    public DataSource getDataSource(PostgreSQLContainer postgresDBContainer) {
         PGSimpleDataSource source = new PGSimpleDataSource();
         source.setURL(postgresDBContainer.getJdbcUrl());
         source.setPassword(postgresDBContainer.getPassword());
