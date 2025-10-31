@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.lang.reflect.InvocationTargetException;
 import java.net.http.HttpResponse;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -213,7 +214,7 @@ public class Jackson2Mapper extends ObjectMapper {
              new JakartaXmlBindAnnotationIntrospector(mapper.getTypeFactory())
          );
 
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setAnnotationIntrospector(introspector);
 
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
@@ -256,23 +257,23 @@ public class Jackson2Mapper extends ObjectMapper {
 
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
-            register(mapper, filter, (com.fasterxml.jackson.databind.Module) avro.newInstance());
+            register(mapper, filter, (com.fasterxml.jackson.databind.Module) avro.getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
             }
             loggedAboutAvro = true;
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             log.error(e.getMessage(), e);
             loggedAboutAvro = true;
         }
 
         try {
             Class<?> guava = Class.forName("nl.vpro.jackson2.GuavaRangeModule");
-            register(mapper, filter, (com.fasterxml.jackson.databind.Module) guava.newInstance());
+            register(mapper, filter, (com.fasterxml.jackson.databind.Module) guava.getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException ncdfe) {
             log.debug(ncdfe.getMessage());
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             log.error(e.getMessage(), e);
         }
     }
