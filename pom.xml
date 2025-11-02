@@ -21,7 +21,7 @@
     <spring-security.version>6.5.6</spring-security.version>
     <jackson2.version>2.20.1</jackson2.version>
 
-    <junit.version>6.0.0</junit.version>
+    <junit.version>6.0.1</junit.version>
     <mockito.version>5.20.0</mockito.version>
     <assertj.version>3.27.6</assertj.version>
     <resteasy.version>7.0.0.Final</resteasy.version>
@@ -58,7 +58,7 @@
     <xml-bind.api.version>4.0.4</xml-bind.api.version>
 
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
-    <camel.version>4.14.1</camel.version> <!-- limit to LTS (I think even majors) -->
+    <camel.version>4.14.2</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.40</swagger.version>
 
