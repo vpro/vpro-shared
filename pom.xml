@@ -42,7 +42,7 @@
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.18.1</math.version>
     <meeuw.util.version>1.15</meeuw.util.version>
-    <checker.version>3.51.1</checker.version>
+    <checker.version>3.52.0</checker.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
@@ -58,7 +58,7 @@
     <xml-bind.api.version>4.0.4</xml-bind.api.version>
 
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
-    <camel.version>4.14.2</camel.version> <!-- limit to LTS (I think even majors) -->
+    <camel.version>4.16.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.40</swagger.version>
 
