@@ -3,15 +3,14 @@ package nl.vpro.monitoring.binder;
 import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
-
-import jakarta.validation.constraints.NotNull;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
+
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
@@ -83,8 +82,10 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
             if (commandExecutor.getBinary().get() != null) {
                 log.info("Executing {} with {}", commandExecutor.getBinary(), Arrays.asList(args));
                 commandExecutor.lines(args).forEach(l -> {
-                        log.info(l);
-                        ScriptGauge gauge = ScriptGauge.parse(l);
+                    log.info(l);
+                    Optional<ScriptGauge> optionalScriptGauge = ScriptGauge.parse(l);
+                    if (optionalScriptGauge.isPresent()) {
+                        ScriptGauge gauge = optionalScriptGauge.get();
                         AtomicDouble atomic = cache.computeIfAbsent(gauge.key(), (k) -> {
                             Gauge numberOfEventsPerPeriod = Gauge.builder(gauge.name(), cache, c -> c.get(k).doubleValue())
                                 .tags(gauge.tags())
@@ -96,6 +97,7 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBe
                         });
 
                         atomic.set(gauge.value());
+                    }
                     }
                 );
                 log.debug("done");
