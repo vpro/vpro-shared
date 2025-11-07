@@ -22,12 +22,19 @@ public class MDCConstants {
     public static final String USER_COUNT      = "userCount";
 
 
+    /**
+     * Set up MDC for 'on behalf of'. Just sets {@link #ON_BEHALF_OF}
+     */
     public static void onBehalfOf(String user) {
+        // first figure out if somewhen is currently authenticated
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
+            // if yes!
             MDC.put(USER_NAME, String.valueOf(authentication.getPrincipal()));
         }
+        // If Yes, store it as 'currentUser'.
         String currentUser = MDC.get(USER_NAME);
+        // and store, as requested 'onBehalfOf' but post fix it with the current user if there was one
         MDC.put(ON_BEHALF_OF, StringUtils.isEmpty(currentUser) ? user  : (":" + user));
 
     }
