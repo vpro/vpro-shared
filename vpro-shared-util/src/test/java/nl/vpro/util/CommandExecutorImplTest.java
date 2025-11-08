@@ -281,4 +281,15 @@ public class CommandExecutorImplTest {
 
         assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo\"bar"))).isEqualTo("ls /tmp/foo\\\"bar");
     }
+
+      @Test
+      public void testToString() {
+          CommandExecutor find =
+              CommandExecutorImpl.builder()
+                  .executablesPaths("/usr/bin/env")
+                  .commonArg("find")
+                  .optional(true)
+                  .build();
+          assertThat(find.toString()).isEqualTo("/usr/bin/env find");
+    }
 }
