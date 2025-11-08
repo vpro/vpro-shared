@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.meeuw.functional.Suppliers;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.LoggerOutputStream;
@@ -82,7 +83,7 @@ public class CommandExecutorImpl implements CommandExecutor {
 
     public CommandExecutorImpl(String binary, File workdir, Duration processTimeout) {
         this.workdir = getWorkdir(workdir);
-        this.binary = () -> binary;
+        this.binary = Suppliers.always(binary);
         this.commonArgs = null;
         this.logger = getDefaultLogger(this.binary.get());
         this.processTimeout = processTimeout;
@@ -185,7 +186,7 @@ public class CommandExecutorImpl implements CommandExecutor {
                 };
             }
         } else {
-            return () -> f.get().getAbsolutePath();
+            return Suppliers.always(f.get().getAbsolutePath());
         }
     }
 
