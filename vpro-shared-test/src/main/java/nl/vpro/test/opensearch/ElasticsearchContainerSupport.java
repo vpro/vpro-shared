@@ -11,13 +11,13 @@ import org.springframework.context.annotation.Configuration;
  * {@code
  * @ExtendWith(SpringExtension.class)
  * @ContextConfiguration(classes = {
- *     PostgresqlContainerSupport.class,
+ *     ElasticsearchContainerSupport.class,
  * })
  * public class MyTest {
  * ...
  *
  * @Inject
- * private DataSoure dataSource;
+ * private ElasticsearchContainer elasticsearchContainer;
  *}
  * }
  * </pre>
