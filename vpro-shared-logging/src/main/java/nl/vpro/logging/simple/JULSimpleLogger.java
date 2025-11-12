@@ -27,19 +27,13 @@ public class JULSimpleLogger implements SimpleLogger {
     }
 
     public static java.util.logging.Level toLevel(Level level) {
-        switch(level) {
-            case TRACE:
-                return java.util.logging.Level.FINEST;
-            case DEBUG:
-                return java.util.logging.Level.FINE;
-            case INFO:
-                return java.util.logging.Level.INFO;
-            case WARN:
-                return java.util.logging.Level.WARNING;
-            case ERROR:
-            default:
-                return java.util.logging.Level.SEVERE;
-        }
+        return switch (level) {
+            case TRACE -> java.util.logging.Level.FINEST;
+            case DEBUG -> java.util.logging.Level.FINE;
+            case INFO -> java.util.logging.Level.INFO;
+            case WARN -> java.util.logging.Level.WARNING;
+            default -> java.util.logging.Level.SEVERE;
+        };
     }
 
 }
