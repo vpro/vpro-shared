@@ -11,10 +11,10 @@ public  class StringSupplierChainedSimpleLogger extends ChainedSimpleLogger impl
     }
 
     @Override
-    public String get(){
+    public String get() {
         for (SimpleLogger l : list) {
-            if (l instanceof StringSupplierSimpleLogger) {
-                return ((StringSupplierSimpleLogger) l).get();
+            if (l instanceof StringSupplierSimpleLogger stringSupplierSimpleLogger) {
+                return stringSupplierSimpleLogger.get();
             }
         }
         return null;
