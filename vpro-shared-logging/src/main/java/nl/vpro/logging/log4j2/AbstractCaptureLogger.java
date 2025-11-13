@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
@@ -24,59 +25,98 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
 
     static final ThreadLocal<UUID> THREAD_LOCAL = ThreadLocal.withInitial(() -> null);
     static final Map<UUID,  AbstractCaptureLogger> LOGGERS = new ConcurrentHashMap<>();
+    static final Map<UUID,  AbstractCaptureLogger> ALL_LOGGERS = new ConcurrentHashMap<>();
 
-    static AbstractAppender appender ;
 
-    static private synchronized void checkAppender() {
-        if (appender == null) {
-            if (LogManager.getRootLogger() instanceof Logger log4j) {
-                appender = new AbstractAppender(AbstractCaptureLogger.class.getName(), new AbstractFilter() {
-                    @Override
-                    public Result filter(LogEvent event) {
-                        UUID uuid = THREAD_LOCAL.get();
-                        boolean inThread = uuid != null && LOGGERS.containsKey(uuid);
-                        return inThread ? Result.NEUTRAL : Result.DENY;
-                    }
-                }, null, false, null) {
-                    @Override
-                    public void append(LogEvent event) {
-                        UUID uuid = THREAD_LOCAL.get();
-                        AbstractCaptureLogger consumer = LOGGERS.get(uuid);
-                        if (consumer != null) {
-                            consumer.accept(event);
-                        }
-                    }
-                };
-                appender.start();
-                log4j.addAppender(appender);
-                log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
-                log.info("Added appender {} to {} to arrange log capturing", appender.getName(), log4j.getName());
+    static AbstractAppender currentThreadAppender ;
+    static AbstractAppender allAppender ;
+
+    static private synchronized void checkAppender(boolean currentThreadOnly) {
+        if (LogManager.getRootLogger() instanceof Logger log4j) {
+            if (currentThreadOnly) {
+                if (currentThreadAppender == null) {
+                    currentThreadAppender = createAppender(log4j, currentThreadOnly);
+                }
             } else {
-                log.warn("Current logging implementation is not log4j2-core");
+                if (allAppender == null) {
+                    allAppender = createAppender(log4j, false);
+                }
             }
+        } else {
+            log.warn("Current logging implementation is not log4j2-core");
+
         }
     }
+
+    private static AbstractAppender createAppender(Logger log4j, boolean currentThreadOnly) {
+        AbstractAppender  appender = new AbstractAppender(AbstractCaptureLogger.class.getName() + "." + currentThreadOnly, new AbstractFilter() {
+            @Override
+            public Result filter(LogEvent event) {
+                if (currentThreadOnly) {
+                    UUID uuid = THREAD_LOCAL.get();
+                    boolean inThread = uuid != null && LOGGERS.containsKey(uuid);
+                    return inThread ? Result.NEUTRAL : Result.DENY;
+                } else {
+                    return Result.NEUTRAL;
+                }
+            }
+        }, null, false, null) {
+            @Override
+            public void append(LogEvent event) {
+                if (currentThreadOnly) {
+                    UUID uuid = THREAD_LOCAL.get();
+                    AbstractCaptureLogger consumer = LOGGERS.get(uuid);
+                    if (consumer != null) {
+                        consumer.accept(event);
+                    }
+                } else {
+                    for (AbstractCaptureLogger consumer: ALL_LOGGERS.values()) {
+                        consumer.accept(event);
+
+                    }
+                }
+            }
+        };
+        appender.start();
+        log4j.addAppender(appender);
+        log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
+        log.info("Added appender {} to {} to arrange log capturing", appender.getName(), StringUtils.isBlank(log4j.getName()) ? "<root logger>" : log4j.getName());
+        return appender;
+    }
+
 
 
     @Getter
     protected final UUID uuid;
+    private final boolean currentThreadOnly;
 
-    AbstractCaptureLogger(UUID uuid) {
-        checkAppender();
+    AbstractCaptureLogger(UUID uuid, boolean currentThreadOnly) {
+        checkAppender(currentThreadOnly);
+        this.currentThreadOnly = currentThreadOnly;
         this.uuid = uuid;
         associateWithCurrentThread();
-        LOGGERS.put(uuid, this);
+        if (currentThreadOnly) {
+            LOGGERS.put(uuid, this);
+        } else {
+            ALL_LOGGERS.put(uuid, this);
+
+        }
     }
 
-    AbstractCaptureLogger() {
-        this(UUID.randomUUID());
+    AbstractCaptureLogger(boolean currentThreadOnly) {
+        this(UUID.randomUUID(), currentThreadOnly);
     }
 
     /**
      * Associates this logger with the current thread. This happens automatically in the constructor, but you can call it again if the instance happens to be used in a different thread later.
      */
-    public void associateWithCurrentThread() {
+    public AutoCloseable associateWithCurrentThread() {
         THREAD_LOCAL.set(uuid);
+        return this::disassociate;
+    }
+
+    public void disassociate() {
+        THREAD_LOCAL.remove();
     }
 
 
@@ -84,10 +124,13 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
 
     @Override
     public void close() {
+        disassociate();
         if (LogManager.getRootLogger() instanceof Logger log4j) {
-            var uuid = THREAD_LOCAL.get();
-            THREAD_LOCAL.remove();
-            LOGGERS.remove(uuid);
+            if (currentThreadOnly) {
+                LOGGERS.remove(uuid);
+            } else {
+                ALL_LOGGERS.remove(uuid);
+            }
         }
     }
 

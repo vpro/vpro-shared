@@ -10,8 +10,5 @@
     <Root level="INFO">
       <Appender-Ref ref="stdout" />
     </Root>
-
-
-
   </Loggers>
 </Configuration>

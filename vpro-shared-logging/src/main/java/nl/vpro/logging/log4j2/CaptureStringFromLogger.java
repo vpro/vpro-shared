@@ -24,6 +24,12 @@ import org.apache.logging.log4j.core.util.StringBuilderWriter;
  *   }
  * }
  * </pre>
+ * It on default only captures log statements originating from the thread it was instantiated in.
+ * There are two ways to do that differently:
+ * <ol>
+ *  <li> Call {@link #associateWithCurrentThread()} to associate the capture with another thread too.
+ *  <li> Instantiate with 'currentThreadOnly' false.
+ * </ol>
  *
  *
  * @author Michiel Meeuwissen
@@ -40,11 +46,28 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public CaptureStringFromLogger(String pattern, Level level) {
-        this(pattern, level, new StringBuilder());
+        this(pattern, level, new StringBuilder(), true);
     }
 
+    public static CaptureStringFromLogger info(String pattern) {
+        return new CaptureStringFromLogger(pattern, Level.INFO, new StringBuilder(), true);
+    }
+
+    public static CaptureStringFromLogger info() {
+        return info("%msg%n");
+    }
+
+    public static CaptureStringFromLogger infoAllThreads(String pattern) {
+        return new CaptureStringFromLogger(pattern, Level.INFO, new StringBuilder(), false);
+    }
+    public static CaptureStringFromLogger infoAllThreads() {
+        return infoAllThreads("%msg%n");
+    }
+
+
     @lombok.Builder
-    private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder) {
+    private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder, Boolean currentThreadOnly) {
+        super(currentThreadOnly == null || currentThreadOnly);
         this.writer = new StringBuilderWriter(builder == null ? new StringBuilder() : builder);
         this.appender = WriterAppender.newBuilder()
             .setTarget(writer)
@@ -53,7 +76,8 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
             .setName(uuid.toString())
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
-                .build())
+                .build()
+            )
             .build();
     }
 

@@ -33,7 +33,7 @@ public class CaptureToSimpleLogger extends AbstractCaptureLogger {
 
     private final SimpleLogger simpleLogger;
     private CaptureToSimpleLogger(SimpleLogger simpleLogger) {
-        super();
+        super(true);
         this.simpleLogger = simpleLogger;
     }
 
