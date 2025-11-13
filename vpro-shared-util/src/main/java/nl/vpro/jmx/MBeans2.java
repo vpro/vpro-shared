@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.ThrowAnyRunnable;
 
 import nl.vpro.logging.log4j2.CaptureToSimpleLogger;
 import nl.vpro.logging.simple.*;
@@ -47,7 +48,7 @@ public class MBeans2 {
     public static String returnMultilineString(
         String key,
         Duration timeout,
-        @NonNull Runnable job,
+        @NonNull ThrowAnyRunnable job,
         boolean currentThreadOnly) {
 
         StringSupplierSimpleLogger logger = StringBuilderSimpleLogger.builder()
@@ -70,11 +71,11 @@ public class MBeans2 {
     /**
      * Defaults to {@code currentThreadOnly = false}
      * @param job The runnable to run
-     * @see #returnMultilineString(String, Duration, Runnable, boolean)
+     * @see #returnMultilineString(String, Duration, ThrowAnyRunnable, boolean)
      * @since 5.13
      */
     public static String returnMultilineString(
-        @NonNull Runnable job) {
+        @NonNull ThrowAnyRunnable job) {
         return returnMultilineString(null, MBeans.DEFAULT_DURATION, job, false);
     }
 

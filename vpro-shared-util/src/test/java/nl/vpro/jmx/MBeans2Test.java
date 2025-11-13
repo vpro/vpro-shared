@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Isolated
 class MBeans2Test {
 
+
     @Test
     public void multiLine() {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.info()) {
@@ -45,7 +46,32 @@ class MBeans2Test {
             assertThat(result).isEqualTo("""
                 foo bar!
                 pietje puk""");
-            assertThat(capture.get()).isEqualTo("""
+            assertThat(capture.get()).endsWith("""
+                foo bar!
+                pietje puk
+                """);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+
+    public void multiLineCaptureTimeout(boolean currentThreadOnly) throws InterruptedException {
+        try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
+
+            String result = MBeans2.returnMultilineString("test",
+                Duration.ofMillis(1),
+                () -> {
+                    log.info("foo bar!");
+                    Thread.sleep(10);
+                    log.info("pietje puk");
+                }, currentThreadOnly);
+            assertThat(result).isEqualTo("""
+                            foo bar!
+                            ...
+                            still busy. Please check logs""");
+            Thread.sleep(20); // wait for logging to be captured
+            assertThat(capture.get()).endsWith("""
                 foo bar!
                 pietje puk
                 """);
