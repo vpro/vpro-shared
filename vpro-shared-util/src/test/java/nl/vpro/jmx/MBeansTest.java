@@ -102,12 +102,10 @@ public class MBeansTest {
         });
         assertThat(MBeans.cancel("KEY").get()).containsIgnoringCase("cancel");
         assertThat(MBeans.locks).isEmpty();
-
     }
 
 
 
-    @SuppressWarnings("InfiniteLoopStatement")
     @Test
     public void abandon() throws InterruptedException, ExecutionException {
         AtomicBoolean running = new AtomicBoolean(true);
