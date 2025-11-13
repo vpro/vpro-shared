@@ -36,7 +36,8 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
             if (logger.isEnabled(level)) {
                 logger.accept(level, message);
             }
-        } }
+        }
+    }
 
     @Override
     public boolean isEnabled(Level level){
