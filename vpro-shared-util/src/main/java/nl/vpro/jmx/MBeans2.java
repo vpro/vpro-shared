@@ -27,7 +27,7 @@ public class MBeans2 {
      * @param log The (logj2) logger to provide to the code.
      * @param job The code the run. As a consumer of a {@link SimpleLogger} to which it can log.
      * @return (The first part) of the logging of the job.
-     * @see MBeans#returnMultilineString(org.slf4j.Logger, org.meeuw.functional.ThrowAnyConsumer)
+     * @see MBeans#returnMultilineString(org.slf4j.Logger, java.util.function.Consumer)
      */
      public static String returnMultilineString(
         @NonNull Logger log,

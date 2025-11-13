@@ -63,7 +63,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
         return new CaptureStringFromLogger(pattern, Level.INFO, new StringBuilder(), false);
     }
     public static CaptureStringFromLogger infoAllThreads() {
-        return infoAllThreads("%msg%n");
+        return infoAllThreads("%msg\n");
     }
 
 
