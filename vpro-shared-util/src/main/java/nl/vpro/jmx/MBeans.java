@@ -16,6 +16,7 @@ import javax.management.*;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.ThrowAnyConsumer;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -283,7 +284,7 @@ public class MBeans {
     }
 
     /**
-     * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}
+     * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, ThrowAnyConsumer)}
      */
     public static class UpdatableString implements StringSupplierSimpleLogger {
         private final Logger logger;

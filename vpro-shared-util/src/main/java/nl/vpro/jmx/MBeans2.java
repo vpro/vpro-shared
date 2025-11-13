@@ -3,11 +3,11 @@ package nl.vpro.jmx;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.Duration;
-import java.util.function.Consumer;
 
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.functional.ThrowAnyConsumer;
 import org.meeuw.functional.ThrowAnyRunnable;
 
 import nl.vpro.logging.log4j2.CaptureToSimpleLogger;
@@ -27,11 +27,11 @@ public class MBeans2 {
      * @param log The (logj2) logger to provide to the code.
      * @param job The code the run. As a consumer of a {@link SimpleLogger} to which it can log.
      * @return (The first part) of the logging of the job.
-     * @see MBeans#returnMultilineString(org.slf4j.Logger, Consumer)
+     * @see MBeans#returnMultilineString(org.slf4j.Logger, org.meeuw.functional.ThrowAnyConsumer)
      */
      public static String returnMultilineString(
         @NonNull Logger log,
-        @NonNull Consumer<StringSupplierSimpleLogger> job) {
+        @NonNull ThrowAnyConsumer<StringSupplierSimpleLogger> job) {
         return MBeans.returnString(
             multiLine(log), job
         );

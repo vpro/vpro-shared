@@ -96,7 +96,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
         checkAppender(currentThreadOnly);
         this.currentThreadOnly = currentThreadOnly;
         this.uuid = uuid;
-        associateWithCurrentThread();
+        THREAD_LOCAL.set(uuid);
         if (currentThreadOnly) {
             LOGGERS.put(uuid, this);
         } else {
@@ -124,6 +124,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
 
     protected abstract void accept(LogEvent event);
 
+    @SuppressWarnings("resource")
     @Override
     public void close() {
         disassociate();

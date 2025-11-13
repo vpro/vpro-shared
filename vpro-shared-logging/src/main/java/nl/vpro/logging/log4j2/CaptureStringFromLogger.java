@@ -5,8 +5,10 @@ import lombok.extern.log4j.Log4j2;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.WriterAppender;
+import org.apache.logging.log4j.core.filter.LevelRangeFilter;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.StringBuilderWriter;
 
@@ -74,6 +76,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
             .setIgnoreExceptions(false)
             .setFollow(true)
             .setName(uuid.toString())
+            .setFilter(LevelRangeFilter.createFilter(level, Level.ALL, Filter.Result.ACCEPT, Filter.Result.DENY))
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
                 .build()

@@ -41,6 +41,7 @@ class MBeans2Test {
                 Duration.ofSeconds(1),
                 () -> {
                     log.info("foo bar!");
+                    log.debug("debug line");
                     log.info("pietje puk");
                 }, currentThreadOnly);
             assertThat(result).isEqualTo("""
@@ -55,7 +56,6 @@ class MBeans2Test {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-
     public void multiLineCaptureTimeout(boolean currentThreadOnly) throws InterruptedException {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
 

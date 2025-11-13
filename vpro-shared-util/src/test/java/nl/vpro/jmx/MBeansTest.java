@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import nl.vpro.jmx.MBeans.UpdatableString;
 import nl.vpro.logging.simple.*;
@@ -26,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings({"Duplicates", "deprecation", "BusyWait"})
 @Slf4j
+@Isolated
 public class MBeansTest {
 
     @Test
@@ -99,20 +102,21 @@ public class MBeansTest {
         });
         assertThat(MBeans.cancel("KEY").get()).containsIgnoringCase("cancel");
         assertThat(MBeans.locks).isEmpty();
+
     }
 
 
 
     @SuppressWarnings("InfiniteLoopStatement")
     @Test
-    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void abandon() throws InterruptedException, ExecutionException {
+        AtomicBoolean running = new AtomicBoolean(true);
         final boolean[] started = new boolean[1];
         final List<String> interrupted = new ArrayList<>();
         String r = returnString("KEY", multiLine(log, "Filling media queues abandon"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
 
-            while(true) {
+            while(running.get()) {
                 try {
                     Thread.sleep(400);
                 } catch (InterruptedException e) {
@@ -124,7 +128,7 @@ public class MBeansTest {
                     started.notifyAll();
                 }
                 // ignoring interrupt, simply proceed
-                l.info(count++ + " " + Instant.now());
+                l.info(count++ + " " + Instant.now() + " abandon");
             }
         });
         log.info(r);
@@ -137,6 +141,8 @@ public class MBeansTest {
             .containsIgnoringCase("Abandoned");
         assertThat(MBeans.locks).isEmpty();
         assertThat(interrupted.get(0)).contains("sleep interrupted");
+        Thread.sleep(5000);
+        running.set(false);
     }
 
 
