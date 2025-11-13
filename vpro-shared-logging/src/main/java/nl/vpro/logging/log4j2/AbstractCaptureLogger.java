@@ -22,7 +22,7 @@ import org.meeuw.functional.ThrowAnyAutoCloseable;
  * @since 5.11
  */
 @Log4j2
-public abstract class AbstractCaptureLogger  implements AutoCloseable  {
+public abstract class AbstractCaptureLogger  implements AutoCloseable {
 
     static final ThreadLocal<UUID> THREAD_LOCAL = ThreadLocal.withInitial(() -> null);
     static final Map<UUID,  AbstractCaptureLogger> LOGGERS = new ConcurrentHashMap<>();
@@ -110,13 +110,17 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
     }
 
     /**
-     * Associates this logger with the current thread. This happens automatically in the constructor, but you can call it again if the instance happens to be used in a different thread later.
+     * Associates this capturing logger with the current thread. This happens automatically in the constructor, but you can call it again if the instance happens to be used in a different thread later.
+     * @see #disassociate()
      */
     public ThrowAnyAutoCloseable associateWithCurrentThread() {
         THREAD_LOCAL.set(uuid);
         return this::disassociate;
     }
 
+    /**
+     * Disassociates this capturing logger from the current thread.
+     */
     public void disassociate() {
         THREAD_LOCAL.remove();
     }
