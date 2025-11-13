@@ -60,7 +60,7 @@ class MBeans2Test {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
 
             String result = MBeans2.returnMultilineString("test",
-                Duration.ofMillis(1),
+                Duration.ofMillis(5),
                 () -> {
                     log.info("foo bar!");
                     Thread.sleep(10);
