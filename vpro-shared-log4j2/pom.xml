@@ -40,13 +40,21 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <!-- and 1 -->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <!-- java.util.logging -->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-jul</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <!-- System.getLogger -->
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-jpl</artifactId>
       <scope>runtime</scope>
     </dependency>
 
