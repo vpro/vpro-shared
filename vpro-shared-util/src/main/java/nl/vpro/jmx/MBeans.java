@@ -1,7 +1,5 @@
 package nl.vpro.jmx;
 
-import com.google.common.util.concurrent.Futures;
-
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,17 +13,14 @@ import java.util.function.Supplier;
 
 import javax.management.*;
 
-import nl.vpro.util.ImmediateFuture;
-
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-
-
 import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.*;
+import nl.vpro.util.ImmediateFuture;
 import nl.vpro.util.ThreadPools;
 
 /**
@@ -75,38 +70,38 @@ public class MBeans {
     /**
      *
      * @param key A key on which the job can be 'locked'.
-     * @param description A supplier that before the job starts should describe the job. One can be created using e.g. {@link #multiLine(Logger, String, Object...)} or {@link #singleLine(Logger, String, Object...)}
+     * @param stringSupplierLogger  A logger that will produce the resulting string. One can be created using e.g. {@link #multiLine(Logger, String, Object...)} or {@link #singleLine(Logger, String, Object...)}
      * @param wait How long to wait before returning with a message that the job is not yet finished, but still running. This may be {@code null}, in which case this will run nothing in the background
-     * @param logger A job returning a String when ready. This string will be returned.
+     * @param job A job to run. It is a consumer of a {@link SimpleLogger}, to which it can log its progress.
      * @return The string to be used as a return value for a JMX operation
      */
     public static String returnString(
         @Nullable final String key,
-        @NonNull  final StringSupplierSimpleLogger description,
+        @NonNull  final StringSupplierSimpleLogger stringSupplierLogger,
         @Nullable final Duration wait,
-        @NonNull  final Consumer<StringSupplierSimpleLogger> logger) {
+        @NonNull  final Consumer<StringSupplierSimpleLogger> job) {
         if (key != null) {
             if (isRunning(key)) {
-                return "Job " + key + " is still running, so could not be started again with " + description.get();
+                return "Job " + key + " is still running, so could not be started again with " + stringSupplierLogger.get();
             }
         }
-        final LockValue value = new LockValue(description);
+        final LockValue value = new LockValue(stringSupplierLogger);
         if (key != null) {
             locks.put(key, value);
         }
 
-        Supplier<String> job = () -> {
+        Supplier<String> supplier = () -> {
             try {
                 value.setThread(Thread.currentThread());
-                logger.accept(description);
+                job.accept(stringSupplierLogger);
             } catch (Exception e) {
-                description.error(e.getClass().getName() + " " + e.getMessage(), e);
+                stringSupplierLogger.error(e.getClass().getName() + " " + e.getMessage(), e);
             } finally {
                 if (key != null) {
                     locks.remove(key);
                 }
             }
-            return description.get();
+            return stringSupplierLogger.get();
 
         };
         if (wait != null) {
@@ -115,8 +110,8 @@ public class MBeans {
                 final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
                     Thread.currentThread().setContextClassLoader(MBeans.class.getClassLoader());
-                    Thread.currentThread().setName(threadName + ":" + description.get());
-                    return job.get();
+                    Thread.currentThread().setName(threadName + ":" + stringSupplierLogger.get());
+                    return supplier.get();
                 } finally {
                     Thread.currentThread().setContextClassLoader(contextClassLoader);
                     Thread.currentThread().setName(threadName);
@@ -129,15 +124,15 @@ public class MBeans {
             } catch (InterruptedException ie) {
                 log.info(ie.getMessage());
                 Thread.currentThread().interrupt();
-                return description.get();
+                return stringSupplierLogger.get();
             } catch (ExecutionException e) {
                 log.info(e.getMessage());
-                return description.get();
+                return stringSupplierLogger.get();
             } catch (TimeoutException e) {
-                return description.get() + "\n...\nstill busy. Please check logs";
+                return stringSupplierLogger.get() + "\n...\nstill busy. Please check logs";
             }
         } else {
-            return job.get();
+            return supplier.get();
         }
     }
 
@@ -147,50 +142,64 @@ public class MBeans {
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}, with a duration {@link #DEFAULT_DURATION}
      */
     public static String returnString(
-        @NonNull String key,
-        @NonNull StringSupplierSimpleLogger description,
-        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
-        return returnString(key, description, DEFAULT_DURATION, logger);
+        @Nullable String key,
+        @NonNull StringSupplierSimpleLogger stringSupplierLogger,
+        @NonNull Consumer<StringSupplierSimpleLogger> job) {
+        return returnString(
+            key,
+            stringSupplierLogger,
+            DEFAULT_DURATION,
+            job
+        );
     }
 
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
-        @NonNull StringSupplierSimpleLogger description,
+        @NonNull StringSupplierSimpleLogger stringSupplierLogger,
         @NonNull Duration wait,
-        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
-        return returnString(null, description, wait, logger);
+        @NonNull Consumer<StringSupplierSimpleLogger> job) {
+        return returnString(null, stringSupplierLogger, wait, job);
     }
 
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
      */
     public static String returnString(
-        @NonNull StringSupplierSimpleLogger description,
-        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
-        return returnString(null, description, DEFAULT_DURATION, logger);
+        @NonNull StringSupplierSimpleLogger stringSupplierLogger,
+        @NonNull Consumer<StringSupplierSimpleLogger> job) {
+        return returnString(null, stringSupplierLogger, DEFAULT_DURATION, job);
     }
 
+    /**
+     * A convenience method for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)} with a multiline logger.
+     * @param log A {@link Logger} instance to log to too.
+     * @param job A job to run. It is a consumer of a {@link SimpleLogger}, to which it can log its progress.
+     * @return
+     */
     public static String returnMultilineString(
         @NonNull Logger log,
-        @NonNull Consumer<StringSupplierSimpleLogger> logger) {
-        return returnString(multiLine(log), logger);
+        @NonNull Consumer<StringSupplierSimpleLogger> job) {
+        return returnString(multiLine(log), job);
     }
 
 
+    /**
+     * @deprecated use {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)} instead.
+     */
     @Deprecated
     public static String returnString(
         @Nullable final String key,
-        @NonNull final StringSupplierSimpleLogger description,
+        @NonNull final StringSupplierSimpleLogger stringSupplierLogger,
         @NonNull final  Duration wait,
         @NonNull final Callable<String> job) {
-        return returnString(key, description, wait, l -> {
+        return returnString(key, stringSupplierLogger, wait, l -> {
             try {
                 String s = job.call();
                 l.info(s);
             } catch (Exception e) {
-                description.error(e.getClass().getName() + " " + e.getMessage(), e);
+                stringSupplierLogger.error(e.getClass().getName() + " " + e.getMessage(), e);
             }
         }
         );
@@ -198,6 +207,7 @@ public class MBeans {
 
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     * @deprecated use {@link #returnString(StringSupplierSimpleLogger, Duration, Consumer)} instead.
      */
     @Deprecated
     public static String returnString(
@@ -208,6 +218,9 @@ public class MBeans {
     }
 
 
+    /**
+     * @deprecated use {@link #returnString(StringSupplierSimpleLogger, Duration, Consumer)}
+     */
     @Deprecated
     public static String returnString(
         @NonNull Supplier<String> description,
@@ -216,7 +229,9 @@ public class MBeans {
         return returnString(null, singleLine(log, description.get()), wait, job);
     }
     /**
-     * Defaulting version of {@link #returnString(StringSupplierSimpleLogger, Duration, Callable)} waiting for 5 seconds before time out.*/
+     * Defaulting version of {@link #returnString(StringSupplierSimpleLogger, Duration, Callable)} waiting for 5 seconds before time out.
+     * @deprecated use {@link #returnString(StringSupplierSimpleLogger, Consumer)}
+     */
     @Deprecated
     public static String returnString(
         @NonNull StringSupplierSimpleLogger description,
@@ -266,6 +281,7 @@ public class MBeans {
     public static StringSupplierSimpleLogger multiLine(Logger log) {
         return multiLine(log, null);
     }
+
     /**
      * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}
      */
@@ -320,7 +336,6 @@ public class MBeans {
     public static boolean isBlank(String string) {
         return "String".equals(string) || StringUtils.isBlank(string);
     }
-
 
     /**
      * @since 5.4

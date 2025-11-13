@@ -27,13 +27,20 @@ import nl.vpro.logging.simple.SimpleLogger;
 public class CaptureToSimpleLogger extends AbstractCaptureLogger {
 
     public static CaptureToSimpleLogger of(SimpleLogger simpleLogger) {
-        return new CaptureToSimpleLogger(simpleLogger);
+        return of(simpleLogger, true);
+    }
+    public static CaptureToSimpleLogger of(SimpleLogger simpleLogger, boolean currentThreadOnly) {
+        return new CaptureToSimpleLogger(simpleLogger, currentThreadOnly);
     }
 
+    public static CaptureToSimpleLogger allThreads(SimpleLogger simpleLogger) {
+        return of(simpleLogger, false);
+    }
 
     private final SimpleLogger simpleLogger;
-    private CaptureToSimpleLogger(SimpleLogger simpleLogger) {
-        super(true);
+
+    private CaptureToSimpleLogger(SimpleLogger simpleLogger, boolean currentThreadOnly) {
+        super(currentThreadOnly);
         this.simpleLogger = simpleLogger;
     }
 

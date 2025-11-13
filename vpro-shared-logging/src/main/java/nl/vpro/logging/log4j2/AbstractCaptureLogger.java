@@ -13,6 +13,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.meeuw.functional.ThrowAnyAutoCloseable;
 
 /**
 
@@ -110,7 +111,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable  {
     /**
      * Associates this logger with the current thread. This happens automatically in the constructor, but you can call it again if the instance happens to be used in a different thread later.
      */
-    public AutoCloseable associateWithCurrentThread() {
+    public ThrowAnyAutoCloseable associateWithCurrentThread() {
         THREAD_LOCAL.set(uuid);
         return this::disassociate;
     }

@@ -17,5 +17,6 @@ module nl.vpro.shared.logging {
     requires static java.logging;
     requires static flogger;
     requires static org.slf4j;
+    requires org.meeuw.functional;
 
 }
