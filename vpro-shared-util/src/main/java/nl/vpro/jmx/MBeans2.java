@@ -3,6 +3,7 @@ package nl.vpro.jmx;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -100,6 +101,9 @@ public class MBeans2 {
 
 
     /**
+     * This is meant to be used as argument of the serveral methods like {@link MBeans#returnString(StringSupplierSimpleLogger, Consumer)}. These things need
+     * an instant of {@link StringBuilderSimpleLogger} which can be done with this method, and it will be based on a log4j2 {@link Logger} instance.
+     *
      * @param log Logger instance to log too
      * @return a {@link StringBuilderSimpleLogger} representing multiple lines. Actually a {@link StringBuilderSimpleLogger}
      */
@@ -108,6 +112,8 @@ public class MBeans2 {
     }
 
      /**
+      * This is meant to be used as argument of the serveral methods like {@link MBeans#returnString(StringSupplierSimpleLogger, Consumer)}. These things need
+      * an instant of {@link StringBuilderSimpleLogger} which can be done with this method, and it will be based on a log4j2 {@link Logger} instance.
      * @param log Logger instance to log too
      * @param initialMessage First line of the string (logged as info)
      * @param args The arguments of the first line
