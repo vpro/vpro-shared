@@ -62,18 +62,18 @@ class MBeans2Test {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
 
             String result = MBeans2.returnMultilineString("test",
-                Duration.ofMillis(5),
+                Duration.ofMillis(10),
                 currentThreadOnly,
                 () -> {
                     log.info("foo bar!");
-                    Thread.sleep(10);
+                    Thread.sleep(100);
                     log.info("pietje puk");
                 });
             assertThat(result).isEqualTo("""
                             foo bar!
                             ...
                             still busy. Please check logs""");
-            Thread.sleep(20); // wait for logging to be captured
+            Thread.sleep(200); // wait for logging to be captured
             assertThat(capture.get()).endsWith("""
                 foo bar!
                 pietje puk

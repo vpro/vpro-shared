@@ -99,6 +99,20 @@ public class MBeans2 {
     }
 
 
+       /**
+     * Default duration {@link MBeans#DEFAULT_DURATION}
+     * @param key A key on which the job can be 'locked'.
+     * @param job The runnable to run
+     * @see #returnMultilineString(String, Duration, boolean, ThrowAnyRunnable)
+     * @since 5.13
+     */
+    public static String returnMultilineString(
+        String key,
+        @NonNull ThrowAnyRunnable job) {
+        return returnMultilineString(key, true, job);
+    }
+
+
 
     /**
      * This is meant to be used as argument of the serveral methods like {@link MBeans#returnString(StringSupplierSimpleLogger, Consumer)}. These things need
