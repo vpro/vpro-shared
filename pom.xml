@@ -17,7 +17,7 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.12</spring.version>
+    <spring.version>6.2.13</spring.version>
     <spring-security.version>6.5.6</spring-security.version>
     <jackson2.version>2.20.1</jackson2.version>
 
