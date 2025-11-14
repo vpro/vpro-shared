@@ -30,7 +30,7 @@ jobs:
           email: 'digitaal-techniek@vpro.nl'
           token: '${{ secrets.GITHUB_TOKEN  }}'
       - name: Release
-        run: mvn  -Pdeploy,central --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
+        run: mvn  -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
