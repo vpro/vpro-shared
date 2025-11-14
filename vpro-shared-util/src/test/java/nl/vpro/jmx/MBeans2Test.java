@@ -39,11 +39,13 @@ class MBeans2Test {
 
             String result = MBeans2.returnMultilineString("test",
                 Duration.ofSeconds(1),
+                currentThreadOnly,
                 () -> {
                     log.info("foo bar!");
                     log.debug("debug line");
                     log.info("pietje puk");
-                }, currentThreadOnly);
+                }
+            );
             assertThat(result).isEqualTo("""
                 foo bar!
                 pietje puk""");
@@ -61,11 +63,12 @@ class MBeans2Test {
 
             String result = MBeans2.returnMultilineString("test",
                 Duration.ofMillis(5),
+                currentThreadOnly,
                 () -> {
                     log.info("foo bar!");
                     Thread.sleep(10);
                     log.info("pietje puk");
-                }, currentThreadOnly);
+                });
             assertThat(result).isEqualTo("""
                             foo bar!
                             ...

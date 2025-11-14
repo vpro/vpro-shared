@@ -104,9 +104,30 @@ We also support a convention to have properties differ per OTAP environment
         ConfigUtils.filtered(env, ConfigUtils.getPropertiesInHome("openskosrepository.properties"));
 ----
 
-It is also possible to instantiate obects using reflection.
+It is also possible to instantiate objects using reflection.
 
 [source,java]
 ----
 TODO device examples
 ----
+
+== JMX calls
+
+The nl.vpro.jmx package contains a few utilities that we use when implementation JMX operations.
+
+E.g.
+[source, java]
+----
+
+@ManagedOperation
+public String publishMediaChangedBackwards(long max) {
+    return MBeans2.returnMultilineString( "backwards", () -> {
+        log.info("a slow piece of code !");
+    });
+}
+----
+
+Will start up the 'slow piece of code'. After (on default) 5 seconds, it will leave that code running, but return what it logged until now (plus in indication that is not ready yet)
+
+`backwards` is just a key. If the operation is called when it is still running it will refuse to do so. It can be `null` or omitted.
+

@@ -13,6 +13,8 @@ import org.meeuw.functional.ThrowAnyRunnable;
 import nl.vpro.logging.log4j2.CaptureToSimpleLogger;
 import nl.vpro.logging.simple.*;
 
+import static nl.vpro.jmx.MBeans.DEFAULT_DURATION;
+
 /**
  * See {@link MBeans} but supporting log4j2.
  * @author Michiel Meeuwissen
@@ -40,16 +42,18 @@ public class MBeans2 {
 
     /**
      * Run a job (probably for JMX) capturing (log4j2) logging into a multiline string.
+     * @param key A key on which the job can be 'locked'.
      * @param job The job to run.
-     * @param currentThreadOnly If true, only logging from the current thread, and the thread the job will be logging in will be captured
+     * @param currentThreadOnly If true, only logging from the current thread, and the thread the job will be running in will be captured
      * @return The (first lines) of the result of the logging of the job.
      * @since 5.13
      */
     public static String returnMultilineString(
         String key,
         Duration timeout,
-        @NonNull ThrowAnyRunnable job,
-        boolean currentThreadOnly) {
+        boolean currentThreadOnly,
+        @NonNull ThrowAnyRunnable job
+    ) {
 
         StringSupplierSimpleLogger logger = StringBuilderSimpleLogger.builder()
             .prefix(l -> l.compareTo(Level.WARN) > 0 ? "" : l.name())
@@ -71,13 +75,28 @@ public class MBeans2 {
     /**
      * Defaults to {@code currentThreadOnly = false}
      * @param job The runnable to run
-     * @see #returnMultilineString(String, Duration, ThrowAnyRunnable, boolean)
+     * @see #returnMultilineString(String, Duration, boolean, ThrowAnyRunnable)
      * @since 5.13
      */
     public static String returnMultilineString(
         @NonNull ThrowAnyRunnable job) {
-        return returnMultilineString(null, MBeans.DEFAULT_DURATION, job, false);
+        return returnMultilineString(null,  true, job);
     }
+
+    /**
+     * Default duration {@link MBeans#DEFAULT_DURATION}
+     * @param key A key on which the job can be 'locked'.
+     * @param job The runnable to run
+     * @see #returnMultilineString(String, Duration, boolean, ThrowAnyRunnable)
+     * @since 5.13
+     */
+    public static String returnMultilineString(
+        String key,
+        boolean currentThreadOnly,
+        @NonNull ThrowAnyRunnable job) {
+        return returnMultilineString(key, DEFAULT_DURATION, currentThreadOnly, job);
+    }
+
 
 
     /**
