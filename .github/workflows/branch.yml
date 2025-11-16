@@ -13,7 +13,7 @@ jobs:
       MAVEN_ARGS: '--no-transfer-progress'
     steps:
       - uses: actions/checkout@v5
-      - uses: oleksiyrudenko/gha-git-credentials@v2.1.2
+      - uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
           global: true
           name: 'github'
