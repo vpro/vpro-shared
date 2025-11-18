@@ -10,10 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -36,10 +34,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.*;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
+import org.w3c.dom.traversal.NodeFilter;
 import org.xml.sax.*;
 import org.xmlunit.XMLUnitException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.*;
+import org.xmlunit.util.Predicate;
 
 import nl.vpro.test.util.TestClass;
 
@@ -137,9 +137,12 @@ public class JAXBTestUtil {
     }
 
 
+    public static  <T> Result<T> roundTripAndSimilarResult(T input, boolean namespaceAware, String... contains){
+        return roundTripAndSimilarResult(input, namespaceAware, builder -> {}, contains);
+    }
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    public static  <T> Result<T> roundTripAndSimilarResult(T input, boolean namespaceAware, String... contains) {
+    public static  <T> Result<T> roundTripAndSimilarResult(T input, boolean namespaceAware, Consumer<DiffBuilder> builderConsumer, String... contains) {
         Element xml = marshalToElement(input);
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -160,12 +163,13 @@ public class JAXBTestUtil {
             for (int i = 0; i < elementsByTagName.getLength(); i++) {
                 Node element = elementsByTagName.item(i);
                 element.normalize();
-                Diff diff = DiffBuilder
+                DiffBuilder diffBuilder = DiffBuilder
                     .compare(elementToFind)
                     .withTest(element)
                     .ignoreWhitespace()
-                    .checkForSimilar()
-                    .build();
+                    .checkForSimilar();
+                builderConsumer.accept(diffBuilder);
+                Diff diff = diffBuilder.build();
                 if (!diff.hasDifferences()) {
                     found = true;
                 }
@@ -247,25 +251,26 @@ public class JAXBTestUtil {
      * @since 5.4
      */
     @SuppressWarnings({"DuplicatedCode", "unchecked"})
-    public static <T> Result<T> roundTripAndSimilarResult(T input, String expected) {
+    public static <T> Result<T> roundTripAndSimilarResult(T input, String expected, Consumer<DiffBuilder>... consumer) {
         String xml = marshal(input);
-        similar(xml, expected);
+        similar(xml, expected, consumer);
         Class<? extends T> clazz = (Class<? extends T>) input.getClass();
         T result = unmarshal(xml, clazz);
         /// make sure unmarshalling worked too, by marshalling the result again.
         String xmlAfter = marshal(result);
-        similar(xmlAfter, xml);
+        similar(xmlAfter, xml, consumer);
         return new Result<>(result, xml);
     }
 
-    public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, InputStream expected) throws IOException, SAXException {
+    @SafeVarargs
+    public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, InputStream expected, Consumer<DiffBuilder>... consumer) throws IOException, SAXException {
         StringWriter write = new StringWriter();
         IOUtils.copy(expected, write, "UTF-8");
-        return roundTripAndValidateAndSimilar(input, xsd, write.toString());
+        return roundTripAndValidateAndSimilar(input, xsd, write.toString(), consumer);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, String expected) throws IOException, SAXException {
+    public static <T> T roundTripAndValidateAndSimilar(T input, URL xsd, String expected, Consumer<DiffBuilder>... consumers) throws IOException, SAXException {
         String xml = null;
         try {
             xml = marshal(input);
@@ -275,12 +280,12 @@ public class JAXBTestUtil {
             Validator validator = schema.newValidator();
             validator.validate( new StreamSource(new StringReader(xml)));
 
-            similar(xml, expected);
+            similar(xml, expected, consumers);
             Class<? extends T> clazz = (Class<? extends T>) input.getClass();
             T result = unmarshal(xml, clazz);
             /// make sure unmarshalling worked too, by marshalling the result again.
             String xmlAfter = marshal(result);
-            similar(xmlAfter, xml);
+            similar(xmlAfter, xml, consumers);
             return result;
         } catch (SAXParseException spe) {
             throw new RuntimeException(
@@ -294,10 +299,11 @@ public class JAXBTestUtil {
         return roundTripAndSimilar(input, writer.toString());
     }
 
-    public static <T> Result<T> roundTripAndSimilarResult(T input, InputStream expected) throws IOException {
+    @SafeVarargs
+    public static <T> Result<T> roundTripAndSimilarResult(T input, InputStream expected, Consumer<DiffBuilder>... consumers) throws IOException {
         StringWriter writer = new StringWriter();
         IOUtils.copy(expected, writer, UTF_8);
-        return roundTripAndSimilarResult(input, writer.toString());
+        return roundTripAndSimilarResult(input, writer.toString(), consumers);
     }
 
 
@@ -399,6 +405,8 @@ public class JAXBTestUtil {
     @SuppressWarnings("UnusedReturnValue")
     public static class XMLObjectAssert<S extends XMLObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
+        List<Consumer<DiffBuilder>> builders = new ArrayList<>();
+
         A rounded;
 
         String xml;
@@ -415,12 +423,23 @@ public class JAXBTestUtil {
             super(actual, XMLObjectAssert.class);
         }
 
+
+        public S withBuilder(Consumer<DiffBuilder> builder) {
+            this.builders.add(builder);
+            return myself;
+        }
+        public S withNodeFilter(Predicate<Node> nodeFilter) {
+            this.builders.add(df -> df.withNodeFilter(nodeFilter));
+            return myself;
+        }
+
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
+            Consumer<DiffBuilder>[] consumers = builders.toArray(new Consumer[0]);
             if (roundTrip) {
                 try {
 
-                    Result<A> result = roundTripAndSimilarResult(actual, expected);
+                    Result<A> result = roundTripAndSimilarResult(actual, expected, consumers);
                     rounded = result.rounded();
                     xml = result.xml();
                 } catch (Exception e) {
@@ -428,7 +447,7 @@ public class JAXBTestUtil {
                 }
             } else {
                 xml = marshal(actual);
-                similar(xml, expected);
+                similar(xml, expected, consumers);
             }
             return myself;
         }
@@ -441,7 +460,7 @@ public class JAXBTestUtil {
             if (roundTrip) {
                 try {
 
-                    Result<A> result =  roundTripAndSimilarResult(actual, expected);
+                    Result<A> result =  roundTripAndSimilarResult(actual, expected, builders.toArray(new Consumer[0]));
                     rounded = result.rounded();
                     xml = result.xml();
                 } catch (Exception e) {
@@ -516,14 +535,26 @@ public class JAXBTestUtil {
 
     public static class XMLStringAssert extends AbstractObjectAssert<XMLStringAssert, CharSequence> {
 
+        List<Consumer<DiffBuilder>> builders = new ArrayList<>();
+
         protected XMLStringAssert(CharSequence actual) {
             super(actual, XMLStringAssert.class);
         }
 
-        public XMLStringAssert isSimilarTo(String expected) {
-            similar(String.valueOf(actual), expected);
+        public XMLStringAssert withBuilder(Consumer<DiffBuilder> builder) {
+            this.builders.add(builder);
             return myself;
         }
+        public XMLStringAssert withNodeFilter(Predicate<Node> nodeFilter) {
+            this.builders.add(df -> df.withNodeFilter(nodeFilter));
+            return myself;
+        }
+
+        public XMLStringAssert isSimilarTo(String expected) {
+            similar(String.valueOf(actual), expected, builders.toArray(new Consumer[0]));
+            return myself;
+        }
+
 
         /**
          * @since 5.4
@@ -562,16 +593,31 @@ public class JAXBTestUtil {
         return pretty(xml.getBytes(UTF_8));
     }
 
+    @SafeVarargs
     @SneakyThrows
-    public static String pretty(byte[] xml) {
+    public static String pretty(byte[] xml, Consumer<Node>... nodeProcessors) {
         Transformer transformer = TransformerFactory.newInstance().newTransformer(new
             StreamSource(JAXBTestUtil.class.getResourceAsStream("/pretty.xslt")));
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        StreamResult result = new StreamResult(new StringWriter());
-        transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
-        String xmlString = result.getWriter().toString();
-        return xmlString;
+        if (nodeProcessors.length == 0) {
+            StreamResult result = new StreamResult(new StringWriter());
+            transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
+            String xmlString = result.getWriter().toString();
+            return xmlString;
+        } else {
+            DOMResult domResult = new DOMResult();
+            transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), domResult);
+            Document doc = (Document) domResult.getNode();
+            for (Consumer<Node> nodeProcessor : nodeProcessors) {
+                nodeProcessor.accept(doc);
+            }
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new StringWriter());
+            transformer.transform(source, result);
+            String xmlString = result.getWriter().toString();
+            return xmlString;
+        }
     }
 
 }
