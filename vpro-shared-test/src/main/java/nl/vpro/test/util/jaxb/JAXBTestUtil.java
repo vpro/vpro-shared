@@ -219,6 +219,10 @@ public class JAXBTestUtil {
 
     public static  <T> Result<T> roundTripContainsResult(T input, String... contains) {
         return roundTripAndSimilarResult(input, true, contains);
+
+    }
+    public static  <T> Result<T> roundTripContainsResult(T input, Consumer<DiffBuilder> consumer, String... contains) {
+        return roundTripAndSimilarResult(input, true, consumer, contains);
     }
 
 
@@ -457,10 +461,12 @@ public class JAXBTestUtil {
          */
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(InputStream expected) {
+            Consumer<DiffBuilder>[] consumers = builders.toArray(new Consumer[0]);
+
             if (roundTrip) {
                 try {
 
-                    Result<A> result =  roundTripAndSimilarResult(actual, expected, builders.toArray(new Consumer[0]));
+                    Result<A> result =  roundTripAndSimilarResult(actual, expected, consumers);
                     rounded = result.rounded();
                     xml = result.xml();
                 } catch (Exception e) {
@@ -468,7 +474,7 @@ public class JAXBTestUtil {
                 }
             } else {
                 xml = marshal(actual);
-                similar(xml, expected);
+                similar(xml, expected, consumers);
             }
             return myself;
         }
@@ -477,7 +483,12 @@ public class JAXBTestUtil {
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S containsSimilar(String expected) {
             try {
-                Result<A> result = roundTripContainsResult(actual, expected);
+                Consumer<DiffBuilder> consumers = (b) -> {
+                    for (Consumer<DiffBuilder> c : builders) {
+                        c.accept(b);
+                    }
+                };
+                Result<A> result = roundTripContainsResult(actual, consumers, expected);
                 rounded = result.rounded;
                 xml = result.xml();
             } catch (Exception e) {
