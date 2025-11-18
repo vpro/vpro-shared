@@ -2,8 +2,6 @@ package nl.vpro.test.util.jaxb;
 
 
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Node;
-import org.xmlunit.util.Predicate;
 
 import nl.vpro.test.util.jaxb.test.*;
 
@@ -42,8 +40,8 @@ public class JAXBTestUtilTest {
 
     }
 
-    @SuppressWarnings("deprecation")
     @Test
+    @Deprecated
     public void testContainsDeprecated() {
         roundTrip(new A(), """
             <b i="1" j="2">
