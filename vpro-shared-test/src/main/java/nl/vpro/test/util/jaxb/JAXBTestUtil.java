@@ -571,7 +571,8 @@ public class JAXBTestUtil {
          * @since 5.4
          */
         public XMLStringAssert isSimilarTo(InputStream expected) {
-            similar(String.valueOf(actual), expected);
+            Consumer<DiffBuilder>[] consumers = builders.toArray(new Consumer[0]);
+            similar(String.valueOf(actual), expected, consumers);
             return myself;
         }
     }
@@ -604,31 +605,15 @@ public class JAXBTestUtil {
         return pretty(xml.getBytes(UTF_8));
     }
 
-    @SafeVarargs
     @SneakyThrows
-    public static String pretty(byte[] xml, Consumer<Node>... nodeProcessors) {
+    public static String pretty(byte[] xml) {
         Transformer transformer = TransformerFactory.newInstance().newTransformer(new
             StreamSource(JAXBTestUtil.class.getResourceAsStream("/pretty.xslt")));
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        if (nodeProcessors.length == 0) {
-            StreamResult result = new StreamResult(new StringWriter());
-            transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
-            String xmlString = result.getWriter().toString();
-            return xmlString;
-        } else {
-            DOMResult domResult = new DOMResult();
-            transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), domResult);
-            Document doc = (Document) domResult.getNode();
-            for (Consumer<Node> nodeProcessor : nodeProcessors) {
-                nodeProcessor.accept(doc);
-            }
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new StringWriter());
-            transformer.transform(source, result);
-            String xmlString = result.getWriter().toString();
-            return xmlString;
-        }
+        StreamResult result = new StreamResult(new StringWriter());
+        transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
+        String xmlString = result.getWriter().toString();
+        return xmlString;
     }
-
 }
