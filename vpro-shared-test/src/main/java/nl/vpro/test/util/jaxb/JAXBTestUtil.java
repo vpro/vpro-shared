@@ -11,7 +11,8 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -30,11 +31,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
-import org.w3c.dom.Element;
 import org.w3c.dom.*;
+import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
-import org.w3c.dom.traversal.NodeFilter;
 import org.xml.sax.*;
 import org.xmlunit.XMLUnitException;
 import org.xmlunit.builder.DiffBuilder;
@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Roelof Jan Koekoek
  * @since 1.6
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @Slf4j
 public class JAXBTestUtil {
 
@@ -246,9 +247,9 @@ public class JAXBTestUtil {
      * Marshalls input and checks if it is similar to given string.
      * Then unmarshals it, and marshalls it another time. The result XMl should still be similar.
      */
-    @SuppressWarnings({"DuplicatedCode"})
-    public static <T> T roundTripAndSimilar(T input, String expected) {
-        return roundTripAndSimilarResult(input, expected).rounded();
+    @SafeVarargs
+    public static <T> T roundTripAndSimilar(T input, String expected, Consumer<DiffBuilder>... consumer) {
+        return roundTripAndSimilarResult(input, expected, consumer).rounded();
     }
 
     /**
@@ -439,11 +440,10 @@ public class JAXBTestUtil {
 
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
-            Consumer<DiffBuilder>[] consumers = builders.toArray(new Consumer[0]);
             if (roundTrip) {
                 try {
 
-                    Result<A> result = roundTripAndSimilarResult(actual, expected, consumers);
+                    Result<A> result = roundTripAndSimilarResult(actual, expected, consumers());
                     rounded = result.rounded();
                     xml = result.xml();
                 } catch (Exception e) {
@@ -451,22 +451,25 @@ public class JAXBTestUtil {
                 }
             } else {
                 xml = marshal(actual);
-                similar(xml, expected, consumers);
+                similar(xml, expected, consumers());
             }
             return myself;
         }
+        @SuppressWarnings("unchecked")
+        protected Consumer<DiffBuilder>[] consumers() {
+            return builders.toArray(new Consumer[0]);
+        }
+
 
         /**
          * @since 5.4
          */
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(InputStream expected) {
-            Consumer<DiffBuilder>[] consumers = builders.toArray(new Consumer[0]);
-
             if (roundTrip) {
                 try {
 
-                    Result<A> result =  roundTripAndSimilarResult(actual, expected, consumers);
+                    Result<A> result =  roundTripAndSimilarResult(actual, expected, consumers());
                     rounded = result.rounded();
                     xml = result.xml();
                 } catch (Exception e) {
@@ -474,7 +477,7 @@ public class JAXBTestUtil {
                 }
             } else {
                 xml = marshal(actual);
-                similar(xml, expected, consumers);
+                similar(xml, expected, consumers());
             }
             return myself;
         }
@@ -538,7 +541,7 @@ public class JAXBTestUtil {
         }
 
         public Result<A> getResult() {
-            return new Result(rounded, xml);
+            return new Result<>(rounded, xml);
         }
 
 
@@ -560,9 +563,13 @@ public class JAXBTestUtil {
             this.builders.add(df -> df.withNodeFilter(nodeFilter));
             return myself;
         }
+        @SuppressWarnings("unchecked")
+        protected Consumer<DiffBuilder>[] consumers() {
+            return builders.toArray(new Consumer[0]);
+        }
 
         public XMLStringAssert isSimilarTo(String expected) {
-            similar(String.valueOf(actual), expected, builders.toArray(new Consumer[0]));
+            similar(String.valueOf(actual), expected, consumers());
             return myself;
         }
 
@@ -571,8 +578,7 @@ public class JAXBTestUtil {
          * @since 5.4
          */
         public XMLStringAssert isSimilarTo(InputStream expected) {
-            Consumer<DiffBuilder>[] consumers = builders.toArray(new Consumer[0]);
-            similar(String.valueOf(actual), expected, consumers);
+            similar(String.valueOf(actual), expected, consumers());
             return myself;
         }
     }
@@ -613,7 +619,6 @@ public class JAXBTestUtil {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         StreamResult result = new StreamResult(new StringWriter());
         transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), result);
-        String xmlString = result.getWriter().toString();
-        return xmlString;
+        return result.getWriter().toString();
     }
 }
