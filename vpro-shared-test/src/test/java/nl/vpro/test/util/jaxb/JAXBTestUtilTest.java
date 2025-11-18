@@ -2,6 +2,8 @@ package nl.vpro.test.util.jaxb;
 
 
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Node;
+import org.xmlunit.util.Predicate;
 
 import nl.vpro.test.util.jaxb.test.*;
 
@@ -117,6 +119,32 @@ public class JAXBTestUtilTest {
                 </b>"""))
             .isInstanceOf(AssertionError.class);
     }
+    @Test
+    public void testFluentWithFilter() {
+        assertThatXml(new A())
+            .withNodeFilter(n -> ! n.getNodeName().equals("value")).isSimilarTo("""
+                <a xmlns="urn:test:1234">
+                         <value>aa</value>
+                         <b i="1" j="2">
+                           <value>different</value>
+                           <c>cc</c>
+                         </b>
+                       </a>""");
+    }
+    @Test
+    public void testFluentWithFilterFails() {
+        assertThatThrownBy(() ->
 
+            assertThatXml(new A())
+            .withNodeFilter(n -> ! n.getNodeName().equals("value")).isSimilarTo("""
+                  <a xmlns="urn:test:1234">
+                         <value>aa</value>
+                         <b i="2" j="2">
+                           <value>different</value>
+                           <c>cc</c>
+                         </b>
+                       </a>""")
+        ).isInstanceOf(AssertionError.class);
+    }
 
 }
