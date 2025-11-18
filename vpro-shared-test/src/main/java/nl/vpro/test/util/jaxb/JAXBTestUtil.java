@@ -428,11 +428,17 @@ public class JAXBTestUtil {
             super(actual, XMLObjectAssert.class);
         }
 
-
+        /**
+         * @since 5.13
+         */
         public S withBuilder(Consumer<DiffBuilder> builder) {
             this.builders.add(builder);
             return myself;
         }
+
+        /**
+         * @since 5.13
+         */
         public S withNodeFilter(Predicate<Node> nodeFilter) {
             this.builders.add(df -> df.withNodeFilter(nodeFilter));
             return myself;
@@ -442,7 +448,6 @@ public class JAXBTestUtil {
         public S isSimilarTo(String expected) {
             if (roundTrip) {
                 try {
-
                     Result<A> result = roundTripAndSimilarResult(actual, expected, consumers());
                     rounded = result.rounded();
                     xml = result.xml();
@@ -455,6 +460,10 @@ public class JAXBTestUtil {
             }
             return myself;
         }
+
+        /**
+         * @since 5.13
+         */
         @SuppressWarnings("unchecked")
         protected Consumer<DiffBuilder>[] consumers() {
             return builders.toArray(new Consumer[0]);
@@ -555,14 +564,24 @@ public class JAXBTestUtil {
             super(actual, XMLStringAssert.class);
         }
 
+        /**
+         * @since 5.13
+         */
         public XMLStringAssert withBuilder(Consumer<DiffBuilder> builder) {
             this.builders.add(builder);
             return myself;
         }
+        /**
+         * @since 5.13
+         */
         public XMLStringAssert withNodeFilter(Predicate<Node> nodeFilter) {
             this.builders.add(df -> df.withNodeFilter(nodeFilter));
             return myself;
         }
+
+        /**
+         * @since 5.13
+         */
         @SuppressWarnings("unchecked")
         protected Consumer<DiffBuilder>[] consumers() {
             return builders.toArray(new Consumer[0]);

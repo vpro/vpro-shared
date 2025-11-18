@@ -53,16 +53,18 @@ public class JAXBTestUtilTest {
 
     @Test
     public void testContains() {
-        A a = roundTripContains(new A(), " <b i=\"1\" j=\"2\">\n" +
-            "        <value>bb</value>\n" +
         /*    "        <map>\n" +
             "            <e>\n" +
             "                <k>x</k>\n" +
             "                <v>y</v>\n" +
             "            </e>\n" +
             "        </map>\n" +*/
-            "        <c>cc</c>\n" +
-            "    </b>");
+        A a = roundTripContains(new A(), """
+             <b i="1" j="2">
+                    <value>bb</value>
+                    <c>cc</c>
+                </b>\
+            """);
 
         assertThat(a.getB().getI()).isEqualTo(1);
     }
