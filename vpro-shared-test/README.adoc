@@ -10,6 +10,7 @@
 E.g.
 [source, java]
 ----
+include::src/test/java/nl/vpro/test/util/jaxb/JAXBTestUtilTest.java[label=]
 ----
 
 
