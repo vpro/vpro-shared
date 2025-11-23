@@ -46,7 +46,7 @@ jobs:
     env:
       MAVEN_ARGS: '--no-transfer-progress'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -65,6 +65,10 @@ jobs:
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Publish to codecov
         uses: codecov/codecov-action@v5
         continue-on-error: true
