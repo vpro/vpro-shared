@@ -65,10 +65,6 @@ jobs:
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Publish to codecov
         uses: codecov/codecov-action@v5
         continue-on-error: true
