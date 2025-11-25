@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.*;
+import tools.jackson.databind.JsonDeserializer;
+import tools.jackson.databind.JsonSerializer;
+import tools.jackson.databind.SerializerProvider;
 
 /**
  * @author Michiel Meeuwissen
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 public class IterableJson {
 
 
-    public static class Serializer extends JsonSerializer<Iterable<?>> {
+    public static class Serializer extends ValueSerializer<Iterable<?>> {
         @Override
         public void serialize(Iterable value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
@@ -30,12 +30,12 @@ public class IterableJson {
                 if (i.hasNext()) {
                     v = i.next();
                     if (! i.hasNext()) {
-                        jgen.writeObject(v);
+                        jgen.writeEmbeddedObject(v);
                     } else {
                         jgen.writeStartArray();
-                        jgen.writeObject(v);
+                        jgen.writeEmbeddedObject(v);
                         while (i.hasNext()) {
-                            jgen.writeObject(i.next());
+                            jgen.writeEmbeddedObject(i.next());
                         }
                         jgen.writeEndArray();
                     }
@@ -48,7 +48,7 @@ public class IterableJson {
     }
 
     private static final Set<Class<?>> simpleTypes = new HashSet<>(Arrays.asList(String.class, Character.class, Boolean.class, Integer.class, Float.class, Long.class, Double.class));
-    public static abstract class Deserializer<T> extends JsonDeserializer<Iterable<T>> {
+    public static abstract class Deserializer<T> extends ValueDeserializer<Iterable<T>> {
 
         private final Function<List<T>, Iterable<T>> creator;
 
@@ -77,16 +77,16 @@ public class IterableJson {
 
         @Override
         public Iterable<T> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-            if (jp.getParsingContext().inObject()) {
+            if (jp.streamReadContext().inObject()) {
                 if (! isSimple) {
                     jp.clearCurrentToken();
                 }
                 T rs = jp.readValueAs(memberClass);
                 return creator.apply(Collections.singletonList(rs));
-            } else if (jp.getParsingContext().inArray()) {
+            } else if (jp.streamReadContext().inArray()) {
                 List<T> list = new ArrayList<>();
                 jp.clearCurrentToken();
-                Iterator<T> i = jp.readValuesAs(memberClass);
+                Iterator<T> i = jp.read(memberClass);
                 while (i.hasNext()) {
                     list.add(i.next());
                 }

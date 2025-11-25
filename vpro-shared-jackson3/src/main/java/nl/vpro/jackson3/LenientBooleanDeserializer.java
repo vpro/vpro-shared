@@ -1,18 +1,14 @@
 package nl.vpro.jackson3;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.*;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
  * @author Michiel Meeuwissen
  * @since 2.3
  */
-public class LenientBooleanDeserializer extends JsonDeserializer<Boolean> {
+public class LenientBooleanDeserializer extends ValueDeserializer<Boolean> {
 
     public static final LenientBooleanDeserializer INSTANCE = new LenientBooleanDeserializer();
 
@@ -22,8 +18,8 @@ public class LenientBooleanDeserializer extends JsonDeserializer<Boolean> {
 
 
     @Override
-    public Boolean deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
-        JsonToken token = jsonParser.getCurrentToken();
+    public Boolean deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws JacksonException {
+        JsonToken token = jsonParser.currentToken();
         if (jsonParser.isNaN()) {
             return false;
         }
@@ -32,14 +28,11 @@ public class LenientBooleanDeserializer extends JsonDeserializer<Boolean> {
         } else if (token.isNumeric()) {
             return jsonParser.getNumberValue().longValue() != 0;
         } else {
-            String text = jsonParser.getText().toLowerCase();
-            switch(text) {
-                case "true":
-                case "1":
-                    return true;
-                default:
-                    return false;
-            }
+            String text = jsonParser.getString().toLowerCase();
+            return switch (text) {
+                case "true", "1" -> true;
+                default -> false;
+            };
         }
 
     }

@@ -1,13 +1,10 @@
 package nl.vpro.jackson3;
 
-import java.io.IOException;
-import java.io.Serial;
-import java.util.Date;
-
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
-
 import tools.jackson.databind.deser.std.StdDeserializer;
+
+import java.util.Date;
 
 
 public class DateToJsonTimestamp {

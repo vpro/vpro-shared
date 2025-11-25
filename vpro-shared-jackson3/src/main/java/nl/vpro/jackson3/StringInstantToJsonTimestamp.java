@@ -12,10 +12,12 @@ import java.util.Optional;
 
 import jakarta.xml.bind.DatatypeConverter;
 
+import nl.vpro.jackson.NattySupport;
+
 import org.slf4j.event.Level;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.core.*;
+import tools.jackson.databind.*;
 
 /**
  * These can be used in conjunction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.

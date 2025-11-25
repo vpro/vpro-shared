@@ -1,24 +1,12 @@
 package nl.vpro.jackson3;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.*;
+import tools.jackson.databind.*;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.*;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.Duration;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import javax.xml.datatype.*;
 
 import nl.vpro.util.TimeUtils;
 
@@ -26,26 +14,26 @@ import nl.vpro.util.TimeUtils;
 public class XMLDurationToJsonTimestamp {
 
 
-    public static class Serializer extends JsonSerializer<Duration> {
+    public static class Serializer extends ValueSerializer<Duration> {
 
         @Override
-        public void serialize(Duration value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(Duration value, JsonGenerator jgen, SerializationContext ctxt) throws JacksonException {
             Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
             cal.setTimeInMillis(0);
             jgen.writeNumber(value.getTimeInMillis(cal));
         }
     }
 
-    public static class DeserializerDate extends JsonDeserializer<Date> {
+    public static class DeserializerDate extends ValueDeserializer<Date> {
         @Override
-        public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public Date deserialize(JsonParser jp, DeserializationContext ctxt)  {
             return new Date(jp.getLongValue());
         }
     }
 
-    public static class Deserializer extends JsonDeserializer<Duration> {
+    public static class Deserializer extends ValueDeserializer<Duration> {
         @Override
-        public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public Duration deserialize(JsonParser jp, DeserializationContext ctxt) {
             DatatypeFactory datatypeFactory;
             try {
                 datatypeFactory = DatatypeFactory.newInstance();
@@ -57,10 +45,10 @@ public class XMLDurationToJsonTimestamp {
         }
     }
 
-    public static class SerializerString extends JsonSerializer<String> {
+    public static class SerializerString extends ValueSerializer<String> {
 
         @Override
-        public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(String value, JsonGenerator jgen, SerializationContext ctxt) throws JacksonException {
             java.time.Duration duration = TimeUtils.parseDuration(value).orElse(null);
             if (duration != null) {
                 jgen.writeNumber(duration.toMillis());
@@ -68,11 +56,12 @@ public class XMLDurationToJsonTimestamp {
                 jgen.writeNull();
             }
         }
+
     }
 
-    public static class DeserializerJavaDuration extends JsonDeserializer<java.time.Duration> {
+    public static class DeserializerJavaDuration extends ValueDeserializer<java.time.Duration> {
         @Override
-        public java.time.Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public java.time.Duration deserialize(JsonParser jp, DeserializationContext ctxt)  {
             return java.time.Duration.ofMillis(jp.getLongValue());
         }
     }

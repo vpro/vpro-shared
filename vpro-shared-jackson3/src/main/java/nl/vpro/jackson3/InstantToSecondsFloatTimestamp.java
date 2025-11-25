@@ -5,21 +5,21 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParseException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonProcessingException;
+import tools.jackson.databind.*;
+import tools.jackson.databind.JsonDeserializer;
+import tools.jackson.databind.JsonSerializer;
+import tools.jackson.databind.SerializerProvider;
 
 
 public class InstantToSecondsFloatTimestamp {
 
     private InstantToSecondsFloatTimestamp() {}
 
-    public static class Serializer extends JsonSerializer<Instant> {
+    public static class Serializer extends ValueSerializer<Instant> {
 
 
         public static final Serializer INSTANCE = new Serializer();
@@ -35,14 +35,14 @@ public class InstantToSecondsFloatTimestamp {
     }
 
 
-    public static class Deserializer extends JsonDeserializer<Instant> {
+    public static class Deserializer extends ValueDeserializer<Instant> {
 
         public static final Deserializer INSTANCE = new Deserializer();
         @Override
-        public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public Instant deserialize(JsonParser jp, DeserializationContext ctxt) {
             try {
                 return Instant.ofEpochMilli((long) Float.parseFloat(jp.getValueAsString()) * 1000);
-            } catch (JsonParseException jpe) {
+            } catch ( jpe) {
                 try {
                     String s = jp.getValueAsString();
                     if (s == null) {

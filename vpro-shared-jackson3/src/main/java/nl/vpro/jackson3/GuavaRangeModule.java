@@ -1,16 +1,17 @@
 package nl.vpro.jackson3;
 
 import lombok.SneakyThrows;
+import tools.jackson.core.*;
+import tools.jackson.databind.*;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.databind.type.CollectionLikeType;
+import tools.jackson.databind.type.SimpleType;
 
 import java.io.IOException;
 import java.io.Serial;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.CollectionLikeType;
-import com.fasterxml.jackson.databind.type.SimpleType;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
 
@@ -30,7 +31,7 @@ public class GuavaRangeModule extends SimpleModule {
         addDeserializer(Range.class, Deserializer.INSTANCE);
     }
 
-    public static class Serializer extends com.fasterxml.jackson.databind.ser.std.StdSerializer<Range<?>> {
+    public static class Serializer extends StdSerializer<Range<?>> {
 
         @Serial
         private static final long serialVersionUID = -4394016847732058088L;
@@ -46,7 +47,7 @@ public class GuavaRangeModule extends SimpleModule {
         }
 
         @Override
-        public void serialize(Range<?> value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(Range<?> value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
             if (value == null) {
                 gen.writeNull();
             } else {
@@ -55,26 +56,26 @@ public class GuavaRangeModule extends SimpleModule {
 
                 if (value.hasLowerBound()) {
                     type = value.lowerEndpoint().getClass();
-                    gen.writeObjectField(LOWER_ENDPOINT, value.lowerEndpoint());
-                    gen.writeObjectField(LOWER_BOUND_TYPE, value.lowerBoundType());
+                    gen.writePOJOProperty(LOWER_ENDPOINT, value.lowerEndpoint());
+                    gen.writePOJOProperty(LOWER_BOUND_TYPE, value.lowerBoundType());
                 }
                 if (value.hasUpperBound()) {
                     type = value.upperEndpoint().getClass();
-                    gen.writeObjectField(UPPER_ENDPOINT, value.upperEndpoint());
-                    gen.writeObjectField(UPPER_BOUND_TYPE, value.upperBoundType());
+                    gen.writePOJOProperty(UPPER_ENDPOINT, value.upperEndpoint());
+                    gen.writePOJOProperty(UPPER_BOUND_TYPE, value.upperBoundType());
                 }
                 if (type != null) {
-                    gen.writeObjectField("type", type.getName());
+                    gen.writeStringProperty("type", type.getName());
                 }
                 gen.writeEndObject();
             }
         }
+
+
     }
 
     public static class Deserializer extends StdDeserializer<Range<?>> {
 
-        @Serial
-        private static final long serialVersionUID = -4394016847732058088L;
         public static Deserializer INSTANCE = new Deserializer();
 
 
@@ -91,14 +92,14 @@ public class GuavaRangeModule extends SimpleModule {
 
         @SneakyThrows
         @Override
-        public Range<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public Range<?> deserialize(JsonParser p, DeserializationContext ctxt) {
 
             if (p.currentToken() == JsonToken.START_OBJECT) {
                 p.nextToken();
             }
             JsonNode node = ctxt.readValue(p, JsonNode.class);
             if (node.has("type")) {
-                Class type = Class.forName(node.get("type").textValue());
+                Class type = Class.forName(node.get("type").stringValue());
                 return of(type, p, node);
             } else {
                 return Range.all();
@@ -116,11 +117,11 @@ public class GuavaRangeModule extends SimpleModule {
 
         if (node.has(LOWER_ENDPOINT)) {
             lowerBoundType = BoundType.valueOf(node.get(LOWER_BOUND_TYPE).asText());
-            lowerValue = p.getCodec().treeToValue(node.get(LOWER_ENDPOINT), clazz);
+            lowerValue = p.objectReadContext().readValue(p, node.get(LOWER_ENDPOINT), clazz);
         }
         if (node.has(UPPER_ENDPOINT)) {
             upperBoundType = BoundType.valueOf(node.get(UPPER_BOUND_TYPE).asText());
-            upperValue = p.getCodec().treeToValue(node.get(UPPER_ENDPOINT), clazz);
+            upperValue = p.(UPPER_ENDPOINT), clazz);
         }
         if (lowerValue != null) {
             if (upperValue != null) {

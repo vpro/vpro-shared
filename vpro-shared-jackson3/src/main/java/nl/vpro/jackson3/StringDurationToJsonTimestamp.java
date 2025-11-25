@@ -4,16 +4,10 @@
  */
 package nl.vpro.jackson3;
 
-import java.io.IOException;
-import java.time.Duration;
+import tools.jackson.core.*;
+import tools.jackson.databind.*;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import java.time.Duration;
 
 /**
  * @author rico
@@ -23,26 +17,27 @@ public class StringDurationToJsonTimestamp {
 
     private StringDurationToJsonTimestamp() {}
 
-    public static class Serializer extends JsonSerializer<String> {
+    public static class Serializer extends ValueSerializer<String> {
         public static final StringDurationToJsonTimestamp.Serializer INSTANCE = new StringDurationToJsonTimestamp.Serializer();
 
         @Override
-        public void serialize(String value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(String value, JsonGenerator jgen, SerializationContext ctxt) throws JacksonException {
             if (value == null) {
                 jgen.writeNull();
             } else {
                 jgen.writeNumber(Duration.parse(value).toMillis());
             }
         }
+
     }
 
 
-    public static class Deserializer extends JsonDeserializer<String> {
+    public static class Deserializer extends ValueDeserializer<String> {
 
         public static final StringDurationToJsonTimestamp.Deserializer INSTANCE = new StringDurationToJsonTimestamp.Deserializer();
 
         @Override
-        public String deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public String deserialize(JsonParser jp, DeserializationContext ctxt)  {
             return Duration.ofMillis(jp.getLongValue()).toString();
         }
     }

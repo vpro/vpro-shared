@@ -1,4 +1,4 @@
-package nl.vpro.jackson3;
+package nl.vpro.jackson;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,6 +8,7 @@ import java.util.*;
 import org.natty.DateGroup;
 import org.natty.Parser;
 
+import nl.vpro.jackson3.StringInstantToJsonTimestamp;
 import nl.vpro.util.BindingUtils;
 import nl.vpro.util.DateUtils;
 

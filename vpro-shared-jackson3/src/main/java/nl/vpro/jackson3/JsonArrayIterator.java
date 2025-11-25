@@ -11,9 +11,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
+import tools.jackson.core.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.NullNode;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
 
@@ -306,7 +306,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         final Function<T, Void> logging) throws IOException {
         try (JsonGenerator jg = Jackson3Mapper.getInstance().getFactory().createGenerator(out)) {
             jg.writeStartObject();
-            jg.writeArrayFieldStart("array");
+            jg.writeArrayPropertyStart("array");
             writeObjects(iterator, jg, logging);
             jg.writeEndArray();
             jg.writeEndObject();

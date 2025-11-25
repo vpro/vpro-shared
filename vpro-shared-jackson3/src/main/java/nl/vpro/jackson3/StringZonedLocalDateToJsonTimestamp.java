@@ -1,13 +1,12 @@
 package nl.vpro.jackson3;
 
-import java.io.IOException;
+import tools.jackson.core.*;
+import tools.jackson.databind.*;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
 
 import nl.vpro.util.BindingUtils;
 import nl.vpro.util.TimeUtils;
@@ -27,12 +26,12 @@ public class StringZonedLocalDateToJsonTimestamp {
         .withLocale(Locale.US);
 
 
-    public static class Serializer extends JsonSerializer<Object> {
+    public static class Serializer extends ValueSerializer<Object> {
 
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
-        public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(Object value, JsonGenerator jgen, SerializationContext ctxt) throws JacksonException {
             if (value == null) {
                 jgen.writeNull();
             } else {
@@ -42,16 +41,18 @@ public class StringZonedLocalDateToJsonTimestamp {
                 jgen.writeNumber(((LocalDate) value).atStartOfDay(BindingUtils.DEFAULT_ZONE).toInstant().toEpochMilli());
             }
         }
+
+
     }
 
-    public static class Deserializer extends JsonDeserializer<Object> {
+    public static class Deserializer extends ValueDeserializer<Object> {
 
         public static final Deserializer INSTANCE = new Deserializer();
         @Override
-        public LocalDate deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public LocalDate deserialize(JsonParser jp, DeserializationContext ctxt)  {
             try {
                 return Instant.ofEpochMilli(jp.getLongValue()).atZone(ZONE).toLocalDate();
-            } catch (JsonParseException jps) {
+            } catch (JacksonException jps) {
                 String s = jp.getValueAsString();
                 if (s == null) {
                     return null;

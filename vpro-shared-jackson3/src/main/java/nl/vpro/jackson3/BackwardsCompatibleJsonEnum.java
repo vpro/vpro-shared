@@ -9,7 +9,7 @@ import tools.jackson.databind.*;
 
 /**
  * Newer jackson version suddenly recognized @XmlEnumValue. This makes it possible to fall back to old behaviour.
- * {@link nl.vpro.domain.media.support.Workflow}
+ * {@code nl.vpro.domain.media.support.Workflow}
  */
 @Slf4j
 public class BackwardsCompatibleJsonEnum {

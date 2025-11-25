@@ -7,6 +7,18 @@ package nl.vpro.jackson3;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import nl.vpro.jackson.Views;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.*;
+import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
+import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.databind.ser.PropertyFilter;
+import tools.jackson.databind.ser.std.SimpleFilterProvider;
+import tools.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
+
 import java.io.IOException;
 import java.io.Serial;
 import java.lang.reflect.InvocationTargetException;
@@ -16,19 +28,6 @@ import java.util.function.Predicate;
 
 import org.slf4j.event.Level;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.ser.PropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
 import com.google.common.annotations.Beta;
 
 import nl.vpro.logging.simple.SimpleLogger;
@@ -58,23 +57,6 @@ public class Jackson3Mapper extends ObjectMapper {
 
 
 
-    @Deprecated
-    public static final Jackson3Mapper INSTANCE = getInstance();
-    @Deprecated
-    public static final Jackson3Mapper LENIENT = getLenientInstance();
-    @Deprecated
-    public static final Jackson3Mapper STRICT = getStrictInstance();
-    @Deprecated
-    public static final Jackson3Mapper PRETTY_STRICT = getPrettyStrictInstance();
-
-    @Deprecated
-    public static final Jackson3Mapper PRETTY = getPrettyInstance();
-    @Deprecated
-    public static final Jackson3Mapper PUBLISHER = getPublisherInstance();
-    @Deprecated
-    public static final Jackson3Mapper PRETTY_PUBLISHER = getPublisherInstance();
-    @Deprecated
-    public static final Jackson3Mapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
 
 
     private static final ThreadLocal<Jackson3Mapper> THREAD_LOCAL = ThreadLocal.withInitial(Jackson3Mapper::getInstance);
@@ -175,7 +157,7 @@ public class Jackson3Mapper extends ObjectMapper {
         }
     }
 
-    @SneakyThrows({JsonProcessingException.class})
+    @SneakyThrows({JacksonException.class})
     public static <T> T lenientTreeToValue(JsonNode jsonNode, Class<T> clazz) {
         return getLenientInstance().treeToValue(jsonNode, clazz);
     }

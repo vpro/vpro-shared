@@ -15,10 +15,10 @@ import jakarta.ws.rs.ext.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.*;
+import tools.jackson.databind.jsontype.TypeDeserializer;
+import tools.jackson.databind.jsontype.TypeIdResolver;
+import tools.jackson.databind.node.ObjectNode;
 
 import nl.vpro.jackson3.Jackson3Mapper;
 
@@ -58,7 +58,7 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         final JavaType javaType = mapper.getTypeFactory().constructType(genericType);
         final JsonNode jsonNode = mapper.readTree(entityStream);
         if (jsonNode instanceof ObjectNode objectNode) {
-            final TypeDeserializer typeDeserializer = mapper.getDeserializationConfig().findTypeDeserializer(javaType);
+            final TypeDeserializer typeDeserializer = mapper.deserializationConfig().getTypeResolverProvider().findTypeDeserializer(javaType);
             if (typeDeserializer != null) {
                 final String propertyName = typeDeserializer.getPropertyName();
                 final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();
