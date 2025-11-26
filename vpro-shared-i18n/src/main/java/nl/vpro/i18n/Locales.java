@@ -56,7 +56,7 @@ public final class Locales {
     /**
      * The locale representing the 'undetermined' language {@link ISO_639#UND}
      */
-    public static final Locale UNDETERMINED  = of(ISO_639.iso639("und"));
+    public static final Locale UNDETERMINED  = of(ISO_639.UND);
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
 
