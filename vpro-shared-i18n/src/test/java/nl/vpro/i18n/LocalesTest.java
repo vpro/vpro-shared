@@ -169,4 +169,9 @@ class LocalesTest {
         assertThat(DUTCH_U.toLanguageTag()).isEqualTo("nl");
         assertThat(DUTCH_U.toString()).isEqualTo("nl_UNDEFINED");
     }
+
+    @Test
+    public void undefined() {
+        assertThat(UNDETERMINED.toString()).isEqualTo("und");
+    }
 }
