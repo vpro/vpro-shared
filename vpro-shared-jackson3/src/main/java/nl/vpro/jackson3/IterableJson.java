@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.core.JsonParser;
+import tools.jackson.core.*;
 import tools.jackson.databind.*;
 import tools.jackson.databind.JsonDeserializer;
 import tools.jackson.databind.JsonSerializer;
@@ -20,7 +19,7 @@ public class IterableJson {
 
     public static class Serializer extends ValueSerializer<Iterable<?>> {
         @Override
-        public void serialize(Iterable value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        public void serialize(Iterable<?> value, JsonGenerator jgen, SerializationContext ctxt) throws JacksonException {
 
             if (value == null) {
                 jgen.writeNull();
@@ -45,6 +44,8 @@ public class IterableJson {
                 }
             }
         }
+
+
     }
 
     private static final Set<Class<?>> simpleTypes = new HashSet<>(Arrays.asList(String.class, Character.class, Boolean.class, Integer.class, Float.class, Long.class, Double.class));
@@ -76,7 +77,7 @@ public class IterableJson {
 
 
         @Override
-        public Iterable<T> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+        public Iterable<T> deserialize(JsonParser jp, DeserializationContext ctxt) {
             if (jp.streamReadContext().inObject()) {
                 if (! isSimple) {
                     jp.clearCurrentToken();
@@ -86,7 +87,7 @@ public class IterableJson {
             } else if (jp.streamReadContext().inArray()) {
                 List<T> list = new ArrayList<>();
                 jp.clearCurrentToken();
-                Iterator<T> i = jp.read(memberClass);
+                Iterator<T> i = jp.readValueAs(memberClass);
                 while (i.hasNext()) {
                     list.add(i.next());
                 }

@@ -2,6 +2,9 @@ package nl.vpro.jackson3;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.*;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.NullNode;
 
 import java.io.*;
 import java.util.*;
@@ -11,9 +14,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import tools.jackson.core.*;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.NullNode;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
 
@@ -28,6 +28,8 @@ import nl.vpro.util.CountedIterator;
 public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
 
+    private final ObjectMapper mapper;
+
     private final JsonParser jp;
 
     private T next = null;
@@ -36,7 +38,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private Boolean hasNext;
 
-    private final BiFunction<JsonParser, TreeNode, ? extends T> valueCreator;
+    private final BiFunction<ObjectMapper, TreeNode, ? extends T> valueCreator;
 
     @Getter
     @Setter
@@ -67,7 +69,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         this(inputStream, null, clazz, callback, null, null, null, null, null, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectMapper, TreeNode, T> valueCreator) throws IOException {
         this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
     }
 
@@ -98,7 +100,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      @lombok.Builder(builderClassName = "Builder", builderMethodName = "builder")
      private JsonArrayIterator(
          @NonNull  InputStream inputStream,
-         @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
+         @Nullable final BiFunction<ObjectMapper, TreeNode,  T> valueCreator,
          @Nullable final Class<T> valueClass,
          @Nullable Runnable callback,
          @Nullable String sizeField,
@@ -111,7 +113,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          if (inputStream == null) {
              throw new IllegalArgumentException("No inputStream given");
          }
-         this.jp = (objectMapper == null ? Jackson3Mapper.getLenientInstance() : objectMapper).getFactory().createParser(inputStream);
+         this.mapper = objectMapper == null ? Jackson3Mapper.getLenientInstance() : objectMapper;
+         this.jp = this.mapper.createParser(inputStream);
          this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
          if (valueCreator != null && valueClass != null) {
              throw new IllegalArgumentException();
@@ -136,8 +139,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                  break;
              }
              this.eventListener.accept(new TokenEvent(token));
-             if (token == JsonToken.FIELD_NAME) {
-                 fieldName = jp.getCurrentName();
+             if (token == JsonToken.PROPERTY_NAME) {
+                 fieldName = jp.currentName();
              }
              if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
                  tmpSize = jp.getLongValue();
@@ -162,11 +165,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.skipNulls = skipNulls == null || skipNulls;
      }
 
-    private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
-        return (jp, tree) -> {
+    private static <T> BiFunction<ObjectMapper, TreeNode, T> valueCreator(Class<T> clazz) {
+        return (m, tree) -> {
             try {
-                return jp.getCodec().treeToValue(tree, clazz);
-            } catch (JsonProcessingException e) {
+                return m.treeToValue(tree, clazz);
+            } catch (JacksonException e) {
                 throw new ValueReadException(e);
             }
         };
@@ -232,7 +235,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                                 logger.warn("Found {} nulls. Will be skipped", foundNulls);
                             }
 
-                            next = valueCreator.apply(jp, tree);
+                            next = valueCreator.apply(mapper, tree);
                             eventListener.accept(new NextEvent(next));
                             hasNext = true;
                         }
@@ -241,8 +244,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         foundNulls++;
                         logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
                     }
-                } catch (IOException e) {
-                    callbackBeforeThrow(new RuntimeException(e));
                 } catch (RuntimeException rte) {
                     callbackBeforeThrow(rte);
                 }
@@ -304,7 +305,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         final CountedIterator<T> iterator,
         final OutputStream out,
         final Function<T, Void> logging) throws IOException {
-        try (JsonGenerator jg = Jackson3Mapper.getInstance().getFactory().createGenerator(out)) {
+        try (JsonGenerator jg = Jackson3Mapper.getInstance().createGenerator(out)) {
             jg.writeStartObject();
             jg.writeArrayPropertyStart("array");
             writeObjects(iterator, jg, logging);
@@ -320,7 +321,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     public static <T> void writeArray(
         final CountedIterator<T> iterator,
         final OutputStream out, final Function<T, Void> logging) throws IOException {
-        try (JsonGenerator jg = Jackson3Mapper.getInstance().getFactory().createGenerator(out)) {
+        try (JsonGenerator jg = Jackson3Mapper.getInstance().createGenerator(out)) {
             jg.writeStartArray();
             writeObjects(iterator, jg, logging);
             jg.writeEndArray();
@@ -341,7 +342,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             try {
                 change = iterator.next();
                 if (change != null) {
-                    jg.writeObject(change);
+                    jg.writePOJO(change);
                 } else {
                     jg.writeNull();
                 }
@@ -357,8 +358,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     cause = cause.getCause();
                 }
 
-                log.warn(e.getClass().getCanonicalName() + " " + e.getMessage());
-                jg.writeObject(e.getMessage());
+                log.warn("{} {}", e.getClass().getCanonicalName(), e.getMessage());
+                jg.writePOJO(e.getMessage());
             }
 
         }
@@ -384,7 +385,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         @Serial
         private static final long serialVersionUID = 6976771876437440576L;
 
-        public ValueReadException(JsonProcessingException e) {
+        public ValueReadException(JacksonException e) {
             super(e);
         }
     }

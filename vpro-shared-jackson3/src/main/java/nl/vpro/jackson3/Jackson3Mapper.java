@@ -15,6 +15,7 @@ import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.*;
 import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
 import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.ser.PropertyFilter;
 import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import tools.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
@@ -45,7 +46,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
  */
 @Slf4j
-public class Jackson3Mapper extends ObjectMapper {
+public class Jackson3Mapper extends JsonMapper {
 
     @Serial
     private static final long serialVersionUID = 8353430660109292010L;
@@ -57,13 +58,25 @@ public class Jackson3Mapper extends ObjectMapper {
 
 
 
+    public static final Jackson3Mapper INSTANCE = getInstance();
+    public static final Jackson3Mapper LENIENT = getLenientInstance();
+    public static final Jackson3Mapper STRICT = getStrictInstance();
+    public static final Jackson3Mapper PRETTY_STRICT = getPrettyStrictInstance();
+    public static final Jackson3Mapper PRETTY = getPrettyInstance();
+    public static final Jackson3Mapper PUBLISHER = getPublisherInstance();
+    public static final Jackson3Mapper PRETTY_PUBLISHER = getPublisherInstance();
+
+    public static final Jackson3Mapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
 
 
     private static final ThreadLocal<Jackson3Mapper> THREAD_LOCAL = ThreadLocal.withInitial(Jackson3Mapper::getInstance);
 
 
+
     public static Jackson3Mapper getInstance()  {
         Jackson3Mapper mapper =  new Jackson3Mapper("instance");
+        Jackson3Mapper.builder()
+            .build();
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Forward.class));
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Forward.class));
         return mapper;

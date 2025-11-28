@@ -5,19 +5,17 @@
 package nl.vpro.jackson3;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.*;
+import tools.jackson.databind.*;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 
 import jakarta.xml.bind.DatatypeConverter;
 
-import nl.vpro.jackson.NattySupport;
-
 import org.slf4j.event.Level;
 
-import tools.jackson.core.*;
-import tools.jackson.databind.*;
+import nl.vpro.util.NattySupport;
 
 /**
  * These can be used in conjunction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
@@ -32,11 +30,11 @@ public class StringInstantToJsonTimestamp {
 
     private StringInstantToJsonTimestamp() {}
 
-    public static class Serializer extends JsonSerializer<Object> {
+    public static class Serializer extends ValueSerializer<Object> {
         public static final StringInstantToJsonTimestamp.Serializer INSTANCE = new StringInstantToJsonTimestamp.Serializer();
 
-        @Override
-        public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+         @Override
+        public void serialize(Object value, JsonGenerator jgen, SerializationContext ctxt) throws JacksonException {
             if (value == null) {
                 jgen.writeNull();
             } else if (value instanceof Instant) { // if no JaxbAnnotationIntrospector
@@ -50,6 +48,7 @@ public class StringInstantToJsonTimestamp {
                 }
             }
         }
+
     }
 
     static Instant parseDateTime(String value) {
@@ -78,12 +77,12 @@ public class StringInstantToJsonTimestamp {
         }
     }
 
-    public static class Deserializer extends JsonDeserializer<Instant> {
+    public static class Deserializer extends ValueDeserializer<Instant> {
 
         public static final StringInstantToJsonTimestamp.Deserializer INSTANCE = new StringInstantToJsonTimestamp.Deserializer();
 
         @Override
-        public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+        public Instant deserialize(JsonParser jp, DeserializationContext ctxt) {
             switch (jp.currentTokenId()) {
                 case JsonTokenId.ID_NUMBER_INT -> {
                     return Instant.ofEpochMilli(jp.getLongValue());
@@ -93,9 +92,9 @@ public class StringInstantToJsonTimestamp {
                 }
                 case JsonTokenId.ID_STRING -> {
                     try {
-                        return parseDateTime(jp.getText());
+                        return parseDateTime(jp.getString());
                     } catch (IllegalArgumentException iae) {
-                        log.warn("Could not parse {}. Writing null to json", jp.getText());
+                        log.warn("Could not parse {}. Writing null to json", jp.getString());
                         return null;
                     }
                 }

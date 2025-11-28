@@ -1,7 +1,7 @@
 package nl.vpro.jackson;
 
 import com.google.common.annotations.Beta;
-import nl.vpro.jackson3.Jackson3Mapper;
+
 
 /**
  * Several setups at VPRO and at NPO involve a backend system that publishes JSON to ElasticSearch.

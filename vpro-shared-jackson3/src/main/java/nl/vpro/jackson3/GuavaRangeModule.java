@@ -33,8 +33,6 @@ public class GuavaRangeModule extends SimpleModule {
 
     public static class Serializer extends StdSerializer<Range<?>> {
 
-        @Serial
-        private static final long serialVersionUID = -4394016847732058088L;
         public static Serializer INSTANCE = new Serializer();
 
         protected Serializer() {
@@ -116,11 +114,11 @@ public class GuavaRangeModule extends SimpleModule {
         C upperValue = null;
 
         if (node.has(LOWER_ENDPOINT)) {
-            lowerBoundType = BoundType.valueOf(node.get(LOWER_BOUND_TYPE).asText());
+            lowerBoundType = BoundType.valueOf(node.get(LOWER_BOUND_TYPE).asString());
             lowerValue = p.objectReadContext().readValue(p, node.get(LOWER_ENDPOINT), clazz);
         }
         if (node.has(UPPER_ENDPOINT)) {
-            upperBoundType = BoundType.valueOf(node.get(UPPER_BOUND_TYPE).asText());
+            upperBoundType = BoundType.valueOf(node.get(UPPER_BOUND_TYPE).asString());
             upperValue = p.(UPPER_ENDPOINT), clazz);
         }
         if (lowerValue != null) {

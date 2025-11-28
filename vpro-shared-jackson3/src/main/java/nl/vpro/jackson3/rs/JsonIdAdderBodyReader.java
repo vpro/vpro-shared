@@ -2,7 +2,6 @@ package nl.vpro.jackson3.rs;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -16,6 +15,7 @@ import jakarta.ws.rs.ext.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import tools.jackson.databind.*;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.TypeDeserializer;
 import tools.jackson.databind.jsontype.TypeIdResolver;
 import tools.jackson.databind.node.ObjectNode;
@@ -49,8 +49,8 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         Annotation[] annotations,
         MediaType mediaType,
         MultivaluedMap<String, String> httpHeaders,
-        InputStream entityStream) throws WebApplicationException, IOException {
-        ObjectMapper mapper =  providers == null ? null : providers.getContextResolver(ObjectMapper.class,  MediaType.APPLICATION_JSON_TYPE).getContext(type);
+        InputStream entityStream) throws WebApplicationException {
+        JsonMapper mapper =  providers == null ? null : providers.getContextResolver(JsonMapper.class,  MediaType.APPLICATION_JSON_TYPE).getContext(type);
         if (mapper == null) {
             log.info("No mapper found in {}", providers);
             mapper = Jackson3Mapper.getLenientInstance();
@@ -58,7 +58,8 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         final JavaType javaType = mapper.getTypeFactory().constructType(genericType);
         final JsonNode jsonNode = mapper.readTree(entityStream);
         if (jsonNode instanceof ObjectNode objectNode) {
-            final TypeDeserializer typeDeserializer = mapper.deserializationConfig().getTypeResolverProvider().findTypeDeserializer(javaType);
+            final TypeDeserializer typeDeserializer = mapper.deserializationConfig().getTypeResolverProvider()
+                .findTypeDeserializer(javaType);
             if (typeDeserializer != null) {
                 final String propertyName = typeDeserializer.getPropertyName();
                 final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType();

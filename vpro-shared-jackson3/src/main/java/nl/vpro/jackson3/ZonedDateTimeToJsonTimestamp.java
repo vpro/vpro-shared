@@ -25,8 +25,6 @@ public class ZonedDateTimeToJsonTimestamp {
                 jgen.writeNumber(value.toInstant().toEpochMilli());
             }
         }
-
-
     }
 
     public static class Deserializer extends ValueDeserializer<ZonedDateTime> {

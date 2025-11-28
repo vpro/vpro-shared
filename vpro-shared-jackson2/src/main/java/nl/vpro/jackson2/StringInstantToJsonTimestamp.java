@@ -17,6 +17,8 @@ import org.slf4j.event.Level;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 
+import nl.vpro.util.NattySupport;
+
 /**
  * These can be used in conjunction with InstantXmlAdapter, if you want 'millis since epoch' in JSON, but formatted date stamps in xml.
  * (this is what we normally do)

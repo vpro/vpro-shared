@@ -1,10 +1,10 @@
 package nl.vpro.jackson3;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
-
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 import nl.vpro.util.TimeUtils;
 
@@ -37,7 +37,7 @@ public class LocalDateTimeToJsonDateWithSpace {
         public static final Deserializer INSTANCE = new Deserializer();
 
         @Override
-        public LocalDateTime deserialize(JsonParser jp, DeserializationContext ctxt) {
+        public LocalDateTime deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
             String text = jp.getString();
             if (text == null) {
                 return null;
@@ -45,7 +45,8 @@ public class LocalDateTimeToJsonDateWithSpace {
                 try {
                     return LocalDateTime.parse(text.replaceFirst(" ", "T"));
                 } catch (DateTimeParseException dtf) {
-                    return TimeUtils.parse(text).map(i -> i.atZone(TimeUtils.ZONE_ID).toLocalDateTime()).orElseThrow(() -> JacksonException.wrapWithPath(dtf, "Cannot parse " + text));
+                    return TimeUtils.parse(text).map(i -> i.atZone(TimeUtils.ZONE_ID).toLocalDateTime())
+                        .orElseThrow(() -> new JacksonException("Cannot parse " + text) {});
                 }
             }
         }
