@@ -1,6 +1,7 @@
-package nl.vpro.jackson2;
+package nl.vpro.jackson;
 
 import com.google.common.annotations.Beta;
+
 
 /**
  * Several setups at VPRO and at NPO involve a backend system that publishes JSON to ElasticSearch.
@@ -42,7 +43,7 @@ public class Views {
     }
 
     /**
-     * New fields may be temporary marked 'ForwardPublisher'. Which will mean that {@link Jackson2Mapper#getBackwardsPublisherInstance()} will ignore them.
+     * New fields may be temporary marked 'ForwardPublisher'. Which will mean that {@link Jackson3Mapper#getBackwardsPublisherInstance()} will ignore them.
      * <p>
      * That way we can serialize for checking purposes compatible with old values in ES.
      * <p>

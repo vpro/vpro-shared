@@ -101,5 +101,10 @@
       <artifactId>junit-platform-launcher</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>io.github.natty-parser</groupId>
+      <artifactId>natty</artifactId>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 </project>

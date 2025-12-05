@@ -13,7 +13,3 @@ Also `nl.vpro.jackson2.Views` is provided which defines a few classes which can 
 
 This package also contains `nl.vpro.jackson2.JsonArrayIterator`. A tool to wrap, using jackson, a stream of json object into an iterator of java objects.
 
-
-## AfterUnmarshallDeserializer
-
-Jackson lacks support for `#afterUnmarshall'. The 'nl.vpro.jackson2.AfterUnmarshalDeserializer' deserializer adds it. This can e.g. be used to add references to parent objects.
