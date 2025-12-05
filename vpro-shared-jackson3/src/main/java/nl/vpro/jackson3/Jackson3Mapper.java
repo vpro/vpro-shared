@@ -13,6 +13,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.*;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
 import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import tools.jackson.databind.json.JsonMapper;
@@ -46,7 +47,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
  */
 @Slf4j
-public class Jackson3Mapper extends JsonMapper {
+public class Jackson3Mapper {
 
     @Serial
     private static final long serialVersionUID = 8353430660109292010L;
@@ -58,34 +59,52 @@ public class Jackson3Mapper extends JsonMapper {
 
 
 
-    public static final Jackson3Mapper INSTANCE = getInstance();
-    public static final Jackson3Mapper LENIENT = getLenientInstance();
-    public static final Jackson3Mapper STRICT = getStrictInstance();
-    public static final Jackson3Mapper PRETTY_STRICT = getPrettyStrictInstance();
-    public static final Jackson3Mapper PRETTY = getPrettyInstance();
-    public static final Jackson3Mapper PUBLISHER = getPublisherInstance();
-    public static final Jackson3Mapper PRETTY_PUBLISHER = getPublisherInstance();
+    public static final JsonMapper INSTANCE = getInstance();
+    public static final JsonMapper LENIENT = getLenientInstance();
+    public static final JsonMapper STRICT = getStrictInstance();
+    public static final JsonMapper PRETTY_STRICT = getPrettyStrictInstance();
+    public static final JsonMapper PRETTY = getPrettyInstance();
+    public static final JsonMapper PUBLISHER = getPublisherInstance();
+    public static final JsonMapper PRETTY_PUBLISHER = getPublisherInstance();
 
-    public static final Jackson3Mapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
+    public static final JsonMapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
 
 
     private static final ThreadLocal<Jackson3Mapper> THREAD_LOCAL = ThreadLocal.withInitial(Jackson3Mapper::getInstance);
 
 
 
-    public static Jackson3Mapper getInstance()  {
-        Jackson3Mapper mapper =  new Jackson3Mapper("instance");
-        Jackson3Mapper.builder()
+    public static JsonMapper getInstance()  {
+
+        var mapper = JsonMapper.builder()
             .build();
-        mapper.setConfig(mapper.getSerializationConfig().withView(Views.Forward.class));
-        mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Forward.class));
+
+        var config = mapper.serializationConfig().withView(Views.Forward.class);
+        mapper.rebuild()
+            .buildSerializationConfig(config, )
+        config.
+        ;
+
+            .writerWithView()
+
+                .buildSerializationConfig()
+
+
+
+        mapper.setConfig(mapper.serializationConfig().withView(Views.Forward.class));
+        mapper.setConfig(mapper.deserializationConfig().withView(Views.Forward.class));
+            .wi(c -> {
+
+            })
+            .build();
+
         return mapper;
 
     }
 
-    public static Jackson3Mapper getLenientInstance() {
+    public static JsonMapper getLenientInstance() {
         Jackson3Mapper lenient = new Jackson3Mapper("lenient");
-        lenient.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        lenient.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         lenient.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         lenient.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
         lenient.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
@@ -94,13 +113,13 @@ public class Jackson3Mapper extends JsonMapper {
         return lenient;
     }
 
-    public static Jackson3Mapper getPrettyInstance() {
+    public static JsonMapper getPrettyInstance() {
         Jackson3Mapper pretty = new Jackson3Mapper("pretty");
         pretty.enable(SerializationFeature.INDENT_OUTPUT);
         return pretty;
     }
 
-    public static Jackson3Mapper getPrettyStrictInstance() {
+    public static JsonMapper getPrettyStrictInstance() {
         Jackson3Mapper pretty_and_strict = new Jackson3Mapper("pretty_strict");
         pretty_and_strict.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -112,7 +131,7 @@ public class Jackson3Mapper extends JsonMapper {
     }
 
 
-    public static Jackson3Mapper getStrictInstance() {
+    public static JsonMapper getStrictInstance() {
         Jackson3Mapper strict = new Jackson3Mapper("strict");
         strict.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         strict.setConfig(strict.getSerializationConfig().withView(Views.Forward.class));
@@ -121,7 +140,7 @@ public class Jackson3Mapper extends JsonMapper {
         return strict;
     }
 
-    public static Jackson3Mapper getPublisherInstance() {
+    public static JsonMapper getPublisherInstance() {
         Jackson3Mapper publisher = new Jackson3Mapper("publisher");
         publisher.setConfig(publisher.getSerializationConfig().withView(Views.ForwardPublisher.class));
         publisher.setConfig(publisher.getDeserializationConfig().withView(Views.Forward.class));
@@ -129,7 +148,7 @@ public class Jackson3Mapper extends JsonMapper {
         return publisher;
     }
 
-    public static Jackson3Mapper getPrettyPublisherInstance() {
+    public static JsonMapper getPrettyPublisherInstance() {
         Jackson3Mapper prettyPublisher = new Jackson3Mapper("pretty_publisher");
         prettyPublisher.setConfig(prettyPublisher.getSerializationConfig().withView(Views.ForwardPublisher.class));
         prettyPublisher.setConfig(prettyPublisher.getDeserializationConfig().withView(Views.Forward.class));
@@ -137,7 +156,7 @@ public class Jackson3Mapper extends JsonMapper {
         return prettyPublisher;
     }
 
-    public static Jackson3Mapper getBackwardsPublisherInstance() {
+    public static JsonMapper getBackwardsPublisherInstance() {
         Jackson3Mapper backwardsPublisher = new Jackson3Mapper("backwards_publisher");
         backwardsPublisher.setConfig(backwardsPublisher.getSerializationConfig().withView(Views.Publisher.class));
         backwardsPublisher.setConfig(backwardsPublisher.getDeserializationConfig().withView(Views.Normal.class));
@@ -146,20 +165,20 @@ public class Jackson3Mapper extends JsonMapper {
     }
 
     @Beta
-    public static Jackson3Mapper getModelInstance() {
+    public static JsonMapper getModelInstance() {
         Jackson3Mapper model = new Jackson3Mapper("model");
         model.setConfig(model.getSerializationConfig().withView(Views.Model.class));
         return model;
     }
 
     @Beta
-    public static Jackson3Mapper getModelAndNormalInstance() {
+    public static JsonMapper getModelAndNormalInstance() {
         Jackson3Mapper modalAndNormal = new Jackson3Mapper("model_and_normal");
         modalAndNormal.setConfig(modalAndNormal.getSerializationConfig().withView(Views.ModelAndNormal.class));
         return modalAndNormal;
     }
 
-    public static Jackson3Mapper getThreadLocal() {
+    public static JsonMapper getThreadLocal() {
         return THREAD_LOCAL.get();
     }
     public static void setThreadLocal(Jackson3Mapper set) {
@@ -177,7 +196,7 @@ public class Jackson3Mapper extends JsonMapper {
 
     private final String toString;
 
-    private Jackson3Mapper(String toString, Predicate<Module> predicate) {
+    private Jackson3Mapper(String toString, Predicate<JacksonModule> predicate) {
         configureMapper(this, predicate);
         this.toString = toString;
     }
@@ -201,7 +220,7 @@ public class Jackson3Mapper extends JsonMapper {
         configureMapper(mapper, m -> true);
     }
 
-    public static void configureMapper(ObjectMapper mapper, Predicate<Module> filter) {
+    public static void configureMapper(ObjectMapper mapper, Predicate<JacksonModule> filter) {
         mapper.setFilterProvider(FILTER_PROVIDER);
 
          AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
@@ -242,8 +261,8 @@ public class Jackson3Mapper extends JsonMapper {
         // jdk8Module.configureAbsentsAsNulls(true); This I think it covered by com.fasterxml.jackson.annotation.JsonInclude.Include.NON_ABSENT
         register(mapper, filter, jdk8Module);
 
-        mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
-        mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
+        mapper.setConfig(mapper.serializationConfig().withView(Views.Normal.class));
+        mapper.setConfig(mapper.serializationConfig().withView(Views.Normal.class));
 
 
         //SimpleModule module = new SimpleModule();
@@ -251,8 +270,8 @@ public class Jackson3Mapper extends JsonMapper {
         //mapper.registerModule(module);
 
         try {
-            Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");
-            register(mapper, filter, (com.fasterxml.jackson.databind.Module) avro.getDeclaredConstructor().newInstance());
+            Class<?> avro = Class.forName("nl.vpro.jackson3.SerializeAvroModule");
+            register(mapper, filter, (tools.jackson.databind.Module) avro.getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
@@ -278,7 +297,7 @@ public class Jackson3Mapper extends JsonMapper {
         log.info("Installed filter {} -> {}", key, filter);
     }
 
-    private static void register(ObjectMapper mapper, Predicate<Module> predicate, Module module) {
+    private static void register(ObjectMapper mapper, Predicate<JacksonModule> predicate, JacksonModule module) {
         if (predicate.test(module)) {
             mapper.registerModule(module);
         }
@@ -310,17 +329,12 @@ public class Jackson3Mapper extends JsonMapper {
                 return HttpResponse.BodySubscribers.mapping(
                     HttpResponse.BodySubscribers.ofInputStream(),
                     body -> {
-                        try {
-                            SimpleLogger simple = slf4j(log);
-                            if (simple.isEnabled(level)) {
-                                body = new LoggingInputStream(simple, body, level);
-                            }
-                            return readValue(body, type);
-
-                        } catch (IOException e) {
-                            log.warn(e.getMessage(), e);
-                            return null;
+                        SimpleLogger simple = slf4j(log);
+                        if (simple.isEnabled(level)) {
+                            body = new LoggingInputStream(simple, body, level);
                         }
+                        return readValue(body, type);
+
                     });
             }
         };

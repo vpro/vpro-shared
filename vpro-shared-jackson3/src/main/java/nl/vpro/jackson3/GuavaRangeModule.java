@@ -98,7 +98,7 @@ public class GuavaRangeModule extends SimpleModule {
             JsonNode node = ctxt.readValue(p, JsonNode.class);
             if (node.has("type")) {
                 Class type = Class.forName(node.get("type").stringValue());
-                return of(type, p, node);
+                return of(type, ctxt, node);
             } else {
                 return Range.all();
             }
@@ -106,7 +106,7 @@ public class GuavaRangeModule extends SimpleModule {
         }
     }
 
-    static <C extends Comparable<C>> Range<C> of(Class<C> clazz, JsonParser p, JsonNode node) throws IOException {
+    static <C extends Comparable<C>> Range<C> of(Class<C> clazz, DeserializationContext context, JsonNode node) throws IOException {
 
         BoundType lowerBoundType = null;
         C lowerValue = null;
@@ -115,11 +115,12 @@ public class GuavaRangeModule extends SimpleModule {
 
         if (node.has(LOWER_ENDPOINT)) {
             lowerBoundType = BoundType.valueOf(node.get(LOWER_BOUND_TYPE).asString());
-            lowerValue = p.objectReadContext().readValue(p, node.get(LOWER_ENDPOINT), clazz);
+            JsonNode jsonNode = node.get(LOWER_ENDPOINT);
+            lowerValue = context.readTreeAsValue(node.get(LOWER_ENDPOINT), clazz);
         }
         if (node.has(UPPER_ENDPOINT)) {
             upperBoundType = BoundType.valueOf(node.get(UPPER_BOUND_TYPE).asString());
-            upperValue = p.(UPPER_ENDPOINT), clazz);
+            upperValue = context.readTreeAsValue(node.get(UPPER_ENDPOINT), clazz);
         }
         if (lowerValue != null) {
             if (upperValue != null) {
@@ -135,7 +136,6 @@ public class GuavaRangeModule extends SimpleModule {
             }
         }
     }
-
 
 
 }

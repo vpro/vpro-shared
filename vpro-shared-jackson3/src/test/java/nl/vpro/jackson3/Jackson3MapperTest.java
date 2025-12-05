@@ -1,6 +1,8 @@
 package nl.vpro.jackson3;
 
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,14 +12,11 @@ import jakarta.xml.bind.annotation.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Log4j2
-public class Jackson2MapperTest {
+public class Jackson3MapperTest {
 
     public enum EnumValues {
         a,
@@ -75,7 +74,7 @@ public class Jackson2MapperTest {
     }
 
     @Test
-    public void write() throws JsonProcessingException {
+    public void write() throws JacksonException {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.of(3);
@@ -83,7 +82,7 @@ public class Jackson2MapperTest {
     }
 
     @Test
-    public void writeWithEmptyOptional() throws JsonProcessingException {
+    public void writeWithEmptyOptional() throws JacksonException {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.empty();

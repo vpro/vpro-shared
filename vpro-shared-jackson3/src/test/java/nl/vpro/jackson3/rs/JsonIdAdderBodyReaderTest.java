@@ -1,5 +1,7 @@
 package nl.vpro.jackson3.rs;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -10,10 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import nl.vpro.jackson3.rs.JacksonContextResolver;
-import nl.vpro.jackson3.rs.JsonIdAdderBodyReader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +54,7 @@ public class JsonIdAdderBodyReaderTest {
     final JsonIdAdderBodyReader idAdderInterceptor = new JsonIdAdderBodyReader();
     {
         idAdderInterceptor.providers = Mockito.mock(Providers.class);
-        when(idAdderInterceptor.providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE)).thenReturn(new JacksonContextResolver());
+        when(idAdderInterceptor.providers.getContextResolver(JsonMapper.class, MediaType.APPLICATION_JSON_TYPE)).thenReturn(new JacksonContextResolver());
     }
 
     @Test

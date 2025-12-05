@@ -1,13 +1,12 @@
 package nl.vpro.jackson3;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import nl.vpro.jackson3.LenientBooleanDeserializer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -25,7 +24,7 @@ public class LenientBooleanDeserializerTest {
         boolean b;
 
     }
-    ObjectMapper mapper = new ObjectMapper();
+    JsonMapper mapper = new JsonMapper();
 
     @Test
     public void deserialize() throws IOException {
@@ -42,7 +41,7 @@ public class LenientBooleanDeserializerTest {
 
     @Test
     public void deserializeNull() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
+        JsonMapper mapper = new JsonMapper();
         assertThat(mapper.readValue("{\"bool\": null}", A.class).bool).isNull();
         assertThat(mapper.readValue("{\"bool\": null}", A.class).b).isFalse();
         assertThat(mapper.readValue("{\"b\": \"x\"}", A.class).b).isFalse();

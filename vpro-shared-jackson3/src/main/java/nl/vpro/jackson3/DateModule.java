@@ -1,11 +1,11 @@
 package nl.vpro.jackson3;
 
+import tools.jackson.core.Version;
+import tools.jackson.databind.module.SimpleModule;
+
 import java.io.Serial;
 import java.time.*;
 import java.util.Date;
-
-import tools.jackson.core.Version;
-import tools.jackson.databind.module.SimpleModule;
 
 
 /**
@@ -22,7 +22,7 @@ public class DateModule extends SimpleModule {
     private static final long serialVersionUID = 1L;
 
     public DateModule() {
-        super(new Version(0, 31, 0, "", "nl.vpro.shared", "vpro-jackson2"));
+        super(new Version(0, 31, 0, "", "nl.vpro.shared", "vpro-jackson3"));
 
         // first deserializers
         addDeserializer(Date.class, DateToJsonTimestamp.Deserializer.INSTANCE);

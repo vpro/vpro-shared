@@ -1,22 +1,22 @@
 package nl.vpro.jackson3;
 
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Range;
 
-import nl.vpro.jackson3.DateModule;
-import nl.vpro.jackson3.GuavaRangeModule;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GuavaRangeModuleTest {
 
-    ObjectMapper mapper = new ObjectMapper();
+    JsonMapper mapper = JsonMapper.builder()
+        .withModules(new DateModule());
     {
         mapper.registerModule(new DateModule());
         mapper.registerModule(new GuavaRangeModule());
@@ -41,7 +41,7 @@ class GuavaRangeModuleTest {
 
 
     @Test
-    public void without() throws JsonProcessingException {
+    public void without() throws JacksonException {
         WithoutSerializer a = new WithoutSerializer();
         a.range = Range.closedOpen(1, 2);
         String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\",\"type\":\"java.lang.Integer\"},\"anotherField\":1}";
@@ -54,14 +54,14 @@ class GuavaRangeModuleTest {
 
 
     @Test
-    public void empty() throws JsonProcessingException {
+    public void empty() throws JacksonException {
         WithIntegerRange a = new WithIntegerRange();
         assertThat(mapper.writeValueAsString(a)).isEqualTo("{\"range\":null}");
 
     }
 
     @Test
-    public void filled() throws JsonProcessingException {
+    public void filled() throws JacksonException {
         WithIntegerRange a = new WithIntegerRange();
         a.range = Range.closedOpen(1, 10);
 
@@ -70,7 +70,7 @@ class GuavaRangeModuleTest {
     }
 
     @Test
-    public void instant() throws JsonProcessingException {
+    public void instant() throws JacksonException {
         WithInstantRange a = new WithInstantRange();
         a.range = Range.closedOpen(
             Instant.parse("2021-12-24T10:00:00Z"),

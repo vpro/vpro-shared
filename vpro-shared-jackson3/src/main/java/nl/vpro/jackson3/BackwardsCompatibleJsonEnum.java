@@ -1,11 +1,9 @@
 package nl.vpro.jackson3;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
+import tools.jackson.databind.cfg.EnumFeature;
 
 /**
  * Newer jackson version suddenly recognized @XmlEnumValue. This makes it possible to fall back to old behaviour.
@@ -43,7 +41,7 @@ public class BackwardsCompatibleJsonEnum {
                 try {
                     return Enum.valueOf(enumClass, jp.getValueAsString().toUpperCase());
                 } catch (IllegalArgumentException iaeu) {
-                    if (ctxt.getConfig().hasDeserializationFeatures(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL.getMask())) {
+                    if (ctxt.getConfig().hasDeserializationFeatures(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL. getMask())) {
                         return null;
                     } else {
                         throw iae;
