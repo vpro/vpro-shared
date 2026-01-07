@@ -17,9 +17,14 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
     @Getter
     private final List<LogEvent> events = new ArrayList<>();
 
-    CaptureListFromLogger(UUID uuid, boolean currentThreadOnly) {
+    public CaptureListFromLogger(UUID uuid, boolean currentThreadOnly) {
         super(uuid, currentThreadOnly);
     }
+
+    public CaptureListFromLogger(boolean currentThreadOnly) {
+        this(UUID.randomUUID(), currentThreadOnly);
+    }
+
 
     @Override
     public List<LogEvent> get() {
