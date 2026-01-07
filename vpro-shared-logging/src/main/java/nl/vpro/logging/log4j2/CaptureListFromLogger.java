@@ -28,11 +28,15 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
 
     @Override
     public List<LogEvent> get() {
-        return getEvents();
+        return Collections.unmodifiableList(getEvents());
     }
 
     @Override
     protected void accept(LogEvent event) {
         events.add(event.toImmutable());
+    }
+
+    public void clear() {
+        events.clear();
     }
 }
