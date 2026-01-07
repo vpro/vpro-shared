@@ -1,11 +1,10 @@
 package nl.vpro.jackson3;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Function;
-
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
+
+import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -85,9 +84,8 @@ public class IterableJson {
             } else if (jp.streamReadContext().inArray()) {
                 List<T> list = new ArrayList<>();
                 jp.clearCurrentToken();
-                Iterator<T> i = jp.readValueAs(memberClass);
-                while (i.hasNext()) {
-                    list.add(i.next());
+                while (jp.nextToken() != JsonToken.END_ARRAY) {
+                    list.add(jp.readValueAs(memberClass));
                 }
                 return creator.apply(list);
             } else {

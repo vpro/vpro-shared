@@ -1,6 +1,5 @@
 package nl.vpro.jackson3.rs;
 
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 
@@ -30,28 +29,28 @@ public class JacksonContextResolver extends JacksonXmlBindJsonProvider implement
 
     static final int PRIORITY = Priorities.USER;
 
-    private final ThreadLocal<JsonMapper> mapper;
+    private final ThreadLocal<Jackson3Mapper> mapper;
 
     public JacksonContextResolver() {
-        this(Jackson3Mapper.getLenientInstance());
+        this(Jackson3Mapper.LENIENT);
     }
-    public JacksonContextResolver(JsonMapper mapper) {
+    public JacksonContextResolver(Jackson3Mapper mapper) {
         this(() -> mapper);
     }
 
-    public JacksonContextResolver(Supplier<JsonMapper> mapper) {
+    public JacksonContextResolver(Supplier<Jackson3Mapper> mapper) {
         this.mapper = ThreadLocal.withInitial(mapper);
     }
 
     @Override
-    public ObjectMapper getContext(Class<?> objectType) {
-        return mapper.get();
+    public JsonMapper getContext(Class<?> objectType) {
+        return mapper.get().mapper();
     }
 
     /**
      * @since 4.0
      */
-    public void set(JsonMapper mapper) {
+    public void set(Jackson3Mapper mapper) {
         this.mapper.set(mapper);
     }
 

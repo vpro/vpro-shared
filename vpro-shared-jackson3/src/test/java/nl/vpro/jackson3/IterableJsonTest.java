@@ -169,13 +169,13 @@ public class IterableJsonTest {
     @SuppressWarnings("unchecked")
     static <T> T roundTripAndSimilar(T input, String expected) throws Exception {
         StringWriter writer = new StringWriter();
-        Jackson3Mapper.getInstance().writeValue(writer, input);
+        Jackson3Mapper.INSTANCE.writer().writeValue(writer, input);
 
         String text = writer.toString();
 
         JSONAssert.assertEquals("\n" + text + "\nis different from expected\n" + expected, expected, text, JSONCompareMode.LENIENT);
 
-        return (T) Jackson3Mapper.getInstance().readValue(text, input.getClass());
+        return (T) Jackson3Mapper.INSTANCE.readerFor(input.getClass()).readValue(text);
 
     }
 

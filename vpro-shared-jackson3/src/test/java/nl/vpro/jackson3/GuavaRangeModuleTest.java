@@ -16,12 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GuavaRangeModuleTest {
 
     JsonMapper mapper = JsonMapper.builder()
-        .withModules(new DateModule());
-    {
-        mapper.registerModule(new DateModule());
-        mapper.registerModule(new GuavaRangeModule());
-    }
-
+        .addModule(new DateModule())
+        .addModule(new GuavaRangeModule())
+        .build();
 
     static class WithoutSerializer {
         @JsonProperty

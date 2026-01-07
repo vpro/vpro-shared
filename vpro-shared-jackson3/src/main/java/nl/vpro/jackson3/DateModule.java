@@ -38,7 +38,5 @@ public class DateModule extends SimpleModule {
         addSerializer(ZonedDateTime.class, ZonedDateTimeToJsonTimestamp.Serializer.INSTANCE);
         addSerializer(LocalDate.class, LocalDateToJsonDate.Serializer.INSTANCE);
         addSerializer(Duration.class, DurationToJsonTimestamp.Serializer.INSTANCE);
-
-
     }
 }

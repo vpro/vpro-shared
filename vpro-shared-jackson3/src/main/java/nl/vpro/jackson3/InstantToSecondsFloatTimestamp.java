@@ -25,10 +25,7 @@ public class InstantToSecondsFloatTimestamp {
                 jgen.writeNumber(value.toEpochMilli() / 1000f);
             }
         }
-
-
     }
-
 
     public static class Deserializer extends ValueDeserializer<Instant> {
 

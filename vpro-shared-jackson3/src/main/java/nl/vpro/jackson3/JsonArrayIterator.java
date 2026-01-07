@@ -3,7 +3,7 @@ package nl.vpro.jackson3;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.*;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectReader;
 import tools.jackson.databind.node.NullNode;
 
 import java.io.*;
@@ -28,7 +28,7 @@ import nl.vpro.util.CountedIterator;
 public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
 
-    private final ObjectMapper mapper;
+    private final ObjectReader reader;
 
     private final JsonParser jp;
 
@@ -38,7 +38,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private Boolean hasNext;
 
-    private final BiFunction<ObjectMapper, TreeNode, ? extends T> valueCreator;
+    private final BiFunction<ObjectReader, TreeNode, ? extends T> valueCreator;
 
     @Getter
     @Setter
@@ -69,7 +69,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         this(inputStream, null, clazz, callback, null, null, null, null, null, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectMapper, TreeNode, T> valueCreator) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, TreeNode, T> valueCreator) throws IOException {
         this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
     }
 
@@ -89,7 +89,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * @param sizeField       The size of the iterator, i.e. the size of the array represented in the json stream
      * @param totalSizeField  Sometimes the array is part of something bigger, e.g. a page in a search result. The size
      *                        of the 'complete' result can be in the beginning of the json in this field.
-     * @param objectMapper    Default the objectMapper {@link Jackson3Mapper#getLenientInstance()} will be used (in
+     * @param objectMapper    Default the objectMapper {@link Jackson3Mapper#LENIENT} will be used (in
      *                        conjunction with <code>valueClass</code>, but you may specify another one
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
      * @param skipNulls       Whether to skip nulls in the array. Default true.
@@ -100,12 +100,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      @lombok.Builder(builderClassName = "Builder", builderMethodName = "builder")
      private JsonArrayIterator(
          @NonNull  InputStream inputStream,
-         @Nullable final BiFunction<ObjectMapper, TreeNode,  T> valueCreator,
+         @Nullable final BiFunction<ObjectReader, TreeNode,  T> valueCreator,
          @Nullable final Class<T> valueClass,
          @Nullable Runnable callback,
          @Nullable String sizeField,
          @Nullable String totalSizeField,
-         @Nullable ObjectMapper objectMapper,
+         @Nullable Jackson3Mapper objectMapper,
          @Nullable Logger logger,
          @Nullable Boolean skipNulls,
          @Nullable Listener<T> eventListener
@@ -113,8 +113,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          if (inputStream == null) {
              throw new IllegalArgumentException("No inputStream given");
          }
-         this.mapper = objectMapper == null ? Jackson3Mapper.getLenientInstance() : objectMapper;
-         this.jp = this.mapper.createParser(inputStream);
+         this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
+         this.jp = this.reader.createParser(inputStream);
          this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
          if (valueCreator != null && valueClass != null) {
              throw new IllegalArgumentException();
@@ -165,7 +165,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.skipNulls = skipNulls == null || skipNulls;
      }
 
-    private static <T> BiFunction<ObjectMapper, TreeNode, T> valueCreator(Class<T> clazz) {
+    private static <T> BiFunction<ObjectReader, TreeNode, T> valueCreator(Class<T> clazz) {
         return (m, tree) -> {
             try {
                 return m.treeToValue(tree, clazz);
@@ -235,7 +235,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                                 logger.warn("Found {} nulls. Will be skipped", foundNulls);
                             }
 
-                            next = valueCreator.apply(mapper, tree);
+                            next = valueCreator.apply(reader, tree);
                             eventListener.accept(new NextEvent(next));
                             hasNext = true;
                         }
@@ -305,7 +305,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         final CountedIterator<T> iterator,
         final OutputStream out,
         final Function<T, Void> logging) throws IOException {
-        try (JsonGenerator jg = Jackson3Mapper.getInstance().createGenerator(out)) {
+        try (JsonGenerator jg = Jackson3Mapper.INSTANCE.mapper().createGenerator(out)) {
             jg.writeStartObject();
             jg.writeArrayPropertyStart("array");
             writeObjects(iterator, jg, logging);
@@ -321,7 +321,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     public static <T> void writeArray(
         final CountedIterator<T> iterator,
         final OutputStream out, final Function<T, Void> logging) throws IOException {
-        try (JsonGenerator jg = Jackson3Mapper.getInstance().createGenerator(out)) {
+        try (JsonGenerator jg = Jackson3Mapper.INSTANCE.mapper().createGenerator(out)) {
             jg.writeStartArray();
             writeObjects(iterator, jg, logging);
             jg.writeEndArray();

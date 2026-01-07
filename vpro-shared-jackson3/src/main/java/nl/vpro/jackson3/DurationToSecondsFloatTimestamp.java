@@ -16,7 +16,6 @@ public class DurationToSecondsFloatTimestamp {
 
     public static class Serializer extends ValueSerializer<Duration> {
 
-
         public static final Serializer INSTANCE = new Serializer();
 
         @Override

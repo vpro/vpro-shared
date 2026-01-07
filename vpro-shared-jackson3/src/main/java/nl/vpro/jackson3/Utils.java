@@ -20,7 +20,7 @@ public class Utils {
     @SuppressWarnings("unchecked")
     public static MapDifference<String, Object> flattenedDifference(
             JsonNode j1, JsonNode j2)  {
-        ObjectMapper mapper = Jackson3Mapper.getPublisherInstance();
+        ObjectMapper mapper = Jackson3Mapper.PUBLISHER.mapper();
         Map<String, Object> map1 = mapper.convertValue(j1, Map.class);
         Map<String, Object> flatten1= flatten(map1);
         Map<String, Object> map2 = mapper.convertValue(j2, Map.class);

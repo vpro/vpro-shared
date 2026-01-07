@@ -10,7 +10,7 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 
 /**
- * Swing contains a nice html parser, which can be used to clean existing html.
+ * Swing contains a nice HTML parser, which can be used to clean existing HTML.
  *
  */
 public class HTMLStripper {

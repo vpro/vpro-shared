@@ -7,8 +7,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -202,12 +201,8 @@ public class FileCachingInputStream extends InputStream {
         final ExecutorService executorService
         ) throws ExecutionException, InterruptedException {
 
-        final boolean effectiveProgressLogging;
-        if (progressLogging == null) {
-            effectiveProgressLogging = ! this.deleteTempFile;
-        } else {
-            effectiveProgressLogging = progressLogging;
-        }
+        final boolean effectiveProgressLogging = Objects.requireNonNullElseGet(progressLogging, () -> !this.deleteTempFile);
+
         return Copier.builder()
             .input(input)
             .expectedCount(expectedCount)

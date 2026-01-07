@@ -4,14 +4,10 @@
  */
 package nl.vpro.jackson3;
 
+import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import nl.vpro.jackson.Views;
-
 import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.*;
 import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
@@ -21,164 +17,157 @@ import tools.jackson.databind.ser.PropertyFilter;
 import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import tools.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
 
-import java.io.IOException;
-import java.io.Serial;
 import java.lang.reflect.InvocationTargetException;
 import java.net.http.HttpResponse;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import org.slf4j.event.Level;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.annotations.Beta;
 
+import nl.vpro.jackson.Views;
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.util.LoggingInputStream;
 
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
+import static tools.jackson.core.json.JsonReadFeature.*;
+import static tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static tools.jackson.databind.MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME;
+import static tools.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
 /**
- * TODO: Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
+ * A wrapper around a Jackson {@link ObjectMapper} with one {@link ObjectReader} and one {@link ObjectWriter} configured with specific views.
  * <p>
- * Please use the static getters (like {@link #getInstance()}, so we could change that.
+ * In the jackson2 version this was itself an ObjectMapper which could have been configured with default views and so on.
+ * In jackson3 you can actually define multiple sets of configuration in the mapper itself (with serializationContexts) , but that is a bit more cumbersome to use, and deviates
+ * more from the original idea.
  *
  * @author Rico
  * @author Michiel Meeuwissen
-
+ * @since 5.14
  */
 @Slf4j
-public class Jackson3Mapper {
 
-    @Serial
-    private static final long serialVersionUID = 8353430660109292010L;
+public class Jackson3Mapper {
 
     private static boolean loggedAboutAvro = false;
     private static boolean loggedAboutFallback = false;
 
     private static final SimpleFilterProvider FILTER_PROVIDER = new SimpleFilterProvider();
 
+    public static final Jackson3Mapper INSTANCE = Jackson3Mapper.builder("instance")
+        .configure(Jackson3Mapper::lenient)
+        .build();
+    public static final Jackson3Mapper LENIENT = getLenientInstance();
+    public static final Jackson3Mapper STRICT = getStrictInstance();
+    public static final Jackson3Mapper PRETTY_STRICT = getPrettyStrictInstance();
+    public static final Jackson3Mapper PRETTY = getPrettyInstance();
+    public static final Jackson3Mapper PUBLISHER = getPublisherInstance();
+    public static final Jackson3Mapper PRETTY_PUBLISHER = getPublisherInstance();
+
+    public static final Jackson3Mapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
 
 
-    public static final JsonMapper INSTANCE = getInstance();
-    public static final JsonMapper LENIENT = getLenientInstance();
-    public static final JsonMapper STRICT = getStrictInstance();
-    public static final JsonMapper PRETTY_STRICT = getPrettyStrictInstance();
-    public static final JsonMapper PRETTY = getPrettyInstance();
-    public static final JsonMapper PUBLISHER = getPublisherInstance();
-    public static final JsonMapper PRETTY_PUBLISHER = getPublisherInstance();
-
-    public static final JsonMapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
-
-
-    private static final ThreadLocal<Jackson3Mapper> THREAD_LOCAL = ThreadLocal.withInitial(Jackson3Mapper::getInstance);
+    private static final ThreadLocal<Jackson3Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
 
 
-    public static JsonMapper getInstance()  {
 
-        var mapper = JsonMapper.builder()
+    private static Jackson3Mapper getLenientInstance() {
+        return Jackson3Mapper.builder("lenient")
+            .forward()
+            .configure(Jackson3Mapper::lenient)
             .build();
+    }
 
-        var config = mapper.serializationConfig().withView(Views.Forward.class);
-        mapper.rebuild()
-            .buildSerializationConfig(config, )
-        config.
-        ;
+    private final void allow() {
 
-            .writerWithView()
+    }
 
-                .buildSerializationConfig()
+    private static void lenient(JsonMapper.Builder builder)  {
+        builder.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        builder.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        builder.disable(FAIL_ON_UNKNOWN_PROPERTIES);
+        builder.enable(ALLOW_UNQUOTED_PROPERTY_NAMES);
+        builder.enable(ALLOW_SINGLE_QUOTES);
+    }
+    private static void strict(JsonMapper.Builder builder)  {
+        builder.enable(FAIL_ON_UNKNOWN_PROPERTIES);
+    }
 
+    private static Jackson3Mapper getPrettyInstance() {
+        Jackson3Mapper.Builder pretty = Jackson3Mapper
+            .builder("pretty")
+            .configure(b -> {
+                lenient(b);
+                b.enable(INDENT_OUTPUT);
+            });
+        return pretty.build();
+    }
 
+    private static Jackson3Mapper getPrettyStrictInstance() {
 
-        mapper.setConfig(mapper.serializationConfig().withView(Views.Forward.class));
-        mapper.setConfig(mapper.deserializationConfig().withView(Views.Forward.class));
-            .wi(c -> {
-
+        return Jackson3Mapper
+            .builder("pretty_strict")
+            .configure(b -> {
+                strict(b);
+                b.enable(INDENT_OUTPUT);
+                b.enable(FAIL_ON_UNKNOWN_PROPERTIES);
             })
+            .forward()
+            .build()
+            ;
+    }
+
+
+    private static Jackson3Mapper getStrictInstance() {
+        return Jackson3Mapper.builder("strict")
+            .configure(b -> {
+                b.enable(FAIL_ON_UNKNOWN_PROPERTIES);
+                }
+            ).forward()
+            .build();
+    }
+
+    private static Jackson3Mapper getPublisherInstance() {
+        return Jackson3Mapper.builder("publisher")
+            .serializationView(Views.ForwardPublisher.class)
+            .deserializationView(Views.Forward.class)
+            .build();
+    }
+
+    private static Jackson3Mapper getPrettyPublisherInstance() {
+        return Jackson3Mapper.builder("pretty_publisher")
+            .serializationView(Views.ForwardPublisher.class)
+            .deserializationView(Views.Forward.class)
+            .configure(b -> b.enable(INDENT_OUTPUT))
+            .build();
+    }
+
+    public static Jackson3Mapper getBackwardsPublisherInstance() {
+        return Jackson3Mapper.builder("backwards_publisher")
+            .serializationView(Views.Publisher.class)
+            .deserializationView(Views.Normal.class)
+            .configure(b -> b.enable(INDENT_OUTPUT))
+            .build();
+    }
+
+    @Beta
+    public static Jackson3Mapper getModelInstance() {
+        return Jackson3Mapper.builder("model")
+            .serializationView(Views.Model.class)
+            .build();
+    }
+
+    @Beta
+    public static Jackson3Mapper getModelAndNormalInstance() {
+        return Jackson3Mapper.builder("model_and_normal")
+            .serializationView(Views.ModelAndNormal.class)
             .build();
 
-        return mapper;
-
     }
 
-    public static JsonMapper getLenientInstance() {
-        Jackson3Mapper lenient = new Jackson3Mapper("lenient");
-        lenient.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
-        lenient.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        lenient.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
-        lenient.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
-        lenient.setConfig(lenient.getSerializationConfig().withView(Views.Forward.class));
-        lenient.setConfig(lenient.getDeserializationConfig().withView(Views.Forward.class));
-        return lenient;
-    }
-
-    public static JsonMapper getPrettyInstance() {
-        Jackson3Mapper pretty = new Jackson3Mapper("pretty");
-        pretty.enable(SerializationFeature.INDENT_OUTPUT);
-        return pretty;
-    }
-
-    public static JsonMapper getPrettyStrictInstance() {
-        Jackson3Mapper pretty_and_strict = new Jackson3Mapper("pretty_strict");
-        pretty_and_strict.enable(SerializationFeature.INDENT_OUTPUT);
-
-        pretty_and_strict.setConfig(pretty_and_strict.getSerializationConfig().withView(Views.Forward.class));
-        pretty_and_strict.setConfig(pretty_and_strict.getDeserializationConfig().withView(Views.Forward.class));
-        pretty_and_strict.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This gives quite a lot of troubles. Though I'd like it to be set, especially because PRETTY is used in tests.
-
-        return pretty_and_strict;
-    }
-
-
-    public static JsonMapper getStrictInstance() {
-        Jackson3Mapper strict = new Jackson3Mapper("strict");
-        strict.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        strict.setConfig(strict.getSerializationConfig().withView(Views.Forward.class));
-        strict.setConfig(strict.getDeserializationConfig().withView(Views.Forward.class));
-
-        return strict;
-    }
-
-    public static JsonMapper getPublisherInstance() {
-        Jackson3Mapper publisher = new Jackson3Mapper("publisher");
-        publisher.setConfig(publisher.getSerializationConfig().withView(Views.ForwardPublisher.class));
-        publisher.setConfig(publisher.getDeserializationConfig().withView(Views.Forward.class));
-
-        return publisher;
-    }
-
-    public static JsonMapper getPrettyPublisherInstance() {
-        Jackson3Mapper prettyPublisher = new Jackson3Mapper("pretty_publisher");
-        prettyPublisher.setConfig(prettyPublisher.getSerializationConfig().withView(Views.ForwardPublisher.class));
-        prettyPublisher.setConfig(prettyPublisher.getDeserializationConfig().withView(Views.Forward.class));
-        prettyPublisher.enable(SerializationFeature.INDENT_OUTPUT);
-        return prettyPublisher;
-    }
-
-    public static JsonMapper getBackwardsPublisherInstance() {
-        Jackson3Mapper backwardsPublisher = new Jackson3Mapper("backwards_publisher");
-        backwardsPublisher.setConfig(backwardsPublisher.getSerializationConfig().withView(Views.Publisher.class));
-        backwardsPublisher.setConfig(backwardsPublisher.getDeserializationConfig().withView(Views.Normal.class));
-        backwardsPublisher.enable(SerializationFeature.INDENT_OUTPUT);
-        return backwardsPublisher;
-    }
-
-    @Beta
-    public static JsonMapper getModelInstance() {
-        Jackson3Mapper model = new Jackson3Mapper("model");
-        model.setConfig(model.getSerializationConfig().withView(Views.Model.class));
-        return model;
-    }
-
-    @Beta
-    public static JsonMapper getModelAndNormalInstance() {
-        Jackson3Mapper modalAndNormal = new Jackson3Mapper("model_and_normal");
-        modalAndNormal.setConfig(modalAndNormal.getSerializationConfig().withView(Views.ModelAndNormal.class));
-        return modalAndNormal;
-    }
-
-    public static JsonMapper getThreadLocal() {
+    public static Jackson3Mapper getThreadLocal() {
         return THREAD_LOCAL.get();
     }
     public static void setThreadLocal(Jackson3Mapper set) {
@@ -191,78 +180,55 @@ public class Jackson3Mapper {
 
     @SneakyThrows({JacksonException.class})
     public static <T> T lenientTreeToValue(JsonNode jsonNode, Class<T> clazz) {
-        return getLenientInstance().treeToValue(jsonNode, clazz);
+        return getLenientInstance().reader().treeToValue(jsonNode, clazz);
     }
 
+    private final JsonMapper mapper;
+    private final ObjectWriter writer;
+    private final ObjectReader reader;
     private final String toString;
 
-    private Jackson3Mapper(String toString, Predicate<JacksonModule> predicate) {
-        configureMapper(this, predicate);
+    @lombok.Builder(
+        builderMethodName = "_builder",
+        buildMethodName = "_build",
+        access = AccessLevel.PRIVATE)
+    private Jackson3Mapper(
+        String toString,
+        JsonMapper mapper,
+        Class<?> serializationView,
+        Class<?> deserializationView) {
+        this.mapper = mapper;
+        this.writer = mapper.writerWithView(serializationView == null ? Views.Normal.class : serializationView);
+        this.reader =  mapper.readerWithView(deserializationView == null ? Views.Normal.class : deserializationView);
         this.toString = toString;
     }
 
-    private Jackson3Mapper(String toString) {
-        configureMapper(this);
-        this.toString = toString;
-    }
-
-
-    @SafeVarargs
-    public static Jackson3Mapper create(String toString, Predicate<Module> module, Consumer<ObjectMapper>... consumer) {
-        Jackson3Mapper result =  new Jackson3Mapper(toString, module);
-        for (Consumer<ObjectMapper> c : consumer){
-            c.accept(result);
-        }
-        return result;
-    }
-
-    public static void configureMapper(ObjectMapper mapper) {
+    public static void configureMapper(Jackson3Mapper.Builder mapper) {
         configureMapper(mapper, m -> true);
     }
 
-    public static void configureMapper(ObjectMapper mapper, Predicate<JacksonModule> filter) {
-        mapper.setFilterProvider(FILTER_PROVIDER);
+    public static void configureMapper(Jackson3Mapper.Builder builder, Predicate<JacksonModule> filter) {
 
-         AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
-             new JacksonAnnotationIntrospector(),
-             new JakartaXmlBindAnnotationIntrospector(mapper.getTypeFactory())
-         );
+        builder.mapperBuilder.filterProvider(FILTER_PROVIDER);
 
-        mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
-        mapper.setAnnotationIntrospector(introspector);
+        AnnotationIntrospector introspector = new AnnotationIntrospectorPair(
+            new JacksonAnnotationIntrospector(),
+            new JakartaXmlBindAnnotationIntrospector(false)
+        );
 
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
+        builder.mapperBuilder.changeDefaultPropertyInclusion(v -> v.withContentInclusion(JsonInclude.Include.NON_EMPTY));
+        builder.mapperBuilder.annotationIntrospector(introspector);
 
-        mapper.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
-        mapper.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
-        mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
+        builder.mapperBuilder.disable(FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
 
-        try {
-            // this should nbe needed, but if I don't do this, resteasy still doesn't allow comments
-            mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        builder.mapperBuilder.enable(ALLOW_SINGLE_QUOTES);
+        builder.mapperBuilder.enable(ALLOW_UNQUOTED_PROPERTY_NAMES);
+        builder.mapperBuilder.enable(USE_WRAPPER_NAME_AS_PROPERTY_NAME);
+        builder.mapperBuilder.enable(ALLOW_JAVA_COMMENTS);
+        builder.mapperBuilder.enable(ALLOW_LEADING_ZEROS_FOR_NUMBERS);
 
-            mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
-            mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_JAVA_COMMENTS));
-
-        } catch (NoClassDefFoundError noClassDefFoundError) {
-            log.atLevel(  loggedAboutFallback ? Level.DEBUG : Level.WARN).log( noClassDefFoundError.getMessage() + " temporary falling back. Please upgrade jackson");
-            loggedAboutFallback = true;
-
-            mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-            //noinspection deprecation
-            mapper.enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
-
-        }
-
-        register(mapper, filter, new JavaTimeModule());
-        register(mapper, filter, new DateModule());
-        // For example normal support for Optional.
-        Jdk8Module jdk8Module = new Jdk8Module();
-        // jdk8Module.configureAbsentsAsNulls(true); This I think it covered by com.fasterxml.jackson.annotation.JsonInclude.Include.NON_ABSENT
-        register(mapper, filter, jdk8Module);
-
-        mapper.setConfig(mapper.serializationConfig().withView(Views.Normal.class));
-        mapper.setConfig(mapper.serializationConfig().withView(Views.Normal.class));
+        //register(builder.mapperBuilder, filter, new JavaTimeModule());
+        register(builder, filter, new DateModule());
 
 
         //SimpleModule module = new SimpleModule();
@@ -271,7 +237,7 @@ public class Jackson3Mapper {
 
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson3.SerializeAvroModule");
-            register(mapper, filter, (tools.jackson.databind.Module) avro.getDeclaredConstructor().newInstance());
+            register(builder, filter, (tools.jackson.databind.JacksonModule) avro.getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
                 log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
@@ -284,7 +250,7 @@ public class Jackson3Mapper {
 
         try {
             Class<?> guava = Class.forName("nl.vpro.jackson3.GuavaRangeModule");
-            register(mapper, filter, (com.fasterxml.jackson.databind.Module) guava.getDeclaredConstructor().newInstance());
+            register(builder, filter, (tools.jackson.databind.JacksonModule) guava.getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException ncdfe) {
             log.debug(ncdfe.getMessage());
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
@@ -297,9 +263,9 @@ public class Jackson3Mapper {
         log.info("Installed filter {} -> {}", key, filter);
     }
 
-    private static void register(ObjectMapper mapper, Predicate<JacksonModule> predicate, JacksonModule module) {
+    private static void register(Jackson3Mapper.Builder mapper, Predicate<JacksonModule> predicate, JacksonModule module) {
         if (predicate.test(module)) {
-            mapper.registerModule(module);
+            mapper.mapperBuilder.addModule(module);
         }
     }
 
@@ -333,11 +299,56 @@ public class Jackson3Mapper {
                         if (simple.isEnabled(level)) {
                             body = new LoggingInputStream(simple, body, level);
                         }
-                        return readValue(body, type);
+                        return mapper.readValue(body, type);
 
                     });
             }
         };
+    }
+
+    public JsonMapper mapper() {
+        return mapper;
+    }
+
+    public ObjectWriter writer() {
+        return writer;
+    }
+
+    public ObjectReader reader() {
+        return reader;
+    }
+    public ObjectReader readerFor(Class<?> clazz) {
+        return reader.forType(clazz);
+    }
+
+    public static Builder builder(String toString) {
+        return _builder().toString(toString);
+    }
+
+    public static class Builder {
+        private final JsonMapper.Builder mapperBuilder = JsonMapper
+            .builder();
+        {
+            configureMapper(this);
+        }
+
+        public Jackson3Mapper.Builder forward() {
+            return serializationView(Views.Forward.class)
+                .deserializationView(Views.Forward.class);
+        }
+
+
+        public Jackson3Mapper build() {
+            mapper(mapperBuilder.build());
+            return _build();
+        }
+
+        public Builder configure(Consumer<JsonMapper.Builder> consumer) {
+            consumer.accept(mapperBuilder);
+            return this;
+        }
+
+
     }
 }
 

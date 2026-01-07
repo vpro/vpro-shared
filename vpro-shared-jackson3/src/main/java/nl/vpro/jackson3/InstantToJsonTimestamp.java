@@ -15,7 +15,6 @@ public class InstantToJsonTimestamp {
 
     public static class Serializer extends ValueSerializer<Instant> {
 
-
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
@@ -26,10 +25,7 @@ public class InstantToJsonTimestamp {
                 jgen.writeNumber(value.toEpochMilli());
             }
         }
-
-
     }
-
 
     public static class Deserializer extends ValueDeserializer<Instant> {
 

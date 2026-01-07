@@ -19,7 +19,6 @@ public class DurationToJsonTimestamp {
 
     public static class Serializer extends ValueSerializer<Duration> {
 
-
         public static final Serializer INSTANCE = new Serializer();
 
         @Override
@@ -30,11 +29,9 @@ public class DurationToJsonTimestamp {
                 jgen.writeNumber(value.toMillis());
             }
         }
-
     }
 
     public static class XmlSerializer extends ValueSerializer<javax.xml.datatype.Duration> {
-
 
         public static final Serializer INSTANCE = new Serializer();
 
@@ -52,6 +49,7 @@ public class DurationToJsonTimestamp {
     public static class Deserializer extends ValueDeserializer<Duration> {
 
         public static final Deserializer INSTANCE = new Deserializer();
+
         @Override
         public Duration deserialize(JsonParser jp, DeserializationContext ctxt) {
             if (jp.currentToken() == JsonToken.VALUE_STRING) {

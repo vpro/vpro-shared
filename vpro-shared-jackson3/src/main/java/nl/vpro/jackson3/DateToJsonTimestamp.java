@@ -22,10 +22,7 @@ public class DateToJsonTimestamp {
                 jgen.writeNumber(value.getTime());
             }
         }
-
-
     }
-
 
     public static class Deserializer extends StdDeserializer<Date> {
 

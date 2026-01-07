@@ -30,6 +30,7 @@ public class ZonedDateTimeToJsonTimestamp {
     public static class Deserializer extends ValueDeserializer<ZonedDateTime> {
 
         public static final Deserializer INSTANCE = new Deserializer();
+
         @Override
         public ZonedDateTime deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
             try {

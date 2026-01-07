@@ -4,7 +4,6 @@ import lombok.extern.log4j.Log4j2;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.exc.InvalidFormatException;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -37,39 +36,38 @@ public class Jackson3MapperTest {
     }
 
     @Test
-    public void read() throws IOException {
+    public void read() {
         String example = "/* leading comments */\n{'integer': 2 /* ignore comments */, 'optional': 3}";
-        A a = Jackson3Mapper.getInstance().readValue(example, A.class);
+        A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue(example);
         assertThat(a.integer).isEqualTo(2);
         assertThat(a.optional).isPresent();
         assertThat(a.optional.get()).isEqualTo(3);
 
-        Jackson3Mapper.getLenientInstance().readerFor(A.class).readValue(example.getBytes(StandardCharsets.UTF_8));
+        Jackson3Mapper.LENIENT.readerFor(A.class).readValue(example.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
-    public void readIntFromString() throws IOException {
-        A a = Jackson3Mapper.getInstance().readValue("{'integer': '2'}", A.class);
+    public void readIntFromString() {
+        A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue("{'integer': '2'}");
         assertThat(a.integer).isEqualTo(2);
     }
 
     @Test
-    public void readEnumValue() throws IOException {
-        A a = Jackson3Mapper.getInstance().readValue("{'enumValue': 'a'}", A.class);
+    public void readEnumValue() {
+        A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue("{'enumValue': 'a'}");
         assertThat(a.enumValue).isEqualTo(EnumValues.a);
     }
 
     @Test
-    public void readUnknownEnumValue() throws IOException {
+    public void readUnknownEnumValue() {
         assertThatThrownBy(() -> {
-            A a = Jackson3Mapper.getInstance().readValue("{'enumValue': 'c'}", A.class);
-            assertThat(a.enumValue).isNull();
+            A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue("{'enumValue': 'c'}");
         }).isInstanceOf(InvalidFormatException.class);
     }
 
     @Test
-    public void readUnknownEnumValueLenient() throws IOException {
-        A a = Jackson3Mapper.getLenientInstance().readValue("{'enumValue': 'c'}", A.class);
+    public void readUnknownEnumValueLenient() {
+        A a = Jackson3Mapper.LENIENT.readerFor(A.class).readValue("{'enumValue': 'c'}");
         assertThat(a.enumValue).isNull();
     }
 
@@ -78,7 +76,7 @@ public class Jackson3MapperTest {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.of(3);
-        assertThat(Jackson3Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2,\"optional\":3}");
+        assertThat(Jackson3Mapper.INSTANCE.writer().writeValueAsString(a)).isEqualTo("{\"integer\":2,\"optional\":3}");
     }
 
     @Test
@@ -86,9 +84,7 @@ public class Jackson3MapperTest {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.empty();
-        assertThat(Jackson3Mapper.getInstance().writeValueAsString(a)).isEqualTo("{\"integer\":2}");
+        assertThat(Jackson3Mapper.INSTANCE.writer().writeValueAsString(a)).isEqualTo("{\"integer\":2}");
     }
-
-
 
 }

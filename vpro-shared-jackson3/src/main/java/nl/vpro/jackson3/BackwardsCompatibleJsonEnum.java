@@ -23,7 +23,6 @@ public class BackwardsCompatibleJsonEnum {
                 jgen.writeString(value.name());
             }
         }
-
     }
 
     public static abstract class Deserializer<T extends Enum<T>> extends ValueDeserializer<T> {
@@ -50,6 +49,5 @@ public class BackwardsCompatibleJsonEnum {
 
             }
         }
-
     }
 }
