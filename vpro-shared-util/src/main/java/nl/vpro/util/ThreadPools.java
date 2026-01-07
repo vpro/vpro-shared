@@ -1,6 +1,6 @@
 package nl.vpro.util;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 
 import java.util.concurrent.*;
 
@@ -12,7 +12,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @author Michiel Meeuwissen
  * @since 1.5
  */
-@Slf4j
+@Log
 public final class ThreadPools {
 
     private ThreadPools() {
@@ -95,7 +95,7 @@ public final class ThreadPools {
                 Thread.NORM_PRIORITY));
 
     public static void shutdown() {
-        log.debug("Shutting down thread pools");
+        log.fine("Shutting down thread pools");
         copyExecutor.shutdown();
         startUpExecutor.shutdown();
         backgroundExecutor.shutdown();

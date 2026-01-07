@@ -742,14 +742,14 @@
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-regions-bom</artifactId>
-        <version>3.0.0</version>
+        <version>3.1-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
         <artifactId>i18n-iso-639</artifactId>
-        <version>3.11</version>
+        <version>3.12-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
