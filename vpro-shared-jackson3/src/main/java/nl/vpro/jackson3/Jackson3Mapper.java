@@ -321,16 +321,27 @@ public class Jackson3Mapper {
         return reader.forType(clazz);
     }
 
+    public Builder rebuild() {
+        Builder builder =  builder(toString);
+        builder.serializationView(writer.getConfig().getActiveView());
+        builder.deserializationView(reader.getConfig().getActiveView());
+        builder.mapperBuilder = mapper.rebuild();
+        return builder;
+    }
+
     public static Builder builder(String toString) {
         return _builder().toString(toString);
     }
 
     public static class Builder {
-        private final JsonMapper.Builder mapperBuilder = JsonMapper
+        private JsonMapper.Builder mapperBuilder = JsonMapper
             .builder();
         {
             configureMapper(this);
         }
+
+
+
 
         public Jackson3Mapper.Builder forward() {
             return serializationView(Views.Forward.class)

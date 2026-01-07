@@ -6,6 +6,11 @@ package nl.vpro.test.util.jackson3;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.*;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -20,13 +25,7 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import tools.jackson.core.JsonPointer;
-import tools.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
-
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.test.util.TestClass;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,18 +39,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class Jackson3TestUtil {
 
-    private static final ObjectMapper MAPPER =
-        Jackson2Mapper.getPrettyStrictInstance();
+    private static final Jackson3Mapper JACKSON_3_MAPPER =
+        Jackson3Mapper.PRETTY
+            .rebuild()
+            .configure(b ->
+                b.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+            )
+            .build();
 
-    private static final ObjectReader JSON_READER = MAPPER.readerFor(JsonNode.class).with(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION);
+    private static final ObjectReader READER = JACKSON_3_MAPPER.reader();
+    private static final ObjectMapper MAPPER = JACKSON_3_MAPPER.mapper();
 
 
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonPointer... ignores) {
         try {
             if (ignores.length > 0) {
-                JsonNode actualJson = MAPPER.readTree(actual.toString());
+                JsonNode actualJson = READER.readTree(actual.toString());
                 remove(actualJson, ignores);
-                actual = MAPPER.writeValueAsString(actualJson);
+                actual = MAPPER.writer().writeValueAsString(actualJson);
             }
 
             JSONAssert.assertEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual), JSONCompareMode.STRICT);
@@ -97,13 +102,8 @@ public class Jackson3TestUtil {
         if (test == null) {
             return null;
         }
-        try {
-            JsonNode jsonNode = JSON_READER.readTree(String.valueOf(test));
-            String pretty = MAPPER.writeValueAsString(jsonNode);
-            return pretty;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        JsonNode jsonNode = READER.readTree(String.valueOf(test));
+        return MAPPER.writeValueAsString(jsonNode);
     }
 
 
@@ -201,7 +201,7 @@ public class Jackson3TestUtil {
 
     public static <T> T assertJsonEquals(String actual, String expected, Class<T> typeReference) throws IOException {
         assertJsonEquals("",  expected, actual);
-        return objectReader(MAPPER, typeReference).readValue(actual, typeReference);
+        return objectReader(MAPPER, typeReference).readValue(actual);
     }
 
 
@@ -256,7 +256,7 @@ public class Jackson3TestUtil {
      */
     public static <T> T roundTripAndSimilarValue(T input, String expected) {
         TestClass<T> embed = new TestClass<>(input);
-        JavaType type = Jackson2Mapper.getInstance().getTypeFactory()
+        JavaType type = Jackson3Mapper.INSTANCE.mapper().getTypeFactory()
             .constructParametricType(TestClass.class, input.getClass());
 
         TestClass<T> result = roundTripAndSimilar(embed, "{\"value\": " + expected + "}", type, true);
@@ -334,12 +334,7 @@ public class Jackson3TestUtil {
 
 
         protected static <A> A read(ObjectMapper mapper, Class<A> actual, String string) {
-            try {
-                return mapper.readValue(string, actual);
-            } catch (IOException e) {
-                Fail.fail(e.getMessage(), e);
-                return null;
-            }
+            return mapper.readValue(string, actual);
         }
 
         @SuppressWarnings({"CatchMayIgnoreException"})
