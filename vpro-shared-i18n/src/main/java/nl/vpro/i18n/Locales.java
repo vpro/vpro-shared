@@ -5,8 +5,7 @@ import java.util.stream.Stream;
 
 import org.meeuw.i18n.countries.Country;
 import org.meeuw.i18n.countries.codes.CountryCode;
-import org.meeuw.i18n.languages.ISO_639;
-import org.meeuw.i18n.languages.ISO_639_Code;
+import org.meeuw.i18n.languages.*;
 import org.meeuw.i18n.regions.Region;
 
 import static org.meeuw.i18n.countries.codes.CountryCode.*;
@@ -54,9 +53,9 @@ public final class Locales {
     public static final Locale FLEMISH       = of(nl, BE);
 
     /**
-     * The locale representing the 'undetermined' language {@link ISO_639#UND}
+     * The locale representing the 'undetermined' language {@link LanguageCode#UND}
      */
-    public static final Locale UNDETERMINED  = of(ISO_639.UND);
+    public static final Locale UNDETERMINED  = of(LanguageCode.UND);
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
 
