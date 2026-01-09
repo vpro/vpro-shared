@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.*;
+import tools.jackson.databind.deser.DeserializationContextExt;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.TypeDeserializer;
 import tools.jackson.databind.jsontype.TypeIdResolver;
@@ -53,34 +54,37 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         MultivaluedMap<String, String> httpHeaders,
         InputStream entityStream) throws WebApplicationException {
 
-        final ObjectReader reader;
         JsonMapper mapper =  providers == null ? null : providers.getContextResolver(JsonMapper.class,  MediaType.APPLICATION_JSON_TYPE).getContext(type);
         if (mapper == null) {
             mapper = Jackson3Mapper.LENIENT.mapper();
         }
-        reader = mapper.reader();
+
+        // Create the reader first (so we can get the TypeFactory from it)
+        final ObjectReader reader = mapper.reader();
         ObjectReader objectReader = reader.forType(type);
         final JsonParser parser = reader.createParser(entityStream);
 
         final JsonNode jsonNode = parser.readValueAsTree();
+        // Construct the JavaType for the declared generic type and ask Jackson for the TypeDeserializer
+        final JavaType javaType = reader.typeFactory().constructType(genericType);
         if (jsonNode instanceof ObjectNode objectNode) {
 
-            final JavaType javaType = reader.typeFactory().constructType(genericType);
-            final TypeDeserializer typeDeserializer = mapper
-                .deserializationConfig()
-                .getTypeResolverProvider()
-                .findTypeDeserializer(null, javaType,  null);
+
+
+            DeserializationContextExt deserializationContextExt = mapper._deserializationContext();
+            final TypeDeserializer typeDeserializer = deserializationContextExt.findTypeDeserializer(javaType);
+
             if (typeDeserializer != null) {
                 final String propertyName = typeDeserializer.getPropertyName();
-                final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType(null);
+                final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType(deserializationContextExt);
                 if (! objectNode.has(propertyName)) {
                     log.debug("Implicitly setting {} = {} for {}", propertyName, propertyValue, javaType);
                     objectNode.put(propertyName, propertyValue);
                 }
             }
         }
-        return mapper.treeToValue(jsonNode, type);
 
+        return mapper.treeToValue(jsonNode, javaType.getRawClass());
 
      }
 }
