@@ -80,10 +80,14 @@ Release builds will be provided via https://central.sonatype.com/search?q=g%3Anl
 |
 | January 2025
 
+| 5.14
+| Support for Jackson3
+| January 2026
+
 
 | 6.x >
 | java 21 (released in sep. 2023)
-| 2025?
+| 2026?
 
 
 |===
