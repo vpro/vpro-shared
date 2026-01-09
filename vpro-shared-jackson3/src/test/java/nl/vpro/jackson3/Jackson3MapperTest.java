@@ -17,6 +17,8 @@ import jakarta.xml.bind.annotation.*;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import nl.vpro.jackson.Views;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,10 +53,13 @@ public class Jackson3MapperTest {
     public void basicJackson3() {
         JsonMapper mapper = JsonMapper.builder()
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+
             .annotationIntrospector(new AnnotationIntrospectorPair(
             new JacksonAnnotationIntrospector(),
             new JakartaXmlBindAnnotationIntrospector(false)
-        )).build();
+            ))
+            .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+            .build();
 
         A a = mapper.readerWithView(Views.Normal.class).forType(A.class)
             .readValue("""
@@ -62,6 +67,8 @@ public class Jackson3MapperTest {
         """);
         assertThat(a.integer).isEqualTo(2);
         assertThat(a.optional).contains(3);
+
+        assertThat(mapper.writer().writeValueAsString(a)).isEqualTo("{\"integer\":2,\"optional\":3}");
     }
 
 

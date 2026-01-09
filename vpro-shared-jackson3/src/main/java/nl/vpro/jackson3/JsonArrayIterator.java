@@ -222,15 +222,19 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         if(needsFindNext) {
             while(true) {
                 try {
-                    var lastToken = jp.getLastClearedToken();
-                    TreeNode tree = jp.readValueAsTree();
-                    var newLastToken = jp.getLastClearedToken();
-                    assert lastToken != newLastToken;
-                    this.eventListener.accept(new TokenEvent(newLastToken));
+                    var currentToken = jp.currentToken();
+                    TreeNode tree;
+                    if (currentToken == JsonToken.START_OBJECT) {
+                        tree = jp.readValueAsTree();
+                    } else {
+                        tree = null;
+                        log.debug("Expected START_OBJECT token but got {}", currentToken);
+                    }
+                    jp.nextToken();
+                    var lastToken = jp.currentToken();
 
-                    this.eventListener.accept(new TokenEvent(jp.getLastClearedToken()));
-
-                    if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
+                    this.eventListener.accept(new TokenEvent(lastToken));
+                    if (lastToken == JsonToken.END_ARRAY) {
                         tree = null;
                     } else {
                         if (tree instanceof NullNode && skipNulls) {

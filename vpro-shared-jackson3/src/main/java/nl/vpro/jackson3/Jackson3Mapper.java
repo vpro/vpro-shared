@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.databind.*;
 import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
@@ -249,7 +250,7 @@ public class Jackson3Mapper {
             new JakartaXmlBindAnnotationIntrospector(false)
         );
 
-        builder.mapperBuilder.changeDefaultPropertyInclusion(v -> v.withContentInclusion(JsonInclude.Include.NON_EMPTY));
+        builder.mapperBuilder.changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_EMPTY));
         builder.mapperBuilder.annotationIntrospector(introspector);
 
         builder.mapperBuilder.disable(FAIL_ON_UNKNOWN_PROPERTIES); // This seems a good idea when reading from couchdb or so, but when reading user supplied forms, it is confusing not getting errors.
@@ -358,7 +359,7 @@ public class Jackson3Mapper {
     }
 
     public Builder rebuild() {
-        Builder builder =  builder(toString);
+        Builder builder =  builder(toString + "'");
         builder.serializationView(writer.getConfig().getActiveView());
         builder.deserializationView(reader.getConfig().getActiveView());
         builder.mapperBuilder = mapper.rebuild();
@@ -369,6 +370,16 @@ public class Jackson3Mapper {
         return _builder()
             .toString(toString);
     }
+
+    public Jackson3Mapper withSourceInLocation() {
+        return rebuild()
+            .toString(toString + " with source in location")
+            .configure(b ->
+                b.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+            ).build();
+    }
+
+
 
     public static class Builder {
         private JsonMapper.Builder mapperBuilder = JsonMapper

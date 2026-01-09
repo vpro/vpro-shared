@@ -27,6 +27,7 @@ public class JsonArrayIteratorTest {
     @Test
     public void simple() {
         for (Change change :  JsonArrayIterator.builder(Change.class)
+            .objectMapper(Jackson3Mapper.INSTANCE.withSourceInLocation())
             .inputStream(
                 new ByteArrayInputStream("""
             {
@@ -38,7 +39,7 @@ public class JsonArrayIteratorTest {
                     "mid": "POMS_NCRV_1138990",
                     "deleted": true
                 }
-                }
+                ]
             }
             """.getBytes(StandardCharsets.UTF_8)))) {
             log.info("{}", change);
@@ -47,13 +48,13 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    public void changes() throws IOException {
+    public void changes() {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
             .inputStream(getClass().getResourceAsStream("/changes.json"))
             .valueClass(Change.class)
-            .objectMapper(Jackson3Mapper.INSTANCE)
+            .objectMapper(Jackson3Mapper.INSTANCE.withSourceInLocation())
             .build()) {
             assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
             assertThat(it.getCount()).isEqualTo(1);
@@ -108,7 +109,7 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    public void testIncompleteJson() throws IOException {
+    public void testIncompleteJson() {
         InputStream input = getClass().getResourceAsStream("/incomplete_changes.json");
         assert input != null;
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
@@ -143,7 +144,8 @@ public class JsonArrayIteratorTest {
             verify(callback, times(0)).run();
             it.next();
         }
-        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
+        assertThat(it.getSize())
+            .hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
         verify(callback, times(1)).run();
     }
 
@@ -192,7 +194,7 @@ public class JsonArrayIteratorTest {
             try (JsonArrayIterator<Object> js = JsonArrayIterator.builder().build()) {
                 log.info("{}", js);
             }
-        }).isInstanceOf(IllegalArgumentException.class);
+        }).isInstanceOf(NullPointerException.class);
 
         assertThatThrownBy(() -> {
             try (JsonArrayIterator<Change> js = JsonArrayIterator
@@ -209,7 +211,7 @@ public class JsonArrayIteratorTest {
 
 
     @Test
-    public void interrupt() throws IOException {
+    public void interrupt() {
         byte[] bytes = "[{},{},{},{},{},{}]".getBytes(StandardCharsets.UTF_8);
         final String[] callback = new String[1];
         try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()

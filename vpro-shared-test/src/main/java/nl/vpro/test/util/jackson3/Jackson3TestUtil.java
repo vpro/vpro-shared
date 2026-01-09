@@ -39,14 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class Jackson3TestUtil {
 
-    private static final Jackson3Mapper JACKSON_3_MAPPER =
-        Jackson3Mapper.PRETTY
-            .rebuild()
-            .configure(b ->
-                b.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
-            )
-            .build();
-
+    private static final Jackson3Mapper JACKSON_3_MAPPER = Jackson3Mapper.PRETTY.withSourceInLocation();
+    
     private static final ObjectReader READER = JACKSON_3_MAPPER.reader();
     private static final ObjectMapper MAPPER = JACKSON_3_MAPPER.mapper();
 

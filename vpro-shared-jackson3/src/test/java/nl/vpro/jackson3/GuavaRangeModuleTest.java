@@ -6,7 +6,10 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Instant;
 
+import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Range;
@@ -38,13 +41,14 @@ class GuavaRangeModuleTest {
 
 
     @Test
-    public void without() throws JacksonException {
+    public void without() throws JacksonException, JSONException {
         WithoutSerializer a = new WithoutSerializer();
         a.range = Range.closedOpen(1, 2);
-        String example = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\",\"type\":\"java.lang.Integer\"},\"anotherField\":1}";
-        assertThat(mapper.writeValueAsString(a)).isEqualTo(example);
+        String expected = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\",\"type\":\"java.lang.Integer\"},\"anotherField\":1}";
+        String result = mapper.writeValueAsString(a);
+        JSONAssert.assertEquals(result + "\nis different from expected\n" + expected, expected, result,  JSONCompareMode.STRICT);
 
-        WithoutSerializer ab = mapper.readValue(example, WithoutSerializer.class);
+        WithoutSerializer ab = mapper.readValue(expected, WithoutSerializer.class);
         assertThat(ab.range).isEqualTo(a.range);
 
     }
