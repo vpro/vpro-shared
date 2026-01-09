@@ -1,6 +1,8 @@
 package nl.vpro.jackson3.rs;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JsonParser;
 import tools.jackson.databind.*;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.jsontype.TypeDeserializer;
@@ -41,6 +43,7 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         return mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE);
     }
 
+    @SneakyThrows
     @Override
     public Object readFrom(
         final @NonNull Class<Object> type,
@@ -49,27 +52,24 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
         MediaType mediaType,
         MultivaluedMap<String, String> httpHeaders,
         InputStream entityStream) throws WebApplicationException {
-        final ObjectReader reader;
 
+        final ObjectReader reader;
         JsonMapper mapper =  providers == null ? null : providers.getContextResolver(JsonMapper.class,  MediaType.APPLICATION_JSON_TYPE).getContext(type);
         if (mapper == null) {
             mapper = Jackson3Mapper.LENIENT.mapper();
-            reader = mapper.reader();
-            log.info("No mapper found in {}", providers);
-        } else {
-            reader = mapper.readerFor(type);
         }
+        reader = mapper.reader();
+        ObjectReader objectReader = reader.forType(type);
+        final JsonParser parser = reader.createParser(entityStream);
 
-        final JavaType javaType = reader.typeFactory().constructType(genericType);
-        final JsonNode jsonNode = reader.readTree(entityStream);
+        final JsonNode jsonNode = parser.readValueAsTree();
         if (jsonNode instanceof ObjectNode objectNode) {
 
-            ObjectReader objectReader = reader.forType(javaType);
-            objectReader.readValue(objectNode); // just to ensure t
+            final JavaType javaType = reader.typeFactory().constructType(genericType);
             final TypeDeserializer typeDeserializer = mapper
                 .deserializationConfig()
                 .getTypeResolverProvider()
-                .findTypeDeserializer(null, javaType, null);
+                .findTypeDeserializer(null, javaType,  null);
             if (typeDeserializer != null) {
                 final String propertyName = typeDeserializer.getPropertyName();
                 final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType(null);
@@ -79,8 +79,8 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
                 }
             }
         }
-        return mapper.treeToValue(jsonNode, javaType.getRawClass());
+        return mapper.treeToValue(jsonNode, type);
 
 
-    }
+     }
 }

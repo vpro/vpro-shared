@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.*;
 import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.node.NullNode;
 
 import java.io.*;
@@ -32,13 +33,16 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private final JsonParser jp;
 
+    private final ObjectReader reader;
+
+
     private T next = null;
 
     private boolean needsFindNext = true;
 
     private Boolean hasNext;
 
-    private final BiFunction<JsonParser, TreeNode, ? extends T> valueCreator;
+    private final BiFunction<ObjectReader, TreeNode, ? extends T> valueCreator;
 
     @Getter
     @Setter
@@ -69,7 +73,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         this(inputStream, null, clazz, callback, null, null, null, null, null, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, TreeNode, T> valueCreator) throws IOException {
         this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
     }
 
@@ -105,7 +109,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
      private JsonArrayIterator(
          @NonNull  InputStream inputStream,
-         @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
+         @Nullable final BiFunction<ObjectReader, TreeNode,  T> valueCreator,
          @Nullable final Class<T> valueClass,
          @Nullable Runnable callback,
          @Nullable String sizeField,
@@ -116,8 +120,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          @Nullable Listener<T> eventListener
      ) {
          requireNonNull(inputStream, "No inputStream given");
-         ObjectReader reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
-         this.jp = reader.createParser(inputStream);
+         this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
+         this.jp = this.reader.createParser(inputStream);
          this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
          if (valueCreator != null && valueClass != null) {
              throw new IllegalArgumentException();
@@ -161,25 +165,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.size = tmpSize;
          this.totalSize = tmpTotalSize;
          this.eventListener.accept(new StartEvent());
-         JsonToken token = jp.nextToken();
-         this.needsFindNext = token != JsonToken.END_ARRAY;
-         if (! needsFindNext) {
-             this.hasNext = false;
-         }
-
-         this.eventListener.accept(new TokenEvent(token));
-
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
      }
 
-    private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
-        return (jp, tree) -> {
-            try (JsonParser sub = jp.objectReadContext().treeAsTokens(tree)) {
-                return sub.readValueAs(clazz);
-            } catch (JacksonException e) {
-                throw new ValueReadException(e);
-            }
+    private static <T> BiFunction<ObjectReader, TreeNode, T> valueCreator(Class<T> clazz) {
+        return (m, tree) -> {
+            return m.treeToValue(tree, clazz);
         };
 
     }
@@ -222,43 +214,32 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         if(needsFindNext) {
             while(true) {
                 try {
-                    var currentToken = jp.currentToken();
-                    TreeNode tree;
-                    if (currentToken == JsonToken.START_OBJECT) {
-                        tree = jp.readValueAsTree();
-                    } else {
-                        tree = null;
-                        log.debug("Expected START_OBJECT token but got {}", currentToken);
-                    }
                     jp.nextToken();
-                    var lastToken = jp.currentToken();
+                    var currentToken = jp.currentToken();
+                    this.eventListener.accept(new TokenEvent(currentToken));
 
-                    this.eventListener.accept(new TokenEvent(lastToken));
-                    if (lastToken == JsonToken.END_ARRAY) {
-                        tree = null;
-                    } else {
-                        if (tree instanceof NullNode && skipNulls) {
-                            foundNulls++;
-                            jp.nextToken();
-                            continue;
-                        }
-                    }
-
-                    try {
-                        if (tree == null) {
-                            callback();
-                            hasNext = false;
-                        } else {
-                            if (foundNulls > 0) {
-                                logger.warn("Found {} nulls. Will be skipped", foundNulls);
-                            }
-
-                            next = valueCreator.apply(jp, tree);
-                            eventListener.accept(new NextEvent(next));
-                            hasNext = true;
-                        }
+                    if (currentToken == JsonToken.END_ARRAY) {
+                        callback();
+                        next = null;
+                        hasNext = false;
                         break;
-                    } catch (ValueReadException jme) {
+                    }
+                    TreeNode tree = jp.readValueAsTree(); // read the next token.
+                    if (tree == null) {
+                        next = null;
+                        hasNext = false;
+                        break;
+                    }
+                    if (tree instanceof NullNode && skipNulls) {
+                        foundNulls++;
+                        continue;
+                    }
+                    try {
+                        next = valueCreator.apply(reader, tree);
+                        eventListener.accept(new NextEvent(next));
+                        hasNext = true;
+                        break;
+                    } catch (MismatchedInputException jme) {
                         foundNulls++;
                         logger.warn("{} {} for\n{}\nWill be skipped", jme.getClass(), jme.getMessage(), tree);
                     }
@@ -298,7 +279,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     /**
      * Write the entire stream to an output stream
      */
-    public void write(OutputStream out, final Consumer<T> logging) throws IOException {
+    public void write(OutputStream out, final Consumer<T> logging) {
         write(this, out, logging == null ? null : (c) -> { logging.accept(c); return null;});
     }
 
@@ -307,14 +288,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     }
 
 
-    /**
-     * Write the entire stream to an output stream
-     * @deprecated Use {@link #write(OutputStream, Consumer)}
-     */
-    @Deprecated
-    public void write(OutputStream out, final Function<T, Void> logging) throws IOException {
-        write(this, out, logging);
-    }
 
     /**
      * Write the entire stream to an output stream
@@ -322,7 +295,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     public static <T> void write(
         final CountedIterator<T> iterator,
         final OutputStream out,
-        final Function<T, Void> logging) throws IOException {
+        final Function<T, Void> logging) {
         try (JsonGenerator jg = Jackson3Mapper.INSTANCE.mapper().createGenerator(out)) {
             jg.writeStartObject();
             jg.writeArrayPropertyStart("array");
@@ -408,15 +381,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
 
 
-    public static class ValueReadException extends RuntimeException {
-
-        @Serial
-        private static final long serialVersionUID = 6976771876437440576L;
-
-        public ValueReadException(JacksonException e) {
-            super(e);
-        }
-    }
 
     public class Event {
 

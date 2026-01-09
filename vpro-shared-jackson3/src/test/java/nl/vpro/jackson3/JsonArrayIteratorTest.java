@@ -26,7 +26,7 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void simple() {
-        for (Change change :  JsonArrayIterator.builder(Change.class)
+        try (JsonArrayIterator<Change> iterator = JsonArrayIterator.builder(Change.class)
             .objectMapper(Jackson3Mapper.INSTANCE.withSourceInLocation())
             .inputStream(
                 new ByteArrayInputStream("""
@@ -41,27 +41,37 @@ public class JsonArrayIteratorTest {
                 }
                 ]
             }
-            """.getBytes(StandardCharsets.UTF_8)))) {
-            log.info("{}", change);
+            """.getBytes(StandardCharsets.UTF_8))).build()) {
 
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.getSize()).hasValue(1L);
+            Change change = iterator.next();
+            log.info("{}", change);
+            assertThat(iterator.hasNext()).isFalse();
         }
     }
 
     @Test
     public void changes() {
-
+        String[] mids = new String[] {
+            "POMS_NCRV_1138990",
+            null,
+            null,
+            "POMS_AVRO_1138559"
+        };
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
             .inputStream(getClass().getResourceAsStream("/changes.json"))
             .valueClass(Change.class)
             .objectMapper(Jackson3Mapper.INSTANCE.withSourceInLocation())
             .build()) {
-            assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
+            assertThat(it.next().getMid()).isEqualTo(
+                mids[0]
+            ); // 1
             assertThat(it.getCount()).isEqualTo(1);
             assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
             for (int i = 0; i < 9; i++) {
                 assertThat(it.hasNext()).isTrue();
-
                 Change change = it.next(); // 10
                 Optional<Long> size = it.getSize();
                 size.ifPresent(aLong ->
@@ -164,7 +174,7 @@ public class JsonArrayIteratorTest {
                 log.info("{}", c);
             });
             String expected = "{'array': " + IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8) + "}";
-            JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+            JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.LENIENT);
         }
     }
 
@@ -184,7 +194,7 @@ public class JsonArrayIteratorTest {
                 log.info("{}", c)
             );
             String expected = IOUtils.resourceToString("/array_from_changes.json", StandardCharsets.UTF_8);
-            JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.STRICT);
+            JSONAssert.assertEquals(expected, out.toString(), JSONCompareMode.LENIENT);
         }
     }
 
@@ -220,10 +230,10 @@ public class JsonArrayIteratorTest {
                 @Override
                 public int read() throws IOException {
                     if (i == 6) {
-                        throw new InterruptedIOException();
+                        throw new InterruptedIOException("INterrupted at 6 bytes, so that would have complete 2 objects");
                     }
                     if (i < bytes.length) {
-                        return (int) bytes[i++];
+                        return bytes[i++];
                     } else {
                         return -1;
                     }

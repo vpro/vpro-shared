@@ -3,7 +3,6 @@ package nl.vpro.jackson3.rs;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.Providers;
@@ -58,7 +57,7 @@ public class JsonIdAdderBodyReaderTest {
     }
 
     @Test
-    public void testA() throws IOException {
+    public void testA() {
 
         Object o = idAdderInterceptor.readFrom(Object.class,
             A.class,
@@ -70,7 +69,7 @@ public class JsonIdAdderBodyReaderTest {
 
 
     @Test
-    public void testBase() throws IOException {
+    public void testBase() {
 
         Object o = idAdderInterceptor.readFrom(Object.class,
             Base.class,
@@ -79,7 +78,7 @@ public class JsonIdAdderBodyReaderTest {
         assertThat(o).isInstanceOf(A.class);
     }
     @Test
-    public void testC() throws IOException {
+    public void testC() {
 
         Object o = idAdderInterceptor.readFrom(Object.class,
             C.class,
