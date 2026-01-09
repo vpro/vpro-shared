@@ -26,12 +26,12 @@ public class IterableJson {
                 if (i.hasNext()) {
                     v = i.next();
                     if (! i.hasNext()) {
-                        jgen.writeEmbeddedObject(v);
+                        jgen.writePOJO(v);
                     } else {
                         jgen.writeStartArray();
-                        jgen.writeEmbeddedObject(v);
+                        jgen.writePOJO(v);
                         while (i.hasNext()) {
-                            jgen.writeEmbeddedObject(i.next());
+                            jgen.writePOJO(i.next());
                         }
                         jgen.writeEndArray();
                     }

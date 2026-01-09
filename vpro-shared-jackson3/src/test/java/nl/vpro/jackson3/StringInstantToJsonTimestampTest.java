@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 
-import nl.vpro.jackson3.StringInstantToJsonTimestamp;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,7 +41,8 @@ public class StringInstantToJsonTimestampTest {
 
     @Test
     public void testNattyNow() {
-        assertThat(StringInstantToJsonTimestamp.parseDateTime("now")).isCloseTo(Instant.now(), within(10, ChronoUnit.SECONDS));
+        assertThat(StringInstantToJsonTimestamp.parseDateTime("now"))
+            .isCloseTo(Instant.now(), within(10, ChronoUnit.SECONDS));
     }
 
 }

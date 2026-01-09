@@ -57,6 +57,11 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>io.github.natty-parser</groupId>
+      <artifactId>natty</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>

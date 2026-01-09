@@ -61,14 +61,15 @@ public class StringInstantToJsonTimestamp {
             return DatatypeConverter.parseTime(value).toInstant();
         } catch (IllegalArgumentException iae) {
             try {
-                Optional<Instant> natty = NattySupport.parseDate(value);
+                final Optional<Instant> natty = NattySupport.parseDate(value);
                 if (natty.isPresent()) {
                     return natty.get();
                 } else {
                     log.debug("Natty didn't match");
                 }
             } catch (NoClassDefFoundError classNotFoundException) {
-                log.atLevel(warnedNatty ? Level.DEBUG : Level.WARN).log("No natty?: " + classNotFoundException.getMessage());
+                log.atLevel(warnedNatty ? Level.DEBUG : Level.WARN).
+                    log("No natty?: " + classNotFoundException.getMessage());
                 warnedNatty  = true;
             } catch (Throwable e) {
                 log.debug("Natty couldn't parse {}: {}", value, e.getMessage());

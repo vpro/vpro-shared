@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -26,10 +25,36 @@ import static org.mockito.Mockito.*;
 public class JsonArrayIteratorTest {
 
     @Test
-    public void test() throws IOException {
+    public void simple() {
+        for (Change change :  JsonArrayIterator.builder(Change.class)
+            .inputStream(
+                new ByteArrayInputStream("""
+            {
+                "size": 1,
+                "changes": [
+                {
+                    "sequence": 724,
+                    "revision": 2,
+                    "mid": "POMS_NCRV_1138990",
+                    "deleted": true
+                }
+                }
+            }
+            """.getBytes(StandardCharsets.UTF_8)))) {
+            log.info("{}", change);
+
+        }
+    }
+
+    @Test
+    public void changes() throws IOException {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
-        try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson3Mapper.INSTANCE).build()) {
+        try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
+            .inputStream(getClass().getResourceAsStream("/changes.json"))
+            .valueClass(Change.class)
+            .objectMapper(Jackson3Mapper.INSTANCE)
+            .build()) {
             assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
             assertThat(it.getCount()).isEqualTo(1);
             assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
@@ -39,10 +64,11 @@ public class JsonArrayIteratorTest {
                 Change change = it.next(); // 10
                 Optional<Long> size = it.getSize();
                 size.ifPresent(aLong ->
-                    log.info(it.getCount() + "/" + aLong + " :" + change)
+                    log.info("{}/{} :{}", it.getCount(), aLong, change)
                 );
                 if (!change.isDeleted()) {
                     assertThat(change.getMedia()).isNotNull();
+                    assertThat(change.getMedia()).isInstanceOf(Map.class);
                 }
             }
             assertThat(it.hasNext()).isTrue(); // 11
@@ -64,7 +90,10 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void testNulls() throws IOException {
-        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(
+            new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()),
+            Change.class
+        );
         assertThat(it.hasNext()).isTrue();
         it.next();
         assertThat(it.peek()).isEqualTo(new Change());
@@ -224,7 +253,7 @@ public class JsonArrayIteratorTest {
     @Getter
     @Setter
     @EqualsAndHashCode
-    private static class Change {
+    public static class Change {
 
         private String mid;
         private boolean deleted;

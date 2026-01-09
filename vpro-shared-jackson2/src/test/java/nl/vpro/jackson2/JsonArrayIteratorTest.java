@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -25,8 +24,32 @@ import static org.mockito.Mockito.*;
 @Slf4j
 public class JsonArrayIteratorTest {
 
+
     @Test
-    public void test() throws IOException {
+    public void simple() throws IOException {
+        try (JsonArrayIterator<Change> i = JsonArrayIterator.<Change>builder().valueClass(Change.class)
+            .inputStream(
+                new ByteArrayInputStream("""
+            {
+                "size": 1,
+                "changes": [
+                {
+                    "sequence": 724,
+                    "revision": 2,
+                    "mid": "POMS_NCRV_1138990",
+                    "deleted": true
+                }
+                }
+            }
+            """.getBytes(StandardCharsets.UTF_8))).build()) {
+            Change change = i.next();
+            log.info("{}", change);
+
+        }
+    }
+
+    @Test
+    public void chanages() throws IOException {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson2Mapper.getInstance()).build()) {
@@ -43,6 +66,7 @@ public class JsonArrayIteratorTest {
                 );
                 if (!change.isDeleted()) {
                     assertThat(change.getMedia()).isNotNull();
+                    assertThat(change.getMedia()).isInstanceOf(Map.class);
                 }
             }
             assertThat(it.hasNext()).isTrue(); // 11

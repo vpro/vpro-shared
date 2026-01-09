@@ -101,7 +101,8 @@ public class DirectoryWatcher implements AutoCloseable {
 
     @SneakyThrows
     private Future<?> watchService() {
-        register(directory, watcher);
+        WatchKey key = register(directory, watcher);
+        log.debug("Registered watch key {} for directory {}", key, directory);
 
         // check initial set of file for existing symlinks to follow the targets of.
         try (Stream<Path> p = Files.list(directory).filter(filter)) {
@@ -162,6 +163,7 @@ public class DirectoryWatcher implements AutoCloseable {
         DELETE,
         RELINKED;
 
+        @NonNull
         public static WatcherEventType of(WatchEvent.Kind<?> type) {
             if (type ==  ENTRY_CREATE) {
                 return CREATE;
@@ -169,8 +171,10 @@ public class DirectoryWatcher implements AutoCloseable {
                 return MODIFY;
             } else if (type == ENTRY_DELETE) {
                 return DELETE;
+            } else if (type == OVERFLOW) {
+                return MODIFY;
             } else {
-                return null;
+                throw new IllegalArgumentException("Unknown WatchEvent.Kind " + type);
             }
         }
     }
@@ -247,7 +251,7 @@ public class DirectoryWatcher implements AutoCloseable {
                     key.reset();
                 }
             } catch (InterruptedException e) {
-                log.info("Interrupted watcher for " + directory);
+                log.info("Interrupted watcher for {}", directory);
                 Thread.currentThread().interrupt();
                 break;
             }
@@ -290,7 +294,7 @@ public class DirectoryWatcher implements AutoCloseable {
             watchedTargetFiles.put(pathToKey(resolve), file);
 
             if (!watchedTargetDirectories.contains(pathToKey(resolve.getParent()))) {
-                register(resolve.getParent(), watcher);
+                WatchKey key = register(resolve.getParent(), watcher);
                 watchedTargetDirectories.add(pathToKey(resolve.getParent()));
             }
             return Optional.of(resolve);

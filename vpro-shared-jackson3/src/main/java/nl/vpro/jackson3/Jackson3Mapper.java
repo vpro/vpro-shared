@@ -32,6 +32,7 @@ import nl.vpro.util.LoggingInputStream;
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static tools.jackson.core.json.JsonReadFeature.*;
 import static tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static tools.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
 import static tools.jackson.databind.MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME;
 import static tools.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
@@ -51,41 +52,75 @@ import static tools.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 public class Jackson3Mapper {
 
     private static boolean loggedAboutAvro = false;
-    private static boolean loggedAboutFallback = false;
 
     private static final SimpleFilterProvider FILTER_PROVIDER = new SimpleFilterProvider();
 
-    public static final Jackson3Mapper INSTANCE = Jackson3Mapper.builder("instance")
-        .configure(Jackson3Mapper::lenient)
-        .build();
-    public static final Jackson3Mapper LENIENT = getLenientInstance();
-    public static final Jackson3Mapper STRICT = getStrictInstance();
-    public static final Jackson3Mapper PRETTY_STRICT = getPrettyStrictInstance();
-    public static final Jackson3Mapper PRETTY = getPrettyInstance();
-    public static final Jackson3Mapper PUBLISHER = getPublisherInstance();
-    public static final Jackson3Mapper PRETTY_PUBLISHER = getPublisherInstance();
+    public static final Jackson3Mapper INSTANCE = Jackson3Mapper.builder("instance").build();
+    public static final Jackson3Mapper LENIENT = buildLenientInstance();
+    public static final Jackson3Mapper STRICT = buildStrictInstance();
+    public static final Jackson3Mapper PRETTY_STRICT = buildPrettyStrictInstance();
+    public static final Jackson3Mapper PRETTY = buildPrettyInstance();
+    public static final Jackson3Mapper PUBLISHER = buildPublisherInstance();
+    public static final Jackson3Mapper PRETTY_PUBLISHER = buildPublisherInstance();
+    public static final Jackson3Mapper BACKWARDS_PUBLISHER = buildBackwardsPublisherInstance();
 
-    public static final Jackson3Mapper BACKWARDS_PUBLISHER = getBackwardsPublisherInstance();
+    public static final Jackson3Mapper MODEL = buildModelInstance();
+    public static final Jackson3Mapper MODEL_AND_NORMAL = buildModelAndNormalInstance();
+
+
+    public static Jackson3Mapper getInstance() {
+        return INSTANCE;
+    }
+    public static Jackson3Mapper getLenientInstance() {
+        return LENIENT;
+    }
+    public static Jackson3Mapper getPrettyInstance() {
+        return PRETTY;
+    }
+
+    public static Jackson3Mapper getPrettyStrictInstance() {
+        return PRETTY_STRICT;
+    }
+
+    public static Jackson3Mapper getStrictInstance() {
+        return STRICT;
+    }
+
+    public static Jackson3Mapper getPublisherInstance() {
+        return PUBLISHER;
+    }
+
+    public static Jackson3Mapper getPrettyPublisherInstance() {
+        return PRETTY_PUBLISHER;
+    }
+
+    public static Jackson3Mapper getBackwardsPublisherInstance() {
+        return BACKWARDS_PUBLISHER;
+    }
+
+    @Beta
+    public static Jackson3Mapper getModelInstance() {
+        return MODEL;
+    }
+
+    @Beta
+    public static Jackson3Mapper getModelAndNormalInstance() {
+        return MODEL_AND_NORMAL;
+    }
+
 
 
     private static final ThreadLocal<Jackson3Mapper> THREAD_LOCAL = ThreadLocal.withInitial(() -> INSTANCE);
 
 
-
-
-    private static Jackson3Mapper getLenientInstance() {
+    private static Jackson3Mapper buildLenientInstance() {
         return Jackson3Mapper.builder("lenient")
             .forward()
             .configure(Jackson3Mapper::lenient)
             .build();
     }
 
-    private final void allow() {
-
-    }
-
     private static void lenient(JsonMapper.Builder builder)  {
-        builder.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         builder.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
         builder.disable(FAIL_ON_UNKNOWN_PROPERTIES);
         builder.enable(ALLOW_UNQUOTED_PROPERTY_NAMES);
@@ -95,7 +130,7 @@ public class Jackson3Mapper {
         builder.enable(FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
-    private static Jackson3Mapper getPrettyInstance() {
+    private static Jackson3Mapper buildPrettyInstance() {
         Jackson3Mapper.Builder pretty = Jackson3Mapper
             .builder("pretty")
             .configure(b -> {
@@ -105,7 +140,7 @@ public class Jackson3Mapper {
         return pretty.build();
     }
 
-    private static Jackson3Mapper getPrettyStrictInstance() {
+    private static Jackson3Mapper buildPrettyStrictInstance() {
 
         return Jackson3Mapper
             .builder("pretty_strict")
@@ -120,7 +155,7 @@ public class Jackson3Mapper {
     }
 
 
-    private static Jackson3Mapper getStrictInstance() {
+    private static Jackson3Mapper buildStrictInstance() {
         return Jackson3Mapper.builder("strict")
             .configure(b -> {
                 b.enable(FAIL_ON_UNKNOWN_PROPERTIES);
@@ -129,14 +164,14 @@ public class Jackson3Mapper {
             .build();
     }
 
-    private static Jackson3Mapper getPublisherInstance() {
+    private static Jackson3Mapper buildPublisherInstance() {
         return Jackson3Mapper.builder("publisher")
             .serializationView(Views.ForwardPublisher.class)
             .deserializationView(Views.Forward.class)
             .build();
     }
 
-    private static Jackson3Mapper getPrettyPublisherInstance() {
+    private static Jackson3Mapper buildPrettyPublisherInstance() {
         return Jackson3Mapper.builder("pretty_publisher")
             .serializationView(Views.ForwardPublisher.class)
             .deserializationView(Views.Forward.class)
@@ -144,7 +179,7 @@ public class Jackson3Mapper {
             .build();
     }
 
-    public static Jackson3Mapper getBackwardsPublisherInstance() {
+    private static Jackson3Mapper buildBackwardsPublisherInstance() {
         return Jackson3Mapper.builder("backwards_publisher")
             .serializationView(Views.Publisher.class)
             .deserializationView(Views.Normal.class)
@@ -152,15 +187,13 @@ public class Jackson3Mapper {
             .build();
     }
 
-    @Beta
-    public static Jackson3Mapper getModelInstance() {
+    private static Jackson3Mapper buildModelInstance() {
         return Jackson3Mapper.builder("model")
             .serializationView(Views.Model.class)
             .build();
     }
 
-    @Beta
-    public static Jackson3Mapper getModelAndNormalInstance() {
+    private static Jackson3Mapper buildModelAndNormalInstance() {
         return Jackson3Mapper.builder("model_and_normal")
             .serializationView(Views.ModelAndNormal.class)
             .build();
@@ -180,7 +213,7 @@ public class Jackson3Mapper {
 
     @SneakyThrows({JacksonException.class})
     public static <T> T lenientTreeToValue(JsonNode jsonNode, Class<T> clazz) {
-        return getLenientInstance().reader().treeToValue(jsonNode, clazz);
+        return buildLenientInstance().reader().treeToValue(jsonNode, clazz);
     }
 
     private final JsonMapper mapper;
@@ -227,7 +260,10 @@ public class Jackson3Mapper {
         builder.mapperBuilder.enable(ALLOW_JAVA_COMMENTS);
         builder.mapperBuilder.enable(ALLOW_LEADING_ZEROS_FOR_NUMBERS);
 
-        //register(builder.mapperBuilder, filter, new JavaTimeModule());
+
+        // actually a breaking change in jackson3, this defaults to false now.
+        builder.mapperBuilder.enable(DEFAULT_VIEW_INCLUSION);
+
         register(builder, filter, new DateModule());
 
 
@@ -240,7 +276,7 @@ public class Jackson3Mapper {
             register(builder, filter, (tools.jackson.databind.JacksonModule) avro.getDeclaredConstructor().newInstance());
         } catch (ClassNotFoundException ncdfe) {
             if (! loggedAboutAvro) {
-                log.debug("SerializeAvroModule could not be registered because: " + ncdfe.getClass().getName() + " " + ncdfe.getMessage());
+                log.debug("SerializeAvroModule could not be registered because: {} {}", ncdfe.getClass().getName(), ncdfe.getMessage());
             }
             loggedAboutAvro = true;
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
@@ -330,7 +366,8 @@ public class Jackson3Mapper {
     }
 
     public static Builder builder(String toString) {
-        return _builder().toString(toString);
+        return _builder()
+            .toString(toString);
     }
 
     public static class Builder {
@@ -362,5 +399,4 @@ public class Jackson3Mapper {
 
     }
 }
-
 

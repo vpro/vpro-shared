@@ -20,6 +20,8 @@ import com.google.common.collect.UnmodifiableIterator;
 import nl.vpro.util.CloseableIterator;
 import nl.vpro.util.CountedIterator;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * @author Michiel Meeuwissen
  * @since 1.0
@@ -27,8 +29,6 @@ import nl.vpro.util.CountedIterator;
 @Slf4j
 public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     implements CloseableIterator<T>, PeekingIterator<T>, CountedIterator<T> {
-
-    private final ObjectReader reader;
 
     private final JsonParser jp;
 
@@ -38,7 +38,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private Boolean hasNext;
 
-    private final BiFunction<ObjectReader, TreeNode, ? extends T> valueCreator;
+    private final BiFunction<JsonParser, TreeNode, ? extends T> valueCreator;
 
     @Getter
     @Setter
@@ -69,14 +69,21 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         this(inputStream, null, clazz, callback, null, null, null, null, null, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, TreeNode, T> valueCreator) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
         this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
     }
 
 
-    public static class Builder<T> {
+    public static class Builder<T> implements Iterable<T> {
 
 
+        @Override
+        public @NonNull Iterator<T> iterator() {
+            JsonArrayIterator<T> build = build();
+            return build.stream()
+                .onClose(build::close)
+                .iterator();
+        }
     }
 
     /**
@@ -94,13 +101,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
      * @param skipNulls       Whether to skip nulls in the array. Default true.
      * @param eventListener   A listener for events that happen during parsing and iteration of the array. See {@link Event} and extension classes.
-     * @throws IOException    If the json parser could not be created or the piece until the start of the array could
-     *                        not be tokenized.
      */
-     @lombok.Builder(builderClassName = "Builder", builderMethodName = "builder")
+     @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
      private JsonArrayIterator(
          @NonNull  InputStream inputStream,
-         @Nullable final BiFunction<ObjectReader, TreeNode,  T> valueCreator,
+         @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
          @Nullable final Class<T> valueClass,
          @Nullable Runnable callback,
          @Nullable String sizeField,
@@ -109,12 +114,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          @Nullable Logger logger,
          @Nullable Boolean skipNulls,
          @Nullable Listener<T> eventListener
-     ) throws IOException {
-         if (inputStream == null) {
-             throw new IllegalArgumentException("No inputStream given");
-         }
-         this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
-         this.jp = this.reader.createParser(inputStream);
+     ) {
+         requireNonNull(inputStream, "No inputStream given");
+         ObjectReader reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
+         this.jp = reader.createParser(inputStream);
          this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
          if (valueCreator != null && valueClass != null) {
              throw new IllegalArgumentException();
@@ -131,7 +134,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          if (totalSizeField == null) {
              totalSizeField = "totalSize";
          }
-         this.eventListener = eventListener == null? (e) -> {} : eventListener;
+         this.eventListener = eventListener == null? Listener.noop() : eventListener;
          // find the start of the array, where we will start iterating.
          while(true) {
              JsonToken token = jp.nextToken();
@@ -148,7 +151,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
              }
              if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
                  tmpTotalSize = jp.getLongValue();
-                 this.eventListener.accept(new TotalSizeEvent(tmpSize));
+                 this.eventListener.accept(new TotalSizeEvent(tmpTotalSize));
 
              }
              if (token == JsonToken.START_ARRAY) {
@@ -159,16 +162,21 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.totalSize = tmpTotalSize;
          this.eventListener.accept(new StartEvent());
          JsonToken token = jp.nextToken();
+         this.needsFindNext = token != JsonToken.END_ARRAY;
+         if (! needsFindNext) {
+             this.hasNext = false;
+         }
+
          this.eventListener.accept(new TokenEvent(token));
 
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
      }
 
-    private static <T> BiFunction<ObjectReader, TreeNode, T> valueCreator(Class<T> clazz) {
-        return (m, tree) -> {
-            try {
-                return m.treeToValue(tree, clazz);
+    private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
+        return (jp, tree) -> {
+            try (JsonParser sub = jp.objectReadContext().treeAsTokens(tree)) {
+                return sub.readValueAs(clazz);
             } catch (JacksonException e) {
                 throw new ValueReadException(e);
             }
@@ -214,7 +222,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         if(needsFindNext) {
             while(true) {
                 try {
+                    var lastToken = jp.getLastClearedToken();
                     TreeNode tree = jp.readValueAsTree();
+                    var newLastToken = jp.getLastClearedToken();
+                    assert lastToken != newLastToken;
+                    this.eventListener.accept(new TokenEvent(newLastToken));
+
                     this.eventListener.accept(new TokenEvent(jp.getLastClearedToken()));
 
                     if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
@@ -222,6 +235,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     } else {
                         if (tree instanceof NullNode && skipNulls) {
                             foundNulls++;
+                            jp.nextToken();
                             continue;
                         }
                     }
@@ -235,14 +249,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                                 logger.warn("Found {} nulls. Will be skipped", foundNulls);
                             }
 
-                            next = valueCreator.apply(reader, tree);
+                            next = valueCreator.apply(jp, tree);
                             eventListener.accept(new NextEvent(next));
                             hasNext = true;
                         }
                         break;
                     } catch (ValueReadException jme) {
                         foundNulls++;
-                        logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                        logger.warn("{} {} for\n{}\nWill be skipped", jme.getClass(), jme.getMessage(), tree);
                     }
                 } catch (RuntimeException rte) {
                     callbackBeforeThrow(rte);
@@ -262,7 +276,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         callback();
         this.jp.close();
 
@@ -336,7 +350,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     public static <T> void writeObjects(
         final CountedIterator<T> iterator,
         final JsonGenerator jg,
-        final Function<T, Void> logging) throws IOException {
+        final Function<T, Void> logging) {
         while (iterator.hasNext()) {
             T change;
             try {
@@ -376,6 +390,16 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     @NonNull
     public Optional<Long> getTotalSize() {
         return Optional.ofNullable(totalSize);
+    }
+
+    public static <O> Builder<O> builder() {
+        return JsonArrayIterator.<O>_builder();
+    }
+
+
+    public static <O> Builder<O> builder(Class<O> valueClass) {
+        return JsonArrayIterator.<O>_builder()
+            .valueClass(valueClass);
     }
 
 
@@ -444,7 +468,21 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     public interface Listener<S> extends EventListener, Consumer<JsonArrayIterator<S>.Event> {
 
 
-    }
+        static <S> Listener<S> noop() {
+            return new Listener<S>() {
 
+                @Override
+                public void accept(JsonArrayIterator<S>.Event event) {
+
+                }
+
+                @Override
+                public String toString() {
+                    return "noop";
+
+                }
+            };
+        }
+    }
 
 }
