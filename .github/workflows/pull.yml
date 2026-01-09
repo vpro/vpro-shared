@@ -4,6 +4,7 @@ name: build pull request
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -16,7 +17,6 @@ jobs:
     env:
       MAVEN_ARGS: '--no-transfer-progress'
     steps:
-
       - uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
