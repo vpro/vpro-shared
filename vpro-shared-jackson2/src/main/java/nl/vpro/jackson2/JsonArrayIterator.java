@@ -211,11 +211,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         if(needsFindNext) {
             while(true) {
                 try {
-                    var lastToken = jp.getLastClearedToken();
-
                     TreeNode tree = jp.readValueAsTree();
                     var newLastToken = jp.getLastClearedToken();
-                    assert lastToken != newLastToken;
+
                     this.eventListener.accept(new TokenEvent(newLastToken));
 
                     if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {

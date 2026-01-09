@@ -49,7 +49,7 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    public void chanages() throws IOException {
+    public void changes() throws IOException {
 
         //Jackson2Mapper.getInstance().writeValue(System.out, new Change("bla", false));
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson2Mapper.getInstance()).build()) {
