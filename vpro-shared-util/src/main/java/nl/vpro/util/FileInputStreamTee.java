@@ -23,7 +23,6 @@ public class FileInputStreamTee extends TruncatedObservableInputStream {
     @Override
     void write(byte[] buffer, int offset, int effectiveLength) throws IOException {
         fileOutputStream.write(buffer, offset, effectiveLength);
-
     }
 
     @Override

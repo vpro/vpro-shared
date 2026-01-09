@@ -91,7 +91,7 @@ public class FileSizeFormatter {
             return format(null, false) + "/s";
         }
         if (duration.isZero()) {
-            return "\u221E B/s";
+            return "∞ B/s";
         }
         Float perSecond = 1000f * numberOfBytes.floatValue() / duration.toMillis();
         return format(perSecond, false) + "/s";

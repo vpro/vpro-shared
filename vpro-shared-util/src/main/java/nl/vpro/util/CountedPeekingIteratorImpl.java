@@ -38,11 +38,6 @@ class CountedPeekingIteratorImpl<T> extends CloseablePeekingIteratorImpl<T> impl
     }
 
     @Override
-    public void close() throws Exception {
-        iterator.close();
-    }
-
-    @Override
     public CountedPeekingIterator<T> peeking() {
         return this;
     }

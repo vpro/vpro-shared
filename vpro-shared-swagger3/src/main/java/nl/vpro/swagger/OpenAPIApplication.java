@@ -36,8 +36,8 @@ import org.springframework.core.env.Environment;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 
+import nl.vpro.jackson.Views;
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.jackson2.Views;
 import nl.vpro.rs.ResteasyApplication;
 import nl.vpro.swagger.model.*;
 import nl.vpro.util.ThreadPools;

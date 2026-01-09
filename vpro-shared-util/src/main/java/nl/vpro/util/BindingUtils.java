@@ -9,7 +9,6 @@ import java.time.ZoneId;
 public class BindingUtils {
 
     private BindingUtils() {
-
     }
 
     public static final ZoneId DEFAULT_ZONE = ZoneId.of("Europe/Amsterdam");

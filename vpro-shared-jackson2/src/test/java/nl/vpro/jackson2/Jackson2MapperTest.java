@@ -12,6 +12,13 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
+
+import nl.vpro.jackson.Views;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,6 +43,27 @@ public class Jackson2MapperTest {
         @XmlElement
         Optional<Integer> optional;
     }
+
+
+    @Test
+
+    public void basicJackson2() throws JsonProcessingException {
+        JsonMapper mapper = new JsonMapper();
+        mapper.setAnnotationIntrospector(new AnnotationIntrospectorPair(
+            new JacksonAnnotationIntrospector(),
+            new JakartaXmlBindAnnotationIntrospector(mapper.getTypeFactory()))
+        );
+        mapper.registerModule(new Jdk8Module());
+
+        A a = mapper.readerWithView(Views.Normal.class).forType(A.class)
+            .readValue("""
+        {"integer": 2, "optional": 3}
+        """);
+        assertThat(a.integer).isEqualTo(2);
+        assertThat(a.optional).contains(3);
+
+    }
+
 
     @Test
     public void read() throws IOException {

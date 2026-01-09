@@ -137,7 +137,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
              }
              this.eventListener.accept(new TokenEvent(token));
              if (token == JsonToken.FIELD_NAME) {
-                 fieldName = jp.getCurrentName();
+                 fieldName = jp.currentName();
              }
              if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
                  tmpSize = jp.getLongValue();
@@ -145,7 +145,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
              }
              if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
                  tmpTotalSize = jp.getLongValue();
-                 this.eventListener.accept(new TotalSizeEvent(tmpSize));
+                 this.eventListener.accept(new TotalSizeEvent(tmpTotalSize));
 
              }
              if (token == JsonToken.START_ARRAY) {
@@ -212,7 +212,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             while(true) {
                 try {
                     TreeNode tree = jp.readValueAsTree();
-                    this.eventListener.accept(new TokenEvent(jp.getLastClearedToken()));
+                    var newLastToken = jp.getLastClearedToken();
+
+                    this.eventListener.accept(new TokenEvent(newLastToken));
 
                     if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
                         tree = null;

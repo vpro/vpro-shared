@@ -31,6 +31,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationIntrospector;
 import com.google.common.annotations.Beta;
 
+import nl.vpro.jackson.Views;
 import nl.vpro.logging.simple.SimpleLogger;
 import nl.vpro.util.LoggingInputStream;
 

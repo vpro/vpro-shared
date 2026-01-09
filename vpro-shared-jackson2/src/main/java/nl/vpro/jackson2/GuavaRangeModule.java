@@ -16,9 +16,9 @@ import com.google.common.collect.Range;
 
 public class GuavaRangeModule extends SimpleModule {
 
-    public static final String LOWER_ENDPOINT = "lowerEndpoint";
+    public static final String LOWER_ENDPOINT   = "lowerEndpoint";
     public static final String LOWER_BOUND_TYPE = "lowerBoundType";
-    public static final String UPPER_ENDPOINT = "upperEndpoint";
+    public static final String UPPER_ENDPOINT   = "upperEndpoint";
     public static final String UPPER_BOUND_TYPE = "upperBoundType";
 
     @Serial
@@ -136,7 +136,5 @@ public class GuavaRangeModule extends SimpleModule {
             }
         }
     }
-
-
 
 }
