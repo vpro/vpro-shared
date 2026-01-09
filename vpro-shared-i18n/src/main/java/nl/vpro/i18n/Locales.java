@@ -53,9 +53,9 @@ public final class Locales {
     public static final Locale FLEMISH       = of(nl, BE);
 
     /**
-     * The locale representing the 'undetermined' language {@link LanguageCode#UND}
+     * The locale representing the 'undetermined' language {@link ISO_639_3_Code#UND}
      */
-    public static final Locale UNDETERMINED  = of(LanguageCode.UND);
+    public static final Locale UNDETERMINED  = of(ISO_639_3_Code.UND);
 
     private static final ThreadLocal<Locale> DEFAULT = ThreadLocal.withInitial(Locale::getDefault);
 

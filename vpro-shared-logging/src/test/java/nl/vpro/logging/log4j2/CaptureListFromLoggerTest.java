@@ -21,7 +21,7 @@ class CaptureListFromLoggerTest {
         for (int i = 0; i < 10; i++) {
             final int j = i;
             futures.add(service.submit(() -> {
-                try (CaptureListFromLogger capture = new CaptureListFromLogger(UUID.randomUUID(), true)) {
+                try (CaptureListFromLogger capture = new CaptureListFromLogger(true)) {
                     log.info("foo" + j);
                     log.info("bar" + j);
 
