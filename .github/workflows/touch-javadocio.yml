@@ -5,7 +5,7 @@ on:
   push:
     paths:
     - pom.xml
-    branches: ['**']
+    branches: ['main', 'REL-*']
   workflow_dispatch:
 
 
