@@ -61,6 +61,7 @@ public class ConfigurationServlet extends HttpServlet {
         return (Context)context.lookup("java:comp/env");
     }
 
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> getProperties(ServletContext context, HttpServletRequest request) {
         return ((Function<HttpServletRequest, Map<String, Object>>)context.getAttribute(ATTRIBUTE_NAME)).apply(request);
     }
@@ -256,6 +257,7 @@ public class ConfigurationServlet extends HttpServlet {
      *
      * @param is InputStream to read as properties file
      */
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     static Map<String, String> getProperties(InputStream is) throws IOException {
 
         final Map<String, String> keys = new LinkedHashMap<>();

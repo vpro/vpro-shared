@@ -6,6 +6,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.junit.jupiter.api.Test;
 
+import static nl.vpro.test.util.jaxb.JAXBTestUtil.assertThatXml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -28,7 +29,7 @@ public class XMLStreamWriterUtilTest {
         try (AutoCloseable closeable = util.writeElement("a")) {
             util.writeAttribute("x", "b");
         }
-        assertThat(builder.toString()).isXmlEqualTo("<a x=\"b\"/>");
+        assertThatXml(builder.toString()).isSimilarTo("<a x=\"b\"/>");
     }
     @Test
     public void writeAutoClosedNestedElement() throws Exception {
@@ -36,7 +37,7 @@ public class XMLStreamWriterUtilTest {
             util.writeAttribute("x", "b");
             util.writeElement("b");
         }
-        assertThat(builder.toString()).isXmlEqualTo("<a x=\"b\"><b></b></a>");
+        assertThatXml(builder.toString()).isSimilarTo("<a x=\"b\"><b></b></a>");
     }
     @Test
     public void writeDocument() throws Exception {

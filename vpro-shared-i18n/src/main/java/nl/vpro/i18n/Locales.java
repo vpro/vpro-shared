@@ -34,7 +34,9 @@ public final class Locales {
     /**
      * Like {@link #DUTCH}, but the country is explicitly {@link CountryCode#UNDEFINED}.
      * @since 2.34
+     * @deprecated use {@link #DUTCH} instead. 'UNDEFINED' country is discouraged,since it is not a proper ISO code.
      */
+    @Deprecated
     public static final Locale DUTCH_U         = of (nl, UNDEFINED);
 
     /**
