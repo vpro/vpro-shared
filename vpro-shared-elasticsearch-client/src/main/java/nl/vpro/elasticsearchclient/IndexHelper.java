@@ -72,7 +72,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private ObjectMapper objectMapper;
     private File writeJsonDir;
     private ElasticSearchIndex elasticSearchIndex;
-    private boolean countAfterCreate = false;
+    private boolean countAfterCreate;
     private final Supplier<Map<String, String>> mdcSupplier;
     private final Distribution distribution;
 
@@ -448,7 +448,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 }
             }
         }
-        if (bulk.size() > 0) {
+        if (!bulk.isEmpty()) {
             ObjectNode bulkResult = bulk(bulk);
             bulkLogger(LoggerFactory.getLogger(log.getName())).accept(bulkResult);
         }
@@ -655,9 +655,8 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
             @Override
             public void onFailure(Exception exception) {
-                if (exception instanceof ResponseException) {
+                if (exception instanceof ResponseException re) {
                     future.completeExceptionally(exception);
-                    ResponseException re = (ResponseException) exception;
                     Response response = re.getResponse();
                     try {
                         ObjectNode result = read(log, response);
@@ -791,7 +790,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public  List<@NonNull Optional<JsonNode>> mgetWithRouting(Collection<RoutedId> ids){
-        if (ids.size() == 0) {
+        if (ids.isEmpty()) {
             return Collections.emptyList();
         }
         Request get = createGet("/_mget");
@@ -1085,7 +1084,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Collection<BulkRequestEntry> request,
         Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
-        if (request.size() == 0) {
+        if (request.isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
 
@@ -1163,7 +1162,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             .performRequest(get);
         if (response.getStatusLine().getStatusCode() == 200) {
             JsonNode result = read(response);
-            return Optional.of(result.fields().next().getValue().get("settings").get(INDEX));
+            return Optional.of(result.properties().iterator().next().getValue().get("settings").get(INDEX));
         } else {
             log.warn("For {} -> {}", get, response);
             return Optional.empty();
@@ -1392,15 +1391,15 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 ObjectNode on = (ObjectNode) n;
                 boolean recognized = false;
                 if (on.has(DELETE)) {
-                    deletes.accept(on.with(DELETE));
+                    deletes.accept(on.withObject(P_DELETE));
                     recognized = true;
                 }
                 if (n.has(INDEX)) {
-                    indexes.accept(on.with(INDEX));
+                    indexes.accept(on.withObject(P_INDEX));
                     recognized = true;
                 }
                 if (n.has(UPDATE)) {
-                    updates.accept(on.with(UPDATE));
+                    updates.accept(on.withObject(P_UPDATE));
                     recognized = true;
                 }
                 if (! recognized) {
@@ -1606,7 +1605,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     public void waitForHealth()  {
-        waitForHealth(client(), log.prefixedWith(clientFactory + ": " + toString()));
+        waitForHealth(client(), log.prefixedWith(clientFactory + ": " + this));
     }
 
     public static void waitForHealth(RestClient client, SimpleLogger log) {
@@ -1677,7 +1676,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     private static void sleepSeconds(int seconds) {
         try {
             SECONDS.sleep(seconds);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
 
         }
     }
