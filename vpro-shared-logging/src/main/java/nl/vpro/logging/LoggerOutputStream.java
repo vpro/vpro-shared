@@ -52,7 +52,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
             protected void log(String line) {
                 Level l = level.apply(line);
                 if (l != null) {
-                    Slf4jHelper.log(log, l, line);
+                    log.atLevel(l).log(line);
                 }
             }
         };
@@ -66,7 +66,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream info(final SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            protected final void log(String line) {
+            protected void log(String line) {
                 log.info(line);
             }
         };
@@ -79,7 +79,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream error(SimpleLogger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            protected final void log(String line) {
+            protected void log(String line) {
                 log.error(line);
             }
         };
@@ -93,7 +93,7 @@ public abstract class LoggerOutputStream extends AbstractLoggerOutputStream {
     public static LoggerOutputStream error(final java.util.logging.Logger log, boolean skipEmptyLines) {
         return new LoggerOutputStream(skipEmptyLines) {
             @Override
-            protected final void log(String line) {
+            protected void log(String line) {
                 log.severe(line);
             }
         };
