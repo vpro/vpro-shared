@@ -10,7 +10,7 @@ import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContex
  * Wraps another bridge.
  * @since 5.0
  */
-public class CollectionPropertyBridge<T> implements PropertyBridge<Collection<?>> {
+public class CollectionPropertyBridge<T> implements PropertyBridge<Collection<T>> {
 
     private final PropertyBridge<T> single;
 
@@ -18,12 +18,11 @@ public class CollectionPropertyBridge<T> implements PropertyBridge<Collection<?>
         this.single = single;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void write(DocumentElement target, Collection bridgedElements, PropertyBridgeWriteContext context) {
+    public void write(DocumentElement target, Collection<T> bridgedElements, PropertyBridgeWriteContext context) {
         if (bridgedElements != null) {
-            for (Object bridgedElement : bridgedElements) {
-                this.single.write(target, (T) bridgedElement, context);
+            for (T bridgedElement : bridgedElements) {
+                this.single.write(target, bridgedElement, context);
             }
         }
     }

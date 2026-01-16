@@ -6,16 +6,17 @@ package nl.vpro.hibernate.search6;
 
 import lombok.With;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collection;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hibernate.search.engine.backend.types.*;
 import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBinder;
 import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContext;
-
-import java.util.Collection;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 @Slf4j
 public class CollectionSizeBridge<E> implements PropertyBridge<Collection<E>> {
@@ -30,7 +31,7 @@ public class CollectionSizeBridge<E> implements PropertyBridge<Collection<E>> {
     }
 
     @Override
-    public void write(DocumentElement target, Collection bridgedElement, PropertyBridgeWriteContext context) {
+    public void write(DocumentElement target, Collection<E> bridgedElement, PropertyBridgeWriteContext context) {
         if (bridgedElement != null) {
             target.addValue(field, this.sizeFunction.apply(bridgedElement));
         } else {
