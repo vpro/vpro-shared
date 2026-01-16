@@ -1,12 +1,13 @@
 package nl.vpro.monitoring.binder;
 
-import io.micrometer.common.lang.NonNull;
 import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
 
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.jspecify.annotations.NonNull;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
 import com.sun.management.VMOption;
