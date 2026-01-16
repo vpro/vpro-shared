@@ -24,10 +24,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
- public class ElasticSearchIteratorContainerTest {
+public class ElasticSearchIteratorContainerTest {
 
 
 
@@ -37,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     static int ID  = 0;
     public static class A {
         public String id = String.valueOf(ID++);
-        public String title = "bar";
+        public String title;
         public int value;
         public A(String title, int value) {
             this.title = title;
@@ -92,7 +93,7 @@ import static org.assertj.core.api.Assertions.assertThat;
             .build()) {
             ObjectNode search = i.prepareSearch("pageupdates-publish");
             QueryBuilder.asc(search, "lastPublished");
-            ObjectNode query = search.with(Constants.QUERY);
+            ObjectNode query = search.withObject(Constants.P_QUERY);
             QueryBuilder.mustTerm(query, "broadcasters", "VPRO");
 
             i.forEachRemaining((u) -> {
@@ -123,6 +124,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @Disabled
     public void test15() {
@@ -185,9 +187,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 .max(2)
                 .build()) {
 
-                j.forEachRemaining((node) -> {
-                    count.incrementAndGet();
-                });
+                j.forEachRemaining((node) -> count.incrementAndGet());
             }
         }
         assertThat(count.get()).isEqualTo(2);
@@ -203,7 +203,7 @@ import static org.assertj.core.api.Assertions.assertThat;
             .build()) {
 
             ObjectNode search = i.prepareSearch("apimedia-publish", "groupMemberRef", "episodeRef");
-            ObjectNode query = search.with("query");
+            ObjectNode query = search.withObject(Constants.P_QUERY);
             QueryBuilder.mustTerm(query, "childRef", "18Jnl1100");
 
 

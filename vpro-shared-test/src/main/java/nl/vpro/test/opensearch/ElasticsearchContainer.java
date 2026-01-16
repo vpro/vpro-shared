@@ -16,11 +16,12 @@ public class ElasticsearchContainer extends GenericContainer<ElasticsearchContai
         // setups may behave differently there.
         if (isMacArm()) {
             log.warn("""
-                    WARNING: detected macOS on ARM (Apple Silicon). Testcontainers/OpenSearch may require special images or Rosetta.
-                    This may require emulation, because no ARM image available for opensearch.
-                    Things go better if you enable 'Use Rosetta for x86/amd64 emulation on Apple Silicon' in Docker Desktop settings.
-                    See (nl.vpro.test.opensearch.ElasticsearchContainerSupport).
-                    Perhaps also something like colima or podman may help (See https://java.testcontainers.org/supported_docker_environment/)
+
+                    WARNING: detected macOS on ARM (Apple Silicon).
+                             This may require emulation, because no ARM image available for opensearch.
+                             Things go better if you enable 'Use Rosetta for x86/amd64 emulation on Apple Silicon' in Docker Desktop settings.
+                             See also javadoc of nl.vpro.test.opensearch.ElasticsearchContainerSupport.
+                             Perhaps also something like colima or podman may help (See https://java.testcontainers.org/supported_docker_environment/)
                     """);
         }
         if (start) {
