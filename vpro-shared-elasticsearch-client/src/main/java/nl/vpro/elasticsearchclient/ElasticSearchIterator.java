@@ -101,7 +101,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     @Getter
     @Setter
-    private boolean jsonRequests = true;
+    private boolean jsonRequests;
 
     @Getter
     private Version<Integer> esVersion = new Version<>(7);
@@ -183,7 +183,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.closeRate = rateMeasurerer == null;
 
         this.routing = routingIds;
-        this.warnSortNotOnDoc = warnSortNotOnDoc == null ? true : warnSortNotOnDoc;
+        this.warnSortNotOnDoc = warnSortNotOnDoc == null || warnSortNotOnDoc;
     }
 
 
@@ -244,13 +244,13 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             .adapt(jn -> jn.get(Fields.SOURCE));
     }
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public ObjectNode prepareSearch(Collection<String> indices, Collection<String> types) {
         return _prepareSearch(indices, types);
     }
 
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public ObjectNode prepareSearch(String indices, String... types) {
         return _prepareSearch(Collections.singletonList(indices), Arrays.asList(types));
     }
@@ -352,7 +352,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     builder.append("/").append(String.join(",", indices));
                 }
                 if (types != null && !types.isEmpty()) {
-                    if (builder.length() > 0) {
+                    if (!builder.isEmpty()) {
                         builder.append("/");
                     }
                     builder.append(String.join(",", types));
@@ -365,7 +365,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                 }
                 post.addParameter(VERSION, String.valueOf(this.requestVersion));
-                if (routing != null && routing.size() > 0) {
+                if (routing != null && !routing.isEmpty()) {
                     post.addParameter(ROUTING, String.join(",", routing));
                 }
 
@@ -459,9 +459,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 }
                 readResponse();
                 i = 0;
-                hasNext = hits.get(HITS).size() > 0;
+                hasNext = !hits.get(HITS).isEmpty();
             } catch(ResponseException re) {
-                log.warn("nextBatch:" + re.getClass().getName() + ":" + re.getMessage());
+                log.warn("nextBatch:{}:{}", re.getClass().getName(), re.getMessage());
                 hits = null;
                 hasNext = false;
             } catch (IOException ioe) {
@@ -513,6 +513,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             JsonNode total  = hits.get("total");
             if (total.has("relation")) {
                 String relation = total.get("relation").asText();
+                //noinspection SwitchStatementWithTooFewBranches
                 switch (relation) {
                     case "eq":
                         this.totalRelation = TotalRelation.EQUAL_TO;
