@@ -222,6 +222,7 @@ public class Jackson2Mapper extends ObjectMapper {
 
         mapper.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
         mapper.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+        //noinspection deprecation
         mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
         try {
@@ -310,26 +311,21 @@ public class Jackson2Mapper extends ObjectMapper {
      */
     public <T> HttpResponse.BodyHandler<T> asBodyHandler(Class<T> type, nl.vpro.logging.simple.Level level) {
 
-        return new HttpResponse.BodyHandler<T>() {
-            @Override
-            public HttpResponse.BodySubscriber<T> apply(HttpResponse.ResponseInfo responseInfo) {
-                return HttpResponse.BodySubscribers.mapping(
-                    HttpResponse.BodySubscribers.ofInputStream(),
-                    body -> {
-                        try {
-                            SimpleLogger simple = slf4j(log);
-                            if (simple.isEnabled(level)) {
-                                body = new LoggingInputStream(simple, body, level);
-                            }
-                            return readValue(body, type);
+        return responseInfo -> HttpResponse.BodySubscribers.mapping(
+            HttpResponse.BodySubscribers.ofInputStream(),
+            body -> {
+                try {
+                    SimpleLogger simple = slf4j(log);
+                    if (simple.isEnabled(level)) {
+                        body = new LoggingInputStream(simple, body, level);
+                    }
+                    return readValue(body, type);
 
-                        } catch (IOException e) {
-                            log.warn(e.getMessage(), e);
-                            return null;
-                        }
-                    });
-            }
-        };
+                } catch (IOException e) {
+                    log.warn(e.getMessage(), e);
+                    return null;
+                }
+            });
     }
 }
 

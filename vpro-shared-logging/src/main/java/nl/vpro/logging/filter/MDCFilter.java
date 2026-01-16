@@ -9,18 +9,13 @@ import java.io.Serial;
 import java.util.function.Function;
 
 import jakarta.servlet.*;
-import jakarta.servlet.http.HttpFilter;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.*;
 import org.slf4j.event.Level;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import nl.vpro.logging.Slf4jHelper;
 
 import static nl.vpro.logging.mdc.MDCConstants.*;
 
@@ -96,7 +91,7 @@ public class  MDCFilter extends HttpFilter {
             chain.doFilter(request, response);
         } finally {
             // access logging...
-            Slf4jHelper.log(afterLogger(logPostFix), accessLevel.apply(path), "{} {}", response.getStatus(), response.getContentType());
+            afterLogger(logPostFix).atLevel(accessLevel.apply(path)).log("{} {}", response.getStatus(), response.getContentType());
             if (clear) {
                 MDC.clear();
             } else {

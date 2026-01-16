@@ -71,6 +71,7 @@ public class GuavaRangeModule extends SimpleModule {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static class Deserializer extends StdDeserializer<Range<?>> {
 
         @Serial

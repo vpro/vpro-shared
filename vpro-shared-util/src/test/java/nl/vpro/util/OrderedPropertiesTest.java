@@ -27,6 +27,7 @@ class OrderedPropertiesTest {
         assertThat(Collections.list(properties.keys())).containsExactly("x", "y", "z", "a");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void propertyNames() {
         assertThat((Collection<Object>) Collections.list(properties.propertyNames())).containsExactly("x", "y", "z", "a");

@@ -9,8 +9,7 @@ import tools.jackson.databind.ser.std.StdSerializer;
 import tools.jackson.databind.type.CollectionLikeType;
 import tools.jackson.databind.type.SimpleType;
 
-import java.io.IOException;
-import java.io.Serial;
+import java.io.*;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
@@ -36,12 +35,7 @@ public class GuavaRangeModule extends SimpleModule {
         public static Serializer INSTANCE = new Serializer();
 
         protected Serializer() {
-            super(new CollectionLikeType(
-                SimpleType.constructUnsafe(Range.class),
-                SimpleType.constructUnsafe(Comparable.class)) {
-                @Serial
-                private static final long serialVersionUID = -2803462566784593946L;
-            });
+            super(RANGE_OR_COMPARABLE);
         }
 
         @Override
@@ -68,26 +62,17 @@ public class GuavaRangeModule extends SimpleModule {
                 gen.writeEndObject();
             }
         }
-
-
     }
 
-    public static class Deserializer extends StdDeserializer<Range<?>> {
 
+    public static class Deserializer extends StdDeserializer<Range<?>>   {
         public static Deserializer INSTANCE = new Deserializer();
 
-
         protected Deserializer() {
-            super(new CollectionLikeType(
-                SimpleType.constructUnsafe(Range.class),
-                SimpleType.constructUnsafe(Comparable.class)) {
-                @Serial
-                private static final long serialVersionUID = -2803462566784593946L;
-            });
+            super(RANGE_OR_COMPARABLE);
         }
 
-
-
+        @SuppressWarnings({"unchecked", "rawtypes"})
         @SneakyThrows
         @Override
         public Range<?> deserialize(JsonParser p, DeserializationContext ctxt) {
@@ -106,7 +91,7 @@ public class GuavaRangeModule extends SimpleModule {
         }
     }
 
-    static <C extends Comparable<C>> Range<C> of(Class<C> clazz, DeserializationContext context, JsonNode node) throws IOException {
+    static <C extends Comparable<C>> Range<C> of(Class<C> clazz, DeserializationContext context, JsonNode node) {
 
         BoundType lowerBoundType = null;
         C lowerValue = null;
@@ -136,6 +121,15 @@ public class GuavaRangeModule extends SimpleModule {
             }
         }
     }
+
+    private static final CollectionLikeType RANGE_OR_COMPARABLE = new CollectionLikeType(
+        SimpleType.constructUnsafe(Range.class),
+        SimpleType.constructUnsafe(Comparable.class)) {
+        @Serial
+        private static final long serialVersionUID = -2803462566784593946L;
+
+    };
+
 
 
 }

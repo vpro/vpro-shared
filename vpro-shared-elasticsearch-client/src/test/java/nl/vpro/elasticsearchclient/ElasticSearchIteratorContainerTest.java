@@ -124,30 +124,6 @@ public class ElasticSearchIteratorContainerTest {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    @Disabled
-    public void test15() {
-        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
-             .sources(client)) {
-            i.setJsonRequests(false);
-            ObjectNode search = i.prepareSearch("apimedia", "program", "group", "segment");
-
-            i.forEachRemaining((node) -> {
-                String string;
-                if (node.has("mid")) {
-                    string = node.get("mid").textValue();
-                } else {
-                    string = node.toString();
-                }
-                if (i.getCount() % 1000 == 0) {
-                    log.info("{}: {}", i.getCount(), string);
-
-                }
-            });
-        }
-    }
-
     @Test
     public void testAll() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
@@ -191,24 +167,6 @@ public class ElasticSearchIteratorContainerTest {
             }
         }
         assertThat(count.get()).isEqualTo(2);
-    }
-
-    @Test
-    @Disabled
-    public void testmemberref() {
-
-        try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
-            .sourcesBuilder(client)
-            .jsonRequests(false)
-            .build()) {
-
-            ObjectNode search = i.prepareSearch("apimedia-publish", "groupMemberRef", "episodeRef");
-            ObjectNode query = search.withObject(Constants.P_QUERY);
-            QueryBuilder.mustTerm(query, "childRef", "18Jnl1100");
-
-
-            i.forEachRemaining((node) -> log.info("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node));
-        }
     }
 
 }

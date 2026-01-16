@@ -3,9 +3,9 @@ package nl.vpro.util;
 import java.io.*;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -77,9 +77,9 @@ public class SkipAtStartInputStreamTest {
     public void testLarge() throws IOException {
         String name = "/" + SkipAtStartInputStream.class.getName().replaceAll("\\.", "/") + ".class";
         InputStream resourceAsStream = SkipAtStartInputStream.class.getResourceAsStream(name);
-        int count = IOUtils.copy(resourceAsStream, NULL_OUTPUT_STREAM);
+        int count = IOUtils.copy(resourceAsStream, NullOutputStream.INSTANCE);
         SkipAtStartInputStream wrapped = new SkipAtStartInputStream(SkipAtStartInputStream.class.getResourceAsStream(name));
-        int count2 = IOUtils.copy(wrapped, NULL_OUTPUT_STREAM);
+        int count2 = IOUtils.copy(wrapped, NullOutputStream.INSTANCE);
         assertThat(count2).isEqualTo(count);
 
 

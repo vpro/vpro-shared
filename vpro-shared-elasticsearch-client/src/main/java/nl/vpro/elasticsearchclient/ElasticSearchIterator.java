@@ -83,7 +83,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     private boolean needsNext = true;
     private Collection<String> indices;
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     private Collection<String> types;
 
     @Getter
@@ -215,6 +215,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             };
         }
         if (adapter == null) {
+            //noinspection unchecked
             return jsonNode -> (T) jsonNode;
         }
         return adapter;
@@ -560,10 +561,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
                 } else {
-                    log.warn("close:" + re.getClass().getName() + ":" + re.getMessage());
+                    log.warn("close:{}:{}", re.getClass().getName(), re.getMessage());
                 }
             } catch (Exception e) {
-                log.warn("close: " + e.getClass().getName() + ": " + e.getMessage());
+                log.warn("close: {}: {}", e.getClass().getName(), e.getMessage());
             } finally {
                 EntityUtils.consumeQuietly(responseEntity);
             }
