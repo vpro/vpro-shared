@@ -45,6 +45,10 @@
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-jackson2</artifactId>
+    </dependency>
 
     <!-- wiring by spring -->
     <dependency>
