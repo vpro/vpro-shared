@@ -36,13 +36,11 @@ public class ESClientTest {
             .build()) {
             ObjectNode search = i.prepareSearchOnIndices("apimedia");
             QueryBuilder.asc(search, "publishDate");
-            ObjectNode query = search.with(Constants.QUERY);
+            ObjectNode query = search.withObject(Constants.QUERY);
             QueryBuilder.mustTerm(query, "workflow", "REVOKED");
             AtomicInteger count = new AtomicInteger(0);
-            i.forEachRemaining((u) -> {
-                //System.out.println(count.incrementAndGet() + " " + u);
-                System.out.println(u);
-            });
+            //System.out.println(count.incrementAndGet() + " " + u);
+            i.forEachRemaining(System.out::println);
         }
 
     }

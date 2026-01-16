@@ -65,8 +65,9 @@ public class PropertiesUtilTest {
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void defaultSpring() throws UnknownHostException {
+    public void defaultSpring() {
 
         log.info("{}", test);
         System.setProperty("some.system.property", "foobar");

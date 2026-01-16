@@ -79,7 +79,7 @@ public class BulkRequestEntry {
 
     /**
      * As this entry is about to be used, i.e. submitted to the ES-server. this method should be called.
-     *
+     * <p>
      * It marks {@link #isUsed()} to be true, and executes (it necessary) the {@link #getSourceConsumer()} on {@link #getSource()}
      */
     public void use() {
@@ -106,13 +106,13 @@ public class BulkRequestEntry {
         JsonNode idNode;
         if (action.has(INDEX)) {
             builder.append(INDEX);
-            idNode = action.with(INDEX);
+            idNode = action.withObject(P_INDEX);
         } else if (action.has(DELETE)) {
             builder.append(DELETE);
-            idNode = action.with(DELETE);
+            idNode = action.withObject(P_DELETE);
         } else if (action.has(UPDATE)) {
             builder.append(UPDATE);
-            idNode = action.with(UPDATE);
+            idNode = action.withObject(P_UPDATE);
         } else {
             throw new IllegalArgumentException("Unrecognized action node " + action);
         }

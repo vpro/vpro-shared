@@ -318,8 +318,7 @@
           <version>3.14.1</version>
           <inherited>true</inherited>
           <configuration>
-            <source>${java.version}</source>
-            <target>${java.version}</target>
+            <release>${java.version}</release>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
