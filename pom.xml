@@ -298,7 +298,7 @@
         <configuration>
           <publishingServerId>central</publishingServerId>
           <autoPublish>true</autoPublish>
-          <waitForPublishCompletion>true</waitForPublishCompletion>
+          <waitUntil>published</waitUntil>
         </configuration>
       </plugin>
     </plugins>
