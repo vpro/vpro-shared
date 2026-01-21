@@ -3,6 +3,8 @@ package nl.vpro.monitoring.config;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
 
@@ -12,7 +14,10 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-public class MonitoringProperties {
+public class MonitoringProperties implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -1602387003789243992L;
 
     @Value("${monitoring.user:${MONITORING_USER:manager}}")
     private String user;
