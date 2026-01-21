@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,8 @@ import nl.vpro.monitoring.web.*;
 @Setter
 public class ManageFilter extends HttpFilter {
 
+    @Serial
+    private static final long serialVersionUID = 7490817616301996196L;
 
     @Inject
     Provider<PrometheusController> prometheusController;

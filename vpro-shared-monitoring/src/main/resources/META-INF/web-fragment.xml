@@ -30,6 +30,6 @@
   </filter>
   <filter-mapping>
     <filter-name>manageFilter</filter-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>/*</url-pattern><!-- match on all, because the paths of the /manage endpoint are (spring) configurable -->
   </filter-mapping>
 </web-fragment>
