@@ -14,7 +14,7 @@
   <filter>
     <filter-name>manageFilter</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-
+    <async-supported>true</async-supported>
     <init-param>
       <param-name>targetFilterLifecycle</param-name>
       <param-value>true</param-value>
@@ -32,5 +32,4 @@
     <filter-name>manageFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-
 </web-fragment>
