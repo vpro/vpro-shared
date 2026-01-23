@@ -92,6 +92,13 @@ public class MultiLanguageString implements CharSequence {
         }
     }
 
+    /**
+     * @since 5.14.1
+     */
+    public LocalizedString getLocalized() {
+        return getLocalized(defaultLocale == null ? Locales.getDefault() : defaultLocale);
+    }
+
     public LocalizedString getLocalized(Locale locale) {
         String result = strings.get(locale);
         while (result == null && Locales.simplifyable(locale)) {
@@ -152,6 +159,7 @@ public class MultiLanguageString implements CharSequence {
         }
         return s;
     }
+
 
     public static class Builder implements Supplier<CharSequence> {
         MultiLanguageString created = new MultiLanguageString();
