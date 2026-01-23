@@ -1,6 +1,7 @@
 package nl.vpro.logging.simple;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -13,11 +14,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger> {
 
-    final List<SimpleLogger> list = new ArrayList<>();
+    final List<SimpleLogger> list;
 
 
     public ChainedSimpleLogger(SimpleLogger... wrapped) {
+        list = new ArrayList<>();
         Collections.addAll(list, wrapped);
+    }
+
+    protected ChainedSimpleLogger(List<SimpleLogger> wrapped) {
+        this.list = wrapped;
     }
 
 
@@ -40,7 +46,7 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     }
 
     @Override
-    public boolean isEnabled(Level level){
+    public boolean isEnabled(Level level) {
         return list.stream().map(l -> l.isEnabled(level)).filter(b -> b).findFirst().orElse(false);
     }
 
@@ -64,5 +70,46 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     @Override
     public String toString() {
         return "chained " + list;
+    }
+
+    /**
+     * Creates a new {@link ChainedSimpleLogger} where the logger at index {@code i} is replaced by a truncated version.
+     * @since 5.14.1
+     */
+    public ChainedSimpleLogger truncated(int i, Level level) {
+        List<SimpleLogger> newList = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            SimpleLogger elogger = list.get(j);
+            if (i == j) {
+                elogger = elogger.truncated(level);
+            }
+            newList.add(elogger);
+        }
+        return new ChainedSimpleLogger(newList);
+    }
+
+    /**
+     * Creates a new {@link ChainedSimpleLogger} where the loggers testing true are replaced by a truncated version.
+     * @param predicate  The predicate to select which loggers to truncate
+     * @since 5.14.1
+     *
+     */
+    public ChainedSimpleLogger truncated(Predicate<SimpleLogger> predicate, Level level) {
+        List<SimpleLogger> newList = new ArrayList<>();
+        for (SimpleLogger elogger : list) {
+            if (predicate.test(elogger)) {
+                elogger = elogger.truncated(level);
+            }
+            newList.add(elogger);
+        }
+        return new ChainedSimpleLogger(newList);
+    }
+
+    /**
+     * Creates a new {@link ChainedSimpleLogger} where the loggers of a certain class are replaced by a truncated version.
+     * @since 5.14.1
+     */
+    public <C extends SimpleLogger> ChainedSimpleLogger truncated(Class<C> predicate, Level level) {
+        return truncated(predicate::isInstance, level);
     }
 }
