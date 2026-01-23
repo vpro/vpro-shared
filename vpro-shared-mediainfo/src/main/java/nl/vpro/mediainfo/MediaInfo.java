@@ -12,6 +12,7 @@ import java.util.OptionalDouble;
 
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.math.shapes.dim2.Rectangle;
 import org.meeuw.math.uncertainnumbers.field.UncertainReal;
 
@@ -95,6 +96,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      * @return the overall bit rate of the media file
      */
     @JsonIgnore
+    @Nullable
     public Float bitRate() {
         return general().getOverallBitRate();
     }
@@ -176,7 +178,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
 
     @Override
     public @NonNull String toString() {
-        return (success() ? "" : "FAIL:") + (video().isPresent() ? ("video " + circumscribedRectangle().map(Rectangle::aspectRatio).orElse("?")) : " (no video track)") + ", bitrate: " + (bitRate() / 1024) + " kbps, duration: " + duration();
+        return (success() ? "" : "FAIL:") + (video().isPresent() ? ("video " + circumscribedRectangle().map(Rectangle::aspectRatio).orElse("?")) : " (no video track)") + ", bitrate: " + Optional.ofNullable(bitRate()).map(f -> String.valueOf(f / 1024)).orElse("?") + " kbps, duration: " + duration();
     }
 
     public BasicMediaInfo basic() {
