@@ -55,7 +55,7 @@ public abstract class AbstractStringBuilderSimpleLogger implements SimpleLogger 
 
         String p = prefix.apply(level);
         append(p);
-        if (p.length() > 0) {
+        if (!p.isEmpty()) {
             append(" ");
         }
         append(message);

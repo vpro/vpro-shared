@@ -22,16 +22,16 @@ public class Event {
     private final int levelInt;
 
     @lombok.Builder
-    protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp) {
+    protected Event(Level level, CharSequence message, Throwable throwable, Instant timeStamp, Map<String, String> mdc) {
         this.level = level;
         this.message = message;
         this.throwable = throwable;
         this.levelInt = level.toInt();
         this.timeStamp = timeStamp;
-        this.mdc = getMdc();
+        this.mdc = mdc == null ? createMdc() : mdc;
     }
 
-    static Map<String, String> getMdc() {
+    static Map<String, String> createMdc() {
         try {
             Map<String, String> mdc = MDC.getCopyOfContextMap();
             return mdc == null ? Map.of() : mdc;
