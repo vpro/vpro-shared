@@ -95,7 +95,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      * @return the overall bit rate of the media file
      */
     @JsonIgnore
-    public double bitRate() {
+    public Float bitRate() {
         return general().getOverallBitRate();
     }
 
