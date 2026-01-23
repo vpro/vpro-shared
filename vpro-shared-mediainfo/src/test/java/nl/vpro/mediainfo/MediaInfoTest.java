@@ -14,6 +14,7 @@ import org.mockito.stubbing.Answer;
 
 import nl.vpro.util.CommandExecutor;
 
+import static java.util.Objects.requireNonNull;
 import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,7 +31,7 @@ class MediaInfoTest {
             .thenAnswer(new Answer<Integer>() {
                 @Override
                 public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                    IOUtils.copy(getClass().getResourceAsStream("/sampleout.xml"), (OutputStream) invocationOnMock.getArguments()[0]);
+                    IOUtils.copy(requireNonNull(getClass().getResourceAsStream("/sampleout.xml")), (OutputStream) invocationOnMock.getArguments()[0]);
                     return 0;
                 }
             });
@@ -52,7 +53,7 @@ class MediaInfoTest {
         log.info("MediaInfo: {}", info);
         assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("9:16");
 
-        assertThat(info.toString()).isEqualTo("video 9:16, bitrate: 19558.138671875 kbps, duration: PT50.072S");
+        assertThat(info.toString()).isEqualTo("video 9:16, bitrate: 19558.139 kbps, duration: PT50.072S");
 
         assertThatJson(info.basic()).isSimilarTo("""
             {
