@@ -112,4 +112,45 @@ public class ChainedSimpleLogger implements SimpleLogger, Iterable<SimpleLogger>
     public <C extends SimpleLogger> ChainedSimpleLogger truncated(Class<C> predicate, Level level) {
         return truncated(predicate::isInstance, level);
     }
+
+    /**
+     * Creates a new {@link ChainedSimpleLogger} where the logger at index {@code i} is replaced by a truncated version.
+     * @since 5.14.1
+     */
+    public ChainedSimpleLogger filter(int i, Level level) {
+        List<SimpleLogger> newList = new ArrayList<>();
+        for (int j = 0; j < list.size(); j++) {
+            SimpleLogger elogger = list.get(j);
+            if (i == j) {
+                elogger = elogger.filter(level);
+            }
+            newList.add(elogger);
+        }
+        return new ChainedSimpleLogger(newList);
+    }
+
+    /**
+     * Creates a new {@link ChainedSimpleLogger} where the loggers testing true are replaced by a truncated version.
+     * @param predicate  The predicate to select which loggers to truncate
+     * @since 5.14.1
+     *
+     */
+    public ChainedSimpleLogger filter(Predicate<SimpleLogger> predicate, Level level) {
+        List<SimpleLogger> newList = new ArrayList<>();
+        for (SimpleLogger elogger : list) {
+            if (predicate.test(elogger)) {
+                elogger = elogger.filter(level);
+            }
+            newList.add(elogger);
+        }
+        return new ChainedSimpleLogger(newList);
+    }
+
+    /**
+     * Creates a new {@link ChainedSimpleLogger} where the loggers of a certain class are replaced by a truncated version.
+     * @since 5.14.1
+     */
+    public <C extends SimpleLogger> ChainedSimpleLogger filter(Class<C> predicate, Level level) {
+        return filter(predicate::isInstance, level);
+    }
 }

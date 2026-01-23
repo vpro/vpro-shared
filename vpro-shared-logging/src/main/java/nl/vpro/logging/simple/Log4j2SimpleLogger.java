@@ -34,19 +34,13 @@ public class Log4j2SimpleLogger implements SimpleLogger {
     }
 
     public static org.apache.logging.log4j.Level toLevel(Level level) {
-        switch(level) {
-            case TRACE:
-                return org.apache.logging.log4j.Level.TRACE;
-            case DEBUG:
-                return org.apache.logging.log4j.Level.DEBUG;
-            case INFO:
-                return org.apache.logging.log4j.Level.INFO;
-            case WARN:
-                return org.apache.logging.log4j.Level.WARN;
-            case ERROR:
-            default:
-                return org.apache.logging.log4j.Level.ERROR;
-        }
+        return switch (level) {
+            case TRACE -> org.apache.logging.log4j.Level.TRACE;
+            case DEBUG -> org.apache.logging.log4j.Level.DEBUG;
+            case INFO -> org.apache.logging.log4j.Level.INFO;
+            case WARN -> org.apache.logging.log4j.Level.WARN;
+            default -> org.apache.logging.log4j.Level.ERROR;
+        };
     }
 
 
