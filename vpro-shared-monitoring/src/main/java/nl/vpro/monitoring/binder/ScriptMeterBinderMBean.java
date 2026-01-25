@@ -2,7 +2,7 @@ package nl.vpro.monitoring.binder;
 
 import nl.vpro.jmx.Description;
 
-public interface ScriptMeterBinderMXBean {
+public interface ScriptMeterBinderMBean {
 
     @Description("run")
     void run();
