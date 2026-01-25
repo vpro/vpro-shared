@@ -20,7 +20,7 @@ import nl.vpro.jmx.MBeans;
 import nl.vpro.util.*;
 
 @Slf4j
-public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterMXBean {
+public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterBinderMXBean {
 
 
     private final Map<String, AtomicDouble> cache = new ConcurrentHashMap<>();
