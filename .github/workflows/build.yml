@@ -57,7 +57,12 @@ jobs:
           server-password: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
+      - name: Run tests (pull request)
+        if: github.event_name == 'pull_request'
+        run: mvn -B test
+      # For push to main or manual dispatch, run the deploy profile.
       - name: Build and ${{ matrix.target }} with Maven
+        if: github.event_name != 'pull_request'
         shell: bash
         run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
@@ -66,9 +71,9 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
       - name: Publish to codecov
+        if:  matrix.target == 'deploy' && github.event_name != 'pull_request'
         uses: codecov/codecov-action@v5
         continue-on-error: true
-        if:  matrix.target == 'deploy'
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always() && runner.os == 'Linux'
