@@ -107,7 +107,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     default void trace(Supplier<CharSequence> message) {
-        trace(message.get());
+        log(Level.TRACE, message);
     }
 
     default void debug(CharSequence message) {
@@ -115,7 +115,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     default void debug(Supplier<CharSequence> message) {
-        debug(message.get());
+        log(Level.DEBUG, message);
     }
 
     default void info(CharSequence message) {
@@ -123,7 +123,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     default void info(Supplier<CharSequence> message) {
-        info(message.get());
+        log(Level.INFO, message);
     }
 
     default void warn(CharSequence message) {
@@ -131,7 +131,7 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     default void warn(Supplier<CharSequence> message) {
-        warn(message.get());
+        log(Level.WARN, message);
     }
 
     default void error(CharSequence message) {
@@ -139,10 +139,14 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     }
 
     default void error(Supplier<CharSequence> message) {
-        error(message.get());
+        log(Level.ERROR, message);
     }
 
     default void log(Level level, CharSequence message) {
+        accept(level, message);
+    }
+
+    default void log(Level level, Supplier<CharSequence> message) {
         accept(level, message);
     }
 
@@ -196,6 +200,12 @@ public interface  SimpleLogger extends BiConsumer<Level, CharSequence> {
     @Override
     default void accept(Level level, CharSequence message) {
         accept(level, message, null);
+    }
+
+    default void accept(Level level, Supplier<CharSequence> message) {
+        if (isEnabled(level)) {
+            accept(level, message.get(), null);
+        }
     }
 
     void accept(Level level, CharSequence message, @Nullable Throwable t);
