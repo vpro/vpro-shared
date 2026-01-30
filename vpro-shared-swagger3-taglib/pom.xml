@@ -5,11 +5,11 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.14.1</version>
+    <version>5.14.2-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-swagger3-taglib</artifactId>
   <name>vpro-shared-swagger3-taglib</name>
-  <version>5.14.1</version>
+  <version>5.14.2-SNAPSHOT</version>
 
   <properties>
     <vpro.shared.module.postfix>swagger_taglib</vpro.shared.module.postfix>
