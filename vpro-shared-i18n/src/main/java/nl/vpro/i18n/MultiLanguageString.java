@@ -71,6 +71,13 @@ public class MultiLanguageString implements CharSequence {
         Builder builder = new Builder();
         return builder.en(text);
     }
+    /**
+     * Created a {@link Builder} for a {@link MultiLanguageString} and adds Dutch text to it.
+     */
+    public static Builder nl(String text) {
+        Builder builder = new Builder();
+        return builder.nl(text);
+    }
     public static Builder builder() {
         return new Builder();
     }
