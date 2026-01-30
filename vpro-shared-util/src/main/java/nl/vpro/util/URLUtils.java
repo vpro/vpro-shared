@@ -32,4 +32,27 @@ public class URLUtils {
         }
     }
 
-}
+    public static String addAuthentication(String url, String basicAuth) {
+        if (url == null) {
+            return null;
+        }
+        try {
+            URI uri = URI.create(url);
+            URI sanitized = new URI(
+                uri.getScheme(),
+                basicAuth,
+                uri.getHost(),
+                uri.getPort(),
+                uri.getPath(),
+                uri.getQuery(),
+                uri.getFragment()
+            );
+            return sanitized.toString();
+        } catch (Exception e) {
+            // on any parse error, return original URL unchanged
+            return url;
+        }
+    }
+
+
+    }
