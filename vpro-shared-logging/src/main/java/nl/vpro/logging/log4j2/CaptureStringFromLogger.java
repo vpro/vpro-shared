@@ -29,8 +29,8 @@ import org.apache.logging.log4j.core.util.StringBuilderWriter;
  * It on default only captures log statements originating from the thread it was instantiated in.
  * There are two ways to do that differently:
  * <ol>
- *  <li> Call {@link #associateWithCurrentThread()} to associate the capture with another thread too.
- *  <li> Instantiate with 'currentThreadOnly' false.
+ *  <li> Call {@link #associateWithCurrentThread()} to associate the capture with another thread too.</li>
+ *  <li> Instantiate with 'currentThreadOnly' false.</li>
  * </ol>
  *
  *
