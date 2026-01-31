@@ -39,7 +39,16 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-logging</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-log4j2</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
