@@ -17,6 +17,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+
 env:
   skipTests: false
 
@@ -44,7 +45,7 @@ jobs:
       pull-requests: write
     runs-on: ${{ matrix.os }}
     env:
-      MAVEN_ARGS: '--no-transfer-progress'
+      MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
       - uses: actions/checkout@v6
       - name: Set up JDK
