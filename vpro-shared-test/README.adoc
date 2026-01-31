@@ -6,6 +6,7 @@
 - xml related assertions
 - json related assertions
 - serialization related assertions
+- log4j2-test.xml
 
 E.g.
 [source, java]
