@@ -236,8 +236,13 @@ public class MultiLanguageString implements CharSequence {
         }
 
         @Override
-        public CharSequence get() {
+        public MultiLanguageString get() {
             return build();
+        }
+
+        @Override
+        public String toString() {
+            return created.toString();
         }
 
         public class In {

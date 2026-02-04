@@ -44,6 +44,7 @@
     <math.version>0.18.1</math.version>
     <meeuw.util.version>1.15</meeuw.util.version>
     <checker.version>3.53.0</checker.version>
+    <commons.lang3.version>3.20.0</commons.lang3.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
@@ -472,7 +473,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.20.0</version>
+        <version>${commons.lang3.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
