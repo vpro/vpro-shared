@@ -1,3 +1,29 @@
 = Set up log4j2
 
 Just arranges dependencies to set up log4j2. Arranges logging from jul and slf4j (1 &amp; 2) to log4j2.
+
+== Usage
+
+Add the dependency to your project:
+[source,xml]
+----
+<dependency>
+    <groupId>nl.vpro.shared</groupId>
+    <artifactId>vpro-shared-log4j2</artifactId>
+    <version>5.14.1</version>
+</dependency>
+----
+
+This is possible to:
+
+[source,xml]
+----
+<dependency>
+    <groupId>nl.vpro.shared</groupId>
+    <artifactId>vpro-shared-log4j2</artifactId>
+    <version>5.14.1</version>
+    <classifier>test</classifier>
+    <scope>test</scope>
+</dependency>
+----
+This will accomplish the same things, but this jar also includes a default `log4j2-test.xml` configuration file, which will then be used when running tests. This is useful if you want to use logging in your test with minimal hassle in setting it up.
