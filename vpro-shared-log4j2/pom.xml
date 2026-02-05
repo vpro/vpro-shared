@@ -83,10 +83,15 @@
               <outputDirectory>${project.build.directory}/test-jar-resources</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${project.basedir}/src</directory>
+                  <directory>${project.basedir}/src/main/resources</directory>
                   <includes>
-                    <include>main/resources/**</include>
-                    <include>test/resources/**</include>
+                    <include>**</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>${project.basedir}/src/test/resources</directory>
+                  <includes>
+                    <include>**</include>
                   </includes>
                 </resource>
               </resources>
