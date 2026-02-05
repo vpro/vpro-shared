@@ -2,11 +2,11 @@
 <Configuration status="INFO" monitorInterval="0">
   <Appenders>
     <Console name="stdout" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} %highlight{%4.4p} %C{1} %M.%L %m (%t) %n"  charset="UTF-8"/>
+      <PatternLayout pattern="%d{ISO8601}&#x09;%highlight{%5.5p}&#x09;%C{1}&#x09;%M.%L&#x09;%m&#x09;(%t)%n"  charset="UTF-8"/>
     </Console>
   </Appenders>
   <Loggers>
-    <Root level="INFO">
+    <Root level="${sys:log4j2.root.level:-INFO}">
       <Appender-Ref ref="stdout" />
     </Root>
   </Loggers>

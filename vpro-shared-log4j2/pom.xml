@@ -36,7 +36,6 @@
       <!-- support slf4j2 -->
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j2-impl</artifactId>
-      <version>${log4j2.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -64,11 +63,16 @@
       <artifactId>disruptor</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
+     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.3.0</version>
@@ -90,6 +94,12 @@
                 </resource>
                 <resource>
                   <directory>${project.basedir}/src/test/resources</directory>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>${project.build.directory}/classes</directory>
                   <includes>
                     <include>**</include>
                   </includes>
