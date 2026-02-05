@@ -20,22 +20,26 @@ import nl.vpro.monitoring.endpoints.Setup;
 public class MonitoringBootstrapListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
-        // Set parent context if available
-        WebApplicationContext rootCtx = (WebApplicationContext)
-            sce.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-        if (rootCtx != null) {
+
+        Object webapplicationContext = sce.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+
+        if (webapplicationContext instanceof WebApplicationContext rootCtx) {
+
+            AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+            // Set parent context if available
             ctx.setParent(rootCtx);
+            ctx.setConfigLocation(Setup.class.getName());
+            ctx.setServletContext(sce.getServletContext());
+
+
+            ctx.refresh();
+            sce.getServletContext().setAttribute("monitoringContext", ctx);
+
+
+            log.debug("BEANS {}", List.of(ctx.getBeanDefinitionNames()));
+        }  else {
+            log.warn("No root WebApplicationContext found, monitoring not initialized: {}", webapplicationContext);
         }
-        ctx.setConfigLocation(Setup.class.getName());
-        ctx.setServletContext(sce.getServletContext());
-
-
-        ctx.refresh();
-        sce.getServletContext().setAttribute("monitoringContext", ctx);
-
-
-        log.debug("BEANS {}", List.of(ctx.getBeanDefinitionNames()));
     }
 
     @Override
