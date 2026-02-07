@@ -252,7 +252,6 @@
             <projectArtifactId>${project.artifactId}</projectArtifactId>
             <log4j2.root.level>${log4j2.root.level}</log4j2.root.level>
           </systemPropertyVariables>
-
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Spec.java</include>
@@ -835,7 +834,7 @@
     <dependency>
       <groupId>nl.mmprogrami</groupId>
       <artifactId>setup-log4j2</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
       <classifier>test</classifier>
       <scope>test</scope>
     </dependency>
