@@ -48,12 +48,6 @@
     </dependency>
 
     <dependency>
-      <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-log4j2</artifactId>
-      <classifier>test</classifier>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <optional>true</optional>
