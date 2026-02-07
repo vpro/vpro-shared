@@ -16,6 +16,7 @@
   </description>
   <properties>
     <vpro.shared.module.postfix>rs.client</vpro.shared.module.postfix>
+    <log4j2.root.level>DEBUG</log4j2.root.level>
   </properties>
 
   <dependencies>

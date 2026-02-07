@@ -14,6 +14,7 @@
 
   <properties>
     <vpro.shared.module.postfix>xml</vpro.shared.module.postfix>
+    <log4j2.root.level>DEBUG</log4j2.root.level>
   </properties>
 
 

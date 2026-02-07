@@ -81,6 +81,7 @@
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
     <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
+    <log4j2.root.level>INFO</log4j2.root.level>
   </properties>
 
   <licenses>
@@ -249,7 +250,9 @@
           <argLine>${EXTRA_TEST_OPTS}</argLine>
           <systemPropertyVariables>
             <projectArtifactId>${project.artifactId}</projectArtifactId>
+            <log4j2.root.level>${log4j2.root.level}</log4j2.root.level>
           </systemPropertyVariables>
+
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Spec.java</include>
