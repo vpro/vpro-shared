@@ -137,6 +137,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-log4j2</artifactId>
+      <classifier>test</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
       <scope>compile</scope>

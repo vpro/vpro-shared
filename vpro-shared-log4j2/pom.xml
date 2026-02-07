@@ -13,6 +13,7 @@
 
   <description>
     Just arranges dependencies to set up log4j2. Arranges logging from jul and slf4j (1 &amp; 2) to log4j2.
+    Deprecated. Completely moved to nl.mmprogrami:setup-log4j2. This module is kept for backward compatibility, but should not be used anymore.
   </description>
 
   <properties>
@@ -20,114 +21,14 @@
   </properties>
 
   <dependencies>
-    <!-- logging -->
+
     <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-    </dependency>
-    <!-- besides log4j api itself, support logging
-    via slf4j and jul api's -->
-    <dependency>
-      <!-- support slf4j2 -->
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j2-impl</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <!-- and 1 -->
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <!-- java.util.logging -->
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-jul</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <!-- System.getLogger -->
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-jpl</artifactId>
+      <groupId>nl.mmprogrami</groupId>
+      <artifactId>setup-log4j2</artifactId>
+      <version>1.0-SNAPSHOT</version>
       <scope>runtime</scope>
     </dependency>
 
-    <!-- support for asynchronous logging in log4j -->
-    <dependency>
-      <groupId>com.lmax</groupId>
-      <artifactId>disruptor</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-launcher</artifactId>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-     <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.0</version>
-        <executions>
-          <execution>
-            <id>copy-log4j2-test-resource</id>
-            <phase>process-test-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/test-jar-resources</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/src/main/resources</directory>
-                  <includes>
-                    <include>**</include>
-                  </includes>
-                </resource>
-                <resource>
-                  <directory>${project.basedir}/src/test/resources</directory>
-                  <includes>
-                    <include>**</include>
-                  </includes>
-                </resource>
-                <resource>
-                  <directory>${project.build.directory}/classes</directory>
-                  <includes>
-                    <include>**</include>
-                  </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
-        <executions>
-          <execution>
-            <id>package-test-resources-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classesDirectory>${project.build.directory}/test-jar-resources</classesDirectory>
-              <classifier>test</classifier>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 </project>

@@ -15,6 +15,7 @@
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
     <vpro.shared.module.postfix>test</vpro.shared.module.postfix>
+    <log4j2.root.logger>debug</log4j2.root.logger>
   </properties>
 
   <dependencies>
@@ -113,6 +114,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-log4j2</artifactId>
+      <classifier>test</classifier>
     </dependency>
   </dependencies>
 

@@ -403,12 +403,7 @@
         <scope>import</scope>
         <version>${log4j2.version}</version>
       </dependency>
-      <dependency>
-        <!-- used for asynchronous logging in log4j2 -->
-        <groupId>com.lmax</groupId>
-        <artifactId>disruptor</artifactId>
-        <version>4.0.0</version>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-bom</artifactId>
@@ -822,11 +817,6 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.hamcrest</groupId>-->
-      <!--<artifactId>hamcrest-all</artifactId>-->
-      <!--<scope>test</scope>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -838,14 +828,12 @@
       <version>${checker.version}</version>
       <optional>true</optional>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j2-impl</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-jul</artifactId>
+      <groupId>nl.mmprogrami</groupId>
+      <artifactId>setup-log4j2</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <classifier>test</classifier>
       <scope>test</scope>
     </dependency>
   </dependencies>
