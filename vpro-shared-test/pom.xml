@@ -115,11 +115,6 @@
       <artifactId>httpcore</artifactId>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-log4j2</artifactId>
-      <classifier>test</classifier>
-    </dependency>
   </dependencies>
 
   <build>
