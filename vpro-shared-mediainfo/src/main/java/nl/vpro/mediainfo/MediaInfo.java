@@ -161,16 +161,17 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      * @return an {@link Optional} containing a {@link Rectangle} that represents the containing rectangle of the video track, or empty if no video track is present
      */
     public Optional<Rectangle<UncertainReal>> circumscribedRectangle() {
-        TrackType trackType = video().orElse(null);
+        TrackType track = video().orElse(null);
 
-        if (trackType != null) {
-            double rotated = trackType.getRotation() == null ? 0 : Double.parseDouble(trackType.getRotation());
+        if (track != null) {
+            double rotated = track.getRotation() == null ? 0 : Double.parseDouble(track.getRotation());
 
             return Optional.of(new Rectangle<>(element(
-                trackType.getWidth().doubleValue()),
-                element(trackType.getHeight().doubleValue()))
+                track.getWidth().doubleValue() * (track.getPixelAspectRatio() == null ? 1f : track.getPixelAspectRatio())),
+                element(track.getHeight().doubleValue()))
                     .rotate(element(Math.toRadians(rotated)))
-                .circumscribedRectangle().shape());
+                .circumscribedRectangle()
+                .shape());
         } else {
             return Optional.empty();
         }

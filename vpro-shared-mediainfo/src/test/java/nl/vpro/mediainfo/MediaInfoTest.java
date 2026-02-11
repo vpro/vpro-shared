@@ -25,6 +25,27 @@ import static org.mockito.Mockito.when;
 class MediaInfoTest {
 
     @Test
+    public void testMediaInfoDegraded() throws IOException {
+        CommandExecutor mock = mock(CommandExecutor.class);
+        when(mock.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
+            .thenAnswer(new Answer<Integer>() {
+                @Override
+                public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
+                    IOUtils.copy(requireNonNull(getClass().getResourceAsStream("/degradedout.xml")), (OutputStream) invocationOnMock.getArguments()[0]);
+                    return 0;
+                }
+            });
+        when(mock.execute(any(), any(), any(), any())).thenReturn(0);
+
+        MediaInfo info = mediaInfo(new MediaInfoService(mock));
+
+        assertThat(info.circumscribedRectangle().get().toString()).isEqualTo("Rectangle{50.56000232696533x90}");
+
+        assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("9:16");
+
+    }
+
+    @Test
     public void testMediaInfo() throws IOException {
         CommandExecutor mock = mock(CommandExecutor.class);
         when(mock.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
@@ -41,16 +62,23 @@ class MediaInfoTest {
 
         testMediaInfo(mediaInfoCaller);
 
+
     }
 
 
 
-    void testMediaInfo(MediaInfoService mediaInfoCaller) throws IOException {
+    MediaInfo mediaInfo(MediaInfoService mediaInfoCaller) throws IOException {
         Path test = Files.createTempFile("test", ".mp4");
         //MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
         MediaInfo info = mediaInfoCaller.apply(test);
 
+
         log.info("MediaInfo: {}", info);
+        return info;
+    }
+
+    void testMediaInfo(MediaInfoService mediaInfoCaller) throws IOException {
+        MediaInfo info = mediaInfo(mediaInfoCaller);
         assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("9:16");
 
         assertThat(info.toString()).isEqualTo("video 9:16, bitrate: 19558.139 kbps, duration: PT50.072S");
