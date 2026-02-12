@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -32,10 +33,17 @@ import nl.vpro.util.ThreadPools;
 @Slf4j
 public class MBeans {
 
-    private static final ExecutorService EXECUTOR =
-        Executors.newCachedThreadPool
-            (ThreadPools.createThreadFactory("MBeans", true, Thread.MAX_PRIORITY));
-
+    private static final ThreadPoolExecutor EXECUTOR =
+        new ThreadPoolExecutor( 0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            ThreadPools.createThreadFactory("MBeans", true, Thread.MAX_PRIORITY) ) {
+            @Override protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                synchronized (this) {
+                    this.notifyAll();
+                }
+            }
+    };
     static final Map<String, LockValue> locks = new ConcurrentHashMap<>();
 
     public static final Duration DEFAULT_DURATION =  Duration.ofSeconds(5);
@@ -117,6 +125,7 @@ public class MBeans {
                     Thread.currentThread().setContextClassLoader(contextClassLoader);
                     Thread.currentThread().setName(threadName);
                 }
+
             }, EXECUTOR);
             value.setFuture(future);
 
@@ -458,4 +467,37 @@ public class MBeans {
         }
     }
 
+
+
+    /**
+     * Wait up to the given timeout for the internal executor to become idle.
+     * Returns true when idle before timeout, false when the timeout elapsed.
+     * @since 5.14.2
+     */
+    public static boolean awaitIdle(Duration timeout) throws InterruptedException {
+        if (timeout == null) {
+            timeout = Duration.ofSeconds(10);
+        }
+        final Instant timeoutInstant = Instant.now().plus(timeout);
+
+        synchronized (EXECUTOR) {
+            int totalToWait = EXECUTOR.getActiveCount() + EXECUTOR.getQueue().size();
+            if (totalToWait > 0) {
+                log.info("Awaiting idle, active count: {}, queue size: {}", EXECUTOR.getActiveCount(), EXECUTOR.getQueue().size());
+                while (totalToWait > 0 && Instant.now().isBefore(timeoutInstant)) {
+                    EXECUTOR.wait(1000);
+                    totalToWait = EXECUTOR.getActiveCount() + EXECUTOR.getQueue().size();
+                }
+                if (totalToWait == 0) {
+                    log.info("became idle");
+                    return true;
+                } else {
+                    log.warn("Still not idle after waiting for {} seconds, active count: {}, queue size: {}", timeout.toSeconds(), EXECUTOR.getActiveCount(), EXECUTOR.getQueue().size());
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
 }

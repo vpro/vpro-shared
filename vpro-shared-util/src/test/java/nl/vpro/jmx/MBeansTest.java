@@ -10,8 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Isolated;
 
 import nl.vpro.jmx.MBeans.UpdatableString;
@@ -30,6 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @Isolated
 public class MBeansTest {
+
+    @AfterEach
+    public void after() throws InterruptedException {
+        MBeans.awaitIdle(Duration.ofMinutes(1));
+    }
 
     @Test
     public void testWithUpdateableString() {
@@ -58,6 +62,7 @@ public class MBeansTest {
     public void testWithStringBuilderLogger() {
         log.info("Start");
 
+
         StringSupplierSimpleLogger string  = StringBuilderSimpleLogger.builder()
             .prefix((l) -> "")
             .chain(Slf4jSimpleLogger.of(log));
@@ -70,14 +75,15 @@ public class MBeansTest {
                 Thread.sleep(50);
                 string.info("first thing");
                 Thread.sleep(200);
-                string.info("second thing thing");
+                string.info("second thing thing x");
                 return "ready";
 
             }
-        )).isEqualTo("starting\n" +
-            "first thing\n" +
-            "...\n" +
-            "still busy. Please check logs");
+        )).isEqualTo("""
+            starting
+            first thing
+            ...
+            still busy. Please check logs""");
     }
 
 
@@ -113,7 +119,6 @@ public class MBeansTest {
         final List<String> interrupted = new ArrayList<>();
         String r = returnString("KEY", multiLine(log, "Filling media queues abandon"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
-
             while(running.get()) {
                 try {
                     Thread.sleep(400);

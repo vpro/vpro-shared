@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.time.Duration;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,6 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Log4j2
 @Isolated
 class MBeans2Test {
+
+    @AfterEach
+    public void after() throws InterruptedException {
+        MBeans.awaitIdle(Duration.ofMinutes(1));
+    }
 
 
     @Test
