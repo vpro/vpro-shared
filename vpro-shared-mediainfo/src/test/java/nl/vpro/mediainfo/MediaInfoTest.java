@@ -43,6 +43,9 @@ class MediaInfoTest {
 
         assertThat(info.circumscribedRectangle().get().vertical()).isTrue();
 
+        assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("");
+
+
     }
 
     @Test
