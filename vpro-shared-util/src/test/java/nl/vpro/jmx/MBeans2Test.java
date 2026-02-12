@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,9 +13,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import nl.vpro.logging.log4j2.CaptureStringFromLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 
 @Log4j2
 @Isolated
+@Execution(SAME_THREAD)
 class MBeans2Test {
 
 
