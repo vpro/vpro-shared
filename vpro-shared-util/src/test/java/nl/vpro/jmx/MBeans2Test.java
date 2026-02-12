@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.time.Duration;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.Isolated;
@@ -19,6 +20,11 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Isolated
 @Execution(SAME_THREAD)
 class MBeans2Test {
+
+    @AfterEach
+    public void after() throws InterruptedException {
+        MBeans.awaitIdle(Duration.ofMinutes(1));
+    }
 
 
     @Test

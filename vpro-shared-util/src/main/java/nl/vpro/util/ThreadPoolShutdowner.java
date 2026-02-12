@@ -15,7 +15,6 @@ import org.junit.platform.launcher.TestPlan;
 @Log
 public class ThreadPoolShutdowner implements TestExecutionListener {
 
-    @SuppressWarnings("resource")
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
 
