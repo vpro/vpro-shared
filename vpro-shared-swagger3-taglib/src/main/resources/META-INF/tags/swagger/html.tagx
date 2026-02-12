@@ -12,7 +12,7 @@
   <jsp:directive.attribute
       name="title"
       rtexprvalue="true"
-      type="java.lang.String" description="extra css to load" required="true" />
+      type="java.lang.String" description="title to use (in html/head)" required="true" />
   <jsp:directive.attribute
       name="url"
       rtexprvalue="true"
