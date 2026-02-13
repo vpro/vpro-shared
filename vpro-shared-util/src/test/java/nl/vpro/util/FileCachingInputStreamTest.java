@@ -201,6 +201,27 @@ public class FileCachingInputStreamTest {
             .hasMessageContaining("Stream closed");
     }
 
+    @Test
+    public void ofTempFile() throws IOException {
+        File file = Files.createTempFile("filecaching", "test").toFile();
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(MANY_BYTES);
+        }
+
+        // Read it back using FileCachingInputStream
+        try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .tempFile(file)
+            .noProgressLogging()
+            .build()) {
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IOUtils.copy(inputStream, out);
+
+            assertThat(out.toByteArray()).containsExactly(MANY_BYTES);
+        }
+    }
+
 
     public static Iterator<Object[]> slowAndNormal() {
 

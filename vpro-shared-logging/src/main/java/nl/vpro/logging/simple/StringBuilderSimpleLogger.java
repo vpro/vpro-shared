@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 /**
  * Simply logs everything to a StringBuilder. It also works as a tail (to avoid excessive memory usage if lots is logged)
- * If more than {@link #getMaxLength()} lines are logged, the string will be prefixed by {@link #TRUNK} and the earliest lines are removed.
+ * If more than {@link AbstractStringBuilderSimpleLogger#getMaxLength()} lines are logged, the string will be prefixed by {@link #TRUNK} and the earliest lines are removed.
  * @author Michiel Meeuwissen
  * @since 1.77
  */

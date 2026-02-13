@@ -86,7 +86,7 @@ public class FileCachingInputStream extends InputStream {
     @lombok.Builder(builderClassName = "Builder")
     @SneakyThrows(IOException.class)
     private FileCachingInputStream(
-        @NonNull final InputStream input,
+        @Nullable InputStream input,
         @Nullable final Long expectedCount,
         @Nullable final Path path,
         @Nullable final String filePrefix,
@@ -109,6 +109,9 @@ public class FileCachingInputStream extends InputStream {
             Slf4jSimpleLogger.of(logger == null ? LoggerFactory.getLogger(FileCachingInputStream.class) : logger) :
             simpleLogger.chain(Slf4jSimpleLogger.of(logger));
         this.deleteTempFile = deleteTempFile == null ? tempPath == null : deleteTempFile;
+        if (input == null && tempPath != null) {
+            input = Files.newInputStream(tempPath);
+        }
         if (initialBuffer == null) {
             initialBuffer = DEFAULT_INITIAL_BUFFER_SIZE;
         }
