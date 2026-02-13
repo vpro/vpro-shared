@@ -49,11 +49,10 @@ jobs:
           - os: ubuntu-latest
             java: 25
             target: 'test'
-        exclude:
-          - os: ${{ (github.event_name == 'workflow_dispatch' && inputs.os != '' && inputs.os != matrix.os) && matrix.os || '' }}
     permissions:
       checks: write
       pull-requests: write
+    if: github.event_name != 'workflow_dispatch' || inputs.os == '' || inputs.os == matrix.os
     runs-on: ${{ matrix.os }}
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
