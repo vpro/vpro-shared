@@ -489,7 +489,7 @@ public class MBeans {
                     totalToWait = EXECUTOR.getActiveCount() + EXECUTOR.getQueue().size();
                 }
                 if (totalToWait == 0) {
-                    log.info("became idle");
+                    log.info("Became idle");
                     return true;
                 } else {
                     log.warn("Still not idle after waiting for {} seconds, active count: {}, queue size: {}", timeout.toSeconds(), EXECUTOR.getActiveCount(), EXECUTOR.getQueue().size());

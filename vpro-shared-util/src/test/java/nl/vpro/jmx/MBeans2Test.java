@@ -23,7 +23,7 @@ class MBeans2Test {
 
     @AfterEach
     public void after() throws InterruptedException {
-        MBeans.awaitIdle(Duration.ofMinutes(1));
+        assertThat(MBeans.awaitIdle(Duration.ofMinutes(1))).isTrue();
     }
 
 
