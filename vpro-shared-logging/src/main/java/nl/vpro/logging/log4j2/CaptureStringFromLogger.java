@@ -12,6 +12,8 @@ import org.apache.logging.log4j.core.filter.LevelRangeFilter;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.StringBuilderWriter;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Simple setup using log4j2 to temporarily capture logging and collect it to a String.
  * <p>
@@ -44,7 +46,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     private final WriterAppender appender;
 
     public CaptureStringFromLogger() {
-        this("%d{ISO8601}{Europe/Amsterdam}\t%msg\n", Level.INFO);
+        this("%d{ISO8601}{Europe/Amsterdam}\t%msg%n", Level.INFO);
     }
 
     public CaptureStringFromLogger(String pattern, Level level) {
@@ -56,14 +58,14 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public static CaptureStringFromLogger info() {
-        return info("%msg\n");
+        return info("%msg%n");
     }
 
     public static CaptureStringFromLogger infoAllThreads(String pattern) {
         return new CaptureStringFromLogger(pattern, Level.INFO, new StringBuilder(), false);
     }
     public static CaptureStringFromLogger infoAllThreads() {
-        return infoAllThreads("%msg\n");
+        return infoAllThreads("%msg%n");
     }
 
 
@@ -79,6 +81,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
             .setFilter(LevelRangeFilter.createFilter(level, Level.ALL, Filter.Result.ACCEPT, Filter.Result.DENY))
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
+                .withCharset(UTF_8)
                 .build()
             )
             .build();
