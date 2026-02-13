@@ -26,7 +26,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-
 env:
   skipTests: false
 
@@ -56,11 +55,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
+      skip: ${{ github.event_name }}" == "workflow_dispatch" && "{{ inputs.os }} != "all" && "${{ inputs.os }}" != "${{ matrix.os }}"
+
     steps:
       - name: Check OS filter
         id: os_check
         shell: bash
         run: |
+          echo "skip: ${skip}"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "all" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
             echo "not_skipped=false" >> $GITHUB_OUTPUT
             echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
