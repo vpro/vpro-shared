@@ -13,14 +13,17 @@ on:
         default: false
         type: boolean
       os:
-        description: 'Filter by OS (leave empty for all)'
+        description: 'OS'
         required: false
         default: ''
         type: choice
         options:
-          - ''
-          - ubuntu-latest
-          - windows-latest
+          - label: 'All OS'
+            value: ''
+          - label: 'Ubuntu Latest'
+            value: 'ubuntu-latest'
+          - label: 'Windows Latest'
+            value: 'windows-latest'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
