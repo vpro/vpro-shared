@@ -18,12 +18,9 @@ on:
         default: ''
         type: choice
         options:
-          - label: 'All OS'
-            value: ''
-          - label: 'Ubuntu Latest'
-            value: 'ubuntu-latest'
-          - label: 'Windows Latest'
-            value: 'windows-latest'
+          - ''
+          - ubuntu-latest
+          - windows-latest
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
