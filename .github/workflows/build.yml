@@ -52,8 +52,12 @@ jobs:
     permissions:
       checks: write
       pull-requests: write
-    if: github.event_name != 'workflow_dispatch' || inputs.os == '' || inputs.os == matrix.os
     runs-on: ${{ matrix.os }}
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      inputs.os == '' ||
+      (inputs.os == 'ubuntu-latest' && matrix.os == 'ubuntu-latest') ||
+      (inputs.os == 'windows-latest' && matrix.os == 'windows-latest')
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
