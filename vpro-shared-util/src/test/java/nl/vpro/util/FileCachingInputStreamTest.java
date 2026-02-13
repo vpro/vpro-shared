@@ -273,13 +273,15 @@ public class FileCachingInputStreamTest {
             ) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
 
+                long total = 0;
                 int r;
                 byte[] buffer = new byte[10];
                 while ((r = inputStream.read(buffer)) != -1) {
                     out.write(buffer, 0, r);
-                    log.debug("Read {}", r);
+                    log.trace("Read {}", r);
+                    total += r;
                 }
-                log.info("EOF !, {}", r);
+                log.info("EOF !, {}, total read: {}, total expected: {}", r, total, expectedCount);
                 throw new AssertionFailedError("should not reach this, it should have been interrupted!");
             }
         } catch (ClosedByInterruptException | InterruptedIOException ie) {
