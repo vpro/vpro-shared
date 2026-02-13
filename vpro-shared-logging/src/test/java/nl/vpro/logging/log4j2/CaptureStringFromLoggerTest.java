@@ -47,13 +47,13 @@ class CaptureStringFromLoggerTest {
             try (CaptureStringFromLogger capture2 = new CaptureStringFromLogger("2:%msg%n", Level.INFO)) {
                 log.info("b");
                 log.info("c");
-                assertThat(capture2.get()).isEqualTo("""
+                assertThat(capture2.get()).isEqualToNormalizingNewlines("""
                    2:b
                    2:c
                    """);
             }
             log.info("d");
-            assertThat(capture1.get()).isEqualTo("""
+            assertThat(capture1.get()).isEqualToNormalizingNewlines("""
                  1:a
                  1:b
                  1:c
