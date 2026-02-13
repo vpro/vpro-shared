@@ -49,6 +49,7 @@ jobs:
           - os: ubuntu-latest
             java: 25
             target: 'test'
+    name: '${{ matrix.target }} on Java ${{ matrix.java }} and OS ${{ matrix.os }}'
     permissions:
       checks: write
       pull-requests: write
