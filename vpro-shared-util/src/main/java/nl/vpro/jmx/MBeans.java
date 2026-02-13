@@ -17,7 +17,6 @@ import javax.management.*;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.meeuw.functional.ThrowAnyConsumer;
 import org.slf4j.Logger;
 
 import nl.vpro.logging.Slf4jHelper;
@@ -164,7 +163,7 @@ public class MBeans {
     }
 
     /**
-     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}, with no key (meaning that jobs can be started concurrently).
      */
     public static String returnString(
         @NonNull StringSupplierSimpleLogger stringSupplierLogger,
@@ -174,7 +173,7 @@ public class MBeans {
     }
 
     /**
-     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)), with no key (meaning that jobs can be started concurrently.
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Consumer)}, with no key (meaning that jobs can be started concurrently).
      */
     public static String returnString(
         @NonNull StringSupplierSimpleLogger stringSupplierLogger,
@@ -216,7 +215,7 @@ public class MBeans {
       }
 
     /**
-     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)), with no key (meaning that jobs can be started concurrently.
+     * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)}, with no key (meaning that jobs can be started concurrently).
      * @deprecated use {@link #returnString(StringSupplierSimpleLogger, Duration, Consumer)} instead.
      */
     @Deprecated
@@ -293,7 +292,7 @@ public class MBeans {
     }
 
     /**
-     * A String supplier of one line. This can be used as argument for {@link #returnString(String, StringSupplierSimpleLogger, Duration, ThrowAnyConsumer)}
+     * A String supplier of one line. This can be used as argument for {@link #returnString(StringSupplierSimpleLogger, Duration, Consumer)}
      */
     public static class UpdatableString implements StringSupplierSimpleLogger {
         private final Logger logger;

@@ -173,7 +173,7 @@ public class BatchedReceiver<T> implements Iterator<T> {
          * For paging with 'resumption tokens' it is convenient to have
          * multiple paths.
          * <p>
-         * See {@link #initialAndResumption(Supplier, UnaryOperator)} if the received objects are iterable themselves,
+         * See {@link #initialAndResumption(Supplier, Function)} if the received objects are iterable themselves,
          * in which case two parameter suffice.
          *
          * @param initial A supplier to get the object representing the first batch

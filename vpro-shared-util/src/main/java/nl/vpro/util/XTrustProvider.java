@@ -55,6 +55,7 @@ public final class XTrustProvider extends java.security.Provider {
     @Serial
     private static final long serialVersionUID = 751080090640704950L;
 
+    @SuppressWarnings("removal")
     public XTrustProvider() {
         super(NAME, VERSION, INFO);
 

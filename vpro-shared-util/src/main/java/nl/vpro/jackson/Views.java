@@ -43,7 +43,7 @@ public class Views {
     }
 
     /**
-     * New fields may be temporary marked 'ForwardPublisher'. Which will mean that {@link Jackson3Mapper#getBackwardsPublisherInstance()} will ignore them.
+     * New fields may be temporary marked 'ForwardPublisher'. Which will mean that {@code Jackson3Mapper#BACKWARDS_PUBLISHER()} will ignore them.
      * <p>
      * That way we can serialize for checking purposes compatible with old values in ES.
      * <p>
