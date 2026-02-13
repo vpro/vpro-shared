@@ -12,6 +12,15 @@ on:
         required: true
         default: false
         type: boolean
+      os:
+        description: 'Filter by OS (leave empty for all)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - ubuntu-latest
+          - windows-latest
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -40,6 +49,8 @@ jobs:
           - os: ubuntu-latest
             java: 25
             target: 'test'
+        exclude:
+          - os: ${{ (github.event_name == 'workflow_dispatch' && inputs.os != '' && inputs.os != matrix.os) && matrix.os || '' }}
     permissions:
       checks: write
       pull-requests: write
