@@ -18,7 +18,7 @@ on:
         default: ''
         type: choice
         options:
-          - ''
+          - 'all'
           - ubuntu-latest
           - windows-latest
 
@@ -57,7 +57,7 @@ jobs:
       MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
       - name: Check OS filter
-        if: github.event_name == 'workflow_dispatch' && inputs.os != '' && inputs.os != matrix.os
+        if: github.event_name == 'workflow_dispatch' && inputs.os != 'all' && inputs.os != matrix.os
         run: |
           echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
           exit 0
