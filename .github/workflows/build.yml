@@ -53,14 +53,14 @@ jobs:
       checks: write
       pull-requests: write
     runs-on: ${{ matrix.os }}
-    if: |
-      github.event_name != 'workflow_dispatch' ||
-      inputs.os == '' ||
-      (inputs.os == 'ubuntu-latest' && matrix.os == 'ubuntu-latest') ||
-      (inputs.os == 'windows-latest' && matrix.os == 'windows-latest')
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
+      - name: Check OS filter
+        if: github.event_name == 'workflow_dispatch' && inputs.os != '' && inputs.os != matrix.os
+        run: |
+          echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
+          exit 1
       - uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
