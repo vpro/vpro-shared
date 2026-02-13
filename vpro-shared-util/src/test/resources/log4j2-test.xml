@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
 <Configuration status="INFO">
+  <Properties>
+    <Property name="pattern" value="%d{ISO8601}&#x09;%highlight{%5.5p}&#x09;%C{1}&#x09;%M.%L&#x09;%m&#x09;(%t)%n" />
+  </Properties>
   <Appenders>
     <Console name="stdout" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{ISO8601} %4.4p %C{1} %M.%L %m %n"  charset="UTF-8"/>
+      <Property name="pattern" value="%d{ISO8601}&#x09;%highlight{%5.5p}&#x09;%C{1}&#x09;%M.%L&#x09;%m&#x09;(%t)%n" />
     </Console>
   </Appenders>
   <Loggers>
-    <Logger level="DEBUG" name="nl.vpro.util.FileCachingInputStreamTest" />
+    <Logger level="INFO" name="nl.vpro.util.FileCachingInputStreamTest" />
     <Root level="INFO">
       <Appender-Ref ref="stdout" />
     </Root>
