@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
-
 class CaptureStringFromLoggerTest {
     ExecutorService service = Executors.newCachedThreadPool();
 
@@ -23,8 +22,8 @@ class CaptureStringFromLoggerTest {
             final int j = i;
             futures.add(service.submit(() -> {
                 try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg\n", Level.INFO)) {
-                    log.info("foo" + j);
-                    log.info("bar" + j);
+                    log.info("foo{}", j);
+                    log.info("bar{}", j);
 
                     assertThat(capture.get()).isEqualToNormalizingNewlines(
                         """
