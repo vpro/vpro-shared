@@ -9,7 +9,7 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger level="INFO" name="nl.vpro.util.FileCachingInputStreamTest" />
+    <Logger level="DEBUG" name="nl.vpro.util.FileCachingInputStreamTest" />
     <Root level="INFO">
       <Appender-Ref ref="stdout" />
     </Root>
