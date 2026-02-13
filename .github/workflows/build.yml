@@ -60,7 +60,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.os != '' && inputs.os != matrix.os
         run: |
           echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
-          exit 1
+          exit 0
       - uses: actions/checkout@v6
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -92,6 +92,12 @@ jobs:
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always() && runner.os == 'Linux'
+        with:
+          check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
+          files: "**/target/surefire-reports/*.xml"
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action/windows/bash@v2
+        if: always() && runner.os == 'Windows'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
