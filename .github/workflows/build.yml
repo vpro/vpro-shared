@@ -15,7 +15,7 @@ on:
       os:
         description: 'OS'
         required: false
-        default: ''
+        default: 'all'
         type: choice
         options:
           - 'all'
@@ -61,7 +61,7 @@ jobs:
         id: os_check
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "all" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
             echo "not_skipped=false" >> $GITHUB_OUTPUT
             echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
           else
