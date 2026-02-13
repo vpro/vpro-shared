@@ -55,8 +55,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
-      skip: ${{ github.event_name }}" == "workflow_dispatch" && "{{ inputs.os }} != "all" && "${{ inputs.os }}" != "${{ matrix.os }}"
-
+      skip: ${{github.event_name}}  == 'workflow_dispatch' && ${{ inputs.os }} != 'all' && ${{ inputs.os }} != ${{ matrix.os }}
     steps:
       - name: Check OS filter
         id: os_check
