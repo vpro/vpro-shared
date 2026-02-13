@@ -5,7 +5,7 @@
   </Properties>
   <Appenders>
     <Console name="stdout" target="SYSTEM_OUT">
-      <Property name="pattern" value="%d{ISO8601}&#x09;%highlight{%5.5p}&#x09;%C{1}&#x09;%M.%L&#x09;%m&#x09;(%t)%n" />
+      <Property name="pattern" value="${pattern}" disableAnsi="false"  />
     </Console>
   </Appenders>
   <Loggers>
