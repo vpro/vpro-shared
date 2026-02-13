@@ -55,18 +55,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
-      skip: ${{github.event_name}}  == 'workflow_dispatch' && ${{ inputs.os }} != 'all' && ${{ inputs.os }} != ${{ matrix.os }}
     steps:
-      - name: Check OS filter
-        id: os_check
+      - id: os_check
         shell: bash
         run: |
-          echo "skip: ${skip}"
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "all" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
-            echo "not_skipped=false" >> $GITHUB_OUTPUT
-            echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
-          else
+          if [[ "${{ github.event_name }}" != "workflow_dispatch" || "${{ inputs.os }}" == "all" || "${{ inputs.os }}" == "${{ matrix.os }}" ]] ; then
             echo "not_skipped=true" >> $GITHUB_OUTPUT
+          else
+            echo "not_skipped=false" >> $GITHUB_OUTPUT
           fi
       - uses: actions/checkout@v6
         if: steps.os_check.outputs.not_skipped
