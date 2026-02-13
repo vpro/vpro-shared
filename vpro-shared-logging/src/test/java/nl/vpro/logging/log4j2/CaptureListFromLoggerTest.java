@@ -39,8 +39,6 @@ class CaptureListFromLoggerTest {
             }
         });
         service.shutdown();
-
-
     }
 
 }
