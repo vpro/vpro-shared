@@ -22,11 +22,15 @@ class CaptureStringFromLoggerTest {
         for (int i = 0; i < 10; i++) {
             final int j = i;
             futures.add(service.submit(() -> {
-                try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg%n", Level.INFO)) {
+                try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg\n", Level.INFO)) {
                     log.info("foo" + j);
                     log.info("bar" + j);
 
-                    assertThat(capture.get()).isEqualTo("foo%d%sbar%d%s", j, System.lineSeparator(), j,  System.lineSeparator());
+                    assertThat(capture.get()).isEqualToNormalizingNewlines(
+                        """
+                                 foo%d
+                                 bar%d
+                                 """.formatted( j,  j));
                 }
             }));
         }
