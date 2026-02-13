@@ -6,74 +6,82 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 public class TailAdderTest {
 
     @Test
-    public void addTo() {
+    public void addTo() throws Exception {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
-        TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).adder((s) -> "c").build();
-        assertEquals("a", adder.next());
-        assertEquals(1, adder.getCount());
-        assertEquals("b", adder.next());
-        assertEquals(2, adder.getCount());
-        assertEquals("c", adder.next());
-        assertEquals(3, adder.getCount());
-        assertFalse(adder.hasNext());
+        try (TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).adder((s) -> "c").build()) {
+            assertEquals("a", adder.next());
+            assertEquals(1, adder.getCount());
+            assertEquals("b", adder.next());
+            assertEquals(2, adder.getCount());
+            assertEquals("c", adder.next());
+            assertEquals(3, adder.getCount());
+            assertFalse(adder.hasNext());
+        }
     }
 
     @Test
-    public void onlyIfEmptyOnNotEmpty() {
+    public void onlyIfEmptyOnNotEmpty() throws Exception {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
-        TailAdder<String> adder = new TailAdder<>(i, true, () -> "c");
-        assertEquals("a", adder.next());
-        assertEquals("b", adder.next());
-        assertFalse(adder.hasNext());
+        try (TailAdder<String> adder = new TailAdder<>(i, true, () -> "c")) {
+            assertEquals("a", adder.next());
+            assertEquals("b", adder.next());
+            assertFalse(adder.hasNext());
+        }
     }
 
 
     @Test
-    public void onlyIfEmptyOnEmpty() {
-        Iterator<String> i = Collections.<String>emptyList().iterator();
-        TailAdder<String> adder = new TailAdder<>(i, true, () -> "c");
-        assertEquals("c", adder.next());
-        assertFalse(adder.hasNext());
+    public void onlyIfEmptyOnEmpty() throws Exception {
+        Iterator<String> i = Collections.emptyIterator();
+        try (TailAdder<String> adder = new TailAdder<>(i, true, () -> "c")) {
+            assertEquals("c", adder.next());
+            assertFalse(adder.hasNext());
+        }
     }
 
 
     @Test
-    public void onlyIfNotEmptyOnNotEmpty() {
+    public void onlyIfNotEmptyOnNotEmpty() throws Exception {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
-        TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c").build();
-        assertEquals("a", adder.next());
-        assertEquals("b", adder.next());
-        assertTrue(adder.hasNext());
-        assertEquals("c", adder.next());
+        try (TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c").build()) {
+            assertEquals("a", adder.next());
+            assertEquals("b", adder.next());
+            assertTrue(adder.hasNext());
+            assertEquals("c", adder.next());
+        }
 
     }
 
 
     @Test
-    public void onlyIfNotEmptyOnEmpty() {
-        Iterator<String> i = Collections.<String>emptyList().iterator();
-        TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c").build();
-        assertFalse(adder.hasNext());
+    public void onlyIfNotEmptyOnEmpty() throws Exception {
+        Iterator<String> i = Collections.emptyIterator();
+        try (TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c").build()) {
+            assertFalse(adder.hasNext());
+        }
     }
 
     @Test
-    public void tailNull() {
-        Iterator<String> i = Collections.<String>emptyList().iterator();
-        TailAdder<String> adder = new TailAdder<>(i, () -> null);
-        assertNull(adder.next());
-        assertFalse(adder.hasNext());
+    public void tailNull() throws Exception {
+        Iterator<String> i = Collections.emptyIterator();
+        try (TailAdder<String> adder = new TailAdder<>(i, () -> null)) {
+            assertNull(adder.next());
+            assertFalse(adder.hasNext());
+        }
     }
 
 
     @Test
-    public void tailException() {
-        Iterator<String> i = Collections.<String>emptyList().iterator();
-        TailAdder<String> adder = new TailAdder<>(i, () -> {
+    public void tailException() throws Exception {
+        Iterator<String> i = Collections.emptyIterator();
+        try (TailAdder<String> adder = new TailAdder<>(i, () -> {
             throw new Exception();
-        });
-        assertFalse(adder.hasNext());
+        })) {
+            assertFalse(adder.hasNext());
+        }
     }
 }

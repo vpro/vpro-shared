@@ -7,12 +7,12 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 
 /**
- * At VPRO we use an convention for configuring web-application using property-files.
- * This boils down to a fall back mechanism:
+ * At VPRO we use a convention for configuring web-application using property-files.
+ * This boils down to a fallback mechanism:
  * <ol>
  *     <li>Look in {@code {user.home}/conf/<application name>.properties}</li>
  *     <li>Look in {@code <classpath>/override-<applicationname>.properties}</li>
@@ -205,7 +205,7 @@ public class ConfigUtils {
         for (Map.Entry<K, String> e : map.entrySet()) {
             String v = e.getValue();
             String replaced = subst.replace(v);
-            if (! StringUtils.equals(v, replaced)) {
+            if (!Strings.CS.equals(v, replaced)) {
                 e.setValue(replaced);
                 log.debug("{}: {} -> {}", e.getKey(), v, replaced);
             }
@@ -231,13 +231,13 @@ public class ConfigUtils {
      *     systema.a.prod=x
      *     systema.a.test=y
      *     systema.a=z
-     *     systema.b.dev=8
+     *     systema.b.localhost=8
      *     systemb.b=7
      *     systemb.a=5
      *     systemb.foo=bar
      * </pre>
      *
-     * Filtered with arguments `env = {@link Env#DEV}` and prefix 'systema' this becomes
+     * Filtered with arguments `env = {@link Env#LOCALHOST}` and prefix 'systema' this becomes
      * <pre>
      *     a=z
      *     b=8
@@ -245,10 +245,10 @@ public class ConfigUtils {
      *
      * The idea is that the resulting map can be fed to {@link ReflectionUtils#configured(Object, Map)}
      *
-     * @param env
-     * @param prefix
-     * @param properties
-     * @return
+     * @param env The environment to filter for, e.g. {@link Env#PROD}
+     * @param prefix The prefix to filter for, e.g. 'systema'. If null, no prefix filtering is done.
+     * @param properties The map of properties to filter
+     * @return A filtered map of properties, with the prefix removed, and the environment-specific values shadowing the non-environment specific ones.
      */
     public static Map<String, String> filtered(final Env env, String prefix, Map<String, String> properties) {
 

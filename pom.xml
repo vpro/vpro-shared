@@ -20,6 +20,7 @@
     <spring.version>6.2.13</spring.version>
     <spring-security.version>6.5.6</spring-security.version>
     <jackson2.version>2.21.0</jackson2.version>
+    <jackson.version.annotations>2.21</jackson.version.annotations>
     <jackson3.version>3.0.4</jackson3.version>
 
     <junit.version>6.0.2</junit.version>
@@ -932,11 +933,16 @@
                 <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
                 <link>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-core/${jackson2.version}/</link>
                 <link>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/${jackson2.version}/</link>
-                <link>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-annotations/${jackson2.version}/</link>
+                <link>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-annotations/${jackson.version.annotations}/</link>
                 <link>https://javadoc.io/doc/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/${jackson2.version}/</link>
               </links>
               <detectLinks />
               <detectJavaApiLink />
+              <additionalOptions>
+                <additionalOption>--link-modularity-mismatch=info</additionalOption>
+                <additionalOption>-Xdoclint:none</additionalOption>
+              </additionalOptions>
+              <includeDependencySources>true</includeDependencySources>
             </configuration>
 
           </plugin>

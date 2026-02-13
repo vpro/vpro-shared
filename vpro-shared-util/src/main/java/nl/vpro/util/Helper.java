@@ -272,7 +272,7 @@ public class Helper {
     }
 
     /**
-     * Compare, taking null into account (null <).
+     * Compare, taking null into account (null &lt;).
      *
      * @param o1 first
      * @param o2 second

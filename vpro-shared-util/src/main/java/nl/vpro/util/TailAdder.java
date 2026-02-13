@@ -60,6 +60,7 @@ public class TailAdder<T> implements CountedIterator<T> {
     }
 
 
+
     @SuppressWarnings("unchecked")
     @SafeVarargs
     @Deprecated

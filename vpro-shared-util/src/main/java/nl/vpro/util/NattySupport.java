@@ -11,7 +11,7 @@ import org.natty.Parser;
 
 
 /**
- * The dependency on natty in {@link StringInstantToJsonTimestamp} is optional. Put support for it in this class, so we can just catch the resulting NoClassDefFoundError.
+ * The dependency on natty in {@code StringInstantToJsonTimestamp} is optional. Put support for it in this class, so we can just catch the resulting NoClassDefFoundError.
  * @author Michiel Meeuwissen
  * @since 2.14
  */
