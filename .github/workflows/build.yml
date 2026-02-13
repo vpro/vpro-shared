@@ -59,8 +59,9 @@ jobs:
     steps:
       - name: Check OS filter
         id: os_check
+        shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "all" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
             echo "not_skipped=false" >> $GITHUB_OUTPUT
             echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
           else
@@ -110,4 +111,3 @@ jobs:
           files: "**/target/surefire-reports/*.xml"
       - uses: MMProgrami/after-maven-action@v2
         if: steps.os_check.outputs.not_skipped
-
