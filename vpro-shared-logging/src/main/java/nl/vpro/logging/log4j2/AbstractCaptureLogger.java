@@ -3,8 +3,7 @@ package nl.vpro.logging.log4j2;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +23,7 @@ import org.meeuw.functional.ThrowAnyAutoCloseable;
 @Log4j2
 public abstract class AbstractCaptureLogger  implements AutoCloseable {
 
-    static final ThreadLocal<UUID> THREAD_LOCAL = ThreadLocal.withInitial(() -> null);
+    static final ThreadLocal<Set<UUID>> THREAD_LOCAL = ThreadLocal.withInitial(HashSet::new);
     static final Map<UUID,  AbstractCaptureLogger> LOGGERS = new ConcurrentHashMap<>();
     static final Map<UUID,  AbstractCaptureLogger> ALL_LOGGERS = new ConcurrentHashMap<>();
 
@@ -54,8 +53,8 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
             @Override
             public Result filter(LogEvent event) {
                 if (currentThreadOnly) {
-                    UUID uuid = THREAD_LOCAL.get();
-                    boolean inThread = uuid != null && LOGGERS.containsKey(uuid);
+                    Set<UUID> uuid = THREAD_LOCAL.get();
+                    boolean inThread = LOGGERS.keySet().stream().anyMatch(uuid::contains);
                     return inThread ? Result.NEUTRAL : Result.DENY;
                 } else {
                     return Result.NEUTRAL;
@@ -65,10 +64,12 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
             @Override
             public void append(LogEvent event) {
                 if (currentThreadOnly) {
-                    UUID uuid = THREAD_LOCAL.get();
-                    AbstractCaptureLogger consumer = LOGGERS.get(uuid);
-                    if (consumer != null) {
-                        consumer.accept(event);
+                    Set<UUID> uuids = THREAD_LOCAL.get();
+                    for (UUID uuid: uuids) {
+                        AbstractCaptureLogger consumer = LOGGERS.get(uuid);
+                        if (consumer != null) {
+                            consumer.accept(event);
+                        }
                     }
                 } else {
                     for (AbstractCaptureLogger consumer: ALL_LOGGERS.values()) {
@@ -78,7 +79,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
                 }
             }
         };
-        log.info("Added appender {} to {} to arrange log capturing", appender.getName(), StringUtils.isBlank(log4j.getName()) ? "<root logger>" : log4j.getName());
+        log.debug("Added appender {} to {} to arrange log capturing", appender.getName(), StringUtils.isBlank(log4j.getName()) ? "<root logger>" : log4j.getName());
         appender.start();
         log4j.addAppender(appender);
         log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
@@ -96,7 +97,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         checkAppender(currentThreadOnly);
         this.currentThreadOnly = currentThreadOnly;
         this.uuid = uuid;
-        THREAD_LOCAL.set(uuid);
+        THREAD_LOCAL.get().add(uuid);
         if (currentThreadOnly) {
             LOGGERS.put(uuid, this);
         } else {
@@ -114,7 +115,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
      * @see #disassociate()
      */
     public ThrowAnyAutoCloseable associateWithCurrentThread() {
-        THREAD_LOCAL.set(uuid);
+        THREAD_LOCAL.get().add(uuid);
         return this::disassociate;
     }
 
@@ -122,7 +123,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
      * Disassociates this capturing logger from the current thread.
      */
     public void disassociate() {
-        THREAD_LOCAL.remove();
+        THREAD_LOCAL.get().remove(uuid);
     }
 
 

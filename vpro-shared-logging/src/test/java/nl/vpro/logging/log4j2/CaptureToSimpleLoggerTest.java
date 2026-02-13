@@ -67,8 +67,6 @@ class CaptureToSimpleLoggerTest {
             "foo3",
             "bar3"
         );
-
-
     }
 
 }
