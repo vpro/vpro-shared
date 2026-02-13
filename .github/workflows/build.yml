@@ -58,12 +58,18 @@ jobs:
       MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
       - name: Check OS filter
-        if: github.event_name == 'workflow_dispatch' && inputs.os != 'all' && inputs.os != matrix.os
+        id: os_check
         run: |
-          echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
-          exit 1
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.os }}" != "all" && "${{ inputs.os }}" != "${{ matrix.os }}" ]]; then
+            echo "not_skipped=false" >> $GITHUB_OUTPUT
+            echo "Skipping job - selected OS (${{ inputs.os }}) does not match matrix OS (${{ matrix.os }})"
+          else
+            echo "not_skipped=true" >> $GITHUB_OUTPUT
+          fi
       - uses: actions/checkout@v6
+        if: steps.os_check.outputs.not_skipped
       - name: Set up JDK
+        if: steps.os_check.outputs.not_skipped
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
@@ -74,11 +80,11 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
       - name: Run tests (pull request)
-        if: github.event_name == 'pull_request'
+        if: steps.os_check.outputs.not_skipped && github.event_name == 'pull_request'
         run: mvn -B test
       # For push to main or manual dispatch, run the deploy profile.
       - name: Build and ${{ matrix.target }} with Maven
-        if: github.event_name != 'pull_request'
+        if: steps.os_check.outputs.not_skipped && github.event_name != 'pull_request'
         shell: bash
         run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false"
         env:
@@ -87,20 +93,21 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
       - name: Publish to codecov
-        if:  matrix.target == 'deploy' && github.event_name != 'pull_request'
+        if: steps.os_check.outputs.not_skipped && matrix.target == 'deploy' && github.event_name != 'pull_request'
         uses: codecov/codecov-action@v5
         continue-on-error: true
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always() && runner.os == 'Linux'
+        if: steps.os_check.outputs.not_skipped && runner.os == 'Linux'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action/windows/bash@v2
-        if: always() && runner.os == 'Windows'
+        if: steps.os_check.outputs.not_skipped && runner.os == 'Windows'
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
       - uses: MMProgrami/after-maven-action@v2
+        if: steps.os_check.outputs.not_skipped
 
