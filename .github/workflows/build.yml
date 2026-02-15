@@ -57,6 +57,7 @@ jobs:
       MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
       - id: os_check
+        name: Check OS input
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" != "workflow_dispatch" || "${{ inputs.os }}" == "all" || "${{ inputs.os }}" == "${{ matrix.os }}" ]] ; then
