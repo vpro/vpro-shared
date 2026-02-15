@@ -108,4 +108,5 @@ jobs:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
       - uses: MMProgrami/after-maven-action@v2
+        name: Simple results
         if: steps.os_check.outputs.not_skipped
