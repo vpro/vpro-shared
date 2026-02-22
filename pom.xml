@@ -23,7 +23,7 @@
     <jackson.version.annotations>2.21</jackson.version.annotations>
     <jackson3.version>3.0.4</jackson3.version>
 
-    <junit.version>6.0.2</junit.version>
+    <junit.version>6.0.3</junit.version>
     <mockito.version>5.21.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
     <resteasy.version>7.0.1.Final</resteasy.version>
@@ -34,7 +34,7 @@
     -->
     <jboss-logging.version>3.6.1.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.18.4</bytebuddy.version>
+    <bytebuddy.version>1.18.5</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
     <log4j2.version>2.25.3</log4j2.version>
     <guava.version>33.5.0-jre</guava.version>
@@ -44,7 +44,7 @@
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.18.1</math.version>
     <meeuw.util.version>1.15</meeuw.util.version>
-    <checker.version>3.53.0</checker.version>
+    <checker.version>3.53.1</checker.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
@@ -61,12 +61,13 @@
     <xml-bind.api.version>4.0.4</xml-bind.api.version>
 
     <hibernate.validator.version>9.0.1.Final</hibernate.validator.version>
-    <camel.version>4.16.0</camel.version> <!-- limit to LTS (I think even majors) -->
+    <camel.version>4.18.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.42</swagger.version>
+    <swagger.version>2.2.43</swagger.version>
 
     <lombok.version>1.18.42</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
+    <delombok.input>${project.build.directory}/delombok-input</delombok.input>
 
 
     <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
@@ -75,8 +76,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.16.2</micrometer.version>
-    <flyway.version>11.20.2</flyway.version>
+    <micrometer.version>1.16.3</micrometer.version>
+    <flyway.version>12.0.2</flyway.version>
 
     <testcontainers.version>2.0.3</testcontainers.version>
 
@@ -332,6 +333,10 @@
                 <version>${lombok.version}</version>
               </path>
             </annotationProcessorPaths>
+            <compilerArgs>
+              <arg>-Xlint:-requires-transitive-automatic</arg>
+            </compilerArgs>
+            <testCompilerArgument>-Xlint:-exports</testCompilerArgument>
           </configuration>
         </plugin>
         <plugin>
@@ -736,7 +741,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.9</version>
+        <version>42.7.10</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
@@ -835,7 +840,7 @@
     <dependency>
       <groupId>nl.mmprogrami</groupId>
       <artifactId>setup-log4j2</artifactId>
-      <version>1.0</version>
+      <version>1.1</version>
       <classifier>test</classifier>
       <scope>test</scope>
     </dependency>
@@ -873,6 +878,30 @@
             </executions>
           </plugin>
           <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.3.1</version>
+            <executions>
+              <execution>
+                <id>copy-sources-for-delombok</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}/src/main/java</directory>
+                      <excludes>
+                        <exclude>module-info.java</exclude>
+                      </excludes>
+                    </resource>
+                  </resources>
+                  <outputDirectory>${delombok.input}</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok-maven-plugin</artifactId>
             <version>1.18.20.0</version>
@@ -882,17 +911,16 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
               </dependency>
-              <dependency>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-annotations</artifactId>
-                <version>4.8.6</version>
-              </dependency>
             </dependencies>
             <configuration>
-              <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+              <sourceDirectory>${delombok.input}</sourceDirectory>
               <outputDirectory>${delombok.output}</outputDirectory>
               <addOutputDirectory>false</addOutputDirectory>
               <encoding>UTF-8</encoding>
+              <verbose>true</verbose>
+              <formatPreferences>
+
+              </formatPreferences>
             </configuration>
             <executions>
               <execution>
@@ -936,8 +964,8 @@
                 <link>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-annotations/${jackson.version.annotations}/</link>
                 <link>https://javadoc.io/doc/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/${jackson2.version}/</link>
               </links>
-              <detectLinks />
-              <detectJavaApiLink />
+              <detectLinks>true</detectLinks>
+              <detectJavaApiLink>true</detectJavaApiLink>
               <additionalOptions>
                 <additionalOption>--link-modularity-mismatch=info</additionalOption>
                 <additionalOption>-Xdoclint:none</additionalOption>
