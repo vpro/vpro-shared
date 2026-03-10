@@ -63,7 +63,7 @@
     <hibernate.validator.version>9.1.0.Final</hibernate.validator.version>
     <camel.version>4.18.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.44</swagger.version>
+    <swagger.version>2.2.45</swagger.version>
 
     <lombok.version>1.18.42</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
@@ -76,8 +76,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.16.3</micrometer.version>
-    <flyway.version>12.0.3</flyway.version>
+    <micrometer.version>1.16.4</micrometer.version>
+    <flyway.version>12.1.0</flyway.version>
 
     <testcontainers.version>2.0.3</testcontainers.version>
 
