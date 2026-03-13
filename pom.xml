@@ -24,7 +24,7 @@
     <jackson3.version>3.1.0</jackson3.version>
 
     <junit.version>6.0.3</junit.version>
-    <mockito.version>5.22.0</mockito.version>
+    <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
     <resteasy.version>7.0.1.Final</resteasy.version>
 
@@ -65,7 +65,7 @@
 
     <swagger.version>2.2.45</swagger.version>
 
-    <lombok.version>1.18.42</lombok.version>
+    <lombok.version>1.18.44</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
     <delombok.input>${project.build.directory}/delombok-input</delombok.input>
 
