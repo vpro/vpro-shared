@@ -17,8 +17,8 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.13</spring.version>
-    <spring-security.version>6.5.6</spring-security.version>
+    <spring.version>6.2.16</spring.version>
+    <spring-security.version>6.5.8</spring-security.version>
     <jackson2.version>2.21.1</jackson2.version>
     <jackson.version.annotations>2.21</jackson.version.annotations>
     <jackson3.version>3.1.0</jackson3.version>
@@ -776,7 +776,7 @@
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
       </dependency>
       <dependency>
         <groupId>info.picocli</groupId>
