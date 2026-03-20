@@ -17,7 +17,7 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.16</spring.version>
+    <spring.version>6.2.17</spring.version>
     <spring-security.version>6.5.8</spring-security.version>
     <jackson2.version>2.21.1</jackson2.version>
     <jackson.version.annotations>2.21</jackson.version.annotations>
@@ -32,7 +32,7 @@
     seems to be in use by both resteasy and hibernate-search
     version must be compatible with both.
     -->
-    <jboss-logging.version>3.6.2.Final</jboss-logging.version>
+    <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
     <bytebuddy.version>1.18.7</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
@@ -77,9 +77,9 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.16.4</micrometer.version>
-    <flyway.version>12.1.0</flyway.version>
+    <flyway.version>12.1.1</flyway.version>
 
-    <testcontainers.version>2.0.3</testcontainers.version>
+    <testcontainers.version>2.0.4</testcontainers.version>
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
     <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
