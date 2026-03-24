@@ -142,17 +142,17 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
              if (token == null) {
                  break;
              }
-             this.eventListener.accept(new TokenEvent(token));
+             this.eventListener.conditionalAccept(new TokenEvent(token));
              if (token == JsonToken.FIELD_NAME) {
                  fieldName = jp.currentName();
              }
              if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
                  tmpSize = jp.getLongValue();
-                 this.eventListener.accept(new SizeEvent(tmpSize));
+                 this.eventListener.conditionalAccept(new SizeEvent(tmpSize));
              }
              if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
                  tmpTotalSize = jp.getLongValue();
-                 this.eventListener.accept(new TotalSizeEvent(tmpTotalSize));
+                 this.eventListener.conditionalAccept(new TotalSizeEvent(tmpTotalSize));
 
              }
              if (token == JsonToken.START_ARRAY) {
@@ -161,9 +161,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          }
          this.size = tmpSize;
          this.totalSize = tmpTotalSize;
-         this.eventListener.accept(new StartEvent());
+         this.eventListener.conditionalAccept(new StartEvent());
          JsonToken token = jp.nextToken();
-         this.eventListener.accept(new TokenEvent(token));
+         this.eventListener.conditionalAccept(new TokenEvent(token));
 
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
@@ -222,7 +222,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     TreeNode tree = jp.readValueAsTree();
                     var newLastToken = jp.getLastClearedToken();
 
-                    this.eventListener.accept(new TokenEvent(newLastToken));
+                    this.eventListener.conditionalAccept(new TokenEvent(newLastToken));
 
                     if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
                         tree = null;
@@ -243,7 +243,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                             }
 
                             next = valueCreator.apply(jp, tree);
-                            eventListener.accept(new NextEvent(next));
+                            eventListener.conditionalAccept(new NextEvent(next));
                             hasNext = true;
                         }
                         break;
@@ -482,7 +482,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
     }
 
-    public abstract class ExceptionListener<S> implements Listener<S> {
+    public static abstract class ExceptionListener<S> implements Listener<S> {
 
         public abstract void accept(JsonArrayIterator<S>.Event s);
 
