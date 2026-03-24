@@ -172,7 +172,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
-         this.skipErrors = skipErrors == null ? skipNulls : skipErrors;
+         this.skipErrors = skipErrors == null ||  skipErrors;
      }
 
     private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
@@ -180,8 +180,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             try {
                 return jp.getCodec().treeToValue(tree, clazz);
             } catch (JsonProcessingException e) {
-                ValueReadException exception =  new ValueReadException(e);
-                throw exception;
+                throw new ValueReadException(e);
             }
         };
 
