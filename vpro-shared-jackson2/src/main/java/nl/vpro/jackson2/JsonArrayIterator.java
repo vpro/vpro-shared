@@ -23,8 +23,12 @@ import nl.vpro.util.CountedIterator;
 /**
  * This converts an {@link InputStream} into a Stream of objects, by parsing the stream as JSON.
  * In the simplest case the JSON is just an array, but it can also be an object containing some metadata and an array.
+ * {@code
  *
  *
+ * }
+ *
+ * @see JsonArrayIterator.Builder()
  * @author Michiel Meeuwissen
  * @since 1.0
  */
@@ -85,7 +89,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     /**
      *
-     * @param inputStream     The inputstream containing the json
+     * @param inputStream     The inputstream containing the JSON
      * @param valueCreator    A function which converts a json {@link TreeNode} to the desired objects in the iterator.
      * @param valueClass      If valueCreator is not given, simply the class of the desired object can be given
      *                        Json unmarshalling with the given objectMapper will happen.
@@ -482,17 +486,23 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
     }
 
-    public static abstract class ExceptionListener<S> implements Listener<S> {
+    public abstract static class ExceptionListener<S> implements Listener<S> {
 
-        public abstract void accept(JsonArrayIterator<S>.Event s);
-
+        public abstract void accept(JsonArrayIterator<S>.ValueReadExceptionEvent s);
 
         public final  boolean conditionalAccept(JsonArrayIterator<S>.Event s) {
-            if (s instanceof JsonArrayIterator<S>.ValueReadExceptionEvent) {
-                accept(s);
+            if (s instanceof JsonArrayIterator<S>.ValueReadExceptionEvent ee) {
+                accept(ee);
                 return true;
             }
             return false;
+        }
+
+        @Override
+        public void accept(JsonArrayIterator<S>.Event event) {
+            if (event instanceof JsonArrayIterator<S>.ValueReadExceptionEvent ee) {
+                accept(ee);
+            }
         }
 
     }
