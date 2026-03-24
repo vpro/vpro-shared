@@ -272,11 +272,11 @@ public class JsonArrayIteratorTest {
             {'value': 'x'},{}
             ]
             """.getBytes(StandardCharsets.UTF_8);
-        List<JsonArrayIterator<Simple>.Event> errors = new ArrayList<>();
+        List<JsonArrayIterator<Simple>.ValueReadExceptionEvent> errors = new ArrayList<>();
         try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
             .eventListener(new JsonArrayIterator.ExceptionListener<Simple>() {
                 @Override
-                public void accept(JsonArrayIterator<Simple>.Event s) {
+                public void accept(JsonArrayIterator<Simple>.ValueReadExceptionEvent s) {
                     errors.add(s);
                 }
             })
@@ -285,7 +285,7 @@ public class JsonArrayIteratorTest {
             .build()) {
             i.forEachRemaining(s -> log.info("{}", s));
             assertThat(errors).hasSize(1);
-            JsonArrayIterator<Simple>.ValueReadExceptionEvent event = (JsonArrayIterator<Simple>.ValueReadExceptionEvent) errors.get(0);
+            JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(0);
             JsonArrayIterator.ValueReadException e = event.getException();
             assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
 
