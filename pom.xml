@@ -17,14 +17,14 @@
     <skipITs>true</skipITs>
     <java.version>17</java.version>
 
-    <spring.version>6.2.13</spring.version>
-    <spring-security.version>6.5.6</spring-security.version>
+    <spring.version>6.2.17</spring.version>
+    <spring-security.version>6.5.9</spring-security.version>
     <jackson2.version>2.21.1</jackson2.version>
     <jackson.version.annotations>2.21</jackson.version.annotations>
     <jackson3.version>3.1.0</jackson3.version>
 
     <junit.version>6.0.3</junit.version>
-    <mockito.version>5.22.0</mockito.version>
+    <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
     <resteasy.version>7.0.1.Final</resteasy.version>
 
@@ -32,7 +32,7 @@
     seems to be in use by both resteasy and hibernate-search
     version must be compatible with both.
     -->
-    <jboss-logging.version>3.6.2.Final</jboss-logging.version>
+    <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
     <bytebuddy.version>1.18.7</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
@@ -50,7 +50,7 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>6.6.41.Final</hibernate.version>
+    <hibernate.version>6.6.44.Final</hibernate.version>
     <hibernate.search.version>7.2.1.Final</hibernate.search.version>
 
     <!-- jakarta versions -->
@@ -65,7 +65,7 @@
 
     <swagger.version>2.2.45</swagger.version>
 
-    <lombok.version>1.18.42</lombok.version>
+    <lombok.version>1.18.44</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
     <delombok.input>${project.build.directory}/delombok-input</delombok.input>
 
@@ -77,9 +77,9 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.16.4</micrometer.version>
-    <flyway.version>12.1.0</flyway.version>
+    <flyway.version>12.1.1</flyway.version>
 
-    <testcontainers.version>2.0.3</testcontainers.version>
+    <testcontainers.version>2.0.4</testcontainers.version>
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
     <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
@@ -776,7 +776,7 @@
       <dependency>
         <groupId>org.glassfish.jaxb</groupId>
         <artifactId>jaxb-runtime</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
       </dependency>
       <dependency>
         <groupId>info.picocli</groupId>
