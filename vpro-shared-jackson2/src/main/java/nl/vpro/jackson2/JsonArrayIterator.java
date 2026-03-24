@@ -65,20 +65,20 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private boolean skipNulls = true;
 
+    private boolean skipErrors = true;
+
     private final Listener<T> eventListener;
-
-
 
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
         this(inputStream, clazz, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
-        this(inputStream, null, clazz, callback, null, null, null, null, null, null);
+        this(inputStream, null, clazz, callback, null, null, null, null, null, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<JsonParser, TreeNode, T> valueCreator) throws IOException {
-        this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null, null, null, null, null, null);
     }
 
 
@@ -89,10 +89,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     /**
      *
-     * @param inputStream     The inputstream containing the JSON
+     * @param inputStream     The {@code InputStream} containing the JSON
      * @param valueCreator    A function which converts a json {@link TreeNode} to the desired objects in the iterator.
      * @param valueClass      If valueCreator is not given, simply the class of the desired object can be given
-     *                        Json unmarshalling with the given objectMapper will happen.
+     *                        JSON unmarshalling with the given objectMapper will happen.
      * @param callback        If the iterator is ready, closed or error this callback will be called.
      * @param sizeField       The size of the iterator, i.e. the size of the array represented in the json stream
      * @param totalSizeField  Sometimes the array is part of something bigger, e.g. a page in a search result. The size
@@ -101,7 +101,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      *                        conjunction with <code>valueClass</code>, but you may specify another one
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
      * @param skipNulls       Whether to skip nulls in the array. Default true.
-
+     * @param skipErrors      Whether to skip objects in the array that can't be marshalled. Default to skipNulls value. If false a {@code null} will be produces (and see skipNulls)
      * @param eventListener   A listener for events that happen during parsing and iteration of the array. See {@link Event} and extension classes.
      * @throws IOException    If the json parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
@@ -117,6 +117,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          @Nullable ObjectMapper objectMapper,
          @Nullable Logger logger,
          @Nullable Boolean skipNulls,
+         @Nullable Boolean skipErrors,
          @Nullable Listener<T> eventListener
      ) throws IOException {
          if (inputStream == null) {
@@ -171,6 +172,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
+         this.skipErrors = skipErrors == null ? skipNulls : skipErrors;
      }
 
     private static <T> BiFunction<JsonParser, TreeNode, T> valueCreator(Class<T> clazz) {
@@ -260,6 +262,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                             } else {
                                 logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be null");
                             }
+                        }
+                        if (! skipErrors) {
+                            next = null;
+                            eventListener.conditionalAccept(new NextEvent(next));
+                            hasNext = true;
+                            break;
                         }
                     }
                 } catch (IOException e) {
