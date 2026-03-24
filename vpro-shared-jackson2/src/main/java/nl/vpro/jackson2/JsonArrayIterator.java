@@ -21,6 +21,10 @@ import nl.vpro.util.CloseableIterator;
 import nl.vpro.util.CountedIterator;
 
 /**
+ * This converts an {@link InputStream} into a Stream of objects, by parsing the stream as JSON.
+ * In the simplest case the JSON is just an array, but it can also be an object containing some metadata and an array.
+ *
+ *
  * @author Michiel Meeuwissen
  * @since 1.0
  */
@@ -59,6 +63,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private final Listener<T> eventListener;
 
+
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
         this(inputStream, clazz, null);
     }
@@ -91,6 +97,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      *                        conjunction with <code>valueClass</code>, but you may specify another one
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
      * @param skipNulls       Whether to skip nulls in the array. Default true.
+
      * @param eventListener   A listener for events that happen during parsing and iteration of the array. See {@link Event} and extension classes.
      * @throws IOException    If the json parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
@@ -128,7 +135,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          if (totalSizeField == null) {
              totalSizeField = "totalSize";
          }
-         this.eventListener = eventListener == null? (e) -> {} : eventListener;
+         this.eventListener = eventListener == null? new DeafListener<>() : eventListener;
          // find the start of the array, where we will start iterating.
          while(true) {
              JsonToken token = jp.nextToken();
@@ -167,7 +174,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             try {
                 return jp.getCodec().treeToValue(tree, clazz);
             } catch (JsonProcessingException e) {
-                throw new ValueReadException(e);
+                ValueReadException exception =  new ValueReadException(e);
+                throw exception;
             }
         };
 
@@ -241,7 +249,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         break;
                     } catch (ValueReadException jme) {
                         foundNulls++;
-                        logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                        boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(jme));
+                        if (! accepted) {
+                            if (skipNulls) {
+                                logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                            } else {
+                                logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be null");
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     callbackBeforeThrow(new RuntimeException(e));
@@ -398,6 +413,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
     }
 
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
     public class StartEvent extends Event {
     }
 
@@ -432,6 +450,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
     }
 
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
     public class NextEvent extends Event {
 
         final T next;
@@ -441,11 +462,60 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
     }
 
-    @FunctionalInterface
-    public interface Listener<S> extends EventListener, Consumer<JsonArrayIterator<S>.Event> {
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public class ValueReadExceptionEvent extends Event {
 
+        final ValueReadException exception;
+
+        public ValueReadExceptionEvent(ValueReadException exception) {
+            this.exception = exception;
+        }
+    }
+
+    @FunctionalInterface
+    public interface Listener<S> extends EventListener, Consumer<JsonArrayIterator<S>.Event>  {
+
+        default boolean conditionalAccept(JsonArrayIterator<S>.Event s) {
+            accept(s);
+            return true;
+        }
+    }
+
+    public abstract class ExceptionListener<S> implements Listener<S> {
+
+        public abstract void accept(JsonArrayIterator<S>.Event s);
+
+
+        public final  boolean conditionalAccept(JsonArrayIterator<S>.Event s) {
+            if (s instanceof JsonArrayIterator<S>.ValueReadExceptionEvent) {
+                accept(s);
+                return true;
+            }
+            return false;
+        }
 
     }
+
+    public static abstract class ConditionalListener<S> implements Listener<S> {
+
+        public void accept(JsonArrayIterator<S>.Event s) {
+            conditionalAccept(s);
+        }
+
+        public abstract  boolean conditionalAccept(JsonArrayIterator<S>.Event s);
+
+    }
+
+    private static final class DeafListener<S> extends ConditionalListener<S> {
+
+
+        @Override
+        public boolean conditionalAccept(JsonArrayIterator<S>.Event s) {
+            return false;
+        }
+    }
+
 
 
 }
