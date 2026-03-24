@@ -150,6 +150,7 @@ public class JsonArrayIteratorTest {
             .valueClass(Change.class)
             .objectMapper(Jackson2Mapper.getInstance())
             .skipNulls(false)
+            .skipErrors(true)
             .build();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
@@ -281,6 +282,7 @@ public class JsonArrayIteratorTest {
                 }
             })
             .inputStream(new ByteArrayInputStream(bytes))
+            .skipErrors(false)
             .valueClass(Simple.class)
             .build()) {
             i.forEachRemaining(s -> log.info("{}", s));
