@@ -45,13 +45,15 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * Use <code>XTrustProvider.install()</code> and you don't have any dealings with untrusted certificates any more....
+ * @deprecated
  */
 @Slf4j
+@Deprecated
 public final class XTrustProvider extends java.security.Provider {
 
     private final static String NAME = "XTrustJSSE";
     private final static String INFO = "XTrust JSSE Provider (implements trust factory with truststore validation disabled)";
-    private final static double VERSION = 1.0D;
+    private final static String VERSION = "1.0D";
     @Serial
     private static final long serialVersionUID = 751080090640704950L;
 
