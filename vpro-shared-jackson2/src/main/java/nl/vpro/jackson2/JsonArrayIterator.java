@@ -23,10 +23,6 @@ import nl.vpro.util.CountedIterator;
 /**
  * This converts an {@link InputStream} into a Stream of objects, by parsing the stream as JSON.
  * In the simplest case the JSON is just an array, but it can also be an object containing some metadata and an array.
- * {@code
- *
- *
- * }
  *
  * @see JsonArrayIterator.Builder()
  * @author Michiel Meeuwissen
