@@ -120,7 +120,6 @@ public class JsonArrayIteratorTest {
     }
 
 
-    @SuppressWarnings("FinalizeCalledExplicitly")
     @Test
     public void testZeroBytes() throws IOException {
 
@@ -151,6 +150,7 @@ public class JsonArrayIteratorTest {
             .valueClass(Change.class)
             .objectMapper(Jackson2Mapper.getInstance())
             .skipNulls(false)
+            .skipErrors(true)
             .build();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
@@ -236,11 +236,72 @@ public class JsonArrayIteratorTest {
         }
     }
 
+    @Test
+    public void events() throws IOException {
+        byte[] bytes = """
+            [
+            {},{},{},
+            {"integerValue": 'x'},
+            {'value': 'x'},{}
+            ]
+            """.getBytes(StandardCharsets.UTF_8);
+        List<JsonArrayIterator<Simple>.Event> events = new ArrayList<>();
+        try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
+            .eventListener(events::add)
+            .inputStream(new ByteArrayInputStream(bytes))
+            .valueClass(Simple.class)
+            .build()) {
+            i.forEachRemaining(s -> log.info("{}", s));
+            log.info("event" + events);
+            assertThat(events).hasSize(16);
+            List<JsonArrayIterator<Simple>.Event> errors = events.stream().filter(e -> e instanceof JsonArrayIterator.ValueReadExceptionEvent).toList();
+            assertThat(errors).hasSize(1);
+            JsonArrayIterator<Simple>.ValueReadExceptionEvent event = (JsonArrayIterator<Simple>.ValueReadExceptionEvent) errors.get(0);
+            JsonArrayIterator.ValueReadException e = event.getException();
+            assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
+
+        }
+    }
+
+
+    @Test
+    public void exceptionHandler() throws IOException {
+        byte[] bytes = """
+            [
+            {},{},{},
+            {"integerValue": 'x'},
+            {'value': 'x'},{}
+            ]
+            """.getBytes(StandardCharsets.UTF_8);
+        List<JsonArrayIterator<Simple>.ValueReadExceptionEvent> errors = new ArrayList<>();
+        try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
+            .eventListener(new JsonArrayIterator.ExceptionListener<Simple>() {
+                @Override
+                public void accept(JsonArrayIterator<Simple>.ValueReadExceptionEvent s) {
+                    errors.add(s);
+                }
+            })
+            .inputStream(new ByteArrayInputStream(bytes))
+            .skipErrors(false)
+            .valueClass(Simple.class)
+            .build()) {
+            i.forEachRemaining(s -> log.info("{}", s));
+            assertThat(errors).hasSize(1);
+            JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(0);
+            JsonArrayIterator.ValueReadException e = event.getException();
+            assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
+
+        }
+    }
+
     @XmlAccessorType(XmlAccessType.FIELD)
     @Getter
     @Setter
+    @Data
     private static class Simple {
         private String value;
+
+        private int integerValue;
     }
 
 

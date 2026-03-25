@@ -3,6 +3,7 @@ package nl.vpro.jackson3;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.*;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.node.NullNode;
@@ -42,7 +43,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private Boolean hasNext;
 
-    private final BiFunction<ObjectReader, TreeNode, ? extends T> valueCreator;
+    private final BiFunction<ObjectReader, JsonNode, ? extends T> valueCreator;
 
     @Getter
     @Setter
@@ -73,7 +74,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         this(inputStream, null, clazz, callback, null, null, null, null, null, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, TreeNode, T> valueCreator) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, JsonNode, T> valueCreator) throws IOException {
         this(inputStream, valueCreator, null, null, null, null, null, null, null, null);
     }
 
@@ -109,7 +110,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
      private JsonArrayIterator(
          @NonNull  InputStream inputStream,
-         @Nullable final BiFunction<ObjectReader, TreeNode,  T> valueCreator,
+         @Nullable final BiFunction<ObjectReader, JsonNode,  T> valueCreator,
          @Nullable final Class<T> valueClass,
          @Nullable Runnable callback,
          @Nullable String sizeField,
@@ -169,7 +170,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.skipNulls = skipNulls == null || skipNulls;
      }
 
-    private static <T> BiFunction<ObjectReader, TreeNode, T> valueCreator(Class<T> clazz) {
+    private static <T> BiFunction<ObjectReader, JsonNode, T> valueCreator(Class<T> clazz) {
         return (m, tree) -> {
             return m.treeToValue(tree, clazz);
         };
@@ -224,7 +225,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         hasNext = false;
                         break;
                     }
-                    TreeNode tree = jp.readValueAsTree(); // read the next token.
+                    JsonNode tree = jp.readValueAsTree(); // read the next token.
                     if (tree == null) {
                         next = null;
                         hasNext = false;
