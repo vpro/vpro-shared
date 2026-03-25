@@ -38,7 +38,15 @@ public class StringDurationToJsonTimestamp {
 
         @Override
         public String deserialize(JsonParser jp, DeserializationContext ctxt)  {
-            return Duration.ofMillis(jp.getLongValue()).toString();
+            try {
+                return Duration.ofMillis(jp.getLongValue()).toString();
+            } catch (NumberFormatException e) {
+                String s = jp.getValueAsString();
+                if (s.isEmpty() && ctxt.isEnabled(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)) {
+                    return null;
+                }
+                throw e;
+            }
         }
     }
 }

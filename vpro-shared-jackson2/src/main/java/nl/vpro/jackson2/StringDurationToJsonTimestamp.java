@@ -9,11 +9,7 @@ import java.time.Duration;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 
 /**
  * @author rico
@@ -42,8 +38,16 @@ public class StringDurationToJsonTimestamp {
         public static final StringDurationToJsonTimestamp.Deserializer INSTANCE = new StringDurationToJsonTimestamp.Deserializer();
 
         @Override
-        public String deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            return Duration.ofMillis(jp.getLongValue()).toString();
+        public String deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+            try {
+                return Duration.ofMillis(jp.getLongValue()).toString();
+            } catch (NumberFormatException e) {
+                String s = jp.getValueAsString();
+                if (s.isEmpty() && ctxt.isEnabled(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)) {
+                    return null;
+                }
+                throw e;
+            }
         }
     }
 }

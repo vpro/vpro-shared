@@ -40,6 +40,10 @@ public class InstantToJsonTimestamp {
                     if (s == null) {
                         return null;
                     }
+                    if (s.isEmpty() && ctxt.isEnabled(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)) {
+                        return null;
+                    }
+
                     return Instant.parse(s);
                 } catch (DateTimeParseException dtps) {
                     return ZonedDateTime.parse(jp.getValueAsString()).toInstant();

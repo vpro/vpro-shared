@@ -34,7 +34,11 @@ public class DurationToSecondsFloatTimestamp {
         public static final Deserializer INSTANCE = new Deserializer();
         @Override
         public Duration deserialize(JsonParser jp, DeserializationContext ctxt) {
-            return Duration.ofMillis((long) (Float.parseFloat(jp.getValueAsString()) * 1000));
+            String s = jp.getValueAsString();
+            if (s.isEmpty() && ctxt.isEnabled(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)) {
+                return null;
+            }
+            return Duration.ofMillis((long) (Float.parseFloat(s) * 1000));
         }
     }
 }
