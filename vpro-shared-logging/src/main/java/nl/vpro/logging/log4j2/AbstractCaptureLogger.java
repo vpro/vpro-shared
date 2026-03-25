@@ -27,7 +27,6 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
     static final Map<UUID,  AbstractCaptureLogger> LOGGERS = new ConcurrentHashMap<>();
     static final Map<UUID,  AbstractCaptureLogger> ALL_LOGGERS = new ConcurrentHashMap<>();
 
-
     static AbstractAppender currentThreadAppender ;
     static AbstractAppender allAppender ;
 
