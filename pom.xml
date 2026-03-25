@@ -967,7 +967,9 @@
               <detectLinks>true</detectLinks>
               <detectJavaApiLink>true</detectJavaApiLink>
               <additionalOptions>
+                <!-- not available in java 17
                 <additionalOption>--link-modularity-mismatch=info</additionalOption>
+                -->
                 <additionalOption>-Xdoclint:none</additionalOption>
               </additionalOptions>
               <includeDependencySources>true</includeDependencySources>
