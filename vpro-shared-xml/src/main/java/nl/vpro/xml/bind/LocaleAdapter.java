@@ -14,6 +14,9 @@ public class LocaleAdapter extends XmlAdapter<String, Locale> {
 
     @Override
     public Locale unmarshal(String locale) {
+        if (locale == null || locale.isEmpty()) {
+            return null;
+        }
         String [] parts = locale.split("[\\-_]", 3);
         if (parts.length == 1) {
             return new Locale(parts[0]);
