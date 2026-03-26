@@ -48,8 +48,10 @@ class CaptureStringFromLoggerTest {
     public void nested() {
         try (CaptureStringFromLogger capture1 = new CaptureStringFromLogger("1:%msg%n", Level.INFO)) {
             log.info("a");
+            log.debug("ignore1");
             try (CaptureStringFromLogger capture2 = new CaptureStringFromLogger("2:%msg%n", Level.INFO)) {
                 log.info("b");
+                log.debug("ignore2");
                 log.info("c");
                 assertThat(capture2.get()).isEqualToNormalizingNewlines("""
                    2:b
