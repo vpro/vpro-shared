@@ -62,6 +62,9 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         }, null, false, null) {
             @Override
             public void append(LogEvent event) {
+                if (isFiltered(event)) {
+                    return;
+                }
                 if (currentThreadOnly) {
                     Set<UUID> uuids = THREAD_LOCAL.get();
                     for (UUID uuid: uuids) {
