@@ -945,7 +945,6 @@
               <detectLinks />
               <detectJavaApiLink />
               <additionalOptions>
-                <additionalOption>--link-modularity-mismatch=info</additionalOption>
                 <additionalOption>-Xdoclint:none</additionalOption>
               </additionalOptions>
               <includeDependencySources>true</includeDependencySources>
