@@ -262,7 +262,7 @@ public class JsonArrayIteratorTest {
             JsonArrayIterator.ValueReadException e = event.getException();
             assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
 
-            JsonNode node = (JsonNode) e.getJson();
+            JsonNode node = (JsonNode) event.getJson();
             assertThat(node.toString()).isEqualTo("""
                 {"integerValue":"x"}""");
 
