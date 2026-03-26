@@ -174,7 +174,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             try {
                 return jp.getCodec().treeToValue(tree, clazz);
             } catch (JsonProcessingException e) {
-                throw new ValueReadException(tree, e);
+                throw new ValueReadException(e);
             }
         };
 
@@ -251,7 +251,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         break;
                     } catch (ValueReadException jme) {
                         foundNulls++;
-                        boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(jme));
+                        boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(tree, jme));
                         if (! accepted) {
                             if (skipNulls) {
                                 logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
@@ -410,11 +410,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         @Serial
         private static final long serialVersionUID = 6976771876437440576L;
 
-        private final TreeNode json;
 
-        public ValueReadException(TreeNode json, JsonProcessingException e) {
+
+        public ValueReadException(JsonProcessingException e) {
             super(e);
-            this.json = json;
         }
     }
 
@@ -487,8 +486,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
         final ValueReadException exception;
 
-        public ValueReadExceptionEvent(ValueReadException exception) {
+        private final TreeNode json;
+
+        public ValueReadExceptionEvent(TreeNode json, ValueReadException exception) {
             this.exception = exception;
+            this.json = json;
         }
     }
 
