@@ -23,6 +23,7 @@ class CaptureStringFromLoggerTest {
             futures.add(service.submit(() -> {
                 try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg\n", Level.INFO)) {
                     log.info("foo{}", j);
+                    log.debug("Ignore this");
                     log.info("bar{}", j);
 
                     assertThat(capture.get()).isEqualToNormalizingNewlines(
