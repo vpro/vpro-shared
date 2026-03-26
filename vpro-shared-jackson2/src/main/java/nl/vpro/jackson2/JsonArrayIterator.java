@@ -163,9 +163,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.size = tmpSize;
          this.totalSize = tmpTotalSize;
          this.eventListener.conditionalAccept(new StartEvent());
-         JsonToken token = jp.nextToken();
-         this.eventListener.conditionalAccept(new TokenEvent(token));
-
+         jp.nextToken();
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
          this.skipErrors = skipErrors == null ||  skipErrors;
@@ -223,11 +221,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     TreeNode tree = jp.readValueAsTree();
                     var newLastToken = jp.getLastClearedToken();
 
-                    this.eventListener.conditionalAccept(new TokenEvent(newLastToken));
 
 
-                    if ( ! tree.isArray() && jp.getLastClearedToken() == JsonToken.END_ARRAY) {
+                    if ( tree != null && ! tree.isArray() && jp.getLastClearedToken() == JsonToken.END_ARRAY) {
                         // we found the end
+                        this.eventListener.conditionalAccept(new EndEvent(count));
+                        this.eventListener.conditionalAccept(new TokenEvent(newLastToken));
                         tree = null;
                     } else {
                         if (tree instanceof NullNode && skipNulls) {
@@ -431,6 +430,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     @Data
     public class StartEvent extends Event {
     }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public class EndEvent extends Event {
+        private final long totalSize;
+    }
+
 
 
     @EqualsAndHashCode(callSuper = true)

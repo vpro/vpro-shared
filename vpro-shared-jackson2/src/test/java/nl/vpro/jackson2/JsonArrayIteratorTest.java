@@ -255,7 +255,7 @@ public class JsonArrayIteratorTest {
             .build()) {
             i.forEachRemaining(s -> log.info("{}", s));
             log.info("event" + events);
-            assertThat(events).hasSize(16);
+            assertThat(events).hasSize(10);
             List<JsonArrayIterator<Simple>.Event> errors = events.stream().filter(e -> e instanceof JsonArrayIterator.ValueReadExceptionEvent).toList();
             assertThat(errors).hasSize(1);
             JsonArrayIterator<Simple>.ValueReadExceptionEvent event = (JsonArrayIterator<Simple>.ValueReadExceptionEvent) errors.get(0);
