@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Log4j2
-
 class CaptureStringFromLoggerTest {
     ExecutorService service = Executors.newCachedThreadPool();
 
@@ -22,11 +21,17 @@ class CaptureStringFromLoggerTest {
         for (int i = 0; i < 10; i++) {
             final int j = i;
             futures.add(service.submit(() -> {
-                try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg%n", Level.INFO)) {
-                    log.info("foo" + j);
-                    log.info("bar" + j);
+                try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg\n", Level.INFO)) {
+                    log.info("foo{}", j);
+                    log.debug("Ignore this");
+                    log.error("bar{}", j);
 
-                    assertThat(capture.get()).isEqualTo("foo%d%sbar%d%s", j, System.lineSeparator(), j,  System.lineSeparator());
+
+                    assertThat(capture.get()).isEqualToNormalizingNewlines(
+                        """
+                                 foo%d
+                                 bar%d
+                                 """.formatted( j,  j));
                 }
             }));
         }
@@ -44,9 +49,11 @@ class CaptureStringFromLoggerTest {
     public void nested() {
         try (CaptureStringFromLogger capture1 = new CaptureStringFromLogger("1:%msg%n", Level.INFO)) {
             log.info("a");
+            log.debug("ignore1");
             try (CaptureStringFromLogger capture2 = new CaptureStringFromLogger("2:%msg%n", Level.INFO)) {
                 log.info("b");
-                log.info("c");
+                log.debug("ignore2");
+                log.error("c");
                 assertThat(capture2.get()).isEqualToNormalizingNewlines("""
                    2:b
                    2:c

@@ -76,7 +76,6 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
             .setIgnoreExceptions(false)
             .setFollow(true)
             .setName(uuid.toString())
-            .setFilter(LevelRangeFilter.createFilter(level, Level.ALL, Filter.Result.ACCEPT, Filter.Result.DENY))
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
                 .build()
@@ -86,9 +85,6 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
 
     @Override
     protected void accept(LogEvent logEvent) {
-        if (appender.isFiltered(logEvent)) {
-            return;
-        }
         appender.append(logEvent);
     }
 
