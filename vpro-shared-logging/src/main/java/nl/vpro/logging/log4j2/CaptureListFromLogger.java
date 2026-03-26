@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.util.*;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 
 /**
@@ -17,13 +18,20 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
     @Getter
     private final List<LogEvent> events = new ArrayList<>();
 
-    private CaptureListFromLogger(UUID uuid, boolean currentThreadOnly) {
-        super(uuid, currentThreadOnly);
+
+
+    private CaptureListFromLogger(Level level, UUID uuid, boolean currentThreadOnly) {
+        super(level, uuid, currentThreadOnly);
+    }
+
+    public CaptureListFromLogger(Level level, boolean currentThreadOnly) {
+        this(level, UUID.randomUUID(), currentThreadOnly);
     }
 
     public CaptureListFromLogger(boolean currentThreadOnly) {
-        this(UUID.randomUUID(), currentThreadOnly);
+        this(Level.INFO, currentThreadOnly);
     }
+
 
 
     @Override

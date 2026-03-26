@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
@@ -70,13 +71,15 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
                     Set<UUID> uuids = THREAD_LOCAL.get();
                     for (UUID uuid: uuids) {
                         AbstractCaptureLogger consumer = LOGGERS.get(uuid);
-                        if (consumer != null) {
+                        if (consumer != null && event.getLevel().isMoreSpecificThan(consumer.level)) {
                             consumer.accept(event);
                         }
                     }
                 } else {
                     for (AbstractCaptureLogger consumer: ALL_LOGGERS.values()) {
-                        consumer.accept(event);
+                        if (consumer != null && event.getLevel().isMoreSpecificThan(consumer.level)) {
+                            consumer.accept(event);
+                        }
 
                     }
                 }
@@ -95,8 +98,10 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
     @Getter
     protected final UUID uuid;
     private final boolean currentThreadOnly;
+    private final Level level;
 
-    AbstractCaptureLogger(UUID uuid, boolean currentThreadOnly) {
+    AbstractCaptureLogger(Level level, UUID uuid, boolean currentThreadOnly) {
+        this.level = level;
         checkAppender(currentThreadOnly);
         this.currentThreadOnly = currentThreadOnly;
         this.uuid = uuid;
@@ -109,8 +114,8 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         }
     }
 
-    AbstractCaptureLogger(boolean currentThreadOnly) {
-        this(UUID.randomUUID(), currentThreadOnly);
+    AbstractCaptureLogger(Level level, boolean currentThreadOnly) {
+        this(level, UUID.randomUUID(), currentThreadOnly);
     }
 
     /**
