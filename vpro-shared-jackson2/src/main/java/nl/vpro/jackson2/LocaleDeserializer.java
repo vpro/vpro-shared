@@ -11,7 +11,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
- * This LocaleDserializer honor {@link DeserializationFeature#ACCEPT_EMPTY_STRING_AS_NULL_OBJECT}
+ * This {@link com.fasterxml.jackson.databind.JsonDeserializer} honors {@link DeserializationFeature#ACCEPT_EMPTY_STRING_AS_NULL_OBJECT}
+ * @since 5.15
+ * @author Michiel Meeuwissen
  */
 public class LocaleDeserializer extends StdDeserializer<Locale> {
 
