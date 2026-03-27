@@ -446,6 +446,9 @@ public class JAXBTestUtil {
 
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
+            if (expected == null) {
+                expected = "<NULL />";
+            }
             if (roundTrip) {
                 try {
                     Result<A> result = roundTripAndSimilarResult(actual, expected, consumers());
@@ -475,6 +478,9 @@ public class JAXBTestUtil {
          */
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(InputStream expected) {
+            if (expected == null) {
+                return isSimilarTo((String) null);
+            }
             if (roundTrip) {
                 try {
 
