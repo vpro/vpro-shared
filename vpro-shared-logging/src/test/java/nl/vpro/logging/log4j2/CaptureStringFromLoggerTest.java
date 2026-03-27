@@ -24,7 +24,8 @@ class CaptureStringFromLoggerTest {
                 try (CaptureStringFromLogger capture = new CaptureStringFromLogger("%msg\n", Level.INFO)) {
                     log.info("foo{}", j);
                     log.debug("Ignore this");
-                    log.info("bar{}", j);
+                    log.error("bar{}", j);
+
 
                     assertThat(capture.get()).isEqualToNormalizingNewlines(
                         """
@@ -52,7 +53,7 @@ class CaptureStringFromLoggerTest {
             try (CaptureStringFromLogger capture2 = new CaptureStringFromLogger("2:%msg%n", Level.INFO)) {
                 log.info("b");
                 log.debug("ignore2");
-                log.info("c");
+                log.error("c");
                 assertThat(capture2.get()).isEqualToNormalizingNewlines("""
                    2:b
                    2:c

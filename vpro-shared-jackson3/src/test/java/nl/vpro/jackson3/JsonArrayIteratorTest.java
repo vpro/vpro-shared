@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.exc.MismatchedInputException;
+
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -23,6 +26,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("DataFlowIssue")
 @Slf4j
 public class JsonArrayIteratorTest {
+
 
     @Test
     public void simple() {
@@ -72,6 +76,7 @@ public class JsonArrayIteratorTest {
             assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
             for (int i = 0; i < 9; i++) {
                 assertThat(it.hasNext()).isTrue();
+
                 Change change = it.next(); // 10
                 Optional<Long> size = it.getSize();
                 size.ifPresent(aLong ->
@@ -101,10 +106,7 @@ public class JsonArrayIteratorTest {
 
     @Test
     public void testNulls() throws IOException {
-        JsonArrayIterator<Change> it = new JsonArrayIterator<>(
-            new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()),
-            Change.class
-        );
+        JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isTrue();
         it.next();
         assertThat(it.peek()).isEqualTo(new Change());
@@ -154,8 +156,7 @@ public class JsonArrayIteratorTest {
             verify(callback, times(0)).run();
             it.next();
         }
-        assertThat(it.getSize())
-            .hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
+        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
         verify(callback, times(1)).run();
     }
 
@@ -167,6 +168,7 @@ public class JsonArrayIteratorTest {
             .valueClass(Change.class)
             .objectMapper(Jackson3Mapper.INSTANCE)
             .skipNulls(false)
+            .skipErrors(true)
             .build();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
@@ -252,11 +254,85 @@ public class JsonArrayIteratorTest {
         }
     }
 
+    @Test
+    public void events() {
+        byte[] bytes = """
+            [
+            {},{},{},
+            {"integerValue": 'x'},
+            {'value': 'x'},{}
+            ]
+            """.getBytes(StandardCharsets.UTF_8);
+        List<JsonArrayIterator<Simple>.Event> events = new ArrayList<>();
+        try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
+            .eventListener(events::add)
+            .inputStream(new ByteArrayInputStream(bytes))
+            .valueClass(Simple.class)
+            .build()) {
+            i.forEachRemaining(s -> log.info("{}", s));
+            log.info("event" + events);
+            assertThat(events).hasSize(10);
+            List<JsonArrayIterator<Simple>.Event> errors = events.stream().filter(e -> e instanceof JsonArrayIterator.ValueReadExceptionEvent).toList();
+            assertThat(errors).hasSize(1);
+            JsonArrayIterator<Simple>.ValueReadExceptionEvent event = (JsonArrayIterator<Simple>.ValueReadExceptionEvent) errors.get(0);
+            MismatchedInputException e = event.getException();
+            assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
+
+            JsonNode node = event.getJson();
+            assertThat(node.toString()).isEqualTo("""
+                {"integerValue":"x"}""");
+
+        }
+    }
+
+
+    @Test
+    public void exceptionHandler() {
+        byte[] bytes = """
+            [
+            {},{},{},
+            ["array"],
+            {"integerValue": 'x'},
+            {'value': 'x'},
+            {}
+
+            ]
+            """.getBytes(StandardCharsets.UTF_8);
+        List<JsonArrayIterator<Simple>.ValueReadExceptionEvent> errors = new ArrayList<>();
+        try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
+            .eventListener(new JsonArrayIterator.ExceptionListener<Simple>() {
+                @Override
+                public void accept(JsonArrayIterator<Simple>.ValueReadExceptionEvent s) {
+                    errors.add(s);
+                }
+            })
+            .inputStream(new ByteArrayInputStream(bytes))
+            .skipErrors(false)
+            .valueClass(Simple.class)
+            .build()) {
+            i.forEachRemaining(s -> log.info("{}", s));
+            assertThat(errors).hasSize(2);
+            {
+                JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(1);
+                MismatchedInputException e = event.getException();
+                assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
+            }
+            {
+                JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(0);
+                MismatchedInputException e = event.getException();
+                assertThat(e.getMessage()).contains("Cannot deserialize value of type `nl.vpro.jackson3.JsonArrayIteratorTest$Simple` from Array value (token `JsonToken.START_ARRAY`)");
+            }
+        }
+    }
+
     @XmlAccessorType(XmlAccessType.FIELD)
     @Getter
     @Setter
+    @Data
     private static class Simple {
         private String value;
+
+        private int integerValue;
     }
 
 
@@ -265,7 +341,7 @@ public class JsonArrayIteratorTest {
     @Getter
     @Setter
     @EqualsAndHashCode
-    public static class Change {
+    static class Change {
 
         private String mid;
         private boolean deleted;

@@ -163,9 +163,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          this.size = tmpSize;
          this.totalSize = tmpTotalSize;
          this.eventListener.conditionalAccept(new StartEvent());
-         JsonToken token = jp.nextToken();
-         this.eventListener.conditionalAccept(new TokenEvent(token));
-
+         jp.nextToken();
          this.callback = callback;
          this.skipNulls = skipNulls == null || skipNulls;
          this.skipErrors = skipErrors == null ||  skipErrors;
@@ -223,9 +221,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     TreeNode tree = jp.readValueAsTree();
                     var newLastToken = jp.getLastClearedToken();
 
-                    this.eventListener.conditionalAccept(new TokenEvent(newLastToken));
 
-                    if (jp.getLastClearedToken() == JsonToken.END_ARRAY) {
+
+                    if ( tree != null && ! tree.isArray() && jp.getLastClearedToken() == JsonToken.END_ARRAY) {
+                        // we found the end
+                        this.eventListener.conditionalAccept(new EndEvent(count));
+                        this.eventListener.conditionalAccept(new TokenEvent(newLastToken));
                         tree = null;
                     } else {
                         if (tree instanceof NullNode && skipNulls) {
@@ -250,7 +251,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         break;
                     } catch (ValueReadException jme) {
                         foundNulls++;
-                        boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(jme));
+                        boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(tree, jme));
                         if (! accepted) {
                             if (skipNulls) {
                                 logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
@@ -403,10 +404,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
 
 
+    @Getter
     public static class ValueReadException extends RuntimeException {
 
         @Serial
         private static final long serialVersionUID = 6976771876437440576L;
+
+
 
         public ValueReadException(JsonProcessingException e) {
             super(e);
@@ -425,6 +429,13 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     @Data
     public class StartEvent extends Event {
     }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public class EndEvent extends Event {
+        private final long totalSize;
+    }
+
 
 
     @EqualsAndHashCode(callSuper = true)
@@ -475,8 +486,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
         final ValueReadException exception;
 
-        public ValueReadExceptionEvent(ValueReadException exception) {
+        private final TreeNode json;
+
+        public ValueReadExceptionEvent(TreeNode json, ValueReadException exception) {
             this.exception = exception;
+            this.json = json;
         }
     }
 

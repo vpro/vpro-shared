@@ -20,7 +20,7 @@ class CaptureToSimpleLoggerTest {
     public void log() {
         List<Future<?>> futures = new ArrayList<>();
         List<String> messages = Collections.synchronizedList(new ArrayList<>());
-        EventSimpleLogger<Event> logger = EventSimpleLogger.of(e -> {
+        EventSimpleLogger<Event> logger = EventSimpleLogger.of(Level.INFO, e -> {
             messages.add(e.getMessage().toString());
         });
 
@@ -29,9 +29,9 @@ class CaptureToSimpleLoggerTest {
             final int j = i;
             futures.add(service.submit(() -> {
                 try (CaptureToSimpleLogger capture = CaptureToSimpleLogger.of(logger)) {
-
+                    log.debug("ignore");
                     log.info("foo" + j);
-                    log.info("bar" + j);
+                    log.error("bar" + j);
                 }
                 log.info("ready!");
             }));

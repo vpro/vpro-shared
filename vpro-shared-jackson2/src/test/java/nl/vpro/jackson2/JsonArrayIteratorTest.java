@@ -1,5 +1,7 @@
 package nl.vpro.jackson2;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -253,12 +255,16 @@ public class JsonArrayIteratorTest {
             .build()) {
             i.forEachRemaining(s -> log.info("{}", s));
             log.info("event" + events);
-            assertThat(events).hasSize(16);
+            assertThat(events).hasSize(10);
             List<JsonArrayIterator<Simple>.Event> errors = events.stream().filter(e -> e instanceof JsonArrayIterator.ValueReadExceptionEvent).toList();
             assertThat(errors).hasSize(1);
             JsonArrayIterator<Simple>.ValueReadExceptionEvent event = (JsonArrayIterator<Simple>.ValueReadExceptionEvent) errors.get(0);
             JsonArrayIterator.ValueReadException e = event.getException();
             assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
+
+            JsonNode node = (JsonNode) event.getJson();
+            assertThat(node.toString()).isEqualTo("""
+                {"integerValue":"x"}""");
 
         }
     }
@@ -269,8 +275,11 @@ public class JsonArrayIteratorTest {
         byte[] bytes = """
             [
             {},{},{},
+            ["array"],
             {"integerValue": 'x'},
-            {'value': 'x'},{}
+            {'value': 'x'},
+            {}
+
             ]
             """.getBytes(StandardCharsets.UTF_8);
         List<JsonArrayIterator<Simple>.ValueReadExceptionEvent> errors = new ArrayList<>();
@@ -286,11 +295,17 @@ public class JsonArrayIteratorTest {
             .valueClass(Simple.class)
             .build()) {
             i.forEachRemaining(s -> log.info("{}", s));
-            assertThat(errors).hasSize(1);
-            JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(0);
-            JsonArrayIterator.ValueReadException e = event.getException();
-            assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
-
+            assertThat(errors).hasSize(2);
+            {
+                JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(1);
+                JsonArrayIterator.ValueReadException e = event.getException();
+                assertThat(e.getMessage()).contains("Cannot deserialize value of type `int` from String \"x\"");
+            }
+            {
+                JsonArrayIterator<Simple>.ValueReadExceptionEvent event = errors.get(0);
+                JsonArrayIterator.ValueReadException e = event.getException();
+                assertThat(e.getMessage()).contains("com.fasterxml.jackson.databind.exc.MismatchedInputException: Cannot deserialize value of type `nl.vpro.jackson2.JsonArrayIteratorTest$Simple` from Array value (token `JsonToken.START_ARRAY`)");
+            }
         }
     }
 

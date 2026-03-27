@@ -18,27 +18,43 @@ public abstract class EventSimpleLogger<E extends Event> implements SimpleLogger
 
     private final Consumer<? super E> consumer;
 
+    private final Level threshold;
+
     protected EventSimpleLogger(Consumer<? super  E> consumer) {
-        this.consumer = consumer;
+        this(Level.TRACE, consumer);
     }
 
-    public static EventSimpleLogger<Event> of(Consumer<Event> consumer) {
-        return new EventSimpleLogger<Event>(consumer) {
+    protected EventSimpleLogger(Level threshold, Consumer<? super  E> consumer) {
+        this.consumer = consumer;
+        this.threshold = threshold;
+    }
+
+    public static EventSimpleLogger<Event> of(Level threshold, Consumer<Event> consumer) {
+        return new EventSimpleLogger<Event>(threshold, consumer) {
             @Override
             protected Event createEvent(Level level, CharSequence message, Throwable t) {
+
                 return createEvent(level, message, t, Clock.systemUTC());
             }
         };
     }
+    public static EventSimpleLogger<Event> of(Consumer<Event> consumer) {
+        return of(Level.TRACE, consumer);
+
+    }
 
     @Override
     public void accept(Level level, CharSequence message, Throwable t) {
-        consumer.accept(createEvent(level, message, t));
+        if (this.threshold.toInt() <= level.toInt()) {
+            consumer.accept(createEvent(level, message, t));
+        }
     }
 
     @Override
     public void accept(Level level, CharSequence message) {
-        consumer.accept(createEvent(level, message));
+        if (this.threshold.toInt() <= level.toInt()) {
+            consumer.accept(createEvent(level, message));
+        }
     }
 
     protected abstract E createEvent(Level level, CharSequence message, Throwable t);

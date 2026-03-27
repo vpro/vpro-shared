@@ -71,14 +71,13 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
 
     @lombok.Builder
     private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder, Boolean currentThreadOnly) {
-        super(currentThreadOnly == null || currentThreadOnly);
+        super(level, currentThreadOnly == null || currentThreadOnly);
         this.writer = new StringBuilderWriter(builder == null ? new StringBuilder() : builder);
         this.appender = WriterAppender.newBuilder()
             .setTarget(writer)
             .setIgnoreExceptions(false)
             .setFollow(true)
             .setName(uuid.toString())
-            .setFilter(LevelRangeFilter.createFilter(level, Level.ALL, Filter.Result.ACCEPT, Filter.Result.DENY))
             .setLayout(PatternLayout.newBuilder()
                 .withPattern(pattern)
                 .withCharset(UTF_8)

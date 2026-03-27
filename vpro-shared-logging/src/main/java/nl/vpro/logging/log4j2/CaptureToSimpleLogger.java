@@ -40,7 +40,7 @@ public class CaptureToSimpleLogger extends AbstractCaptureLogger {
     private final SimpleLogger simpleLogger;
 
     private CaptureToSimpleLogger(SimpleLogger simpleLogger, boolean currentThreadOnly) {
-        super(currentThreadOnly);
+        super(org.apache.logging.log4j.Level.TRACE, currentThreadOnly); // filtering happens by SimpleLogger itself
         this.simpleLogger = simpleLogger;
     }
 
