@@ -52,23 +52,47 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Roelof Jan Koekoek
  * @since 1.6
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @Slf4j
-public class JAXBTestUtil {
+public class JAXBTestUtil  {
 
     private static final String LOCAL_URI = "uri:local";
 
     public static final Consumer<DiffBuilder> IGNORE_ELEMENT_ORDER = df ->df.withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText));
 
+    private static final ThreadLocal<Map<String, String>> namespaces = ThreadLocal.withInitial(HashMap::new);
+
+
+    public static AutoCloseable registerNamespace(String... register){
+        assert register.length % 2 == 0;
+        final Map<String, String> put  = new HashMap<>();;
+        for (int i = 0; i < register.length; i = i + 2) {
+            put.put(register[i], register[i + 1]);
+        }
+
+        namespaces.get().putAll(put);
+        return () -> {
+            put.keySet().forEach(k -> namespaces.get().remove(k));
+        };
+    }
+
+    public static void cleanup() {
+        namespaces.remove();
+    }
 
     public static <T> String marshal(T object) {
         final StringWriter writer = new StringWriter();
-        marshal(object, (o) -> JAXB.marshal(o, writer));
+        marshal(object, writer);
         return writer.toString();
     }
+    public static <T> void marshal(T object, Writer writer) {
+        Marshaller marshaller = getMarshallerForUnknownClasses(object.getClass());
+        marshal(object, (o) -> marshal(marshaller, o, writer));
+    }
+
     public static <T> Element marshalToElement(T object) {
         DOMResult writer = new DOMResult();
-        marshal(object, (o) -> JAXB.marshal(o, writer));
+        Marshaller marshaller = getMarshallerForUnknownClasses(object.getClass());
+        marshal(object, (o) -> marshal(marshaller, o, writer));
         return ((Document) writer.getNode()).getDocumentElement();
     }
 
@@ -90,14 +114,39 @@ public class JAXBTestUtil {
         }
     }
 
+    @SneakyThrows
+    private static void marshal(Marshaller m, Object v, Writer writer) {
+        m.marshal(v, writer);
 
-    private static Marshaller getMarshallerForUnknownClasses(Class<?>... clazz) throws JAXBException {
+    }
+    @SneakyThrows
+    private static void marshal(Marshaller m, Object v, DOMResult writer) {
+        m.marshal(v, writer);
+    }
+
+    @SneakyThrows
+    private static Marshaller getMarshallerForUnknownClasses(Class<?>... clazz)  {
         JAXBContext context = JAXBContext.newInstance(clazz);
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        StringBuilder schemaLocation = new StringBuilder();;
+        for (var e : namespaces.get().entrySet()) {
+            if (!schemaLocation.isEmpty()) {
+                schemaLocation.append('\n');
+            }
+            schemaLocation.append(e.getKey()).append(" ").append(e.getValue());
+        }
+        if (!schemaLocation.isEmpty()) {
+            marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation.toString());
+        }
+
         return marshaller;
     }
-    private static String marshal(Marshaller marshaller, Object o) throws JAXBException {
+
+
+
+    @SneakyThrows
+    private static String marshal(Marshaller marshaller, Object o) {
         StringWriter writer = new StringWriter();
         marshaller.marshal(o, writer);
         return writer.toString();
@@ -177,7 +226,7 @@ public class JAXBTestUtil {
             }
             if (!found) {
                 StringBuilderWriter writer = new StringBuilderWriter();
-                JAXB.marshal(input, writer);
+                marshal(input, writer);
                 assertThat(writer.toString()).contains(contains);
             }
         }
