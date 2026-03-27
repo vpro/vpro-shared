@@ -22,8 +22,9 @@ public class Log4j2Helper {
     private Log4j2Helper() {
     }
 
+    //@Deprecated ?
     public static void debugOrInfo(Logger logger, boolean info, String format, Object... argArray) {
-        logger.log(info ? Level.INFO : Level.DEBUG, format, argArray);
+        logger.atLevel(info ? Level.INFO : Level.DEBUG).log(format, argArray);
     }
 
     public static void log(Logger log, nl.vpro.logging.simple.Level level, CharSequence format, Object... argArray) {
