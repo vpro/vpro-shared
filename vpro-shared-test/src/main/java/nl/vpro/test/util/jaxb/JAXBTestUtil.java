@@ -312,7 +312,7 @@ public class JAXBTestUtil  {
         T result = unmarshal(xml, clazz);
         /// make sure unmarshalling worked too, by marshalling the result again.
         String xmlAfter = marshal(result);
-        similar(xmlAfter, xml, consumer);
+        similar("REMARSHALLED", xmlAfter, xml, consumer);
         return new Result<>(result, xml);
     }
 
@@ -383,11 +383,19 @@ public class JAXBTestUtil  {
 
     @SafeVarargs
     public static void similar(String input, String expected, Consumer<DiffBuilder>... build) {
-        similar(input.getBytes(UTF_8), expected.getBytes(UTF_8), build);
+        similar(null, input, expected, build);
+    }
+    @SafeVarargs
+    public static void similar(String description, String input, String expected, Consumer<DiffBuilder>... build) {
+        similar(description, input.getBytes(UTF_8), expected.getBytes(UTF_8), build);
     }
 
-    @SafeVarargs
     public static void similar(byte[] input, byte[] expected, Consumer<DiffBuilder>... build) {
+        similar(null, input, expected, build);
+
+    }
+    @SafeVarargs
+    public static void similar(String description, byte[] input, byte[] expected, Consumer<DiffBuilder>... build) {
         DiffBuilder builder = DiffBuilder
             .compare(expected)
             .withTest(input)
@@ -402,7 +410,7 @@ public class JAXBTestUtil  {
             Diff diff = builder.build();
             assertNoDifferences(diff, input, expected);
         } catch (XMLUnitException xue) {
-            Fail.fail(xue.getMessage() + ": expected:\n" + new String(expected, UTF_8) + "\nactual:\n" + new String(input, UTF_8));
+            Fail.fail((description != null ? description : "") + ":" +xue.getMessage() + ": expected:\n" + new String(expected, UTF_8) + "\nactual:\n" + new String(input, UTF_8));
         }
     }
 
