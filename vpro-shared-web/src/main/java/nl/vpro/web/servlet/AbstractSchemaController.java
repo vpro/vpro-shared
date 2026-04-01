@@ -1,7 +1,5 @@
 package nl.vpro.web.servlet;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -12,6 +10,9 @@ import java.util.function.BiFunction;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -25,6 +26,9 @@ import nl.vpro.util.SchemaType;
  */
 @Slf4j
 public abstract class AbstractSchemaController<M extends BiFunction<String, SchemaType, File>> {
+
+    @Inject
+    HttpServletRequest httpServletRequest;
 
     protected M mappings;
 
@@ -44,6 +48,10 @@ public abstract class AbstractSchemaController<M extends BiFunction<String, Sche
 
     protected void a(XMLStreamWriter w, String href, String chars) throws XMLStreamException {
         w.writeStartElement("a");
+        if (href.startsWith("./") && ! httpServletRequest.getServletPath().endsWith("/")) {
+            href = httpServletRequest.getServletPath() + "/" + href.substring(2);
+
+        }
         w.writeAttribute("href", href);
         w.writeCharacters(chars);
         w.writeEndElement();
