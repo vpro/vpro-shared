@@ -1,5 +1,7 @@
 package nl.vpro.util;
 
+import lombok.Getter;
+
 import org.meeuw.functional.ThrowingFunction;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ import java.util.stream.Stream;
 public class StreamInputStream<O, E extends IOException> extends InputStream {
     private final Stream<O> stream;
     private final Iterator<O> iterator;
+    @Getter
     private final AtomicLong counter;
     private byte[] buf = null;
     private int pos = 0;
@@ -25,8 +28,12 @@ public class StreamInputStream<O, E extends IOException> extends InputStream {
     private final ThrowingFunction<O, byte[], E> toByteArray;
 
 
+    public StreamInputStream(Stream<O> stream, ThrowingFunction<O, byte[], E> toByteArray) {
+        this(stream, new AtomicLong(0), toByteArray);
+    }
 
-    StreamInputStream(Stream<O> stream, AtomicLong counter, ThrowingFunction<O, byte[], E> toByteArray) {
+
+    public StreamInputStream(Stream<O> stream, AtomicLong counter, ThrowingFunction<O, byte[], E> toByteArray) {
         this.stream = stream;
         this.iterator = stream.sequential().iterator();
         this.counter = counter;
@@ -57,6 +64,7 @@ public class StreamInputStream<O, E extends IOException> extends InputStream {
         return toCopy;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean fillBuffer() throws E {
         if (!iterator.hasNext()) {
             finished = true;
