@@ -229,7 +229,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     var currentToken = jp.currentToken();
 
                     if (currentToken == JsonToken.END_ARRAY) {
-                        this.eventListener.conditionalAccept(new EndEvent(size));
+                        this.eventListener.conditionalAccept(new EndEvent(count));
                         this.eventListener.conditionalAccept(new TokenEvent(currentToken));
                         callback();
                         next = null;
