@@ -2,6 +2,8 @@ package nl.vpro.jackson3;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -15,9 +17,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.exc.MismatchedInputException;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
@@ -47,11 +46,32 @@ public class JsonArrayIteratorTest {
             }
             """.getBytes(StandardCharsets.UTF_8))).build()) {
 
+            assertThat(iterator.getProperty()).isEqualTo("changes");
             assertThat(iterator.hasNext()).isTrue();
             assertThat(iterator.getSize()).hasValue(1L);
             Change change = iterator.next();
             log.info("{}", change);
             assertThat(iterator.hasNext()).isFalse();
+        }
+    }
+
+    @Test
+    public void specifyField() {
+        try (JsonArrayIterator<JsonNode> iterator = JsonArrayIterator.builder(JsonNode.class)
+            .property("array2")
+            .inputStream(
+                new ByteArrayInputStream("""
+            {
+                "size": 3,
+                "array1": [ "a", "b" ],
+                "array2": [ "c", "d", "e" ]
+            }
+            """.getBytes(StandardCharsets.UTF_8))).build()) {
+
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.getSize()).hasValue(3L);
+            JsonNode change = iterator.next();
+            log.info("{}", change);
         }
     }
 
@@ -253,9 +273,36 @@ public class JsonArrayIteratorTest {
             assertThat(callback[0]).isEqualTo("called");
         }
     }
-
     @Test
-    public void events() {
+    public void eventsOnObject() {
+        byte[] bytes = """
+            {
+              "array1": [],
+              "array2": [1, 2, 3],
+              "array3": [4, 5, 6],
+              "foo": "bar"
+            }
+            """.getBytes(StandardCharsets.UTF_8);
+        List<JsonArrayIterator<Integer>.Event> events = new ArrayList<>();
+        try (JsonArrayIterator<Integer> i = JsonArrayIterator.<Integer>builder()
+            .valueCreator((jp, on) -> on.intValue())
+            .eventListener(events::add)
+            .property("array2")
+            .inputStream(new ByteArrayInputStream(bytes))
+            .build()) {
+            assertThat(i.next()).isEqualTo(1);
+            assertThat(i.next()).isEqualTo(2);
+            assertThat(i.next()).isEqualTo(3);
+            assertThat(i.hasNext()).isFalse();
+
+        }
+        for (JsonArrayIterator<Integer>.Event event : events) {
+            log.info("{}", event);
+        }
+
+    }
+    @Test
+    public void eventsOnArray() {
         byte[] bytes = """
             [
             {},{},{},
@@ -300,7 +347,7 @@ public class JsonArrayIteratorTest {
             """.getBytes(StandardCharsets.UTF_8);
         List<JsonArrayIterator<Simple>.ValueReadExceptionEvent> errors = new ArrayList<>();
         try (JsonArrayIterator<Simple> i = JsonArrayIterator.<Simple>builder()
-            .eventListener(new JsonArrayIterator.ExceptionListener<Simple>() {
+            .eventListener(new JsonArrayIterator.ExceptionListener<>() {
                 @Override
                 public void accept(JsonArrayIterator<Simple>.ValueReadExceptionEvent s) {
                     errors.add(s);

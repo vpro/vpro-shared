@@ -28,7 +28,7 @@ import static java.util.Objects.requireNonNull;
  * This converts an {@link InputStream} into a Stream of objects, by parsing the stream as JSON.
  * In the simplest case the JSON is just an array, but it can also be an object containing some metadata and an array.
  *
- * @see JsonArrayIterator.Builder()
+ * @see Builder()
  * @author Michiel Meeuwissen
  * @since 1.0
  */
@@ -71,16 +71,19 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private final Listener<T> eventListener;
 
+    @Getter
+    private String property;
+
     public JsonArrayIterator(InputStream inputStream, Class<T> clazz) {
         this(inputStream, clazz, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) {
-        this(inputStream, null, clazz, callback, null, null, null, null, null, null, null);
+        this(inputStream, null, clazz, callback, null, null, null, null, null, null, null, null);
     }
 
     public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, JsonNode, T> valueCreator) {
-        this(inputStream, valueCreator, null, null, null, null, null, null, null, null, null);
+        this(inputStream, valueCreator, null, null, null, null, null, null, null, null, null, null);
     }
 
 
@@ -103,6 +106,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * @param valueClass      If valueCreator is not given, simply the class of the desired object can be given
      *                        JSON unmarshalling with the given objectMapper will happen.
      * @param callback        If the iterator is ready, closed or error this callback will be called.
+     * @param property        If specified, then the array will be searched as a value of this property
      * @param sizeField       The size of the iterator, i.e. the size of the array represented in the json stream
      * @param totalSizeField  Sometimes the array is part of something bigger, e.g. a page in a search result. The size
      *                        of the 'complete' result can be in the beginning of the json in this field.
@@ -112,7 +116,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * @param skipNulls       Whether to skip nulls in the array. Default true.
      * @param skipErrors      Whether to skip objects in the array that can't be marshaled. Default to skipNulls value. If false a {@code null} will be produces (and see skipNulls)
      * @param eventListener   A listener for events that happen during parsing and iteration of the array. See {@link Event} and extension classes.
-     * @throws IOException    If the JSON parser could not be created or the piece until the start of the array could
+     * @throws JacksonException    If the JSON parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
      */
      @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
@@ -121,6 +125,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         @Nullable final BiFunction<ObjectReader, JsonNode,  T> valueCreator,
         @Nullable final Class<T> valueClass,
         @Nullable Runnable callback,
+        @Nullable String property,
         @Nullable String sizeField,
         @Nullable String totalSizeField,
         @Nullable Jackson3Mapper objectMapper,
@@ -141,7 +146,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
         Long tmpSize = null;
         Long tmpTotalSize = null;
-        String fieldName = null;
         if (sizeField == null) {
             sizeField = "size";
         }
@@ -149,27 +153,32 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             totalSizeField = "totalSize";
         }
          this.eventListener = eventListener == null? Listener.noop() : eventListener;
+
+        String fn = null;
         // find the start of the array, where we will start iterating.
         while(true) {
             JsonToken token = jp.nextToken();
             if (token == null) {
                 break;
             }
-            this.eventListener.conditionalAccept(new TokenEvent(token));
+            this.eventListener.conditionalAccept(eventFor((jp)));
             if (token == JsonToken.PROPERTY_NAME) {
-                fieldName = jp.currentName();
+                fn = jp.currentName();
             }
-            if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
+            if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fn)) {
                 tmpSize = jp.getLongValue();
-                 this.eventListener.conditionalAccept(new SizeEvent(tmpSize));
+                this.eventListener.conditionalAccept(new SizeEvent(tmpSize));
             }
-            if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
+            if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fn)) {
                 tmpTotalSize = jp.getLongValue();
-                 this.eventListener.conditionalAccept(new TotalSizeEvent(tmpTotalSize));
+                this.eventListener.conditionalAccept(new TotalSizeEvent(tmpTotalSize));
 
             }
             if (token == JsonToken.START_ARRAY) {
-                break;
+                if (property == null || property.equals(fn)) {
+                    this.property = fn;
+                    break;
+                }
             }
         }
         this.size = tmpSize;
@@ -181,9 +190,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
     }
 
     private static <T> BiFunction<ObjectReader, JsonNode, T> valueCreator(Class<T> clazz) {
-        return (m, tree) -> {
-            return m.treeToValue(tree, clazz);
-        };
+        return (m, tree) -> m.treeToValue(tree, clazz);
 
     }
 
@@ -230,7 +237,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
                     if (currentToken == JsonToken.END_ARRAY) {
                         this.eventListener.conditionalAccept(new EndEvent(count));
-                        this.eventListener.conditionalAccept(new TokenEvent(currentToken));
+                        this.eventListener.conditionalAccept(eventFor(jp));
                         callback();
                         next = null;
                         hasNext = false;
@@ -287,6 +294,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     @Override
     public void close() {
+        var token = jp.nextToken();
+        while(token != null) {
+            eventListener.conditionalAccept(eventFor(jp));
+            token = jp.nextToken();
+        }
+
         callback();
         this.jp.close();
 
@@ -430,12 +443,50 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     @EqualsAndHashCode(callSuper = true)
     @Data
-    public class TokenEvent extends Event {
+    public  class TokenEvent extends Event {
         final JsonToken token;
 
         public TokenEvent(JsonToken token) {
             this.token = token;
         }
+    }
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public  class PropertyNameEvent extends TokenEvent {
+        final String name;
+
+        public PropertyNameEvent(JsonToken token, String name) {
+            super(token);
+            this.name = name;
+        }
+    }
+    @EqualsAndHashCode(callSuper = true)
+    @ToString(callSuper = true)
+    @Data
+    public  class ValueEvent<V> extends TokenEvent {
+        final V value;
+
+        public ValueEvent(JsonToken token, V value) {
+            super(token);
+            this.value = value;
+        }
+    }
+
+    public  TokenEvent eventFor(JsonParser jp) {
+        JsonToken token = jp.currentToken();
+        return switch (token) {
+
+            case PROPERTY_NAME -> new PropertyNameEvent(jp.currentToken(), jp.currentName());
+            case VALUE_NUMBER_INT -> new ValueEvent<>(jp.currentToken(), jp.getIntValue());
+            case VALUE_NUMBER_FLOAT -> new ValueEvent<>(jp.currentToken(), jp.getFloatValue());
+            case VALUE_EMBEDDED_OBJECT -> new ValueEvent<>(jp.currentToken(), jp.getEmbeddedObject());
+            case VALUE_STRING -> new ValueEvent<>(jp.currentToken(), jp.getString());
+            case VALUE_TRUE -> new ValueEvent<>(jp.currentToken(), Boolean.TRUE);
+            case VALUE_FALSE -> new ValueEvent<>(jp.currentToken(), Boolean.FALSE);
+            case VALUE_NULL -> new ValueEvent<Void>(jp.currentToken(), null);
+            default -> new TokenEvent(token);
+        };
+
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -477,7 +528,6 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         final MismatchedInputException exception;
 
         private final JsonNode json;
-
 
         public ValueReadExceptionEvent(JsonNode json, MismatchedInputException exception) {
             this.exception = exception;
@@ -529,7 +579,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     }
 
-    private static final class DeafListener<S> extends ConditionalListener<S> {
+    public static final class DeafListener<S> extends ConditionalListener<S> {
 
 
         @Override
