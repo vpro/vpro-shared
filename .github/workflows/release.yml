@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
     env:
-      MAVEN_ARGS: '--no-transfer-progress'
+      MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
       - name: echo
         run: echo {{ $github.ref }}

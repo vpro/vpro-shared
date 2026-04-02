@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
     env:
-      MAVEN_ARGS: '--no-transfer-progress'
+      MAVEN_ARGS: '--no-transfer-progress --color always'
     steps:
       - uses: actions/checkout@v6
       - uses: oleksiyrudenko/gha-git-credentials@v2-latest
