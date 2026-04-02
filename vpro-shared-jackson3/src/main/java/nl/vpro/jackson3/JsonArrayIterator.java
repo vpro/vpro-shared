@@ -71,15 +71,15 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     private final Listener<T> eventListener;
 
-    public JsonArrayIterator(InputStream inputStream, Class<T> clazz) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, Class<T> clazz) {
         this(inputStream, clazz, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final Class<T> clazz, Runnable callback) {
         this(inputStream, null, clazz, callback, null, null, null, null, null, null, null);
     }
 
-    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, JsonNode, T> valueCreator) throws IOException {
+    public JsonArrayIterator(InputStream inputStream, final BiFunction<ObjectReader, JsonNode, T> valueCreator) {
         this(inputStream, valueCreator, null, null, null, null, null, null, null, null, null);
     }
 
@@ -110,12 +110,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      *                        conjunction with <code>valueClass</code>, but you may specify another one
      * @param logger          Default this is logging to nl.vpro.jackson2.JsonArrayIterator, but you may override that.
      * @param skipNulls       Whether to skip nulls in the array. Default true.
-     * @param skipErrors      Whether to skip objects in the array that can't be marshalled. Default to skipNulls value. If false a {@code null} will be produces (and see skipNulls)
+     * @param skipErrors      Whether to skip objects in the array that can't be marshaled. Default to skipNulls value. If false a {@code null} will be produces (and see skipNulls)
      * @param eventListener   A listener for events that happen during parsing and iteration of the array. See {@link Event} and extension classes.
-     * @throws IOException    If the json parser could not be created or the piece until the start of the array could
+     * @throws IOException    If the JSON parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
      */
-     @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
+    @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
     private JsonArrayIterator(
         @NonNull  InputStream inputStream,
         @Nullable final BiFunction<ObjectReader, JsonNode,  T> valueCreator,
@@ -128,10 +128,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         @Nullable Boolean skipNulls,
         @Nullable Boolean skipErrors,
         @Nullable Listener<T> eventListener
-     ) {
-         requireNonNull(inputStream, "No inputStream given");
-         this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
-         this.jp = this.reader.createParser(inputStream);
+    ) {
+        requireNonNull(inputStream, "No inputStream given");
+        this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
+        this.jp = this.reader.createParser(inputStream);
         this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
         if (valueCreator != null && valueClass != null) {
             throw new IllegalArgumentException();
@@ -148,7 +148,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         if (totalSizeField == null) {
             totalSizeField = "totalSize";
         }
-         this.eventListener = eventListener == null? Listener.noop() : eventListener;
+        this.eventListener = eventListener == null? Listener.noop() : eventListener;
         // find the start of the array, where we will start iterating.
         while(true) {
             JsonToken token = jp.nextToken();
@@ -161,11 +161,11 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             }
             if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fieldName)) {
                 tmpSize = jp.getLongValue();
-                 this.eventListener.conditionalAccept(new SizeEvent(tmpSize));
+                this.eventListener.conditionalAccept(new SizeEvent(tmpSize));
             }
             if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fieldName)) {
                 tmpTotalSize = jp.getLongValue();
-                 this.eventListener.conditionalAccept(new TotalSizeEvent(tmpTotalSize));
+                this.eventListener.conditionalAccept(new TotalSizeEvent(tmpTotalSize));
 
             }
             if (token == JsonToken.START_ARRAY) {
@@ -229,7 +229,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     var currentToken = jp.currentToken();
 
                     if (currentToken == JsonToken.END_ARRAY) {
-                        this.eventListener.conditionalAccept(new EndEvent(size));
+                        this.eventListener.conditionalAccept(new EndEvent(count));
                         this.eventListener.conditionalAccept(new TokenEvent(currentToken));
                         callback();
                         next = null;
@@ -256,9 +256,9 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(tree, jme));
                         if (! accepted) {
                             if (skipNulls) {
-                                logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be skipped");
+                                logger.warn("{} {} for\n{}\nWill be skipped", jme.getClass(), jme.getMessage(), tree);
                             } else {
-                                logger.warn(jme.getClass() + " " + jme.getMessage() + " for\n" + tree + "\nWill be null");
+                                logger.warn("{} {} for\n{}\nWill be null", jme.getClass(), jme.getMessage(), tree);
                             }
                         }
                         if (! skipErrors) {
@@ -308,7 +308,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         write(this, out, logging == null ? null : (c) -> { logging.accept(c); return null;});
     }
 
-    public void writeArray(OutputStream out, final Consumer<T> logging) throws IOException {
+    public void writeArray(OutputStream out, final Consumer<T> logging) {
         writeArray(this, out, logging == null ? null : (c) -> { logging.accept(c); return null;});
     }
 
@@ -336,7 +336,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      */
     public static <T> void writeArray(
         final CountedIterator<T> iterator,
-        final OutputStream out, final Function<T, Void> logging) throws IOException {
+        final OutputStream out, final Function<T, Void> logging) {
         try (JsonGenerator jg = Jackson3Mapper.INSTANCE.mapper().createGenerator(out)) {
             jg.writeStartArray();
             writeObjects(iterator, jg, logging);
