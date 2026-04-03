@@ -24,11 +24,9 @@ jobs:
           server-password: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
-      - uses: oleksiyrudenko/gha-git-credentials@v2-latest
+      - uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          name: 'github'
-          email: 'digitaal-techniek@vpro.nl'
-          token: '${{ secrets.GITHUB_TOKEN  }}'
+          commit_message: Release
       - name: Release
         run: mvn  -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
         env:
