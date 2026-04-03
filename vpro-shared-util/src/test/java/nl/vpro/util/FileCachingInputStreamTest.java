@@ -226,7 +226,7 @@ public class FileCachingInputStreamTest {
     public static Iterator<Object[]> slowAndNormal() {
 
         int slows = 10;
-        int bytearrays = 4;
+        int bytearrays = 40;
         int total = bytearrays + slows;
         return new Iterator<>() {
             int count = 0;
@@ -244,10 +244,10 @@ public class FileCachingInputStreamTest {
                 {
                     RANDOM.nextBytes(bytes);
                 }
-                if (count++ < slows) {
-                    return new Object[]{new ByteArrayInputStream(bytes), expectedSize};
+                if (count++ < bytearrays) {
+                    return new Object[]{"byte array " + count, new ByteArrayInputStream(bytes), expectedSize};
                 } else {
-                    return new Object[]{new SlowInputStream(5, bytes), expectedSize};
+                    return new Object[]{"slow " + (count - bytearrays), new SlowInputStream(5, bytes), expectedSize};
 
                 }
             }
@@ -257,7 +257,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest(name = "{displayName} {arguments}")
     @MethodSource("slowAndNormal")
-    public void readFileGetsInterrupted(InputStream input, Long expectedCount) throws IOException {
+    public void readFileGetsInterrupted(String description, InputStream input, Long expectedCount) throws IOException {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
@@ -280,7 +280,7 @@ public class FileCachingInputStreamTest {
                             thisThread.interrupt();
                             // According to javadoc this will either cause an exception or set the interrupted status.
                         } else {
-                            log.debug("{} Interrupted already {} {}", f.getCount(), thisThread, i);
+                            log.info("{} Interrupted already {} {}", f.getCount(), thisThread, i);
                         }
                     }
                 })
@@ -303,11 +303,11 @@ public class FileCachingInputStreamTest {
                     total += r;
                 }
                 log.info("EOF !, {}, total read: {}, total expected: {}", r, total, expectedCount);
-                throw new AssertionFailedError("should not reach this, it should have been interrupted!");
+                throw new AssertionFailedError(description + ": should not reach this, it should have been interrupted!");
             }
         } catch (ClosedByInterruptException | InterruptedIOException ie) {
             isInterrupted = true;
-            log.info("Caught {}", ie.getClass() + " " + ie.getMessage(), ie);
+            log.info("Caught {}", ie.getClass() + " " + ie.getMessage());
         } finally {
             isInterrupted |= thisThread.isInterrupted();
             closed.getAndIncrement();
