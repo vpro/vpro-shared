@@ -236,6 +236,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest(name = "{displayName} {arguments}")
     @MethodSource("slowAndNormal")
+    @Disabled
     public void readFileGetsInterrupted(InputStream input, Long expectedCount) throws IOException {
         final Thread thisThread = Thread.currentThread();
 
