@@ -3,6 +3,7 @@ package nl.vpro.jackson3;
 import lombok.extern.log4j.Log4j2;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.databind.introspect.AnnotationIntrospectorPair;
 import tools.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -43,6 +44,19 @@ public class Jackson3MapperTest {
 
         @XmlElement
         Optional<Integer> optional;
+    }
+
+    @JsonDeserialize(using = BDeserializer.class)
+    public static class B {
+
+    }
+
+    public static class BDeserializer extends tools.jackson.databind.ValueDeserializer<B> {
+
+        @Override
+        public B deserialize(tools.jackson.core.JsonParser p, tools.jackson.databind.DeserializationContext ctxt) throws JacksonException {
+            return new B();
+        }
     }
 
     /**

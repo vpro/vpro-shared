@@ -119,7 +119,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
      * @throws JacksonException    If the JSON parser could not be created or the piece until the start of the array could
      *                        not be tokenized.
      */
-     @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
+    @lombok.Builder(builderClassName = "Builder", builderMethodName = "_builder")
     private JsonArrayIterator(
         @NonNull  InputStream inputStream,
         @Nullable final BiFunction<ObjectReader, JsonNode,  T> valueCreator,
@@ -133,10 +133,10 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         @Nullable Boolean skipNulls,
         @Nullable Boolean skipErrors,
         @Nullable Listener<T> eventListener
-     ) {
-         requireNonNull(inputStream, "No inputStream given");
-         this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
-         this.jp = this.reader.createParser(inputStream);
+    ) {
+        requireNonNull(inputStream, "No inputStream given");
+        this.reader = objectMapper == null ? Jackson3Mapper.LENIENT.reader() : objectMapper.reader();
+        this.jp = this.reader.createParser(inputStream);
         this.valueCreator = valueCreator == null ? valueCreator(valueClass) : valueCreator;
         if (valueCreator != null && valueClass != null) {
             throw new IllegalArgumentException();
@@ -152,7 +152,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         if (totalSizeField == null) {
             totalSizeField = "totalSize";
         }
-         this.eventListener = eventListener == null? Listener.noop() : eventListener;
+        this.eventListener = eventListener;
 
         String fn = null;
         // find the start of the array, where we will start iterating.
@@ -161,18 +161,16 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             if (token == null) {
                 break;
             }
-            this.eventListener.conditionalAccept(eventFor((jp)));
+            eventFor(jp);
             if (token == JsonToken.PROPERTY_NAME) {
                 fn = jp.currentName();
             }
             if (token == JsonToken.VALUE_NUMBER_INT && sizeField.equals(fn)) {
                 tmpSize = jp.getLongValue();
-                this.eventListener.conditionalAccept(new SizeEvent(tmpSize));
+
             }
             if (token == JsonToken.VALUE_NUMBER_INT && totalSizeField.equals(fn)) {
                 tmpTotalSize = jp.getLongValue();
-                this.eventListener.conditionalAccept(new TotalSizeEvent(tmpTotalSize));
-
             }
             if (token == JsonToken.START_ARRAY) {
                 if (property == null || property.equals(fn)) {
@@ -182,8 +180,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
             }
         }
         this.size = tmpSize;
+        if (this.size != null) {
+            event(() -> new SizeEvent(this.size));
+        }
         this.totalSize = tmpTotalSize;
-        this.eventListener.conditionalAccept(new StartEvent());
+        if (this.totalSize != null) {
+            event(() -> new TotalSizeEvent(this.totalSize));
+        }
+        event(StartEvent::new);
         this.callback = callback;
         this.skipNulls = skipNulls == null || skipNulls;
         this.skipErrors = skipErrors == null ||  skipErrors;
@@ -236,8 +240,8 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     var currentToken = jp.currentToken();
 
                     if (currentToken == JsonToken.END_ARRAY) {
-                        this.eventListener.conditionalAccept(new EndEvent(count));
-                        this.eventListener.conditionalAccept(eventFor(jp));
+                        event(() -> new EndEvent(count));
+                        eventFor(jp);
                         callback();
                         next = null;
                         hasNext = false;
@@ -255,12 +259,12 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                     }
                     try {
                         next = valueCreator.apply(reader, tree);
-                        eventListener.conditionalAccept(new NextEvent(next));
+                        event(() -> new NextEvent(next));
                         hasNext = true;
                         break;
                     } catch (MismatchedInputException jme) {
                         foundNulls++;
-                        boolean accepted = eventListener.conditionalAccept(new ValueReadExceptionEvent(tree, jme));
+                        boolean accepted = eventListener != null && eventListener.conditionalAccept(new ValueReadExceptionEvent(tree, jme));
                         if (! accepted) {
                             if (skipNulls) {
                                 logger.warn("{} {} for\n{}\nWill be skipped", jme.getClass(), jme.getMessage(), tree);
@@ -270,7 +274,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
                         }
                         if (! skipErrors) {
                             next = null;
-                            eventListener.conditionalAccept(new NextEvent(next));
+                            event(() -> new NextEvent(next));
                             hasNext = true;
                             break;
                         }
@@ -294,12 +298,19 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     @Override
     public void close() {
-        var token = jp.nextToken();
-        while(token != null) {
-            eventListener.conditionalAccept(eventFor(jp));
-            token = jp.nextToken();
-        }
+        if (eventListener != null) {
 
+            try {
+                var token = jp.nextToken();
+                while (token != null) {
+                    eventFor(jp);
+                    token = jp.nextToken();
+                }
+            } catch (Exception e) {
+                logger.warn("{} {} while closing JsonParser", e.getClass().getCanonicalName(), e.getMessage());
+
+            }
+        }
         callback();
         this.jp.close();
 
@@ -472,21 +483,27 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
         }
     }
 
-    public  TokenEvent eventFor(JsonParser jp) {
-        JsonToken token = jp.currentToken();
-        return switch (token) {
+    protected void eventFor(JsonParser jp) {
+        event(() -> {
+            JsonToken token = jp.currentToken();
+            return switch (token) {
 
-            case PROPERTY_NAME -> new PropertyNameEvent(jp.currentToken(), jp.currentName());
-            case VALUE_NUMBER_INT -> new ValueEvent<>(jp.currentToken(), jp.getIntValue());
-            case VALUE_NUMBER_FLOAT -> new ValueEvent<>(jp.currentToken(), jp.getFloatValue());
-            case VALUE_EMBEDDED_OBJECT -> new ValueEvent<>(jp.currentToken(), jp.getEmbeddedObject());
-            case VALUE_STRING -> new ValueEvent<>(jp.currentToken(), jp.getString());
-            case VALUE_TRUE -> new ValueEvent<>(jp.currentToken(), Boolean.TRUE);
-            case VALUE_FALSE -> new ValueEvent<>(jp.currentToken(), Boolean.FALSE);
-            case VALUE_NULL -> new ValueEvent<Void>(jp.currentToken(), null);
-            default -> new TokenEvent(token);
-        };
-
+                case PROPERTY_NAME -> new PropertyNameEvent(jp.currentToken(), jp.currentName());
+                case VALUE_NUMBER_INT -> new ValueEvent<>(jp.currentToken(), jp.getIntValue());
+                case VALUE_NUMBER_FLOAT -> new ValueEvent<>(jp.currentToken(), jp.getFloatValue());
+                case VALUE_EMBEDDED_OBJECT -> new ValueEvent<>(jp.currentToken(), jp.getEmbeddedObject());
+                case VALUE_STRING -> new ValueEvent<>(jp.currentToken(), jp.getString());
+                case VALUE_TRUE -> new ValueEvent<>(jp.currentToken(), Boolean.TRUE);
+                case VALUE_FALSE -> new ValueEvent<>(jp.currentToken(), Boolean.FALSE);
+                case VALUE_NULL -> new ValueEvent<Void>(jp.currentToken(), null);
+                default -> new TokenEvent(token);
+            };
+        });
+    }
+    protected void event(Supplier<Event> event) {
+        if (eventListener != null) {
+            eventListener.conditionalAccept(event.get());
+        }
     }
 
     @EqualsAndHashCode(callSuper = true)

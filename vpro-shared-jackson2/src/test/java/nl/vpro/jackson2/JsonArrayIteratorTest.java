@@ -41,7 +41,7 @@ public class JsonArrayIteratorTest {
                     "mid": "POMS_NCRV_1138990",
                     "deleted": true
                 }
-                }
+                ]
             }
             """.getBytes(StandardCharsets.UTF_8))).build()) {
             Change change = i.next();
