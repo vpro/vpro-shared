@@ -10,12 +10,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import static nl.vpro.logging.Log4j2Helper.debugOrInfo;
+
 import static nl.vpro.util.DirectoryWatcher.pathToKey;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -211,7 +212,7 @@ class DirectoryWatcherTest {
             while (events.size() < size && (System.currentTimeMillis() - start) < Duration.ofSeconds(1000).toMillis()) {
                 boolean info =  prevSize != events.size() ||
                     Duration.between(prevLog, Instant.now()).compareTo(Duration.ofSeconds(5)) > 0;
-                debugOrInfo(log, info, "Waiting for " + size + " events, got " + events.size() + " " + events);
+                log.atLevel(info ? Level.INFO : Level.DEBUG).log("Waiting for " + size + " events, got " + events.size() + " " + events);
                 prevSize = events.size();
                 if (info) {
                     prevLog = Instant.now();
