@@ -17,6 +17,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 import jakarta.annotation.PreDestroy;
@@ -44,8 +45,7 @@ import nl.vpro.util.locker.ObjectLockerAdmin;
 
 import static io.micrometer.core.instrument.Gauge.builder;
 import static nl.vpro.util.locker.ObjectLockerAdmin.JMX_INSTANCE;
-import static org.slf4j.event.Level.DEBUG;
-import static org.slf4j.event.Level.WARN;
+import static org.slf4j.event.Level.*;
 
 /**
  * Sets up Prometheus {@link MeterRegistry}.
@@ -139,13 +139,13 @@ public class MeterRegistryConfiguration {
             new ClassLoaderMetrics().bindTo(registry);
         }
 
-        if (isActive("meter logj", monitoringProperties.getMeterLog4j(), "org.apache.logging.log4j.core.config.Configuration")) {
+        if (isActive("meter logj", monitoringProperties.getMeterLog4j(),  m -> Level.INFO,"org.apache.logging.log4j.core.config.Configuration")) {
             Log4j2Metrics metrics = new Log4j2Metrics();
             metrics.bindTo(registry);
             closables.add(metrics);
         }
 
-        if (isActive("meter jcache", monitoringProperties.getMeterJCache(), "javax.cache.CacheManager"))  {
+        if (isActive("meter jcache", monitoringProperties.getMeterJCache(),  m -> DEBUG,"javax.cache.CacheManager"))  {
             final Optional<?> cacheManager = getCacheManager();
             if (cacheManager.isPresent()) {
                 try {
@@ -188,7 +188,7 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (isActive("meter hibernate", monitoringProperties.getMeterHibernate(), "org.hibernate.SessionFactory", "org.hibernate.stat.Statistics", "org.hibernate.stat.HibernateMetrics")) {
+        if (isActive("meter hibernate", monitoringProperties.getMeterHibernate(), (m) -> m.size() >= 3 ? DEBUG : INFO, "org.hibernate.SessionFactory", "org.hibernate.stat.Statistics", "org.hibernate.stat.HibernateMetrics")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
             if (sessionFactory.isPresent()) {
                 new HibernateMetrics(
@@ -201,7 +201,7 @@ public class MeterRegistryConfiguration {
                 warn("No session factory to monitor (hibernate)");
             }
         }
-        if (isActive("meter hibernate query", monitoringProperties.getMeterHibernateQuery(), "org.hibernate.SessionFactory", "org.hibernate.stat.HibernateQueryMetrics")) {
+        if (isActive("meter hibernate query", monitoringProperties.getMeterHibernateQuery(), (m) -> m.size() >= 2 ? DEBUG : INFO, "org.hibernate.SessionFactory", "org.hibernate.stat.HibernateQueryMetrics")) {
             final Optional<SessionFactory> sessionFactory = (Optional<SessionFactory>) getSessionFactory();
 
             if (sessionFactory.isPresent()) {
@@ -212,7 +212,7 @@ public class MeterRegistryConfiguration {
         }
 
         try {
-            if (isActive("meter postgresql", monitoringProperties.getMeterPostgres(), "org.postgresql.Driver")) {
+            if (isActive("meter postgresql", monitoringProperties.getMeterPostgres(), m -> DEBUG, "org.postgresql.Driver")) {
                 final Optional<Object> dataSource = (Optional<Object>) getDataSource();
                 if (dataSource.isPresent()) {
                     if (monitoringProperties.getPostgresDatabaseName() != null) {
@@ -233,7 +233,7 @@ public class MeterRegistryConfiguration {
             new ProcessorMetrics().bindTo(registry);
         }
 
-        if (isActive("meter camel", monitoringProperties.getMeterCamel(), "org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory")) {
+        if (isActive("meter camel", monitoringProperties.getMeterCamel(), m -> m.size() >= 2 ? DEBUG : INFO,"org.apache.camel.CamelContext", "org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory")) {
             try {
                 Class<?> factoryClass = Class.forName("org.apache.camel.component.micrometer.routepolicy.MicrometerRoutePolicyFactory");
                 Object factory = factoryClass.getDeclaredConstructor().newInstance();
@@ -259,7 +259,7 @@ public class MeterRegistryConfiguration {
         }
 
 
-        if (isActive("tomcat", monitoringProperties.isMeterTomcat(), "org.apache.catalina.startup.Tomcat")) {
+        if (isActive("tomcat", monitoringProperties.isMeterTomcat(), m -> DEBUG, "org.apache.catalina.startup.Tomcat")) {
             final Optional<Manager> manager = (Optional<Manager>) getManager();
             TomcatMetrics metrics = new TomcatMetrics(manager.orElse(null), Tags.empty());
             metrics.bindTo(registry);
@@ -321,7 +321,7 @@ public class MeterRegistryConfiguration {
                 .register(registry);
 
         }
-        if (isActive("meter gauge scripts", monitoringProperties.getMeterGaugeScript()) && monitoringProperties.gaugeScript != null)  {
+        if (isActive("meter gauge scripts", monitoringProperties.getMeterGaugeScript(),  m -> DEBUG) && monitoringProperties.gaugeScript != null)  {
             try {
                 String[] lines = monitoringProperties.gaugeScript.trim().split("\n");
                 for (String l : lines) {
@@ -349,20 +349,18 @@ public class MeterRegistryConfiguration {
     }
 
 
-    private boolean isActive(String description, Boolean active, String... clazzes) {
+    private boolean isActive(String description, Boolean active, Function<List<String>, Level> level, String... clazzes) {
         if (active == null || active) {
             List<String> missing = new ArrayList<>();
             for (String clazz : clazzes) {
-                if (!classForName(clazz, active == null ? DEBUG : WARN).isPresent()) {
-
+                if (classForName(clazz, active == null ? DEBUG : WARN).isEmpty()) {
                     missing.add(clazz);
-
                 }
             }
             if (missing.isEmpty()) {
                 return true;
             } else {
-                log.info("Not activating {} because the following classes are not available: {}", description, String.join(", ", missing));
+                log.atLevel(level.apply(missing)).log("Not activating {} because the following classes are not available: {}", description, String.join(", ", missing));
                 return false;
             }
         } else {
