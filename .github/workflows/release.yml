@@ -24,11 +24,11 @@ jobs:
           server-password: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
-      - uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: Release
       - name: Release
-        run: mvn  -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
+        run: |
+          git config --global user.name 'github actions'
+          git config --global user.email 'github@meeuw.org'
+          mvn  -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
