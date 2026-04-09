@@ -99,7 +99,7 @@ public class MeterRegistryConfiguration {
         for (AutoCloseable c : closables) {
             try {
                 c.close();
-                log.info("Closed {}", c);
+                log.debug("Closed {}", c);
             } catch (Exception e) {
                 log.warn("{}: {}", c, e.getMessage());
             }
