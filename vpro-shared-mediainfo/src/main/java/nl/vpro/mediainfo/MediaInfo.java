@@ -13,13 +13,14 @@ import java.util.OptionalDouble;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.math.abstractalgebra.reals.RealNumber;
 import org.meeuw.math.shapes.dim2.Rectangle;
-import org.meeuw.math.uncertainnumbers.field.UncertainReal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import static org.meeuw.math.uncertainnumbers.field.UncertainRealField.element;
+import static org.meeuw.math.abstractalgebra.reals.RealField.element;
+
 
 /**
  * A wrapper around {@link net.mediaarea.mediainfo.MediaInfo} (which is the straightforwardly unmarshalled result of the mediainfo command).
@@ -160,7 +161,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return an {@link Optional} containing a {@link Rectangle} that represents the containing rectangle of the video track, or empty if no video track is present
      */
-    public Optional<Rectangle<UncertainReal>> circumscribedRectangle() {
+    public Optional<Rectangle<RealNumber>> circumscribedRectangle() {
         TrackType track = video().orElse(null);
 
         if (track != null) {
