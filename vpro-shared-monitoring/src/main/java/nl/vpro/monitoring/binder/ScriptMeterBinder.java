@@ -32,13 +32,16 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterBind
     private ScheduledFuture<?> scheduledFuture;
     private Duration interval;
     private final Set<Meter.Id> registered = new CopyOnWriteArraySet<>();
+    private boolean mbeanRegistered = false;
+    private final String name;
 
     ScriptMeterBinder(String name, Duration interval, CommandExecutor commandExecutor, Duration duration, String... arguments) {
         this.commandExecutor = commandExecutor;
         this.interval = interval;
         this.duration = duration;
         this.arguments = arguments;
-        MBeans.registerBean(MBeans.getObjectNameWithName(this, name), this);
+        this.name = name;
+
     }
 
 
@@ -80,6 +83,10 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterBind
             args[0] = String.valueOf(duration.toMinutes());
             System.arraycopy(this.arguments, 0, args, 1, this.arguments.length);
             if (commandExecutor.getBinary().get() != null) {
+                if (! mbeanRegistered) {
+                    MBeans.registerBean(MBeans.getObjectNameWithName(this, name), this);
+                    this.mbeanRegistered = true;
+                }
                 log.info("Executing {} with {}", commandExecutor.getBinary(), Arrays.asList(args));
                 commandExecutor.lines(args).forEach(l -> {
                     log.info(l);
