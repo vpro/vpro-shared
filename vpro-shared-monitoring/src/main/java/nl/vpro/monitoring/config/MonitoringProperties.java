@@ -86,7 +86,7 @@ public class MonitoringProperties implements Serializable {
     @Value("${monitoring.health.permitAll:true}")
     private boolean healthPermitAll;
 
-    @Value("${data.dir:/data}")
+    @Value("${data.dir:#{null}}")
     String dataDir;
 
     @Value("${monitoring.unhealthyThreshold:10s}")
