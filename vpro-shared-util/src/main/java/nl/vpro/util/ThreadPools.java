@@ -28,11 +28,13 @@ public final class ThreadPools {
         return createThreadFactory(THREAD_GROUP, namePrefix, daemon, priority);
     }
     public static ThreadFactory createThreadFactory(final ThreadGroup threadGroup, final String namePrefix, final boolean daemon, final int priority) {
+        //return Thread.ofVirtual().factory();
         return new ThreadFactory() {
             long counter = 1;
 
             @Override
             public Thread newThread(@NonNull Runnable r) {
+
                 Thread thread = new Thread(threadGroup, r);
                 thread.setContextClassLoader(ThreadPools.class.getClassLoader());
                 thread.setDaemon(daemon);
@@ -109,12 +111,12 @@ public final class ThreadPools {
     /**
      * A scheduled executor service with <em>fixed pool size</em>, so should be used to schedule short-lived background tasks only.
      */
-    public static final ScheduledExecutorService backgroundExecutor =  createExecutor("newSingleThreadScheduledExecutor", () ->
-        Executors.newScheduledThreadPool(5,
+
+    public static final ScheduledExecutorService backgroundExecutor = Executors.newScheduledThreadPool(5,
             createThreadFactory(
                 "nl.vpro.util.threadpools-Background",
                 true,
-                Thread.MIN_PRIORITY))
+                Thread.MIN_PRIORITY)
     );
 
 
