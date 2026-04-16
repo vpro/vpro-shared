@@ -45,7 +45,7 @@ public class ManageFilter extends HttpFilter {
         try {
             // Try to use virtual threads if available (Java 21+)
             var method = Executors.class.getMethod("newVirtualThreadPerTaskExecutor");
-            log.info("Using virtual threads for async prometheus handling");
+            log.debug("Using virtual threads for async prometheus handling");
             return (ExecutorService) method.invoke(null);
         } catch (NoSuchMethodException e) {
             log.info("Virtual threads not available (requires Java 21+), using cached thread pool");

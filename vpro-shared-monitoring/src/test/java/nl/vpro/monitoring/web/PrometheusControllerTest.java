@@ -63,9 +63,10 @@ class PrometheusControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/prometheus", "/metrics"})
-    void statusReady(String endpoint) throws Exception {
+    void metrics(String endpoint) throws Exception {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setAsyncSupported(true);
         request.addHeader("Authorization", "Basic bWFuYWdlcjphZG1pbjJr");
         request.setContentType("text/plain");
         request.setServletPath("/manage" + endpoint);
@@ -75,6 +76,12 @@ class PrometheusControllerTest {
 
 
         manageFilter.doFilter(request, response, chain);
+
+        // Wait for async executor to finish the prometheus scrape
+        // The executor uses concurrent threads, so we need to poll until the response is written
+        for (int i = 0; i < 50 && response.getContentType() == null; i++) {
+            Thread.sleep(100);
+        }
 
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getContentType()).isEqualTo("text/plain; version=0.0.4; charset=utf-8");
