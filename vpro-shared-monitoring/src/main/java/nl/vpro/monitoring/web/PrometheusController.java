@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Duration;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -16,19 +15,15 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.math.windowed.WindowedStatisticalLong;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.*;
 
 import nl.vpro.monitoring.config.*;
 
-import static nl.vpro.logging.Slf4jHelper.debugOrInfo;
-
 @Lazy(false)
-
 @Slf4j
 public class PrometheusController {
 
@@ -52,7 +47,7 @@ public class PrometheusController {
 
     /**
      * As {@link #prometheus(HttpServletRequest, HttpServletResponse)}. TODO: spring boot actuator does something different.
-     * It give s json with all metric names for /metrics.
+     * It give s JSON with all metric names for /metrics.
      * May be we could conform?
      */
 
@@ -90,7 +85,7 @@ public class PrometheusController {
                 OutputStream writer = response.getOutputStream()) {
 
                 Duration took = scrape(writer);
-                debugOrInfo(log, took.compareTo(Duration.ofSeconds(2)) > 0, "Scraping Prometheus metrics took {}", took);
+                log.atLevel(took.compareTo(Duration.ofSeconds(2)) > 0 ? Level.INFO : Level.DEBUG).log("Scraping Prometheus metrics took {}", took);
             }
         }
     }
