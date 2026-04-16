@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
 import nl.vpro.monitoring.web.*;
+import nl.vpro.util.ThreadPools;
 
 /**
  * There are a lot of spring projects out there that simply capture the entire servlet context. This breaks the idea of adding just a few servlets. Therefore, the 'managements' endpoints are done via this Filter.
@@ -39,22 +40,7 @@ public class ManageFilter extends HttpFilter {
     @Serial
     private static final long serialVersionUID = 7490817616301996196L;
 
-    private final ExecutorService asyncExecutor = createAsyncExecutor();
-
-    private static ExecutorService createAsyncExecutor() {
-        try {
-            // Try to use virtual threads if available (Java 21+)
-            var method = Executors.class.getMethod("newVirtualThreadPerTaskExecutor");
-            log.debug("Using virtual threads for async prometheus handling");
-            return (ExecutorService) method.invoke(null);
-        } catch (NoSuchMethodException e) {
-            log.info("Virtual threads not available (requires Java 21+), using cached thread pool");
-            return Executors.newCachedThreadPool();
-        } catch (ReflectiveOperationException e) {
-            log.warn("Failed to create virtual thread executor, falling back to cached thread pool", e);
-            return Executors.newCachedThreadPool();
-        }
-    }
+    private final ExecutorService asyncExecutor = ThreadPools.createExecutor(Executors::newCachedThreadPool);
 
     @Inject
     Provider<PrometheusController> prometheusController;
