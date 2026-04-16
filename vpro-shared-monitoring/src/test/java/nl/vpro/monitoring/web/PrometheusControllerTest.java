@@ -65,6 +65,11 @@ class PrometheusControllerTest {
     @ValueSource(strings = {"/prometheus", "/metrics"})
     void metrics(String endpoint) throws Exception {
 
+        String expected =
+                        """
+                        # HELP test_total \s
+                        # TYPE test_total counter
+                        test_total""";
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setAsyncSupported(true);
         request.addHeader("Authorization", "Basic bWFuYWdlcjphZG1pbjJr");
@@ -79,17 +84,14 @@ class PrometheusControllerTest {
 
         // Wait for async executor to finish the prometheus scrape
         // The executor uses concurrent threads, so we need to poll until the response is written
-        for (int i = 0; i < 50 && response.getContentType() == null; i++) {
+        for (int i = 0; i < 50 && ! response.isCommitted(); i++) {
             Thread.sleep(100);
         }
 
+        assertThat(response.isCommitted()).isTrue();
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getContentType()).isEqualTo("text/plain; version=0.0.4; charset=utf-8");
 
-        assertThat(response.getContentAsString()).contains(
-                """
-                    # HELP test_total \s
-                    # TYPE test_total counter
-                    test_total\s""");
+        assertThat(response.getContentAsString()).contains(expected);
     }
 }
