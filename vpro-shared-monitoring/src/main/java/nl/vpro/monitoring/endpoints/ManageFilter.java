@@ -39,7 +39,22 @@ public class ManageFilter extends HttpFilter {
     @Serial
     private static final long serialVersionUID = 7490817616301996196L;
 
-    private final ExecutorService asyncExecutor = Executors.newCachedThreadPool();
+    private final ExecutorService asyncExecutor = createAsyncExecutor();
+
+    private static ExecutorService createAsyncExecutor() {
+        try {
+            // Try to use virtual threads if available (Java 21+)
+            var method = Executors.class.getMethod("newVirtualThreadPerTaskExecutor");
+            log.info("Using virtual threads for async prometheus handling");
+            return (ExecutorService) method.invoke(null);
+        } catch (NoSuchMethodException e) {
+            log.info("Virtual threads not available (requires Java 21+), using cached thread pool");
+            return Executors.newCachedThreadPool();
+        } catch (ReflectiveOperationException e) {
+            log.warn("Failed to create virtual thread executor, falling back to cached thread pool", e);
+            return Executors.newCachedThreadPool();
+        }
+    }
 
     @Inject
     Provider<PrometheusController> prometheusController;
