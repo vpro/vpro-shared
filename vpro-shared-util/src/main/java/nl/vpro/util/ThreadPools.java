@@ -129,7 +129,7 @@ public final class ThreadPools {
             createThreadFactory(
                 "nl.vpro-util-StartUp",
                 false,
-                Thread.NORM_PRIORITY));
+                Thread.MAX_PRIORITY));
 
     public static void shutdown() {
         log.fine("Shutting down thread pools");
