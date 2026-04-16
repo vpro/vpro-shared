@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.util.concurrent.*;
@@ -49,13 +50,37 @@ public final class ThreadPools {
      * <p>
      * These may be quite long-lived thread, performing simple jobs like copying streams.
      */
-    public static final ThreadPoolExecutor copyExecutor =
-        new ThreadPoolExecutor(2, 2000, 60, TimeUnit.SECONDS,
-            new SynchronousQueue<>(),
-            createThreadFactory(
-                "nl.vpro.util.threadpools-Copier",
-                false,
-                Thread.NORM_PRIORITY));
+    public static final ExecutorService copyExecutor = createCopyExecutor();
+
+    public static String copyExecutorDescription() {
+        if (copyExecutor instanceof ThreadPoolExecutor tpe) {
+            return String.format("copyExecutor: %s, pool size: %d, active threads: %d, queue size: %d",
+                copyExecutor.getClass().getSimpleName(),
+                tpe.getPoolSize(), tpe.getActiveCount(), tpe.getQueue().size());
+        } else {
+            return "copyExecutor: " + copyExecutor.getClass().getSimpleName();
+        }
+
+    }
+
+    @SneakyThrows
+    private static ExecutorService createCopyExecutor() {
+        try {
+            // Try to use virtual threads if available (Java 21+)
+            var method = Executors.class.getMethod("newVirtualThreadPerTaskExecutor");
+            log.fine("Using virtual threads for copy executor");
+            return (ExecutorService) method.invoke(null);
+        } catch (NoSuchMethodException e) {
+            log.info("Virtual threads not available (requires Java 21+), using cached thread pool");
+            return new ThreadPoolExecutor(2, 2000, 60, TimeUnit.SECONDS,
+                new SynchronousQueue<>(),
+                createThreadFactory(
+                    "nl.vpro.util.threadpools-Copier",
+                    false,
+                    Thread.NORM_PRIORITY));
+        }
+    }
+
 
 
     /**
