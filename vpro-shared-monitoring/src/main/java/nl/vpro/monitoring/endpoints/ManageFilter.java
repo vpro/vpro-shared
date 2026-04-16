@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import jakarta.inject.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 
+import org.meeuw.functional.ThrowingRunnable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +38,8 @@ public class ManageFilter extends HttpFilter {
 
     @Serial
     private static final long serialVersionUID = 7490817616301996196L;
+
+    private final ExecutorService asyncExecutor = Executors.newCachedThreadPool();
 
     @Inject
     Provider<PrometheusController> prometheusController;
@@ -89,10 +94,10 @@ public class ManageFilter extends HttpFilter {
             writeResponseEntity(entity, response, MediaType.APPLICATION_JSON);
             return;
         } else if (metrics != null && metrics.equals(servletPath)) {
-            prometheusController.get().metrics(request, response);
+            handlePrometheusAsync(request, response, () -> prometheusController.get().metrics(request, response));
             return;
         } else if (prometheus != null && prometheus.equals(servletPath)) {
-            prometheusController.get().prometheus(request, response);
+            handlePrometheusAsync(request, response, () -> prometheusController.get().prometheus(request, response));
             return;
         } else if (wellknown && servletPath.startsWith("/.well-known/")) {
             String fileName = servletPath.substring("/.well-known/".length());
@@ -104,6 +109,26 @@ public class ManageFilter extends HttpFilter {
         chain.doFilter(request, response);
 
     }
+
+    private void handlePrometheusAsync(HttpServletRequest request, HttpServletResponse response, ThrowingRunnable<IOException> task) {
+        AsyncContext asyncContext = request.startAsync(request, response);
+        asyncExecutor.submit(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                log.error("Error during async prometheus handling", e);
+                try {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                } catch (IOException ex) {
+                    log.error("Failed to send error response", ex);
+                }
+            } finally {
+                asyncContext.complete();
+            }
+        });
+    }
+
+
 
     public void writeResponseEntity(ResponseEntity<?> entity, HttpServletResponse response, MediaType defaultContentType) throws IOException {
         // Set status
