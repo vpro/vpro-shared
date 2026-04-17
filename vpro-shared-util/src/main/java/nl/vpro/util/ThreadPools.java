@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -27,11 +28,13 @@ public final class ThreadPools {
         return createThreadFactory(THREAD_GROUP, namePrefix, daemon, priority);
     }
     public static ThreadFactory createThreadFactory(final ThreadGroup threadGroup, final String namePrefix, final boolean daemon, final int priority) {
+        //return Thread.ofVirtual().factory();
         return new ThreadFactory() {
             long counter = 1;
 
             @Override
             public Thread newThread(@NonNull Runnable r) {
+
                 Thread thread = new Thread(threadGroup, r);
                 thread.setContextClassLoader(ThreadPools.class.getClassLoader());
                 thread.setDaemon(daemon);
@@ -50,7 +53,14 @@ public final class ThreadPools {
      * <p>
      * These may be quite long-lived thread, performing simple jobs like copying streams.
      */
-    public static final ExecutorService copyExecutor = createCopyExecutor();
+    public static final ExecutorService copyExecutor = createExecutor(() -> {
+        return new ThreadPoolExecutor(2, 2000, 60, TimeUnit.SECONDS,
+            new SynchronousQueue<>(),
+            createThreadFactory(
+                "nl.vpro.util.threadpools-Copier",
+                false,
+                Thread.NORM_PRIORITY));
+    });
 
     public static String copyExecutorDescription() {
         if (copyExecutor instanceof ThreadPoolExecutor tpe) {
@@ -63,21 +73,21 @@ public final class ThreadPools {
 
     }
 
+    public static ExecutorService  createExecutor(Supplier<ExecutorService> fallback) {
+        return createExecutor("newVirtualThreadPerTaskExecutor", fallback);
+    }
     @SneakyThrows
-    private static ExecutorService createCopyExecutor() {
+    public static <E extends ExecutorService> E createExecutor(String virtual, Supplier<E> fallback) {
         try {
             // Try to use virtual threads if available (Java 21+)
-            var method = Executors.class.getMethod("newVirtualThreadPerTaskExecutor");
+            var method = Executors.class.getMethod(virtual);
             log.fine("Using virtual threads for copy executor");
-            return (ExecutorService) method.invoke(null);
+            return (E) method.invoke(null);
         } catch (NoSuchMethodException e) {
-            log.info("Virtual threads not available (requires Java 21+), using cached thread pool");
-            return new ThreadPoolExecutor(2, 2000, 60, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                createThreadFactory(
-                    "nl.vpro.util.threadpools-Copier",
-                    false,
-                    Thread.NORM_PRIORITY));
+            E fallbackExecutor = fallback.get();
+            log.info("Virtual threads not available (requires Java 21+), using " + fallbackExecutor);
+            return fallbackExecutor;
+
         }
     }
 
@@ -89,23 +99,25 @@ public final class ThreadPools {
      * These may be quite long-lived thread, performing more complex jobs like complicated SQL queries.
      * @since 3.0
      */
-    public static final ThreadPoolExecutor longBackgroundExecutor =
+    public static final ExecutorService longBackgroundExecutor = createExecutor(() ->
         new ThreadPoolExecutor(2, 100, 60, TimeUnit.SECONDS,
             new SynchronousQueue<>(),
             createThreadFactory(
                 "nl.vpro.util.threadpools-LongBackground",
                 false,
-                Thread.NORM_PRIORITY));
+                Thread.NORM_PRIORITY))
+    );
 
     /**
      * A scheduled executor service with <em>fixed pool size</em>, so should be used to schedule short-lived background tasks only.
      */
-    public static final ScheduledExecutorService backgroundExecutor =
-        Executors.newScheduledThreadPool(5,
+
+    public static final ScheduledExecutorService backgroundExecutor = Executors.newScheduledThreadPool(5,
             createThreadFactory(
                 "nl.vpro.util.threadpools-Background",
                 true,
-                Thread.MIN_PRIORITY));
+                Thread.MIN_PRIORITY)
+    );
 
 
     /**
@@ -117,7 +129,7 @@ public final class ThreadPools {
             createThreadFactory(
                 "nl.vpro-util-StartUp",
                 false,
-                Thread.NORM_PRIORITY));
+                Thread.MAX_PRIORITY));
 
     public static void shutdown() {
         log.fine("Shutting down thread pools");
