@@ -18,6 +18,7 @@ import jakarta.servlet.http.*;
 import org.meeuw.functional.ThrowingRunnable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -116,9 +117,19 @@ public class ManageFilter extends HttpFilter {
             return;
         } else if (wellknown && servletPath.startsWith("/.well-known/")) {
             String fileName = servletPath.substring("/.well-known/".length());
-            String f = wellKnownController.get().wellKnownFile(fileName, request, response);
-            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-            response.getWriter().write(f);
+            try {
+                String f = wellKnownController.get().wellKnownFile(fileName, request, response);
+                response.setContentType(MediaType.TEXT_PLAIN_VALUE);
+                response.getWriter().write(f);
+            } catch (ResponseStatusException e) {
+                int status = e.getStatusCode().value();
+                if (status >= 500) {
+                    log.error("Error serving /.well-known/{}: {}", fileName, e.getReason());
+                } else {
+                    log.debug("Returning {} for /.well-known/{}: {}", status, fileName, e.getReason());
+                }
+                response.sendError(status, e.getReason());
+            }
             return;
         }
         chain.doFilter(request, response);
