@@ -14,8 +14,7 @@ public class Setup {
 
     @Bean
     public MonitoringProperties endpointMonitoringProperties() {
-        MonitoringProperties monitoringProperties = new MonitoringProperties();
-        return monitoringProperties;
+        return new MonitoringProperties();
     }
 
     @Bean

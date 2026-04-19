@@ -14,8 +14,6 @@ import nl.vpro.monitoring.web.PrometheusController;
 @Configuration
 public class MonitoringEndpoints {
 
-
-
     @Bean
     @Lazy
     public HealthController healthController() {
