@@ -41,6 +41,9 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
  * TODO: Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
  * <p>
  * Please use the static getters (like {@link #getInstance()}, so we could change that.
+ * <p>
+ *  Not that in jackson 3 ObjectMappers <em>are unmodifiable</em>, so in {@code Jackson3Mapper}, the constants are
+ *  <em>not</em> deprecated anymore.
  *
  * @author Rico
  * @author Michiel Meeuwissen
@@ -165,9 +168,15 @@ public class Jackson2Mapper extends ObjectMapper {
         return modalAndNormal;
     }
 
+    /**
+     *
+     * @return
+     */
+    @Deprecated
     public static Jackson2Mapper getThreadLocal() {
         return THREAD_LOCAL.get();
     }
+    @Deprecated
     public static void setThreadLocal(Jackson2Mapper set) {
         if (set == null) {
             THREAD_LOCAL.remove();
