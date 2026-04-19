@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,8 +40,13 @@ public class ManageFilter extends HttpFilter {
 
     @Serial
     private static final long serialVersionUID = 7490817616301996196L;
+    private static final String WELL_KNOWN_PREFIX = "/.well-known/";
+    private static final int WELL_KNOWN_PREFIX_LENGTH = WELL_KNOWN_PREFIX.length();
+    private static final int FAST_PATH_ASCII_BOUND = 128;
 
-    private final ExecutorService asyncExecutor = ThreadPools.createExecutor(Executors::newCachedThreadPool);
+    private final ExecutorService asyncExecutor = ThreadPools.createExecutor(
+        Executors::newCachedThreadPool
+    );
 
     @Inject
     Provider<PrometheusController> prometheusController;
@@ -65,6 +70,9 @@ public class ManageFilter extends HttpFilter {
 
     private boolean wellknown = true;
 
+    // Fast negative lookup: most requests can bypass this filter via path[1].
+    private final boolean[] managedSecondChar = new boolean[FAST_PATH_ASCII_BOUND];
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         super.init(filterConfig);
@@ -82,15 +90,44 @@ public class ManageFilter extends HttpFilter {
         } else {
             wellknown = monitoringProperties.getWellknown();
         }
+        initFastPathHints();
     }
 
+    private void initFastPathHints() {
+        Arrays.fill(managedSecondChar, false);
+        addSecondCharCandidate(health);
+        addSecondCharCandidate(metrics);
+        addSecondCharCandidate(prometheus);
+        if (wellknown) {
+            addSecondCharCandidate(WELL_KNOWN_PREFIX);
+        }
+    }
 
-
+    private void addSecondCharCandidate(String path) {
+        if (path != null && path.length() > 1) {
+            char c = path.charAt(1);
+            if (c < FAST_PATH_ASCII_BOUND) {
+                managedSecondChar[c] = true;
+            }
+        }
+    }
 
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String servletPath = request.getServletPath();
+        final String servletPath = request.getServletPath();
+
+        // Hot path: quickly skip this filter for clearly unrelated routes.
+        if (servletPath == null || servletPath.length() < 2) {
+            chain.doFilter(request, response);
+            return;
+        }
+        char secondChar = servletPath.charAt(1);
+        if (secondChar < FAST_PATH_ASCII_BOUND && !managedSecondChar[secondChar]) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if (health != null && health.equals(servletPath)) {
             ResponseEntity<Health> entity = healthController.get().health();
             writeResponseEntity(entity, response, MediaType.APPLICATION_JSON);
@@ -101,8 +138,8 @@ public class ManageFilter extends HttpFilter {
         } else if (prometheus != null && prometheus.equals(servletPath)) {
             handlePrometheusAsync(request, response, () -> prometheusController.get().prometheus(request, response));
             return;
-        } else if (wellknown && servletPath.startsWith("/.well-known/")) {
-            String fileName = servletPath.substring("/.well-known/".length());
+        } else if (wellknown && servletPath.startsWith(WELL_KNOWN_PREFIX)) {
+            String fileName = servletPath.substring(WELL_KNOWN_PREFIX_LENGTH);
             try {
                 String f = wellKnownController.get().wellKnownFile(fileName, request, response);
                 response.setContentType(MediaType.TEXT_PLAIN_VALUE);
@@ -148,28 +185,30 @@ public class ManageFilter extends HttpFilter {
 
         // Set headers
         HttpHeaders headers = entity.getHeaders();
-        for (String headerName : headers.keySet()) {
-            List<String> values = headers.get(headerName);
+        for (var header : headers.entrySet()) {
+            List<String> values = header.getValue();
             if (values != null) {
                 for (String value : values) {
-                    response.addHeader(headerName, value);
+                    response.addHeader(header.getKey(), value);
                 }
             }
         }
 
-        MediaType contentType = Optional.ofNullable(headers.getContentType()).orElse(defaultContentType);
+        MediaType contentType = headers.getContentType();
+        if (contentType == null) {
+            contentType = defaultContentType;
+        }
+
         // Write body if present
         Object body = entity.getBody();
         if (body != null) {
             if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                objectMapper.writeValue(response.getOutputStream(), entity.getBody());
+                objectMapper.writeValue(response.getOutputStream(), body);
                 return;
-            } else {
-                response.setContentType(contentType.toString());
-                response.getWriter().write(body.toString());
             }
+            response.setContentType(contentType.toString());
+            response.getWriter().write(body.toString());
         }
     }
 }
-
