@@ -73,6 +73,11 @@ public final class ThreadPools {
 
     }
 
+    /**
+     * Creates a virtual thread by task executor if on java >=21, otherwise create using the fallback.
+     * @param fallback
+     * @return
+     */
     public static ExecutorService  createExecutor(Supplier<ExecutorService> fallback) {
         return createExecutor("newVirtualThreadPerTaskExecutor", fallback);
     }
