@@ -5,8 +5,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import java.io.IOException;
 import java.time.*;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,14 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.meeuw.time.TestClock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.endpoints.ManageFilter;
@@ -29,8 +24,6 @@ import nl.vpro.monitoring.endpoints.ManageFilter;
 import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
@@ -49,7 +42,8 @@ class HealthControllerTest {
 
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws ServletException {
+        this.manageFilter.init(new MockFilterConfig());
         this.healthController.clock = clock;
         this.healthController.setStatus(HealthController.Status.STARTING);
         this.healthController.prometheusController = new PrometheusController(() -> new PrometheusMeterRegistry(s -> null), new MonitoringProperties());
