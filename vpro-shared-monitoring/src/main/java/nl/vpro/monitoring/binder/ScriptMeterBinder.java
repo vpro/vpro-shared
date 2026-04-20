@@ -12,8 +12,6 @@ import java.util.concurrent.*;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.springframework.jmx.export.annotation.ManagedOperation;
-
 import com.google.common.util.concurrent.AtomicDouble;
 
 import nl.vpro.jmx.MBeans;
@@ -41,7 +39,6 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterBind
         this.duration = duration;
         this.arguments = arguments;
         this.name = name;
-
     }
 
 
@@ -76,7 +73,6 @@ public class ScriptMeterBinder implements MeterBinder, Runnable, ScriptMeterBind
 
 
     @Override
-    @ManagedOperation
     public synchronized void run() {
         try {
             String[] args = new String[this.arguments.length + 1];

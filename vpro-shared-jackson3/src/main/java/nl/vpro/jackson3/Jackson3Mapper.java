@@ -49,10 +49,7 @@ import static tools.jackson.databind.SerializationFeature.INDENT_OUTPUT;
  * @since 5.14
  */
 @Slf4j
-
 public class Jackson3Mapper {
-
-    private static boolean loggedAboutAvro = false;
 
     private static final SimpleFilterProvider FILTER_PROVIDER = new SimpleFilterProvider();
 
@@ -272,18 +269,7 @@ public class Jackson3Mapper {
         //module.setDeserializerModifier(new AfterUnmarshalModifier());
         //mapper.registerModule(module);
 
-        try {
-            Class<?> avro = Class.forName("nl.vpro.jackson3.SerializeAvroModule");
-            register(builder, filter, (tools.jackson.databind.JacksonModule) avro.getDeclaredConstructor().newInstance());
-        } catch (ClassNotFoundException ncdfe) {
-            if (! loggedAboutAvro) {
-                log.debug("SerializeAvroModule could not be registered because: {} {}", ncdfe.getClass().getName(), ncdfe.getMessage());
-            }
-            loggedAboutAvro = true;
-        } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
-            loggedAboutAvro = true;
-        }
+
 
         try {
             Class<?> guava = Class.forName("nl.vpro.jackson3.GuavaRangeModule");

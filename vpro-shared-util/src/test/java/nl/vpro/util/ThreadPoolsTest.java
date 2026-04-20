@@ -69,7 +69,7 @@ public class ThreadPoolsTest {
 
     @Test
     public void copyingThreads() throws ExecutionException, InterruptedException {
-        log.info("pool size: {}", ThreadPools.copyExecutor.getPoolSize());
+        log.info(ThreadPools.copyExecutorDescription());
         final long start = System.currentTimeMillis();
         List<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -88,7 +88,7 @@ public class ThreadPoolsTest {
 
         assertThat(duration)
             .isCloseTo(500L, Percentage.withPercentage(150));
-        log.info("pool size: {}", ThreadPools.copyExecutor.getPoolSize());
+        log.info(ThreadPools.copyExecutorDescription());
 
     }
 
