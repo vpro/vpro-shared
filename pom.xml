@@ -26,7 +26,7 @@
     <junit.version>6.0.3</junit.version>
     <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
-    <resteasy.version>7.0.1.Final</resteasy.version>
+    <resteasy.version>7.0.2.Final</resteasy.version>
 
     <!--
     seems to be in use by both resteasy and hibernate-search
@@ -37,7 +37,7 @@
     <bytebuddy.version>1.18.8</bytebuddy.version>
     <slf4j.version>2.0.17</slf4j.version>
     <log4j2.version>2.25.4</log4j2.version>
-    <guava.version>33.5.0-jre</guava.version>
+    <guava.version>33.6.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.11.0</xmlunit.version>
@@ -77,7 +77,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.16.5</micrometer.version>
-    <flyway.version>12.3.0</flyway.version>
+    <flyway.version>12.4.0</flyway.version>
 
     <testcontainers.version>2.0.4</testcontainers.version>
 
@@ -652,7 +652,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.22.1</version>
+        <version>1.22.2</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>

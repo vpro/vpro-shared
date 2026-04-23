@@ -390,7 +390,7 @@ public class MeterRegistryConfiguration {
         Optional<?> manager = classForName("org.apache.catalina.Manager", DEBUG)
             .flatMap(this::getBean);
         if (manager.isEmpty()) {
-            log.info("No tomcat manager found");
+            log.debug("No tomcat manager found");
         }
         return manager;
     }
