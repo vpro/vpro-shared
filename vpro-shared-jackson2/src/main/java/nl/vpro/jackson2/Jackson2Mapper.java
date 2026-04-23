@@ -40,7 +40,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 /**
  * TODO: Many static public members that are not unmodifiable (e.g. {@link #INSTANCE}).
  * <p>
- * Please use the static getters (like {@link #getInstance()}, so we could change that.
+ * Please use the static getters (like {@link #getInstance()}), so we could change that.
  * <p>
  *  Not that in jackson 3 ObjectMappers <em>are unmodifiable</em>, so in {@code Jackson3Mapper}, the constants are
  *  <em>not</em> deprecated anymore.
@@ -59,8 +59,6 @@ public class Jackson2Mapper extends ObjectMapper {
     private static boolean loggedAboutFallback = false;
 
     private static final SimpleFilterProvider FILTER_PROVIDER = new SimpleFilterProvider();
-
-
 
     @Deprecated
     public static final Jackson2Mapper INSTANCE = getInstance();
@@ -98,6 +96,7 @@ public class Jackson2Mapper extends ObjectMapper {
         lenient.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         lenient.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
         lenient.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+        lenient.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
         lenient.setConfig(lenient.getSerializationConfig().withView(Views.Forward.class));
         lenient.setConfig(lenient.getDeserializationConfig().withView(Views.Forward.class));
         return lenient;
@@ -168,10 +167,6 @@ public class Jackson2Mapper extends ObjectMapper {
         return modalAndNormal;
     }
 
-    /**
-     *
-     * @return
-     */
     @Deprecated
     public static Jackson2Mapper getThreadLocal() {
         return THREAD_LOCAL.get();
@@ -235,7 +230,7 @@ public class Jackson2Mapper extends ObjectMapper {
         mapper.enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME);
 
         try {
-            // this should nbe needed, but if I don't do this, resteasy still doesn't allow comments
+            // this should not be needed, but if I don't do this, resteasy still doesn't allow comments
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
 
             mapper.setConfig(mapper.getDeserializationConfig().with(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS));
@@ -260,11 +255,6 @@ public class Jackson2Mapper extends ObjectMapper {
 
         mapper.setConfig(mapper.getSerializationConfig().withView(Views.Normal.class));
         mapper.setConfig(mapper.getDeserializationConfig().withView(Views.Normal.class));
-
-
-        //SimpleModule module = new SimpleModule();
-        //module.setDeserializerModifier(new AfterUnmarshalModifier());
-        //mapper.registerModule(module);
 
         try {
             Class<?> avro = Class.forName("nl.vpro.jackson2.SerializeAvroModule");

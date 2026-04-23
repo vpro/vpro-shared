@@ -33,8 +33,7 @@ import nl.vpro.util.LoggingInputStream;
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 import static tools.jackson.core.json.JsonReadFeature.*;
 import static tools.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static tools.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
-import static tools.jackson.databind.MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME;
+import static tools.jackson.databind.MapperFeature.*;
 import static tools.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
 /**
@@ -120,9 +119,11 @@ public class Jackson3Mapper {
 
     private static void lenient(JsonMapper.Builder builder)  {
         builder.enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        builder.enable(ACCEPT_CASE_INSENSITIVE_ENUMS);
         builder.disable(FAIL_ON_UNKNOWN_PROPERTIES);
         builder.enable(ALLOW_UNQUOTED_PROPERTY_NAMES);
         builder.enable(ALLOW_SINGLE_QUOTES);
+
     }
     private static void strict(JsonMapper.Builder builder)  {
         builder.enable(FAIL_ON_UNKNOWN_PROPERTIES);
