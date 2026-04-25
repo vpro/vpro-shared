@@ -375,8 +375,15 @@ public class MBeans {
                 Class<T> mxBean = (Class<T>) Class.forName(mbeanName);
                 mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
                 return;
-            } catch (ClassNotFoundException classNotFoundException) {
-                log.info("Interface {} not found: {} (vpro.jmx annotations not supported)", mbeanName, classNotFoundException.getMessage());
+            } catch (ClassNotFoundException classNotFoundException1) {
+                final String mxbeanName = className + "MXBean";
+                try {
+                    Class<T> mxBean = (Class<T>) Class.forName(mxbeanName);
+                    mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
+                    return;
+                } catch (ClassNotFoundException classNotFoundException) {
+                    log.info("Interface {} not found: {} (vpro.jmx annotations not supported)", mbeanName, classNotFoundException.getMessage());
+                }
             }
             mbs.registerMBean(object, name);
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
