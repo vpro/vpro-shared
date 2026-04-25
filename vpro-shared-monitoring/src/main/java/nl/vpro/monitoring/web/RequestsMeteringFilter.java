@@ -111,8 +111,12 @@ public class RequestsMeteringFilter extends HttpFilter {
                     MediaType type = MediaType.parse(response.getContentType());
                     contentType = type.withoutParameters().toString();
                 } else {
-                    if (200 == response.getStatus()) {
-                        log.warn("No content type in {}", path);
+                    if (request.isAsyncStarted()) {
+                        contentType = "async";
+                    } else {
+                        if (200 == response.getStatus()) {
+                            log.warn("No content type in {}", path);
+                        }
                     }
                 }
             }
