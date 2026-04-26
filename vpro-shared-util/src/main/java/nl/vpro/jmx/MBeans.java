@@ -6,8 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -365,27 +364,34 @@ public class MBeans {
      * @since 2.10
      */
     @SuppressWarnings("unchecked")
-    public static synchronized <T> void registerBean(ObjectName name, T object) {
-        try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            unregister(name);
-            final String className = object.getClass().getName();
-            final String mbeanName = className + "MBean";
+    public static synchronized <T> void registerBean(ObjectName name, final T object) {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
+        unregister(mbs, name);
+
+        final String className = object.getClass().getName();
+
+        List<String>  postfixes = Arrays.asList("MBean", "MXBean");
+        ClassNotFoundException cnf = null;
+        for (String postFix : postfixes) {
+            final String mbeanName = className + postFix;
             try {
                 Class<T> mxBean = (Class<T>) Class.forName(mbeanName);
                 mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
                 return;
-            } catch (ClassNotFoundException classNotFoundException1) {
-                final String mxbeanName = className + "MXBean";
-                try {
-                    Class<T> mxBean = (Class<T>) Class.forName(mxbeanName);
-                    mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
-                    return;
-                } catch (ClassNotFoundException classNotFoundException) {
-                    log.info("Interface {} not found: {} (vpro.jmx annotations not supported)", mbeanName, classNotFoundException.getMessage());
-                }
+            } catch (ClassNotFoundException classNotFoundException) {
+                cnf = classNotFoundException;
+            } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+                log.error(e.getMessage(), e);
+            } catch (SecurityException se) {
+                log.info("For {}: {}", name, se.getMessage());
             }
-            mbs.registerMBean(object, name);
+        }
+        if (cnf != null) {
+            log.info("Interface {} not found: {} (vpro.jmx annotations not supported)", className + postfixes, cnf.getMessage());
+        }
+        try {
+            mbs.registerMBean(object,name);
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             log.error(e.getMessage(), e);
         } catch (SecurityException se) {
@@ -404,13 +410,18 @@ public class MBeans {
         return objectName;
     }
 
-
     /**
      * @since 2.10
      */
     public static void unregister(ObjectName name) {
+        unregister(ManagementFactory.getPlatformMBeanServer(), name);
+    }
+    /**
+     * @since 5.15
+     */
+    public static void unregister(MBeanServer mbs, ObjectName name) {
         try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
             if (mbs.isRegistered(name)) {
                 log.debug("Unregistering mbean {}", name);
                 try {
