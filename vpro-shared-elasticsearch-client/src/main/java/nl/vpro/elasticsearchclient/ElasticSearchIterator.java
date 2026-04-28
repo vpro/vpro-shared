@@ -30,8 +30,6 @@ import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jmx.MBeans;
-import nl.vpro.logging.Slf4jHelper;
-import nl.vpro.logging.simple.Level;
 import nl.vpro.util.ThreadPools;
 import nl.vpro.util.Version;
 
@@ -39,6 +37,8 @@ import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 import static nl.vpro.elasticsearch.Constants.Methods.METHOD_DELETE;
 import static nl.vpro.elasticsearch.Constants.Methods.POST;
+import static org.slf4j.event.Level.DEBUG;
+import static org.slf4j.event.Level.WARN;
 
 /**
  * A wrapper around the Elastic Search scroll interface, to expose it as a simple {@link Iterator}
@@ -418,7 +418,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     checkedOrder = Long.MAX_VALUE;
                     ArrayNode sort = request.withArray(SORT);
                     if (!DOC.equals(sort.get(0).textValue())) {
-                        Slf4jHelper.log(log, warnSortNotOnDoc ? Level.WARN : Level.DEBUG, "Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
+                        log.atLevel(warnSortNotOnDoc ? WARN : DEBUG).log("Not sorting on {} (but on {}). This has bad influence on performance", DOC, sort);
                     }
                 }
 

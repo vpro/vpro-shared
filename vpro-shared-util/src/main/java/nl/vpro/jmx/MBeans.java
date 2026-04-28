@@ -18,7 +18,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.*;
 import nl.vpro.util.ImmediateFuture;
 import nl.vpro.util.ThreadPools;
@@ -313,7 +312,7 @@ public class MBeans {
             this.string = s;
             if (logger != null) {
                 if (! Objects.equals(prev, this.string)) {
-                    Slf4jHelper.log(logger, level, this.string.toString());
+                    logger.atLevel(org.slf4j.event.Level.valueOf(level.name())).log(this.string.toString());
                 }
             }
         }

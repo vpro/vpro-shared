@@ -3,17 +3,16 @@ package nl.vpro.configuration.util;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.springframework.jmx.export.MBeanExporter;
-import org.springframework.jmx.export.SpringModelMBean;
 
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.RequiredModelMBean;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.jmx.export.MBeanExporter;
+import org.springframework.jmx.export.SpringModelMBean;
 
-import nl.vpro.logging.Slf4jHelper;
 import nl.vpro.logging.simple.Level;
 
 /**
@@ -43,7 +42,7 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | Error | RuntimeException e) {
-                        Slf4jHelper.log(log, level, e.getMessage(), e);
+                        log.atLevel(org.slf4j.event.Level.valueOf(level.name())).log(e.getMessage(), e);
                         throw e;
                     }
                 }
@@ -55,7 +54,7 @@ public class LoggingFailedCallsMBeanExporter extends MBeanExporter {
                     try {
                         return super.invoke(opName, opArgs, sig);
                     } catch (MBeanException | ReflectionException | RuntimeException | Error e) {
-                        Slf4jHelper.log(log, level, e.getMessage(), e);
+                        log.atLevel(org.slf4j.event.Level.valueOf(level.name())).log(e.getMessage(), e);
                         throw e;
                     }
                 }
