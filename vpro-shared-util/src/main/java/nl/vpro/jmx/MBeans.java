@@ -6,8 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -42,7 +41,7 @@ public class MBeans {
                     this.notifyAll();
                 }
             }
-    };
+        };
     static final Map<String, LockValue> locks = new ConcurrentHashMap<>();
 
     public static final Duration DEFAULT_DURATION =  Duration.ofSeconds(5);
@@ -204,15 +203,15 @@ public class MBeans {
         @NonNull final  Duration wait,
         @NonNull final Callable<String> job) {
         return returnString(key, stringSupplierLogger, wait, l -> {
-            try {
-                String s = job.call();
-                l.info(s);
-            } catch (Exception e) {
-                stringSupplierLogger.error(e.getClass().getName() + " " + e.getMessage(), e);
+                try {
+                    String s = job.call();
+                    l.info(s);
+                } catch (Exception e) {
+                    stringSupplierLogger.error(e.getClass().getName() + " " + e.getMessage(), e);
+                }
             }
-        }
         );
-      }
+    }
 
     /**
      * Defaulting version of {@link #returnString(String, StringSupplierSimpleLogger, Duration, Callable)}, with no key (meaning that jobs can be started concurrently).
@@ -362,55 +361,101 @@ public class MBeans {
 
 
     /**
+     * Registers an object as an MBean. The object is expected to implement an interface with the same name as its own class but
+     * ending in {@code MBean} or {@code MXBean}, which will be used as the management interface. If no such interface is found, then the object itself will be registered as an MBean, which means that all public methods will be exposed, but without any description.
+     *
      * @since 2.10
+     * @return a boolean whether it successfully registered the bean. It can fail when the bean is not compliant, or when there is a security exception, in which case it will log the error and return false.
      */
     @SuppressWarnings("unchecked")
-    public static synchronized <T> void registerBean(ObjectName name, T object) {
-        try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            unregister(name);
-            final String className = object.getClass().getName();
-            final String mbeanName = className + "MBean";
+    public static synchronized <T> boolean registerBean(ObjectName name, final T object) {
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
+        unregister(mbs, name);
+
+        final String className = object.getClass().getName();
+
+        List<String>  postfixes = Arrays.asList("MBean", "MXBean");
+        ClassNotFoundException cnf = null;
+        for (String postFix : postfixes) {
+            final String mbeanName = className + postFix;
             try {
                 Class<T> mxBean = (Class<T>) Class.forName(mbeanName);
                 mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
-                return;
-            } catch (ClassNotFoundException classNotFoundException1) {
-                final String mxbeanName = className + "MXBean";
-                try {
-                    Class<T> mxBean = (Class<T>) Class.forName(mxbeanName);
-                    mbs.registerMBean( new AnnotatedStandardMXBean(object, mxBean), name);
-                    return;
-                } catch (ClassNotFoundException classNotFoundException) {
-                    log.info("Interface {} not found: {} (vpro.jmx annotations not supported)", mbeanName, classNotFoundException.getMessage());
-                }
+                return true;
+            } catch (ClassNotFoundException classNotFoundException) {
+                cnf = classNotFoundException;
+            } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
+                log.error(e.getMessage(), e);
+            } catch (SecurityException se) {
+                log.info("For {}: {}", name, se.getMessage());
             }
-            mbs.registerMBean(object, name);
+        }
+        if (cnf != null) {
+            log.info("Interface {} not found: {} (vpro.jmx annotations not supported)", className + postfixes, cnf.getMessage());
+        }
+        try {
+            mbs.registerMBean(object,name);
+            return true;
         } catch (NotCompliantMBeanException | MBeanRegistrationException | InstanceAlreadyExistsException e) {
             log.error(e.getMessage(), e);
         } catch (SecurityException se) {
             log.info("For {}: {}", name, se.getMessage());
         }
+        return false;
+    }
+
+    /**
+     * @param name
+     * @param object
+     */
+    public static synchronized Optional<ObjectName> registerBean(String name, Object object) {
+        name = name.replaceAll("[^a-zA-Z\\-0-9]+", "_");
+        ObjectName objectName = getObjectNameWithName(object, name);
+        boolean b = registerBean(objectName, object);
+        return b ? Optional.of(objectName) : Optional.empty();
+
     }
 
     /**
      *
+     * @param object
+     * @return
+     * @since 5.15
+     */
+
+    public static synchronized Optional<ObjectName> registerBean(Object object) {
+        ObjectName on  = getObjectNameForClass(object.getClass());
+        if (registerBean(on, object)) {
+            return Optional.of(on);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * @deprecated use {@link #registerBean(String, Object)}
      */
     @SneakyThrows
+    @Deprecated
     public static synchronized ObjectName registerBean(Object object, String name) {
         name = name.replaceAll("[^a-zA-Z\\-0-9]+", "_");
         ObjectName objectName = getObjectNameWithName(object, name);
-        registerBean(objectName, object);
+        boolean b = registerBean(objectName, object);
         return objectName;
     }
-
 
     /**
      * @since 2.10
      */
     public static void unregister(ObjectName name) {
+        unregister(ManagementFactory.getPlatformMBeanServer(), name);
+    }
+    /**
+     * @since 5.15
+     */
+    public static void unregister(MBeanServer mbs, ObjectName name) {
         try {
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+
             if (mbs.isRegistered(name)) {
                 log.debug("Unregistering mbean {}", name);
                 try {
@@ -439,11 +484,36 @@ public class MBeans {
         }
     }
 
+    /**
+     * @see #getObjectNameWithName(Class, String)
+     */
     @SneakyThrows
     public static ObjectName getObjectNameWithName(Object object, String name) {
         Class<?> clazz= object.getClass();
+        return getObjectNameWithName(clazz, name);
+    }
+
+
+    /**
+     * Generates an object name based on the class name, with the package as domain and the simple class name as type, and given name as name. So for example for class {@code nl.vpro.jmx.MyClass}, @{code foo} it will generate an object name {@code nl.vpro.jmx:type=MyCLass,name=foo}
+     * Useful for singleton, when no type is necessary
+     */
+    @SneakyThrows
+    public static ObjectName getObjectNameWithName(Class<?> clazz, String name) {
         return new ObjectName(clazz.getPackage().getName() + ":name=" + name + ",type=" + clazz.getSimpleName());
     }
+
+
+    /**
+     * Generates an object name based on the class name, with the package as domain and the simple class name as name. So for example for class {@code nl.vpro.jmx.MyClass} it will generate an object name {@code nl.vpro.jmx:name=MyCLass}
+     * Useful for singleton, when no type is necessary
+     * @see #getObjectNameWithName(Class, String)
+     */
+    @SneakyThrows
+    public static ObjectName getObjectNameForClass(Class<?> clazz) {
+        return new ObjectName(clazz.getPackage().getName() + ":name=" + clazz.getSimpleName());
+    }
+
 
 
     @Getter

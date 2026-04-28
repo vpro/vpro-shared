@@ -2,6 +2,7 @@ package nl.vpro.jmx;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.management.*;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Isolated;
@@ -147,6 +150,50 @@ public class MBeansTest {
         Thread.sleep(5000);
         running.set(false);
     }
+
+    public static class A {
+        public String getSomething() {
+            return "something";
+        }
+    }
+
+    @MXBean
+    public static interface BMXBean {
+
+        @Description("test")
+        public String getSomething();
+
+    }
+
+    public static class B implements BMXBean {
+        public String getSomething() {
+            return "something";
+        }
+    }
+
+
+
+    @Test
+    public void failRegisterBean() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
+        assertThat(MBeans.registerBean(new A())).isEmpty();
+        ;
+    }
+
+    @Test
+    public void registerBBean() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
+        ObjectName on = assertThat(MBeans.registerBean(new B())).isNotEmpty().get().actual();
+        var info = ManagementFactory.getPlatformMBeanServer().getMBeanInfo(on);
+        log.info("MBean info: {}", info);
+        assertThat(on.toString()).isEqualTo("nl.vpro.jmx:name=B");
+    }
+    @Test
+    public void registerBBeanWithName() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
+        ObjectName on = assertThat(MBeans.registerBean("foobar", new B())).isNotEmpty().get().actual();
+        var info = ManagementFactory.getPlatformMBeanServer().getMBeanInfo(on);
+        log.info("MBean info: {}", info);
+        assertThat(on.toString()).isEqualTo("nl.vpro.jmx:name=foobar,type=B");
+    }
+
 
 
 }
