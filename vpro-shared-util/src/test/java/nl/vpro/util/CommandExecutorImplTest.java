@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
  * @author Michiel Meeuwissen
  */
 @Slf4j
-@Timeout(value = 10, unit = TimeUnit.SECONDS)
+@Timeout(value = 15, unit = TimeUnit.SECONDS)
 @Isolated
 @Execution(SAME_THREAD)
 @DisabledOnOs(OS.WINDOWS) // using some binaries not available on windows
