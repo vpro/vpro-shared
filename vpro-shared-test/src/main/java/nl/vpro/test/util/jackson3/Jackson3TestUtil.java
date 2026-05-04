@@ -47,8 +47,8 @@ public class Jackson3TestUtil {
 
     private static final Jackson3Mapper JACKSON_3_MAPPER = Jackson3Mapper.PRETTY.withSourceInLocation();
 
-    private static final ObjectReader READER = JACKSON_3_MAPPER.reader();
-    private static final ObjectMapper MAPPER = JACKSON_3_MAPPER.mapper();
+    public static final ObjectReader READER = JACKSON_3_MAPPER.reader();
+    public static final ObjectMapper MAPPER = JACKSON_3_MAPPER.mapper();
 
 
     /**
@@ -113,7 +113,7 @@ public class Jackson3TestUtil {
             if (parent instanceof ObjectNode parentNode) {
                 parentNode.remove(ignore.getMatchingProperty());
             } else if (parent instanceof ArrayNode parentArray) {
-                parentArray.remove(ignore.getMatchingIndex());
+                parentArray.remove(ignore.last().getMatchingIndex());
             }
         }
     }
@@ -306,7 +306,7 @@ public class Jackson3TestUtil {
      * @param <T>
      */
     public static <T> JsonObjectAssert<T> assertThatJson(T o) {
-        return new JsonObjectAssert<>(o);
+        return assertThatJson(MAPPER, o);
     }
 
 
@@ -314,7 +314,7 @@ public class Jackson3TestUtil {
         return assertThatJson(new String(o, StandardCharsets.UTF_8));
     }
     public static JsonStringAssert assertThatJson(String o) {
-        return new JsonStringAssert(o);
+        return new JsonStringAssert(MAPPER, o);
     }
 
     public static <T> JsonObjectAssert<T> assertThatJson(ObjectMapper mapper, T o) {
@@ -322,7 +322,7 @@ public class Jackson3TestUtil {
     }
 
     public static <T> JsonObjectAssert<T> assertThatJson(Class<T> o, String value) {
-        return new JsonObjectAssert<>(o, value);
+        return assertThatJson(MAPPER, o, value);
     }
 
     public static <T> JsonObjectAssert<T> assertThatJson(ObjectMapper mapper, Class<T> o, String value) {
@@ -335,10 +335,13 @@ public class Jackson3TestUtil {
     @SuppressWarnings("unchecked")
     public static abstract class JsonAssert<S extends JsonAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
+        protected final ObjectMapper mapper;
+
         final List<JsonPointer> ignores = new ArrayList<>();
 
-        public JsonAssert(A a, Class<?> selfType) {
+        public JsonAssert(ObjectMapper mapper, A a, Class<?> selfType) {
             super(a, selfType);
+            this.mapper = mapper;
         }
 
         public S containsKeys(String... keys) {
@@ -396,33 +399,17 @@ public class Jackson3TestUtil {
     public static class JsonObjectAssert<A> extends JsonAssert<JsonObjectAssert<A>, A> implements Supplier<A> {
 
         A rounded;
-        private final ObjectMapper mapper;
 
         private boolean checkRemarshal = true;
 
-
-        protected JsonObjectAssert(A actual) {
-            super(actual, JsonObjectAssert.class);
-            this.mapper = MAPPER;
-        }
-
-
-        protected JsonObjectAssert(Class<A> actual, String string) {
-            super(read(MAPPER, actual, string), JsonObjectAssert.class);
-            this.mapper = MAPPER;
-        }
-
         protected JsonObjectAssert(ObjectMapper mapper, A actual) {
-            super(actual, JsonObjectAssert.class);
-            this.mapper = mapper;
+            super(mapper, actual, JsonObjectAssert.class);
         }
 
 
         protected JsonObjectAssert(ObjectMapper mapper, Class<A> actual, String string) {
-            super(read(mapper, actual, string), JsonObjectAssert.class);
-            this.mapper = mapper;
+            super(mapper, read(mapper, actual, string), JsonObjectAssert.class);
         }
-
 
 
         @Override
@@ -481,16 +468,10 @@ public class Jackson3TestUtil {
     }
     public static class JsonMarshallAssert<A> extends JsonAssert<JsonMarshallAssert<A>, A> implements Supplier<String> {
 
-        final ObjectMapper mapper;
         String marshalled;
 
-        protected JsonMarshallAssert(A a) {
-            this(MAPPER, a);
-        }
-
         protected JsonMarshallAssert(ObjectMapper mapper, A a) {
-            super(a, JsonMarshallAssert.class);
-            this.mapper = mapper;
+            super(mapper, a, JsonMarshallAssert.class);
         }
 
         @SneakyThrows
@@ -518,8 +499,8 @@ public class Jackson3TestUtil {
 
         private JsonNode actualJson;
 
-        protected JsonStringAssert(CharSequence actual) {
-            super(actual, JsonStringAssert.class);
+        protected JsonStringAssert(ObjectMapper mapper, CharSequence actual) {
+            super(mapper, actual, JsonStringAssert.class);
         }
 
         public JsonStringAssert isSimilarTo(String expected, JsonPointer... ignoresOverride) {
@@ -535,7 +516,7 @@ public class Jackson3TestUtil {
         @SneakyThrows
         public JsonNode actualJson() {
             if (actualJson == null) {
-                actualJson = MAPPER.readTree(actual.toString());
+                actualJson = mapper.readTree(actual.toString());
             }
             return actualJson;
         }
