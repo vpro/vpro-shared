@@ -289,15 +289,60 @@ public class Jackson2TestUtil {
     }
 
 
+    public static abstract class JsonAssert<S extends JsonAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
+
+        final List<JsonPointer> ignores = new ArrayList<>();
+
+        public JsonAssert(A a, Class<?> selfType) {
+            super(a, selfType);
+        }
+
+        public S containsKeys(String... keys) {
+            JsonNode actualJson = actualJson();
+            List<String> notFound = new ArrayList<>();
+            for (String key : keys) {
+                if (actualJson.get(key) == null) {
+                    notFound.add(key);
+                }
+            }
+            assertThat(notFound).withFailMessage("Keys " + notFound + " not found (in " + actualJson + ")").isEmpty();
+            return (S) this;
+        }
+
+        public S doesNotContainKeys(String... keys) {
+            JsonNode actualJson = actualJson();
+            List<String> found = new ArrayList<>();
+
+            for (String key : keys) {
+                if (actualJson.get(key) != null) {
+                    found.add(key);
+                }
+
+            }
+            assertThat(found).withFailMessage("Unexpected keys" + found + " found (in "+ actualJson + ")").isEmpty();
+            return (S) this;
+        }
+        public S ignore(JsonPointer... jsonPointers) {
+            ignores.addAll(Arrays.asList(jsonPointers));
+            return (S) this;
+        }
+
+        public S ignore(String... jsonPointers) {
+            Arrays.stream(jsonPointers).map(JsonPointer::compile).forEach(ignores::add);
+            return (S) this;
+        }
+
+        public abstract JsonNode actualJson();
+    }
+
     @SuppressWarnings("UnusedReturnValue")
-    public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends AbstractObjectAssert<S, A> implements Supplier<A> {
+    public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends JsonAssert<S, A> implements Supplier<A> {
 
         A rounded;
         private final ObjectMapper mapper;
 
         private boolean checkRemarshal = true;
 
-        private List<JsonPointer> ignores = new ArrayList<>();
 
         protected JsonObjectAssert(A actual) {
             super(actual, JsonObjectAssert.class);
@@ -321,21 +366,17 @@ public class Jackson2TestUtil {
             this.mapper = mapper;
         }
 
-        public JsonObjectAssert<S, A> ignore(JsonPointer... jsonPointers) {
-            ignores.addAll(Arrays.asList(jsonPointers));
-            return this;
-        }
 
-        public JsonObjectAssert<S, A> ignore(String... jsonPointers) {
-            Arrays.stream(jsonPointers).map(JsonPointer::compile).forEach(jp -> ignores.add(jp));
-            return this;
+
+        @Override
+        public JsonNode actualJson() {
+            return mapper.valueToTree(actual);
         }
 
 
-
-        protected static <A> A read(ObjectMapper mapper, Class<A> actual, String string) {
+        protected static <A> A read(ObjectMapper mapper, Class<A> actualClass, String string) {
             try {
-                return mapper.readValue(string, actual);
+                return mapper.readValue(string, actualClass);
             } catch (IOException e) {
                 Fail.fail(e.getMessage(), e);
                 return null;
@@ -345,7 +386,7 @@ public class Jackson2TestUtil {
         @SuppressWarnings({"CatchMayIgnoreException"})
         public S isSimilarTo(String expected) {
             try {
-                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal, ignores.toArray(i -> new JsonPointer[i]));
+                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal, ignores.toArray(JsonPointer[]::new));
             } catch (Exception e) {
                 Fail.fail(e.getMessage(), e);
             }
@@ -386,7 +427,7 @@ public class Jackson2TestUtil {
 
     }
     public static class JsonMarshallAssert<A>
-        extends AbstractObjectAssert<JsonMarshallAssert<A>, A> implements Supplier<String> {
+        extends JsonAssert<JsonMarshallAssert<A>, A> implements Supplier<String> {
 
         final ObjectMapper mapper;
         String marshalled;
@@ -413,10 +454,15 @@ public class Jackson2TestUtil {
             }
             return marshalled;
         }
+
+        @Override
+        public JsonNode actualJson() {
+            return mapper.valueToTree(actual);
+        }
     }
 
 
-    public static class JsonStringAssert extends AbstractObjectAssert<JsonStringAssert, CharSequence> {
+    public static class JsonStringAssert extends JsonAssert<JsonStringAssert, CharSequence> {
 
         private JsonNode actualJson;
 
@@ -424,42 +470,22 @@ public class Jackson2TestUtil {
             super(actual, JsonStringAssert.class);
         }
 
-        public JsonStringAssert isSimilarTo(String expected, JsonPointer... ignores) {
-            assertJsonEquals("", expected, actual, ignores);
-            return myself;
-        }
-
-        public JsonStringAssert containsKeys(String... keys) {
-            actualJson();
-            List<String> notFound = new ArrayList<>();
-            for (String key : keys) {
-                if (actualJson.get(key) == null) {
-                    notFound.add(key);
-                }
+        public JsonStringAssert isSimilarTo(String expected, JsonPointer... ignoresOverride) {
+            if (ignoresOverride.length == 0) {
+                assertJsonEquals("", expected, actual, ignores.toArray(JsonPointer[]::new));
+            } else {
+                assertJsonEquals("", expected, actual, ignoresOverride);
             }
-            assertThat(notFound).withFailMessage("Keys " + notFound + " found (in " + actualJson + ")").isEmpty();
-            return myself;
-        }
 
-        public JsonStringAssert doesNotContainKeys(String... keys) {
-            actualJson();
-            List<String> found = new ArrayList<>();
-
-            for (String key : keys) {
-                if (actualJson.get(key) != null) {
-                    found.add(key);
-                }
-
-            }
-            assertThat(found).withFailMessage("Unexpected keys" + found + " found (in "+ actualJson + ")").isEmpty();
             return myself;
         }
 
         @SneakyThrows
-        protected void actualJson() {
+        public JsonNode actualJson() {
             if (actualJson == null) {
                 actualJson = MAPPER.readTree(actual.toString());
             }
+            return actualJson;
         }
 
         public JsonStringAssert isSimilarToResource(String resource) {
