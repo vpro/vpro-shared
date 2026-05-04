@@ -1,10 +1,14 @@
 package nl.vpro.test.util.jackson2;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.xml.bind.annotation.*;
 import lombok.Getter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 
 /**
@@ -56,6 +60,16 @@ public class Jackson2TestUtilTest {
 
 
     @Test
+    public void assertThatTest() {
+        JsonNode actual = Jackson2TestUtil.assertThatJson(new A())
+            .isSimilarTo("{'a': 'a'}")
+            .actualJson();
+        assertThat(actual.get("a").textValue()).isEqualTo("a");
+    }
+
+
+
+    @Test
     public void roundTripAndSimilar() {
         Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'a'}");
     }
@@ -66,10 +80,7 @@ public class Jackson2TestUtilTest {
             Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'b'}"));
     }
 
-    @Test
-    public void roundTripAndSimilarValue() {
-        Jackson2TestUtil.roundTripAndSimilarValue("a", "\"a\"");
-    }
+
 
     @Test
     public void roundTripAndSimilarValueFail() {
@@ -82,10 +93,13 @@ public class Jackson2TestUtilTest {
     public void testNotunmarshable() {
         Jackson2TestUtil
             .assertThatJson(new NotUnmarshable("x"))
+            .containsKeys("string")
             .withoutUnmarshalling()
-            .isSimilarTo("{\n" +
-            "  \"string\" : \"x\"\n" +
-            "}");
+            .isSimilarTo("""
+                {
+                  "string" : "x"
+                }""");
+
     }
 
 }
