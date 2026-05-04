@@ -8,6 +8,10 @@ import jakarta.xml.bind.annotation.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.databind.JsonNode;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Michiel Meeuwissen
@@ -58,6 +62,16 @@ public class Jackson3TestUtilTest {
 
 
     @Test
+    public void assertThatTest() {
+        JsonNode actual = Jackson3TestUtil.assertThatJson(new A())
+            .isSimilarTo("{'a': 'a'}")
+            .actualJson();
+        assertThat(actual.get("a").textValue()).isEqualTo("a");
+    }
+
+
+
+    @Test
     public void roundTripAndSimilar() {
         Jackson3TestUtil.roundTripAndSimilar(new A(), "{'a': 'a'}");
     }
@@ -84,10 +98,13 @@ public class Jackson3TestUtilTest {
     public void testNotunmarshable() {
         Jackson3TestUtil
             .assertThatJson(new NotUnmarshable("x"))
+            .containsKeys("string")
             .withoutUnmarshalling()
-            .isSimilarTo("{\n" +
-            "  \"string\" : \"x\"\n" +
-            "}");
+            .isSimilarTo("""
+                {
+                  "string" : "x"
+                }""");
+
     }
 
 }
