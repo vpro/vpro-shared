@@ -1,13 +1,19 @@
 package nl.vpro.test.util.jackson2;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Getter;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.xml.bind.annotation.*;
-import lombok.Getter;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 
@@ -23,6 +29,7 @@ public class Jackson2TestUtilTest {
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class A {
         private String a = "a";
+        String b = null;
         public A() {
 
         }
@@ -61,11 +68,50 @@ public class Jackson2TestUtilTest {
 
     @Test
     public void assertThatTest() {
-        JsonNode actual = Jackson2TestUtil.assertThatJson(new A())
+        JsonNode actual = assertThatJson(new A())
             .isSimilarTo("{'a': 'a'}")
+            .actualJson((a) -> {
+                assertThat(a.get("a").textValue()).isEqualTo("a");
+                assertFail(() ->{
+                    assertThat(a.get("a").textValue()).isEqualTo("b");
+                });
+            })
             .actualJson();
         assertThat(actual.get("a").textValue()).isEqualTo("a");
     }
+
+    @Test
+    public void assertThatWithIgnore() {
+        A a = new A();
+        a.b = RandomStringUtils.insecure().nextAlphanumeric(10);
+        assertThatJson(a)
+            .ignore("/b")
+            .isSimilarTo("{'a': 'a'}")
+            .actualJson((j) -> {
+                assertThat(j.get("b").textValue()).isNotEmpty();
+            })
+        ;
+    }
+    @Test
+    public void assertThatWithContains() {
+        A a = new A();
+        a.b = null;
+        assertFail(() -> {
+            assertThatJson(a)
+                .containsKeys("b");
+        });
+        assertFail(() -> {
+            assertThatJson(a)
+                .doesNotContainKeys("a");
+        });
+
+        assertThatJson(a)
+            .containsKeys("a")
+            .doesNotContainKeys("b");
+
+    }
+
+
 
 
 
@@ -91,8 +137,7 @@ public class Jackson2TestUtilTest {
 
     @Test
     public void testNotunmarshable() {
-        Jackson2TestUtil
-            .assertThatJson(new NotUnmarshable("x"))
+        assertThatJson(new NotUnmarshable("x"))
             .containsKeys("string")
             .withoutUnmarshalling()
             .isSimilarTo("""
@@ -102,4 +147,14 @@ public class Jackson2TestUtilTest {
 
     }
 
+
+    static void assertFail(Runnable runnable) {
+        AtomicBoolean failed = new AtomicBoolean(false);
+        try {
+            runnable.run();
+        } catch (AssertionError e) {
+            failed.set(true);
+        }
+        assertThat(failed.get()).isTrue();
+    }
 }
