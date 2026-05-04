@@ -5,6 +5,8 @@ import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 
 /**
+ * Simple container class for any object.
+ *
  * @author Michiel Meeuwissen
  * @since 0.36
  */

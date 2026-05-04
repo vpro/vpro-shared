@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.IOUtils;
@@ -33,6 +34,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
+ * Some utility for testing json.
+ * <p>
+ * Orignally this contained only static methods like {@link #assertJsonEquals(String, CharSequence, CharSequence, JsonPointer...)}. But nowadays there are also 'fluent' versions
+ * like {@link #assertThatJson(Object)}.
+ *
  * @author Roelof Jan Koekoek
  * @since 3.3
  */
@@ -46,6 +52,13 @@ public class Jackson2TestUtil {
     private static final ObjectReader JSON_READER = MAPPER.readerFor(JsonNode.class).with(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION);
 
 
+    /**
+     * Just compares to json, wrapping {@link JSONAssert#assertEquals(String, String, String, JSONCompareMode)}
+     * @param pref A prefix used for the fail message
+     * @param expected The expected JSON
+     * @param actual The actual JSON
+     * @param ignores An array of {@link JsonPointer json pointers} of things int the JSON that are to be ignored in the comparison. These will just be removed from the actual json before comparison
+     */
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonPointer... ignores) {
         try {
             if (ignores.length > 0) {
@@ -65,6 +78,14 @@ public class Jackson2TestUtil {
         }
     }
 
+
+    /**
+     * Just compares to json, wrapping {@link JSONAssert#assertEquals(String, String, String, JSONCompareMode)}
+     * @param pref A prefix used for the fail message
+     * @param expected The expected JSON
+     * @param actualJson The actual JSON
+     * @param ignores An array of {@link JsonPointer json pointers} of things int the JSON that are to be ignored in the comparison. These will just be removed from the actual json before comparison
+     */
     @SneakyThrows
     public static void assertJsonEquals(String pref, CharSequence expected, JsonNode actualJson, JsonPointer... ignores) {
         String actual = null;
@@ -80,6 +101,12 @@ public class Jackson2TestUtil {
         }
     }
 
+
+    /**
+     * Utility to remove a set of JsonPointers from a {@link JsonNode}
+     * @param actualJson The actual JSON
+     * @param ignores An array of {@link JsonPointer json pointers} of things int the JSON that are to be ignored in the comparison. These will just be removed from the actual json before comparison
+     */
     public static void remove(JsonNode actualJson, JsonPointer... ignores) {
         for (JsonPointer ignore : ignores){
             JsonNode parent = actualJson.at(ignore.head());
@@ -92,6 +119,10 @@ public class Jackson2TestUtil {
         }
     }
 
+    /**
+     * @param test JSON
+     * @return Prettyfied version of the same JON
+     */
     @PolyNull
     public static String prettify(@PolyNull CharSequence test) {
         if (test == null) {
@@ -107,11 +138,17 @@ public class Jackson2TestUtil {
     }
 
 
+    /**
+     * Defaulting version of {@link #assertJsonEquals(CharSequence, CharSequence, JsonPointer...)}, with empty value for prefix.
+     */
     public static void assertJsonEquals(CharSequence expected, CharSequence actual, JsonPointer... ignores) {
         assertJsonEquals("", expected, actual, ignores);
     }
 
 
+    /**
+     * Defaulting version of {@link #roundTrip(Object, String)}
+     */
     public static  <T> T roundTrip(T input) throws Exception {
         return roundTrip(input, "");
     }
@@ -120,6 +157,10 @@ public class Jackson2TestUtil {
      * <p>Marshalls input, checks whether it contains a string, and unmarshall it.</p>
      *
      * <p>Checks whether marshalling and unmarshalling happens without errors, and the return value can be checked with other tests.</p>
+     * @param <T> type of input
+     * @param input Object to marshall
+     * @param contains A string expected to be contained in the resulting string
+     * @return The remarshalled version of {@code input}
      */
     @SuppressWarnings("unchecked")
     public static  <T> T roundTrip(T input, String contains) throws Exception {
@@ -252,7 +293,7 @@ public class Jackson2TestUtil {
     }
 
     /**
-     * Can be used if the input is not a stand alone json object.
+     * Can be used if the input is not a stand alone json object. It will implicitely be wrapped in {@link TestClass}
      */
     public static <T> T roundTripAndSimilarValue(T input, String expected) {
         TestClass<T> embed = new TestClass<>(input);
@@ -264,7 +305,13 @@ public class Jackson2TestUtil {
         return result.value;
     }
 
-    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(T o) {
+    /**
+     * Fluent assertion for an object
+     * @param o object to marshall
+     * @return
+     * @param <T>
+     */
+    public static <T> JsonObjectAssert<T> assertThatJson(T o) {
         return new JsonObjectAssert<>(o);
     }
 
@@ -272,23 +319,26 @@ public class Jackson2TestUtil {
     public static JsonStringAssert assertThatJson(byte[] o) {
         return assertThatJson(new String(o, StandardCharsets.UTF_8));
     }
-    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(ObjectMapper mapper, T o) {
-        return new JsonObjectAssert<>(mapper, o);
-    }
-
-    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(Class<T> o, String value) {
-        return new JsonObjectAssert<>(o, value);
-    }
-
-    public static <S extends JsonObjectAssert<S, T>, T> JsonObjectAssert<S, T> assertThatJson(ObjectMapper mapper, Class<T> o, String value) {
-        return new JsonObjectAssert<>(mapper, o, value);
-    }
-
     public static JsonStringAssert assertThatJson(String o) {
         return new JsonStringAssert(o);
     }
 
+    public static <T> JsonObjectAssert<T> assertThatJson(ObjectMapper mapper, T o) {
+        return new JsonObjectAssert<>(mapper, o);
+    }
 
+    public static <T> JsonObjectAssert<T> assertThatJson(Class<T> o, String value) {
+        return new JsonObjectAssert<>(o, value);
+    }
+
+    public static <T> JsonObjectAssert<T> assertThatJson(ObjectMapper mapper, Class<T> o, String value) {
+        return new JsonObjectAssert<>(mapper, o, value);
+    }
+
+
+
+
+    @SuppressWarnings("unchecked")
     public static abstract class JsonAssert<S extends JsonAssert<S, A>, A> extends AbstractObjectAssert<S, A> {
 
         final List<JsonPointer> ignores = new ArrayList<>();
@@ -328,15 +378,28 @@ public class Jackson2TestUtil {
         }
 
         public S ignore(String... jsonPointers) {
-            Arrays.stream(jsonPointers).map(JsonPointer::compile).forEach(ignores::add);
-            return (S) this;
+            return ignore(Arrays.stream(jsonPointers).map(JsonPointer::compile).toArray(JsonPointer[]::new));
         }
 
         public abstract JsonNode actualJson();
+
+        public S actualJson(JsonConsumer... consumers) {
+            JsonNode actualJson = actualJson();
+            for (JsonConsumer consumer : consumers) {
+                consumer.accept(actualJson);
+            }
+            return (S) this;
+        }
+
+    }
+
+    @FunctionalInterface
+    public interface JsonConsumer extends Consumer<JsonNode> {
+
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    public static class JsonObjectAssert<S extends JsonObjectAssert<S, A>, A> extends JsonAssert<S, A> implements Supplier<A> {
+    public static class JsonObjectAssert<A> extends JsonAssert<JsonObjectAssert<A>, A> implements Supplier<A> {
 
         A rounded;
         private final ObjectMapper mapper;
@@ -374,6 +437,7 @@ public class Jackson2TestUtil {
         }
 
 
+
         protected static <A> A read(ObjectMapper mapper, Class<A> actualClass, String string) {
             try {
                 return mapper.readValue(string, actualClass);
@@ -384,7 +448,7 @@ public class Jackson2TestUtil {
         }
 
         @SuppressWarnings({"CatchMayIgnoreException"})
-        public S isSimilarTo(String expected) {
+        public JsonObjectAssert<A> isSimilarTo(String expected) {
             try {
                 rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal, ignores.toArray(JsonPointer[]::new));
             } catch (Exception e) {
@@ -393,17 +457,18 @@ public class Jackson2TestUtil {
             return myself;
         }
 
-        public JsonObjectAssert<S, A> withoutRemarshalling() {
-            JsonObjectAssert<S,A> copy = new JsonObjectAssert<>(mapper, actual);
+        public JsonObjectAssert<A> withoutRemarshalling() {
+            JsonObjectAssert<A> copy = new JsonObjectAssert<>(mapper, actual);
             copy.checkRemarshal = false;
             return copy;
         }
+
         public JsonMarshallAssert<A> withoutUnmarshalling() {
             return new JsonMarshallAssert<>(mapper, actual);
         }
 
         @SuppressWarnings({"CatchMayIgnoreException"})
-        public S isSimilarTo(JsonNode expected) {
+        public JsonObjectAssert<A> isSimilarTo(JsonNode expected) {
             try {
                 rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal);
             } catch (Exception e) {
@@ -426,8 +491,7 @@ public class Jackson2TestUtil {
         }
 
     }
-    public static class JsonMarshallAssert<A>
-        extends JsonAssert<JsonMarshallAssert<A>, A> implements Supplier<String> {
+    public static class JsonMarshallAssert<A> extends JsonAssert<JsonMarshallAssert<A>, A> implements Supplier<String> {
 
         final ObjectMapper mapper;
         String marshalled;
