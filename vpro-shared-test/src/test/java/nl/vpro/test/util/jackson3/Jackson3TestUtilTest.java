@@ -4,6 +4,7 @@ package nl.vpro.test.util.jackson3;
 import lombok.Getter;
 import tools.jackson.databind.JsonNode;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.xml.bind.annotation.*;
@@ -67,13 +68,11 @@ public class Jackson3TestUtilTest {
 
     @Test
     public void assertThatTest() {
-        JsonNode actual = assertThatJson(new A())
+        JsonNode actual = assertThatJson(Jackson3TestUtil.MAPPER, new A())
             .isSimilarTo("{'a': 'a'}")
             .actualJson((a) -> {
-                assertThat(a.get("a").textValue()).isEqualTo("a");
-                assertFail(() ->{
-                    assertThat(a.get("a").textValue()).isEqualTo("b");
-                });
+                assertThat(a.get("a").stringValue()).isEqualTo("a");
+                assertFail(() -> assertThat(a.get("a").stringValue()).isEqualTo("b"));
             })
             .actualJson();
         assertThat(actual.get("a").stringValue()).isEqualTo("a");
@@ -86,24 +85,19 @@ public class Jackson3TestUtilTest {
         assertThatJson(a)
             .ignore("/b")
             .isSimilarTo("{'a': 'a'}")
-            .actualJson((j) -> {
-                assertThat(j.get("b").textValue()).isNotEmpty();
-            })
+            .actualJson((j) -> assertThat(j.get("b").stringValue()).isNotEmpty())
         ;
     }
     @Test
     public void assertThatWithContains() {
         A a = new A();
         a.b = null;
-        assertFail(() -> {
-            assertThatJson(a)
-                .containsKeys("b");
-        });
-        assertFail(() -> {
-            assertThatJson(a)
-                .doesNotContainKeys("a");
-        });
-
+        assertFail(() ->
+            assertThatJson(a).containsKeys("b")
+        );
+        assertFail(() ->
+            assertThatJson(a).doesNotContainKeys("a")
+        );
         assertThatJson(a)
             .containsKeys("a")
             .doesNotContainKeys("b");
@@ -141,6 +135,29 @@ public class Jackson3TestUtilTest {
                 {
                   "string" : "x"
                 }""");
+    }
+
+    @Test
+    public void prettifyNull() {
+        assertThat(prettify(null)).isNull();
+    }
+    @Test
+    public void removePointers() {
+        assertThatJson(
+            """
+            {
+            "a": "a",
+            "b": "b",
+            "c": [1, 2, 3]
+            }""".getBytes(StandardCharsets.UTF_8))
+            .ignore("/b", "/c/1")
+            .isSimilarTo("""
+            {
+              "a": "a",
+              "c": [1, 3]
+            }
+            """);
+
     }
 
 
