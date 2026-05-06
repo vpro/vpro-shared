@@ -364,10 +364,16 @@ public class MBeans {
      * ending in {@code MBean} or {@code MXBean}, which will be used as the management interface. If no such interface is found, then the object itself will be registered as an MBean, which means that all public methods will be exposed, but without any description.
      *
      * @since 2.10
+
+     */
+    public static synchronized <T> void registerBean(ObjectName name, final T object) {
+        tryRegisterBean(name, object);
+    }
+
+    /**
      * @return a boolean whether it successfully registered the bean. It can fail when the bean is not compliant, or when there is a security exception, in which case it will log the error and return false.
      */
-    @SuppressWarnings("unchecked")
-    public static synchronized <T> boolean registerBean(ObjectName name, final T object) {
+    public static <T> boolean tryRegisterBean(ObjectName name, final T object) {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
         unregister(mbs, name);
@@ -411,9 +417,8 @@ public class MBeans {
     public static synchronized Optional<ObjectName> registerBean(String name, Object object) {
         name = name.replaceAll("[^a-zA-Z\\-0-9]+", "_");
         ObjectName objectName = getObjectNameWithName(object, name);
-        boolean b = registerBean(objectName, object);
+        boolean b = tryRegisterBean(objectName, object);
         return b ? Optional.of(objectName) : Optional.empty();
-
     }
 
     /**
@@ -425,7 +430,7 @@ public class MBeans {
 
     public static synchronized Optional<ObjectName> registerBean(Object object) {
         ObjectName on  = getObjectNameForClass(object.getClass());
-        if (registerBean(on, object)) {
+        if (tryRegisterBean(on, object)) {
             return Optional.of(on);
         }
         return Optional.empty();
@@ -439,7 +444,7 @@ public class MBeans {
     public static synchronized ObjectName registerBean(Object object, String name) {
         name = name.replaceAll("[^a-zA-Z\\-0-9]+", "_");
         ObjectName objectName = getObjectNameWithName(object, name);
-        boolean b = registerBean(objectName, object);
+        boolean b = tryRegisterBean(objectName, object);
         return objectName;
     }
 
