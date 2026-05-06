@@ -46,7 +46,10 @@ jobs:
             java: 21
             target: 'test'
           - os: ubuntu-latest
-            java: 25
+            java: 25     # LTS
+            target: 'test'
+          - os: ubuntu-latest
+            java: 26     # latest release
             target: 'test'
     name: '${{ matrix.target }} on java ${{ matrix.java }},  ${{ matrix.os }}'
     permissions:
@@ -93,7 +96,7 @@ jobs:
         continue-on-error: ${{ matrix.target != 'deploy' }}
       - name: Publish to codecov
         if: steps.os_check.outputs.not_skipped && matrix.target == 'deploy' && github.event_name != 'pull_request'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         continue-on-error: true
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
