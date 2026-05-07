@@ -133,10 +133,18 @@ public class ManageFilter extends HttpFilter {
             writeResponseEntity(entity, response, MediaType.APPLICATION_JSON);
             return;
         } else if (metrics != null && metrics.equals(servletPath)) {
-            handlePrometheusAsync(request, response, () -> prometheusController.get().metrics(request, response));
+            if (request.isAsyncSupported()) {
+                handlePrometheusAsync(request, response, () -> prometheusController.get().metrics(request, response));
+            } else {
+                prometheusController.get().metrics(request, response);
+            }
             return;
         } else if (prometheus != null && prometheus.equals(servletPath)) {
-            handlePrometheusAsync(request, response, () -> prometheusController.get().prometheus(request, response));
+            if (request.isAsyncSupported()) {
+                handlePrometheusAsync(request, response, () -> prometheusController.get().prometheus(request, response));
+            } else {
+                prometheusController.get().prometheus(request, response);
+            }
             return;
         } else if (wellknown && servletPath.startsWith(WELL_KNOWN_PREFIX)) {
             String fileName = servletPath.substring(WELL_KNOWN_PREFIX_LENGTH);
