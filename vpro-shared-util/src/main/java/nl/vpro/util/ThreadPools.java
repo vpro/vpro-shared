@@ -147,10 +147,11 @@ public final class ThreadPools {
         backgroundExecutor.shutdown();
         longBackgroundExecutor.shutdown();
 
-        shutdownNowAndWait("copy", copyExecutor);
-        shutdownNowAndWait("startup", startUpExecutor);
-        shutdownNowAndWait("background", backgroundExecutor);
-        shutdownNowAndWait("long background", longBackgroundExecutor);
+        shutdownNowAndWait(
+            new ExecutorWithName("copy", copyExecutor),
+            new ExecutorWithName("startup", startUpExecutor),
+            new ExecutorWithName("background", backgroundExecutor),
+            new ExecutorWithName("long background", longBackgroundExecutor));
     }
 
     public static List<Runnable> shutdownNowAndWait(String description, ExecutorService  executor) {
