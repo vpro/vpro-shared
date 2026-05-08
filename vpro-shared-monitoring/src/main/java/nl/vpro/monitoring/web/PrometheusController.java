@@ -103,6 +103,7 @@ public class PrometheusController {
         }
     }
 
+
     public void reset() {
         this.duration.reset();
     }
