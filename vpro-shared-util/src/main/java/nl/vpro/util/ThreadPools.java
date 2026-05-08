@@ -154,31 +154,35 @@ public final class ThreadPools {
             new ExecutorWithName("long background", longBackgroundExecutor));
     }
 
-    public static List<Runnable> shutdownNowAndWait(String description, ExecutorService  executor) {
-        return shutdownNowAndWait(Duration.ofSeconds(30), description, executor);
+    public static List<Runnable> shutdownAndWait(boolean now, String description, ExecutorService  executor) {
+        return shutdownAndWait(now, Duration.ofSeconds(30), description, executor);
     }
 
-    public static List<Runnable> shutdownNowAndWait( Duration duration, String description, ExecutorService  executor) {
-        return shutdownNowAndWait(duration, new ExecutorWithName(description, executor));
+    public static List<Runnable> shutdownAndWait(boolean now, Duration duration, String description, ExecutorService  executor) {
+        return shutdownAndWait(now, duration, new ExecutorWithName(description, executor));
     }
 
-    public static List<Runnable> shutdownNowAndWait(ExecutorWithName@NonNull... executors) {
-        return shutdownNowAndWait(Duration.ofSeconds(30), executors);
+    public static List<Runnable> shutdownAndWait(boolean now, ExecutorWithName@NonNull... executors) {
+        return shutdownAndWait(now, Duration.ofSeconds(30), executors);
     }
     @SuppressWarnings("resource")
-    public static List<Runnable> shutdownNowAndWait(Duration duration, ExecutorWithName@NonNull... executors) {
+    public static List<Runnable> shutdownAndWait(boolean now, Duration duration, ExecutorWithName@NonNull... executors) {
         List<Runnable> runnables = new ArrayList<>();
         for (ExecutorWithName executor: executors) {
-            runnables.addAll(executor.executor().shutdownNow());
+            if (now) {
+                runnables.addAll(executor.executor().shutdownNow());
+            } else {
+                executor.executor().shutdown();
+            }
         }
 
-        Instant now =  Instant.now();
+        Instant i =  Instant.now();
         for (ExecutorWithName executor: executors) {
             if (executor.executor().isTerminated()) {
                 log.fine("%s executor already terminated".formatted(executor.name()));
                 continue;
             }
-            Duration busy =  Duration.between(now, Instant.now());
+            Duration busy =  Duration.between(i, Instant.now());
             Duration wait = duration.minus(busy);
             try {
                 if (!executor.executor().awaitTermination(Math.min(100, wait.toMillis()), TimeUnit.MILLISECONDS)) {
