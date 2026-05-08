@@ -4,6 +4,8 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
@@ -142,22 +144,43 @@ public final class ThreadPools {
     }
 
     public static List<Runnable> shutdownNowAndWait(String description, ExecutorService  executor) {
-        return shutdownNowAndWait(description, executor, Duration.ofSeconds(30));
+        return shutdownNowAndWait(Duration.ofSeconds(30), description, executor);
     }
 
-    public static List<Runnable> shutdownNowAndWait(String description, ExecutorService  executor, Duration duration) {
-        List<Runnable> runnables = executor.shutdownNow();
-        try {
-            if (!executor.awaitTermination(duration.toMillis(), TimeUnit.MILLISECONDS)) {
-                log.warning("%s executor did not terminate within %s ".formatted(description, duration));
-            } else {
-                log.info("%s executor terminated cleanly".formatted(description));
+    public static List<Runnable> shutdownNowAndWait( Duration duration, String description, ExecutorService  executor) {
+        return shutdownNowAndWait(duration, new ExecutorWithName(description, executor));
+    }
+
+    @SuppressWarnings("resource")
+    public static List<Runnable> shutdownNowAndWait(Duration duration, ExecutorWithName@NonNull... executors) {
+        List<Runnable> runnables = new ArrayList<>();
+        for (ExecutorWithName executor: executors) {
+            runnables.addAll(executor.executor().shutdownNow());
+        }
+
+        Instant now =  Instant.now();
+        for (ExecutorWithName executor: executors) {
+            if (executor.executor().isTerminated()) {
+                log.fine("%s executor already terminated".formatted(executor.name()));
+                continue;
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warning("Interrupted while waiting for %s executor to terminate".formatted(description));
+            Duration busy =  Duration.between(now, Instant.now());
+            Duration wait = duration.minus(busy);
+            try {
+                if (!executor.executor().awaitTermination(Math.min(100, wait.toMillis()), TimeUnit.MILLISECONDS)) {
+                    log.warning("%s executor did not terminate within %s ".formatted(executor.name(), duration));
+                } else {
+                    log.info("%s executor terminated cleanly".formatted(executor.name()));
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warning("Interrupted while waiting for %s executor to terminate".formatted(executor.name));
+            }
         }
         return runnables;
+    }
+
+    public record ExecutorWithName( @NonNull String name, @NonNull ExecutorService executor) {
     }
 }
 
