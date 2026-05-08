@@ -142,12 +142,8 @@ public final class ThreadPools {
 
     public static void shutdown() {
         log.fine("Shutting down thread pools");
-        copyExecutor.shutdown();
-        startUpExecutor.shutdown();
-        backgroundExecutor.shutdown();
-        longBackgroundExecutor.shutdown();
 
-        shutdownNowAndWait(
+        shutdownAndWait(false,
             new ExecutorWithName("copy", copyExecutor),
             new ExecutorWithName("startup", startUpExecutor),
             new ExecutorWithName("background", backgroundExecutor),
