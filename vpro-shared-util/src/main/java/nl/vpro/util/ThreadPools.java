@@ -150,17 +150,33 @@ public final class ThreadPools {
             new ExecutorWithName("long background", longBackgroundExecutor));
     }
 
+    /**
+     * @since 5.15.5
+     */
     public static List<Runnable> shutdownAndWait(boolean now, String description, ExecutorService  executor) {
         return shutdownAndWait(now, Duration.ofSeconds(30), description, executor);
     }
 
+
+    /**
+     * @since 5.15.5
+     */
     public static List<Runnable> shutdownAndWait(boolean now, Duration duration, String description, ExecutorService  executor) {
         return shutdownAndWait(now, duration, new ExecutorWithName(description, executor));
     }
 
+
+    /**
+     * @since 5.15.5
+     */
     public static List<Runnable> shutdownAndWait(boolean now, ExecutorWithName@NonNull... executors) {
         return shutdownAndWait(now, Duration.ofSeconds(30), executors);
     }
+
+
+    /**
+     * @since 5.15.5
+     */
     @SuppressWarnings("resource")
     public static List<Runnable> shutdownAndWait(boolean now, Duration duration, ExecutorWithName@NonNull... executors) {
         List<Runnable> runnables = new ArrayList<>();
