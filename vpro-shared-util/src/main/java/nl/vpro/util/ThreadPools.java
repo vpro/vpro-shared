@@ -145,7 +145,7 @@ public final class ThreadPools {
         longBackgroundExecutor.shutdown();
 
         shutdownNowAndWait("copy", copyExecutor);
-        shutdownNowAndWait("starup", startUpExecutor);
+        shutdownNowAndWait("startup", startUpExecutor);
         shutdownNowAndWait("background", backgroundExecutor);
         shutdownNowAndWait("long background", longBackgroundExecutor);
     }
