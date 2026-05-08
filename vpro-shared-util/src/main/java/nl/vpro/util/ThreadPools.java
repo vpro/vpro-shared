@@ -161,6 +161,9 @@ public final class ThreadPools {
         return shutdownNowAndWait(duration, new ExecutorWithName(description, executor));
     }
 
+    public static List<Runnable> shutdownNowAndWait(ExecutorWithName@NonNull... executors) {
+        return shutdownNowAndWait(Duration.ofSeconds(30), executors);
+    }
     @SuppressWarnings("resource")
     public static List<Runnable> shutdownNowAndWait(Duration duration, ExecutorWithName@NonNull... executors) {
         List<Runnable> runnables = new ArrayList<>();
