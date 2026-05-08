@@ -3,6 +3,7 @@ package nl.vpro.util;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+import java.time.Duration;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -142,6 +143,24 @@ public final class ThreadPools {
         startUpExecutor.shutdown();
         backgroundExecutor.shutdown();
         longBackgroundExecutor.shutdown();
+    }
+
+    public static void shutdownNowAndWait(String description, ExecutorService  executor) {
+        shutdownNowAndWait(description, executor, Duration.ofSeconds(30));
+    }
+
+    public static void shutdownNowAndWait(String description, ExecutorService  executor, Duration duration) {
+        executor.shutdownNow();
+        try {
+            if (!executor.awaitTermination(duration.toMillis(), TimeUnit.MILLISECONDS)) {
+                log.warning("%s executor did not terminate within %s ".formatted(description, duration));
+            } else {
+                log.info("%s executor terminated cleanly".formatted(description));
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warning("Interrupted while waiting for %s executor to terminate".formatted(description));
+        }
     }
 }
 
