@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -150,12 +151,12 @@ public final class ThreadPools {
         shutdownNowAndWait("long background", longBackgroundExecutor);
     }
 
-    public static void shutdownNowAndWait(String description, ExecutorService  executor) {
-        shutdownNowAndWait(description, executor, Duration.ofSeconds(30));
+    public static List<Runnable> shutdownNowAndWait(String description, ExecutorService  executor) {
+        return shutdownNowAndWait(description, executor, Duration.ofSeconds(30));
     }
 
-    public static void shutdownNowAndWait(String description, ExecutorService  executor, Duration duration) {
-        executor.shutdownNow();
+    public static List<Runnable> shutdownNowAndWait(String description, ExecutorService  executor, Duration duration) {
+        List<Runnable> runnables = executor.shutdownNow();
         try {
             if (!executor.awaitTermination(duration.toMillis(), TimeUnit.MILLISECONDS)) {
                 log.warning("%s executor did not terminate within %s ".formatted(description, duration));
@@ -166,6 +167,7 @@ public final class ThreadPools {
             Thread.currentThread().interrupt();
             log.warning("Interrupted while waiting for %s executor to terminate".formatted(description));
         }
+        return runnables;
     }
 }
 
