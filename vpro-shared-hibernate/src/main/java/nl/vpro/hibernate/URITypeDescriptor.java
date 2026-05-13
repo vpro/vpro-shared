@@ -1,11 +1,12 @@
 package nl.vpro.hibernate;
 
+import java.io.Serial;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.hibernate.HibernateException;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.AbstractClassJavaType;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 
 /**
@@ -15,8 +16,10 @@ import java.net.URISyntaxException;
  */
 class URITypeDescriptor extends AbstractClassJavaType<URI> {
     public static final URITypeDescriptor INSTANCE = new URITypeDescriptor(URI.class);
+    @Serial
+    private static final long serialVersionUID = -8084874037847068699L;
 
-    protected URITypeDescriptor(Class<? extends URI> type) {
+    protected URITypeDescriptor(Class<URI> type) {
         super(type);
     }
 
