@@ -92,6 +92,36 @@ public class Jackson2TestUtilTest {
             })
         ;
     }
+
+
+    @Test
+    public void assertThatWithIgnoreArrayElement() {
+
+        assertThatJson("""
+             {
+                   "user" : null,
+                   "filename" : null,
+                   "errors" : [ {
+                     "messages" : [ "maag niet null zijn" ]
+                   } ],
+                   "total" : 1
+                 }
+             """)
+            .ignore("/errors/0/messages/0")
+            .isSimilarTo("""
+                 {
+                                   "user" : null,
+                                   "filename" : null,
+                                   "errors" : [ {
+                                     "messages" : [ "mag niet null zijn" ]
+                                   } ],
+                                   "total" : 1
+                                 }
+                             ""\"
+                """)
+        ;
+    }
+
     @Test
     public void assertThatWithContains() {
         A a = new A();
