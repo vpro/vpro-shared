@@ -3,6 +3,7 @@ package nl.vpro.test.util.jackson2;
 
 import lombok.Getter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.xml.bind.annotation.*;
@@ -220,6 +221,45 @@ public class Jackson2TestUtilTest {
                 {
                   "string" : "x"
                 }""");
+
+    }
+
+    @Test
+    public void removePointers() {
+        Jackson2TestUtil.assertThatJson(
+                """
+                {
+                "a": "a",
+                "b": "b",
+                "c": [1, 2, 3]
+                }""".getBytes(StandardCharsets.UTF_8))
+            .remove("/b", "/c/1")
+            .isSimilarTo("""
+            {
+              "a": "a",
+              "c": [1, 3]
+            }
+            """);
+
+    }
+
+    @Test
+    public void ignorePointers() {
+        Jackson2TestUtil.assertThatJson(
+                """
+                {
+                "a": "a",
+                "b": "b",
+                "c": [1, 2, 3]
+                }""".getBytes(StandardCharsets.UTF_8))
+            .ignore("/b", "/c/1")
+            .isSimilarTo("""
+                {
+                   "a" : "a",
+                   "b" : "IGNORED",
+                   "c" : [ 1, "IGNORED", 3 ]
+                 }
+            """);
 
     }
 
