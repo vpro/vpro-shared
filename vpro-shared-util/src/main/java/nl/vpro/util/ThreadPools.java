@@ -3,6 +3,10 @@ package nl.vpro.util;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -138,10 +142,75 @@ public final class ThreadPools {
 
     public static void shutdown() {
         log.fine("Shutting down thread pools");
-        copyExecutor.shutdown();
-        startUpExecutor.shutdown();
-        backgroundExecutor.shutdown();
-        longBackgroundExecutor.shutdown();
+
+        shutdownAndWait(false,
+            new ExecutorWithName("copy", copyExecutor),
+            new ExecutorWithName("startup", startUpExecutor),
+            new ExecutorWithName("background", backgroundExecutor),
+            new ExecutorWithName("long background", longBackgroundExecutor));
+    }
+
+    /**
+     * @since 5.15.5
+     */
+    public static List<Runnable> shutdownAndWait(boolean now, String description, ExecutorService  executor) {
+        return shutdownAndWait(now, Duration.ofSeconds(30), description, executor);
+    }
+
+
+    /**
+     * @since 5.15.5
+     */
+    public static List<Runnable> shutdownAndWait(boolean now, Duration duration, String description, ExecutorService  executor) {
+        return shutdownAndWait(now, duration, new ExecutorWithName(description, executor));
+    }
+
+
+    /**
+     * @since 5.15.5
+     */
+    public static List<Runnable> shutdownAndWait(boolean now, ExecutorWithName@NonNull... executors) {
+        return shutdownAndWait(now, Duration.ofSeconds(30), executors);
+    }
+
+
+    /**
+     * @since 5.15.5
+     */
+    @SuppressWarnings("resource")
+    public static List<Runnable> shutdownAndWait(boolean now, Duration duration, ExecutorWithName@NonNull... executors) {
+        List<Runnable> runnables = new ArrayList<>();
+        for (ExecutorWithName executor: executors) {
+            if (now) {
+                runnables.addAll(executor.executor().shutdownNow());
+            } else {
+                executor.executor().shutdown();
+            }
+        }
+
+        Instant i =  Instant.now();
+        for (ExecutorWithName executor: executors) {
+            if (executor.executor().isTerminated()) {
+                log.fine("%s executor already terminated".formatted(executor.name()));
+                continue;
+            }
+            Duration busy =  Duration.between(i, Instant.now());
+            Duration wait = duration.minus(busy);
+            try {
+                if (!executor.executor().awaitTermination(Math.min(100, wait.toMillis()), TimeUnit.MILLISECONDS)) {
+                    log.warning("%s executor did not terminate within %s ".formatted(executor.name(), duration));
+                } else {
+                    log.info("%s executor terminated cleanly".formatted(executor.name()));
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warning("Interrupted while waiting for %s executor to terminate".formatted(executor.name));
+            }
+        }
+        return runnables;
+    }
+
+    public record ExecutorWithName( @NonNull String name, @NonNull ExecutorService executor) {
     }
 }
 

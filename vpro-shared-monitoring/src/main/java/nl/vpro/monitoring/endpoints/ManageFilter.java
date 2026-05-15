@@ -193,7 +193,7 @@ public class ManageFilter extends HttpFilter {
 
         // Set headers
         HttpHeaders headers = entity.getHeaders();
-        for (var header : headers.entrySet()) {
+        for (var header : headers.headerSet()) {
             List<String> values = header.getValue();
             if (values != null) {
                 for (String value : values) {
