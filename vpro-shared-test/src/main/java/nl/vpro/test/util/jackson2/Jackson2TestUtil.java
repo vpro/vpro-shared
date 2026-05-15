@@ -431,7 +431,7 @@ public class Jackson2TestUtil {
         }
 
         JsonConsumer consumer() {
-            return consumers.isEmpty() ? JsonConsumer.NOP : (json) -> consume(json, consumers.toArray(JsonConsumer[]::new));
+            return consumers.isEmpty() ? JsonConsumer.NOP : (json) -> Jackson2TestUtil.consume(json, consumers.toArray(JsonConsumer[]::new));
         }
 
         public S containsKeys(String... keys) {
@@ -478,12 +478,21 @@ public class Jackson2TestUtil {
             consumers.addAll(Stream.of(jsonPointers).map(j -> (JsonConsumer) jsonNode -> Jackson2TestUtil.ignore(jsonNode, j)).toList());
             return (S) this;
         }
-
         /**
          * @see #ignore(JsonPointer...)
          */
         public S ignore(String... jsonPointers) {
             return ignore(Arrays.stream(jsonPointers).map(JsonPointer::compile).toArray(JsonPointer[]::new));
+        }
+
+        /**
+         * Add a consumer to be called before comparison
+         * @param consumer
+         * @return
+         */
+        public S beforeComparison(JsonConsumer consumer) {
+            consumers.add(consumer);
+            return (S) this;
         }
 
         public abstract JsonNode actualJson();

@@ -485,6 +485,16 @@ public class Jackson3TestUtil {
             return ignore(Arrays.stream(jsonPointers).map(JsonPointer::compile).toArray(JsonPointer[]::new));
         }
 
+        /**
+         * Add a consumer to be called before comparison
+         * @param consumer
+         * @return
+         */
+        public S beforeComparison(JsonConsumer consumer) {
+            consumers.add(consumer);
+            return (S) this;
+        }
+
         public abstract JsonNode actualJson();
 
         public S actualJson(JsonConsumer... consumers) {
