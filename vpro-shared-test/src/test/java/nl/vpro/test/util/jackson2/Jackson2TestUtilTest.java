@@ -2,6 +2,7 @@ package nl.vpro.test.util.jackson2;
 
 
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.jayway.jsonpath.*;
+import com.jayway.jsonpath.spi.json.JacksonJsonNodeJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 import nl.vpro.jackson2.Jackson2Mapper;
 
@@ -26,6 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.48
  */
+@Log4j2
 public class Jackson2TestUtilTest {
 
     @SuppressWarnings("FieldMayBeFinal")
@@ -242,6 +247,36 @@ public class Jackson2TestUtilTest {
             """);
 
     }
+
+    @Test
+    public void removeByJsonPath() {
+        Configuration config = Configuration.builder()
+            .jsonProvider(new JacksonJsonNodeJsonProvider())
+            .mappingProvider(new JacksonMappingProvider())
+            .build();
+        ParseContext context = JsonPath.using(config);
+        assertThatJson(
+                """
+                {
+                "a": "a",
+                "b": "b",
+                "c": [1, 2, 3]
+                }""".getBytes(StandardCharsets.UTF_8))
+            .beforeComparison(j ->
+                context.parse(j)
+                    .delete("$.b")
+                    .delete("$.c[1]")
+                    .json()
+            )
+            .isSimilarTo("""
+            {
+              "a": "a",
+              "c": [1, 3]
+            }
+            """);
+
+    }
+
 
     @Test
     public void ignorePointers() {

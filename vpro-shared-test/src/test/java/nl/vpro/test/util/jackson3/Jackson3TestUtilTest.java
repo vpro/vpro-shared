@@ -14,6 +14,10 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.jayway.jsonpath.*;
+import com.jayway.jsonpath.spi.json.Jackson3JsonNodeJsonProvider;
+import com.jayway.jsonpath.spi.mapper.Jackson3MappingProvider;
+
 import nl.vpro.jackson3.Jackson3Mapper;
 
 import static nl.vpro.test.util.jackson3.Jackson3TestUtil.*;
@@ -237,6 +241,36 @@ public class Jackson3TestUtilTest {
             """);
 
     }
+
+    @Test
+    public void removeByJsonPath() {
+        Configuration config = Configuration.builder()
+            .jsonProvider(new Jackson3JsonNodeJsonProvider())
+            .mappingProvider(new Jackson3MappingProvider())
+            .build();
+        ParseContext context = JsonPath.using(config);
+        assertThatJson(
+            """
+            {
+            "a": "a",
+            "b": "b",
+            "c": [1, 2, 3]
+            }""".getBytes(StandardCharsets.UTF_8))
+            .beforeComparison(j ->
+                context.parse(j)
+                    .delete("$.b")
+                    .delete("$.c[1]")
+                    .json()
+            )
+            .isSimilarTo("""
+            {
+              "a": "a",
+              "c": [1, 3]
+            }
+            """);
+
+    }
+
 
     @Test
     public void ignorePointers() {
