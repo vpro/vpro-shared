@@ -270,6 +270,31 @@ public class Jackson3TestUtilTest {
             """);
 
     }
+    @Test
+    public void operate() {
+        assertThatJson(
+            """
+            {
+            "a": "a",
+            "b": "b",
+            "c": [1, 2, 3]
+            }""".getBytes(StandardCharsets.UTF_8))
+            .beforeComparisonOperate(j -> {
+                j =  MAPPER.readTree("""
+                    {
+                      "foo": 1
+                    }
+                    """
+                    );
+                return j;
+            })
+            .isSimilarTo("""
+                {
+                     "foo" : 1
+                   }
+            """);
+
+    }
 
 
     @Test

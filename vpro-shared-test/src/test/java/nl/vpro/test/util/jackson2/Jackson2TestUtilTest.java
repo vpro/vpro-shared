@@ -277,6 +277,32 @@ public class Jackson2TestUtilTest {
 
     }
 
+    @Test
+    public void operate() {
+        Jackson2TestUtil.assertThatJson(
+                """
+                {
+                "a": "a",
+                "b": "b",
+                "c": [1, 2, 3]
+                }""".getBytes(StandardCharsets.UTF_8))
+            .beforeComparisonOperate(j -> {
+                j =  Jackson2Mapper.getInstance().readTree("""
+                    {
+                      "foo": 1
+                    }
+                    """
+                );
+                return j;
+            })
+            .isSimilarTo("""
+                {
+                     "foo" : 1
+                   }
+            """);
+
+    }
+
 
     @Test
     public void ignorePointers() {

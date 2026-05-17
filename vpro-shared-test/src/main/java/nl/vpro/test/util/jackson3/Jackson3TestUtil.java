@@ -76,9 +76,10 @@ public class Jackson3TestUtil {
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonConsumer operator) {
         assertJsonEquals(pref, expected, actual, operator.asOperator());
     }
+
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonOperator operator) {
         try {
-            if (operator != null && operator != Jackson3TestUtil.JsonConsumer.NOP) {
+            if (operator != null && operator != Jackson3TestUtil.JsonOperator.NOP) {
                 JsonNode actualJson = READER.readTree(actual.toString());
                 actualJson = operator.apply(actualJson);
                 actual = MAPPER.writer().writeValueAsString(actualJson);
@@ -90,8 +91,7 @@ public class Jackson3TestUtil {
             log.info(fail.getMessage());
             assertThat(prettify(actual)).isEqualTo(prettify(expected));
         } catch (Exception e) {
-            log.error(e.getMessage());
-            assertThatJson(actual).isEqualTo(prettify(expected));
+            throw new RuntimeException(e);
         }
     }
 

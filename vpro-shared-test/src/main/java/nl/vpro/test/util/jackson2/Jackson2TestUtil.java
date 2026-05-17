@@ -10,7 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.meeuw.functional.ThrowAnyFunction;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -79,7 +81,7 @@ public class Jackson2TestUtil {
     }
     public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonOperator operator) {
         try {
-            if (operator != null && operator != Jackson2TestUtil.JsonConsumer.NOP) {
+            if (operator != null && operator != Jackson2TestUtil.JsonOperator.NOP) {
                 JsonNode actualJson = MAPPER.readTree(actual.toString());
                 actualJson = operator.apply(actualJson);
                 actual = MAPPER.writeValueAsString(actualJson);
@@ -91,8 +93,7 @@ public class Jackson2TestUtil {
             log.info(fail.getMessage());
             assertThat(prettify(actual)).isEqualTo(prettify(expected));
         } catch (Exception e) {
-            log.error(e.getMessage());
-            assertThatJson(actual).isEqualTo(prettify(expected));
+            throw new RuntimeException(e);
         }
     }
 
@@ -548,10 +549,8 @@ public class Jackson2TestUtil {
      *
      */
     @FunctionalInterface
-    public interface JsonOperator extends UnaryOperator<JsonNode> {
-
+    public interface JsonOperator extends ThrowAnyFunction<JsonNode, JsonNode> {
         JsonOperator NOP = (js) -> js;
-
     }
 
 
