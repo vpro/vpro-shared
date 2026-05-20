@@ -6,10 +6,14 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 
 jobs:
   build:
@@ -21,12 +25,12 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
-         distribution: 'temurin'
-         java-version: 17
+          distribution: temurin
+          java-version: 17
       - name: Build with Maven
-        run: mvn  -fae -DskipITs=false -B  package
+        run: mvn -fae -DskipITs=false -B package
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: "**/target/surefire-reports/*.xml"
