@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Execution(SAME_THREAD)
 class MBeans2Test {
     static {
-        ThreadPools.copyExecutor.submit(() -> {}); // Just to early tricker the info about virtual threads in j < 25
+        ThreadPools.copyExecutor.submit(() -> {}); // Just to early trigger the info about virtual threads in java < 21
     }
 
     @AfterEach
