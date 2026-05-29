@@ -3,10 +3,12 @@ package nl.vpro.logging.log4j2;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  *
@@ -18,14 +20,13 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
     @Getter
     private final List<LogEvent> events = new ArrayList<>();
 
-
-
-    private CaptureListFromLogger(Level level, UUID uuid, boolean currentThreadOnly) {
-        super(level, uuid, currentThreadOnly);
+    @lombok.Builder
+    private CaptureListFromLogger(@Nullable Predicate<LogEvent> predicate, @Nullable Level level, @Nullable UUID uuid, boolean currentThreadOnly) {
+        super(filter(predicate, level),  uuid, currentThreadOnly);
     }
 
     public CaptureListFromLogger(Level level, boolean currentThreadOnly) {
-        this(level, UUID.randomUUID(), currentThreadOnly);
+        this(null, level, null, currentThreadOnly);
     }
 
     public CaptureListFromLogger(boolean currentThreadOnly) {

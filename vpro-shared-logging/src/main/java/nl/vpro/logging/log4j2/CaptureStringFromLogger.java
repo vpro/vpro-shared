@@ -2,13 +2,12 @@ package nl.vpro.logging.log4j2;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.WriterAppender;
-import org.apache.logging.log4j.core.filter.LevelRangeFilter;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.util.StringBuilderWriter;
 
@@ -50,11 +49,11 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public CaptureStringFromLogger(String pattern, Level level) {
-        this(pattern, level, new StringBuilder(), true);
+        this(pattern, level, null, new StringBuilder(), true);
     }
 
     public static CaptureStringFromLogger info(String pattern) {
-        return new CaptureStringFromLogger(pattern, Level.INFO, new StringBuilder(), true);
+        return new CaptureStringFromLogger(pattern, Level.INFO, null, new StringBuilder(), true);
     }
 
     public static CaptureStringFromLogger info() {
@@ -62,7 +61,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public static CaptureStringFromLogger infoAllThreads(String pattern) {
-        return new CaptureStringFromLogger(pattern, Level.INFO, new StringBuilder(), false);
+        return new CaptureStringFromLogger(pattern, Level.INFO, null, new StringBuilder(), false);
     }
     public static CaptureStringFromLogger infoAllThreads() {
         return infoAllThreads("%msg\n");
@@ -70,8 +69,8 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
 
 
     @lombok.Builder
-    private CaptureStringFromLogger(String pattern, Level level, StringBuilder builder, Boolean currentThreadOnly) {
-        super(level, currentThreadOnly == null || currentThreadOnly);
+    private CaptureStringFromLogger(String pattern, Level level, Predicate<LogEvent> predicate, StringBuilder builder, Boolean currentThreadOnly) {
+        super(filter(predicate, level), currentThreadOnly == null || currentThreadOnly);
         this.writer = new StringBuilderWriter(builder == null ? new StringBuilder() : builder);
         this.appender = WriterAppender.newBuilder()
             .setTarget(writer)
@@ -79,8 +78,8 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
             .setFollow(true)
             .setName(uuid.toString())
             .setLayout(PatternLayout.newBuilder()
-                .withPattern(pattern)
-                .withCharset(UTF_8)
+                .setPattern(pattern)
+                .setCharset(UTF_8)
                 .build()
             )
             .build();

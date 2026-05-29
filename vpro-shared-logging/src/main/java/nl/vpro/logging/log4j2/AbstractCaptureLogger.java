@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
@@ -13,7 +14,10 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.functional.ThrowAnyAutoCloseable;
+
+import static org.meeuw.functional.Predicates.alwaysTrue;
 
 /**
 
@@ -35,7 +39,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         if (LogManager.getRootLogger() instanceof Logger log4j) {
             if (currentThreadOnly) {
                 if (currentThreadAppender == null) {
-                    currentThreadAppender = createAppender(log4j, currentThreadOnly);
+                    currentThreadAppender = createAppender(log4j, true);
                 }
             } else {
                 if (allAppender == null) {
@@ -70,14 +74,18 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
                     Set<UUID> uuids = THREAD_LOCAL.get();
                     for (UUID uuid: uuids) {
                         AbstractCaptureLogger consumer = LOGGERS.get(uuid);
-                        if (consumer != null && event.getLevel().isMoreSpecificThan(consumer.level)) {
+                        if (consumer != null && consumer.filter.test(event)) {
                             consumer.accept(event);
+                        } else {
+                            System.out.println("No consumer for " + uuid + " and event " + event.getMessage().getFormattedMessage());
                         }
                     }
                 } else {
                     for (AbstractCaptureLogger consumer: ALL_LOGGERS.values()) {
-                        if (consumer != null && event.getLevel().isMoreSpecificThan(consumer.level)) {
+                        if (consumer != null && consumer.filter.test(event)) {
                             consumer.accept(event);
+                        } else {
+                            //
                         }
 
                     }
@@ -93,28 +101,47 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
     }
 
 
+    public static Predicate<LogEvent> levelFilter(Level level) {
+        if (level == null) {
+            return alwaysTrue();
+        }
+        return event -> event.getLevel().isMoreSpecificThan(level);
+    }
+
+    public static Predicate<LogEvent> filter(Predicate<LogEvent> predicate, Level level) {
+        if (predicate == null) {
+            return levelFilter(level);
+        } else if (level == null) {
+            return predicate;
+        } else {
+            return levelFilter(level).and(predicate);
+        }
+    }
+
 
     @Getter
     protected final UUID uuid;
     private final boolean currentThreadOnly;
-    private final Level level;
+    private final Predicate<LogEvent> filter;
 
-    AbstractCaptureLogger(Level level, UUID uuid, boolean currentThreadOnly) {
-        this.level = level;
+
+
+    AbstractCaptureLogger(@Nullable Predicate<LogEvent> filter, @Nullable UUID uuid, boolean currentThreadOnly) {
+        this.filter = filter == null ? alwaysTrue() : filter;
         checkAppender(currentThreadOnly);
         this.currentThreadOnly = currentThreadOnly;
-        this.uuid = uuid;
-        THREAD_LOCAL.get().add(uuid);
+        this.uuid = uuid == null ? UUID.randomUUID() : uuid;
+        THREAD_LOCAL.get().add(this.uuid);
         if (currentThreadOnly) {
-            LOGGERS.put(uuid, this);
+            LOGGERS.put(this.uuid, this);
         } else {
-            ALL_LOGGERS.put(uuid, this);
+            ALL_LOGGERS.put(this.uuid, this);
 
         }
     }
 
-    AbstractCaptureLogger(Level level, boolean currentThreadOnly) {
-        this(level, UUID.randomUUID(), currentThreadOnly);
+    AbstractCaptureLogger(Predicate<LogEvent>  level, boolean currentThreadOnly) {
+        this(level, null, currentThreadOnly);
     }
 
     /**
