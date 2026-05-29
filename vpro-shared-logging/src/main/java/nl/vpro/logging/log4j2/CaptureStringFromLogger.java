@@ -83,6 +83,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
                 .build()
             )
             .build();
+        this.appender.start();
     }
 
     @Override

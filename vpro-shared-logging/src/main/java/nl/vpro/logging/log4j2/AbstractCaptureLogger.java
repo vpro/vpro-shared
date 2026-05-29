@@ -1,6 +1,6 @@
 package nl.vpro.logging.log4j2;
 
-import lombok.Getter;
+import lombok.*;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
@@ -32,26 +32,34 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
     static final Map<UUID,  AbstractCaptureLogger> LOGGERS = new ConcurrentHashMap<>();
     static final Map<UUID,  AbstractCaptureLogger> ALL_LOGGERS = new ConcurrentHashMap<>();
 
-    static AbstractAppender currentThreadAppender ;
-    static AbstractAppender allAppender ;
+    static volatile AbstractAppender currentThreadAppender ;
+    static volatile AbstractAppender allAppender ;
 
     static private synchronized void checkAppender(boolean currentThreadOnly) {
-        if (LogManager.getRootLogger() instanceof Logger log4j) {
-            if (currentThreadOnly) {
-                if (currentThreadAppender == null) {
+
+        if (currentThreadOnly) {
+            if (currentThreadAppender == null) {
+                if (LogManager.getRootLogger() instanceof Logger log4j) {
                     currentThreadAppender = createAppender(log4j, true);
+                    return;
                 }
             } else {
-                if (allAppender == null) {
-                    allAppender = createAppender(log4j, false);
-                }
+                return;
             }
         } else {
-            log.warn("Current logging implementation is not log4j2-core");
-
+            if (allAppender == null) {
+                if (LogManager.getRootLogger() instanceof Logger log4j) {
+                    allAppender = createAppender(log4j, false);
+                    return;
+                }
+            } else {
+                return;
+            }
         }
+        log.warn("Current logging implementation is not log4j2-core");
     }
 
+    @SneakyThrows
     private static AbstractAppender createAppender(Logger log4j, boolean currentThreadOnly) {
         AbstractAppender  appender = new AbstractAppender(AbstractCaptureLogger.class.getName() + "." + currentThreadOnly, new AbstractFilter() {
             @Override
@@ -96,7 +104,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         appender.start();
         log4j.addAppender(appender);
         log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
-
+        Thread.sleep(100);
         return appender;
     }
 
@@ -120,7 +128,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
 
 
     @Getter
-    protected final UUID uuid;
+    protected final @NonNull UUID uuid;
     private final boolean currentThreadOnly;
     private final Predicate<LogEvent> filter;
 
