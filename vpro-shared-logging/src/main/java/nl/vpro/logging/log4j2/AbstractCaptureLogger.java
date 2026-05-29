@@ -82,20 +82,19 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
                     Set<UUID> uuids = THREAD_LOCAL.get();
                     for (UUID uuid: uuids) {
                         AbstractCaptureLogger consumer = LOGGERS.get(uuid);
-                        if (consumer != null && consumer.filter.test(event)) {
-                            consumer.accept(event);
+                        if (consumer != null) {
+                            if (consumer.filter.test(event)) {
+                                consumer.accept(event);
+                            }
                         } else {
-                            System.out.println("No consumer for " + uuid + " and event " + event.getMessage().getFormattedMessage());
+                            log.debug("No consumer for {} and event {}", uuid, event.getMessage().getFormattedMessage());
                         }
                     }
                 } else {
                     for (AbstractCaptureLogger consumer: ALL_LOGGERS.values()) {
-                        if (consumer != null && consumer.filter.test(event)) {
+                        if (consumer.filter.test(event)) {
                             consumer.accept(event);
-                        } else {
-                            //
                         }
-
                     }
                 }
             }
