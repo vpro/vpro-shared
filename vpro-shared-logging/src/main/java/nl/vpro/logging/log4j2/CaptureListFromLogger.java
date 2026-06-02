@@ -21,12 +21,17 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
     private final List<LogEvent> events = new ArrayList<>();
 
     @lombok.Builder
-    private CaptureListFromLogger(@Nullable Predicate<LogEvent> predicate, @Nullable Level level, @Nullable UUID uuid, boolean currentThreadOnly) {
-        super(filter(predicate, level),  uuid, currentThreadOnly);
+    private CaptureListFromLogger(
+        @Nullable Predicate<LogEvent> predicate,
+        @Nullable Level level,
+        @Nullable String loggerName,
+        @Nullable UUID uuid,
+        boolean currentThreadOnly) {
+        super(filter(predicate, level, loggerName),  uuid, currentThreadOnly);
     }
 
     public CaptureListFromLogger(Level level, boolean currentThreadOnly) {
-        this(null, level, null, currentThreadOnly);
+        this(null, level, null, null, currentThreadOnly);
     }
 
     public CaptureListFromLogger(boolean currentThreadOnly) {

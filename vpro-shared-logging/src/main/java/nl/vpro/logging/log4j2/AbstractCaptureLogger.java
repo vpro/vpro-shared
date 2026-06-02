@@ -115,14 +115,28 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         return event -> event.getLevel().isMoreSpecificThan(level);
     }
 
-    public static Predicate<LogEvent> filter(Predicate<LogEvent> predicate, Level level) {
-        if (predicate == null) {
-            return levelFilter(level);
-        } else if (level == null) {
-            return predicate;
-        } else {
-            return levelFilter(level).and(predicate);
+    public static Predicate<LogEvent> loggerNameFilter(String loggerName) {
+        if (loggerName == null) {
+            return alwaysTrue();
         }
+        final String plusDot = loggerName + ".";
+        return event -> event.getLoggerName().equals(loggerName) || event.getLoggerName().startsWith(plusDot);
+    }
+
+
+
+    public static Predicate<LogEvent> filter(Predicate<LogEvent> predicate, Level level, String loggerName) {
+        Predicate<LogEvent> result = null;
+        if (predicate != null) {
+            result = predicate;
+        }
+        if (level != null) {
+            result = result == null ? levelFilter(level) : result.and(levelFilter(level));
+        }
+        if (loggerName != null) {
+            result = result == null ? loggerNameFilter(loggerName) : result.and(loggerNameFilter(loggerName));
+        }
+        return result == null ? alwaysTrue() : result;
     }
 
 
