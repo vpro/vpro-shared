@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -60,5 +60,24 @@ class CaptureListFromLoggerTest {
             assertThat(capture.getEvents()).hasSize(10);
         }
     }
+
+
+    @Test
+    public void logWithLevel() {
+        Logger logger = LogManager.getLogger("foo");
+
+        try (CaptureListFromLogger capture = CaptureListFromLogger.builder()
+            .loggerName("foo")
+            .level(Level.INFO)
+            .currentThreadOnly(true)
+            .build()) {
+            logger.info("info");
+            logger.debug("debug");
+            log.info("ignored");
+
+            assertThat(capture.getEvents()).hasSize(1);
+        }
+    }
+
 
 }

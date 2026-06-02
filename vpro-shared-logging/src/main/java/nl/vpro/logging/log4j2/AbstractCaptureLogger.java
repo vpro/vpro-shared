@@ -125,13 +125,20 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
 
 
 
-    public static Predicate<LogEvent> filter(Predicate<LogEvent> predicate, Level level, String loggerName) {
+    public static Predicate<LogEvent> filter(Predicate<LogEvent> predicate, Level level, String loggerName, Class<?> loggerClass) {
         Predicate<LogEvent> result = null;
         if (predicate != null) {
             result = predicate;
         }
         if (level != null) {
             result = result == null ? levelFilter(level) : result.and(levelFilter(level));
+        }
+        if (loggerClass != null) {
+            if (loggerName != null) {
+                throw new IllegalArgumentException("Cannot specify both loggerName and loggerClass");
+            }
+            loggerName = loggerClass.getName();
+
         }
         if (loggerName != null) {
             result = result == null ? loggerNameFilter(loggerName) : result.and(loggerNameFilter(loggerName));

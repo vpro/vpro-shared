@@ -49,11 +49,11 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public CaptureStringFromLogger(String pattern, Level level) {
-        this(pattern, level, null, null, new StringBuilder(), true);
+        this(pattern, level, null, null, null, new StringBuilder(), true);
     }
 
     public static CaptureStringFromLogger info(String pattern) {
-        return new CaptureStringFromLogger(pattern, Level.INFO, null, null, new StringBuilder(), true);
+        return new CaptureStringFromLogger(pattern, Level.INFO, null, null, null, new StringBuilder(), true);
     }
 
     public static CaptureStringFromLogger info() {
@@ -61,7 +61,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public static CaptureStringFromLogger infoAllThreads(String pattern) {
-        return new CaptureStringFromLogger(pattern, Level.INFO, null, null, new StringBuilder(), false);
+        return new CaptureStringFromLogger(pattern, Level.INFO, null, null, null, new StringBuilder(), false);
     }
     public static CaptureStringFromLogger infoAllThreads() {
         return infoAllThreads("%msg\n");
@@ -69,8 +69,8 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
 
 
     @lombok.Builder
-    private CaptureStringFromLogger(String pattern, Level level, String loggerName, Predicate<LogEvent> predicate, StringBuilder builder, Boolean currentThreadOnly) {
-        super(filter(predicate, level, loggerName), currentThreadOnly == null || currentThreadOnly);
+    private CaptureStringFromLogger(String pattern, Level level, String loggerName, Class<?> loggerClass, Predicate<LogEvent> predicate, StringBuilder builder, Boolean currentThreadOnly) {
+        super(filter(predicate, level, loggerName, loggerClass), currentThreadOnly == null || currentThreadOnly);
         this.writer = new StringBuilderWriter(builder == null ? new StringBuilder() : builder);
         this.appender = WriterAppender.newBuilder()
             .setTarget(writer)

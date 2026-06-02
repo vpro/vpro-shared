@@ -25,13 +25,14 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
         @Nullable Predicate<LogEvent> predicate,
         @Nullable Level level,
         @Nullable String loggerName,
+        @Nullable Class<?> loggerClass,
         @Nullable UUID uuid,
         boolean currentThreadOnly) {
-        super(filter(predicate, level, loggerName),  uuid, currentThreadOnly);
+        super(filter(predicate, level, loggerName, loggerClass),  uuid, currentThreadOnly);
     }
 
     public CaptureListFromLogger(Level level, boolean currentThreadOnly) {
-        this(null, level, null, null, currentThreadOnly);
+        this(null, level, null, null, null, currentThreadOnly);
     }
 
     public CaptureListFromLogger(boolean currentThreadOnly) {
