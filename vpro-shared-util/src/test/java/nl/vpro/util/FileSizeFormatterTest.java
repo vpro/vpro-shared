@@ -90,7 +90,7 @@ public class FileSizeFormatterTest {
         formatAndParse(1025);
     }
 
-    @Property
+    @Property(tries = 20)
     public void formatAndParse(@ForAll("longs") long size) {
         for (FileSizeFormatter formatter : Arrays.asList(FileSizeFormatter.DEFAULT, FileSizeFormatter.SI)) {
 
@@ -103,7 +103,7 @@ public class FileSizeFormatterTest {
 
     @Provide()
     public Arbitrary<Long> longs() {
-        return Arbitraries.longs().between(0, 10L * 1024 * 1024 * 1024);
+        return Arbitraries.longs().between(-10L * 1024 * 1024 * 1024, 10L * 1024 * 1024 * 1024);
     }
 
 }

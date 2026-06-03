@@ -141,8 +141,17 @@ public class FileSizeFormatter {
 
         // Find where the numeric part ends (digits, dot, comma as decimal separator, underscore like Java literals)
         int i = 0;
+        boolean foundSign = false;
         while (i < string.length()) {
             char c = string.charAt(i);
+            if (c == '+' || c == '-') {
+                if (foundSign) {
+                    break; // Only one sign allowed, and it must be at the beginning
+                }
+                foundSign = true;
+                i++;
+                continue;
+            }
             if (Character.isDigit(c) || c == '.' || c == ',' || c == '_') {
                 i++;
             } else {

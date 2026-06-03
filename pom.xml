@@ -253,6 +253,8 @@
           <systemPropertyVariables>
             <projectArtifactId>${project.artifactId}</projectArtifactId>
             <log4j2.root.level>${log4j2.root.level}</log4j2.root.level>
+            <jqwik.hideAntiAiClause>true</jqwik.hideAntiAiClause>
+            <jqwik.database />
           </systemPropertyVariables>
           <includes>
             <include>**/*Test.java</include>

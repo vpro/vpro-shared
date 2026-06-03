@@ -101,9 +101,11 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
         };
         log.debug("Added appender {} to {} to arrange log capturing", appender.getName(), StringUtils.isBlank(log4j.getName()) ? "<root logger>" : log4j.getName());
         appender.start();
+        Thread.sleep(100);
+
         log4j.addAppender(appender);
         log4j.getContext().updateLoggers(); // ensure the logger is updated with the new appender
-        Thread.sleep(100);
+
         return appender;
     }
 
@@ -149,6 +151,7 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
 
     @Getter
     protected final @NonNull UUID uuid;
+    @Getter
     private final boolean currentThreadOnly;
     private final Predicate<LogEvent> filter;
 
@@ -187,7 +190,6 @@ public abstract class AbstractCaptureLogger  implements AutoCloseable {
     public void disassociate() {
         THREAD_LOCAL.get().remove(uuid);
     }
-
 
     protected abstract void accept(LogEvent event);
 

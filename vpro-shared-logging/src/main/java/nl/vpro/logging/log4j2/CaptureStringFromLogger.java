@@ -1,7 +1,10 @@
 package nl.vpro.logging.log4j2;
 
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -41,7 +44,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Log4j2
 public class CaptureStringFromLogger extends AbstractCaptureLogger implements Supplier<String> {
 
-    private final StringBuilderWriter writer;
+    private final Writer writer;
+    private final StringBuilder builder;
     private final WriterAppender appender;
 
     public CaptureStringFromLogger() {
@@ -61,7 +65,7 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     }
 
     public static CaptureStringFromLogger infoAllThreads(String pattern) {
-        return new CaptureStringFromLogger(pattern, Level.INFO, null, null, null, new StringBuilder(), false);
+        return new CaptureStringFromLogger(pattern, Level.INFO, null, null, null,null, false);
     }
     public static CaptureStringFromLogger infoAllThreads() {
         return infoAllThreads("%msg\n");
@@ -71,9 +75,19 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
     @lombok.Builder
     private CaptureStringFromLogger(String pattern, Level level, String loggerName, Class<?> loggerClass, Predicate<LogEvent> predicate, StringBuilder builder, Boolean currentThreadOnly) {
         super(filter(predicate, level, loggerName, loggerClass), currentThreadOnly == null || currentThreadOnly);
-        this.writer = new StringBuilderWriter(builder == null ? new StringBuilder() : builder);
+        if (isCurrentThreadOnly()) {
+            if (builder == null) {
+                builder = new StringBuilder();
+            }
+        } else {
+            if (builder != null) {
+                throw new IllegalArgumentException("builder should be null when not currentThreadOnly");
+            }
+        }
+        this.builder = builder;
+        this.writer = isCurrentThreadOnly() ? new StringBuilderWriter(this.builder) : new StringWriter();
         this.appender = WriterAppender.newBuilder()
-            .setTarget(writer)
+            .setTarget(this.writer)
             .setIgnoreExceptions(false)
             .setFollow(true)
             .setName(uuid.toString())
@@ -91,10 +105,19 @@ public class CaptureStringFromLogger extends AbstractCaptureLogger implements Su
         appender.append(logEvent);
     }
 
-    public StringBuilder getBuilder() {
-        return writer.getBuilder();
+    /**
+     *
+     * @return A {@link StringBuilder} if {@link #isCurrentThreadOnly()} is true, otherwise a {@link StringBuffer} (since thread safety was required then)
+     */
+    public Appendable getBuilder() {
+        if (writer instanceof StringWriter w) {
+             return w.getBuffer();
+        } else {
+            return builder;
+        }
     }
 
+    @SneakyThrows
     @Override
     public String get() {
         writer.flush();
