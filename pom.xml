@@ -776,6 +776,13 @@
         <version>${flyway.version}</version>
         <scope>compile</scope>
       </dependency>
+      <dependency>
+        <groupId>nl.mmprogrami</groupId>
+        <artifactId>setup-log4j2</artifactId>
+        <version>1.4</version>
+        <classifier>test</classifier>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -805,7 +812,6 @@
     <dependency>
       <groupId>nl.mmprogrami</groupId>
       <artifactId>setup-log4j2</artifactId>
-      <version>1.4</version>
       <classifier>test</classifier>
       <scope>test</scope>
     </dependency>
