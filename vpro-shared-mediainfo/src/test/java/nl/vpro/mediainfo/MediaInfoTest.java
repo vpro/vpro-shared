@@ -99,7 +99,7 @@ class MediaInfoTest {
 
         assertThatJson(info)
 
-            .ignore("/path")
+            .remove("/path")
             .isSimilarTo("""
             {
               "mediaInfo" : {

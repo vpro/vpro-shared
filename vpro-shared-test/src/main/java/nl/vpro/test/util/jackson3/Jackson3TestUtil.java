@@ -15,8 +15,8 @@ import tools.jackson.databind.node.ObjectNode;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Some utility for testing json.
  * <p>
- * Orignally this contained only static methods like {@link #assertJsonEquals(String, CharSequence, CharSequence, JsonPointer...)}. But nowadays there are also 'fluent' versions
+ * Originally, this contained only static methods like {@link #assertJsonEquals(String, CharSequence, CharSequence, JsonPointer...)}. But nowadays, there are also 'fluent' versions
  * like {@link #assertThatJson(Object)}.
  *
  * @author Roelof Jan Koekoek
@@ -58,11 +58,30 @@ public class Jackson3TestUtil {
      * @param actual The actual JSON
      * @param ignores An array of {@link JsonPointer json pointers} of things int the JSON that are to be ignored in the comparison. These will just be removed from the actual json before comparison
      */
-    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonPointer... ignores) {
+
+    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonPointer...  ignores) {
+        assertJsonEquals(pref, expected, actual, jsonNode ->  {return remove(jsonNode, ignores);});
+    }
+
+
+    /**
+     * Just compares to json, wrapping {@link JSONAssert#assertEquals(String, String, String, JSONCompareMode)}
+     * @param pref A prefix used for the fail message
+     * @param expected The expected JSON
+     * @param actual The actual JSON
+     * @param operator
+     * @since 5.16
+     */
+
+    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonConsumer operator) {
+        assertJsonEquals(pref, expected, actual, operator.asOperator());
+    }
+
+    public static void assertJsonEquals(String pref, CharSequence expected, CharSequence actual, JsonOperator operator) {
         try {
-            if (ignores.length > 0) {
+            if (operator != null && operator != Jackson3TestUtil.JsonOperator.NOP) {
                 JsonNode actualJson = READER.readTree(actual.toString());
-                remove(actualJson, ignores);
+                actualJson = operator.apply(actualJson);
                 actual = MAPPER.writer().writeValueAsString(actualJson);
             }
 
@@ -72,8 +91,7 @@ public class Jackson3TestUtil {
             log.info(fail.getMessage());
             assertThat(prettify(actual)).isEqualTo(prettify(expected));
         } catch (Exception e) {
-            log.error(e.getMessage());
-            assertThatJson(actual).isEqualTo(prettify(expected));
+            throw new RuntimeException(e);
         }
     }
 
@@ -83,13 +101,14 @@ public class Jackson3TestUtil {
      * @param pref A prefix used for the fail message
      * @param expected The expected JSON
      * @param actualJson The actual JSON
-     * @param ignores An array of {@link JsonPointer json pointers} of things int the JSON that are to be ignored in the comparison. These will just be removed from the actual json before comparison
+     * @param consumer
+     * @since 5.16
      */
     @SneakyThrows
-    public static void assertJsonEquals(String pref, CharSequence expected, JsonNode actualJson, JsonPointer... ignores) {
+    public static void assertJsonEquals(String pref, CharSequence expected, JsonNode actualJson, JsonConsumer consumer) {
         String actual = null;
         try {
-            remove(actualJson, ignores);
+            consumer.accept(actualJson);
             actual = MAPPER.writeValueAsString(actualJson);
 
             JSONAssert.assertEquals(pref + "\n" + actual + "\nis different from expected\n" + expected, String.valueOf(expected), String.valueOf(actual), JSONCompareMode.STRICT);
@@ -106,17 +125,67 @@ public class Jackson3TestUtil {
      * @param actualJson The actual JSON
      * @param ignores An array of {@link JsonPointer json pointers} of things int the JSON that are to be ignored in the comparison. These will just be removed from the actual json before comparison
      */
-    public static void remove(JsonNode actualJson, JsonPointer... ignores) {
+    public static JsonNode remove(JsonNode actualJson, JsonPointer... ignores) {
         for (JsonPointer ignore : ignores){
-            JsonNode parent = actualJson.at(ignore.head());
-            JsonNode at = actualJson.at(ignore);
-            if (parent instanceof ObjectNode parentNode) {
-                parentNode.remove(ignore.getMatchingProperty());
-            } else if (parent instanceof ArrayNode parentArray) {
-                parentArray.remove(ignore.last().getMatchingIndex());
+            remove(actualJson, ignore);
+        }
+        return actualJson;
+    }
+
+
+    public static JsonNode operate(JsonNode actualJson, JsonOperator... operators) {
+        for (JsonOperator operator  : operators){
+            actualJson = operator.apply(actualJson);
+        }
+        return actualJson;
+    }
+
+    /**
+     * @since 5.16
+     * @param actualJson
+     * @param ignore
+     */
+    public static JsonNode remove(JsonNode actualJson, JsonPointer ignore) {
+        if (actualJson == null || ignore == null || ignore.matches()) {
+            return actualJson;
+        }
+        JsonNode parent = actualJson.at(ignore.head());
+        JsonPointer target = ignore.last();
+        if (parent instanceof ObjectNode parentNode) {
+            String property = target.getMatchingProperty();
+            if (property != null) {
+                parentNode.remove(property);
             }
+        } else if (parent instanceof ArrayNode parentArray) {
+            int index = target.getMatchingIndex();
+            if (index >= 0 && index < parentArray.size()) {
+                parentArray.remove(index);
+            }
+
+        }
+        return actualJson;
+    }
+
+    public static void ignore(JsonNode actualJson, JsonPointer ignore) {
+        if (actualJson == null || ignore == null || ignore.matches()) {
+            return;
+        }
+        JsonNode parent = actualJson.at(ignore.head());
+        JsonPointer target = ignore.last();
+        if (parent instanceof ObjectNode parentNode) {
+            String property = target.getMatchingProperty();
+            if (property != null) {
+                parentNode.put(property, "IGNORED");
+            }
+        } else if (parent instanceof ArrayNode parentArray) {
+            int index = target.getMatchingIndex();
+            if (index >= 0 && index < parentArray.size()) {
+                parentArray.set(index, "IGNORED");
+            }
+
         }
     }
+
 
     /**
      * @param test JSON
@@ -128,16 +197,21 @@ public class Jackson3TestUtil {
             return null;
         }
         JsonNode jsonNode = READER.readTree(String.valueOf(test));
-        return MAPPER.writeValueAsString(jsonNode);
+            return MAPPER.writeValueAsString(jsonNode);
     }
 
 
     /**
-     * Defaulting version of {@link #assertJsonEquals(String, CharSequence, CharSequence, JsonPointer...)}, with empty value for prefix.
+     * Defaulting version of {@link #assertJsonEquals(CharSequence, CharSequence, JsonPointer...)}, with empty value for prefix.
      */
     public static void assertJsonEquals(CharSequence expected, CharSequence actual, JsonPointer... ignores) {
         assertJsonEquals("", expected, actual, ignores);
     }
+
+    public static void assertJsonEquals(CharSequence expected, CharSequence actual, JsonOperator operator) {
+        assertJsonEquals("", expected, actual, operator);
+    }
+
 
 
     /**
@@ -181,18 +255,33 @@ public class Jackson3TestUtil {
         return roundTripAndSimilar(MAPPER, input, expected);
     }
 
-    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, boolean remarshall, JsonPointer... ignores)  {
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, boolean remarshall, JsonPointer... pointers) {
         return roundTripAndSimilar(
             mapper,
             input,
             expected,
             mapper.getTypeFactory().constructType(input.getClass()),
             remarshall,
-            ignores
+            (json) -> remove(json, pointers)
+        );
+    }
+
+    /**
+     * @since 5.16
+     */
+
+    public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, boolean remarshall, JsonOperator consumer) {
+        return roundTripAndSimilar(
+            mapper,
+            input,
+            expected,
+            mapper.getTypeFactory().constructType(input.getClass()),
+            remarshall,
+            consumer
         );
     }
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected)  {
-        return roundTripAndSimilar(mapper, input, expected, true);
+        return roundTripAndSimilar(mapper, input, expected, true, JsonOperator.NOP);
     }
 
     public static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, boolean remarshall) {
@@ -241,7 +330,7 @@ public class Jackson3TestUtil {
 
 
     protected static <T> T roundTripAndSimilar(T input, String expected, JavaType typeReference, boolean remarshal) {
-        return roundTripAndSimilar(MAPPER, input, expected, typeReference, remarshal);
+        return roundTripAndSimilar(MAPPER, input, expected, typeReference, remarshal, JsonOperator.NOP);
     }
 
     protected static ObjectReader objectReader(ObjectMapper mapper, JavaType typeReference) {
@@ -256,8 +345,8 @@ public class Jackson3TestUtil {
     }
 
     @SneakyThrows
-    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference, boolean remarshall, JsonPointer... ignores) {
-        String marshalled = marshallAndSimilar(mapper, input, expected, ignores);
+    protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, String expected, JavaType typeReference, boolean remarshall, JsonOperator operator) {
+        String marshalled = marshallAndSimilar(mapper, input, expected, operator);
 
         T unmarshalled =  mapper.readValue(marshalled, typeReference);
         if (remarshall) {
@@ -266,24 +355,24 @@ public class Jackson3TestUtil {
             String remarshalled = remarshal.toString();
             log.debug("Comparing {} with expected {}", remarshalled, expected);
 
-            assertJsonEquals("REMARSHALLED", expected, remarshalled, ignores);
+            assertJsonEquals("REMARSHALLED", expected, remarshalled, operator);
         }
         return unmarshalled;
     }
 
-    protected static <T> String marshallAndSimilar(ObjectMapper mapper, T input, String expected, JsonPointer... ignores) {
+    protected static <T> String marshallAndSimilar(ObjectMapper mapper, T input, String expected, JsonOperator operator) {
         StringWriter originalWriter = new StringWriter();
         mapper.writeValue(originalWriter, input);
         String marshalled = originalWriter.toString();
 
         log.debug("Comparing {} with expected {}", marshalled, expected);
-        assertJsonEquals(expected, marshalled, ignores);
+        assertJsonEquals(expected, marshalled, operator);
         return marshalled;
     }
 
 
     protected static <T> T roundTripAndSimilar(ObjectMapper mapper, T input, JsonNode expected, JavaType typeReference, boolean remarshall) {
-        return roundTripAndSimilar(mapper, input, mapper.writeValueAsString(expected), typeReference, remarshall);
+        return roundTripAndSimilar(mapper, input, mapper.writeValueAsString(expected), typeReference, remarshall, JsonOperator.NOP);
     }
 
     /**
@@ -337,11 +426,16 @@ public class Jackson3TestUtil {
 
         protected final ObjectMapper mapper;
 
-        final List<JsonPointer> ignores = new ArrayList<>();
+        final List<JsonOperator> operators = new ArrayList<>();
 
         public JsonAssert(ObjectMapper mapper, A a, Class<?> selfType) {
             super(a, selfType);
             this.mapper = mapper;
+
+        }
+
+        JsonOperator operator() {
+            return operators.isEmpty() ? JsonOperator.NOP : (json) -> operate(json, operators.toArray(JsonOperator[]::new));
         }
 
         public S containsKeys(String... keys) {
@@ -369,13 +463,45 @@ public class Jackson3TestUtil {
             assertThat(found).withFailMessage("Unexpected keys" + found + " found (in "+ actualJson + ")").isEmpty();
             return (S) this;
         }
-        public S ignore(JsonPointer... jsonPointers) {
-            ignores.addAll(Arrays.asList(jsonPointers));
+
+        public S remove(JsonPointer... jsonPointers) {
+            operators.addAll(Stream.of(jsonPointers).map(j -> (JsonOperator) jsonNode -> Jackson3TestUtil.remove(jsonNode, j)).toList());
             return (S) this;
         }
 
+        public S remove(String... jsonPointers) {
+            return remove(Arrays.stream(jsonPointers).map(JsonPointer::compile).toArray(JsonPointer[]::new));
+        }
+
+        /**
+         * Replaces given JsonPointers with 'IGNORED'
+         * @param jsonPointers
+         * @see #remove(JsonPointer...)  For removal instead
+         * @return
+         */
+        public S ignore(JsonPointer... jsonPointers) {
+            operators.addAll(Stream.of(jsonPointers).map(j -> (JsonOperator) jsonNode -> {Jackson3TestUtil.ignore(jsonNode, j); return jsonNode;}).toList());
+            return (S) this;
+        }
+        /**
+         * @see #ignore(JsonPointer...)
+         */
         public S ignore(String... jsonPointers) {
             return ignore(Arrays.stream(jsonPointers).map(JsonPointer::compile).toArray(JsonPointer[]::new));
+        }
+
+        /**
+         * Add a consumer to be called before comparison
+         * @param consumer
+         * @return
+         */
+        public S beforeComparison(JsonConsumer consumer) {
+            return beforeComparisonOperate(consumer.asOperator());
+        }
+
+        public S beforeComparisonOperate(JsonOperator operator) {
+            operators.add(operator);
+            return (S) this;
         }
 
         public abstract JsonNode actualJson();
@@ -393,7 +519,40 @@ public class Jackson3TestUtil {
     @FunctionalInterface
     public interface JsonConsumer extends Consumer<JsonNode> {
 
+        JsonConsumer NOP = new JsonConsumer() {
+            @Override
+            public void accept(JsonNode jsonNode) {
+
+            }
+
+            @Override
+            public JsonOperator asOperator() {
+                return JsonOperator.NOP;
+            }
+        };
+
+
+        default JsonOperator asOperator() {
+            return (js) -> {
+                this.accept(js);
+                return js;
+            };
+        }
+
     }
+
+    /**
+     * Acts on a JsonNode. It can edit and return it, or completely replace it.
+     * E.g. when dealing with jsonpath
+     *
+     */
+    @FunctionalInterface
+    public interface JsonOperator extends UnaryOperator<JsonNode> {
+
+        JsonOperator NOP = (js) -> js;
+
+    }
+
 
     @SuppressWarnings("UnusedReturnValue")
     public static class JsonObjectAssert<A> extends JsonAssert<JsonObjectAssert<A>, A> implements Supplier<A> {
@@ -412,6 +571,7 @@ public class Jackson3TestUtil {
         }
 
 
+
         @Override
         public JsonNode actualJson() {
             return mapper.valueToTree(actual);
@@ -425,7 +585,7 @@ public class Jackson3TestUtil {
         @SuppressWarnings({"CatchMayIgnoreException"})
         public JsonObjectAssert<A> isSimilarTo(String expected) {
             try {
-                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal, ignores.toArray(JsonPointer[]::new));
+                rounded = roundTripAndSimilar(mapper, actual, expected, checkRemarshal, operator());
             } catch (Exception e) {
                 Fail.fail(e.getMessage(), e);
             }
@@ -476,7 +636,7 @@ public class Jackson3TestUtil {
 
         @SneakyThrows
         public JsonMarshallAssert<A> isSimilarTo(String expected)  {
-            marshalled = marshallAndSimilar(mapper, actual, expected);
+            marshalled = marshallAndSimilar(mapper, actual, expected, operator());
             return myself;
         }
 
@@ -505,7 +665,7 @@ public class Jackson3TestUtil {
 
         public JsonStringAssert isSimilarTo(String expected, JsonPointer... ignoresOverride) {
             if (ignoresOverride.length == 0) {
-                assertJsonEquals("", expected, actual, ignores.toArray(JsonPointer[]::new));
+                assertJsonEquals("", expected, actual, operator());
             } else {
                 assertJsonEquals("", expected, actual, ignoresOverride);
             }

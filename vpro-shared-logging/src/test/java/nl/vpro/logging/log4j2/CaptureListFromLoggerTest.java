@@ -2,10 +2,12 @@ package nl.vpro.logging.log4j2;
 
 import lombok.extern.log4j.Log4j2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
-import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,6 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CaptureListFromLoggerTest {
     ExecutorService service = Executors.newCachedThreadPool();
 
+    @AfterEach
+    void tearDown() {
+        service.shutdown();
+    }
     @Test
     public void log() {
         List<Future<?>> futures = new ArrayList<>();
@@ -38,7 +44,40 @@ class CaptureListFromLoggerTest {
                 throw new AssertionError(e);
             }
         });
-        service.shutdown();
     }
+
+    @Test
+    public void logWithFilter() {
+        try (CaptureListFromLogger capture = CaptureListFromLogger.builder()
+            .predicate(le -> le.getMessage().getFormattedMessage().contains("foo"))
+            .currentThreadOnly(true)
+            .build()) {
+            for (int i = 0; i < 10; i++) {
+                log.info("foo" + i);
+                log.info("bar" + i);
+            }
+
+            assertThat(capture.getEvents()).hasSize(10);
+        }
+    }
+
+
+    @Test
+    public void logWithLevel() {
+        Logger logger = LogManager.getLogger("foo");
+
+        try (CaptureListFromLogger capture = CaptureListFromLogger.builder()
+            .loggerName("foo")
+            .level(Level.INFO)
+            .currentThreadOnly(true)
+            .build()) {
+            logger.info("info");
+            logger.debug("debug");
+            log.info("ignored");
+
+            assertThat(capture.getEvents()).hasSize(1);
+        }
+    }
+
 
 }

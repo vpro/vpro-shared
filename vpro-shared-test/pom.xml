@@ -4,7 +4,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.16-SNAPSHOT</version>
+    <version>5.17-SNAPSHOT</version>
   </parent>
   <artifactId>vpro-shared-test</artifactId>
   <name>vpro-shared-test</name>
@@ -53,6 +53,12 @@
     <dependency>
       <groupId>org.skyscreamer</groupId>
       <artifactId>jsonassert</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>3.0.0</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>

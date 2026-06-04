@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import nl.vpro.logging.log4j2.CaptureStringFromLogger;
+import nl.vpro.util.ThreadPools;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
@@ -20,6 +21,9 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Isolated
 @Execution(SAME_THREAD)
 class MBeans2Test {
+    static {
+        ThreadPools.copyExecutor.submit(() -> {}); // Just to early trigger the info about virtual threads in java < 21
+    }
 
     @AfterEach
     public void after() throws InterruptedException {
@@ -69,11 +73,11 @@ class MBeans2Test {
     @ValueSource(booleans = {true, false})
     public void multiLineCaptureTimeout(boolean currentThreadOnly) throws InterruptedException {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
-
             String result = MBeans2.returnMultilineString("test",
                 Duration.ofMillis(10),
                 currentThreadOnly,
                 () -> {
+
                     log.info("foo bar!");
                     Thread.sleep(100);
                     log.info("pietje puk");

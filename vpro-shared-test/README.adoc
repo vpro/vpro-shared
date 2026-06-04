@@ -3,10 +3,9 @@
 
 == Assertj
 
-- xml related assertions
-- json related assertions
+- link:src/test/java/nl/vpro/test/util/jaxb/JAXBTestUtilTest.java[jaxb] related assertions
+- json related assertions link:src/test/java/nl/vpro/test/util/jackson2/Jackson2TestUtilTest.java[jackson2]/link:src/test/java/nl/vpro/test/util/jackson3/Jackson3TestUtilTest.java[jackson3]
 - serialization related assertions
-- log4j2-test.xml
 
 E.g.
 [source, java]

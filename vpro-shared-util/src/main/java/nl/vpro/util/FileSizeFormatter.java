@@ -133,6 +133,51 @@ public class FileSizeFormatter {
         return (exact ? exactFormat.format(length) : format.format(length)) + " B";
     }
 
+    public static long parse(String string) {
+        if (string == null || string.isBlank()) {
+            throw new IllegalArgumentException("Cannot parse null or blank string");
+        }
+        string = string.trim();
+
+        // Find where the numeric part ends (digits, dot, comma as decimal separator, underscore like Java literals)
+        int i = 0;
+        boolean foundSign = false;
+        while (i < string.length()) {
+            char c = string.charAt(i);
+            if (c == '+' || c == '-') {
+                if (foundSign) {
+                    break; // Only one sign allowed, and it must be at the beginning
+                }
+                foundSign = true;
+                i++;
+                continue;
+            }
+            if (Character.isDigit(c) || c == '.' || c == ',' || c == '_') {
+                i++;
+            } else {
+                break;
+            }
+        }
+
+        String numberPart = string.substring(0, i).replace("_", "").replace(',', '.').trim();
+        String unitPart = string.substring(i).trim().toLowerCase();
+
+        double number = Double.parseDouble(numberPart);
+
+        long multiplier = switch (unitPart) {
+            case "kib" -> KiB;
+            case "mib" -> MiB;
+            case "gib" -> GiB;
+            case "kb"  -> K;
+            case "mb"  -> M;
+            case "gb"  -> G;
+            case "b", "" -> 1L;
+            default -> throw new IllegalArgumentException("Unknown unit: '" + unitPart + "' in '" + string + "'");
+        };
+
+        return Math.round(number * multiplier);
+    }
+
 
     public static class Builder {
         {

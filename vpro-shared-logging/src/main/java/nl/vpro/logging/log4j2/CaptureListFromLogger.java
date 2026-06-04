@@ -1,12 +1,12 @@
 package nl.vpro.logging.log4j2;
 
-import lombok.Getter;
-
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  *
@@ -15,28 +15,36 @@ import org.apache.logging.log4j.core.LogEvent;
  */
 public class CaptureListFromLogger extends AbstractCaptureLogger implements Supplier<List<LogEvent>> {
 
-    @Getter
-    private final List<LogEvent> events = new ArrayList<>();
+    private final List<LogEvent> events = Collections.synchronizedList(new ArrayList<>());
 
-
-
-    private CaptureListFromLogger(Level level, UUID uuid, boolean currentThreadOnly) {
-        super(level, uuid, currentThreadOnly);
+    @lombok.Builder
+    private CaptureListFromLogger(
+        @Nullable Predicate<LogEvent> predicate,
+        @Nullable Level level,
+        @Nullable String loggerName,
+        @Nullable Class<?> loggerClass,
+        @Nullable UUID uuid,
+        boolean currentThreadOnly) {
+        super(filter(predicate, level, loggerName, loggerClass),  uuid, currentThreadOnly);
     }
 
     public CaptureListFromLogger(Level level, boolean currentThreadOnly) {
-        this(level, UUID.randomUUID(), currentThreadOnly);
+        this(null, level, null, null, null, currentThreadOnly);
     }
 
     public CaptureListFromLogger(boolean currentThreadOnly) {
         this(Level.INFO, currentThreadOnly);
     }
 
-
+    public List<LogEvent> getEvents() {
+        synchronized (events) {
+            return List.copyOf(events);
+        }
+    }
 
     @Override
     public List<LogEvent> get() {
-        return Collections.unmodifiableList(getEvents());
+        return getEvents();
     }
 
     @Override
