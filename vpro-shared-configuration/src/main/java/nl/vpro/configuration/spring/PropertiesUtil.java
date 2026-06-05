@@ -247,7 +247,7 @@ public class PropertiesUtil extends PropertyPlaceholderConfigurer  {
                 log.warn("Malformed URL in {} skipping", location);
                 continue;
             } catch (IOException ioe) {
-                System.out.println(location);
+                System.out.println(ioe.getMessage()  + ":" + location);
                 //jul.warning(location.toString() + ":" + ioe.getMessage());
 
             }

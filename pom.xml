@@ -4,7 +4,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>5.16-SNAPSHOT</version>
+  <version>5.17-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -253,6 +253,8 @@
           <systemPropertyVariables>
             <projectArtifactId>${project.artifactId}</projectArtifactId>
             <log4j2.root.level>${log4j2.root.level}</log4j2.root.level>
+            <jqwik.hideAntiAiClause>true</jqwik.hideAntiAiClause>
+            <jqwik.database />
           </systemPropertyVariables>
           <includes>
             <include>**/*Test.java</include>
@@ -774,6 +776,13 @@
         <version>${flyway.version}</version>
         <scope>compile</scope>
       </dependency>
+      <dependency>
+        <groupId>nl.mmprogrami</groupId>
+        <artifactId>setup-log4j2</artifactId>
+        <version>1.4</version>
+        <classifier>test</classifier>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -803,7 +812,6 @@
     <dependency>
       <groupId>nl.mmprogrami</groupId>
       <artifactId>setup-log4j2</artifactId>
-      <version>1.4</version>
       <classifier>test</classifier>
       <scope>test</scope>
     </dependency>

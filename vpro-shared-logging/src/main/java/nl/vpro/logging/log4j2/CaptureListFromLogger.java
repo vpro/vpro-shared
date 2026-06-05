@@ -1,7 +1,5 @@
 package nl.vpro.logging.log4j2;
 
-import lombok.Getter;
-
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -17,8 +15,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class CaptureListFromLogger extends AbstractCaptureLogger implements Supplier<List<LogEvent>> {
 
-    @Getter
-    private final List<LogEvent> events = new ArrayList<>();
+    private final List<LogEvent> events = Collections.synchronizedList(new ArrayList<>());
 
     @lombok.Builder
     private CaptureListFromLogger(
@@ -39,11 +36,15 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
         this(Level.INFO, currentThreadOnly);
     }
 
-
+    public List<LogEvent> getEvents() {
+        synchronized (events) {
+            return List.copyOf(events);
+        }
+    }
 
     @Override
     public List<LogEvent> get() {
-        return Collections.unmodifiableList(getEvents());
+        return getEvents();
     }
 
     @Override
