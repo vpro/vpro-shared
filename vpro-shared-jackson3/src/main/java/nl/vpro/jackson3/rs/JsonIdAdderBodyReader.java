@@ -76,7 +76,7 @@ public class JsonIdAdderBodyReader implements MessageBodyReader<Object> {
 
             if (typeDeserializer != null) {
                 final String propertyName = typeDeserializer.getPropertyName();
-                final String propertyValue = typeDeserializer.getTypeIdResolver().idFromBaseType(deserializationContextExt);
+                final String propertyValue = typeDeserializer.getTypeIdResolver().idFromValueAndType(deserializationContextExt, null, javaType.getRawClass());
                 if (! objectNode.has(propertyName)) {
                     log.debug("Implicitly setting {} = {} for {}", propertyName, propertyValue, javaType);
                     objectNode.put(propertyName, propertyValue);
