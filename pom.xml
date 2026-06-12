@@ -52,21 +52,21 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>7.3.4.Final</hibernate.version>
-    <hibernate.search.version>7.2.1.Final</hibernate.search.version>
+    <hibernate.version>7.4.1.Final</hibernate.version>
+    <hibernate.search.version>8.4.0.Final</hibernate.search.version>
+    <hibernate.validator.version>9.1.0.Final</hibernate.validator.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.1.0</servlet.api.version>
     <validation.api.version>3.1.1</validation.api.version>
-    <persistence.api.version>3.1.0</persistence.api.version>
+    <persistence.api.version>3.2.0</persistence.api.version>
     <annotation.api.version>3.0.0</annotation.api.version>
     <xml-bind.api.version>4.0.5</xml-bind.api.version>
 
-    <hibernate.validator.version>9.1.0.Final</hibernate.validator.version>
+
     <camel.version>4.20.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.50</swagger.version>
-
     <lombok.version>1.18.46</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
     <delombok.input>${project.build.directory}/delombok-input</delombok.input>
@@ -425,29 +425,24 @@
       </dependency>
       <dependency>
         <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-core</artifactId>
+        <artifactId>hibernate-platform</artifactId>
         <version>${hibernate.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-micrometer</artifactId>
-        <version>${hibernate.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.search</groupId>
-        <artifactId>hibernate-search-mapper-orm</artifactId>
+        <artifactId>hibernate-search-bom</artifactId>
         <version>${hibernate.search.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.search</groupId>
-        <artifactId>hibernate-search-backend-lucene</artifactId>
-        <version>${hibernate.search.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
+        <artifactId>hibernate-validator-bom</artifactId>
         <version>${hibernate.validator.version}</version>
-        <scope>test</scope>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <dependency>
@@ -604,7 +599,6 @@
         <groupId>jakarta.persistence</groupId>
         <artifactId>jakarta.persistence-api</artifactId>
         <version>${persistence.api.version}</version>
-        <scope>provided</scope> <!-- hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>org.meeuw.math</groupId>
