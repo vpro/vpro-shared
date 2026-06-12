@@ -8,10 +8,10 @@
     <version>5.17-SNAPSHOT</version>
   </parent>
 
-  <artifactId>vpro-shared-hibernate</artifactId>
-  <name>vpro-shared-hibernate</name>
+  <artifactId>vpro-shared-hibernate7</artifactId>
+  <name>vpro-shared-hibernate7</name>
   <properties>
-    <vpro.shared.module.postfix>hibernate</vpro.shared.module.postfix>
+    <vpro.shared.module.postfix>hibernate7</vpro.shared.module.postfix>
   </properties>
 
 
@@ -20,13 +20,7 @@
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
     </dependency>
-  <!-- dependency breaks mockito?
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy-dep</artifactId>
-      &lt;!&ndash; otherwise java.lang.NoClassDefFoundError: net/bytebuddy/NamingStrategy$SuffixingRandom$BaseNameResolver &ndash;&gt;
-    </dependency>
-  -->
+
     <dependency>
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-test</artifactId>

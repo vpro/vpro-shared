@@ -136,7 +136,7 @@
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-elasticsearch-high-level-client</module>
 
-    <module>vpro-shared-hibernate</module>
+    <module>vpro-shared-hibernate7</module>
     <!--
     <module>vpro-shared-hibernate-search</module>
     -->
