@@ -85,7 +85,7 @@
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
     <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
-    <log4j2.root.level>INFO</log4j2.root.level>
+    <log4j2.stdout.level>INFO</log4j2.stdout.level>
   </properties>
 
   <licenses>
@@ -264,8 +264,11 @@
         <configuration>
           <argLine>${EXTRA_TEST_OPTS} -javaagent:${org.mockito:mockito-core:jar}</argLine>
           <systemPropertyVariables>
+
             <projectArtifactId>${project.artifactId}</projectArtifactId>
-            <log4j2.root.level>${log4j2.root.level}</log4j2.root.level>
+            <log4j2.stdout.level>${log4j2.stdout.level}</log4j2.stdout.level>
+            <log4j2.pattern>%d{HH:mm:ss.SS} %highlight{%5.5p}&#x09;%c{1}&#x09;%M.%L&#x09;%m%n</log4j2.pattern>
+
             <jqwik.hideAntiAiClause>true</jqwik.hideAntiAiClause>
             <jqwik.database />
           </systemPropertyVariables>
