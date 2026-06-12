@@ -21,7 +21,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static nl.vpro.util.URLResource.PROPERTIES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -103,7 +103,7 @@ public class URLResourceTest {
     public void broadcastersRedirect(WireMockRuntimeInfo runtimeInfo) {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create(runtimeInfo.getHttpBaseUrl() + "/redirect"));
 
-        assertTrue(broadcasters.get().size() > 0);
+        assertFalse(broadcasters.get().isEmpty());
 
     }
 
@@ -112,7 +112,7 @@ public class URLResourceTest {
     public void broadcastersFromClassPath() throws InterruptedException {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create("classpath:/broadcasters.properties"));
         broadcasters.setMinAge(Duration.ofMillis(100));
-        assertTrue(broadcasters.get().size() > 0);
+        assertFalse(broadcasters.get().isEmpty());
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         assertThat(broadcasters.getCheckedCount()).isEqualTo(1);
 
@@ -133,7 +133,7 @@ public class URLResourceTest {
     @Test
     public void broadcastersFromClassPathMap() {
         URLResource<Map<String, String>> broadcasters = URLResource.map(URI.create("classpath:/broadcasters.properties"));
-        assertTrue(broadcasters.get().size() > 0);
+        assertFalse(broadcasters.get().isEmpty());
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         broadcasters.get();
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
@@ -145,7 +145,7 @@ public class URLResourceTest {
         when(connection.getResponseCode()).thenReturn(503, 200, 500, 200);
         when(connection.getInputStream()).thenAnswer(invocation -> new ByteArrayInputStream("VPRO=VPRO".getBytes()));
 
-        URLResource<Properties> broadcasters = new URLResource<Properties>(URI.create("https://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
+        URLResource<Properties> broadcasters = new URLResource<>(URI.create("https://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
             @Override
             public URLConnection openConnection() {
                 return connection;
@@ -187,7 +187,7 @@ public class URLResourceTest {
         broadcasters.setMinAge(Duration.ZERO);
         Properties properties = broadcasters.get();
         if (broadcasters.getCode() != 503) {
-            assertTrue(properties.size() > 0);
+            assertFalse(properties.isEmpty());
             assertThat(broadcasters.getChangesCount()).isEqualTo(1);
             assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
             assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
@@ -201,7 +201,7 @@ public class URLResourceTest {
         } else {
             log.info("Skipping because code = {}", broadcasters.getCode());
         }
-        System.out.println(broadcasters.get());
+        log.info("{}", broadcasters.get());
     }
 
 }

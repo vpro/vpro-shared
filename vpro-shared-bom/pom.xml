@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-bom</artifactId>
-  <version>5.17-SNAPSHOT</version>
+  <version>6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
   <description>Bill of Materials of modules in vpro shared</description>
@@ -88,7 +88,7 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate</artifactId>
+        <artifactId>vpro-shared-hibernate7</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -258,6 +258,11 @@
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger</artifactId>
         <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-hibernate</artifactId>
+        <version>5.16.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

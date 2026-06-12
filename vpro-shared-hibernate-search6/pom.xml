@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>5.17-SNAPSHOT</version>
+    <version>6.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>vpro-shared-hibernate-search6</artifactId>
@@ -53,7 +53,7 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-hibernate</artifactId>
+      <artifactId>vpro-shared-hibernate7</artifactId>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
