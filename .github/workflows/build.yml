@@ -37,11 +37,8 @@ jobs:
         #  os: [ ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            java: 17
-            target: 'deploy'
-          - os: ubuntu-latest
             java: 21
-            target: 'test'
+            target: 'deploy'
           - os: windows-latest
             java: 21
             target: 'test'
