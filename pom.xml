@@ -21,7 +21,7 @@
     <spring-security.version>6.5.10</spring-security.version>
     <jackson2.version>2.21.4</jackson2.version> <!-- 2.21 is LTS -->
     <jackson.version.annotations>2.21</jackson.version.annotations>
-    <jackson3.version>3.1.4</jackson3.version>
+    <jackson3.version>3.2.0</jackson3.version>
 
     <junit.version>6.1.0</junit.version>
     <mockito.version>5.23.0</mockito.version>
@@ -34,7 +34,7 @@
     -->
     <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.18.9</bytebuddy.version>
+    <bytebuddy.version>1.18.10</bytebuddy.version>
     <slf4j.version>2.0.18</slf4j.version>
     <log4j2.version>2.26.0</log4j2.version>
     <guava.version>33.6.0-jre</guava.version>
@@ -76,8 +76,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.16.5</micrometer.version>
-    <flyway.version>12.7.0</flyway.version>
+    <micrometer.version>1.17.0</micrometer.version>
+    <flyway.version>12.8.1</flyway.version>
 
     <testcontainers.version>2.0.5</testcontainers.version>
 
@@ -779,7 +779,7 @@
       <dependency>
         <groupId>nl.mmprogrami</groupId>
         <artifactId>setup-log4j2</artifactId>
-        <version>1.4</version>
+        <version>1.5</version>
         <classifier>test</classifier>
         <scope>test</scope>
       </dependency>
