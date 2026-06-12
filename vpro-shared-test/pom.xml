@@ -27,9 +27,10 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-jackson3</artifactId>
     </dependency>
+ 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+      <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>org.xmlunit</groupId>
