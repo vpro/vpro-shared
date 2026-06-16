@@ -6,7 +6,7 @@ import java.sql.*;
 import java.time.Duration;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.usertype.UserType;
 
 /**
@@ -51,7 +51,7 @@ public class DurationToLongType implements UserType<Duration> {
     }
 
     @Override
-    public Duration nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+    public Duration nullSafeGet(ResultSet rs, int position, WrapperOptions wrapperOptions) throws SQLException {
         BigDecimal ts = rs.getBigDecimal(position);
         if (ts == null) {
             return null;
@@ -61,7 +61,7 @@ public class DurationToLongType implements UserType<Duration> {
 
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Duration value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Duration value, int index, WrapperOptions wrapperOptions) throws HibernateException, SQLException {
         if (value == null) {
             st.setNull(index, Types.TIMESTAMP);
         } else {

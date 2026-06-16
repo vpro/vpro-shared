@@ -1,12 +1,12 @@
 package nl.vpro.hibernate;
 
-import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.usertype.UserType;
-
 import java.io.Serializable;
 import java.sql.*;
 import java.time.Instant;
+
+import org.hibernate.HibernateException;
+import org.hibernate.type.descriptor.WrapperOptions;
+import org.hibernate.usertype.UserType;
 
 /**
  * @author Michiel Meeuwissen
@@ -50,7 +50,7 @@ public class InstantToTimestampType implements UserType<Instant> {
     }
 
     @Override
-    public Instant nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+    public Instant nullSafeGet(ResultSet rs, int position, WrapperOptions wrapperOptions) throws SQLException {
         Timestamp ts = rs.getTimestamp(position);
         if (ts == null) {
             return null;
@@ -60,7 +60,7 @@ public class InstantToTimestampType implements UserType<Instant> {
 
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Instant value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Instant value, int index, WrapperOptions wrapperOptions) throws HibernateException, SQLException {
         if (value == null) {
             st.setNull(index, Types.TIMESTAMP);
         } else {

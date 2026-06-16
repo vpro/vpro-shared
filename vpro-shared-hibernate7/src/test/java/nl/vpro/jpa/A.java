@@ -6,6 +6,9 @@ import java.net.URI;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
+
+import nl.vpro.hibernate.FalseToNullType;
 
 /**
  * @author Michiel Meeuwissen
@@ -35,6 +38,10 @@ public abstract class A implements I {
 
     @Column
     protected URI uriField;
+
+    @Column
+    @Type(FalseToNullType.class)
+    protected Boolean falseToNull;
 
     A() {
 

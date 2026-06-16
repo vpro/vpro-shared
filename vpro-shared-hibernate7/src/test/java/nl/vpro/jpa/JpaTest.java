@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.55
  */
-@Testcontainers
 @Log4j2
 public abstract class JpaTest {
 
@@ -51,6 +50,7 @@ public abstract class JpaTest {
         d.setUriField(URI.create("http://example.com"));
         d.setAField("a");
         d.setA3Field("a3");
+        d.setFalseToNull(false);
         D saved = repository.save(d);
 
         D found = repository.findById(saved.getId()).orElseThrow();
@@ -59,6 +59,7 @@ public abstract class JpaTest {
 
         assertThat(d.getUuidField()).isEqualTo(found.getUuidField());
         assertThat(d.getUriField()).isEqualTo(found.getUriField());
+        assertThat(found.getFalseToNull()).isNull();
     }
 
 

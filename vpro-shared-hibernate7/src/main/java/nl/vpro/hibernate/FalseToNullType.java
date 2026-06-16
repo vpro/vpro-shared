@@ -1,11 +1,11 @@
 package nl.vpro.hibernate;
 
-import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.usertype.UserType;
-
 import java.io.Serializable;
 import java.sql.*;
+
+import org.hibernate.HibernateException;
+import org.hibernate.type.descriptor.WrapperOptions;
+import org.hibernate.usertype.UserType;
 
 /**
  *
@@ -49,16 +49,14 @@ public class FalseToNullType implements UserType<Boolean> {
     }
 
     @Override
-    public Boolean nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+    public Boolean nullSafeGet(ResultSet rs, int position, WrapperOptions wrapperOptions) throws SQLException {
         Boolean result = rs.getBoolean(position);
-        if (result == null || !result) return null;
+        if (!result) return null;
         return result;
     }
 
-
-
     @Override
-    public void nullSafeSet(PreparedStatement st, Boolean value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Boolean value, int index, WrapperOptions wrapperOptions) throws HibernateException, SQLException {
         if (value == null) {
             st.setBoolean(index, false);
         } else {
