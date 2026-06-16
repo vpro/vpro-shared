@@ -795,7 +795,12 @@
       <dependency>
         <groupId>nl.mmprogrami</groupId>
         <artifactId>setup-log4j2</artifactId>
-        <version>1.5</version>
+        <version>1.6</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.mmprogrami</groupId>
+        <artifactId>setup-log4j2</artifactId>
+        <version>1.6</version>
         <classifier>test</classifier>
         <scope>test</scope>
       </dependency>
