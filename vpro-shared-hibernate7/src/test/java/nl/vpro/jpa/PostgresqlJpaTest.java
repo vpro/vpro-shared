@@ -7,13 +7,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * @author Michiel Meeuwissen
  * @since 6.0
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @SpringJUnitConfig(classes = PostgresqlJpaTestConfig.class)
 public class PostgresqlJpaTest extends JpaTest {
-
-
-
-
 
 
 }
