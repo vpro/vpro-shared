@@ -1,14 +1,18 @@
 package nl.vpro.jpa;
 
-import jakarta.persistence.*;
+import lombok.Data;
 
+import java.net.URI;
 import java.util.UUID;
+
+import jakarta.persistence.*;
 
 /**
  * @author Michiel Meeuwissen
  * @since ...
  */
 @MappedSuperclass
+@Data
 public abstract class A implements I {
 
     @Id
@@ -28,6 +32,9 @@ public abstract class A implements I {
 
     @Column
     protected UUID uuidField;
+
+    @Column
+    protected URI uriField;
 
     A() {
 
