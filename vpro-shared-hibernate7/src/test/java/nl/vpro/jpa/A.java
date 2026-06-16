@@ -2,6 +2,8 @@ package nl.vpro.jpa;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 /**
  * @author Michiel Meeuwissen
  * @since ...
@@ -23,6 +25,9 @@ public abstract class A implements I {
 
     @Column(nullable = false)
     protected String a3Field;
+
+    @Column
+    protected UUID uuidField;
 
     A() {
 
