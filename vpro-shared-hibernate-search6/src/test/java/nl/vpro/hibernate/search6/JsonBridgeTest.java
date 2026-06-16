@@ -1,9 +1,8 @@
 package nl.vpro.hibernate.search6;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Test;
 
 import nl.vpro.test.util.jackson2.Jackson2TestUtil;
 
@@ -89,9 +88,7 @@ public class JsonBridgeTest {
     public void testTooLargeObject() {
         /* Single object 100 * 1000 chars long which is too long to serialize to JSON to store in Lucene */
         StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
-            buf.append(LONG_STRING);
-        }
+        buf.repeat(LONG_STRING, 1000);
 
         try (JsonBridge<String> bridge = new JsonBridge<>(String.class)) {
             String ret = bridge.toIndexedValue(buf.toString(), null);

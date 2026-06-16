@@ -69,13 +69,13 @@ public class JsonBridge<T> implements ValueBridge<T, String> {
 
             int len = ret.length();
             if (len > MAX_LENGTH) {
-                if (object instanceof Collection || object instanceof Object[]) {
+                if (object instanceof Collection<?> || object instanceof Object[]) {
 
                     Object[] array;
                     if (object instanceof Object[]) {
                         array = (Object[]) object;
                     } else {
-                        array = ((Collection) object).stream().toArray(i -> new Object[((Collection) object).size()]);
+                        array = ((Collection<?>) object).toArray(i -> new Object[((Collection<?>) object).size()]);
                     }
                     int originalSize = array.length;
                     int size = array.length;
@@ -85,13 +85,14 @@ public class JsonBridge<T> implements ValueBridge<T, String> {
                         len = ret.length();
                     }
                     if (size == 0) {
-                        log.warn("Cannot store JSON representation of object type " + object.getClass().getName() + ": even first item in array already too large (maxlength = " + MAX_LENGTH + ")");
+                        log.warn("Cannot store JSON representation of object type {}: even first item in array already too large (maxlength = " + MAX_LENGTH + ")", object.getClass().getName());
                         return "[]";
                     } else {
                         log.warn("Truncated JSON representation of object type {}: {} -> {} ", object.getClass().getName(), originalSize, size);
                     }
                 } else {
-                    log.warn("Cannot store JSON representation of object type " + object.getClass().getName() + ": " + object + " (maxlength = " + MAX_LENGTH + ")");
+                    String sValue = object.toString().substring(0, Math.min(object.toString().length(), 100)) + "...(length: " + len + ")";
+                    log.warn("Cannot store JSON representation of object type {}: {} (maxlength = " + MAX_LENGTH + ")", object.getClass().getName(), sValue);
                     return "{}";
                 }
             }
