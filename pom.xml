@@ -66,7 +66,7 @@
 
     <camel.version>4.20.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.50</swagger.version>
+    <swagger.version>2.2.51</swagger.version>
     <lombok.version>1.18.46</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
     <delombok.input>${project.build.directory}/delombok-input</delombok.input>
@@ -79,7 +79,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.0</micrometer.version>
-    <flyway.version>12.8.1</flyway.version>
+    <flyway.version>12.9.0</flyway.version>
 
     <testcontainers.version>2.0.5</testcontainers.version>
 
@@ -429,7 +429,13 @@
         <scope>import</scope>
         <version>${log4j2.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-bom</artifactId>
+        <version>${micrometer.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-bom</artifactId>
@@ -513,6 +519,7 @@
         <version>${slf4j.version}</version>
         <scope>import</scope>
       </dependency>
+
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
@@ -737,13 +744,7 @@
         <artifactId>i18n-iso-639</artifactId>
         <version>4.4</version>
       </dependency>
-      <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-bom</artifactId>
-        <version>${micrometer.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
