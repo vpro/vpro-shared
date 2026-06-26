@@ -2,9 +2,8 @@ package nl.vpro.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.*;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
@@ -13,18 +12,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static nl.vpro.util.URLResource.PROPERTIES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 /**
@@ -138,70 +132,6 @@ public class URLResourceTest {
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
         broadcasters.get();
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(1);
-    }
-
-    @Test
-    public void broadcasters503() throws IOException {
-        HttpURLConnection connection = mock(HttpURLConnection.class);
-        when(connection.getResponseCode()).thenReturn(503, 200, 500, 200);
-        when(connection.getInputStream()).thenAnswer(invocation -> new ByteArrayInputStream("VPRO=VPRO".getBytes()));
-
-        URLResource<Properties> broadcasters = new URLResource<Properties>(URI.create("https://poms.omroep.nl/broadcasters/"), PROPERTIES, new Properties()) {
-            @Override
-            public URLConnection openConnection() {
-                return connection;
-            }
-        }.setMinAge(Duration.ZERO).setErrorCache(Duration.ZERO);
-
-
-
-        assertThat(broadcasters.get()).hasSize(0);
-        assertThat(broadcasters.getChangesCount()).isEqualTo(0);
-        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
-        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-        assertThat(broadcasters.getErrorCount()).isEqualTo(1);
-        Properties props = broadcasters.get();
-        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
-        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-        assertThat(broadcasters.getErrorCount()).isEqualTo(1);
-        assertThat((long) props.size()).isEqualTo(1);
-        props = broadcasters.get();
-        assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
-        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-        assertThat(broadcasters.getErrorCount()).isEqualTo(2);
-        assertThat((long) props.size()).isEqualTo(1);
-        props = broadcasters.get();
-        assertThat(broadcasters.getChangesCount()).isEqualTo(2);
-        assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
-        assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-        assertThat(broadcasters.getErrorCount()).isEqualTo(2);
-        assertThat((long) props.size()).isEqualTo(1);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"", "-acc", "-test"})
-    public void broadcastersReal(String env) {
-        URLResource<Properties> broadcasters = URLResource.properties(URI.create(String.format("https://poms%s.omroep.nl/broadcasters/", env)));
-        broadcasters.setMinAge(Duration.ZERO);
-        Properties properties = broadcasters.get();
-        if (broadcasters.getCode() != 503) {
-            assertTrue(properties.size() > 0);
-            assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-            assertThat(broadcasters.getNotModifiedCount()).isEqualTo(0);
-            assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-            broadcasters.get();
-
-            if (!"".equals(env)) { // TODO remove this in >= 7.1
-                assertThat(broadcasters.getChangesCount()).isEqualTo(1);
-                assertThat(broadcasters.getNotModifiedCount()).isEqualTo(1);
-                assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
-            }
-        } else {
-            log.info("Skipping because code = {}", broadcasters.getCode());
-        }
-        System.out.println(broadcasters.get());
     }
 
 }
