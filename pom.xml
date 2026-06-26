@@ -260,12 +260,31 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.21.0</version>
+        <configuration>
+          <rulesUri>file:///${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.10.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <autoPublish>true</autoPublish>
+          <waitUntil>published</waitUntil>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.4.1</version>
+          <version>3.12.0</version>
           <configuration>
             <!-- javadoc met java 8 is anders een absolute ramp, zeker met de oude zooi in dit project -->
             <doclint>none</doclint>
@@ -275,11 +294,10 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.12.1</version>
+          <version>3.15.0</version>
           <inherited>true</inherited>
           <configuration>
-            <source>${java.version}</source>
-            <target>${java.version}</target>
+            <release>${java.version}</release>
             <encoding>UTF-8</encoding>
             <annotationProcessorPaths>
               <path>
@@ -303,11 +321,11 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.10.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
@@ -316,7 +334,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>properties-maven-plugin</artifactId>
-          <version>1.1.0</version>
+          <version>1.3.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -912,82 +930,15 @@
     </dependency>
   </dependencies>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>vpro-ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>vpro-ossrh-release</id>
-      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 
   <profiles>
-    <profile>
-      <id>sonatype</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <repositories>
-        <repository>
-          <id>sonatype_snapshot</id>
-          <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-    <profile>
-      <id>vpro-nexus</id>
-      <distributionManagement>
-        <repository>
-          <id>nexus</id>
-          <name>Nexus releases</name>
-          <url>https://nexus.vpro.nl/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-          <id>nexus</id>
-          <name>Nexus snapshots</name>
-          <url>https://nexus.vpro.nl/content/repositories/snapshots</url>
-        </snapshotRepository>
-      </distributionManagement>
-      <repositories>
-        <repository>
-          <id>nexus</id>
-          <url>https://nexus.vpro.nl/content/groups/public</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
     <profile>
       <id>deploy</id>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>vpro-ossrh</serverId>
-              <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.4.0</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -998,9 +949,8 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -1010,12 +960,30 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.3.1</version>
+            <executions>
+              <execution>
+                <id>copy-sources-for-delombok</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
             <configuration>
-              <gpgArguments>
-                <arg>--pinentry-mode</arg>
-                <arg>loopback</arg>
-              </gpgArguments>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}/src/main/java</directory>
+                      <excludes>
+                        <exclude>module-info.java</exclude>
+                      </excludes>
+                    </resource>
+                  </resources>
+                  <outputDirectory>${delombok.input}</outputDirectory>
             </configuration>
+              </execution>
+            </executions>
           </plugin>
           <plugin>
             <groupId>org.projectlombok</groupId>
@@ -1029,10 +997,14 @@
               </dependency>
             </dependencies>
             <configuration>
-              <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+              <sourceDirectory>${delombok.input}</sourceDirectory>
               <outputDirectory>${delombok.output}</outputDirectory>
               <addOutputDirectory>false</addOutputDirectory>
               <encoding>UTF-8</encoding>
+              <verbose>true</verbose>
+              <formatPreferences>
+
+              </formatPreferences>
             </configuration>
             <executions>
               <execution>
@@ -1056,7 +1028,8 @@
             <configuration>
               <sourcepath>
                 ${delombok.output};
-                ${project.build.directory}/generated-sources/apt
+                ${project.build.directory}/generated-sources/apt;
+                ${project.build.directory}/generated-sources/xjb
               </sourcepath>
             </configuration>
           </plugin>
@@ -1064,5 +1037,19 @@
       </build>
     </profile>
   </profiles>
+
+  <repositories>
+    <repository>
+      <name>Central Portal Snapshots</name>
+      <id>central-portal-snapshots</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
 </project>

@@ -127,52 +127,31 @@
     </dependencies>
   </dependencyManagement>
 
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>vpro-ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>vpro-ossrh-release</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
+      <build>
+    <defaultGoal>install</defaultGoal>
+        <plugins>
+          <plugin>
+         <groupId>org.sonatype.central</groupId>
+         <artifactId>central-publishing-maven-plugin</artifactId>
+         <version>0.10.0</version>
+            <extensions>true</extensions>
+            <configuration>
+           <publishingServerId>central</publishingServerId>
+           <autoPublish>true</autoPublish>
+           <waitUntil>published</waitUntil>
+            </configuration>
+          </plugin>
+    </plugins>
+  </build>
 
   <profiles>
-    <profile>
-      <id>vpro-nexus</id>
-      <distributionManagement>
-        <repository>
-          <id>nexus</id>
-          <name>Nexus releases</name>
-          <url>https://nexus.vpro.nl/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-          <id>nexus</id>
-          <name>Nexus snapshots</name>
-          <url>https://nexus.vpro.nl/content/repositories/snapshots</url>
-        </snapshotRepository>
-      </distributionManagement>
-    </profile>
     <profile>
       <id>deploy</id>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>vpro-ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-          <plugin>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.4.0</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -184,7 +163,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
