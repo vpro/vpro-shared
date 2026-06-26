@@ -279,12 +279,13 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         }
     }
 
+    private final Map<ClassLoader, Boolean> warned = new ConcurrentHashMap<>();
     @SneakyThrows
     protected String getVersion(String prop, ClassLoader loader) {
         final Properties properties = new Properties();
         try {
             URL resource = loader.getResource("/maven.properties");
-            if (resource == null) {
+            if (resource == null && warned.putIfAbsent(loader, Boolean.TRUE) != null) {
                 log.warn("No maven.properties found");
             } else {
                 properties.load(resource.openStream());
