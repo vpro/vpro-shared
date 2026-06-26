@@ -57,6 +57,7 @@
 
     <lombok.version>1.18.30</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
+    <delombok.input>${project.build.directory}/delombok-input</delombok.input>
 
 
     <!-- https://github.com/elastic/elasticsearch-py/issues/1639 -->
