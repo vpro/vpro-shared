@@ -12,6 +12,10 @@ on:
         required: true
         default: 'false'
 
+permissions:
+  checks: write
+  contents: read
+
 env:
   skipTests: false
 
