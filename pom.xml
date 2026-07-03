@@ -46,7 +46,7 @@
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.19.0</math.version>
     <meeuw.util.version>1.17</meeuw.util.version>
-    <checker.version>4.2.0</checker.version>
+    <checker.version>4.2.1</checker.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
