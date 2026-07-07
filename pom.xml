@@ -25,7 +25,7 @@
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <jackson3.version>3.2.0</jackson3.version>
 
-    <junit.version>6.1.0</junit.version>
+    <junit.version>6.1.1</junit.version>
     <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
     <resteasy.version>7.0.2.Final</resteasy.version>
@@ -46,15 +46,15 @@
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.19.0</math.version>
     <meeuw.util.version>1.17</meeuw.util.version>
-    <checker.version>4.2.0</checker.version>
+    <checker.version>4.2.1</checker.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>7.4.1.Final</hibernate.version>
+    <hibernate.version>7.4.3.Final</hibernate.version>
     <hibernate.search.version>8.4.0.Final</hibernate.search.version>
-    <hibernate.validator.version>9.1.0.Final</hibernate.validator.version>
+    <hibernate.validator.version>9.1.1.Final</hibernate.validator.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.1.0</servlet.api.version>
@@ -66,7 +66,7 @@
 
     <camel.version>4.20.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.50</swagger.version>
+    <swagger.version>2.2.52</swagger.version>
     <lombok.version>1.18.46</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
     <delombok.input>${project.build.directory}/delombok-input</delombok.input>
@@ -79,7 +79,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.0</micrometer.version>
-    <flyway.version>12.8.1</flyway.version>
+    <flyway.version>12.10.0</flyway.version>
 
     <testcontainers.version>2.0.5</testcontainers.version>
 
@@ -429,7 +429,13 @@
         <scope>import</scope>
         <version>${log4j2.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-bom</artifactId>
+        <version>${micrometer.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-bom</artifactId>
@@ -513,6 +519,7 @@
         <version>${slf4j.version}</version>
         <scope>import</scope>
       </dependency>
+
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
@@ -723,7 +730,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.11</version>
+        <version>42.7.12</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
@@ -737,13 +744,7 @@
         <artifactId>i18n-iso-639</artifactId>
         <version>4.4</version>
       </dependency>
-      <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-bom</artifactId>
-        <version>${micrometer.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
