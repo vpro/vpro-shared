@@ -19,7 +19,6 @@ import org.slf4j.event.Level;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpHeaders;
 
 import nl.vpro.monitoring.config.*;
 
@@ -35,8 +34,6 @@ public class PrometheusController {
     private final Provider<PrometheusMeterRegistry> registry;
 
     private final MonitoringProperties properties;
-
-
 
 
     @Inject
@@ -71,13 +68,6 @@ public class PrometheusController {
         if (authenticate(request, response)) {
 
             log.debug("Scraping Prometheus metrics");
-            String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (auth == null || !auth.startsWith("Basic ")) {
-                response.setHeader("WWW-Authenticate", "Basic realm=\"Protected\"");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(CONTENT_TYPE);
             try (
@@ -121,6 +111,9 @@ public class PrometheusController {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws IOException {
+        if (Authentication.service(request, response, properties)) {
+            return true;
+        }
         return Authentication.basic(request, response, properties);
     }
 
