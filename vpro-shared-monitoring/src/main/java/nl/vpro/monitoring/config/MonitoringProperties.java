@@ -25,6 +25,15 @@ public class MonitoringProperties implements Serializable {
     @Value("${monitoring.password:${MONITORING_PASSWORD:admin2k}}")
     private String password;
 
+    /**
+     * File containing the bearer token of the service account of the (OpenShift/Kubernetes) deployment.
+     * An incoming {@code Authorization: Bearer <token>} is accepted when it equals the contents of this file.
+     * Defaults to the standard location where Kubernetes mounts the pod's service account token.
+     * When the file is absent or unreadable, service-account (bearer) authentication is simply disabled.
+     */
+    @Value("${monitoring.serviceTokenFile:${MONITORING_SERVICE_TOKEN_FILE:/var/run/secrets/kubernetes.io/serviceaccount/token}}")
+    private String serviceTokenFile;
+
     @Value("${monitoring.tags:#{null}}")
     private List<String> commonTags;
 

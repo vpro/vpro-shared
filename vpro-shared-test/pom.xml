@@ -15,7 +15,7 @@
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
     <vpro.shared.module.postfix>test</vpro.shared.module.postfix>
-    <log4j2.root.logger>debug</log4j2.root.logger>
+    <log4j2.stdout.level>DEBUG</log4j2.stdout.level>
   </properties>
 
   <dependencies>
@@ -27,7 +27,7 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-jackson3</artifactId>
     </dependency>
- 
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
