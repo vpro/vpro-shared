@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.*;
@@ -17,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
+
+import static nl.vpro.util.CloseableIterator.*;
 
 /**
  * Executor for external commands.
@@ -239,10 +242,55 @@ public interface CommandExecutor {
                 }
                 getLogger().debug("Ready with {}", i);
             });
-            return result.lines().onClose(() -> {
-                submit.cancel(true);
-                CloseableIterator.closeQuietly(writer);
-            });
+            @SuppressWarnings("resource")
+            CloseableIterator<String> iterator = new CloseableIterator<>() {
+                String next;
+                boolean fetched;
+                boolean finished;
+
+                @Override
+                public boolean hasNext() {
+                    if (finished) {
+                        return false;
+                    }
+                    if (fetched) {
+                        return true;
+                    }
+                    try {
+                        next = result.readLine();
+                        fetched = true;
+                        if (next == null) {
+                            finished = true;
+                            closeQuietly(result, writer, reader);
+                            return false;
+                        }
+                        return true;
+                    } catch (IOException ioe) {
+                        if (isBrokenPipe(ioe)) {
+                            finished = true;
+                            closeQuietly(result, writer, reader);
+                            return false;
+                        }
+                        throw new UncheckedIOException(ioe);
+                    }
+                }
+
+                @Override
+                public String next() {
+                    if (!hasNext()) {
+                        throw new java.util.NoSuchElementException();
+                    }
+                    fetched = false;
+                    return next;
+                }
+
+                @Override
+                public void close() {
+                    submit.cancel(true);
+                    closeQuietly(result, writer, reader);
+                }
+            };
+            return iterator.stream();
         } catch (IOException e) {
             getLogger().error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -257,7 +305,18 @@ public interface CommandExecutor {
     }
 
     static boolean isBrokenPipe(Throwable ioe) {
-         return ioe.getCause() != null && ioe.getCause().getMessage().equalsIgnoreCase("broken pipe");
+        Throwable current = ioe;
+        while (current != null) {
+            String message = current.getMessage();
+            if (message != null) {
+                String lowerCase = message.toLowerCase(Locale.ROOT);
+                if (lowerCase.contains("broken pipe") || lowerCase.contains("write end dead")) {
+                    return true;
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     SimpleLogger getLogger();
