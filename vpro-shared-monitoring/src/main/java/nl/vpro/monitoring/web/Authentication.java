@@ -1,6 +1,12 @@
 package nl.vpro.monitoring.web;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.Base64;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +21,7 @@ import nl.vpro.monitoring.config.MonitoringProperties;
  * It is just called from within
  * @since 5.7
  */
+@Slf4j
 public class Authentication {
 
     private Authentication() {
@@ -44,5 +51,45 @@ public class Authentication {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return false;
 
+    }
+
+    /**
+     * Authenticates the service account of the (OpenShift/Kubernetes) deployment: an incoming bearer token is
+     * accepted when it equals the pod's service account token, as read from
+     * {@link MonitoringProperties#getServiceTokenFile()}.
+     * <p>
+     * Unlike {@link #basic(HttpServletRequest, HttpServletResponse, MonitoringProperties) basic} this does <em>not</em>
+     * send an error response when it fails, so the caller can fall back to another authentication method.
+     */
+    static boolean service(HttpServletRequest request, HttpServletResponse response, MonitoringProperties properties) {
+        String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (auth == null || !auth.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return false;
+        }
+        String token = auth.substring(7).trim();
+
+        String tokenFile = properties.getServiceTokenFile();
+        if (tokenFile == null || tokenFile.isEmpty()) {
+            return false;
+        }
+        Path path = Path.of(tokenFile);
+        if (!Files.isReadable(path)) {
+            log.debug("No service account token readable at {}; bearer authentication disabled", path);
+            return false;
+        }
+        final String expectedToken;
+        try {
+            expectedToken = Files.readString(path).trim();
+        } catch (IOException e) {
+            log.warn("Could not read service account token from {}: {}", path, e.getMessage());
+            return false;
+        }
+        if (expectedToken.isEmpty()) {
+            return false;
+        }
+        // constant-time comparison to avoid leaking the token via timing.
+        return MessageDigest.isEqual(
+            expectedToken.getBytes(StandardCharsets.UTF_8),
+            token.getBytes(StandardCharsets.UTF_8));
     }
 }
