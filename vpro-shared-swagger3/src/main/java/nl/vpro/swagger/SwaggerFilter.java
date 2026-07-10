@@ -17,6 +17,7 @@ import org.meeuw.json.grep.Sed;
 import org.meeuw.json.grep.matching.*;
 
 import nl.vpro.web.HttpServletRequestUtils;
+import nl.vpro.web.support.WrappedServletOutputStream;
 
 /**
  * This filter can be used to fill in 'api.basePath' using the request, so you don't have to configure it anymore.
@@ -72,37 +73,9 @@ public class SwaggerFilter extends HttpFilter {
         final HttpServletResponseWrapper wrapped = new HttpServletResponseWrapper(response) {
             @Override
             public ServletOutputStream getOutputStream() {
-                return new ServletOutputStream() {
-                    @Override
-                    public boolean isReady() {
-                        return servletOutputStream.isReady();
-
-                    }
-
-                    @Override
-                    public void setWriteListener(WriteListener writeListener) {
-                        servletOutputStream.setWriteListener(writeListener);
-                    }
-
-                    @Override
-                    public void write(int b) throws IOException {
-                        out.write(b);
-
-                    }
-
-                    @Override
-                    public void write(byte[] b) throws IOException {
-                        out.write(b);
-                    }
-
-                    @Override
-                    public void write(byte[] b, int off, int len) throws IOException {
-                        out.write(b, off, len);
-                    }
-                };
+                return new WrappedServletOutputStream(out, servletOutputStream);
             }
         };
-
         chain.doFilter(request, wrapped);
         out.close();
 

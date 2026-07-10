@@ -19,10 +19,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public class WrappedServletOutputStream extends ServletOutputStream {
 
     private final DataOutputStream stream;
+    private final ServletOutputStream delegate;
 
 
     public WrappedServletOutputStream(OutputStream stream) {
+        this(stream, null);
+    }
+    public WrappedServletOutputStream(OutputStream stream, ServletOutputStream delegate) {
         this.stream = new DataOutputStream(stream);
+        this.delegate = delegate;
     }
 
     @Override
@@ -42,12 +47,13 @@ public class WrappedServletOutputStream extends ServletOutputStream {
 
     @Override
     public boolean isReady() {
-        return false;
-
+        return delegate != null && delegate.isReady();
     }
 
     @Override
     public void setWriteListener(WriteListener writeListener) {
-
+        if (delegate != null) {
+            delegate.setWriteListener(writeListener);
+        }
     }
 }
