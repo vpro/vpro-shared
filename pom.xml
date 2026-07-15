@@ -21,11 +21,11 @@
     <spring-security.version>7.1.0</spring-security.version>
 
 
-    <jackson2.version>2.21.4</jackson2.version> <!-- 2.21 is LTS -->
+    <jackson2.version>2.21.5</jackson2.version> <!-- 2.21 is LTS -->
     <jackson-annotations.version>2.22</jackson-annotations.version>
-    <jackson3.version>3.2.0</jackson3.version>
+    <jackson3.version>3.2.1</jackson3.version>
 
-    <junit.version>6.1.1</junit.version>
+    <junit.version>6.1.2</junit.version>
     <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
     <resteasy.version>7.0.2.Final</resteasy.version>
@@ -36,9 +36,9 @@
     -->
     <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.18.10</bytebuddy.version>
+    <bytebuddy.version>1.18.11</bytebuddy.version>
     <slf4j.version>2.0.18</slf4j.version>
-    <log4j2.version>2.26.0</log4j2.version>
+    <log4j2.version>2.26.1</log4j2.version>
     <guava.version>33.6.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
@@ -52,13 +52,13 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>7.4.3.Final</hibernate.version>
+    <hibernate.version>7.4.5.Final</hibernate.version>
     <hibernate.search.version>8.4.0.Final</hibernate.search.version>
-    <hibernate.validator.version>9.1.1.Final</hibernate.validator.version>
+    <hibernate.validator.version>9.1.2.Final</hibernate.validator.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.1.0</servlet.api.version>
-    <validation.api.version>3.1.1</validation.api.version>
+    <validation.api.version>3.1.2</validation.api.version>
     <persistence.api.version>3.2.0</persistence.api.version>
     <annotation.api.version>3.0.0</annotation.api.version>
     <xml-bind.api.version>4.0.5</xml-bind.api.version>
@@ -79,7 +79,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.0</micrometer.version>
-    <flyway.version>12.10.0</flyway.version>
+    <flyway.version>12.11.0</flyway.version>
 
     <testcontainers.version>2.0.5</testcontainers.version>
 
@@ -730,7 +730,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.12</version>
+        <version>42.7.13</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
@@ -748,7 +748,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>5.0.6</version>
+        <version>5.0.7</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
