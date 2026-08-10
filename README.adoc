@@ -86,7 +86,7 @@ Release builds will be provided via https://central.sonatype.com/search?q=g%3Anl
 
 
 | 6.x >
-| java 21 (released in sep. 2023)
+| java 21 (released in sep. 2023), spring 7, hibernate 7
 | 2026?
 
 
