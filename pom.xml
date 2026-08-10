@@ -21,14 +21,14 @@
     <spring-security.version>7.1.0</spring-security.version>
 
 
-    <jackson2.version>2.21.5</jackson2.version> <!-- 2.21 is LTS -->
+    <jackson2.version>2.22.1</jackson2.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <jackson3.version>3.2.1</jackson3.version>
 
-    <junit.version>6.1.2</junit.version>
+    <junit.version>6.1.3</junit.version>
     <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
-    <resteasy.version>7.0.2.Final</resteasy.version>
+    <resteasy.version>7.0.3.Final</resteasy.version>
 
     <!--
     seems to be in use by both resteasy and hibernate-search
@@ -42,11 +42,11 @@
     <guava.version>33.6.0-jre</guava.version>
     <javassist.version>3.30.2-GA</javassist.version>
     <wss4j.version>2.3.2</wss4j.version>
-    <xmlunit.version>2.12.0</xmlunit.version>
+    <xmlunit.version>2.13.0</xmlunit.version>
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.19.0</math.version>
     <meeuw.util.version>1.17</meeuw.util.version>
-    <checker.version>4.2.1</checker.version>
+    <checker.version>4.2.2</checker.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
@@ -54,7 +54,7 @@
 
     <hibernate.version>7.4.5.Final</hibernate.version>
     <hibernate.search.version>8.4.0.Final</hibernate.search.version>
-    <hibernate.validator.version>9.1.2.Final</hibernate.validator.version>
+    <hibernate.validator.version>9.1.3.Final</hibernate.validator.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.1.0</servlet.api.version>
@@ -66,7 +66,7 @@
 
     <camel.version>4.20.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
-    <swagger.version>2.2.52</swagger.version>
+    <swagger.version>2.2.53</swagger.version>
     <lombok.version>1.18.46</lombok.version>
     <delombok.output>${project.build.directory}/delombok</delombok.output>
     <delombok.input>${project.build.directory}/delombok-input</delombok.input>
@@ -79,7 +79,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.0</micrometer.version>
-    <flyway.version>12.11.0</flyway.version>
+    <flyway.version>13.2.0</flyway.version>
 
     <testcontainers.version>2.0.5</testcontainers.version>
 
@@ -217,7 +217,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.14</version>
+        <version>0.8.15</version>
         <executions>
           <execution>
             <goals>
@@ -359,7 +359,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.5.1</version>
           <configuration>
             <archive>
               <manifestEntries>
@@ -375,11 +375,11 @@
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.10.0</version>
+          <version>3.11.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>3.5.0</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -748,7 +748,7 @@
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
-        <version>5.0.7</version>
+        <version>5.0.8</version>
       </dependency>
       <dependency>
         <groupId>org.javassist</groupId>
@@ -872,7 +872,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-resources-plugin</artifactId>
-            <version>3.3.1</version>
+            <version>3.5.0</version>
             <executions>
               <execution>
                 <id>copy-sources-for-delombok</id>
