@@ -7,8 +7,7 @@ import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,6 +36,10 @@ class PrometheusControllerTest {
     @Autowired
     ManageFilter manageFilter;
 
+    @BeforeAll
+    public static void init() {
+        System.setProperty("MONITORING_PASSWORD", "admin2k");
+    }
 
     @BeforeEach
     public void setup() throws ServletException {
@@ -52,8 +55,11 @@ class PrometheusControllerTest {
         healthController.monitoringProperties.setUser("foo");
         healthController.monitoringProperties.setPassword("bar");
         healthController.monitoringProperties.setHealthPermitAll(true);
+        healthController.monitoringProperties.init();
+
         healthController.request = new MockHttpServletRequest();
         healthController.response = new MockHttpServletResponse();
+
         ResponseEntity<Health> response = healthController.health();
         assertThat(response.getStatusCode().value()).isEqualTo(503);
         assertThat(response.getBody()).isNotNull();
