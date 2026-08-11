@@ -66,7 +66,7 @@ public class PrometheusController {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws IOException {
-        if (authenticate(request, response)) {
+        if (Authentication.authenticate(request, response, properties)) {
 
             log.debug("Scraping Prometheus metrics");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -112,14 +112,5 @@ public class PrometheusController {
     }
 
 
-    private boolean authenticate(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws IOException {
-        if (Authentication.service(request, response, properties)) {
-            return true;
-        }
-        return Authentication.basic(request, response, properties);
-    }
 
 }
