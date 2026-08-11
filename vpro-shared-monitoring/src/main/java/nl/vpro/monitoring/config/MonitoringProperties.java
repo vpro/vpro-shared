@@ -159,7 +159,7 @@ public class MonitoringProperties implements Serializable {
             authenticationMethods.add(Method.BEARER);
         }
         this.authenticationMethods = Collections.unmodifiableSet(authenticationMethods);
-        log.info("Available methods for authentication {}", this.authenticationMethods + (healthPermitAll ? "(/health is always permitted)" : ""));
+        log.info("Available methods for authentication {}", this.authenticationMethods + (healthPermitAll ? " (/health is always permitted)" : ""));
 
     }
 }
