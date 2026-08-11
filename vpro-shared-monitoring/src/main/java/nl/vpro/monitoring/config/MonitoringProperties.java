@@ -10,6 +10,10 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.util.*;
 
+import lombok.extern.log4j.Log4j2;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
+@Slf4j
 public class MonitoringProperties implements Serializable {
 
     @Serial
@@ -154,6 +159,7 @@ public class MonitoringProperties implements Serializable {
             authenticationMethods.add(Method.BEARER);
         }
         this.authenticationMethods = Collections.unmodifiableSet(authenticationMethods);
+        log.info("Available methods for authentication {}", this.authenticationMethods + (healthPermitAll ? "(/health is always permitted)" : ""));
 
     }
 }
