@@ -163,6 +163,8 @@ public class Authentication {
         if (serviceAuth.isPresent()) {
             return serviceAuth.getAsBoolean();
         }
-        return basic(methods, request, response, properties).orElse(false);
+        return basic(methods, request, response, properties)
+            // basic authentication not present either. Just permit all.
+            .orElse(true);
     }
 }
