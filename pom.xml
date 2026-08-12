@@ -768,7 +768,7 @@
       <dependency>
         <groupId>org.meeuw</groupId>
         <artifactId>mihxil-json-grep</artifactId>
-        <version>1.0</version>
+        <version>0.15</version> <!-- 1.x is jackson 3 -->
       </dependency>
       <dependency>
         <groupId>org.ehcache</groupId>
