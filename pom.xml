@@ -64,7 +64,7 @@
     <xml-bind.api.version>4.0.5</xml-bind.api.version>
 
 
-    <camel.version>4.20.0</camel.version> <!-- limit to LTS (I think even majors) -->
+    <camel.version>4.22.0</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.53</swagger.version>
     <lombok.version>1.18.46</lombok.version>
