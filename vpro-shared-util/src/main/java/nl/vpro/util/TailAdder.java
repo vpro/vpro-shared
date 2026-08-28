@@ -14,8 +14,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  *
  * @author Michiel Meeuwissen
  * @since 1.17
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Slf4j
+@Deprecated
 public class TailAdder<T> implements CountedIterator<T> {
 
     private final boolean onlyIfEmpty;

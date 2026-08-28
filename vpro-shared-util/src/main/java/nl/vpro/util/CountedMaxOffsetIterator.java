@@ -13,7 +13,9 @@ import org.meeuw.functional.Unwrappable;
 /**
  * @author Michiel Meeuwissen
  * @since 2.23
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class CountedMaxOffsetIterator<T>  extends MaxOffsetIterator<T>  implements CountedIterator<T>, Unwrappable<CountedIterator<T>> {
 
     private final CountedIterator<T> wrappedCountedIterator;

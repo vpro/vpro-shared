@@ -11,7 +11,9 @@ import org.meeuw.functional.Unwrappable;
  * <p>
  * It simply wraps another iterator, which is one iteration ahead on call of 'hasNext'.
  * @author Michiel Meeuwissen
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class CallbackIterator<T> implements CountedIterator<T>, Unwrappable<CloseableIterator<T>> {
 
     private final CloseableIterator<T> wrapped;

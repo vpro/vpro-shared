@@ -18,8 +18,10 @@ import org.meeuw.functional.Unwrappable;
  * Filtering, or Transforming iterator.
  * @author Michiel Meeuwissen
  * @since 1.3
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Slf4j
+@Deprecated
 public class FilteringIterator<T> implements CloseableIterator<T>, Unwrappable<Iterator<? extends T>> {
 
     private final Iterator<? extends T> wrapped;

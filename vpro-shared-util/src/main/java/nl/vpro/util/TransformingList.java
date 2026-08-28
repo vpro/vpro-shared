@@ -6,7 +6,9 @@ import java.util.function.Function;
 /**
  * @author Michiel Meeuwissen
  * @since 4.3
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class TransformingList<T, S> extends AbstractList<T> implements TransformingCollection<T, S, List<T>, List<S>> {
 
     private final List<S> wrapped;
