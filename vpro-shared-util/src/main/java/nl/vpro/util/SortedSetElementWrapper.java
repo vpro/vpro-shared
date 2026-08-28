@@ -10,7 +10,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * @author Michiel Meeuwissen
  * @since 2.3.1
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public abstract class SortedSetElementWrapper<T, S> extends AbstractSet<S> implements SortedSet<S> {
 
     protected final SortedSet<T> wrapped;

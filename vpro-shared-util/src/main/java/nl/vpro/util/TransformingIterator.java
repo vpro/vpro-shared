@@ -6,7 +6,9 @@ import java.util.function.Function;
 /**
  * @author Michiel Meeuwissen
  * @since 2.9
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class TransformingIterator<T, W> implements CloseableIterator<T> {
 
     final Iterator<? extends W> wrapped;
