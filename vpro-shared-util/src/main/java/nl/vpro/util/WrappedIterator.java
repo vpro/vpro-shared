@@ -9,7 +9,9 @@ import org.meeuw.functional.Unwrappable;
 /**
  * @author Michiel Meeuwissen
  * @since 1.3
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public  abstract class WrappedIterator<T, S> implements CountedIterator<S>, Unwrappable<CloseableIterator<T>> {
 
     protected final CloseableIterator<T> wrapped;

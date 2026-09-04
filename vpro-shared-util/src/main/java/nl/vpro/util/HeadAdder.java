@@ -13,8 +13,10 @@ import org.meeuw.functional.Unwrappable;
  * Wraps an iterator, to add zero or more elements at the start of it.
  * @author Michiel Meeuwissen
  * @since 1.72
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Slf4j
+@Deprecated
 public class HeadAdder<T> implements Iterator<T>, Unwrappable<Iterator<T>> {
 
     private final Function<T, T>[] adder;

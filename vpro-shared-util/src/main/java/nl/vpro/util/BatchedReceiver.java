@@ -80,9 +80,11 @@ import java.util.function.*;
  *
  * @author Michiel Meeuwissen
  * @since 1.68
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @ToString
 @Slf4j
+@Deprecated
 public class BatchedReceiver<T> implements Iterator<T> {
 
     /**

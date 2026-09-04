@@ -9,8 +9,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  *
  * @author Michiel Meeuwissen
  * @since 5.1
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @SuppressWarnings("rawtypes")
+@Deprecated
 class CountedPeekingIteratorImpl<T> extends CloseablePeekingIteratorImpl<T> implements  CountedPeekingIterator<T> {
 
     private final CountedIterator<? extends T> wrapped;

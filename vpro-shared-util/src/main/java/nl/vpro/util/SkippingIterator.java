@@ -11,8 +11,10 @@ import java.util.function.BiFunction;
  * A wrapping iterator with the option to skip certain entries (based on comparing with the previous entry)
  * @author Michiel Meeuwissen
  * @since 1.68
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @ToString
+@Deprecated
 public class SkippingIterator<T> implements Iterator<T> {
 
     private final Iterator<T> wrapped;

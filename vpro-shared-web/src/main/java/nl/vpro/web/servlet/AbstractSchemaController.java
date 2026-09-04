@@ -49,7 +49,7 @@ public abstract class AbstractSchemaController<M extends BiFunction<String, Sche
     protected void a(XMLStreamWriter w, String href, String chars) throws XMLStreamException {
         w.writeStartElement("a");
         if (href.startsWith("./") && ! httpServletRequest.getServletPath().endsWith("/")) {
-            href = httpServletRequest.getServletPath() + "/" + href.substring(2);
+            href = httpServletRequest.getContextPath() + httpServletRequest.getServletPath() + "/" + href.substring(2);
 
         }
         w.writeAttribute("href", href);

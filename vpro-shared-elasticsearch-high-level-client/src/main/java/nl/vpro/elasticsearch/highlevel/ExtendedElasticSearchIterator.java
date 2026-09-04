@@ -31,7 +31,6 @@ public class ExtendedElasticSearchIterator<T> extends ElasticSearchIterator<T> {
     private SearchSourceBuilder searchSourceBuilder;
 
     @lombok.Builder(builderClassName = "ExtendedBuilder", builderMethodName = "extendedBuilder")
-    @lombok.SneakyThrows
     protected ExtendedElasticSearchIterator(
         @lombok.NonNull RestHighLevelClient client,
         Function<JsonNode, T> adapt,
