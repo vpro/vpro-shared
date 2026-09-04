@@ -17,6 +17,6 @@ public class CRIDValidator implements ConstraintValidator<CRID, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
-        return PATTERN.matcher(value).matches();
+        return value == null || PATTERN.matcher(value).matches();
     }
 }

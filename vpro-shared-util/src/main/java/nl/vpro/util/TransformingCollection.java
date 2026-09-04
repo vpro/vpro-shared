@@ -9,7 +9,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * @author Michiel Meeuwissen
  * @since 4.3
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public interface TransformingCollection<T, S, U extends Collection<T>, V extends Collection<S>> extends Collection<T> {
 
     T transform(S entry);

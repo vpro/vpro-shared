@@ -9,7 +9,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * @author Michiel Meeuwissen
  * @since 4.3
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class TransformingSortedSet<T, S> extends AbstractSet<T> implements SortedSet<T>, TransformingCollection<T, S, SortedSet<T>, SortedSet<S>> {
     private final SortedSet<S> wrapped;
     private final Map<S, Optional<T>> transformed;

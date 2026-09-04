@@ -1,19 +1,27 @@
 package nl.vpro.monitoring.config;
 
+import jakarta.annotation.PostConstruct;
+
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.List;
+import java.util.*;
 
+import lombok.extern.log4j.Log4j2;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
 @Component
+@Slf4j
 public class MonitoringProperties implements Serializable {
 
     @Serial
@@ -22,7 +30,7 @@ public class MonitoringProperties implements Serializable {
     @Value("${monitoring.user:${MONITORING_USER:manager}}")
     private String user;
 
-    @Value("${monitoring.password:${MONITORING_PASSWORD:admin2k}}")
+    @Value("${monitoring.password:${MONITORING_PASSWORD:#{null}}}")
     private String password;
 
     /**
@@ -133,4 +141,25 @@ public class MonitoringProperties implements Serializable {
     @Value("${monitoring.endpoints.wellknown:#{null}}")
     private Boolean wellknown = null;
 
+
+    public enum Method {
+        BASIC,
+        BEARER
+    }
+
+    private Set<Method> authenticationMethods;
+
+    @PostConstruct
+    public void init() {
+        Set<Method> authenticationMethods = new HashSet<>();
+        if (StringUtils.isNotBlank(getPassword()) && StringUtils.isNotBlank(getUser())) {
+            authenticationMethods.add(Method.BASIC);
+        }
+        if (StringUtils.isNotBlank(getServiceTokenFile())) {
+            authenticationMethods.add(Method.BEARER);
+        }
+        this.authenticationMethods = Collections.unmodifiableSet(authenticationMethods);
+        log.info("Available methods for authentication {}", this.authenticationMethods + (healthPermitAll ? " (/health is always permitted)" : ""));
+
+    }
 }

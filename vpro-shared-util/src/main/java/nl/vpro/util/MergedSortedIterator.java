@@ -9,7 +9,9 @@ import com.google.common.collect.PeekingIterator;
 /**
  * @author Michiel Meeuwissen
  * @since 0.32
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class MergedSortedIterator<T>  extends BasicWrappedIterator<T> implements  CountedIterator<T> {
 
     protected MergedSortedIterator(Supplier<Long> size, Supplier<Long> totalSize, Iterator<T> iterator) {

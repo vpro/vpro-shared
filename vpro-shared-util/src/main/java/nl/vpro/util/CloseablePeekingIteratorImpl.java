@@ -10,7 +10,9 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Michiel Meeuwissen
  * @since 5.1
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 class CloseablePeekingIteratorImpl<T> implements CloseablePeekingIterator<T>, Unwrappable<CloseableIterator<? extends T>> {
     protected final CloseableIterator<? extends T> iterator;
     private boolean hasPeeked;

@@ -13,7 +13,9 @@ import com.google.common.collect.PeekingIterator;
  *
  * @author Michiel Meeuwissen
  * @since 0.31
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public interface CountedIterator<T> extends Iterator<T>, CloseableIterator<T>, Counted {
 
     static <S> CountedIterator<S> of(Collection<S> wrapped) {

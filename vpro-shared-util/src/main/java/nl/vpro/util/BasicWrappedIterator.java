@@ -11,7 +11,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 /**
  * @author Michiel Meeuwissen
  * @since 0.31
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
 
     private final Supplier<Long> size;

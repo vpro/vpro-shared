@@ -5,7 +5,9 @@ import java.util.SortedSet;
 /**
  * @author Michiel Meeuwissen
  * @since 2.3.1
+ * @deprecated Use org.meeuw.util:mihxil-collections
  */
+@Deprecated
 public abstract class SortedSetSameElementWrapper<T> extends SortedSetElementWrapper<T, T> {
     public SortedSetSameElementWrapper(SortedSet<T> wrapped) {
         super(wrapped);
