@@ -13,7 +13,6 @@ import jakarta.inject.Provider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.connector.ClientAbortException;
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.math.windowed.WindowedStatisticalLong;
 import org.slf4j.event.Level;
@@ -91,10 +90,14 @@ public class PrometheusController {
             writer.write("# No prometheus registry available. Please use %s or %s (or some other way) to register a PrometheusRegistry in your spring application context\n".formatted(EnableMonitoring.class, MeterRegistryConfiguration.class).getBytes());
             writer.flush();
             return Duration.ZERO;
-        } catch (ClientAbortException clientAbortException) {
-            Duration duration  = Duration.ofNanos(System.nanoTime() - start);
-            log.info("Client aborted connection while scraping Prometheus metrics (after {})", duration);
-            return duration;
+        } catch (IOException clientAbortException) {
+            if (clientAbortException.getClass().getSimpleName().equals("ClientAbortException")) {
+                Duration duration = Duration.ofNanos(System.nanoTime() - start);
+                log.info("Client aborted connection while scraping Prometheus metrics (after {})", duration);
+                return duration;
+            } else {
+                throw clientAbortException;
+            }
         }
     }
 
