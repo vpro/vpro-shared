@@ -40,10 +40,16 @@ class MonitoringConfigTest {
         properties.setMeterHibernateQuery(false);
         properties.setMeterPostgres(false);
         properties.setMeterLog4j(false);
-
-
-        config.init(null);
-        config.getGlobalMeterRegistry().clear();
+        properties.setMeterClassloader(false);
+        properties.setMeterJvmHeap(false);
+        properties.setMeterJvmGc(false);
+        properties.setMeterJvmMemory(false);
+        properties.setMeterJvmThread(false);
+        properties.setMeterProcessor(false);
+        properties.setMeterTomcat(false);
+        properties.setMeterUptime(false);
+        properties.setMeterGaugeScript(false);
+        config.createMeterRegistry();
     }
 
 
