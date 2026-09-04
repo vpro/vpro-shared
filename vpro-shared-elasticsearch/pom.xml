@@ -26,8 +26,8 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-util</artifactId>
+      <groupId>org.meeuw.util</groupId>
+      <artifactId>mihxil-collections</artifactId>
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>

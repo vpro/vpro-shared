@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import nl.vpro.util.CountedIterator;
+import org.meeuw.collections.CountedIterator;
 
 /**
  * @author Michiel Meeuwissen
