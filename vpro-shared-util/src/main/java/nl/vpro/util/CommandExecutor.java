@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
-import static nl.vpro.util.CloseableIterator.*;
-
 /**
  * Executor for external commands.
  * <p>
@@ -458,6 +456,18 @@ public interface CommandExecutor {
             @Deprecated
             public Builder consumer(Consumer<Process> consumer) {
                 return onProcessCreation(consumer);
+            }
+        }
+    }
+
+    static void closeQuietly(AutoCloseable... closeables) {
+        for (AutoCloseable closeable : closeables) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (Exception e) {
+                // ignore
             }
         }
     }
