@@ -19,7 +19,7 @@ public class ProviderAndBuilderTest {
 
     @AllArgsConstructor
     @Data
-    @Builder
+    @lombok.Builder
     public static class A {
         private String a;
         private Integer b;
