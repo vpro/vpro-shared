@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 
-@Builder
+@lombok.Builder
 public record Health(
     int status,
     String message,
