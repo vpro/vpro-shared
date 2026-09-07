@@ -15,6 +15,7 @@ import org.meeuw.functional.Unwrappable;
  * of hasNext() or next().
  * @author Michiel Meeuwissen
  */
+@Deprecated
 public class LazyIterator<T> implements CloseableIterator<T>, CountedIterator<T>, Unwrappable<Supplier<Iterator<T>>> {
 
     private final Supplier<Iterator<T>> supplier;
