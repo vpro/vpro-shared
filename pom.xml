@@ -146,7 +146,6 @@
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
-    <module>vpro-shared-log4j2</module>
     <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
@@ -801,9 +800,14 @@
       <dependency>
         <groupId>nl.mmprogrami</groupId>
         <artifactId>setup-log4j2</artifactId>
-        <version>1.5</version>
+        <version>1.7</version>
         <classifier>test</classifier>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>nl.mmprogrami</groupId>
+        <artifactId>setup-log4j2</artifactId>
+        <version>1.7</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
