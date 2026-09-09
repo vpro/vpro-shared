@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.collections.CloseableIterator;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.logging.LoggerOutputStream;
 import nl.vpro.logging.simple.*;
 
-import static nl.vpro.util.CloseableIterator.*;
 
 /**
  * Executor for external commands.
@@ -261,14 +261,14 @@ public interface CommandExecutor {
                         fetched = true;
                         if (next == null) {
                             finished = true;
-                            closeQuietly(result, writer, reader);
+                            CloseableIterator.closeQuietly(result, writer, reader);
                             return false;
                         }
                         return true;
                     } catch (IOException ioe) {
                         if (isBrokenPipe(ioe)) {
                             finished = true;
-                            closeQuietly(result, writer, reader);
+                            CloseableIterator.closeQuietly(result, writer, reader);
                             return false;
                         }
                         throw new UncheckedIOException(ioe);
@@ -287,7 +287,7 @@ public interface CommandExecutor {
                 @Override
                 public void close() {
                     submit.cancel(true);
-                    closeQuietly(result, writer, reader);
+                    CloseableIterator.closeQuietly(result, writer, reader);
                 }
             };
             return iterator.stream();

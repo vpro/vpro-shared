@@ -9,44 +9,13 @@ import java.util.function.Function;
  * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Deprecated
-public class TransformingIterator<T, W> implements CloseableIterator<T> {
-
-    final Iterator<? extends W> wrapped;
-    final Function<W, T> transformer;
+public class TransformingIterator<T, W> extends org.meeuw.collections.TransformingIterator<T, W> {
 
     @lombok.Builder
     TransformingIterator(
         Function<W, T> transformer,
         Iterator<? extends W> wrapped) {
-        this.wrapped = wrapped;
-        this.transformer = transformer;
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (wrapped instanceof AutoCloseable) {
-            ((AutoCloseable) wrapped).close();
-        }
-    }
-
-    T transform(W incoming) {
-        return transformer.apply(incoming);
-    }
-
-
-    @Override
-    public final boolean hasNext() {
-        return this.wrapped.hasNext();
-    }
-
-    @Override
-    public final T next() {
-        return this.transform(this.wrapped.next());
-    }
-
-    @Override
-    public final void remove() {
-        this.wrapped.remove();
+        super(transformer, wrapped);
     }
 
 

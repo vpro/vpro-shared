@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import org.meeuw.collections.CountedPeekingIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -15,7 +16,7 @@ class CountedPeekingIteratorImplTest {
 
     @Test
     public void basic() throws Exception {
-        BasicWrappedIterator<String> wrapped = BasicWrappedIterator.<String>builder()
+        org.meeuw.collections.BasicWrappedIterator<String> wrapped = BasicWrappedIterator.<String>builder()
             .wrapped(Arrays.asList("a", "b", "c").iterator())
             .size(3L)
             .build();

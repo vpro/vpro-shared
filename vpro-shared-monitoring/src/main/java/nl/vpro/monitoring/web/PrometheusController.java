@@ -91,13 +91,11 @@ public class PrometheusController {
             writer.flush();
             return Duration.ZERO;
         } catch (IOException clientAbortException) {
-            if (clientAbortException.getClass().getSimpleName().equals("ClientAbortException")) {
-                Duration duration = Duration.ofNanos(System.nanoTime() - start);
-                log.info("Client aborted connection while scraping Prometheus metrics (after {})", duration);
-                return duration;
-            } else {
-                throw clientAbortException;
+            if (clientAbortException.getMessage().contains("aborted")) {
             }
+            Duration duration  = Duration.ofNanos(System.nanoTime() - start);
+            log.info("Client aborted connection while scraping Prometheus metrics (after {})", duration);
+            return duration;
         }
     }
 

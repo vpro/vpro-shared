@@ -3,7 +3,6 @@ package nl.vpro.util;
 import lombok.ToString;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
@@ -15,64 +14,19 @@ import java.util.function.BiFunction;
  */
 @ToString
 @Deprecated
-public class SkippingIterator<T> implements Iterator<T> {
+public class SkippingIterator<T> extends org.meeuw.collections.SkippingIterator<T> {
 
-    private final Iterator<T> wrapped;
-
-    private final BiFunction<T, T, Boolean> comparator;
-
-    private Boolean hasNext = null;
-
-    private T next;
 
     @lombok.Builder(builderClassName = "Builder")
     public SkippingIterator(
         Iterator<T> wrapped,
         BiFunction<T, T, Boolean> comparator) {
-        this.wrapped = wrapped;
-        this.comparator = comparator == null ? Objects::equals : comparator;
+        super(wrapped, comparator);
     }
 
     public SkippingIterator(
         Iterator<T> wrapped) {
         this(wrapped, Objects::equals);
     }
-
-
-    @Override
-    public boolean hasNext() {
-        findNext();
-        return hasNext;
-    }
-
-    @Override
-    public T next() {
-        findNext();
-        if (hasNext) {
-            hasNext = null;
-            return next;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
-
-    protected void findNext() {
-        if (hasNext == null) {
-            hasNext = false;
-
-            while (wrapped.hasNext()) {
-                T n = wrapped.next();
-                T previous = next;
-                if (comparator.apply(previous, n)) {
-                    continue;
-                } else {
-                    hasNext = true;
-                    next = n;
-                    break;
-                }
-            }
-        }
-    }
-
 
 }

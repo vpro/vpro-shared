@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.*;
+import org.meeuw.collections.CountedIterator;
 
 import org.junit.jupiter.api.Test;
 

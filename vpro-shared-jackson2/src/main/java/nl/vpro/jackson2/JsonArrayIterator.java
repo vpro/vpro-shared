@@ -1,7 +1,5 @@
 package nl.vpro.jackson2;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,23 +9,24 @@ import java.util.function.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.collections.CloseableIterator;
+import org.meeuw.collections.CountedIterator;
 import org.meeuw.functional.ThrowingSupplier;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
 
-import nl.vpro.util.CloseableIterator;
-import nl.vpro.util.CountedIterator;
 
 /**
  * This converts an {@link InputStream} into a Stream of objects, by parsing the stream as JSON.
  * In the simplest case the JSON is just an array, but it can also be an object containing some metadata and an array.
  *
- * @see JsonArrayIterator.Builder()
+ * @see JsonArrayIterator.Builder
  * @author Michiel Meeuwissen
  * @since 1.0
  */

@@ -2,11 +2,9 @@ package nl.vpro.util;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * @author Michiel Meeuwissen
@@ -14,29 +12,20 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Deprecated
-public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
+public class BasicWrappedIterator<T> extends org.meeuw.collections.BasicWrappedIterator<T> {
 
-    private final Supplier<Long> size;
-    private final Supplier<Long> totalSize;
-
-    private long count = 0;
 
     public BasicWrappedIterator(Iterator<T> wrapped) {
         super(wrapped);
-        size = null;
-        totalSize = null;
     }
 
-    @lombok.Builder(builderClassName = "Builder")
     protected BasicWrappedIterator(
         Supplier<Long> sizeSupplier,
         Supplier<Long> totalSizeSupplier,
         Long size,
         Long totalSize,
         Iterator<T> wrapped) {
-        super(wrapped);
-        this.size = sizeSupplier != null ? sizeSupplier : () -> size;
-        this.totalSize = totalSizeSupplier != null ? totalSizeSupplier :  () -> totalSize;
+        super(sizeSupplier, totalSizeSupplier, size, totalSize, wrapped);
     }
 
 
@@ -57,39 +46,7 @@ public class BasicWrappedIterator<T> extends WrappedIterator<T, T> {
     }
 
     public BasicWrappedIterator(Collection<T> wrapped) {
-        super(wrapped.iterator());
-        this.size = () -> (long) wrapped.size();
-        this.totalSize = () -> (long) wrapped.size();
-    }
-
-    @Override
-    public @NonNull Optional<Long> getSize() {
-        if (size != null) {
-            return Optional.ofNullable(size.get());
-        } else {
-            return super.getSize();
-        }
-    }
-
-    @Override
-    public @NonNull Optional<Long> getTotalSize() {
-        if (totalSize != null) {
-            return Optional.ofNullable(totalSize.get());
-        } else {
-            return super.getTotalSize();
-        }
-    }
-
-    @Override
-    public T next() {
-        T n = wrapped.next();
-        count++;
-        return n;
-    }
-
-    @Override
-    public Long getCount() {
-        return count;
+        super(wrapped);
     }
 
 }

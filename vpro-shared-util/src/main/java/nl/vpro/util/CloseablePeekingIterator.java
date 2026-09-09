@@ -8,5 +8,5 @@ import com.google.common.collect.PeekingIterator;
  * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Deprecated
-public interface CloseablePeekingIterator<E> extends PeekingIterator<E>, CloseableIterator<E> {
+public interface CloseablePeekingIterator<E> extends PeekingIterator<E>, org.meeuw.collections.CloseablePeekingIterator<E> {
 }

@@ -8,7 +8,7 @@ import java.util.SortedSet;
  * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Deprecated
-public abstract class SortedSetSameElementWrapper<T> extends SortedSetElementWrapper<T, T> {
+public abstract class SortedSetSameElementWrapper<T> extends org.meeuw.collections.SortedSetSameElementWrapper<T> {
     public SortedSetSameElementWrapper(SortedSet<T> wrapped) {
         super(wrapped);
     }
