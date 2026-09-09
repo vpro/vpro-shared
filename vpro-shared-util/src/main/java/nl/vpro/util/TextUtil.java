@@ -22,6 +22,7 @@ import org.jsoup.safety.Safelist;
  *
  * @author Roelof Jan Koekoek
  * @since 1.5
+ * @see Strings
  */
 @SuppressWarnings("UnnecessaryUnicodeEscape")
 public class TextUtil {
@@ -198,6 +199,12 @@ public class TextUtil {
 
     public static final Pattern VALID_XML = Pattern.compile("[^\\x09\\x0A\\x0D\\x20-\\xD7FF\\xE000-\\xFFFD\\x10000-x10FFFF]*");
 
+    /**
+     * Removes characters that are not permitted in XML text content.
+     *
+     * @param input text to sanitize, possibly {@code null}
+     * @return XML-valid text, or {@code null} when {@code input} is {@code null}
+     */
     @PolyNull
     public static String makeValidXmlText(@PolyNull String input) {
         if (input == null) {
@@ -207,6 +214,12 @@ public class TextUtil {
         return input.replaceAll("[\\x{0}-\\x{8}]|[\\x{B}-\\x{C}]|[\\x{E}-\\x{1F}]|[\\x{D800}-\\x{DFFF}]|[\\x{FFFE}-\\x{FFFF}]", "");
     }
 
+    /**
+     * Tests whether text contains only characters permitted in XML text content.
+     *
+     * @param input text to test
+     * @return {@code true} if the text is valid XML text
+     */
     public static boolean isValidXmlText(String input) {
         return VALID_XML.matcher(input).matches();
     }
@@ -254,6 +267,12 @@ public class TextUtil {
         return input.trim().replaceAll("[\\s\u00a0]+", " ");
     }
 
+    /**
+     * Normalizes horizontal whitespace while preserving line breaks.
+     *
+     * @param input text to normalize, possibly {@code null}
+     * @return normalized text, or {@code null} when {@code input} is {@code null}
+     */
     @PolyNull
     public static String normalizeWhiteSpacePreserveNewlines(@PolyNull String input) {
         if (input == null) {
@@ -475,6 +494,13 @@ public class TextUtil {
         return Stream.of(options).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
+    /**
+     * Truncates text at a sentence or word boundary where possible.
+     *
+     * @param text text to truncate, possibly {@code null}
+     * @param max maximum length of the returned text
+     * @return the truncated text, or {@code null} when {@code text} is {@code null}
+     */
     @PolyNull
     public static String truncate(@PolyNull String text, int max) {
         return truncate(text, max, false);
@@ -491,6 +517,14 @@ public class TextUtil {
         return -1;
     }
 
+    /**
+     * Truncates text at a sentence or word boundary where possible.
+     *
+     * @param text text to truncate, possibly {@code null}
+     * @param max maximum length before the optional ellipsis is appended
+     * @param ellipses whether to append {@code ...} when text was truncated
+     * @return the truncated text, or {@code null} when {@code text} is {@code null}
+     */
     @PolyNull
     public static String truncate(@PolyNull String text, int max, boolean ellipses) {
         if (text == null) {
@@ -578,6 +612,11 @@ public class TextUtil {
     }
 
     /**
+     * Appends a combining Unicode control character after every character in text.
+     *
+     * @param s text to decorate, possibly {@code null}
+     * @param control combining character to append
+     * @return the decorated text, or {@code null} when {@code s} is {@code null}
      * @since 2.11
      */
     @PolyNull
