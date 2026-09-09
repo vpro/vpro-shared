@@ -17,8 +17,6 @@ import org.springframework.http.HttpHeaders;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 
-import org.springframework.objenesis.SpringObjenesis;
-
 /**
  * Just provides  {@link #authenticate(HttpServletRequest, HttpServletResponse, MonitoringProperties)}   for the /manage/ endpoints.
  * It is just called from within
@@ -39,47 +37,50 @@ public class Authentication {
      */
     static OptionalBoolean basic(Set<MonitoringProperties.Method> left, HttpServletRequest request, HttpServletResponse response, MonitoringProperties properties) throws IOException {
         if (left.remove(MonitoringProperties.Method.BASIC)) {
-            String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
-            if (auth == null || !auth.startsWith("Basic ")) {
-                if (left.isEmpty()) {
-                    response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"%s\"".formatted(REALM));
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                    return OptionalBoolean.FALSE;
-                }  else {
-                    return OptionalBoolean.EMPTY;
-                }
-            }
-            String credentials = new String(Base64.getDecoder().decode(auth.substring(6))); // Remove "Basic "
-            String[] values = credentials.split(":", 2);
-            if (values.length == 2) {
-                String username = values[0];
-                String password = values[1];
-                if (properties.getUser().equals(username) && password.equals(properties.getPassword())) {
-                    return OptionalBoolean.TRUE;
-                }
-            }
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return OptionalBoolean.FALSE;
+            return basic(left.isEmpty(), request, response, properties);
         } else {
             return OptionalBoolean.EMPTY;
         }
 
     }
+    static OptionalBoolean basic(boolean last, HttpServletRequest request, HttpServletResponse response, MonitoringProperties properties) throws IOException {
+        String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (auth == null || !auth.startsWith("Basic ")) {
+            if (last) {
+                response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"%s\"".formatted(REALM));
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return OptionalBoolean.FALSE;
+            }  else {
+                return OptionalBoolean.EMPTY;
+            }
+        }
+        String credentials = new String(Base64.getDecoder().decode(auth.substring(6))); // Remove "Basic "
+        String[] values = credentials.split(":", 2);
+        if (values.length == 2) {
+            String username = values[0];
+            String password = values[1];
+            if (properties.getUser().equals(username) && password.equals(properties.getPassword())) {
+                return OptionalBoolean.TRUE;
+            }
+        }
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        return OptionalBoolean.FALSE;
+    }
 
     /**
-     * Authenticates the service account of the (OpenShift/Kubernetes) deployment: an incoming bearer token is
-     * accepted when it equals the pod's service account token, as read from
-     * {@link MonitoringProperties#getServiceTokenFile()}.
-     * <p>
-     * Returns {@code null} when bearer authentication is not applicable to this request (no bearer token
-     * presented, or no service account token configured/readable) so the caller can fall back to another
-     * authentication method without any response being written.
-     * <p>
-     * Once bearer authentication is clearly the method being attempted (a bearer token was presented and a
-     * service account token is available to check it against), this is definitive: it returns {@code true} or
-     * {@code false} and, on failure, decorates the response with a {@code 401} and a {@code WWW-Authenticate: Bearer}
-     * challenge itself. The caller must not fall back to another authentication method in that case.
-     */
+         * Authenticates the service account of the (OpenShift/Kubernetes) deployment: an incoming bearer token is
+         * accepted when it equals the pod's service account token, as read from
+         * {@link MonitoringProperties#getServiceTokenFile()}.
+         * <p>
+         * Returns {@code null} when bearer authentication is not applicable to this request (no bearer token
+         * presented, or no service account token configured/readable) so the caller can fall back to another
+         * authentication method without any response being written.
+         * <p>
+         * Once bearer authentication is clearly the method being attempted (a bearer token was presented and a
+         * service account token is available to check it against), this is definitive: it returns {@code true} or
+         * {@code false} and, on failure, decorates the response with a {@code 401} and a {@code WWW-Authenticate: Bearer}
+         * challenge itself. The caller must not fall back to another authentication method in that case.
+         */
     static OptionalBoolean service(Set<MonitoringProperties.Method> left, HttpServletRequest request, HttpServletResponse response, MonitoringProperties properties) throws IOException {
 
         if (left.remove(MonitoringProperties.Method.BEARER)) {
@@ -149,22 +150,26 @@ public class Authentication {
         }
     }
 
-
-    public static  boolean authenticate(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        MonitoringProperties properties
+    public static OptionalBoolean authenticate(HttpServletRequest request,
+                                               HttpServletResponse response,
+                                               MonitoringProperties properties
     ) throws IOException {
         Set<MonitoringProperties.Method> methods = new HashSet<>(properties.getAuthenticationMethods());
+        return authenticate(request, response, properties, methods);
+    }
+    public static OptionalBoolean authenticate(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        MonitoringProperties properties,
+        Set<MonitoringProperties.Method> methods
+    ) throws IOException {
         if (methods.isEmpty()) {
-            return true;
+            return OptionalBoolean.EMPTY;
         }
         OptionalBoolean serviceAuth = service(methods, request, response, properties);
         if (serviceAuth.isPresent()) {
-            return serviceAuth.getAsBoolean();
+            return serviceAuth;
         }
-        return basic(methods, request, response, properties)
-            // basic authentication not present either. Just permit all.
-            .orElse(true);
+        return basic(methods, request, response, properties);
     }
 }

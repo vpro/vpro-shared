@@ -45,7 +45,7 @@ public class PrometheusController {
     /**
      * As {@link #prometheus(HttpServletRequest, HttpServletResponse)}. TODO: spring boot actuator does something different.
      * It give s JSON with all metric names for /metrics.
-     * May be we could conform?
+     * Maybe we could conform?
      */
 
     public void metrics(
@@ -57,6 +57,7 @@ public class PrometheusController {
     }
 
 
+    private boolean warnedNoAuth = false;
     /**
      * Returns metrics in format fit for prometheus
      */
@@ -65,7 +66,11 @@ public class PrometheusController {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws IOException {
-        if (Authentication.authenticate(request, response, properties)) {
+        if (Authentication.basic(true, request, response, properties).orElseGet(() -> {
+            log.atLevel(warnedNoAuth ? Level.DEBUG: Level.INFO).log("No basic authentication configured for Prometheus endpoint. Permitting all.");
+            warnedNoAuth = true;
+            return true;
+        })) {
 
             log.debug("Scraping Prometheus metrics");
             response.setStatus(HttpServletResponse.SC_OK);
