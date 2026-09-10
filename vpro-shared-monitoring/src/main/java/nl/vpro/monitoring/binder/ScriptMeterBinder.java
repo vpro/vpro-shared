@@ -12,8 +12,6 @@ import java.util.concurrent.*;
 
 import jakarta.validation.constraints.NotNull;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.*;
 
