@@ -44,6 +44,9 @@ public class Authentication {
 
     }
     static OptionalBoolean basic(boolean last, HttpServletRequest request, HttpServletResponse response, MonitoringProperties properties) throws IOException {
+        if (properties.getUser() == null || properties.getPassword() == null || properties.getPassword().isEmpty()) {
+            return OptionalBoolean.EMPTY;
+        }
         String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (auth == null || !auth.startsWith("Basic ")) {
             if (last) {
