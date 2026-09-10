@@ -1,5 +1,7 @@
 package nl.vpro.monitoring.binder;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
