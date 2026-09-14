@@ -11,7 +11,11 @@ import java.util.function.Function;
 @Deprecated
 public class TransformingIterator<T, W> extends org.meeuw.collections.TransformingIterator<T, W> {
 
-    @lombok.Builder
+    @lombok.Builder(
+        builderClassName = "Builder",
+        buildMethodName = "_build",
+        builderMethodName = "_builder"
+    )
     TransformingIterator(
         Function<W, T> transformer,
         Iterator<? extends W> wrapped) {

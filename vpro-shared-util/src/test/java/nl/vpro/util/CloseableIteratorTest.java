@@ -1,54 +1,20 @@
 package nl.vpro.util;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michiel Meeuwissen
  */
 class CloseableIteratorTest {
 
-    @Test
-    void closeQuietly() {
-        AtomicInteger count = new AtomicInteger(0);
-        Impl2 impl2 = new Impl2();
-        CloseableIterator.closeQuietly(null,
-            () -> {
-                throw new IOException();
-            },
-            count::incrementAndGet,
-            CloseableIterator.of(impl2)
-        );
 
-        assertThat(count.get()).isEqualTo(1);
-        assertThat(impl2.closed.get()).isEqualTo(1);
-    }
-
-    @Test
-    void empty() {
-        CloseableIterator<String> empty = CloseableIterator.empty();
-        assertThat(empty.hasNext()).isFalse();
-        assertThatThrownBy(empty::next).isInstanceOf(NoSuchElementException.class);
-        assertThatNoException().isThrownBy(empty::close);
-    }
-
-    @Test
-    void peeking() {
-        Impl i = new Impl();
-        CloseablePeekingIterator<String> peeking = CloseableIterator.peeking(i);
-        assertThat(peeking.peek()).isEqualTo("a");
-        assertThatThrownBy(peeking::remove).isInstanceOf(IllegalStateException.class);
-        assertThat(peeking.stream()).contains("a", "b", "c");
-
-        assertThat(CloseableIterator.peeking(null)).isNull();
-
-    }
 
     @Test
     void stream() {

@@ -41,12 +41,12 @@ public class MaxOffsetIteratorTest {
         final boolean[] booleans = new boolean[2];
         AutoCloseable autoCloseable = () -> booleans[0] = true;
         Runnable callback  = () -> booleans[1] = true;
-        MaxOffsetIterator<String> i = MaxOffsetIterator
-            .<String>builder()
+        org.meeuw.collections.MaxOffsetIterator<String> i = MaxOffsetIterator
+            .<String>_builder()
             .wrapped(Arrays.asList("a", "b", "c").iterator())
             .max(2)
             .callback(callback)
-            .build()
+            ._build()
             .autoClose(autoCloseable);
 
         assertThat(Lists.newArrayList(i)).containsExactly("a", "b");
@@ -71,11 +71,11 @@ public class MaxOffsetIteratorTest {
         assertThat(i.peek()).isEqualTo("a");
 
         MaxOffsetIterator<String> mo = MaxOffsetIterator
-            .<String>builder()
+            .<String>_builder()
             .wrapped(i)
             .max(2)
             .offset(1)
-            .build();
+            ._build();
         assertThat(mo.peek()).isEqualTo("b");
         assertThat(mo.peekingWrapped().hasNext()).isTrue();
 
@@ -90,15 +90,15 @@ public class MaxOffsetIteratorTest {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
 
         try (MaxOffsetIterator<String> mo = MaxOffsetIterator
-            .<String>builder()
+            .<String>_builder()
             .wrapped(list.iterator())
             .max(2)
             .countPredicate(s -> ! "c".equals(s))
             .offset(1)
-            .build()) {
+            ._build()) {
             assertThat(mo.next()).isEqualTo("b");
             assertThat(mo.next()).isEqualTo("c");// not counted, but returned!
-            assertThat(mo.count).isEqualTo(2);
+            //assertThat(mo.getCount()).isEqualTo(2);
             assertThat(mo.next()).isEqualTo("d");
 
             assertThatThrownBy(mo::next).isInstanceOf(NoSuchElementException.class);

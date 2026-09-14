@@ -16,7 +16,10 @@ import java.util.function.Function;
 public class TailAdder<T> extends org.meeuw.collections.TailAdder<T> {
 
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(builderClassName = "Builder",
+        builderMethodName = "_builder",
+        buildMethodName = "_build"
+    )
     private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
         super(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders);
     }

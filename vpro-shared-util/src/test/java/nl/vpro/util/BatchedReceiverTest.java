@@ -37,7 +37,7 @@ public class BatchedReceiverTest {
         for (int i = 0; i < 23; i++) {
             result.add(String.valueOf((char) ('a' + i)));
         }
-        BatchedReceiver<String> i =
+        org.meeuw.collections.BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
                 .batchGetter((offset, max) ->
                     result.subList(
@@ -58,7 +58,7 @@ public class BatchedReceiverTest {
         for (int i = 0; i < 23; i++) {
             result.add("a" + i);
         }
-        BatchedReceiver<String> i =
+        org.meeuw.collections.BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
                 .batchGetter((offset, max) ->
                     result.subList(
@@ -81,7 +81,7 @@ public class BatchedReceiverTest {
             result.add("a" + i);
         }
         AtomicInteger offset = new AtomicInteger(0);
-        BatchedReceiver<String> i =
+        org.meeuw.collections.BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
                 .batchGetter(() -> {
                     int of = offset.getAndAdd(5);
@@ -126,7 +126,7 @@ public class BatchedReceiverTest {
 
     @Test
     public void testWithTokens() {
-        BatchedReceiver<String> i =
+        org.meeuw.collections.BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
                 .initialAndResumption(WithToken::initial,
                     (withToken) -> WithToken.forToken(withToken.token))
@@ -155,7 +155,7 @@ public class BatchedReceiverTest {
                  }
              }
          };
-         BatchedReceiver<String> i =
+         org.meeuw.collections.BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
                 .supplier(supplier)
                 .build();

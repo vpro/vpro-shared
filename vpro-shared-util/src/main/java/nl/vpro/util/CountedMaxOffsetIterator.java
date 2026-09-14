@@ -18,7 +18,10 @@ public class CountedMaxOffsetIterator<T>  extends org.meeuw.collections.CountedM
 
 
 
-    @lombok.Builder(builderClassName = "Builder", builderMethodName = "_countedBuilder")
+    @lombok.Builder(
+        builderClassName = "Builder",
+        buildMethodName = "_build",
+        builderMethodName = "_builder")
     private CountedMaxOffsetIterator(
         @NonNull CountedIterator<T> wrapped,
         @Nullable Number max,

@@ -3,6 +3,8 @@ package nl.vpro.util;
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
+import org.meeuw.collections.CountedIterator;
+import org.meeuw.collections.CountedMaxOffsetIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

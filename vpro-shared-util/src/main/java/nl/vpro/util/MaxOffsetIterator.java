@@ -38,7 +38,10 @@ public class MaxOffsetIterator<T> extends org.meeuw.collections.MaxOffsetIterato
         this(wrapped, max, offset, null, countNulls, null, false);
     }
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(builderClassName = "Builder",
+        builderMethodName = "_builder",
+        buildMethodName = "_build"
+    )
     protected MaxOffsetIterator(
         @NonNull Iterator<T> wrapped,
         @Nullable Number max,

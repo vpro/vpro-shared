@@ -30,7 +30,10 @@ public class FilteringIterator<T> extends org.meeuw.collections.FilteringIterato
         super(wrapped, filter, keepAlive);
     }
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(builderClassName = "Builder",
+        builderMethodName = "_builder",
+        buildMethodName = "_build"
+    )
     private FilteringIterator(
             Iterator<? extends T> wrapped,
             Predicate<? super T> filter,

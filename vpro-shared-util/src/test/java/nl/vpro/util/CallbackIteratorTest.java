@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import org.meeuw.collections.CountedIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -15,10 +16,10 @@ public class CallbackIteratorTest {
     @Test
     public void test() {
         Runnable runnable = mock(Runnable.class);
-        CallbackIterator<String> i = CallbackIterator.<String>builder()
+        CallbackIterator<String> i = CallbackIterator.<String>_builder()
             .wrapped(Arrays.asList("A", "B").iterator())
             .callback(runnable)
-            .build()
+            ._build()
             ;
         verifyNoInteractions(runnable);
         i.next();
@@ -37,12 +38,12 @@ public class CallbackIteratorTest {
     @Test
     public void withCounted() {
         Runnable runnable = mock(Runnable.class);
-        CallbackIterator<String> i = CallbackIterator.<String>builder()
+        CallbackIterator<String> i = CallbackIterator.<String>_builder()
             .wrapped(BasicWrappedIterator.<String>builder()
                 .wrapped(Arrays.asList("A", "B").iterator()).size(2L).build()
             )
             .callback(runnable)
-            .build()
+            ._build()
             ;
         assertThat(i.getCount()).isEqualTo(0);
 
@@ -60,9 +61,9 @@ public class CallbackIteratorTest {
 
     @Test
     public void withoutCallback() {
-        CallbackIterator<String> i = CallbackIterator.<String>builder()
+        CallbackIterator<String> i = CallbackIterator.<String>_builder()
             .wrapped(CountedIterator.of(Arrays.asList("A", "B")))
-            .build();
+            ._build();
         assertThat(i.getCount()).isEqualTo(0);
         i.next();
         i.next();

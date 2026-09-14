@@ -89,14 +89,13 @@ import java.util.function.*;
 public class BatchedReceiver<T> extends org.meeuw.collections.BatchedReceiver<T> {
 
 
-    @lombok.Builder(
-        builderClassName = "Builder",
-        buildMethodName = "_build")
     private BatchedReceiver(
         Long offset,
         Supplier<Optional<Iterator<T>>> supplier) {
         super(offset, supplier);
     }
+
+
 
 
 }

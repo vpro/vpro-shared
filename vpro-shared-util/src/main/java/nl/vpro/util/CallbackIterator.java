@@ -14,7 +14,11 @@ public class CallbackIterator<T> extends org.meeuw.collections.CallbackIterator<
 
 
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(
+        builderClassName = "Builder",
+        builderMethodName = "_builder",
+        buildMethodName = "_build"
+    )
     public CallbackIterator(Iterator<T> wrapped, Runnable callback) {
         super(wrapped, callback);
     }

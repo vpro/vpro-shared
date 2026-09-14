@@ -12,12 +12,12 @@ import org.meeuw.functional.Unwrappable;
  * @deprecated Use org.meeuw.util:mihxil-collections
  */
 @Deprecated
-public  abstract class WrappedIterator<T, S> implements CountedIterator<S>, Unwrappable<CloseableIterator<T>> {
+public  abstract class WrappedIterator<T, S> implements CountedIterator<S>, Unwrappable<org.meeuw.collections.CloseableIterator<T>> {
 
-    protected final CloseableIterator<T> wrapped;
+    protected final org.meeuw.collections.CloseableIterator<T> wrapped;
 
     public WrappedIterator(Iterator<T> wrapped) {
-        this.wrapped = CloseableIterator.of(wrapped);
+        this.wrapped =org.meeuw.collections.CloseableIterator.of(wrapped);
     }
 
     @Override
@@ -73,7 +73,7 @@ public  abstract class WrappedIterator<T, S> implements CountedIterator<S>, Unwr
     }
 
     @Override
-    public CloseableIterator<T> unwrap() {
+    public org.meeuw.collections.CloseableIterator<T> unwrap() {
         return wrapped;
     }
 

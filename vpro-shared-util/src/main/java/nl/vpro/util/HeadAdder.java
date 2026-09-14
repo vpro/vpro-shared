@@ -20,8 +20,10 @@ public class HeadAdder<T> extends org.meeuw.collections.HeadAdder<T>  {
 
 
 
-    @SuppressWarnings("unchecked")
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(builderClassName = "Builder",
+        builderMethodName = "_builder",
+        buildMethodName = "_build"
+    )
     private HeadAdder(Iterator<T> wrapped, final boolean onlyIfEmpty, final boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
         super(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders);
     }

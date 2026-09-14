@@ -17,7 +17,11 @@ import java.util.function.BiFunction;
 public class SkippingIterator<T> extends org.meeuw.collections.SkippingIterator<T> {
 
 
-    @lombok.Builder(builderClassName = "Builder")
+    @lombok.Builder(
+        builderClassName = "Builder",
+        builderMethodName = "_builder",
+        buildMethodName = "_build"
+    )
     public SkippingIterator(
         Iterator<T> wrapped,
         BiFunction<T, T, Boolean> comparator) {

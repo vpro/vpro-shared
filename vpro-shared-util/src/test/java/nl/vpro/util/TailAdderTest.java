@@ -7,12 +7,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
+@Deprecated
 public class TailAdderTest {
 
     @Test
     public void addTo() throws Exception {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
-        try (TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).adder((s) -> "c").build()) {
+        try (TailAdder<String> adder = TailAdder.<String>_builder().wrapped(i).adder((s) -> "c")._build()) {
             assertEquals("a", adder.next());
             assertEquals(1, adder.getCount());
             assertEquals("b", adder.next());
@@ -47,7 +48,7 @@ public class TailAdderTest {
     @Test
     public void onlyIfNotEmptyOnNotEmpty() throws Exception {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
-        try (TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c").build()) {
+        try (TailAdder<String> adder = TailAdder.<String>_builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c")._build()) {
             assertEquals("a", adder.next());
             assertEquals("b", adder.next());
             assertTrue(adder.hasNext());
@@ -60,7 +61,7 @@ public class TailAdderTest {
     @Test
     public void onlyIfNotEmptyOnEmpty() throws Exception {
         Iterator<String> i = Collections.emptyIterator();
-        try (TailAdder<String> adder = TailAdder.<String>builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c").build()) {
+        try (TailAdder<String> adder = TailAdder.<String>_builder().wrapped(i).onlyIfNotEmpty(true).adder((s) -> "c")._build()) {
             assertFalse(adder.hasNext());
         }
     }
