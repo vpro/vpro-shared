@@ -25,6 +25,7 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.*;
+import org.meeuw.collections.CloseableIterator;
 import org.slf4j.*;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
