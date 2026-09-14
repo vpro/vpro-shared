@@ -25,7 +25,7 @@ class CountedMaxOffsetIteratorTest {
             .max(2)
             .build();
 
-        assertThat(i.getCount()).isEqualTo(-1);
+        assertThat(i.getCount()).isEqualTo(0); // Used to return -1, but that contradict contract of {@link #getCount}
         assertThat(i.next()).isEqualTo("b");
         assertThat(i.getSize()).contains(2L);
         assertThat(i.getTotalSize()).contains(5L);
