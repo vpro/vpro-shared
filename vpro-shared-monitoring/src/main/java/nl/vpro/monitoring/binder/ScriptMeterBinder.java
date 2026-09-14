@@ -1,5 +1,7 @@
 package nl.vpro.monitoring.binder;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import io.micrometer.core.instrument.*;
 import io.micrometer.core.instrument.binder.BaseUnits;
 import io.micrometer.core.instrument.binder.MeterBinder;
@@ -11,8 +13,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import jakarta.validation.constraints.NotNull;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.*;
