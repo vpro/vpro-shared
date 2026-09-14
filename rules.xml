@@ -20,5 +20,11 @@
         <ignoreVersion type="regex">^\d+\.\d?[13579]\..*$</ignoreVersion>
       </ignoreVersions>
     </rule>
+    <rule groupId="net.bytebuddy">
+
+      <ignoreVersions>
+        <ignoreVersion type="regex">.*jdk5$</ignoreVersion>
+      </ignoreVersions>
+    </rule>
   </rules>
 </ruleset>

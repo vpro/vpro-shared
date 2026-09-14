@@ -17,8 +17,8 @@
     <skipITs>true</skipITs>
     <java.version>21</java.version>
 
-    <spring.version>7.0.8</spring.version>
-    <spring-security.version>7.1.0</spring-security.version>
+    <spring.version>7.0.9</spring.version>
+    <spring-security.version>7.1.1</spring-security.version>
 
 
     <jackson2.version>2.22.2</jackson2.version>
@@ -45,7 +45,7 @@
     <xmlunit.version>2.13.0</xmlunit.version>
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.19.0</math.version>
-    <meeuw.util.version>1.21-SNAPSHOT</meeuw.util.version>
+    <meeuw.util.version>1.21</meeuw.util.version>
 
     <checker.version>4.2.3</checker.version>
     <commons.lang3.version>3.20.0</commons.lang3.version>
@@ -53,7 +53,7 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>7.4.5.Final</hibernate.version>
+    <hibernate.version>7.4.8.Final</hibernate.version>
     <hibernate.search.version>8.4.0.Final</hibernate.search.version>
     <hibernate.validator.version>9.1.3.Final</hibernate.validator.version>
 
@@ -80,7 +80,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.1</micrometer.version>
-    <flyway.version>13.5.0</flyway.version>
+    <flyway.version>13.6.0</flyway.version>
     <testcontainers.version>2.0.5</testcontainers.version>
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -573,12 +573,6 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
@@ -709,7 +703,7 @@
         <groupId>jakarta.xml.bind</groupId>
         <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${xml-bind.api.version}</version>
-        <scope>compile</scope> <!--look out,  hibernate provides it as javax.xml -->
+        <scope>compile</scope> <!--look out, hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>jakarta.annotation</groupId>
@@ -783,7 +777,7 @@
       <dependency>
         <groupId>org.meeuw</groupId>
         <artifactId>mihxil-json-grep</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
       </dependency>
       <dependency>
         <groupId>org.ehcache</groupId>
