@@ -83,9 +83,11 @@ jobs:
         run: mvn -B test
       # For push to main or manual dispatch, run the deploy profile.
       - name: Build and ${{ matrix.target }} with Maven
+        id: maven
         if: steps.os_check.outputs.not_skipped && github.event_name != 'pull_request'
         shell: bash
-        run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false"
+        run: |
+          mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
@@ -107,6 +109,9 @@ jobs:
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
-      - uses: MMProgrami/after-maven-action@v2
+      - uses: MMProgrami/after-maven-action@main
         name: Simple results
         if: steps.os_check.outputs.not_skipped
+        with:
+          maven_exit_code: ${{ steps.maven.outcome == 'failure' && 1 || 0 }}
+
