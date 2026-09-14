@@ -26,7 +26,6 @@ import org.apache.catalina.Manager;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.HibernateMetrics;
 import org.hibernate.stat.HibernateQueryMetrics;
-import org.meeuw.functional.Functions;
 import org.slf4j.event.Level;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,7 +213,7 @@ public class MeterRegistryConfiguration {
         }
 
         try {
-            if (isActive("meter postgresql", monitoringProperties.getMeterPostgres(), biAlways(DEBUG), "org.postgresql.Driver")) {
+            if (isActive("meter postgresql", monitoringProperties.getMeterPostgres(), (b, f) -> b == null ?DEBUG : WARN, "org.postgresql.Driver")) {
                 final Optional<Object> dataSource = (Optional<Object>) getDataSource();
                 if (dataSource.isPresent()) {
                     if (monitoringProperties.getPostgresDatabaseName() != null) {
@@ -362,7 +361,7 @@ public class MeterRegistryConfiguration {
             if (missing.isEmpty()) {
                 return true;
             } else {
-                log.atLevel(level.apply(active, missing)).log("Not activating {} because the following classes are not available: {}", description, String.join(", ", missing));
+                warn("Not activating %s because the following classes are not available: %s".formatted(description, String.join(", ", missing)), level.apply(active, missing));
                 return false;
             }
         } else {
@@ -420,7 +419,9 @@ public class MeterRegistryConfiguration {
 
     private void warn(String warn, Level level){
         log.atLevel(level).log(warn);
-        warnings.add(warn);
+        if (level.compareTo(WARN) >= 0) {
+            warnings.add(warn);
+        }
     }
 
     private Optional<?> getBean(Class<?> clazz) {
