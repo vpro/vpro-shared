@@ -113,5 +113,5 @@ jobs:
         name: Simple results
         if: steps.os_check.outputs.not_skipped
         with:
-          maven_exit_code: ${{ steps.maven.outcome == 'failure' && 1 || 0 }}
+          maven_outcome: ${{ steps.maven.outcome }}
 

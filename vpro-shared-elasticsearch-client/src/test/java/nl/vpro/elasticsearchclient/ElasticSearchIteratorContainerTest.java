@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
+import org.meeuw.collections.MaxOffsetIterator;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,7 +17,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.vpro.elasticsearch.Constants;
 import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.test.opensearch.ElasticsearchContainer;
-import nl.vpro.util.MaxOffsetIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
