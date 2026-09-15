@@ -46,6 +46,13 @@ public class FileSizeFormatter {
      */
     private final boolean mebi;
 
+    /**
+     * Creates a file-size formatter.
+     *
+     * @param format format used for scaled values
+     * @param exactFormat format used for byte values when exact formatting is requested; defaults to {@code format}
+     * @param mebi whether to use binary rather than SI prefixes
+     */
     @lombok.Builder(builderClassName = "Builder", toBuilder = true)
     public FileSizeFormatter(DecimalFormat format, DecimalFormat exactFormat, boolean mebi) {
         this.format = format== null ? new DecimalFormat("#") : format;
@@ -66,11 +73,24 @@ public class FileSizeFormatter {
         .mebi(false)
         .build();
 
+    /**
+     * Formats a number of bytes, using exact formatting for values below the selected prefix threshold.
+     *
+     * @param numberOfBytes number of bytes to format, or {@code null}
+     * @return the formatted file size, or {@code "? B"} when the value is {@code null}
+     */
     public String format(@Nullable Number numberOfBytes) {
         return format(numberOfBytes, true);
     }
 
 
+    /**
+     * Formats a number of bytes.
+     *
+     * @param numberOfBytes number of bytes to format, or {@code null}
+     * @param exact whether values expressed in bytes use the exact format
+     * @return the formatted file size, or {@code "? B"} when the value is {@code null}
+     */
     public String format(@Nullable Number numberOfBytes, boolean exact) {
         if (numberOfBytes == null) {
             return "? B";
@@ -85,6 +105,9 @@ public class FileSizeFormatter {
     /**
      * Given a number of bytes, processed in a certain duration, format it as certain amount of bytes per second.
      *
+     * @param numberOfBytes number of processed bytes, or {@code null}
+     * @param duration duration during which the bytes were processed, or {@code null}
+     * @return the formatted transfer speed
      */
     public String formatSpeed(@Nullable Number numberOfBytes, Duration duration) {
         if (numberOfBytes == null || duration == null) {
@@ -98,7 +121,13 @@ public class FileSizeFormatter {
     }
 
 
-
+    /**
+     * Formats a transfer speed for bytes processed since a given instant.
+     *
+     * @param length number of processed bytes
+     * @param start instant at which processing started
+     * @return the formatted transfer speed
+     */
     public String formatSpeed(Number length, Instant start) {
         return formatSpeed(length, Duration.between(start, Instant.now()));
     }
@@ -133,6 +162,17 @@ public class FileSizeFormatter {
         return (exact ? exactFormat.format(length) : format.format(length)) + " B";
     }
 
+    /**
+     * Parses a file size expressed as a number optionally followed by a supported unit.
+     *
+     * <p>Supported units are {@code B}, {@code KB}, {@code MB}, {@code GB}, {@code KiB}, {@code MiB}, and
+     * {@code GiB}; unit matching is case-insensitive.</p>
+     *
+     * @param string file size to parse
+     * @return the corresponding number of bytes, rounded to the nearest whole byte
+     * @throws IllegalArgumentException if the value is null, blank, or uses an unknown unit
+     * @throws NumberFormatException if the numeric part is invalid
+     */
     public static long parse(String string) {
         if (string == null || string.isBlank()) {
             throw new IllegalArgumentException("Cannot parse null or blank string");
@@ -179,12 +219,21 @@ public class FileSizeFormatter {
     }
 
 
+    /**
+     * Builder for {@link FileSizeFormatter} instances.
+     */
     public static class Builder {
         {
             mebi = true;
         }
         private DecimalFormatSymbols symbols = DECIMAL;
 
+        /**
+         * Sets the symbols used by formats created from a pattern.
+         *
+         * @param decimalFormatSymbols symbols to use, or {@link FileSizeFormatter#DECIMAL} when {@code null}
+         * @return this builder
+         */
         public Builder decimalFormatSymbols(DecimalFormatSymbols decimalFormatSymbols) {
             this.symbols = decimalFormatSymbols == null ? DECIMAL : decimalFormatSymbols;
             if (Builder.this.format != null) {
@@ -193,15 +242,34 @@ public class FileSizeFormatter {
             return this;
         }
 
+        /**
+         * Sets the locale from which symbols for formats created from a pattern are derived.
+         *
+         * @param locale locale to use
+         * @return this builder
+         */
         public Builder decimalFormatSymbols(Locale locale) {
             return decimalFormatSymbols(new DecimalFormatSymbols(locale));
         }
 
+        /**
+         * Sets the format pattern for scaled values.
+         *
+         * @param pattern decimal format pattern
+         * @return this builder
+         */
         public Builder pattern(String pattern) {
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
             decimalFormat.setDecimalFormatSymbols(symbols);
             return format(decimalFormat);
         }
+
+        /**
+         * Sets the format pattern for byte values when exact formatting is requested.
+         *
+         * @param pattern decimal format pattern
+         * @return this builder
+         */
         public Builder exactPattern(String pattern) {
             DecimalFormat decimalFormat = new DecimalFormat(pattern);
             decimalFormat.setDecimalFormatSymbols(symbols);
