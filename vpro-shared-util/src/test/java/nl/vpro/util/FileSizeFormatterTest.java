@@ -21,51 +21,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FileSizeFormatterTest {
 
     @Test
-    public void mebi() {
+    void mebi() {
         FileSizeFormatter formatter = FileSizeFormatter.builder()
             .build();
         assertThat(formatter.format(1000L)).isEqualTo("1000 B");
         assertThat(formatter.format(221400200L)).isEqualTo("211 MiB");
-
     }
 
-
     @Test
-    public void testDefault() {
+    void testDefault() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT;
         assertThat(formatter.format(1000L)).isEqualTo("1000 B");
         assertThat(formatter.format(221400200L)).isEqualTo("211.1 MiB");
     }
 
-
     @Test
-    public void testDefaultSpeed() {
+    void testDefaultSpeed() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT;
         assertThat(formatter.formatSpeed(221400200L, Duration.ofMillis(12344L))).isEqualTo("17.1 MiB/s");
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT;
         assertThat(formatter.formatSpeed(null, Duration.ofMillis(12344L))).isEqualTo("? B/s");
         assertThat(formatter.formatSpeed(0, Duration.ofMillis(12344L))).isEqualTo(".0 B/s"); // ?
         assertThat(formatter.formatSpeed(1000, Duration.ofMillis(0))).isEqualTo("\u221E B/s");
         assertThat(formatter.formatSpeed(1000, (Duration) null)).isEqualTo("? B/s");
-
     }
 
 
     @Test
-    public void testDefaultChangedPrecision() {
+    void testDefaultChangedPrecision() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT.toBuilder().pattern("#.00").build();
         assertThat(formatter.format(1000L)).isEqualTo("1000 B");
         assertThat(formatter.format(221400200L)).isEqualTo("211.14 MiB");
-
     }
 
 
     @Test
-    public void testNl() {
+    void testNl() {
         FileSizeFormatter formatter = FileSizeFormatter.builder()
             .decimalFormatSymbols(Locale.forLanguageTag("nl"))
             .pattern("##.00")
@@ -77,7 +72,7 @@ public class FileSizeFormatterTest {
 
 
     @Test
-    public void si() {
+    void si() {
         FileSizeFormatter formatter = FileSizeFormatter.builder()
             .mebi(false)
             .build();
@@ -86,12 +81,19 @@ public class FileSizeFormatterTest {
     }
 
     @Test
-    public void formatAndParse1025() {
+    void parseLong() {
+        assertThat(FileSizeFormatter.parse("100_000_000")).isEqualTo(100_000_000L);
+        assertThat(FileSizeFormatter.parse("100_000 kB")).isEqualTo(100_000_000L);
+    }
+
+
+    @Test
+    void formatAndParse1025() {
         formatAndParse(1025);
     }
 
     @Property(tries = 20)
-    public void formatAndParse(@ForAll("longs") long size) {
+    void formatAndParse(@ForAll("longs") long size) {
         for (FileSizeFormatter formatter : Arrays.asList(FileSizeFormatter.DEFAULT, FileSizeFormatter.SI)) {
 
             String formatted = formatter.format(size);
