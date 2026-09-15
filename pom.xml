@@ -36,7 +36,7 @@
     -->
     <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.18.13</bytebuddy.version>
+    <bytebuddy.version>1.18.14</bytebuddy.version>
     <slf4j.version>2.0.19</slf4j.version>
     <log4j2.version>2.26.1</log4j2.version>
     <guava.version>33.7.1-jre</guava.version>
@@ -44,7 +44,7 @@
     <wss4j.version>2.3.2</wss4j.version>
     <xmlunit.version>2.13.0</xmlunit.version>
     <hamcrest.version>3.0</hamcrest.version>
-    <math.version>0.19.0</math.version>
+    <math.version>0.20.0</math.version>
     <meeuw.util.version>1.21</meeuw.util.version>
 
     <checker.version>4.2.3</checker.version>
@@ -80,7 +80,7 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.1</micrometer.version>
-    <flyway.version>13.6.0</flyway.version>
+    <flyway.version>13.7.0</flyway.version>
     <testcontainers.version>2.0.5</testcontainers.version>
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
