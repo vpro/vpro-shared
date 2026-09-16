@@ -73,6 +73,7 @@ public class FileSizeFormatter {
         .mebi(false)
         .build();
 
+
     /**
      * Formats a number of bytes, using exact formatting for values below the selected prefix threshold.
      *
@@ -132,6 +133,8 @@ public class FileSizeFormatter {
         return formatSpeed(length, Duration.between(start, Instant.now()));
     }
 
+
+
     private String formatMebi(Number length, boolean exact) {
         long longValue = length.longValue();
         if (longValue > GiB) {
@@ -161,6 +164,24 @@ public class FileSizeFormatter {
         }
         return (exact ? exactFormat.format(length) : format.format(length)) + " B";
     }
+
+    public FileSizeFormatter withPattern(String pattern) {
+        return toBuilder().pattern(pattern).build();
+    }
+
+    public FileSizeFormatter withExtraDigit() {
+        String p = pattern();
+        if (p.contains(".")) {
+            return toBuilder().pattern(p + "0").build();
+        } else {
+            return toBuilder().pattern(p + ".0").build();
+        }
+    }
+
+    public String pattern() {
+        return format.toPattern();
+    }
+
 
     /**
      * Parses a file size expressed as a number optionally followed by a supported unit.
