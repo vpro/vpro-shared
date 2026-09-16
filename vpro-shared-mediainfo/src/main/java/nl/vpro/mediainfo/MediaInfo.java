@@ -161,7 +161,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return an {@link Optional} containing a {@link Rectangle} that represents the containing rectangle of the video track, or empty if no video track is present
      */
-    public Optional<Rectangle<RealNumber>> circumscribedRectangle() {
+    public Optional<Rectangle<RealNumber, RealNumber>> circumscribedRectangle() {
         TrackType track = video().orElse(null);
 
         if (track != null) {
