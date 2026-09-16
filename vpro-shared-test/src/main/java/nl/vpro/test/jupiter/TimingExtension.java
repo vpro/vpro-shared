@@ -7,14 +7,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.extension.*;
 import org.meeuw.math.statistics.StatisticalLong;
 import org.meeuw.time.UncertainJavaTime;
 
 import org.opentest4j.TestAbortedException;
-
-import nl.vpro.logging.Log4j2Helper;
 
 
 /**
@@ -70,8 +69,7 @@ public class TimingExtension implements
             StatisticalLong statisticalLong = (StatisticalLong) repetitionsMap.computeIfAbsent(rk, (kk) -> new StatisticalLong(UncertainJavaTime.Mode.DURATION));
             statisticalLong.enter(duration);
         });
-
-        Log4j2Helper.debugOrInfo(log, repeated.isEmpty(), "{} took {}", key, duration.truncatedTo(ChronoUnit.MILLIS));
+        log.atLevel(repeated.isEmpty() ? Level.INFO : Level.DEBUG).log("{} took {}", key, duration.truncatedTo(ChronoUnit.MILLIS));
     }
 
     @Override
