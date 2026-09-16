@@ -20,7 +20,7 @@ import org.meeuw.functional.Unwrappable;
 public class WrappedReadableByteChannel implements ReadableByteChannel, Unwrappable<ReadableByteChannel> {
 
     @Getter
-    long total = 0;
+    volatile long total = 0;
     long prevBatch = 0;
     final long batchSize;
     final ReadableByteChannel delegate;
@@ -41,6 +41,9 @@ public class WrappedReadableByteChannel implements ReadableByteChannel, Unwrappa
             throw new IllegalArgumentException("One of inputStream or delegate should be set");
         }
         this.batchSize = batchSize == null ? 1_000_000L : batchSize;
+        if (this.batchSize <= 0) {
+            throw new IllegalArgumentException("batchSize must be positive");
+        }
         this.consumer = consumer;
         this.hasConsumer = consumer != null;
     }
@@ -52,10 +55,7 @@ public class WrappedReadableByteChannel implements ReadableByteChannel, Unwrappa
         if (result > 0) {
             total += result;
             if (hasConsumer) {
-                prevBatch += result;
-                if (prevBatch >= batchSize) {
-                    consume();
-                }
+                consumeCompletedBatches(result);
             }
         }
         return result;
@@ -68,9 +68,25 @@ public class WrappedReadableByteChannel implements ReadableByteChannel, Unwrappa
 
     @Override
     public void close() throws IOException {
-        delegate.close();
+        IOException closeException = null;
+        try {
+            delegate.close();
+        } catch (IOException e) {
+            closeException = e;
+        }
         if (prevBatch > 0) {
-            consume();
+            try {
+                consume(total);
+                prevBatch = 0;
+            } catch (RuntimeException e) {
+                if (closeException == null) {
+                    throw e;
+                }
+                closeException.addSuppressed(e);
+            }
+        }
+        if (closeException != null) {
+            throw closeException;
         }
     }
 
@@ -79,8 +95,22 @@ public class WrappedReadableByteChannel implements ReadableByteChannel, Unwrappa
         return delegate;
     }
 
-    private void consume() {
-        consumer.accept(total);
-        prevBatch = 0;
+    private void consumeCompletedBatches(int result) {
+        int remaining = result;
+        while (remaining > 0) {
+            long untilNextBatch = batchSize - prevBatch;
+            if (remaining < untilNextBatch) {
+                prevBatch += remaining;
+                return;
+            }
+            long consumed = total - remaining + untilNextBatch;
+            remaining -= (int) untilNextBatch;
+            prevBatch = 0;
+            consume(consumed);
+        }
+    }
+
+    private void consume(long consumed) {
+        consumer.accept(consumed);
     }
 }
