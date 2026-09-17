@@ -545,19 +545,19 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             rate.close();
         }
         if (scrollId != null) {
+            String id = scrollId;
             HttpEntity responseEntity = null;
             try {
-                Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + scrollId);
+                Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + id);
                 Response res = client.performRequest(delete);
                 responseEntity = res.getEntity();
                 if (res.getStatusLine().getStatusCode() == 200) {
-                    log.debug("Deleted {} {}", scrollId, res);
-                    SCROLL_IDS.remove(scrollId);
+                    log.debug("Deleted {} {}", id, res);
                 } else {
-                    log.warn("Something wrong deleting scroll id {} {}", scrollId, res);
+                    log.warn("Something wrong deleting scroll id {} {}", id, res);
                 }
-                scrollId = null;
             } catch (ResponseException re) {
+                responseEntity = re.getResponse().getEntity();
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
                 } else {
@@ -567,6 +567,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 log.warn("close: {}: {}", e.getClass().getName(), e.getMessage());
             } finally {
                 EntityUtils.consumeQuietly(responseEntity);
+                SCROLL_IDS.remove(id);
+                scrollId = null;
             }
         } else {
             log.debug("no need to close");
