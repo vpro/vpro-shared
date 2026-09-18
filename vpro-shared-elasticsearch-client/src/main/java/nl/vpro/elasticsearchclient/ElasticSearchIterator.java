@@ -363,7 +363,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 Request post = new Request(POST, builder.toString());
                 post.setEntity(entity);
                 if (! scrollContext.isNegative()) {
-                    post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                    post.addParameter(SCROLL, scrollContext.toMillis() + "ms");
                 }
                 post.addParameter(VERSION, String.valueOf(this.requestVersion));
                 if (routing != null && !routing.isEmpty()) {
