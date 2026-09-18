@@ -20,5 +20,28 @@
         <ignoreVersion type="regex">^\d+\.\d?[13579]\..*$</ignoreVersion>
       </ignoreVersions>
     </rule>
+
+    <rule groupId="net.bytebuddy">
+      <ignoreVersions>
+        <ignoreVersion type="regex">.*jdk5$</ignoreVersion>
+      </ignoreVersions>
+    </rule>
+
+
+    <rule groupId="org.springframework">
+      <ignoreVersions>
+        <ignoreVersion type="regex">^7(?:\..*)?$</ignoreVersion>
+      </ignoreVersions>
+    </rule>
+    <rule groupId="org.hibernate.orm">
+      <ignoreVersions>
+        <ignoreVersion type="regex">^7(?:\..*)?$</ignoreVersion>
+      </ignoreVersions>
+    </rule>
+    <rule groupId="org.hibernate.search">
+      <ignoreVersions>
+        <ignoreVersion type="regex">^8(?:\..*)?$</ignoreVersion>
+      </ignoreVersions>
+    </rule>
   </rules>
 </ruleset>

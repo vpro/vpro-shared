@@ -13,13 +13,12 @@ import java.util.OptionalDouble;
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.meeuw.math.abstractalgebra.reals.RealNumber;
+import org.meeuw.math.abstractalgebra.bigdecimals.BigDecimalElement;
+import org.meeuw.math.abstractalgebra.rationalnumbers.RationalNumber;
 import org.meeuw.math.shapes.dim2.Rectangle;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static org.meeuw.math.abstractalgebra.reals.RealField.element;
 
 
 /**
@@ -161,16 +160,16 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
      *
      * @return an {@link Optional} containing a {@link Rectangle} that represents the containing rectangle of the video track, or empty if no video track is present
      */
-    public Optional<Rectangle<RealNumber, RealNumber>> circumscribedRectangle() {
+    public Optional<Rectangle<BigDecimalElement, BigDecimalElement>> circumscribedRectangle() {
         TrackType track = video().orElse(null);
 
         if (track != null) {
             double rotated = track.getRotation() == null ? 0 : Double.parseDouble(track.getRotation());
 
-            return Optional.of(new Rectangle<>(element(
-                track.getWidth().doubleValue() * (track.getPixelAspectRatio() == null ? 1f : track.getPixelAspectRatio())),
-                element(track.getHeight().doubleValue()))
-                    .rotate(element(Math.toRadians(rotated)))
+            RationalNumber width =  RationalNumber.of(track.getWidth()).times(track.getPixelAspectRatio() == null ? 1f : track.getPixelAspectRatio());
+            RationalNumber height =  RationalNumber.of(track.getHeight());
+            return Optional.of(new Rectangle<>(width, height)
+                    .rotate(RationalNumber.of((long) (100L * Math.toRadians(rotated)), 1000L))
                 .circumscribedRectangle()
                 .shape());
         } else {
