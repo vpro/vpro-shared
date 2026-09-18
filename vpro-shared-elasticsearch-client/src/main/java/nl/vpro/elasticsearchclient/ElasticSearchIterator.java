@@ -149,9 +149,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
         this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
-        this.requestOptions = opaqueId == null
+        String requestOpaqueId = ElasticSearchOpaqueId.withRequest(opaqueId);
+        this.requestOptions = requestOpaqueId == null
             ? RequestOptions.DEFAULT
-            : RequestOptions.DEFAULT.toBuilder().addHeader("X-Opaque-Id", opaqueId).build();
+            : RequestOptions.DEFAULT.toBuilder().addHeader("X-Opaque-Id", requestOpaqueId).build();
         if (_autoEsVersion && esVersion == null) {
             try {
                 Request versionRequest = new Request("GET", "");
