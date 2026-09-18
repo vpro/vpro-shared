@@ -118,12 +118,14 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private final ObjectName objectName;
 
+    private final RequestOptions requestOptions;
+
     @Getter
     @Setter
     private boolean warnSortNotOnDoc;
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null, true);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null, true, null);
     }
 
 
@@ -141,14 +143,20 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         String beanName,
         WindowedEventRate rateMeasurerer,
         List<String> routingIds,
-        Boolean warnSortNotOnDoc
+        Boolean warnSortNotOnDoc,
+        String opaqueId
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
         this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
+        this.requestOptions = opaqueId == null
+            ? RequestOptions.DEFAULT
+            : RequestOptions.DEFAULT.toBuilder().addHeader("X-Opaque-Id", opaqueId).build();
         if (_autoEsVersion && esVersion == null) {
             try {
-                Response response = client.performRequest(new Request("GET", ""));
+                Request versionRequest = new Request("GET", "");
+                versionRequest.setOptions(requestOptions);
+                Response response = client.performRequest(versionRequest);
                 try {
                     JsonNode read = Jackson2Mapper.getLenientInstance()
                         .readerFor(ObjectNode.class)
@@ -361,6 +369,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 builder.append(Paths.SEARCH);
                 start = Instant.now();
                 Request post = new Request(POST, builder.toString());
+                post.setOptions(requestOptions);
                 post.setEntity(entity);
                 if (! scrollContext.isNegative()) {
                     post.addParameter(SCROLL, scrollContext.toMillis() + "ms");
@@ -429,10 +438,12 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     scrollRequest.put(SCROLL_ID, scrollId);
 
                     post = new Request(POST, Paths.SCROLL);
+                    post.setOptions(requestOptions);
                     post.setJsonEntity(scrollRequest.toString());
 
                 } else {
                     post = new Request(POST, Paths.SCROLL);
+                    post.setOptions(requestOptions);
                     post.addParameter(SCROLL, scrollContext.toMillis() + "ms");
                     post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                 }
@@ -549,6 +560,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             HttpEntity responseEntity = null;
             try {
                 Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + id);
+                delete.setOptions(requestOptions);
                 Response res = client.performRequest(delete);
                 responseEntity = res.getEntity();
                 if (res.getStatusLine().getStatusCode() == 200) {
