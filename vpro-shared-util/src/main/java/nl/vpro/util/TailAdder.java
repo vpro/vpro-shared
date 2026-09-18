@@ -33,6 +33,7 @@ public class TailAdder<T> implements CountedIterator<T> {
     T nextFromAdder;
     Boolean adderHasNext = null;
     T last = null;
+    private boolean closed;
 
     @SafeVarargs
     public static <T> TailAdder<T> withFunctions(Iterator<T> wrapped, Function<T, T>... adder) {
@@ -91,6 +92,9 @@ public class TailAdder<T> implements CountedIterator<T> {
             return true;
         }
         findNext();
+        if (! adderHasNext) {
+            closeAfterExhaustion();
+        }
         return adderHasNext;
     }
 
@@ -104,6 +108,7 @@ public class TailAdder<T> implements CountedIterator<T> {
         }
         findNext();
         if (! adderHasNext) {
+            closeAfterExhaustion();
             throw new NoSuchElementException();
         }
         adderHasNext = null;
@@ -173,7 +178,18 @@ public class TailAdder<T> implements CountedIterator<T> {
 
     @Override
     public void close() throws Exception {
-        wrapped.close();
+        if (! closed) {
+            closed = true;
+            wrapped.close();
+        }
+    }
+
+    private void closeAfterExhaustion() {
+        try {
+            close();
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not close tail iterator", e);
+        }
     }
 
     @Override
