@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ElasticSearchIterator;
+import nl.vpro.elasticsearchclient.ElasticSearchOpaqueId;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.ThreadPools;
@@ -136,7 +137,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         WindowedEventRate rateMeasurerer,
         List<String> routingIds,
         RequestOptions requestOptions,
-        Boolean requestVersion
+        Boolean requestVersion,
+        String opaqueId
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
@@ -160,7 +162,13 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
         this.closeRate = rateMeasurerer == null;
 
         this.routing = routingIds == null ? null : routingIds.toArray(new String[0]);
-        this.requestOptions = requestOptions == null ? RequestOptions.DEFAULT : requestOptions;
+        String requestOpaqueId = ElasticSearchOpaqueId.withRequest(opaqueId);
+        this.requestOptions = requestOpaqueId == null
+            ? requestOptions == null ? RequestOptions.DEFAULT : requestOptions
+            : (requestOptions == null ? RequestOptions.DEFAULT : requestOptions)
+                .toBuilder()
+                .addHeader("X-Opaque-Id", requestOpaqueId)
+                .build();
         this.requestVersion = requestVersion;
     }
 
@@ -393,7 +401,7 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
                 ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
                 clearScrollRequest.addScrollId(scrollId);
 
-                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, requestOptions);
 
                 if (clearScrollResponse.isSucceeded()) {
                     log.debug("Deleted {} {}", scrollId, clearScrollResponse);
