@@ -425,7 +425,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 Request post;
                 if (jsonRequests) {
                     ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
-                    scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
+                    scrollRequest.put(SCROLL, scrollContext.toMillis() + "ms");
                     scrollRequest.put(SCROLL_ID, scrollId);
 
                     post = new Request(POST, Paths.SCROLL);
@@ -433,7 +433,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
                 } else {
                     post = new Request(POST, Paths.SCROLL);
-                    post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
+                    post.addParameter(SCROLL, scrollContext.toMillis() + "ms");
                     post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                 }
 

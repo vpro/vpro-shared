@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +9,36 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
 public class TailAdderTest {
+
+    @Test
+    public void closesOnExhaustion() throws Exception {
+        AtomicInteger closes = new AtomicInteger();
+        CloseableIterator<String> iterator = new CloseableIterator<>() {
+            private final Iterator<String> delegate = Collections.singletonList("a").iterator();
+
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return delegate.next();
+            }
+
+            @Override
+            public void close() {
+                closes.incrementAndGet();
+            }
+        };
+
+        TailAdder<String> adder = TailAdder.withFunctions(iterator, last -> "b");
+        assertEquals("a", adder.next());
+        assertEquals("b", adder.next());
+        assertFalse(adder.hasNext());
+        assertFalse(adder.hasNext());
+        assertEquals(1, closes.get());
+    }
 
     @Test
     public void addTo() throws Exception {
