@@ -2,10 +2,9 @@ package nl.vpro.elasticsearchclient;
 
 import org.apache.logging.log4j.ThreadContext;
 
-public final class ElasticSearchOpaqueId {
+import nl.vpro.logging.mdc.MDCConstants;
 
-    private static final String REQUEST_MDC_KEY = "request";
-    private static final String USER_NAME_MDC_KEY = "userName";
+public final class ElasticSearchOpaqueId {
 
     private ElasticSearchOpaqueId() {
     }
@@ -14,8 +13,8 @@ public final class ElasticSearchOpaqueId {
      * Adds the current user and HTTP method and path, when present, without forwarding query parameters.
      */
     public static String withRequest(String operation) {
-        String request = ThreadContext.get(REQUEST_MDC_KEY);
-        String userName = ThreadContext.get(USER_NAME_MDC_KEY);
+        String request = ThreadContext.get(MDCConstants.REQUEST);
+        String userName = ThreadContext.get(MDCConstants.USER_NAME);
         StringBuilder result = new StringBuilder(operation == null ? "" : operation);
         if (userName != null && !userName.isBlank()) {
             append(result, "user=" + userName);
