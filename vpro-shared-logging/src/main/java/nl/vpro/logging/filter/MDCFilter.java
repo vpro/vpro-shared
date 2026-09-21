@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.Serial;
+import java.time.Duration;
 import java.util.function.Function;
 
 import jakarta.servlet.*;
@@ -63,6 +64,7 @@ public class  MDCFilter extends HttpFilter {
 
         final String path = request.getRequestURI().substring(request.getContextPath().length());
         final String logPostFix = path.replace('/', '.');
+        final long nanos = System.nanoTime();
         try {
             try {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -91,13 +93,19 @@ public class  MDCFilter extends HttpFilter {
             chain.doFilter(request, response);
         } finally {
             // access logging...
-            afterLogger(logPostFix).atLevel(accessLevel.apply(path)).log("{} {}", response.getStatus(), response.getContentType());
+            Duration duration = Duration.ofNanos(System.nanoTime() - nanos);
+            MDC.put(DURATION, duration.toString());
+            afterLogger(logPostFix)
+                .atLevel(accessLevel.apply(path))
+                .log("{}\t{}\t{}", response.getStatus(), response.getContentType(), duration);
             if (clear) {
                 MDC.clear();
             } else {
                 MDC.remove(USER_NAME);
                 MDC.remove(REQUEST);
                 MDC.remove(REMOTE_ADDR);
+                MDC.remove(DURATION);
+                MDC.remove(USER_AGENT);
             }
         }
     }

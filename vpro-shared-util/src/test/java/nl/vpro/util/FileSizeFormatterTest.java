@@ -92,6 +92,14 @@ public class FileSizeFormatterTest {
         formatAndParse(1025);
     }
 
+    @Test
+    public void withExtraDigit() {
+        FileSizeFormatter formatter = FileSizeFormatter.DEFAULT.withPattern("#");
+        assertThat(formatter.format(1025)).isEqualTo("1 KiB");
+        assertThat(formatter.withExtraDigit().format(1025)).isEqualTo("1.0 KiB");
+        assertThat(formatter.withExtraDigit().withExtraDigit().format(1025)).isEqualTo("1.00 KiB");
+    }
+
     @Property(tries = 20)
     void formatAndParse(@ForAll("longs") long size) {
         for (FileSizeFormatter formatter : Arrays.asList(FileSizeFormatter.DEFAULT, FileSizeFormatter.SI)) {

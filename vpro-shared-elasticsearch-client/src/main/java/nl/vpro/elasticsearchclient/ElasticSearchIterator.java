@@ -118,12 +118,14 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
     private final ObjectName objectName;
 
+    private final RequestOptions requestOptions;
+
     @Getter
     @Setter
     private boolean warnSortNotOnDoc;
 
     public ElasticSearchIterator(RestClient client, Function<JsonNode, T> adapt) {
-        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null, true);
+        this(client, adapt, null, Duration.ofMinutes(1), new Version<>(7), false, true, true, null, null, null, true, null);
     }
 
 
@@ -141,14 +143,21 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         String beanName,
         WindowedEventRate rateMeasurerer,
         List<String> routingIds,
-        Boolean warnSortNotOnDoc
+        Boolean warnSortNotOnDoc,
+        String opaqueId
     ) {
         this.adapt = adapterTo(adapt, adaptTo);
         this.client = client;
         this.scrollContext = scrollContext == null ? Duration.ofMinutes(1) : scrollContext;
+        String requestOpaqueId = ElasticSearchOpaqueId.withRequest(opaqueId);
+        this.requestOptions = requestOpaqueId == null
+            ? RequestOptions.DEFAULT
+            : RequestOptions.DEFAULT.toBuilder().addHeader("X-Opaque-Id", requestOpaqueId).build();
         if (_autoEsVersion && esVersion == null) {
             try {
-                Response response = client.performRequest(new Request("GET", ""));
+                Request versionRequest = new Request("GET", "");
+                versionRequest.setOptions(requestOptions);
+                Response response = client.performRequest(versionRequest);
                 try {
                     JsonNode read = Jackson2Mapper.getLenientInstance()
                         .readerFor(ObjectNode.class)
@@ -361,6 +370,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 builder.append(Paths.SEARCH);
                 start = Instant.now();
                 Request post = new Request(POST, builder.toString());
+                post.setOptions(requestOptions);
                 post.setEntity(entity);
                 if (! scrollContext.isNegative()) {
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
@@ -429,10 +439,12 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     scrollRequest.put(SCROLL_ID, scrollId);
 
                     post = new Request(POST, Paths.SCROLL);
+                    post.setOptions(requestOptions);
                     post.setJsonEntity(scrollRequest.toString());
 
                 } else {
                     post = new Request(POST, Paths.SCROLL);
+                    post.setOptions(requestOptions);
                     post.addParameter(SCROLL, scrollContext.toMinutes() + "m");
                     post.setEntity(new NStringEntity(scrollId, ContentType.TEXT_PLAIN));
                 }
@@ -545,19 +557,20 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
             rate.close();
         }
         if (scrollId != null) {
+            String id = scrollId;
             HttpEntity responseEntity = null;
             try {
-                Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + scrollId);
+                Request delete = new Request(METHOD_DELETE, "/_search/scroll/" + id);
+                delete.setOptions(requestOptions);
                 Response res = client.performRequest(delete);
                 responseEntity = res.getEntity();
                 if (res.getStatusLine().getStatusCode() == 200) {
-                    log.debug("Deleted {} {}", scrollId, res);
-                    SCROLL_IDS.remove(scrollId);
+                    log.debug("Deleted {} {}", id, res);
                 } else {
-                    log.warn("Something wrong deleting scroll id {} {}", scrollId, res);
+                    log.warn("Something wrong deleting scroll id {} {}", id, res);
                 }
-                scrollId = null;
             } catch (ResponseException re) {
+                responseEntity = re.getResponse().getEntity();
                 if (re.getResponse().getStatusLine().getStatusCode() == 404) {
                     log.debug("Not found to delete");
                 } else {
@@ -567,6 +580,8 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 log.warn("close: {}: {}", e.getClass().getName(), e.getMessage());
             } finally {
                 EntityUtils.consumeQuietly(responseEntity);
+                SCROLL_IDS.remove(id);
+                scrollId = null;
             }
         } else {
             log.debug("no need to close");
