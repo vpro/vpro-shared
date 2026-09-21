@@ -1,13 +1,14 @@
 package nl.vpro.elasticsearch;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;

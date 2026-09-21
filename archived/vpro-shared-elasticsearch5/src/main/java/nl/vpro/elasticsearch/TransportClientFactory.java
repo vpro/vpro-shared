@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch;
 
+import jakarta.annotation.PreDestroy;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;

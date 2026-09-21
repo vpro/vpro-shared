@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.client.Client;
-import org.junit.Ignore;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 
@@ -34,7 +35,7 @@ public class JoinClusterClientFactoryITest {
 
     @SuppressWarnings("deprecation")
     @Test
-    @Ignore("Doesn't work?")
+    @Disabled("Doesn't work?")
     public void joinMulticast() throws ExecutionException, InterruptedException {
         JoinClusterClientFactory factory = new JoinClusterClientFactory();
         factory.setClusterName(clusterName);

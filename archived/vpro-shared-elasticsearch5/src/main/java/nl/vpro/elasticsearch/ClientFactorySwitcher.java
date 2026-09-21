@@ -1,5 +1,7 @@
 package nl.vpro.elasticsearch;
 
+import jakarta.annotation.PostConstruct;
+
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.PostConstruct;
+
 import javax.management.*;
 
 import org.elasticsearch.client.Client;
@@ -49,7 +51,7 @@ public class ClientFactorySwitcher implements ESClientFactory, ClientFactorySwit
                 client.close();
                 log.info("Found {} objects in {}", count, this);
             } catch (InterruptedException e) {
-                Thread.currentTread().interrupt();
+                Thread.currentThread().interrupt();
                 log.error(e.getMessage(), e);
             } catch (ExecutionException e) {
                 log.error(e.getMessage(), e);

@@ -4,9 +4,8 @@ import java.util.Map;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.*;
 
 import nl.vpro.util.UrlProvider;
 
@@ -14,11 +13,11 @@ import nl.vpro.util.UrlProvider;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
-@Ignore("Requires actualy es connection")
+@Disabled("Requires actualy es connection")
 public class ElasticSearchIteratorITest {
 
     Client client;
-    @Before
+    @BeforeEach
     public void setup() {
         TransportClientFactory factory = new TransportClientFactory();
         factory.setTransportAddresses(new UrlProvider("localhost", 9300));

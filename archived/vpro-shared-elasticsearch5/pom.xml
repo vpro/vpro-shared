@@ -5,7 +5,7 @@
   <parent>
     <artifactId>vpro-shared-parent</artifactId>
     <groupId>nl.vpro.shared</groupId>
-    <version>2.12-SNAPSHOT</version>
+    <version>5.17.5</version>
   </parent>
 
   <artifactId>vpro-shared-elasticsearch5</artifactId>
@@ -33,15 +33,6 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-to-slf4j</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
       <version>${elasticsearch.version}</version>
@@ -57,15 +48,8 @@
       <version>${elasticsearch.version}</version>
     </dependency>
     <dependency>
-      <!-- java 11 compliancy -->
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <optional>true</optional>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
     </dependency>
-    <!--  <dependency>
-        <groupId>org.elasticsearch.client</groupId>
-        <artifactId>rest</artifactId>
-        <version>${elasticsearch.version}</version>
-      </dependency>-->
   </dependencies>
 </project>

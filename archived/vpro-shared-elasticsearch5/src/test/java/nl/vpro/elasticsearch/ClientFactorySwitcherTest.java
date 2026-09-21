@@ -3,7 +3,8 @@ package nl.vpro.elasticsearch;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Ignore;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import nl.vpro.util.UrlProvider;
@@ -12,7 +13,7 @@ import nl.vpro.util.UrlProvider;
  * @author Michiel Meeuwissen
  * @since 0.48
  */
-@Ignore
+@Disabled
 public class ClientFactorySwitcherTest {
 
 
