@@ -1,6 +1,7 @@
 package nl.vpro.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -35,6 +36,47 @@ class LoggingInputStreamTest {
         assertThat(event.getMessage().toString()).startsWith("body of 1073741824 bytes (truncated):");
 
 
+    }
+
+    @Test
+    void reportsTruncationWhenLaterReadsExceedTheLimit() throws IOException {
+        Queue<Event> queue = new ArrayDeque<>();
+        QueueSimpleLogger<Event> simpleLogger = QueueSimpleLogger.of(queue);
+        try (LoggingInputStream input = new LoggingInputStream(
+            simpleLogger,
+            new ChunkedInputStream("abcdef".getBytes())
+        )) {
+            input.setTruncateAfter(4);
+            input.readAllBytes();
+        }
+
+        assertThat(queue.poll().getMessage().toString())
+            .startsWith("body of 6 bytes (truncated):");
+    }
+
+    private static class ChunkedInputStream extends InputStream {
+        private final byte[] bytes;
+        private int position;
+
+        private ChunkedInputStream(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        @Override
+        public int read() {
+            return position < bytes.length ? bytes[position++] : -1;
+        }
+
+        @Override
+        public int read(byte[] buffer, int offset, int length) {
+            if (position == bytes.length) {
+                return -1;
+            }
+            int read = Math.min(2, Math.min(length, bytes.length - position));
+            System.arraycopy(bytes, position, buffer, offset, read);
+            position += read;
+            return read;
+        }
     }
 
 }

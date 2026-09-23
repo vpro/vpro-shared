@@ -7,7 +7,7 @@ import java.io.*;
 
 
 /**
- * A wrapper for an {@link InputStream} that logs it's first bytes.
+ * A wrapper for an {@link InputStream} that writes its first bytes to an output stream.
  */
 @Setter
 @Getter
@@ -31,8 +31,27 @@ public class FileInputStreamTee extends TruncatedObservableInputStream {
     }
 
     @Override
-    void closed(long count, boolean truncated) throws IOException {
-        fileOutputStream.close();
+    public void close() throws IOException {
+        IOException exception = null;
+        try {
+            super.close();
+        } catch (IOException e) {
+            exception = e;
+        }
+
+        try {
+            fileOutputStream.close();
+        } catch (IOException e) {
+            if (exception == null) {
+                exception = e;
+            } else {
+                exception.addSuppressed(e);
+            }
+        }
+
+        if (exception != null) {
+            throw exception;
+        }
     }
 
 }
