@@ -19,13 +19,23 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
 import nl.vpro.jmx.MBeans;
-import nl.vpro.logging.mdc.MDCConstants;
 import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.util.*;
 
+import static nl.vpro.logging.mdc.MDCConstants.USER_COUNT;
+import static nl.vpro.logging.mdc.MDCConstants.USER_NAME;
+
 
 /**
+ * JAX-RS request filter that conditionally captures POST request bodies for access logging.
  *
+ * <p>When enabled, this filter wraps the entity stream for requests with a matching content type
+ * and, optionally, an authenticated user whose name matches {@link #setForUser(String)}. Captured
+ * bodies are written to the application log by default, or to a file in the configured
+ * {@linkplain #setFilesPath(String) files path}. The captured content is truncated after the
+ * configured number of bytes to prevent unbounded logging.</p>
+ *
+ * <p>The filter's configuration is exposed through JMX.</p>
  */
 @Provider
 @Component
@@ -53,7 +63,7 @@ public class AccessLogInterceptor implements ContainerRequestFilter {
         if (enabled) {
             if ("POST".equals(requestContext.getMethod())) {
                 String contentType = requestContext.getHeaderString("content-type");
-                String user = MDC.get(MDCConstants.USER_NAME);
+                String user = MDC.get(USER_NAME);
                 if ((forUser == null || (user != null && forUser.matcher(user).matches())) &&
                     (contentType != null && forContentType.matcher(contentType).matches())
                 ) {
@@ -61,7 +71,7 @@ public class AccessLogInterceptor implements ContainerRequestFilter {
                         user = "unknown";
                     }
                     long count = counters.computeIfAbsent(user, k -> new AtomicLong()).incrementAndGet();
-                    MDC.put(MDCConstants.USER_COUNT, String.valueOf(count));
+                    MDC.put(USER_COUNT, String.valueOf(count));
                     TruncatedObservableInputStream inputStream;
                     if (filesPath == null) {
                         inputStream = new LoggingInputStream(Slf4jSimpleLogger.slf4j(log), requestContext.getEntityStream());
