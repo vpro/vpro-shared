@@ -8,19 +8,19 @@ import tools.jackson.databind.ObjectReader;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.node.NullNode;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.function.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.collections.CloseableIterator;
+import org.meeuw.collections.CountedIterator;
 import org.slf4j.Logger;
 
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
-
-import nl.vpro.util.CloseableIterator;
-import nl.vpro.util.CountedIterator;
 
 import static java.util.Objects.requireNonNull;
 

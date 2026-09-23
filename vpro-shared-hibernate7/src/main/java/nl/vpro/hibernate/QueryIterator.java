@@ -1,17 +1,16 @@
 package nl.vpro.hibernate;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.function.Function;
+
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 
-import java.util.function.Function;
-
-
-import nl.vpro.util.CloseableIterator;
 
 /**
- * Makes a Scroll and makes the result accessible as a {@link CloseableIterator}.
+ * Makes a Scroll and makes the result accessible as a {@link org.meeuw.collections.CloseableIterator}.
  * @author Michiel Meeuwissen
  * @since 1.63
  */

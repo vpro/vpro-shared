@@ -141,8 +141,6 @@
     <module>vpro-shared-hibernate-search</module>
     -->
     <module>vpro-shared-hibernate-search6</module>
-
-    <module>vpro-shared-jackson2</module>
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
@@ -158,9 +156,8 @@
     <module>vpro-shared-validation</module>
     <module>vpro-shared-web</module>
     <module>vpro-shared-xml</module>
-    <module>vpro-shared-guice</module>
+
     <module>vpro-shared-i18n</module>
-    <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
     <module>vpro-shared-mediainfo</module>
 

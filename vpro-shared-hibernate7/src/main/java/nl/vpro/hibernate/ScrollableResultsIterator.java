@@ -1,13 +1,13 @@
 package nl.vpro.hibernate;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.ScrollableResults;
 
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
+import org.hibernate.ScrollableResults;
+import org.meeuw.collections.CloseableIterator;
 
-import nl.vpro.util.CloseableIterator;
 
 /**
 
