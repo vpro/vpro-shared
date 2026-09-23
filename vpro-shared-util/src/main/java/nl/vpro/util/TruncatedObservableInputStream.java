@@ -31,6 +31,8 @@ public abstract class TruncatedObservableInputStream extends ObservableInputStre
                     int effectiveLength = Math.min(truncateAfter - (int) count, length);
                     truncated = effectiveLength < length;
                     write(buffer, offset, effectiveLength);
+                } else {
+                    truncated = true;
                 }
                 count += length;
             }
