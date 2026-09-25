@@ -164,14 +164,15 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
         TrackType track = video().orElse(null);
 
         if (track != null) {
-            double rotated = track.getRotation() == null ? 0 : Double.parseDouble(track.getRotation());
+            int rotated = track.getRotation() == null ? 0  : Math.round(Float.parseFloat(track.getRotation()));
 
             RationalNumber width =  RationalNumber.of(track.getWidth()).times(track.getPixelAspectRatio() == null ? 1f : track.getPixelAspectRatio());
             RationalNumber height =  RationalNumber.of(track.getHeight());
             return Optional.of(new Rectangle<>(width, height)
-                    .rotate(RationalNumber.of((long) (100L * Math.toRadians(rotated)), 1000L))
+                .rotateDegrees(rotated)
                 .circumscribedRectangle()
-                .shape());
+                .shape()
+            );
         } else {
             return Optional.empty();
         }

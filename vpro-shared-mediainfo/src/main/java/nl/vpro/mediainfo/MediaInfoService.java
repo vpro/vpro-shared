@@ -70,10 +70,10 @@ public class MediaInfoService implements Function<Path, MediaInfo> {
         int status = mediainfo.execute(outputStream, STDERR, path.toAbsolutePath().toString());
         log.atLevel(status == 0 ? Level.DEBUG : Level.WARN).log("Mediainfo returned with status {}", status);
 
-
+        net.mediaarea.mediainfo.MediaInfo wrapped = JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()),
+            net.mediaarea.mediainfo.MediaInfo.class);
         return new MediaInfo(path,
-            JAXB.unmarshal(new ByteArrayInputStream(outputStream.toByteArray()),
-                net.mediaarea.mediainfo.MediaInfo.class),
+            wrapped,
             status
         );
     }
