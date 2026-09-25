@@ -57,7 +57,7 @@ public class FileCachingInputStream extends InputStream {
     private final Path tempFile;
     private final boolean deleteTempFile;
 
-    private final InputStream tempFileInputStream;
+    private InputStream tempFileInputStream;
     private boolean tempFileInputStreamClosed = false;
 
     @Getter
@@ -148,8 +148,7 @@ public class FileCachingInputStream extends InputStream {
                 progressLoggingBatch
             );
 
-            this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile));
-            incStreams(tempFileInputStream);
+            openTempFileInputStream();
 
             toFileCopier = createToFileCopier(
                 input,
@@ -388,6 +387,36 @@ public class FileCachingInputStream extends InputStream {
             }
             tempFileInputStreamClosed = true;
         }
+    }
+
+    private void openTempFileInputStream() throws IOException {
+        this.tempFileInputStream = new BufferedInputStream(Files.newInputStream(tempFile));
+        tempFileInputStreamClosed = false;
+        incStreams(tempFileInputStream);
+    }
+
+    /**
+     * Rewinds this stream to its beginning while retaining its cached data.
+     *
+     * <p>The stream must not have been closed.</p>
+     */
+    @Override
+    public synchronized void reset() throws IOException {
+        if (closed) {
+            throw new IOException("Stream closed");
+        }
+        if (tempFileInputStream != null) {
+            if (!tempFileInputStreamClosed) {
+                closeAndDecStreams("file input", tempFileInputStream);
+            }
+            openTempFileInputStream();
+        }
+        count.set(0);
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
     }
 
     public void deleteTempFile() {

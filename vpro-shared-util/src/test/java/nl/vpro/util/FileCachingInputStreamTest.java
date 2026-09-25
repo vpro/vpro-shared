@@ -222,6 +222,26 @@ public class FileCachingInputStreamTest {
         }
     }
 
+    @Test
+    public void resetRewindsCachedFile() throws IOException {
+        try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
+            .input(new ByteArrayInputStream(MANY_BYTES))
+            .initialBuffer(0)
+            .downloadFirst(true)
+            .noProgressLogging()
+            .build()) {
+
+            ByteArrayOutputStream first = new ByteArrayOutputStream();
+            IOUtils.copy(inputStream, first);
+            inputStream.reset();
+            ByteArrayOutputStream second = new ByteArrayOutputStream();
+            IOUtils.copy(inputStream, second);
+
+            assertThat(first.toByteArray()).containsExactly(MANY_BYTES);
+            assertThat(second.toByteArray()).containsExactly(MANY_BYTES);
+        }
+    }
+
 
     public static Iterator<Object[]> slowAndNormal() {
 
