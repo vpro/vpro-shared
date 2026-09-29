@@ -11,7 +11,7 @@ image:screenshot.png[]]
 
 == How to install?
 
-Adding the dependency should do it:
+Adding the dependency should do it for vpro projects:
 
 .pom.xml
 [source,xml]
@@ -20,4 +20,11 @@ Adding the dependency should do it:
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-jcache</artifactId>
     </dependency>
+----
+
+Otherwise, also
+
+[source, java]
+----
+@Import(nl.vpro.javax.cache.managment.CacheManagerMXBeans.class)
 ----
