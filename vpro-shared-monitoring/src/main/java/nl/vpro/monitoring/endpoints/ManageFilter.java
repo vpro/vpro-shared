@@ -3,6 +3,7 @@ package nl.vpro.monitoring.endpoints;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectWriter;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -19,8 +20,6 @@ import org.meeuw.functional.ThrowingRunnable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
@@ -56,8 +55,8 @@ public class ManageFilter extends HttpFilter {
     Provider<WellKnownController> wellKnownController;
 
     @Inject
-    @Named("monitoringObjectMapper")
-    ObjectMapper objectMapper;
+    @Named("monitoringObjectWriter")
+    ObjectWriter objectWriter;
 
     @Inject
     MonitoringProperties monitoringProperties;
@@ -212,10 +211,11 @@ public class ManageFilter extends HttpFilter {
         if (body != null) {
             if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                objectMapper.writeValue(response.getOutputStream(), body);
+                objectWriter.writeValue(response.getOutputStream(), body);
                 return;
             }
             response.setContentType(contentType.toString());
+
             response.getWriter().write(body.toString());
         }
     }

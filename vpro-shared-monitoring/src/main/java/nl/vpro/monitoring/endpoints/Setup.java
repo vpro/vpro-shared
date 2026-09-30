@@ -1,9 +1,11 @@
 package nl.vpro.monitoring.endpoints;
 
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.springframework.context.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 
@@ -22,16 +24,10 @@ public class Setup {
     }
 
     @Bean
-    public ObjectMapper monitoringObjectMapper() {
-        ObjectMapper om = new ObjectMapper() {
-            @Override
-            public String toString() {
-                return "ObjectMapper(monitoring)";
-            }
-        };
-        //om.registerModule(new JavaTim());
-        om.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
-        return om;
+    public ObjectWriter monitoringObjectWriter() {
+        JsonMapper.Builder builder = JsonMapper.builder();
+        builder.changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_EMPTY));
+        return builder.build().writer();
     }
 
 }
