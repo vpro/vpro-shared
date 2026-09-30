@@ -31,7 +31,7 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-jackson2</artifactId>
+      <artifactId>vpro-shared-jackson3</artifactId>
     </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>

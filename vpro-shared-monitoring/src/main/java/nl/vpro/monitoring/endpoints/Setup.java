@@ -4,7 +4,6 @@ import org.springframework.context.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 
@@ -30,7 +29,7 @@ public class Setup {
                 return "ObjectMapper(monitoring)";
             }
         };
-        om.registerModule(new JavaTimeModule());
+        //om.registerModule(new JavaTim());
         om.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
         return om;
     }

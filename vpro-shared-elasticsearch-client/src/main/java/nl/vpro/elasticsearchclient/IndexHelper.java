@@ -1,6 +1,10 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.*;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -30,14 +34,10 @@ import org.slf4j.*;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Suppliers;
 
 import nl.vpro.elasticsearch.*;
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.logging.simple.*;
 import nl.vpro.util.*;
 
@@ -45,7 +45,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Methods.*;
 import static nl.vpro.elasticsearch.ElasticSearchIndex.resourceToObjectNode;
-import static nl.vpro.jackson2.Jackson2Mapper.getPublisherInstance;
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 
 /**
@@ -63,7 +62,7 @@ import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 @Setter
 public class IndexHelper implements IndexHelperInterface<RestClient>, AutoCloseable {
 
-    private static final Jackson2Mapper LENIENT = Jackson2Mapper.getLenientInstance();
+    private static final Jackson3Mapper LENIENT = Jackson3Mapper.LENIENT;
     private final SimpleLogger log;
     private Supplier<String> indexNameSupplier;
     private Supplier<ObjectNode> settings;
@@ -146,7 +145,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         this.indexNameSupplier = indexNameSupplier == null ? () -> "" : indexNameSupplier;
         this.settings = settings;
         this.writeJsonDir = writeJsonDir;
-        this.objectMapper = objectMapper == null ? getPublisherInstance() : objectMapper;
+        this.objectMapper = objectMapper == null ? Jackson3Mapper.getPublisherInstance().mapper() : objectMapper;
         this.aliases = aliases == null ? Collections.emptyList() : aliases;
         this.countAfterCreate = countAfterCreate;
         this.mdcSupplier = mdcSupplier == null ? MDC::getCopyOfContextMap : mdcSupplier;
@@ -244,7 +243,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             indexName = supplied;
         }
 
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode request = Jackson3Mapper.INSTANCE.writer().createObjectNode();
 
         if (createIndex.isCreateAliases() && (! this.aliases.isEmpty() || createIndex.isUseNumberPostfix())) {
             ObjectNode aliases = request.withObject("/aliases");
@@ -346,7 +345,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     @SafeVarargs
     @SneakyThrows
     public final void reputSettings(Consumer<ObjectNode>... postProcessSettings) {
-        ObjectNode request = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode request = Jackson3Mapper.INSTANCE.writer().createObjectNode();
         ObjectNode  settings = request.set("settings", this.settings.get());
         ObjectNode index = settings.withObject(P_SETTINGS).withObject(P_INDEX);
         if (!index.has("refresh_interval")) {
@@ -443,9 +442,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             while (i.hasNext()) {
                 JsonNode node = i.next();
                 if (node.has(Fields.ROUTING)) {
-                    bulk.add(deleteRequestWithRouting(node.get(Fields.ID).asText(), node.get(Fields.ROUTING).asText()));
+                    bulk.add(deleteRequestWithRouting(node.get(Fields.ID).asString(), node.get(Fields.ROUTING).asString()));
                 } else {
-                    bulk.add(deleteRequest(node.get(Fields.ID).asText()));
+                    bulk.add(deleteRequest(node.get(Fields.ID).asString()));
                 }
             }
         }
@@ -489,7 +488,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         try {
             Response response = client().performRequest(new Request(GET, "/"));
             JsonNode read = read(response);
-            return read.get("version").get("number").asText();
+            return read.get("version").get("number").asString();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return null;
@@ -520,7 +519,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         Response response = client().performRequest(request);
                         ArrayNode read = readArray(response);
                         for (JsonNode i : read) {
-                            result.put(i.get("alias").textValue(), i.get(INDEX).textValue());
+                            result.put(i.get("alias").stringValue(), i.get(INDEX).stringValue());
                         }
                     } catch (IOException e) {
                         log.error(e.getMessage(), e);
@@ -663,7 +662,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                         ObjectNode result = read(log, response);
                         if (result == null) {
                             log.warn("{} No object node found from {}", requestDescription, response);
-                            result = Jackson2Mapper.getInstance().createObjectNode();
+                            result = Jackson3Mapper.INSTANCE.writer().createObjectNode();
                         }
                         for (Consumer<ObjectNode> rl : listeners) {
                             rl.accept(result);
@@ -674,7 +673,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 } else {
                     log.error("{}: {}", requestDescription, exception.getMessage(), exception);
                     future.completeExceptionally(exception);
-                    ObjectNode error  = new ObjectNode(LENIENT.getNodeFactory());
+                    ObjectNode error  = Jackson3Mapper.LENIENT.writer().createObjectNode();
                     error.put("errors", true);
                     error.putArray("items");
                     error.put("message", exception.getMessage());
@@ -724,9 +723,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public ObjectNode index(BulkRequestEntry indexRequest) {
         return post(
             _indexPath(
-                indexRequest.getAction().get(TYPE).textValue(),
-                indexRequest.getAction().get(ID).textValue(),
-                indexRequest.getAction().get(PARENT).textValue()
+                indexRequest.getAction().get(TYPE).stringValue(),
+                indexRequest.getAction().get(ID).stringValue(),
+                indexRequest.getAction().get(PARENT).stringValue()
             ),
             indexRequest.getSource()
         );
@@ -760,7 +759,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public final Future<ObjectNode> deleteAsync(
         @NonNull BulkRequestEntry deleteRequest,
         @NonNull Consumer<ObjectNode>... listeners) {
-        return deleteAsync(deleteRequest.getAction().get(TYPE).textValue(), deleteRequest.getSource().get(ID).textValue(), listeners);
+        return deleteAsync(deleteRequest.getAction().get(TYPE).stringValue(), deleteRequest.getSource().get(ID).stringValue(), listeners);
     }
 
 
@@ -797,7 +796,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         Request get = createGet("/_mget");
         //get.addParameter("routing", "AUTO_WEKKERWAKKER");
 
-        ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode body = Jackson3Mapper.INSTANCE.writer().createObjectNode();
         ArrayNode array = body.withArray("docs");
         for (RoutedId id :ids ) {
             ObjectNode doc = array.addObject();
@@ -869,7 +868,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     private <T> Optional<T> _get(Collection<String> type, String id, Function<JsonNode, T> adapter) {
-        ObjectNode body = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode body = Jackson3Mapper.INSTANCE.writer().createObjectNode();
         ArrayNode array = body.withArray("docs");
         for (String t : type) {
             ObjectNode doc = array.addObject();
@@ -912,7 +911,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
     /**
-     * Reads a response to json, using {@link Jackson2Mapper#getLenientInstance()}, catch exceptions,
+     * Reads a response to json, using {@link Jackson3Mapper#getLenientInstance()}, catch exceptions,
      * make sure resources are closed.
      */
     public static <T extends JsonNode> T read(SimpleLogger log, Response response, Class<T> clazz) {
@@ -936,7 +935,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (response.getHeader("content-type").startsWith(ContentType.APPLICATION_JSON.getMimeType())) {
             return read(log, response, ObjectNode.class);
         } else {
-            ObjectNode n = Jackson2Mapper.getInstance().createObjectNode();
+            ObjectNode n = Jackson3Mapper.INSTANCE.writer().createObjectNode();
             try {
                 n.put("error", true);
                 n.put("body", IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
@@ -1031,7 +1030,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
 
     public BulkRequestEntry deleteRequest(String id) {
-        ObjectNode actionLine = Jackson2Mapper.getInstance().createObjectNode();
+        ObjectNode actionLine = Jackson3Mapper.INSTANCE.writer().createObjectNode();
         ObjectNode index = actionLine.withObject(P_DELETE);
         index.put(Fields.ID, id);
         index.put(Fields.INDEX, getIndexName());
@@ -1188,7 +1187,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (jsonNode == null) {
             return defaultValue;
         }
-        Duration result = TimeUtils.parseDuration(jsonNode.textValue()).orElse(defaultValue);
+        Duration result = TimeUtils.parseDuration(jsonNode.stringValue()).orElse(defaultValue);
 
         if (result.isNegative()) {
             return TimeUtils.MAX_DURATION;
@@ -1249,19 +1248,19 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             public void onSuccess(Response response) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 try (InputStream inputStream = response.getEntity().getContent()) {
-                    ObjectNode jsonNode = (ObjectNode) LENIENT.readTree(inputStream);
-                    String clusterName = jsonNode.get("cluster_name").textValue();
-                    String name = jsonNode.get("name").textValue();
+                    ObjectNode jsonNode = (ObjectNode) LENIENT.reader().readTree(inputStream);
+                    String clusterName = jsonNode.get("cluster_name").stringValue();
+                    String name = jsonNode.get("name").stringValue();
                     JsonNode version = jsonNode.withObject("/version");
-                    String buildFlavor = version.has("build_flavor") ? version.get("build_flavor").textValue() : "default";
-                    Distribution distribution = version.has("distribution") ? Distribution.valueOf(version.get("distribution").textValue().toUpperCase()): "default".equals(buildFlavor) ? Distribution.ELASTICSEARCH : Distribution.OPENSEARCH;
+                    String buildFlavor = version.has("build_flavor") ? version.get("build_flavor").stringValue() : "default";
+                    Distribution distribution = version.has("distribution") ? Distribution.valueOf(version.get("distribution").stringValue().toUpperCase()): "default".equals(buildFlavor) ? Distribution.ELASTICSEARCH : Distribution.OPENSEARCH;
                     Info info = Info.builder()
                         .clusterName(clusterName)
                         .name(name)
                         .distribution(distribution)
                         .buildFlavor(buildFlavor)
-                        .version(version.has("number") ? IntegerVersion.parseIntegers(version.get("number").textValue()) :  null)
-                        .luceneVersion(version.has("lucene_version") ? IntegerVersion.parseIntegers(version.get("lucene_version").textValue()) :  null)
+                        .version(version.has("number") ? IntegerVersion.parseIntegers(version.get("number").stringValue()) :  null)
+                        .luceneVersion(version.has("lucene_version") ? IntegerVersion.parseIntegers(version.get("lucene_version").stringValue()) :  null)
                         .build();
                     log.info("Connected with {} -> {}", jsonNode, info);
                     future.complete(info);
@@ -1299,9 +1298,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
     public Consumer<ObjectNode> indexLogger(SimpleLogger logger, Supplier<String> prefix) {
         return jsonNode -> {
-            String index = jsonNode.get(Fields.INDEX).textValue();
-            String type = jsonNode.get(Fields.TYPE).textValue();
-            String id = jsonNode.get(Fields.ID).textValue();
+            String index = jsonNode.get(Fields.INDEX).stringValue();
+            String type = jsonNode.get(Fields.TYPE).stringValue();
+            String id = jsonNode.get(Fields.ID).stringValue();
             Integer version = jsonNode.hasNonNull(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : null;
             if (jsonNode.hasNonNull(Fields.ERROR)) {
                 logger.error("{}{}/{}/{}/{}: {}", prefix.get(), clientFactory.logString(), index, type, encode(id), jsonNode);
@@ -1325,9 +1324,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     public Consumer<ObjectNode> deleteLogger(@NonNull SimpleLogger logger, @NonNull Supplier<String> prefix) {
         return jsonNode -> {
             boolean found = jsonNode.has("found") && jsonNode.get("found").booleanValue();
-            String index = jsonNode.get(Fields.INDEX).textValue();
-            String type = jsonNode.get(Fields.TYPE).textValue();
-            String id = jsonNode.get(Fields.ID).textValue();
+            String index = jsonNode.get(Fields.INDEX).stringValue();
+            String type = jsonNode.get(Fields.TYPE).stringValue();
+            String id = jsonNode.get(Fields.ID).stringValue();
             if (logger.isInfoEnabled()) {
                 if (found) {
                     int version = jsonNode.has(Fields.VERSION) ? jsonNode.get(Fields.VERSION).intValue() : -1;
@@ -1436,9 +1435,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 }
                 if (on.has(DELETE)) {
                     final ObjectNode delete = on.withObject(P_DELETE);
-                    index = delete.get(Fields.INDEX).textValue();
-                    String type = delete.has(Fields.TYPE) ? delete.get(Fields.TYPE).textValue() : DOC;
-                    String id = delete.get(Fields.ID).textValue();
+                    index = delete.get(Fields.INDEX).stringValue();
+                    String type = delete.has(Fields.TYPE) ? delete.get(Fields.TYPE).stringValue() : DOC;
+                    String id = delete.get(Fields.ID).stringValue();
                     String logEntry = handleResponse(delete, type, id);
                     deleted.add(logEntry);
                     if (! singleVerbose) {
@@ -1448,9 +1447,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 }
                 if (n.has(INDEX)) {
                     ObjectNode indexResponse = on.withObject(P_INDEX);
-                    index = indexResponse.get(Fields.INDEX).textValue();
-                    String type = indexResponse.get(Fields.TYPE).textValue();
-                    String id = indexResponse.get(Fields.ID).textValue();
+                    index = indexResponse.get(Fields.INDEX).stringValue();
+                    String type = indexResponse.get(Fields.TYPE).stringValue();
+                    String id = indexResponse.get(Fields.ID).stringValue();
                     String logEntry = handleResponse(indexResponse, type, id);
                     indexed.add(logEntry);
                     if (! singleVerbose) {
@@ -1460,9 +1459,9 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 }
                 if (n.has(UPDATE)) {
                     ObjectNode indexResponse = on.withObject(P_UPDATE);
-                    index = indexResponse.get(Fields.INDEX).textValue();
-                    String type = indexResponse.get(Fields.TYPE).textValue();
-                    String id = indexResponse.get(Fields.ID).textValue();
+                    index = indexResponse.get(Fields.INDEX).stringValue();
+                    String type = indexResponse.get(Fields.TYPE).stringValue();
+                    String id = indexResponse.get(Fields.ID).stringValue();
                     String logEntry = handleResponse(indexResponse, type, id);
                     indexed.add(logEntry);
                     if (! singleVerbose) {
@@ -1505,7 +1504,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             logEntry.append("status:").append(status);
         }
         if (indexResponse.has("result")) {
-            String result = indexResponse.get("result").textValue();
+            String result = indexResponse.get("result").stringValue();
             logEntry.append(" ").append(logEntry(type, id, result));
         }
         if (indexResponse.has("error")) {
@@ -1586,7 +1585,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         for (BulkRequestEntry request: requests) {
             ObjectNode actionLine = request.getAction();
             if (actionLine.has("index")) {
-                writeJson(log, writeJsonDir, actionLine.get("index").get(Fields.ID).textValue(), request.getSource());
+                writeJson(log, writeJsonDir, actionLine.get("index").get(Fields.ID).stringValue(), request.getSource());
             }
         }
     }
@@ -1597,7 +1596,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 File.separator, "_"
             ) + ".json");
             try (OutputStream out = Files.newOutputStream(file.toPath())) {
-                Jackson2Mapper.getPrettyInstance().writeValue(out, jsonNode);
+                Jackson3Mapper.PRETTY.writer().writeValue(out, jsonNode);
                 log.info("Wrote {}", file);
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
@@ -1655,7 +1654,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
                 JsonNode clusterHealth = LENIENT
                     .readerFor(JsonNode.class)
                     .readValue(response.getEntity().getContent());
-                Status status = Status.valueOf(clusterHealth.get("status").textValue());
+                Status status = Status.valueOf(clusterHealth.get("status").stringValue());
                 log.info("status {}", status);
                 boolean serviceIsUp = status.compareTo(waitForStatus) >= 0;
                 if (serviceIsUp) {
@@ -1683,14 +1682,6 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
     }
 
 
-    @Getter
-    public static class RoutedId {
-        final String id;
-        final String routing;
-
-        public RoutedId(String id, String routing) {
-            this.id = id;
-            this.routing = routing;
-        }
+    public record RoutedId(String id, String routing) {
     }
 }

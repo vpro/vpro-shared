@@ -3,6 +3,8 @@ package nl.vpro.elasticsearchclient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -10,9 +12,6 @@ import java.util.function.UnaryOperator;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
 

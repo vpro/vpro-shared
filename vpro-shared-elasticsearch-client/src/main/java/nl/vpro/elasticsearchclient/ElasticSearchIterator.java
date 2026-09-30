@@ -22,13 +22,13 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.client.*;
 import org.meeuw.math.windowed.WindowedEventRate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.ThreadPools;
 import nl.vpro.util.Version;
@@ -159,7 +159,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 versionRequest.setOptions(requestOptions);
                 Response response = client.performRequest(versionRequest);
                 try {
-                    JsonNode read = Jackson2Mapper.getLenientInstance()
+                    JsonNode read = Jackson3Mapper.LENIENT
                         .readerFor(ObjectNode.class)
                         .readValue(response.getEntity().getContent());
                     esVersion = Version.parseIntegers(read.get("version").get("number").asText());
@@ -199,7 +199,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     public static <T> Function<JsonNode, T> adapterTo(Class<T> clazz) {
         return jsonNode -> {
             try {
-                return Jackson2Mapper.getLenientInstance()
+                return Jackson3Mapper.LENIENT.reader()
                     .treeToValue(jsonNode.get(SOURCE), clazz);
             } catch (Exception e) {
                 return null;
@@ -215,7 +215,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         if (clazz != null) {
             return jsonNode -> {
                 try {
-                    return Jackson2Mapper.getLenientInstance()
+                    return Jackson3Mapper.LENIENT.reader()
                         .treeToValue(jsonNode.get(SOURCE), clazz);
                 } catch (Exception e) {
                     return null;
@@ -280,7 +280,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     protected  ObjectNode _prepareSearch(Collection<String> indices, Collection<String> types) {
-        request = Jackson2Mapper.getInstance().createObjectNode();
+        request = Jackson3Mapper.INSTANCE.writer().createObjectNode();
         this.types = types == null ? Collections.emptyList() : types;
         setIndices(indices);
         return request;
@@ -384,7 +384,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 try {
                     Response res = client.performRequest(post);
                     responseEntity = res.getEntity();
-                    response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
+                    response = Jackson3Mapper.LENIENT.readerFor(JsonNode.class).readTree(responseEntity.getContent());
                 } finally {
                     EntityUtils.consumeQuietly(responseEntity);
                 }
