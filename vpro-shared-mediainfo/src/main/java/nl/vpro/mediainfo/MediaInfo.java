@@ -15,6 +15,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.math.abstractalgebra.bigdecimals.BigDecimalElement;
 import org.meeuw.math.abstractalgebra.rationalnumbers.RationalNumber;
+import org.meeuw.math.shapes.Angle;
 import org.meeuw.math.shapes.dim2.Rectangle;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -169,7 +170,7 @@ public record MediaInfo(Path path, net.mediaarea.mediainfo.MediaInfo mediaInfo, 
             RationalNumber width =  RationalNumber.of(track.getWidth()).times(track.getPixelAspectRatio() == null ? 1f : track.getPixelAspectRatio());
             RationalNumber height =  RationalNumber.of(track.getHeight());
             return Optional.of(new Rectangle<>(width, height)
-                .rotateDegrees(rotated)
+                .rotate(Angle.degrees(rotated))
                 .circumscribedRectangle()
                 .shape()
             );
