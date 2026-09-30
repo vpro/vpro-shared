@@ -144,7 +144,7 @@ public class ConfigurationServlet extends HttpServlet {
             w.writeName("configuration");
             w.writeStartObject();
             for (Map.Entry<String, Object> prop : props.entrySet()) {
-                w.writePOJOProperty(prop.getKey(), prop.getValue());
+                w.writeStringProperty(prop.getKey(), (String) prop.getValue());
             }
             w.writeEndObject();
             w.writeEndObject();
@@ -153,6 +153,7 @@ public class ConfigurationServlet extends HttpServlet {
                 outputStream.write(';');
             }
         }
+
 
     }
 
@@ -285,5 +286,3 @@ public class ConfigurationServlet extends HttpServlet {
         return getInitParameter("name");
     }
 }
-
-
