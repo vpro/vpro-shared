@@ -1,8 +1,9 @@
 package nl.vpro.util;
 
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Supplier;
+
+import org.meeuw.collections.CountedIterator;
 
 /**
  * @author Michiel Meeuwissen
@@ -12,8 +13,8 @@ import java.util.function.Supplier;
 @Deprecated
 public class MergedSortedIterator<T>  extends org.meeuw.collections.MergedSortedIterator<T> {
 
-    protected MergedSortedIterator(Supplier<Long> size, Supplier<Long> totalSize, Iterator<T> iterator) {
-        super(size, totalSize, iterator, Collections.emptyList());
+    protected MergedSortedIterator(Supplier<Long> size, Supplier<Long> totalSize, Iterator<T> iterator, List<CountedIterator<T>> sources) {
+        super(size, totalSize, iterator, sources);
     }
 
 
