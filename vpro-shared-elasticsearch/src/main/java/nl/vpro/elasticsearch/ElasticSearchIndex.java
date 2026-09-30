@@ -3,6 +3,8 @@ package nl.vpro.elasticsearch;
 
 import lombok.SneakyThrows;
 import lombok.With;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -12,10 +14,7 @@ import java.util.function.*;
 import org.apache.commons.io.IOUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 
 import static nl.vpro.elasticsearch.Constants.Mappings.PROPERTIES;
 
@@ -37,7 +36,7 @@ public class ElasticSearchIndex {
         public void accept(Distribution distribution, ObjectNode jsonNode) {
             ObjectNode properties =  jsonNode.withObject(PROPERTIES);
             List<Consumer<ObjectNode>> runnable = new ArrayList<>();
-            properties.fieldNames().forEachRemaining(f -> {
+            properties.propertyNames().iterator().forEachRemaining(f -> {
                 String[] split = f.split("\\|", 2);
                 if (split.length == 2) {
                     runnable.add(p -> {
@@ -139,7 +138,7 @@ public class ElasticSearchIndex {
 
     @SneakyThrows
     public static JsonNode resourceToJson(String name) {
-        return Jackson2Mapper.getInstance().readTree(resourceToString(name));
+        return Jackson3Mapper.INSTANCE.reader().readTree(resourceToString(name));
     }
 
     public static ObjectNode resourceToObjectNode(String name) {
