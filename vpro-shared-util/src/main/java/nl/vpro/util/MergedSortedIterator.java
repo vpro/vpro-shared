@@ -1,5 +1,6 @@
 package nl.vpro.util;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
 public class MergedSortedIterator<T>  extends org.meeuw.collections.MergedSortedIterator<T> {
 
     protected MergedSortedIterator(Supplier<Long> size, Supplier<Long> totalSize, Iterator<T> iterator) {
-        super(size, totalSize, iterator);
+        super(size, totalSize, iterator, Collections.emptyList());
     }
 
 
