@@ -1,12 +1,11 @@
 package nl.vpro.rs.client;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
+
 import jakarta.ws.rs.ext.ContextResolver;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
-
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 
 /**
  * @author Michiel Meeuwissen
@@ -20,7 +19,7 @@ public class JacksonContextResolver extends JacksonXmlBindJsonProvider implement
         this(null);
     }
     public JacksonContextResolver(ObjectMapper mapper) {
-        this.mapper = mapper == null ? Jackson2Mapper.getLenientInstance() : mapper;
+        this.mapper = mapper == null ? Jackson3Mapper.LENIENT.mapper() : mapper;
     }
 
     @Override

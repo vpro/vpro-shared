@@ -51,7 +51,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.jmx.*;
 import nl.vpro.logging.simple.Level;
 import nl.vpro.logging.simple.Slf4jSimpleLogger;
@@ -131,7 +131,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected boolean registerMBean = false;
 
     @Getter
-    protected Jackson2Mapper objectMapper = Jackson2Mapper.getLenientInstance();
+    protected Jackson3Mapper objectMapper = Jackson3Mapper.getLenientInstance();
 
     protected ClassLoader classLoader;
 
@@ -160,7 +160,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         MediaType accept,
         MediaType contentType,
         Boolean trustAll,
-        Jackson2Mapper objectMapper,
+        Jackson3Mapper objectMapper,
         String mbeanName,
         ClassLoader classLoader,
         String userAgent,
@@ -213,7 +213,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         MediaType accept,
         MediaType contentType,
         Boolean trustAll,
-        Jackson2Mapper objectMapper,
+        Jackson3Mapper objectMapper,
         String mbeanName,
         ClassLoader classLoader,
         String userAgent,
@@ -245,7 +245,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
         if (trustAll != null) {
             setTrustAll(trustAll);
         }
-        this.objectMapper = objectMapper == null ? Jackson2Mapper.getLenientInstance() : objectMapper;
+        this.objectMapper = objectMapper == null ? Jackson3Mapper.LENIENT : objectMapper;
         this.mbeanName = mbeanName;
         this.classLoader = classLoader == null ? Thread.currentThread().getContextClassLoader() : classLoader;
         this.userAgent = userAgent == null ? getUserAgent(getClass().getSimpleName(), getVersion("vpro.shared.version", this.classLoader)) : userAgent;
@@ -417,7 +417,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
 
-    public void setObjectMapper(Jackson2Mapper objectMapper) {
+    public void setObjectMapper(Jackson3Mapper objectMapper) {
         if (! Objects.equals(this.objectMapper, objectMapper)) {
             this.objectMapper = objectMapper;
             invalidate();
@@ -826,7 +826,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected ResteasyClientBuilder defaultResteasyClientBuilder(ClientHttpEngine engine) {
         ResteasyClientBuilder builder = ResteasyHelper.clientBuilder()
             .httpEngine(engine);
-        builder.register(new JacksonContextResolver(objectMapper));
+        builder.register(new JacksonContextResolver(objectMapper.mapper()));
         builder.register(new AcceptRequestFilter(accept));
         builder.register(new AcceptLanguageRequestFilter(acceptableLanguages));
         builder.register(new CountFilter(log));

@@ -1,8 +1,7 @@
 package nl.vpro.rs.client;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import lombok.Getter;
+import tools.jackson.core.JacksonException;
 
 import java.lang.reflect.*;
 import java.net.ConnectException;
@@ -10,12 +9,13 @@ import java.net.SocketException;
 import java.util.*;
 import java.util.function.Supplier;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 
 import static java.util.stream.Collectors.joining;
 
@@ -246,8 +246,8 @@ public class ErrorAspect<T, E> implements InvocationHandler {
             return o.toString();
         } else {
             try {
-                return Jackson2Mapper.getInstance().writeValueAsString(o);
-            } catch (JsonProcessingException ignored) {
+                return Jackson3Mapper.INSTANCE.mapper().writeValueAsString(o);
+            } catch (JacksonException ignored) {
 
             }
             return Objects.toString(o);

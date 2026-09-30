@@ -1,5 +1,8 @@
 package nl.vpro.web.servlet;
 
+import tools.jackson.core.*;
+import tools.jackson.core.json.JsonFactory;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -12,8 +15,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-
-import com.fasterxml.jackson.core.*;
 
 
 /**
@@ -127,7 +128,7 @@ public class ConfigurationServlet extends HttpServlet {
 
     ) throws IOException {
         JsonFactory jfactory = new JsonFactory();
-        try(JsonGenerator w  = jfactory.createGenerator(outputStream, JsonEncoding.UTF8)) {
+        try(JsonGenerator w  = jfactory.createGenerator(ObjectWriteContext.empty(), outputStream, JsonEncoding.UTF8)) {
 
             if (varName != null) {
                 outputStream.write(("var " + varName + " = ").getBytes(StandardCharsets.UTF_8));
@@ -136,14 +137,14 @@ public class ConfigurationServlet extends HttpServlet {
             w.writeStartObject();
 
             for (Map.Entry<String, String> e : system.entrySet()) {
-                w.writeStringField(e.getKey(), e.getValue());
+                w.writeStringProperty(e.getKey(), e.getValue());
             }
 
             //w.key("version").value(getVersion());
-            w.writeFieldName("configuration");
+            w.writeName("configuration");
             w.writeStartObject();
             for (Map.Entry<String, Object> prop : props.entrySet()) {
-                w.writeObjectField(prop.getKey(), prop.getValue());
+                w.writePOJOProperty(prop.getKey(), prop.getValue());
             }
             w.writeEndObject();
             w.writeEndObject();

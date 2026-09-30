@@ -16,7 +16,7 @@ import org.mockito.stubbing.Answer;
 import nl.vpro.util.CommandExecutor;
 
 import static java.util.Objects.requireNonNull;
-import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
+import static nl.vpro.test.util.jackson3.Jackson3TestUtil.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;

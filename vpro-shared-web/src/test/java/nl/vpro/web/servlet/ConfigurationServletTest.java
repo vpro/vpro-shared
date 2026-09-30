@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
+import static nl.vpro.test.util.jackson3.Jackson3TestUtil.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
