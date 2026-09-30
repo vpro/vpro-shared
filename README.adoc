@@ -33,9 +33,16 @@ SNAPSHOT builds can be found at      https://central.sonatype.com/repository/mav
 
 Release builds will be provided via https://central.sonatype.com/search?q=g%3Anl.vpro.shared[maven central].
 
-== TODO
+== Archived
 
-* Some of these modules are old, contain very little usefull or are very specific for VPRO. We should remove them.
+Some of these modules are old, contain very little useful or are very specific for VPRO.
+
+If a module receives very few, if any, updates, it may be moved to link:archived[archived]. The latest version will be pinned in the link:vpro-shared-bom[bom].
+
+
+
+
+== TODO
 * A bit more of documentation here and there would be welcome. Though we provide this mainly to be able to provide _other_ artifact too, which themselves depend on this
 * Some, or perhaps even most or all, of the submodules should be migrated to git repositories of their own. They don't change often. This will make the builds faster and leaner.
 

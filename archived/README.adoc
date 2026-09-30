@@ -1,1 +1,10 @@
+= Archived modules
+
 It is unlikely that we make changes in these modules. These are their latest versions. The latest releases are in the bom.
+
+Releases of individual modules can be made by upping parent as appropriate, and manually calling in the module's directory
+
+[source, bash]
+----
+mvn -Pdeploy,central' deploy`
+----
