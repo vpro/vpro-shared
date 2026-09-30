@@ -145,7 +145,6 @@
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
-    <module>vpro-shared-log4j2</module>
     <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
@@ -158,7 +157,7 @@
     <module>vpro-shared-validation</module>
     <module>vpro-shared-web</module>
     <module>vpro-shared-xml</module>
-    <module>vpro-shared-guice</module>
+
     <module>vpro-shared-i18n</module>
     <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
@@ -166,6 +165,9 @@
 
 
     <!--
+    <module>vpro-shared-guice</module>
+        <module>vpro-shared-log4j2</module>
+
         <module>vpro-shared-swagger</module>
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
          <module>vpro-shared-resteasy</module>
