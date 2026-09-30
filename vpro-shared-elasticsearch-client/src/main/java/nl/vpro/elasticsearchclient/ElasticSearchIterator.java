@@ -62,7 +62,7 @@ import static org.slf4j.event.Level.WARN;
 public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T>, ElasticSearchIteratorMXBean {
 
 
-    private static final Jackson2Mapper LENIENT = Jackson2Mapper.getLenientInstance();
+    protected static final Jackson2Mapper LENIENT = Jackson2Mapper.getLenientInstance();
     private static final Jackson2Mapper INSTANCE = Jackson2Mapper.getInstance();
 
     private static long instances = 0;

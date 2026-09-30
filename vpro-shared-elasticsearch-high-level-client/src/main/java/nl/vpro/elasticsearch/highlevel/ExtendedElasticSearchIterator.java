@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearchclient.ElasticSearchIterator;
-import nl.vpro.jackson2.Jackson2Mapper;
 
 /**
  * Like a low level {@link ElasticSearchIterator}, but with a method {@link #prepareSearchSource}, so queries can be
@@ -73,7 +72,7 @@ public class ExtendedElasticSearchIterator<T> extends ElasticSearchIterator<T> {
     protected boolean firstBatch() {
         if (searchSourceBuilder != null) {
             byte[] json =  XContentHelper.toXContent(searchSourceBuilder, XContentType.JSON, ToXContent.EMPTY_PARAMS, false).toBytesRef().bytes;
-            ObjectNode jsonNode = (ObjectNode) Jackson2Mapper.getLenientInstance().readTree(json);
+            ObjectNode jsonNode = (ObjectNode) LENIENT.readTree(json);
             request = jsonNode;
         }
         return super.firstBatch();

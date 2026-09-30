@@ -57,6 +57,8 @@ import nl.vpro.util.ThreadPools;
 @Slf4j
 public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorInterface<T>, HighLevelElasticSearchIteratorMXBean {
 
+    private static final Jackson2Mapper LENIENT = Jackson2Mapper.getLenientInstance();
+
     private static long instances = 0;
 
     @Getter
@@ -176,7 +178,7 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     public static <T> Function<SearchHit, T> adapterTo(Class<T> clazz) {
         return searchHit -> {
             try {
-                return Jackson2Mapper.getLenientInstance()
+                return LENIENT
                     .readValue(searchHit.getSourceRef().toBytesRef().bytes, clazz);
             } catch (Exception e) {
                 log.warn("{}: {}", searchHit, e.getMessage());
