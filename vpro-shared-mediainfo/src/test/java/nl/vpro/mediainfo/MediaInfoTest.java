@@ -9,6 +9,7 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.meeuw.jupiter.WithRounding;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -25,7 +26,8 @@ import static org.mockito.Mockito.when;
 class MediaInfoTest {
 
     @Test
-    public void testMediaInfoDegraded() throws IOException {
+    @WithRounding
+    void mediaInfoDegraded() throws IOException {
         CommandExecutor mock = mock(CommandExecutor.class);
         when(mock.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
             .thenAnswer(new Answer<Integer>() {
@@ -39,19 +41,21 @@ class MediaInfoTest {
 
         MediaInfo info = mediaInfo(new MediaInfoService(mock));
 
-        assertThat(info.circumscribedRectangle().get().toString()).isEqualTo("Rectangle{50.56000232696533x90}");
+        var rectangle  = info.circumscribedRectangle().orElseThrow();
 
-        assertThat(info.circumscribedRectangle().get().vertical()).isTrue();
+        assertThat(rectangle.vertical()).isTrue();
 
-        assertThat(info.circumscribedRectangle().get().aspectRatio()).isEqualTo("17:30");
+        assertThat(rectangle.toString()).isEqualTo("Rectangle{50.56x90}");
+
+        assertThat(rectangle.aspectRatio()).isEqualTo("5:9");
 
 
     }
 
     @Test
-    public void testMediaInfo() throws IOException {
-        CommandExecutor mock = mock(CommandExecutor.class);
-        when(mock.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
+    void mediaInfo() throws IOException {
+        CommandExecutor commandExecutor = mock(CommandExecutor.class);
+        when(commandExecutor.execute(any(OutputStream.class), any(OutputStream.class), any(String.class)))
             .thenAnswer(new Answer<Integer>() {
                 @Override
                 public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -59,21 +63,19 @@ class MediaInfoTest {
                     return 0;
                 }
             });
-        when(mock.execute(any(), any(), any(), any())).thenReturn(0);
+        //when(commandExecutor.execute(any(), any(), any(), any())).thenReturn(0);
 
-        MediaInfoService mediaInfoCaller = new MediaInfoService(mock);
+        MediaInfoService mediaInfoCaller = new MediaInfoService(commandExecutor);
 
         testMediaInfo(mediaInfoCaller);
-
-
     }
 
 
 
-    MediaInfo mediaInfo(MediaInfoService mediaInfoCaller) throws IOException {
+    MediaInfo mediaInfo(MediaInfoService mediaInfoService) throws IOException {
         Path test = Files.createTempFile("test", ".mp4");
         //MediaInfo.Result info = mediaInfoCaller.apply(Path.of("/Users/michiel/samples/portrait.mp4"));
-        MediaInfo info = mediaInfoCaller.apply(test);
+        MediaInfo info = mediaInfoService.apply(test);
 
 
         log.info("MediaInfo: {}", info);
