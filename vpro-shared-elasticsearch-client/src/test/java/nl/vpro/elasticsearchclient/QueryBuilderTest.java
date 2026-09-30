@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.vpro.jackson3.Jackson3Mapper;
 
-import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
+import static nl.vpro.test.util.jackson3.Jackson3TestUtil.assertThatJson;
 
 /**
  * @author Michiel Meeuwissen

@@ -21,7 +21,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.endpoints.ManageFilter;
 
-import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
+import static nl.vpro.test.util.jackson3.Jackson3TestUtil.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
