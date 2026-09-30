@@ -1,9 +1,9 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.log4j.Log4j2;
+import tools.jackson.databind.JsonNode;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -15,10 +15,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.*;
 import org.junit.jupiter.api.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 
 @Log4j2
 @Disabled
@@ -30,10 +27,8 @@ public class IndexHelperITest {
 
     {
         Properties properties = new Properties();
-        try (FileInputStream is = new FileInputStream(new File(System.getProperty("user.home") + File.separator + "conf" + File.separator + "itests.properties"))) {
+        try (FileInputStream is = new FileInputStream(System.getProperty("user.home") + File.separator + "conf" + File.separator + "itests.properties")) {
             properties.load(is);
-        } catch (FileNotFoundException e) {
-            log.warn(e.getMessage(), e);
         } catch (IOException e) {
             log.warn(e.getMessage(), e);
         }
@@ -56,7 +51,7 @@ public class IndexHelperITest {
 
     IndexHelper helper;
     @BeforeEach
-    public void setup() throws URISyntaxException {
+    public void setup() {
 
         ClientElasticSearchFactory factory = new ClientElasticSearchFactory();
         factory.setHttpHosts(host);
@@ -74,9 +69,9 @@ public class IndexHelperITest {
     }
 
     @Test
-    public void index() throws JsonProcessingException {
+    public void index() {
 
-        JsonNode node = Jackson2Mapper.getLenientInstance().readValue(example, JsonNode.class);
+        JsonNode node = Jackson3Mapper.getLenientInstance().readerFor(JsonNode.class).readValue(example);
 
         byte[]  s= example.getBytes(StandardCharsets.UTF_8);
 

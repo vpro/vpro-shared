@@ -2,6 +2,8 @@ package nl.vpro.elasticsearch.highlevel;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -13,11 +15,8 @@ import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.meeuw.math.windowed.WindowedEventRate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import nl.vpro.elasticsearchclient.ElasticSearchIterator;
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 
 /**
  * Like a low level {@link ElasticSearchIterator}, but with a method {@link #prepareSearchSource}, so queries can be
@@ -73,7 +72,7 @@ public class ExtendedElasticSearchIterator<T> extends ElasticSearchIterator<T> {
     protected boolean firstBatch() {
         if (searchSourceBuilder != null) {
             byte[] json =  XContentHelper.toXContent(searchSourceBuilder, XContentType.JSON, ToXContent.EMPTY_PARAMS, false).toBytesRef().bytes;
-            ObjectNode jsonNode = (ObjectNode) Jackson2Mapper.getLenientInstance().readTree(json);
+            ObjectNode jsonNode = (ObjectNode) Jackson3Mapper.getLenientInstance().reader().readTree(json);
             request = jsonNode;
         }
         return super.firstBatch();

@@ -1,6 +1,7 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -8,8 +9,6 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
 
@@ -32,7 +31,7 @@ public class ESClientTest {
         try (ElasticSearchIterator<String> i = ElasticSearchIterator
             .<String>builder()
             .client(client)
-            .adapt(jsonNode -> jsonNode.get(Constants.Fields.ID).textValue())
+            .adapt(jsonNode -> jsonNode.get(Constants.Fields.ID).stringValue())
             .build()) {
             ObjectNode search = i.prepareSearchOnIndices("apimedia");
             QueryBuilder.asc(search, "publishDate");

@@ -8,7 +8,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 
 import org.junit.jupiter.api.Test;
 
-import nl.vpro.test.util.jackson2.Jackson2TestUtil;
+import nl.vpro.test.util.jackson3.Jackson3TestUtil;
 import nl.vpro.test.util.jaxb.JAXBTestUtil;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -32,29 +32,32 @@ public class LocalizedStringTest {
     public void xml() {
         A a = new A();
         a.string = impl("bla", Locales.DUTCH);
-        JAXBTestUtil.roundTripAndSimilar(a, "<local:a xmlns:local=\"uri:local\">\n" +
-            "    <string xml:lang=\"nl\">bla</string>\n" +
-            "</local:a>");
+        JAXBTestUtil.roundTripAndSimilar(a, """
+            <local:a xmlns:local="uri:local">
+                <string xml:lang="nl">bla</string>
+            </local:a>""");
     }
 
     @Test
     public void json() {
         A a = new A();
         a.string = impl("bla", NETHERLANDISH);
-        Jackson2TestUtil.roundTripAndSimilar(a, "{\n" +
-            "  \"string\" : {\n" +
-            "    \"value\" : \"bla\",\n" +
-            "    \"lang\" : \"nl_NL\"\n" +
-            "  }\n" +
-            "}");
+        Jackson3TestUtil.roundTripAndSimilar(a, """
+            {
+              "string" : {
+                "value" : "bla",
+                "lang" : "nl_NL"
+              }
+            }""");
 
     }
 
     @Test
     public void unmarshal() {
-        A a = JAXB.unmarshal(new StringReader("<local:a xmlns:local=\"uri:local\">\n" +
-            "    <string xml:lang=\"nl_NL\">bla</string>\n" +
-            "</local:a>"), A.class);
+        A a = JAXB.unmarshal(new StringReader("""
+            <local:a xmlns:local="uri:local">
+                <string xml:lang="nl_NL">bla</string>
+            </local:a>"""), A.class);
         assertThat(a.string.getLocale()).isEqualTo(NETHERLANDISH);
     }
 
@@ -77,12 +80,12 @@ public class LocalizedStringTest {
 
     @Test
     public void adaptNl_NL() {
-        assertThat(LocalizedString.adapt("nl_NL")).isEqualTo(new Locale("nl", "NL"));
+        assertThat(LocalizedString.adapt("nl_NL")).isEqualTo(Locale.of("nl", "NL"));
     }
 
     @Test
     public void adaptNl_NL_informal() {
-        assertThat(LocalizedString.adapt("nl_NL_informal")).isEqualTo(new Locale("nl", "NL", "informal"));
+        assertThat(LocalizedString.adapt("nl_NL_informal")).isEqualTo(Locale.of("nl", "NL", "informal"));
     }
 
     @Test
@@ -93,7 +96,7 @@ public class LocalizedStringTest {
 
     @Test
     public void adaptUnknownLanguage() {
-        assertThat(LocalizedString.adapt("foo_bar")).isEqualTo(new Locale("foo", "bar"));
+        assertThat(LocalizedString.adapt("foo_bar")).isEqualTo(Locale.of("foo", "bar"));
     }
 
 

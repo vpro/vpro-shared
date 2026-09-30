@@ -3,6 +3,7 @@ package nl.vpro.elasticsearch.highlevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -23,12 +24,10 @@ import org.elasticsearch.search.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.meeuw.math.windowed.WindowedEventRate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
 import nl.vpro.elasticsearchclient.ElasticSearchIterator;
 import nl.vpro.elasticsearchclient.ElasticSearchOpaqueId;
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.jmx.MBeans;
 import nl.vpro.util.ThreadPools;
 
@@ -176,8 +175,8 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
     public static <T> Function<SearchHit, T> adapterTo(Class<T> clazz) {
         return searchHit -> {
             try {
-                return Jackson2Mapper.getLenientInstance()
-                    .readValue(searchHit.getSourceRef().toBytesRef().bytes, clazz);
+                return Jackson3Mapper.LENIENT.readerFor(clazz)
+                    .readValue(searchHit.getSourceRef().toBytesRef().bytes);
             } catch (Exception e) {
                 log.warn("{}: {}", searchHit, e.getMessage());
                 return null;

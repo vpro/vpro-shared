@@ -1,19 +1,13 @@
 package nl.vpro.monitoring.domain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import nl.vpro.test.util.jackson2.Jackson2TestUtil;
-
-import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 import java.time.Instant;
 
-import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import static nl.vpro.test.util.jackson3.Jackson3TestUtil.assertThatJson;
 
 class HealthTest {
 
@@ -28,7 +22,6 @@ class HealthTest {
             Duration.ofSeconds(2), 0L);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
 
         assertThatJson(objectMapper, health).isSimilarTo("""
             {

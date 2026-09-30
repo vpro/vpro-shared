@@ -1,18 +1,18 @@
 package nl.vpro.elasticsearch.highlevel;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Duration;
 import java.util.NoSuchElementException;
 
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
@@ -150,7 +150,7 @@ class HighLevelElasticSearchIteratorITest {
             log.info("Iterating: {}", iterator);
             while(iterator.hasNext()) {
                 JsonNode next = iterator.next();
-                assertThat(next.get("title").textValue()).isEqualTo("bar");
+                assertThat(next.get("title").stringValue()).isEqualTo("bar");
                 if (iterator.getCount() % 5 == 0) {
                     log.info("{}: {} {}", next, iterator.getRate(), iterator.getFraction());
                 }

@@ -1,6 +1,8 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -10,9 +12,6 @@ import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
 import org.meeuw.collections.MaxOffsetIterator;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.Constants;
 import nl.vpro.elasticsearch.CreateIndex;
@@ -89,7 +88,7 @@ public class ElasticSearchIteratorContainerTest {
         try (ElasticSearchIterator<String> i = ElasticSearchIterator
             .<String>builder()
             .client(client)
-            .adapt(jsonNode -> jsonNode.get(Constants.Fields.ID).textValue())
+            .adapt(jsonNode -> jsonNode.get(Constants.Fields.ID).stringValue())
             .build()) {
             ObjectNode search = i.prepareSearch("pageupdates-publish");
             QueryBuilder.asc(search, "lastPublished");
@@ -115,7 +114,7 @@ public class ElasticSearchIteratorContainerTest {
             i.setJsonRequests(false);
             JsonNode search = i.prepareSearch("pageupdates-publish");
             i.forEachRemaining((node) -> {
-                String url = node.get("url").textValue();
+                String url = node.get("url").stringValue();
                 if (i.getCount() % 1000 == 0) {
                     log.info("{}: {}", i.getCount(), url);
 

@@ -1,12 +1,14 @@
 package nl.vpro.elasticsearchclient;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.client.RestClient;
@@ -14,11 +16,7 @@ import org.junit.jupiter.api.*;
 import org.slf4j.event.Level;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import nl.vpro.jackson2.Jackson2Mapper;
+import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.logging.simple.*;
 import nl.vpro.test.opensearch.ElasticsearchContainer;
 
@@ -102,16 +100,13 @@ public class IndexHelperContainerTest {
         test.setTitle("bla");
 
         final List<BulkRequestEntry> jobs = Arrays.asList(helper.indexRequest(test.getId(), test));
-        helper.bulkAsync(jobs, new Consumer<ObjectNode>() {
-            @Override
-            public void accept(ObjectNode jsonNodes) {
-                ArrayNode items = jsonNodes.withArray("items");
-                log.info("{}", jobs);
-                for (JsonNode i : items) {
-                    log.info("{}", IndexHelper.find(jobs, (ObjectNode) i));
-                }
-
+        helper.bulkAsync(jobs, jsonNodes -> {
+            ArrayNode items = jsonNodes.withArray("items");
+            log.info("{}", jobs);
+            for (JsonNode i : items) {
+                log.info("{}", IndexHelper.find(jobs, (ObjectNode) i));
             }
+
         }).get();
     }
 
@@ -127,7 +122,7 @@ public class IndexHelperContainerTest {
             TestObject test = new TestObject();
             test.setId("id");
             test.setTitle("wrong");
-            ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(test);
+            ObjectNode jsonNode = Jackson3Mapper.getPublisherInstance().writer().valueToTree(test);
             jsonNode.put("unrecognizedField", "foobar");
             helper.index(test.getId(), jsonNode);
         }).isInstanceOf(RuntimeException.class);
@@ -142,7 +137,7 @@ public class IndexHelperContainerTest {
         TestObject test = new TestObject();
         test.setId("id");
         test.setTitle("wrong");
-        ObjectNode jsonNode = Jackson2Mapper.getPublisherInstance().valueToTree(test);
+        ObjectNode jsonNode = Jackson3Mapper.getPublisherInstance().writer().valueToTree(test);
         jsonNode.put("unrecognizedField", "foobar");
         BulkRequestEntry bulkRequestEntry = helper.indexRequest(test.getId(), jsonNode);
         ObjectNode result = helper.bulk(Arrays.asList(bulkRequestEntry));
@@ -171,14 +166,14 @@ public class IndexHelperContainerTest {
         log.info("{}", jsonNode1);
 
         helper.refresh();
-        test.setTitle("ok2");;
+        test.setTitle("ok2");
         helper.index(test.getId(), test);
         helper.refresh();
         log.info("CReading indexing");
         Optional<JsonNode> got2 = helper.get(test.getId());
         assertThat(got2).isPresent();
         log.info("{}", got2);
-        assertThat(got2.get().get(SOURCE).get("title").asText()).isEqualTo("ok2");
+        assertThat(got2.get().get(SOURCE).get("title").asString()).isEqualTo("ok2");
 
 
 
