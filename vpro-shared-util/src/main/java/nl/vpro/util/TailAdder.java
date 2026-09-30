@@ -1,7 +1,7 @@
 package nl.vpro.util;
 
-import java.util.*;
-import java.util.concurrent.Callable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 
 
@@ -20,23 +20,16 @@ public class TailAdder<T> extends org.meeuw.collections.TailAdder<T> {
         builderMethodName = "_builder",
         buildMethodName = "_build"
     )
-    private TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, boolean onlyIfNotEmpty, @lombok.Singular  List<Function<T, T>> adders) {
-        super(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders);
+    private TailAdder(Iterator<T> wrapped,
+                      boolean onlyIfEmpty,
+                      boolean onlyIfNotEmpty,
+                      @lombok.Singular  List<? extends Function<T, T>> adders
+                      ) {
+        super(wrapped, onlyIfEmpty, onlyIfNotEmpty, adders.toArray(new Function[0]));
     }
 
 
-    @SafeVarargs
-    @Deprecated
-    public TailAdder(Iterator<T> wrapped, boolean onlyIfEmpty, Callable<T>... adder) {
-        super(wrapped, onlyIfEmpty, adder);
-    }
 
-
-
-    @Deprecated
-    public TailAdder(Iterator<T> wrapped, Callable<T> adder) {
-        this(wrapped, false, adder);
-    }
 
 
 }
