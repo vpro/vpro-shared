@@ -76,9 +76,9 @@ public class PrometheusController {
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(CONTENT_TYPE);
             try (
-                WindowedStatisticalLong.RunningDuration measure = duration.measure();
-                OutputStream writer = response.getOutputStream()) {
+                WindowedStatisticalLong.RunningDuration measure = duration.measure()) {
 
+                OutputStream writer = response.getOutputStream();
                 Duration took = scrape(writer);
                 log.atLevel(took.compareTo(Duration.ofSeconds(2)) > 0 ? Level.INFO : Level.DEBUG).log("Scraping Prometheus metrics took {}", took);
             }
