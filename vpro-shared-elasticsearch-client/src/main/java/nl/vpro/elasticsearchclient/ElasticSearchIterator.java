@@ -3,6 +3,9 @@ package nl.vpro.elasticsearchclient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -21,10 +24,6 @@ import org.apache.http.util.EntityUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.client.*;
 import org.meeuw.math.windowed.WindowedEventRate;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 
 import nl.vpro.elasticsearch.ElasticSearchIndex;
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
@@ -162,7 +161,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                     JsonNode read = Jackson3Mapper.LENIENT
                         .readerFor(ObjectNode.class)
                         .readValue(response.getEntity().getContent());
-                    esVersion = Version.parseIntegers(read.get("version").get("number").asText());
+                    esVersion = Version.parseIntegers(read.get("version").get("number").asString());
                 } finally {
                     EntityUtils.consumeQuietly(response.getEntity());
                 }
@@ -180,7 +179,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.jsonRequests = jsonRequests == null || jsonRequests;
         this.requestVersion = requestVersion == null || requestVersion;
         if (beanName != null) {
-            objectName = MBeans.registerBean(this, instance + "-" + beanName);
+            objectName = MBeans.registerBean( instance + "-" + beanName, this).orElse(null);
         } else {
             objectName = null;
         }
@@ -398,7 +397,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         if (hits == null) {
             readResponse();
         }
-        String newScrollId = response.get(_SCROLL_ID).asText();
+        String newScrollId = response.get(_SCROLL_ID).asString();
         if (newScrollId != null) {
             log.debug("Scroll id {} -> {}", scrollId, newScrollId);
             scrollId = newScrollId;
@@ -434,7 +433,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
                 Request post;
                 if (jsonRequests) {
-                    ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
+                    ObjectNode scrollRequest = Jackson3Mapper.INSTANCE.writer().createObjectNode();
                     scrollRequest.put(SCROLL, scrollContext.toMinutes() + "m");
                     scrollRequest.put(SCROLL_ID, scrollId);
 
@@ -453,7 +452,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 try {
                     Response res = client.performRequest(post);
                     responseEntity = res.getEntity();
-                    response = Jackson2Mapper.getLenientInstance()
+                    response = Jackson3Mapper.LENIENT
                             .readerFor(JsonNode.class)
                             .readTree(responseEntity.getContent()
                             );
@@ -462,7 +461,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 }
                 log.debug("New scroll");
                 if (response.has(_SCROLL_ID)) {
-                    String newScrollId = response.get(_SCROLL_ID).asText();
+                    String newScrollId = response.get(_SCROLL_ID).asString();
                     if (!scrollId.equals(newScrollId)) {
                         log.info("new scroll id {}", newScrollId);
                         SCROLL_IDS.remove(scrollId);
@@ -525,7 +524,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         if (hits != null) {
             JsonNode total  = hits.get("total");
             if (total.has("relation")) {
-                String relation = total.get("relation").asText();
+                String relation = total.get("relation").asString();
                 //noinspection SwitchStatementWithTooFewBranches
                 switch (relation) {
                     case "eq":
