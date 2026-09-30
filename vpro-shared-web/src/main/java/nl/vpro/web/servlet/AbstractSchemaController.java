@@ -1,7 +1,5 @@
 package nl.vpro.web.servlet;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Calendar;
@@ -24,7 +22,6 @@ import nl.vpro.util.SchemaType;
  * @author Michiel Meeuwissen
  * @since 3.4
  */
-@Slf4j
 public abstract class AbstractSchemaController<M extends BiFunction<String, SchemaType, File>> {
 
     @Inject
