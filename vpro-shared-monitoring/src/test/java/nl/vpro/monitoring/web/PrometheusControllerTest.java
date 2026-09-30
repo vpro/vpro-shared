@@ -4,8 +4,10 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import java.io.IOException;
 
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,5 +101,18 @@ class PrometheusControllerTest {
         assertThat(response.getContentType()).isEqualTo("text/plain; version=0.0.4; charset=utf-8");
 
         assertThat(response.getContentAsString()).contains(expected);
+    }
+
+    @Test
+    void doesNotCloseServletOutputStream() throws IOException {
+        ServletOutputStream outputStream = Mockito.mock(ServletOutputStream.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(response.getOutputStream()).thenReturn(outputStream);
+
+        PrometheusController controller = new PrometheusController(() -> meterRegistry, new MonitoringProperties());
+        controller.metrics(new MockHttpServletRequest(), response);
+
+        Mockito.verify(outputStream, Mockito.atLeastOnce()).flush();
+        Mockito.verify(outputStream, Mockito.never()).close();
     }
 }
