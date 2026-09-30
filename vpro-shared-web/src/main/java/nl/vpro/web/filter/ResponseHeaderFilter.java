@@ -1,14 +1,13 @@
 package nl.vpro.web.filter;
 
+import lombok.extern.java.Log;
+
 import java.io.IOException;
 import java.util.Enumeration;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Filter to set headers on all matching requests, the following example sets headers to avoid caching:
@@ -29,8 +28,8 @@ import org.slf4j.LoggerFactory;
  * }</pre>
  * @author Peter Maas <peter.maas@finalist.com>
  */
+@Log
 public class ResponseHeaderFilter implements Filter {
-    private static final Logger log = LoggerFactory.getLogger(ResponseHeaderFilter.class);
 
     FilterConfig filterConfig;
 
@@ -41,9 +40,8 @@ public class ResponseHeaderFilter implements Filter {
         for(Enumeration<String> e = filterConfig.getInitParameterNames(); e.hasMoreElements(); ) {
             String headerName = e.nextElement();
             String headerValue = filterConfig.getInitParameter(headerName);
-            if(log.isDebugEnabled()) {
-                log.debug(String.format("setting header %s, value=%s", headerName, headerValue));
-            }
+            log.fine(() -> String.format("setting header %s, value=%s", headerName, headerValue));
+
 
             response.addHeader(headerName, headerValue);
         }

@@ -8,7 +8,6 @@ module nl.vpro.shared.web {
     requires static lombok;
     requires com.fasterxml.jackson.core;
     requires java.naming;
-    requires org.slf4j;
 
     exports nl.vpro.web;
     exports nl.vpro.web.filter;

@@ -1,8 +1,6 @@
 package nl.vpro.web.servlet;
 
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.8
  */
-@Slf4j
 public class ConfigurationServletTest {
 
     @Test

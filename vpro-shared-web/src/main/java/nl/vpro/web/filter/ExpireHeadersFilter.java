@@ -1,6 +1,7 @@
 package nl.vpro.web.filter;
 
-import lombok.extern.slf4j.Slf4j;
+
+import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -18,7 +19,7 @@ import static nl.vpro.util.TimeUtils.parseDuration;
  *
  * @author Rob Vermeulen (VPRO)
  */
-@Slf4j
+@Log
 public class ExpireHeadersFilter implements Filter {
 
     public static final String HEADER_EXPIRES       = "Expires";
@@ -34,7 +35,7 @@ public class ExpireHeadersFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
         development = "true".equals(System.getProperty("development"));
-        log.debug("Using ExpireHeadersFilter");
+        log.fine("Using ExpireHeadersFilter");
         this.ttlInMillis = parseDuration(filterConfig.getInitParameter("ttl")).orElse(DEFAULT_TTL).toMillis();
         this.cacheControl = "public, max-age=" + (this.ttlInMillis / 1000) + ", must-revalidate";
     }
@@ -46,13 +47,13 @@ public class ExpireHeadersFilter implements Filter {
             if (!response.containsHeader(HEADER_EXPIRES)) {
                 response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + ttlInMillis);
             } else {
-                log.debug("Response already has expires header");
+                log.fine("Response already has expires header");
             }
             if (! response.containsHeader(HEADER_CACHE_CONTROL)) {
                 // Set the max-age header.
                 response.setHeader(HEADER_CACHE_CONTROL, cacheControl);
             } else {
-                log.debug("Response already has cache control header");
+                log.fine("Response already has cache control header");
             }
         } else {
             response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
