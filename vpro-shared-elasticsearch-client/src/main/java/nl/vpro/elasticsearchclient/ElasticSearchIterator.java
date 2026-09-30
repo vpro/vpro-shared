@@ -61,6 +61,10 @@ import static org.slf4j.event.Level.WARN;
 @Slf4j
 public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface<T>, ElasticSearchIteratorMXBean {
 
+
+    private static final Jackson2Mapper LENIENT = Jackson2Mapper.getLenientInstance();
+    private static final Jackson2Mapper INSTANCE = Jackson2Mapper.getInstance();
+
     private static long instances = 0;
 
     @Getter
@@ -159,7 +163,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 versionRequest.setOptions(requestOptions);
                 Response response = client.performRequest(versionRequest);
                 try {
-                    JsonNode read = Jackson2Mapper.getLenientInstance()
+                    JsonNode read = LENIENT
                         .readerFor(ObjectNode.class)
                         .readValue(response.getEntity().getContent());
                     esVersion = Version.parseIntegers(read.get("version").get("number").asText());
@@ -180,7 +184,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         this.jsonRequests = jsonRequests == null || jsonRequests;
         this.requestVersion = requestVersion == null || requestVersion;
         if (beanName != null) {
-            objectName = MBeans.registerBean(this, instance + "-" + beanName);
+            objectName = MBeans.registerBean(instance + "-" + beanName, this).orElse(null);
         } else {
             objectName = null;
         }
@@ -199,7 +203,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
     public static <T> Function<JsonNode, T> adapterTo(Class<T> clazz) {
         return jsonNode -> {
             try {
-                return Jackson2Mapper.getLenientInstance()
+                return LENIENT
                     .treeToValue(jsonNode.get(SOURCE), clazz);
             } catch (Exception e) {
                 return null;
@@ -215,7 +219,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         if (clazz != null) {
             return jsonNode -> {
                 try {
-                    return Jackson2Mapper.getLenientInstance()
+                    return LENIENT
                         .treeToValue(jsonNode.get(SOURCE), clazz);
                 } catch (Exception e) {
                     return null;
@@ -280,7 +284,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     protected  ObjectNode _prepareSearch(Collection<String> indices, Collection<String> types) {
-        request = Jackson2Mapper.getInstance().createObjectNode();
+        request = INSTANCE.createObjectNode();
         this.types = types == null ? Collections.emptyList() : types;
         setIndices(indices);
         return request;
@@ -384,7 +388,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 try {
                     Response res = client.performRequest(post);
                     responseEntity = res.getEntity();
-                    response = Jackson2Mapper.getLenientInstance().readerFor(JsonNode.class).readTree(responseEntity.getContent());
+                    response = LENIENT.readerFor(JsonNode.class).readTree(responseEntity.getContent());
                 } finally {
                     EntityUtils.consumeQuietly(responseEntity);
                 }
@@ -434,7 +438,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
                 Request post;
                 if (jsonRequests) {
-                    ObjectNode scrollRequest = Jackson2Mapper.getInstance().createObjectNode();
+                    ObjectNode scrollRequest = INSTANCE.createObjectNode();
                     scrollRequest.put(SCROLL, scrollContext.toMillis() + "ms");
                     scrollRequest.put(SCROLL_ID, scrollId);
 
@@ -453,7 +457,7 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
                 try {
                     Response res = client.performRequest(post);
                     responseEntity = res.getEntity();
-                    response = Jackson2Mapper.getLenientInstance()
+                    response = LENIENT
                             .readerFor(JsonNode.class)
                             .readTree(responseEntity.getContent()
                             );
