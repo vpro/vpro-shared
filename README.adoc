@@ -31,7 +31,7 @@ places in VPRO artifacts.
 
 SNAPSHOT builds can be found at      https://central.sonatype.com/repository/maven-snapshots/ (this is afaik not currently browsable)
 
-Release builds will be provided via https://central.sonatype.com/search?q=g%3Anl.vpro.shared[maven central].
+Release builds are  provided via https://central.sonatype.com/search?q=g%3Anl.vpro.shared[maven central].
 
 == Archived
 
