@@ -36,16 +36,15 @@
     </dependency>
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-test</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-util</artifactId>
     </dependency>
+
     <dependency>
       <groupId>nl.vpro.shared</groupId>
-      <artifactId>vpro-shared-jackson2</artifactId>
+      <artifactId>vpro-shared-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+
   </dependencies>
 </project>

@@ -4,8 +4,6 @@
  */
 package nl.vpro.cors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.io.Serial;
 import java.util.Set;
@@ -29,7 +27,7 @@ public class CorsFilter extends HttpFilter {
     public void doFilter(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain) throws IOException, ServletException {
         String origin = httpRequest.getHeader(CorsHeaders.ORIGIN);
         String method = httpRequest.getMethod();
-        if (StringUtils.isNotEmpty(origin) && METHODS.contains(method)) {
+        if (origin != null && ! origin.isEmpty() && METHODS.contains(method)) {
             httpResponse.addHeader(CorsHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
             httpResponse.addHeader(CorsHeaders.ACCESS_CONTROL_ALLOW_METHODS, CorsHeaders.ACCESS_CONTROL_ALLOW_READ_METHODS_VALUE);
             httpResponse.addHeader(CorsHeaders.ACCESS_CONTROL_ALLOW_HEADERS, CorsHeaders.ACCESS_CONTROL_ALLOW_HEADERS_VALUE);
