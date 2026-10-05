@@ -239,7 +239,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch5</artifactId>
-        <version>2.11.3</version>
+        <version>5.17.5</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
