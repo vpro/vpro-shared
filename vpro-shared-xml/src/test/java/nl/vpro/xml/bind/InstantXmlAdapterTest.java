@@ -7,6 +7,10 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.meeuw.configuration.ConfigurationService;
+import org.meeuw.time.text.TimeConfiguration;
+
+import nl.vpro.util.TimeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -73,9 +77,10 @@ public class InstantXmlAdapterTest {
         String xmlomitisfalse,
         boolean marshal
     ) {
-
-        assertThat(instance.unmarshal(xml)).isEqualTo(in.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS));
-        assertThat(instance.unmarshal(xmlomitisfalse)).isEqualTo(in.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS));
+        try (var reset = ConfigurationService.withAspect(TimeConfiguration.class, c -> c.withZoneId(TimeUtils.ZONE_ID))) {
+            assertThat(instance.unmarshal(xml)).isEqualTo(in.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS));
+            assertThat(instance.unmarshal(xmlomitisfalse)).isEqualTo(in.plusNanos(500000).truncatedTo(ChronoUnit.MILLIS));
+        }
     }
 
 }
