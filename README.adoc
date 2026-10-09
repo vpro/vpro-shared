@@ -93,7 +93,7 @@ If a module receives very few, if any, updates, it may be moved to link:archived
 
 
 | 6.x >
-| java 21 (released in sep. 2023), spring 7, hibernate 7, jackson 3
+| java 21 (released in sep. 2023), spring 7, hibernate 7, all json produced by jackson 3 
 | 2026?
 
 
