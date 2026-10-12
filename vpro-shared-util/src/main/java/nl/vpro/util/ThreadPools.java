@@ -21,6 +21,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Log
 public final class ThreadPools {
 
+    static {
+        // Record that this class actually got initialized, so that e.g. ThreadPoolShutdowner can
+        // check this without triggering initialization (and hence creation of all thread pools) itself.
+        ThreadPoolsState.INITIALIZED = true;
+    }
+
     private ThreadPools() {
         // this class has no instances
     }
@@ -85,6 +91,7 @@ public final class ThreadPools {
     public static ExecutorService  createExecutor(Supplier<ExecutorService> fallback) {
         return createExecutor("newVirtualThreadPerTaskExecutor", fallback);
     }
+
     @SneakyThrows
     public static <E extends ExecutorService> E createExecutor(String virtual, Supplier<E> fallback) {
         try {
@@ -94,7 +101,7 @@ public final class ThreadPools {
             return (E) method.invoke(null);
         } catch (NoSuchMethodException e) {
             E fallbackExecutor = fallback.get();
-            log.info("Virtual threads not available (requires Java 21+), using " + fallbackExecutor);
+            log.fine("Virtual threads not available (requires Java 21+), using " + fallbackExecutor);
             return fallbackExecutor;
 
         }
@@ -211,6 +218,19 @@ public final class ThreadPools {
     }
 
     public record ExecutorWithName( @NonNull String name, @NonNull ExecutorService executor) {
+    }
+}
+
+/**
+ * Whether {@link ThreadPools} was actually initialized (i.e. actually used by something).
+ * <p>
+ * Kept outside of {@link ThreadPools} itself, so it can be checked without triggering that class's
+ * (expensive) initialization.
+ */
+class ThreadPoolsState {
+    static volatile boolean INITIALIZED = false;
+
+    private ThreadPoolsState() {
     }
 }
 
