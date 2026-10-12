@@ -81,6 +81,10 @@ jobs:
           server-password-env-var: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
+      - uses: stCarolas/setup-maven@v5
+        # https://github.com/mavenplugins/central-publishing-maven-plugin/issues/78
+        with:
+           maven-version: 3.9.16
       - name: Run tests (pull request)
         if: steps.os_check.outputs.not_skipped && github.event_name == 'pull_request'
         run: mvn -B test
