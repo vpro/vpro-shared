@@ -18,7 +18,11 @@ public class ThreadPoolShutdowner implements TestExecutionListener {
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
 
-        ThreadPools.shutdown();
+        if (ThreadPoolsState.INITIALIZED) {
+            ThreadPools.shutdown();
+        } else {
+            log.fine("ThreadPools was never used, no need to shut it down");
+        }
         log.fine("Waiting for ForkJoinPool.commonPool() too");
         // commonPool cannot be shut down. But you can wait for tasks
         boolean b = ForkJoinPool.commonPool().awaitQuiescence(100, TimeUnit.SECONDS);
