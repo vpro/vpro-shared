@@ -945,9 +945,8 @@
               <detectLinks>true</detectLinks>
               <detectJavaApiLink>true</detectJavaApiLink>
               <additionalOptions>
-                <!-- not available in java 17
-                <additionalOption> &#45;&#45;link-modularity-mismatch=info</additionalOption>
--->                <additionalOption>-Xdoclint:none</additionalOption>
+                <additionalOption>--link-modularity-mismatch=info</additionalOption>
+                <additionalOption>-Xdoclint:none</additionalOption>
               </additionalOptions>
               <includeDependencySources>true</includeDependencySources>
             </configuration>
@@ -957,19 +956,5 @@
       </build>
     </profile>
   </profiles>
-
-  <repositories>
-    <repository>
-      <name>Central Portal Snapshots</name>
-      <id>central-portal-snapshots</id>
-      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
 
 </project>
