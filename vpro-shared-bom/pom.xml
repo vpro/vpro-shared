@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-bom</artifactId>
-  <version>5.19-SNAPSHOT</version>
+  <version>6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>vpro-shared-bom</name>
   <description>Bill of Materials of modules in vpro shared</description>
@@ -81,10 +81,14 @@
         <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-hibernate</artifactId>
+        <artifactId>vpro-shared-guice</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-hibernate7</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -97,11 +101,7 @@
         <artifactId>vpro-shared-i18n</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jackson2</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson3</artifactId>
@@ -112,7 +112,11 @@
         <artifactId>vpro-shared-logging</artifactId>
         <version>${project.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-log4j2</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-monitoring</artifactId>
@@ -178,13 +182,8 @@
       <!-- not maintained anymore -->
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-guice</artifactId>
-        <version>5.17.5</version>
-      </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-log4j2</artifactId>
-        <version>5.17.5</version>
+        <artifactId>vpro-shared-jackson2</artifactId>
+        <version>5.18.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -260,6 +259,11 @@
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger</artifactId>
         <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-hibernate</artifactId>
+        <version>5.18.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

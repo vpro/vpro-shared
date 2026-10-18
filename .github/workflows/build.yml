@@ -37,11 +37,8 @@ jobs:
         #  os: [ ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            java: 17
-            target: 'deploy'
-          - os: ubuntu-latest
             java: 21
-            target: 'test'
+            target: 'deploy'
           - os: windows-latest
             java: 21
             target: 'test'
@@ -81,18 +78,16 @@ jobs:
           server-password-env-var: CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
-      - uses: stCarolas/setup-maven@v5
-        # https://github.com/mavenplugins/central-publishing-maven-plugin/issues/78
-        with:
-           maven-version: 3.9.16
       - name: Run tests (pull request)
         if: steps.os_check.outputs.not_skipped && github.event_name == 'pull_request'
         run: mvn -B test
       # For push to main or manual dispatch, run the deploy profile.
       - name: Build and ${{ matrix.target }} with Maven
+        id: maven
         if: steps.os_check.outputs.not_skipped && github.event_name != 'pull_request'
         shell: bash
-        run: "mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false"
+        run: |
+          mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
@@ -114,6 +109,8 @@ jobs:
         with:
           check_name: Tests results java ${{ matrix.java }}, os ${{ matrix.os }}
           files: "**/target/surefire-reports/*.xml"
-      - uses: MMProgrami/after-maven-action@v2
+      - uses: MMProgrami/after-maven-action@v2.9
         name: Simple results
         if: steps.os_check.outputs.not_skipped
+        with:
+          maven_outcome: ${{ steps.maven.outcome }}

@@ -4,7 +4,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>5.19-SNAPSHOT</version>
+  <version>6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -15,12 +15,12 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipITs>true</skipITs>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
+
+    <spring.version>7.0.9</spring.version>
+    <spring-security.version>7.1.1</spring-security.version>
 
 
-    <spring.version>6.2.19</spring.version>
-    <spring-security.version>6.5.11</spring-security.version>
-    <jackson2.version>2.22.3</jackson2.version>
     <jackson-annotations.version>2.22</jackson-annotations.version>
     <jackson3.version>3.2.3</jackson3.version>
 
@@ -36,7 +36,7 @@
     -->
     <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.18.14</bytebuddy.version>
+    <bytebuddy.version>1.18.15</bytebuddy.version>
     <slf4j.version>2.0.20</slf4j.version>
     <log4j2.version>2.26.1</log4j2.version>
     <guava.version>33.7.2-jre</guava.version>
@@ -47,23 +47,23 @@
     <math.version>0.22.0</math.version>
     <meeuw.util.version>1.23</meeuw.util.version>
     <checker.version>4.2.3</checker.version>
-    <commons.lang3.version>3.20.0</commons.lang3.version>
+    <commons.lang3.version>3.21.0</commons.lang3.version>
 
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>6.6.58.Final</hibernate.version>
-    <hibernate.search.version>7.2.6.Final</hibernate.search.version>
+    <hibernate.version>7.4.13.Final</hibernate.version>
+    <hibernate.search.version>8.4.0.Final</hibernate.search.version>
+    <hibernate.validator.version>9.1.5.Final</hibernate.validator.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.1.0</servlet.api.version>
     <validation.api.version>3.1.1</validation.api.version>
-    <persistence.api.version>3.1.0</persistence.api.version>
-
+    <persistence.api.version>3.2.0</persistence.api.version>
     <annotation.api.version>3.0.0</annotation.api.version>
     <xml-bind.api.version>4.0.5</xml-bind.api.version>
 
-    <hibernate.validator.version>9.1.4.Final</hibernate.validator.version>
+
     <camel.version>4.22.1</camel.version> <!-- limit to LTS (I think even majors) -->
 
     <swagger.version>2.2.55</swagger.version>
@@ -79,12 +79,12 @@
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
     <micrometer.version>1.17.1</micrometer.version>
-    <flyway.version>13.8.1</flyway.version>
+    <flyway.version>13.8.0</flyway.version>
     <testcontainers.version>2.0.5</testcontainers.version>
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
     <vpro.shared.module.postfix>OVERRIDE</vpro.shared.module.postfix>
-    <log4j2.root.level>INFO</log4j2.root.level>
+    <log4j2.stdout.level>INFO</log4j2.stdout.level>
   </properties>
 
   <licenses>
@@ -135,13 +135,11 @@
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-elasticsearch-high-level-client</module>
 
-    <module>vpro-shared-hibernate</module>
+    <module>vpro-shared-hibernate7</module>
     <!--
     <module>vpro-shared-hibernate-search</module>
     -->
     <module>vpro-shared-hibernate-search6</module>
-
-    <module>vpro-shared-jackson2</module>
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
@@ -159,15 +157,11 @@
     <module>vpro-shared-xml</module>
 
     <module>vpro-shared-i18n</module>
-    <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
     <module>vpro-shared-mediainfo</module>
 
 
     <!--
-    <module>vpro-shared-guice</module>
-        <module>vpro-shared-log4j2</module>
-
         <module>vpro-shared-swagger</module>
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
          <module>vpro-shared-resteasy</module>
@@ -249,13 +243,27 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>mockito-agent</id>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.6.0</version>
         <configuration>
-          <argLine>${EXTRA_TEST_OPTS}</argLine>
+          <argLine>${EXTRA_TEST_OPTS} -javaagent:${org.mockito:mockito-core:jar}</argLine>
           <systemPropertyVariables>
+
             <projectArtifactId>${project.artifactId}</projectArtifactId>
-            <log4j2.root.level>${log4j2.root.level}</log4j2.root.level>
+            <log4j2.stdout.level>${log4j2.stdout.level}</log4j2.stdout.level>
+            <log4j2.pattern>%d{HH:mm:ss.SS} %highlight{%5.5p}&#x09;%c{1}&#x09;%M.%L&#x09;%m%n</log4j2.pattern>
+
             <jqwik.hideAntiAiClause>true</jqwik.hideAntiAiClause>
             <jqwik.database />
           </systemPropertyVariables>
@@ -270,7 +278,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.5.6</version>
+        <version>3.6.0</version>
         <configuration>
           <skipITs>${skipITs}</skipITs>
           <includes>
@@ -303,7 +311,7 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.11.0</version>
+        <version>0.12.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
@@ -326,7 +334,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.15.0</version>
+          <version>3.16.0</version>
           <inherited>true</inherited>
           <configuration>
             <release>${java.version}</release>
@@ -416,7 +424,13 @@
         <scope>import</scope>
         <version>${log4j2.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-bom</artifactId>
+        <version>${micrometer.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-bom</artifactId>
@@ -426,29 +440,24 @@
       </dependency>
       <dependency>
         <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-core</artifactId>
+        <artifactId>hibernate-platform</artifactId>
         <version>${hibernate.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-micrometer</artifactId>
-        <version>${hibernate.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.search</groupId>
-        <artifactId>hibernate-search-mapper-orm</artifactId>
+        <artifactId>hibernate-search-bom</artifactId>
         <version>${hibernate.search.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hibernate.search</groupId>
-        <artifactId>hibernate-search-backend-lucene</artifactId>
-        <version>${hibernate.search.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate.validator</groupId>
-        <artifactId>hibernate-validator</artifactId>
+        <artifactId>hibernate-validator-bom</artifactId>
         <version>${hibernate.validator.version}</version>
-        <scope>test</scope>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <dependency>
@@ -558,25 +567,12 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>${jackson-annotations.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>${jackson2.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>tools.jackson</groupId>
@@ -604,7 +600,6 @@
         <groupId>jakarta.persistence</groupId>
         <artifactId>jakarta.persistence-api</artifactId>
         <version>${persistence.api.version}</version>
-        <scope>provided</scope> <!-- hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>org.meeuw.math</groupId>
@@ -695,7 +690,7 @@
         <groupId>jakarta.xml.bind</groupId>
         <artifactId>jakarta.xml.bind-api</artifactId>
         <version>${xml-bind.api.version}</version>
-        <scope>compile</scope> <!--look out,  hibernate provides it as javax.xml -->
+        <scope>compile</scope> <!--look out, hibernate provides it as javax.xml -->
       </dependency>
       <dependency>
         <groupId>jakarta.annotation</groupId>
@@ -720,7 +715,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.13</version>
+        <version>42.7.14</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
@@ -734,13 +729,7 @@
         <artifactId>i18n-iso-639</artifactId>
         <version>4.6</version>
       </dependency>
-      <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-bom</artifactId>
-        <version>${micrometer.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
       <dependency>
         <groupId>org.apache.groovy</groupId>
         <artifactId>groovy</artifactId>
@@ -769,13 +758,13 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik</artifactId>
-        <version>1.10.1</version>
+        <version>1.10.2</version>
       </dependency>
 
       <dependency>
         <groupId>org.meeuw</groupId>
         <artifactId>mihxil-json-grep</artifactId>
-        <version>0.15</version> <!-- 1.x is jackson 3 -->
+        <version>1.1</version>
       </dependency>
       <dependency>
         <groupId>org.ehcache</groupId>
@@ -795,6 +784,11 @@
         <version>1.8</version>
         <classifier>test</classifier>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>nl.mmprogrami</groupId>
+        <artifactId>setup-log4j2</artifactId>
+        <version>1.8</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
