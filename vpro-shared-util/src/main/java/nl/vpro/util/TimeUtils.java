@@ -9,6 +9,9 @@ import java.util.Optional;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.meeuw.configuration.Configuration;
+import org.meeuw.configuration.ConfigurationService;
+import org.meeuw.time.text.TimeConfiguration;
 
 /**
  * @author Michiel Meeuwissen
@@ -20,17 +23,20 @@ public class TimeUtils {
     public static final ZoneId ZONE_ID =  ZoneId.of("Europe/Amsterdam");
     public static final ZonedDateTime LOCAL_EPOCH = Instant.EPOCH.atZone(ZONE_ID);
 
+    private static final Configuration configuration = Configuration.builder().configure(TimeConfiguration.class, tc -> tc.withZoneId(ZONE_ID)).build();
+
+
     public static final Duration MAX_DURATION = Duration.ofSeconds(Long.MAX_VALUE, 999_999_999);
 
 
     @Deprecated
     public static Optional<ZonedDateTime> parseZoned(CharSequence parse) {
-        return org.meeuw.time.TimeUtils.parseZoned(parse);
+        return ConfigurationService.withConfiguration(configuration, () -> org.meeuw.time.TimeUtils.parseZoned(parse));
 
     }
     @Deprecated
     public static Optional<Instant> parse(CharSequence dateValue) {
-        return org.meeuw.time.TimeUtils.parse(dateValue);
+        return ConfigurationService.withConfiguration(configuration, () -> org.meeuw.time.TimeUtils.parse(dateValue));
     }
 
     @Deprecated
