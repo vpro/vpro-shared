@@ -22,6 +22,7 @@
 
 
     <jackson-annotations.version>2.22</jackson-annotations.version>
+    <jackson2.version>2.22.4</jackson2.version>
     <jackson3.version>3.2.3</jackson3.version>
 
 
@@ -141,6 +142,7 @@
     <module>vpro-shared-hibernate-search</module>
     -->
     <module>vpro-shared-hibernate-search6</module>
+    <module>vpro-shared-jackson2</module>
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
@@ -158,6 +160,7 @@
     <module>vpro-shared-xml</module>
 
     <module>vpro-shared-i18n</module>
+    <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
     <module>vpro-shared-mediainfo</module>
 
@@ -576,6 +579,13 @@
         <version>${jackson-annotations.version}</version>
       </dependency>
       <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson2.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
         <groupId>tools.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${jackson3.version}</version>
@@ -958,19 +968,4 @@
       </build>
     </profile>
   </profiles>
-
-  <repositories>
-    <repository>
-      <name>Central Portal Snapshots</name>
-      <id>central-portal-snapshots</id>
-      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
 </project>
