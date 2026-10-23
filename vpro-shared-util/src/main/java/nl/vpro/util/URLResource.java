@@ -25,6 +25,7 @@ import nl.vpro.jmx.MBeans;
  * A simple http client wrapping exactly one external resource, keeping track of cache headers.
  * @author Michiel Meeuwissen
  * @since 0.37
+ * @param <T> Type of the object that is proxied.
  */
 @Slf4j
 public class URLResource<T> implements URLResourceMXBean, Supplier<T> {

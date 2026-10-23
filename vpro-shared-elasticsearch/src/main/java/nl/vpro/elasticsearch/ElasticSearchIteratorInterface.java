@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.meeuw.collections.CountedIterator;
+import org.meeuw.functional.Optionals;
 
 /**
  * @author Michiel Meeuwissen
@@ -34,10 +35,10 @@ public interface ElasticSearchIteratorInterface<T> extends CountedIterator<T>, E
         Long count = getCount();
         if (count != null && count != 0) {
             Instant start = getStart();
-            Optional<Long> ts = getTotalSize();
+            OptionalLong ts = getTotalSize();
             if (ts.isPresent()) {
                 Duration duration = Duration.between(start, Instant.now());
-                Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * (ts.get().doubleValue() / getCount())));
+                Duration estimatedTotalDuration = Duration.ofNanos((long) (duration.toNanos() * ((double) ts.getAsLong() / getCount())));
                 return Optional.of(start.plus(estimatedTotalDuration));
             }
         }
@@ -62,7 +63,7 @@ public interface ElasticSearchIteratorInterface<T> extends CountedIterator<T>, E
 
     @Override
     default Long getTotalSizeLong() {
-        return getTotalSize().orElse(null);
+        return Optionals.orElse(getTotalSize(), null);
     }
     @Override
     default double getSpeed() {

@@ -8,19 +8,19 @@ import tools.jackson.databind.ObjectReader;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.node.NullNode;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.function.*;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.meeuw.collections.CloseableIterator;
+import org.meeuw.collections.CountedIterator;
 import org.slf4j.Logger;
 
 import com.google.common.collect.PeekingIterator;
 import com.google.common.collect.UnmodifiableIterator;
-
-import nl.vpro.util.CloseableIterator;
-import nl.vpro.util.CountedIterator;
 
 import static java.util.Objects.requireNonNull;
 
@@ -408,14 +408,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     @Override
     @NonNull
-    public Optional<Long> getSize() {
-        return Optional.ofNullable(size);
+    public OptionalLong getSize() {
+        return size == null ? OptionalLong.empty() : OptionalLong.of(size);
     }
 
     @Override
     @NonNull
-    public Optional<Long> getTotalSize() {
-        return Optional.ofNullable(totalSize);
+    public OptionalLong getTotalSize() {
+        return totalSize == null ? OptionalLong.empty() : OptionalLong.of(totalSize);
     }
 
     public static <O> Builder<O> builder() {

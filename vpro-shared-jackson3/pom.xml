@@ -82,6 +82,10 @@
       <artifactId>natty</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.meeuw.util</groupId>
+      <artifactId>mihxil-collections</artifactId>
+    </dependency>
 
   </dependencies>
 </project>

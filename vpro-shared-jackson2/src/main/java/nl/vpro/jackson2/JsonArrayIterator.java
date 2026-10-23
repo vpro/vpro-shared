@@ -11,6 +11,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.meeuw.collections.CloseableIterator;
 import org.meeuw.collections.CountedIterator;
+import org.meeuw.functional.Optionals;
 import org.meeuw.functional.ThrowingSupplier;
 import org.slf4j.Logger;
 
@@ -426,14 +427,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     @Override
     @NonNull
-    public Optional<Long> getSize() {
-        return Optional.ofNullable(size);
+    public OptionalLong getSize() {
+        return Optionals.ofNullable(size);
     }
 
     @Override
     @NonNull
-    public Optional<Long> getTotalSize() {
-        return Optional.ofNullable(totalSize);
+    public OptionalLong getTotalSize() {
+        return Optionals.ofNullable(totalSize);
     }
 
 

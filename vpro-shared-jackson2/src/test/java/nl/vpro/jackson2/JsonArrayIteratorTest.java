@@ -1,7 +1,5 @@
 package nl.vpro.jackson2;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +15,8 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.*;
@@ -57,12 +57,12 @@ public class JsonArrayIteratorTest {
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder().inputStream(getClass().getResourceAsStream("/changes.json")).valueClass(Change.class).objectMapper(Jackson2Mapper.getInstance()).build()) {
             assertThat(it.next().getMid()).isEqualTo("POMS_NCRV_1138990"); // 1
             assertThat(it.getCount()).isEqualTo(1);
-            assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
+            assertThat(it.getSize()).hasValue(14);
             for (int i = 0; i < 9; i++) {
                 assertThat(it.hasNext()).isTrue();
 
                 Change change = it.next(); // 10
-                Optional<Long> size = it.getSize();
+                OptionalLong size = it.getSize();
                 size.ifPresent(aLong ->
                     log.info(it.getCount() + "/" + aLong + " :" + change)
                 );
@@ -140,7 +140,7 @@ public class JsonArrayIteratorTest {
             verify(callback, times(0)).run();
             it.next();
         }
-        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
+        assertThat(it.getSize()).hasValue(it.getCount());
         verify(callback, times(1)).run();
     }
 
@@ -219,7 +219,7 @@ public class JsonArrayIteratorTest {
                         throw new InterruptedIOException();
                     }
                     if (i < bytes.length) {
-                        return bytes[i++];
+                        return bytes[i++] & 0xFF;
                     } else {
                         return -1;
                     }

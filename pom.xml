@@ -46,7 +46,7 @@
     <xmlunit.version>2.14.0</xmlunit.version>
     <hamcrest.version>3.0</hamcrest.version>
     <math.version>0.22.1-SNAPSHOT</math.version>
-    <meeuw.util.version>1.23</meeuw.util.version>
+    <meeuw.util.version>2.0-SNAPSHOT</meeuw.util.version>
     <checker.version>4.2.3</checker.version>
     <commons.lang3.version>3.21.0</commons.lang3.version>
 

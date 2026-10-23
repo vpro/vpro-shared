@@ -255,7 +255,7 @@ public class JsonArrayIteratorTest {
                         throw new InterruptedIOException("INterrupted at 6 bytes, so that would have complete 2 objects");
                     }
                     if (i < bytes.length) {
-                        return bytes[i++];
+                        return bytes[i++] & 0xFF;
                     } else {
                         return -1;
                     }
