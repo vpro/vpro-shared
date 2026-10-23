@@ -22,6 +22,7 @@ import org.elasticsearch.client.*;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.meeuw.functional.Optionals;
 import org.meeuw.math.windowed.WindowedEventRate;
 
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
@@ -359,9 +360,9 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
 
 
     @Override
-    public @NonNull Optional<Long> getSize() {
+    public @NonNull OptionalLong getSize() {
         findNext();
-        return Optional.ofNullable(this.totalSize);
+        return Optionals.ofNullable(this.totalSize);
     }
 
     @Override

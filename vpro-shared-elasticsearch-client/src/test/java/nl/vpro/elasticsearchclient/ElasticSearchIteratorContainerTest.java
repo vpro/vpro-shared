@@ -18,6 +18,7 @@ import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.test.opensearch.ElasticsearchContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.meeuw.functional.Optionals.boxed;
 
 /**
  * @author Michiel Meeuwissen
@@ -97,7 +98,7 @@ public class ElasticSearchIteratorContainerTest {
 
             i.forEachRemaining((u) -> {
                 if (i.getCount() % 1000 == 0) {
-                    log.info("{}/{}: {} (eta: {})", i.getCount(), i.getTotalSize().orElse(null), u,
+                    log.info("{}/{}: {} (eta: {})", i.getCount(), boxed(i.getTotalSize()).orElse(null), u,
                         i.getETA().map(eta -> eta.atZone(ZoneId.of("Europe/Amsterdam")).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS)).orElse(null)
                     );
                 }
@@ -137,7 +138,7 @@ public class ElasticSearchIteratorContainerTest {
 
             AtomicLong count = new AtomicLong(0);
             i.forEachRemaining((node) -> {
-                log.debug("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node);
+                log.debug("{}/{}: {}", i.getCount(), i.getTotalSize().orElseThrow(), node);
                 count.incrementAndGet();
             });
             assertThat(count.get()).isEqualTo(numberOfObjects);

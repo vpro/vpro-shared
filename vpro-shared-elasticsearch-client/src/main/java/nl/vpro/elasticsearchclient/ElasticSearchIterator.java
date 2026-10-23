@@ -36,6 +36,7 @@ import static nl.vpro.elasticsearch.Constants.*;
 import static nl.vpro.elasticsearch.Constants.Fields.SOURCE;
 import static nl.vpro.elasticsearch.Constants.Methods.METHOD_DELETE;
 import static nl.vpro.elasticsearch.Constants.Methods.POST;
+import static org.meeuw.functional.Optionals.ofNullable;
 import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.WARN;
 
@@ -513,9 +514,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     @Override
-    public @NonNull Optional<Long> getSize() {
+    public @NonNull OptionalLong getSize() {
         findNext();
-        return Optional.ofNullable(this.totalSize);
+        return ofNullable(this.totalSize);
     }
 
     @Override
@@ -538,14 +539,10 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
         return Optional.ofNullable(this.totalRelation);
     }
 
-
     @Override
     public String toString() {
         return client + " " + request + " " + count;
     }
-
-
-
 
     @Override
     public synchronized void close()  {

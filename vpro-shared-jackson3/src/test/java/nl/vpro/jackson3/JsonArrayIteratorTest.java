@@ -93,12 +93,12 @@ public class JsonArrayIteratorTest {
                 mids[0]
             ); // 1
             assertThat(it.getCount()).isEqualTo(1);
-            assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
+            assertThat(it.getSize()).hasValue(14);
             for (int i = 0; i < 9; i++) {
                 assertThat(it.hasNext()).isTrue();
 
                 Change change = it.next(); // 10
-                Optional<Long> size = it.getSize();
+                OptionalLong size = it.getSize();
                 size.ifPresent(aLong ->
                     log.info("{}/{} :{}", it.getCount(), aLong, change)
                 );
@@ -176,7 +176,7 @@ public class JsonArrayIteratorTest {
             verify(callback, times(0)).run();
             it.next();
         }
-        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
+        assertThat(it.getSize()).hasValue(it.getCount());
         verify(callback, times(1)).run();
     }
 

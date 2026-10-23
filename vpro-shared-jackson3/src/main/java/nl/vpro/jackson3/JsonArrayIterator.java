@@ -408,14 +408,14 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
     @Override
     @NonNull
-    public Optional<Long> getSize() {
-        return Optional.ofNullable(size);
+    public OptionalLong getSize() {
+        return size == null ? OptionalLong.empty() : OptionalLong.of(size);
     }
 
     @Override
     @NonNull
-    public Optional<Long> getTotalSize() {
-        return Optional.ofNullable(totalSize);
+    public OptionalLong getTotalSize() {
+        return totalSize == null ? OptionalLong.empty() : OptionalLong.of(totalSize);
     }
 
     public static <O> Builder<O> builder() {
