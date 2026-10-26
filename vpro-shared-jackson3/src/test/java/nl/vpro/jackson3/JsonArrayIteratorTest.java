@@ -93,12 +93,12 @@ public class JsonArrayIteratorTest {
                 mids[0]
             ); // 1
             assertThat(it.getCount()).isEqualTo(1);
-            assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(14));
+            assertThat(it.getSize()).hasValue(14);
             for (int i = 0; i < 9; i++) {
                 assertThat(it.hasNext()).isTrue();
 
                 Change change = it.next(); // 10
-                Optional<Long> size = it.getSize();
+                OptionalLong size = it.getSize();
                 size.ifPresent(aLong ->
                     log.info("{}/{} :{}", it.getCount(), aLong, change)
                 );
@@ -115,7 +115,7 @@ public class JsonArrayIteratorTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testEmpty() throws IOException {
+    public void testEmpty() {
         try (JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class)) {
             assertThat(it.hasNext()).isFalse();
             assertThat(it.hasNext()).isFalse();
@@ -125,7 +125,7 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    public void testNulls() throws IOException {
+    public void testNulls() {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isTrue();
         it.next();
@@ -159,7 +159,7 @@ public class JsonArrayIteratorTest {
 
 
     @Test
-    public void testZeroBytes() throws IOException {
+    public void testZeroBytes() {
 
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream(new byte[0]), Change.class);
 
@@ -169,14 +169,14 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    public void callback() throws IOException {
+    public void callback() {
         Runnable callback = mock(Runnable.class);
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(getClass().getResourceAsStream("/changes.json"), Change.class, callback);
         while (it.hasNext()) {
             verify(callback, times(0)).run();
             it.next();
         }
-        assertThat(it.getSize()).hasValueSatisfying(size -> assertThat(size).isEqualTo(it.getCount()));
+        assertThat(it.getSize()).hasValue(it.getCount());
         verify(callback, times(1)).run();
     }
 
