@@ -1,14 +1,13 @@
 package nl.vpro.persistence;
 
 import lombok.SneakyThrows;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Converts a {@code Map<String, String>} to/from a JSON string, for entity fields backed by a MariaDB {@code json}
