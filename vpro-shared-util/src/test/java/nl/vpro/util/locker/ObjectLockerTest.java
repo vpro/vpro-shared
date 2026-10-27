@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @Log4j2
 @Execution(ExecutionMode.SAME_THREAD)
-public class ObjectLockerTest {
+class ObjectLockerTest {
 
     @BeforeEach
     public void setup() {
@@ -48,7 +48,7 @@ public class ObjectLockerTest {
     }
 
     @Test
-    public void withLock() throws InterruptedException, ExecutionException {
+    void withLock() throws InterruptedException, ExecutionException {
         final List<String> events = new CopyOnWriteArrayList<>();
         ForkJoinTask<?> submitA = submit(() -> {
             withKeyLock("key", "test1", () -> {
@@ -77,7 +77,7 @@ public class ObjectLockerTest {
 
 
     @Test
-    public void withNullLock() throws InterruptedException, ExecutionException {
+    void withNullLock() throws InterruptedException, ExecutionException {
         final List<String> events = new CopyOnWriteArrayList<>();
         ForkJoinTask<?> submitA = submit(() -> {
             withKeyLock(null, "test1", () -> {
@@ -124,7 +124,7 @@ public class ObjectLockerTest {
      * Tests MSE-4946, this used to throw {{@link IllegalMonitorStateException}}
      */
     @Test
-    public void withMonitor() throws InterruptedException, ExecutionException {
+    void withMonitor() throws InterruptedException, ExecutionException {
         ObjectLocker.monitor = true;
         ObjectLockerAdmin.JMX_INSTANCE.setMaxLockAcquireTime(Duration.ofMillis(20).toString());
         ObjectLocker.minWaitTime = Duration.ofMillis(5);
@@ -166,7 +166,7 @@ public class ObjectLockerTest {
 
 
     @Test
-    public void twoSameLocks() {
+    void twoSameLocks() {
         final List<String> events = new CopyOnWriteArrayList<>();
         withKeyLock(new Key("key"), "test2", () -> {
             events.add("b1");
@@ -180,7 +180,7 @@ public class ObjectLockerTest {
     }
 
     @Test
-    public void twoDifferentLocksAndTestLockerAdmin() {
+    void twoDifferentLocksAndTestLockerAdmin() {
         ObjectLocker.strictlyOne = false;
         ObjectLockerAdmin.JMX_INSTANCE.reset();
         int before = ObjectLockerAdmin.JMX_INSTANCE.getLockCount();
@@ -213,7 +213,7 @@ public class ObjectLockerTest {
     }
 
     @Test
-    public void twoDifferentLocksStrictly() {
+    void twoDifferentLocksStrictly() {
         ObjectLockerAdmin.JMX_INSTANCE.setStrictlyOne(true);
         assertThatThrownBy(() -> {
             final List<String> events = new CopyOnWriteArrayList<>();
@@ -227,7 +227,7 @@ public class ObjectLockerTest {
     }
 
     @Test
-    public void delayedClose() throws InterruptedException, ExecutionException {
+    void delayedClose() throws InterruptedException, ExecutionException {
         //TestClock testClock = TestClock.twentyTwenty();
         //ObjectLocker.clock = testClock;
         //ObjectLocker.sleeper = d -> testClock.sleep(d.toMillis());
@@ -269,7 +269,7 @@ public class ObjectLockerTest {
 
 
     @Test
-    public void delayedClose2() throws InterruptedException, ExecutionException {
+    void delayedClose2() throws InterruptedException, ExecutionException {
         List<Event> events = Collections.synchronizedList(new ArrayList<>());
         SimpleLogger logger = Log4j2SimpleLogger.of(log).chain(QueueSimpleLogger.of(events::add));
         CompletableFuture<Void> voidCompletableFuture = new CompletableFuture<>();

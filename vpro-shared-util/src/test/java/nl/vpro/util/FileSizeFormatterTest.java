@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 1.76
  */
 @Log4j2
-public class FileSizeFormatterTest {
+class FileSizeFormatterTest {
 
     @Test
     void mebi() {
@@ -36,7 +36,7 @@ public class FileSizeFormatterTest {
     }
 
     @Test
-    void testDefaultSpeed() {
+    void defaultSpeed() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT;
         assertThat(formatter.formatSpeed(221400200L, Duration.ofMillis(12344L))).isEqualTo("17.1 MiB/s");
     }
@@ -52,7 +52,7 @@ public class FileSizeFormatterTest {
 
 
     @Test
-    void testDefaultChangedPrecision() {
+    void defaultChangedPrecision() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT.toBuilder().pattern("#.00").build();
         assertThat(formatter.format(1000L)).isEqualTo("1000 B");
         assertThat(formatter.format(221400200L)).isEqualTo("211.14 MiB");
@@ -60,7 +60,7 @@ public class FileSizeFormatterTest {
 
 
     @Test
-    void testNl() {
+    void nl() {
         FileSizeFormatter formatter = FileSizeFormatter.builder()
             .decimalFormatSymbols(Locale.forLanguageTag("nl"))
             .pattern("##.00")
@@ -93,7 +93,7 @@ public class FileSizeFormatterTest {
     }
 
     @Test
-    public void withExtraDigit() {
+    void withExtraDigit() {
         FileSizeFormatter formatter = FileSizeFormatter.DEFAULT.withPattern("#");
         assertThat(formatter.format(1025)).isEqualTo("1 KiB");
         assertThat(formatter.withExtraDigit().format(1025)).isEqualTo("1.0 KiB");

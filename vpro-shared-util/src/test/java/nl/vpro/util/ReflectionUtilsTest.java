@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Michiel Meeuwissen
  */
-public class ReflectionUtilsTest {
+class ReflectionUtilsTest {
 
     public enum AnEnum {
         X,Y,Z
@@ -95,7 +95,7 @@ public class ReflectionUtilsTest {
     }
 
     @Test
-    public void testOnlyIfNull() {
+    void onlyIfNull() {
         AWithOutSetters a = new AWithOutSetters();
         ReflectionUtils.configureIfNull(a, properties);
         assertThat(a.a).isEqualTo("A");
@@ -104,7 +104,7 @@ public class ReflectionUtilsTest {
 
 
     @Test
-    public void testOnField() {
+    void onField() {
         AWithOutSetters a = new AWithOutSetters();
         ReflectionUtils.configured(a, properties);
         assertThat(a.a).isEqualTo("B");
@@ -112,7 +112,7 @@ public class ReflectionUtilsTest {
     }
 
     @Test
-    public void testOnMethods() {
+    void onMethods() {
         A a = new A();
         ReflectionUtils.configured(a, properties);
         assertThat(a.getA()).isEqualTo("B");
@@ -123,7 +123,7 @@ public class ReflectionUtilsTest {
     }
 
     @Test
-    public void testConfigureIfNullBuilder() {
+    void configureIfNullBuilder() {
         AWithBuilder.Builder builder = AWithBuilder
             .builder()
             .a("A")
@@ -136,7 +136,7 @@ public class ReflectionUtilsTest {
     }
 
     @Test
-    public void testConfigureBuilder() {
+    void configureBuilder() {
         AWithBuilder.Builder builder = AWithBuilder
             .builder()
             .a("A")
@@ -150,7 +150,7 @@ public class ReflectionUtilsTest {
 
 
     @Test
-    public void testConfigureInstance() {
+    void configureInstance() {
         A a = ReflectionUtils.configured(A.class, properties);
         assertThat(a.getA()).isEqualTo("B");
         assertThat(a.b).isEqualTo(3);
@@ -158,7 +158,7 @@ public class ReflectionUtilsTest {
     }
 
     @Test
-    public void testConfigureInstanceWithBuilder() {
+    void configureInstanceWithBuilder() {
         AWithBuilder a = ReflectionUtils.configured(AWithBuilder.class, properties);
         assertThat(a.getA()).isEqualTo("B");
         assertThat(a.b).isEqualTo(3);

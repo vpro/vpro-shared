@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class IndexHelperContainerTest {
+class IndexHelperContainerTest {
 
     ElasticsearchContainer es = new ElasticsearchContainer(true);
 
@@ -70,30 +70,30 @@ public class IndexHelperContainerTest {
     }
 
     @Test
-    public void checkExists() {
+    void checkExists() {
         assertThat(helper.checkIndex()).isTrue();
     }
 
     @Test
-    public void count() {
+    void count() {
         assertThat(helper.count()).isEqualTo(0);
     }
 
 
     @Test
-    public void getClusterName() throws ExecutionException, InterruptedException {
+    void getClusterName() throws ExecutionException, InterruptedException {
         log.info("clustername: {}", helper.getClusterName());
         log.info("distribution: {}", helper.getInfo().get().getDistribution());
         log.info("info: {}", helper.getInfo().get());
     }
 
     @Test
-    public void getActualSettings() throws IOException {
+    void getActualSettings() throws IOException {
         log.info("settings: {}", helper.getActualSettings());
     }
 
     @Test
-    public void writeJson() throws ExecutionException, InterruptedException {
+    void writeJson() throws ExecutionException, InterruptedException {
         helper.setWriteJsonDir(new File("/tmp"));
         TestObject test = new TestObject();
         test.setId("a");
@@ -112,12 +112,12 @@ public class IndexHelperContainerTest {
 
 
     @Test
-    public void unalias() {
+    void unalias() {
         log.info("{}", helper.unalias("apipagequeries"));
     }
 
     @Test
-    public void indexWrong() {
+    void indexWrong() {
         assertThatThrownBy(() -> {
             TestObject test = new TestObject();
             test.setId("id");
@@ -133,7 +133,7 @@ public class IndexHelperContainerTest {
 
 
     @Test
-    public void bulkWrong() {
+    void bulkWrong() {
         TestObject test = new TestObject();
         test.setId("id");
         test.setTitle("wrong");
@@ -150,7 +150,7 @@ public class IndexHelperContainerTest {
     }
 
     @Test
-    public void indexAndGetAndUpdateAndDelete() {
+    void indexAndGetAndUpdateAndDelete() {
         helper.refresh();
         long before = helper.count();
         TestObject test = new TestObject();

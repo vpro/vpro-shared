@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * @author Michiel Meeuwissen
  */
-public class DateToDurationTest {
+class DateToDurationTest {
 
 
     @Test
-    public void testDayTime() throws Exception {
+    void dayTime() throws Exception {
         DateToDuration dateToDuration = new DateToDuration();
         assertEquals("P0DT0H0M0.000S", dateToDuration.marshalDayTime(0L).toString());
         assertEquals("P0DT0H1M40.000S", dateToDuration.marshalDayTime(100000L).toString());
@@ -25,7 +25,7 @@ public class DateToDurationTest {
     }
 
     @Test
-    public void testTime() throws Exception {
+    void time() throws Exception {
         DateToDuration dateToDuration = new DateToDuration();
         assertEquals("P0Y0M0DT0H0M0.000S", dateToDuration.marshal(0L).toString());
         assertEquals("P0Y0M0DT0H1M40.000S", dateToDuration.marshal(100000L).toString());
@@ -34,7 +34,7 @@ public class DateToDurationTest {
     }
 
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         DateToDuration dateToDuration = new DateToDuration();
         assertEquals("P0DT0H0M0.000S", dateToDuration.marshal(new Date(0)).toString());
         assertEquals("P0DT0H1M40.000S", dateToDuration.marshal(new Date(100000L)).toString());
@@ -43,7 +43,7 @@ public class DateToDurationTest {
     }
 
     @Test
-    public void jaxb() {
+    void jaxb() {
         JAXB.marshal(new TestObject(), System.out);
     }
 

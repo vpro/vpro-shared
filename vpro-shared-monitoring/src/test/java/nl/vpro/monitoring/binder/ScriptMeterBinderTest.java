@@ -37,7 +37,7 @@ class ScriptMeterBinderTest {
     }
 
     @Test
-    public void test() {
+    void test() {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         ScriptMeterBinder binder = new ScriptMeterBinder("test", Duration.ofHours(1), commandExecutor, Duration.ofDays(7), "/data/logs");
         binder.bindTo(registry);

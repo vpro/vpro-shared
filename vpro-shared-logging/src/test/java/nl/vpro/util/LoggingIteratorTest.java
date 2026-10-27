@@ -18,7 +18,7 @@ class LoggingIteratorTest {
 
 
     @Test
-    public void test() {
+    void test() {
         Iterator<String> i = Arrays.asList("a", "b", "c", "d").iterator();
 
         LoggingIterator<String> logging = LoggingIterator

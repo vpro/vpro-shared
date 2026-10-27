@@ -70,7 +70,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(2)
-    public void waitForNewFileAnNewSymlink() throws IOException, InterruptedException {
+    void waitForNewFileAnNewSymlink() throws IOException, InterruptedException {
 
 
         f2 = Files.createFile(dir.resolve("test-2.xml"));
@@ -84,14 +84,14 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(3)
-    public void touchFile() throws IOException, InterruptedException {
+    void touchFile() throws IOException, InterruptedException {
         tickAndTouch(f1);
 
         wait(f1);
     }
     @Test
     @Order(3)
-    public void touchTargetOfSymlink() throws IOException, InterruptedException {
+    void touchTargetOfSymlink() throws IOException, InterruptedException {
 
         tickAndTouch(tarf3);
 
@@ -100,7 +100,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(4)
-    public void createSymlink() throws IOException, InterruptedException {
+    void createSymlink() throws IOException, InterruptedException {
         symf6 = Files.createSymbolicLink(dir.resolve("test-6.xml"), tarf5);
 
         wait(symf6);
@@ -111,7 +111,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(5)
-    public void deleteSymlink() throws IOException, InterruptedException {
+    void deleteSymlink() throws IOException, InterruptedException {
         Files.delete(symf3);
 
         wait(symf3);
@@ -126,7 +126,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(5)
-    public void newDestinationOfSymlink() throws IOException, InterruptedException {
+    void newDestinationOfSymlink() throws IOException, InterruptedException {
         tick();
 
         Files.createSymbolicLink(symf3, tarf3_2);
@@ -140,7 +140,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Order(6)
-    public void newDestinationOfSymlink2() throws IOException, InterruptedException {
+    void newDestinationOfSymlink2() throws IOException, InterruptedException {
         tick();
 
         Files.delete(symf3);
@@ -166,7 +166,7 @@ class DirectoryWatcherTest {
     @Test
     @Order(20)
     @Disabled
-    public void noSubsequentEvents() throws InterruptedException {
+    void noSubsequentEvents() throws InterruptedException {
 
         for (int i = 0; i < 10; i++) {
             log.info("Checking for subsequent events {}", i);
@@ -179,7 +179,7 @@ class DirectoryWatcherTest {
 
     @Test
     @Disabled
-    public void tryout() throws IOException {
+    void tryout() throws IOException {
         Path dir = Files.createTempDirectory(DirectoryWatcherTest.class.getSimpleName());
 
         var w  = dir.getFileSystem().newWatchService();

@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2.8
  */
 @Slf4j
-public class XMLStreamWriterUtilTest {
+class XMLStreamWriterUtilTest {
 
 
     StringBuilder builder = new StringBuilder();
@@ -25,14 +25,14 @@ public class XMLStreamWriterUtilTest {
 
 
     @Test
-    public void writeOneElement() throws Exception {
+    void writeOneElement() throws Exception {
         try (AutoCloseable closeable = util.writeElement("a")) {
             util.writeAttribute("x", "b");
         }
         assertThatXml(builder.toString()).isSimilarTo("<a x=\"b\"/>");
     }
     @Test
-    public void writeAutoClosedNestedElement() throws Exception {
+    void writeAutoClosedNestedElement() throws Exception {
         try (AutoCloseable closeable = util.writeElement("a")) {
             util.writeAttribute("x", "b");
             util.writeElement("b");
@@ -40,7 +40,7 @@ public class XMLStreamWriterUtilTest {
         assertThatXml(builder.toString()).isSimilarTo("<a x=\"b\"><b></b></a>");
     }
     @Test
-    public void writeDocument() throws Exception {
+    void writeDocument() throws Exception {
         util.setDefaultNamespace("urn:bla");
 
 
@@ -60,7 +60,7 @@ public class XMLStreamWriterUtilTest {
         assertThat(builder.toString()).isEqualTo("<?xml version=\"1.0\"?><a x=\"b\"><b><![CDATA[cdata]]>characters<empty/>&amp;<!--comment--></b></a>");
     }
     @Test
-    public void writeWithException() throws Exception {
+    void writeWithException() throws Exception {
 
         try (AutoCloseable c1= util.writeElement("a")) {
             util.writeAttribute("x", "b");

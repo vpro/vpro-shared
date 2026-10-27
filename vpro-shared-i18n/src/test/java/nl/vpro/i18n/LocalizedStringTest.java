@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 4.8.2
  */
-public class LocalizedStringTest {
+class LocalizedStringTest {
 
     public static class A {
         @XmlElement
@@ -29,7 +29,7 @@ public class LocalizedStringTest {
     }
 
     @Test
-    public void xml() {
+    void xml() {
         A a = new A();
         a.string = impl("bla", Locales.DUTCH);
         JAXBTestUtil.roundTripAndSimilar(a, """
@@ -39,7 +39,7 @@ public class LocalizedStringTest {
     }
 
     @Test
-    public void json() {
+    void json() {
         A a = new A();
         a.string = impl("bla", NETHERLANDISH);
         Jackson3TestUtil.roundTripAndSimilar(a, """
@@ -53,7 +53,7 @@ public class LocalizedStringTest {
     }
 
     @Test
-    public void unmarshal() {
+    void unmarshal() {
         A a = JAXB.unmarshal(new StringReader("""
             <local:a xmlns:local="uri:local">
                 <string xml:lang="nl_NL">bla</string>
@@ -62,7 +62,7 @@ public class LocalizedStringTest {
     }
 
     @Test
-    public void unmarshalAndMarshalNull() {
+    void unmarshalAndMarshalNull() {
         LocalizedString.XmlLangAdapter xml = new LocalizedString.XmlLangAdapter();
         assertThat(xml.unmarshal(null)).isNull();
         assertThat(xml.marshal(null)).isNull();
@@ -70,63 +70,63 @@ public class LocalizedStringTest {
 
 /*
     @Test
-    public void adaptXx() {
+    void adaptXx() {
         assertThat(LocalizedString.adapt("xx")).isEqualTo(new Locale("zxx"));
     }
     @Test
-    public void adaptCz() {
+    void adaptCz() {
         assertThat(LocalizedString.adapt("cz")).isEqualTo(new Locale("cs"));
     }*/
 
     @Test
-    public void adaptNl_NL() {
+    void adaptNl_NL() {
         assertThat(LocalizedString.adapt("nl_NL")).isEqualTo(Locale.of("nl", "NL"));
     }
 
     @Test
-    public void adaptNl_NL_informal() {
+    void adaptNl_NL_informal() {
         assertThat(LocalizedString.adapt("nl_NL_informal")).isEqualTo(Locale.of("nl", "NL", "informal"));
     }
 
     @Test
-    public void adapNull() {
+    void adapNull() {
         assertThat(LocalizedString.adapt(null)).isNull();
     }
 
 
     @Test
-    public void adaptUnknownLanguage() {
+    void adaptUnknownLanguage() {
         assertThat(LocalizedString.adapt("foo_bar")).isEqualTo(Locale.of("foo", "bar"));
     }
 
 
     @Test
-    public void ofNull() {
+    void ofNull() {
         assertThat(of(null, NETHERLANDISH)).isNull();
     }
 
     @Test
-    public void subSequence() {
+    void subSequence() {
         assertThat(of("de kat krabt de krullen", NETHERLANDISH).subSequence(3, 6)).isEqualTo(of("kat", NETHERLANDISH));
     }
 
     @Test
-    public void charAt() {
+    void charAt() {
         assertThat(of("de kat krabt de krullen", NETHERLANDISH).charAt(10)).isEqualTo('b');
     }
 
     @Test
-    public void length() {
+    void length() {
         assertThat(of("de kat krabt de krullen", NETHERLANDISH).length()).isEqualTo(23);
     }
 
     @Test
-    public void testString() {
+    void string() {
         assertThat(of("de kat krabt de krullen", NETHERLANDISH).toString()).isEqualTo("de kat krabt de krullen");
     }
 
     @Test
-    public void get() {
+    void get() {
         Set<LocalizedString> strings = new HashSet<>();
         strings.add(of("hoi", NETHERLANDISH));
         strings.add(of("hey", FLEMISH));
@@ -138,7 +138,7 @@ public class LocalizedStringTest {
 
     @SuppressWarnings({"EqualsWithItself", "ConstantConditions"})
     @Test
-    public void equals() {
+    void equals() {
         LocalizedString hoi = of("hoi", NETHERLANDISH);
         assertThat(hoi.equals(hoi)).isTrue();
         assertThat(hoi.equals(null)).isFalse();

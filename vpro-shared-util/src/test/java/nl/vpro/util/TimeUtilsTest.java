@@ -16,30 +16,30 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @Slf4j
-public class TimeUtilsTest {
+class TimeUtilsTest {
 
 
     @Test
-    public void parseZoned() {
+    void parseZoned() {
 
         assertThat(TimeUtils.parseZoned("2000-01-01").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(0, 0), TimeUtils.ZONE_ID));
 
     }
 
     @Test
-    public void parseZonedYear() {
+    void parseZonedYear() {
         assertThat(TimeUtils.parseZoned("2000").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(0, 0), TimeUtils.ZONE_ID));
 
     }
 
     @Test
-    public void parseMillis() {
+    void parseMillis() {
         assertThat(TimeUtils.parseZoned("1474643244279").get()).isEqualTo(ZonedDateTime.of(LocalDate.of(2016, 9, 23), LocalTime.of(17, 7, 24, 279000000), TimeUtils.ZONE_ID));
 
     }
 
     @Test
-    public void parse() {
+    void parse() {
 
         assertThat(TimeUtils.parse("2000-07-11T14:00:33.556+02:00").get())
             .isEqualTo(ZonedDateTime.of(LocalDate.of(2000, 7, 11), LocalTime.of(14, 0, 33, 556000000), TimeUtils.ZONE_ID).toInstant());
@@ -47,7 +47,7 @@ public class TimeUtilsTest {
     }
 
     @Test
-    public void parse2() {
+    void parse2() {
         LocalDateTime example = LocalDateTime.of(2018, 2, 13, 9, 0);
         log.info("{}", example);
         assertThat(TimeUtils.parse("2018-02-13T09:00").get())
@@ -56,7 +56,7 @@ public class TimeUtilsTest {
     }
 
     @Test
-    public void parseDuration() {
+    void parseDuration() {
         assertThat(TimeUtils.parseDuration("PT5M").get()).isEqualTo(Duration.ofMinutes(5));
         assertThat(TimeUtils.parseDuration("T5M").get()).isEqualTo(Duration.ofMinutes(5));
         assertThat(TimeUtils.parseDuration("5M").get()).isEqualTo(Duration.ofMinutes(5));
@@ -90,25 +90,25 @@ public class TimeUtilsTest {
     }
 
     @Test
-    public void parseWeek() {
+    void parseWeek() {
         assertThat(TimeUtils.parseDuration("P4W").get()).isEqualTo(Duration.ofDays(7 * 4));
 
     }
 
     @Test
-    public void parseMonth() {
+    void parseMonth() {
         assertThat(TimeUtils.parseTemporalAmount("P1M").get()).isEqualTo(Period.ofMonths(1));
         assertThat(TimeUtils.parseTemporalAmount("1M").get()).isEqualTo(Duration.ofMinutes(1));
         assertThat(TimeUtils.parseTemporalAmount("PT1M").get()).isEqualTo(Duration.ofMinutes(1));
         assertThat(TimeUtils.parseTemporalAmount("T1M").get()).isEqualTo(Duration.ofMinutes(1));
     }
     @Test
-    public void parseYears() {
+    void parseYears() {
         assertThat(TimeUtils.parseDuration("P2Y2M10DT0H0M0.000S")).contains(Duration.ofDays(800));
     }
 
     @Test
-    public void durationToString() {
+    void durationToString() {
         assertThat(TimeUtils.toParsableString(Duration.ofSeconds(5))).isEqualTo("5S");
         assertThat(TimeUtils.toParsableString(Duration.ofDays(50))).isEqualTo("1200H");
 
@@ -116,7 +116,7 @@ public class TimeUtilsTest {
 
 
     @Test
-    public void parseLocalDateTime() {
+    void parseLocalDateTime() {
         assertThat(
             TimeUtils.parseLocalDateTime("2019-02-13T09:16").get()).isEqualTo(LocalDateTime.of(2019,2, 13, 9, 16));
 
@@ -126,12 +126,12 @@ public class TimeUtilsTest {
     }
 
     @Test
-    public void testLarger() {
+    void larger() {
         assertThat(TimeUtils.isLarger(TimeUtils.parseDuration("PT6M").get(), TimeUtils.parseDuration("PT5M").get())).isTrue();
     }
 
     @Test
-    public void roundMillis() {
+    void roundMillis() {
         Duration duration = Duration.ofSeconds(4).plusNanos(600_000); // 4 seconds 0.6 ms
         assertThat(duration.toMillis()).isEqualTo(4000);
 

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since ...
  */
-public class URLPathEncodeTest {
+class URLPathEncodeTest {
 
 
     public static Stream<Case> cases() {
@@ -38,7 +38,7 @@ public class URLPathEncodeTest {
 
     @ParameterizedTest
     @MethodSource("cases")
-    public void encodePath(Case c) {
+    void encodePath(Case c) {
         assertThat(URLPathEncode.encode(c.in)).isEqualTo(c.encodedVariant);
         assertThat(URLPathEncode.encodePath(c.in)).isEqualTo(c.pathEncodedVariant);
         assertThat(URLPathEncode.encodePath(c.in, false)).isEqualTo(c.pathEncoded);
@@ -46,7 +46,7 @@ public class URLPathEncodeTest {
 
     @ParameterizedTest
     @MethodSource("cases")
-    public void encodePathUrlEncoder(Case c) throws UnsupportedEncodingException {
+    void encodePathUrlEncoder(Case c) throws UnsupportedEncodingException {
         assertThat(URLEncoder.encode(c.in, StandardCharsets.UTF_8)).isEqualTo(c.encoded);
     }
 
@@ -54,13 +54,13 @@ public class URLPathEncodeTest {
 
     @ParameterizedTest
     @MethodSource("cases")
-    public void encodePathUri(Case c) throws URISyntaxException {
+    void encodePathUri(Case c) throws URISyntaxException {
         assertThat(new URI(null, null, c.in, null).toASCIIString()).isEqualTo(c.pathEncoded);
     }
 
     @ParameterizedTest
     @MethodSource("cases")
-    public void decode(Case c) {
+    void decode(Case c) {
         assertThat(URLPathEncode.decode(c.encoded)).isEqualTo(c.in);
         assertThat(URLPathEncode.decode(c.encodedVariant)).isEqualTo(c.in);
         assertThat(URLPathEncode.decode(c.pathEncoded)).isEqualTo(c.in);
@@ -69,7 +69,7 @@ public class URLPathEncodeTest {
 
 
     @Test
-    public void encode() {
+    void encode() {
 
         assertThat(URLPathEncode.encode("test bla")).isEqualToIgnoringCase("test+bla");
         assertThat(URLPathEncode.encode("test&bla")).isEqualToIgnoringCase("test%26bla");
@@ -78,7 +78,7 @@ public class URLPathEncodeTest {
     }
 
     @Test
-    public void encodePath() {
+    void encodePath() {
         assertThat(URLPathEncode.encodePath("test/bla/1234/jcr:node/@vpro/ /ĥ/")).isEqualToIgnoringCase("test/bla/1234/jcr:node/@vpro/+/%C4%A5/");
 
         assertThat(URLPathEncode.encodePath("s1400</s3000>")).isEqualTo("s1400%3C/s3000%3E");

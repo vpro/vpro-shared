@@ -16,7 +16,7 @@ import nl.vpro.test.opensearch.ElasticsearchContainer;
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class IndexHelper2ContainerTest {
+class IndexHelper2ContainerTest {
     ElasticsearchContainer es = new ElasticsearchContainer(true);
 
 
@@ -38,7 +38,7 @@ public class IndexHelper2ContainerTest {
 
 
     @Test
-    public void mget2() {
+    void mget2() {
         log.info("{}", helper.mgetWithRouting(
                 new IndexHelper.RoutedId("AUTO_WEKKERWAKKER/1104/RBX_MAX_13070966/episodeRef", "AUTO_WEKKERWAKKER"),
                 new IndexHelper.RoutedId("AUTO_WEKKERWAKKER/1096/RBX_MAX_13070914/episodeRe", "AUTO_WEKKERWAKKER")
@@ -48,7 +48,7 @@ public class IndexHelper2ContainerTest {
 
 
     @Test
-    public void mget404() {
+    void mget404() {
         log.info("{}", helper.get("BESTAATNIET"));
     }
 

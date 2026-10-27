@@ -32,7 +32,7 @@ class MBeans2Test {
 
 
     @Test
-    public void multiLine() {
+    void multiLine() {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.info()) {
             String result  = MBeans2.returnMultilineString(log, (logging) -> {
                 capture.associateWithCurrentThread();
@@ -47,7 +47,7 @@ class MBeans2Test {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
 
-    public void multiLineCapture(boolean currentThreadOnly) {
+    void multiLineCapture(boolean currentThreadOnly) {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
 
             String result = MBeans2.returnMultilineString("test",
@@ -71,7 +71,7 @@ class MBeans2Test {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void multiLineCaptureTimeout(boolean currentThreadOnly) throws InterruptedException {
+    void multiLineCaptureTimeout(boolean currentThreadOnly) throws InterruptedException {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
             String result = MBeans2.returnMultilineString("test",
                 Duration.ofMillis(10),

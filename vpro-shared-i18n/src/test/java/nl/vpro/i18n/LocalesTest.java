@@ -20,7 +20,7 @@ import static org.meeuw.i18n.languages.ISO_639.iso639;
 class LocalesTest {
 
     @Test
-    public void ofString() {
+    void ofString() {
         assertThat(Locales.ofString("nl-NL-informal")).isEqualTo(new Locale("nl", "NL", "informal"));
         assertThat(Locales.ofString(null)).isNull();
     }
@@ -28,21 +28,21 @@ class LocalesTest {
 
     @SuppressWarnings("DataFlowIssue")
     @Test
-    public void ofAlpha3() {
+    void ofAlpha3() {
         assertThat(Locales.of(iso639("dut"), RegionService.getInstance().getByCode("NL", Country.class).orElse(null))).isEqualTo(new Locale("nl", "NL"));
 
         assertThat(Locales.of(iso639("afh"), RegionService.getInstance().getByCode("KE", Country.class).orElse(null))).isEqualTo(new Locale("afh", "KE"));
     }
 
     @Test
-    public void getCountryName() {
+    void getCountryName() {
         assertThat(Locales.getCountryName(
             RegionService.getInstance().getByCode("NL", Country.class).orElseThrow(IllegalStateException::new), Locales.of(iso639("nld")))).isEqualTo("Nederland");
     }
 
 
     @Test
-    public void findBestMatchDutch() {
+    void findBestMatchDutch() {
         assertThat(Locales.findBestMatch(DUTCH, Stream.of(
             new Locale("en"),
             new Locale("nl", "BE"),
@@ -53,7 +53,7 @@ class LocalesTest {
 
     @Test
     @Deprecated
-    public void findBestMatchDutchU() {
+    void findBestMatchDutchU() {
          assertThat(Locales.findBestMatch(DUTCH_U, Stream.of(
              new Locale("en"),
              new Locale("nl", "BE"),
@@ -63,7 +63,7 @@ class LocalesTest {
      }
 
     @Test
-    public void findBestMatchFlemish() {
+    void findBestMatchFlemish() {
         assertThat(Locales.findBestMatch(FLEMISH, Stream.of(
             new Locale("en"),
             new Locale("nl", "BE"),
@@ -73,7 +73,7 @@ class LocalesTest {
     }
 
     @Test
-    public void findBestMatchNoMatch() {
+    void findBestMatchNoMatch() {
 
         assertThat(Locales.findBestMatch(new Locale("fr"), Stream.of(
             new Locale("en"),
@@ -93,7 +93,7 @@ class LocalesTest {
     }
 
     @Test
-    public void findBestMatchInformalDutch() {
+    void findBestMatchInformalDutch() {
 
           assertThat(Locales.findBestMatch(new Locale("nl", "NL", "informal"), Stream.of(
             new Locale("en"),
@@ -117,7 +117,7 @@ class LocalesTest {
     }
 
     @Test
-    public void simplify() {
+    void simplify() {
         assertThat(Locales.simplify(null)).isNull();
         assertThat(Locales.simplify(new Locale("nl"))).isEqualTo(new Locale("nl"));
         assertThat(Locales.simplify(new Locale("nl", "BE"))).isEqualTo(new Locale("nl"));
@@ -125,7 +125,7 @@ class LocalesTest {
     }
 
     @Test
-    public void simplifiable() {
+    void simplifiable() {
         assertThat(Locales.simplifyable(null)).isFalse();
         assertThat(Locales.simplifyable(new Locale("nl"))).isFalse();
         assertThat(Locales.simplifyable(new Locale("nl", "BE"))).isTrue();
@@ -135,7 +135,7 @@ class LocalesTest {
     }
 
     @Test
-    public void setDefault() {
+    void setDefault() {
         Locale.setDefault(DUTCH);
         Locales.resetDefault();
         assertThat(Locales.getDefault()).isEqualTo(DUTCH);
@@ -153,7 +153,7 @@ class LocalesTest {
 
 
     @Test
-    public void dutch() {
+    void dutch() {
         assertThat(WeekFields.of(NETHERLANDISH).getFirstDayOfWeek()).isEqualTo(MONDAY);
 
         //FAILS in java >=11
@@ -164,7 +164,7 @@ class LocalesTest {
 
     @Test
     @Deprecated
-    public void dutchU() {
+    void dutchU() {
 
         // this may be used.
         assertThat(WeekFields.of(DUTCH_U).getFirstDayOfWeek()).isEqualTo(MONDAY);
@@ -176,7 +176,7 @@ class LocalesTest {
     }
 
     @Test
-    public void undefined() {
+    void undefined() {
         assertThat(UNDETERMINED.toString()).isEqualTo("und");
     }
 }

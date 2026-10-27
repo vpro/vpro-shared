@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Log4j2
 @ToString
 @Isolated
-public class IntegrationTest {
+class IntegrationTest {
     static TestClock clock = new TestClock();
 
 
@@ -136,7 +136,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void test() {
+    void test() {
         TestEntity test = entityManager.find(TestEntity.class, 1L);
         assertThat(test.getId()).isNotNull();
         assertThat(test.getText()).isEqualTo("Hallo Werelden");
@@ -162,7 +162,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void enumField() {
+    void enumField() {
         var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
@@ -175,7 +175,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void instantField() {
+    void instantField() {
         var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
@@ -192,7 +192,7 @@ public class IntegrationTest {
 
 
     @Test
-    public void size() {
+    void size() {
         var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
@@ -208,7 +208,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void filteredSize() {
+    void filteredSize() {
         var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
@@ -225,7 +225,7 @@ public class IntegrationTest {
 
 
     @Test
-    public void booleanField() {
+    void booleanField() {
         var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)
@@ -242,7 +242,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void jsonProjection() {
+    void jsonProjection() {
         var searchSession = Search.session(entityManager);
         var list = searchSession.search(TestEntity.class)
             .select(MyProjection.class)

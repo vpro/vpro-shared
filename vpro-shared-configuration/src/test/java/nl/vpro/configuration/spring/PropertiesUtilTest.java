@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @Slf4j
-public class PropertiesUtilTest {
+class PropertiesUtilTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -39,14 +39,14 @@ public class PropertiesUtilTest {
 
 
     @Test
-    public void testGetMap() {
+    void getMap() {
         PropertiesUtil properties = applicationContext.getBean(PropertiesUtil.class);
         assertThat(properties.getMap().get("b")).isEqualTo("B");
         assertThat(properties.getMap().get("c")).isEqualTo("A/B/C");
     }
 
     @Test
-    public void testEL() throws UnknownHostException {
+    void el() throws UnknownHostException {
 
         log.info("{} {}", test, system);
         System.setProperty("some.system.property", "foobar");
@@ -67,7 +67,7 @@ public class PropertiesUtilTest {
 
     @SuppressWarnings("deprecation")
     @Test
-    public void defaultSpring() {
+    void defaultSpring() {
 
         log.info("{}", test);
         System.setProperty("some.system.property", "foobar");
@@ -77,7 +77,7 @@ public class PropertiesUtilTest {
     }
 
     @Test
-    public void testSetExposeAsSystemProperty() {
+    void setExposeAsSystemProperty() {
         assertThat(System.getProperty("b")).isEqualTo("B");
         assertThat(System.getProperty("a")).isNull();
         assertThat(System.getProperty("c")).isNull();

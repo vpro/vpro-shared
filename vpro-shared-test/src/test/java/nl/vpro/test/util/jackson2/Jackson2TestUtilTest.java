@@ -31,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  * @since 0.48
  */
 @Log4j2
-public class Jackson2TestUtilTest {
+class Jackson2TestUtilTest {
 
     @SuppressWarnings("FieldMayBeFinal")
     @XmlRootElement
@@ -71,13 +71,13 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void roundTrip() throws Exception {
+    void roundTrip() throws Exception {
         Jackson2TestUtil.roundTrip(new A());
     }
 
 
     @Test
-    public void assertThatTest() {
+    void assertThatTest() {
         JsonNode actual = assertThatJson(new A())
             .isSimilarTo("{'a': 'a'}")
             .actualJson((a) -> {
@@ -91,7 +91,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void assertThatWithRemove() {
+    void assertThatWithRemove() {
         A a = new A();
         a.b = RandomStringUtils.insecure().nextAlphanumeric(10);
         assertThatJson(a)
@@ -104,7 +104,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void removeJsonPointerArray() throws JsonProcessingException {
+    void removeJsonPointerArray() throws JsonProcessingException {
         JsonNode node = Jackson2Mapper.getLenientInstance().readTree("""
               {
                    "user" : null,
@@ -121,7 +121,7 @@ public class Jackson2TestUtilTest {
 
 
     @Test
-    public void assertThatWithIgnoreArrayElement() {
+    void assertThatWithIgnoreArrayElement() {
 
         assertThatJson("""
              {
@@ -148,7 +148,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void assertThatWithRemoveArrayElement() {
+    void assertThatWithRemoveArrayElement() {
 
         assertThatJson("""
              {
@@ -175,7 +175,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void assertThatWithContains() {
+    void assertThatWithContains() {
         A a = new A();
         a.b = null;
         assertFail(() -> {
@@ -198,12 +198,12 @@ public class Jackson2TestUtilTest {
 
 
     @Test
-    public void roundTripAndSimilar() {
+    void roundTripAndSimilar() {
         Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'a'}");
     }
 
     @Test
-    public void roundTripAndSimilarFail() {
+    void roundTripAndSimilarFail() {
         Assertions.assertThrows(AssertionError.class, () ->
             Jackson2TestUtil.roundTripAndSimilar(new A(), "{'a': 'b'}"));
     }
@@ -211,14 +211,14 @@ public class Jackson2TestUtilTest {
 
 
     @Test
-    public void roundTripAndSimilarValueFail() {
+    void roundTripAndSimilarValueFail() {
         Assertions.assertThrows(AssertionError.class, () ->
             Jackson2TestUtil.roundTripAndSimilarValue("a", "\"b\"")
         );
     }
 
     @Test
-    public void testNotunmarshable() {
+    void notunmarshable() {
         assertThatJson(new NotUnmarshable("x"))
             .containsKeys("string")
             .withoutUnmarshalling()
@@ -230,7 +230,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void removePointers() {
+    void removePointers() {
         Jackson2TestUtil.assertThatJson(
                 """
                 {
@@ -249,7 +249,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void removeByJsonPath() {
+    void removeByJsonPath() {
         Configuration config = Configuration.builder()
             .jsonProvider(new JacksonJsonNodeJsonProvider())
             .mappingProvider(new JacksonMappingProvider())
@@ -278,7 +278,7 @@ public class Jackson2TestUtilTest {
     }
 
     @Test
-    public void operate() {
+    void operate() {
         Jackson2TestUtil.assertThatJson(
                 """
                 {
@@ -305,7 +305,7 @@ public class Jackson2TestUtilTest {
 
 
     @Test
-    public void ignorePointers() {
+    void ignorePointers() {
         Jackson2TestUtil.assertThatJson(
                 """
                 {

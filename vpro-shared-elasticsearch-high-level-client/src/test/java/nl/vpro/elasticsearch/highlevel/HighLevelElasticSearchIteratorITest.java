@@ -75,7 +75,7 @@ class HighLevelElasticSearchIteratorITest {
 
 
     @Test
-    public void iterateA() {
+    void iterateA() {
         long count = 0;
         try (HighLevelElasticSearchIterator<A> iterator = HighLevelElasticSearchIterator.<A>builder()
             .client(highLevelClientFactory.highLevelClient())
@@ -107,7 +107,7 @@ class HighLevelElasticSearchIteratorITest {
     }
 
     @Test
-    public void iterateSearchHit() {
+    void iterateSearchHit() {
         long count = 0;
         try (HighLevelElasticSearchIterator<SearchHit> iterator = HighLevelElasticSearchIterator.searchHits(highLevelClientFactory.highLevelClient())) {
             SearchSourceBuilder sourceBuilder = iterator.prepareSearchSource(helper.getIndexName());
@@ -138,7 +138,7 @@ class HighLevelElasticSearchIteratorITest {
     }
 
      @Test
-    public void iterateSources() {
+    void iterateSources() {
         long count = 0;
         try (HighLevelElasticSearchIterator<JsonNode> iterator = HighLevelElasticSearchIterator.sources(highLevelClientFactory.highLevelClient())) {
 
@@ -162,7 +162,7 @@ class HighLevelElasticSearchIteratorITest {
     }
 
     @Test
-    public void iterateString() {
+    void iterateString() {
         long count = 0;
         try (HighLevelElasticSearchIterator<String> iterator = HighLevelElasticSearchIterator.<String>builder()
             .client(highLevelClientFactory.highLevelClient())
@@ -192,7 +192,7 @@ class HighLevelElasticSearchIteratorITest {
     }
 
     @Test
-    public void findNothing() {
+    void findNothing() {
         long count = 0;
         try (HighLevelElasticSearchIterator<String> iterator = HighLevelElasticSearchIterator.<String>builder()
             .client(highLevelClientFactory.highLevelClient())
@@ -214,7 +214,7 @@ class HighLevelElasticSearchIteratorITest {
     }
 
     @Test
-    public void illegalConstructions()  {
+    void illegalConstructions()  {
         assertThatThrownBy(() -> HighLevelElasticSearchIterator.<String>builder()
             .client(highLevelClientFactory.highLevelClient())
             .scrollContext(Duration.ofMillis(-100)).build()).isInstanceOf(IllegalArgumentException.class);

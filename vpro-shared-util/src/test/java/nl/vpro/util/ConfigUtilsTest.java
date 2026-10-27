@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 1.75
  */
 @Slf4j
-public class ConfigUtilsTest {
+class ConfigUtilsTest {
 
 
     public enum E {
@@ -94,7 +94,7 @@ public class ConfigUtilsTest {
     }
 
     @Test
-    public void testFilteredANull() {
+    void filteredANull() {
         assertThat(ConfigUtils.filtered(null, properties).get("a")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(null, properties).get("a.test")).isNull();
         assertThat(ConfigUtils.filtered(null, properties).get("a.prod")).isNull();
@@ -102,56 +102,56 @@ public class ConfigUtilsTest {
     }
 
     @Test
-    public void testFilteredATest() {
+    void filteredATest() {
         assertThat(ConfigUtils.filtered(TEST, properties).get("a")).isEqualTo("2");
         assertThat(ConfigUtils.filtered(TEST, properties).get("a.test")).isNull();
         assertThat(ConfigUtils.filtered(TEST, properties).get("a.prod")).isNull();
     }
 
     @Test
-    public void testFilteredAProd() {
+    void filteredAProd() {
         assertThat(ConfigUtils.filtered(PROD, properties).get("a")).isEqualTo("3");
         assertThat(ConfigUtils.filtered(PROD, properties).get("a.test")).isNull();
         assertThat(ConfigUtils.filtered(PROD, properties).get("a.prod")).isNull();
     }
 
     @Test
-    public void testFilteredBNull() {
+    void filteredBNull() {
         assertThat(ConfigUtils.filtered(null, properties).get("b")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(null, properties).get("b.test")).isNull();
         assertThat(ConfigUtils.filtered(null, properties).get("b.prod")).isNull();
     }
 
     @Test
-    public void testFilteredBTest() {
+    void filteredBTest() {
         assertThat(ConfigUtils.filtered(TEST, properties).get("b")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(TEST, properties).get("b.test")).isNull();
         assertThat(ConfigUtils.filtered(TEST, properties).get("b.prod")).isNull();
     }
 
     @Test
-    public void testFilteredBProd() {
+    void filteredBProd() {
         assertThat(ConfigUtils.filtered(PROD, properties).get("b")).isEqualTo("2");
         assertThat(ConfigUtils.filtered(PROD, properties).get("b.test")).isNull();
         assertThat(ConfigUtils.filtered(PROD, properties).get("b.prod")).isNull();
     }
 
     @Test
-    public void testFilteredCNull() {
+    void filteredCNull() {
         assertThat(ConfigUtils.filtered(null, properties).get("c")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(null, properties).get("c.test")).isNull();
         assertThat(ConfigUtils.filtered(null, properties).get("c.prod")).isNull();
     }
 
     @Test
-    public void testFilteredCTest() {
+    void filteredCTest() {
         assertThat(ConfigUtils.filtered(TEST, properties).get("c")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(TEST, properties).get("c.test")).isNull();
         assertThat(ConfigUtils.filtered(TEST, properties).get("c.prod")).isNull();
     }
 
     @Test
-    public void testFilteredCProd() {
+    void filteredCProd() {
         assertThat(ConfigUtils.filtered(PROD, properties).get("c")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(PROD, properties).get("c.test")).isNull();
         assertThat(ConfigUtils.filtered(PROD, properties).get("c.prod")).isNull();
@@ -159,24 +159,24 @@ public class ConfigUtilsTest {
 
 
     @Test
-    public void testFilteredWitPrefixA() {
+    void filteredWitPrefixA() {
         assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("a")).isEqualTo("3");
     }
 
     @Test
-    public void testFilteredWitPrefixB() {
+    void filteredWitPrefixB() {
         assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("b")).isEqualTo("2");
     }
 
     @Test
-    public void testFilteredWitPrefixC() {
+    void filteredWitPrefixC() {
         assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("c")).isEqualTo("1");
         assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("c.test")).isNull();
         assertThat(ConfigUtils.filtered(PROD, "abc", propertiesWithPrefix).get("c.prod")).isNull();
     }
 
     @Test
-    public void testConfigured() {
+    void configured() {
         AWithSetters a = new AWithSetters();
         ConfigUtils.configured(Env.PROD, a, properties);
         assertThat(a.a).isEqualTo("3");
@@ -185,7 +185,7 @@ public class ConfigUtilsTest {
 
 
     @Test
-    public void testConfiguredWithoutSetter() {
+    void configuredWithoutSetter() {
         AWithOutSetters a = new AWithOutSetters();
         ConfigUtils.configured(Env.PROD, a, properties);
         assertThat(a.a).isEqualTo("3");
@@ -194,7 +194,7 @@ public class ConfigUtilsTest {
 
 
     @Test
-    public void testConfiguredWithFile() {
+    void configuredWithFile() {
         AWithSetters a = new AWithSetters();
         ConfigUtils.configured(Env.PROD, a, "classpath:/reflectionutilstest.properties");
         assertThat(a.a).isEqualTo("3");
@@ -202,7 +202,7 @@ public class ConfigUtilsTest {
     }
 
     @Test
-    public void testConfiguredWithLombok() {
+    void configuredWithLombok() {
         AWithLombok a = ConfigUtils.configured(Env.PROD, AWithLombok.class, properties);
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
@@ -211,21 +211,21 @@ public class ConfigUtilsTest {
 
 
     @Test
-    public void testConfiguredWithLombokAndFile() {
+    void configuredWithLombokAndFile() {
         AWithLombok a = ConfigUtils.configured(Env.PROD, AWithLombok.class, "classpath:/reflectionutilstest.properties");
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
     }
 
     @Test
-    public void testConfiguredWithConstructor() {
+    void configuredWithConstructor() {
         AWithSetters a = ConfigUtils.configured(Env.PROD, AWithSetters.class, properties);
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);
     }
 
     @Test
-    public void testConfiguredWithConstructorAndDefaultEnv() {
+    void configuredWithConstructorAndDefaultEnv() {
         AWithSetters a = ConfigUtils.configured(AWithSetters.class, properties);
         assertThat(a.a).isEqualTo("2");
         assertThat(a.b).isEqualTo(1);
@@ -233,7 +233,7 @@ public class ConfigUtilsTest {
 
 
     @Test
-    public void testConfiguredWithLomokAndFileAndDefaultEnv() {
+    void configuredWithLomokAndFileAndDefaultEnv() {
         AWithLombok a = ConfigUtils.configured(AWithLombok.class, "classpath:/reflectionutilstest.properties");
         assertThat(a.a).isEqualTo("3");
         assertThat(a.b).isEqualTo(2);

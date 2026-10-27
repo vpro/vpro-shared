@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Isolated
 @Execution(SAME_THREAD)
 @TestMethodOrder(MethodOrderer.Random.class)
-public class FileCachingInputStreamTest {
+class FileCachingInputStreamTest {
     private static final int SEED = new Random().nextInt();
     //private static final int SEED = -118023437; // gave some troubles
 
@@ -87,7 +87,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest(name = "{displayName} {arguments}")
     @ValueSource(booleans = {true, false})
-    public void slowProduceAndIOUtils(boolean downloadFirst) throws IOException {
+    void slowProduceAndIOUtils(boolean downloadFirst) throws IOException {
 
         try(FileCachingInputStream inputStream =  slowReader(downloadFirst);
             ByteArrayOutputStream out = new ByteArrayOutputStream()
@@ -103,7 +103,7 @@ public class FileCachingInputStreamTest {
      */
     @ParameterizedTest(name = "{displayName}  downloadFirst: {arguments}")
     @ValueSource(booleans = {true, false})
-    public void testSlowProduce(boolean downloadFirst) throws IOException {
+    void slowProduce(boolean downloadFirst) throws IOException {
 
         try(FileCachingInputStream inputStream = slowReader(downloadFirst)) {
 
@@ -125,7 +125,7 @@ public class FileCachingInputStreamTest {
      */
     @SuppressWarnings("BusyWait")
     @Test
-    public void slowConsume() throws IOException, InterruptedException {
+    void slowConsume() throws IOException, InterruptedException {
 
         log.info("Size: {}", SIZE_OF_HUGE_STREAM);
         try(FileCachingInputStream inputStream = FileCachingInputStream
@@ -160,7 +160,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void readFileGetsBroken()  {
+    void readFileGetsBroken()  {
         assertThatThrownBy(() -> {
             try (
                 FileCachingInputStream inputStream = FileCachingInputStream
@@ -202,7 +202,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void ofTempFile() throws IOException {
+    void ofTempFile() throws IOException {
         File file = Files.createTempFile("filecaching", "test").toFile();
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
@@ -223,7 +223,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void resetRewindsCachedFile() throws IOException {
+    void resetRewindsCachedFile() throws IOException {
         try (FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .input(new ByteArrayInputStream(MANY_BYTES))
             .initialBuffer(0)
@@ -277,7 +277,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest(name = "{displayName} {arguments}")
     @MethodSource("slowAndNormal")
-    public void readFileGetsInterrupted(String description, InputStream input, Long expectedCount) throws IOException {
+    void readFileGetsInterrupted(String description, InputStream input, Long expectedCount) throws IOException {
         final Thread thisThread = Thread.currentThread();
 
         final AtomicLong interrupted = new AtomicLong(0);
@@ -350,7 +350,7 @@ public class FileCachingInputStreamTest {
     }
 
     @RepeatedTest(value = 100, name = "{displayName} {currentRepetition}")
-    public void readAutoStart(RepetitionInfo repetitionInfo) throws IOException {
+    void readAutoStart(RepetitionInfo repetitionInfo) throws IOException {
 
         final List<String> logs = new CopyOnWriteArrayList<>();
         final String expected = "[batch consumes " + MANY_BYTES.length + ", then apply " + MANY_BYTES.length + ", then apply again " + MANY_BYTES.length +"]";
@@ -395,7 +395,7 @@ public class FileCachingInputStreamTest {
 
 
     @Test
-    public void readLargeBuffer() throws IOException {
+    void readLargeBuffer() throws IOException {
 
         assertThat(FileCachingInputStream.DEFAULT_INITIAL_BUFFER_SIZE).isGreaterThan(MANY_BYTES.length);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -428,7 +428,7 @@ public class FileCachingInputStreamTest {
 
 
     @RepeatedTest(value = 5, name = "{displayName} {currentRepetition}")
-    public void simple() throws IOException {
+    void simple() throws IOException {
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -450,7 +450,7 @@ public class FileCachingInputStreamTest {
 
     @ParameterizedTest(name = "{displayName} {arguments}")
     @ValueSource(booleans = {true, false})
-    public void tempFile(boolean deleteTempFile) throws IOException {
+    void tempFile(boolean deleteTempFile) throws IOException {
         FileCachingInputStream inputStream = FileCachingInputStream.builder()
             .outputBuffer(2)
             .batchSize(3)
@@ -480,7 +480,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void noAutostart() throws IOException {
+    void noAutostart() throws IOException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -500,7 +500,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void withLargeBuffer() throws IOException {
+    void withLargeBuffer() throws IOException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -520,7 +520,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void withLargeBufferByte() throws IOException {
+    void withLargeBufferByte() throws IOException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -540,7 +540,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void withBufferEdge() throws IOException {
+    void withBufferEdge() throws IOException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -561,7 +561,7 @@ public class FileCachingInputStreamTest {
 
     @SuppressWarnings("BusyWait")
     @Test
-    public void slowInput() throws IOException {
+    void slowInput() throws IOException {
         PipedInputStream pipedInputStream = new PipedInputStream();
         PipedOutputStream outputStream = new PipedOutputStream(pipedInputStream);
         new Thread(() -> {
@@ -600,7 +600,7 @@ public class FileCachingInputStreamTest {
 
 
     @Test
-    public void waitForBytes() throws IOException, InterruptedException {
+    void waitForBytes() throws IOException, InterruptedException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
@@ -625,7 +625,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void waitForBytesOnZeroBytes() throws IOException, InterruptedException {
+    void waitForBytesOnZeroBytes() throws IOException, InterruptedException {
         try (
             FileCachingInputStream inputStream = FileCachingInputStream.builder()
                 .outputBuffer(2)
@@ -647,7 +647,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void ioExceptionFromSourceReadBytes() throws IOException {
+    void ioExceptionFromSourceReadBytes() throws IOException {
         try (
             // an input stream that  will throw IOException when it's busy with file buffering
             InputStream in = new InputStream() {
@@ -699,7 +699,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void ioExceptionFromSourceReadByte() throws IOException {
+    void ioExceptionFromSourceReadByte() throws IOException {
         try (
             // an input stream that  will throw IOException when it's busy with file buffering
             InputStream in = new InputStream() {
@@ -736,7 +736,7 @@ public class FileCachingInputStreamTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void createPath() throws IOException {
+    void createPath() throws IOException {
         new File(System.getProperty("java.io.tmpdir"), "bestaatniet").delete();
         try (FileCachingInputStream ignored = FileCachingInputStream.builder()
             .outputBuffer(2)
@@ -756,7 +756,7 @@ public class FileCachingInputStreamTest {
      */
     @SuppressWarnings("UnusedAssignment")
     @Test
-    public void performanceBenchmarkAndVerify() throws IOException {
+    void performanceBenchmarkAndVerify() throws IOException {
         log.info("Using seed {}", SEED);
         final int bufferSize = 8192;
 
@@ -803,7 +803,7 @@ public class FileCachingInputStreamTest {
     }
 
     @Test
-    public void performanceBenchmarkAndVerifyIOUtils() throws IOException {
+    void performanceBenchmarkAndVerifyIOUtils() throws IOException {
 
         log.info("Using seed {}", SEED);
         final int bufferSize = 8192;

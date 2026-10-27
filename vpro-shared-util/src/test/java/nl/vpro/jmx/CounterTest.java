@@ -12,11 +12,11 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.66
  */
-public class CounterTest {
+class CounterTest {
 
 
     @Test
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         TestClock clock = new  TestClock();
         Counter counter = Counter.builder()
             .bucketCount(10)
@@ -37,7 +37,7 @@ public class CounterTest {
 
 
     @Test
-    public void testMultipleDuration() throws InterruptedException {
+    void multipleDuration() throws InterruptedException {
         Counter counter = Counter.builder()
             .bucketCount(10)
             .countWindow(Duration.ofSeconds(10))

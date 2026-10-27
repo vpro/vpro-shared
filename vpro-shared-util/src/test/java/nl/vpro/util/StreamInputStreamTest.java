@@ -13,7 +13,7 @@ class StreamInputStreamTest {
 
 
     @Test
-    public void test() throws IOException {
+    void test() throws IOException {
         try (StreamInputStream<String, IOException> stream = new StreamInputStream<>(Stream.of("Hello", " ", "world!"), (s) -> s.getBytes(UTF_8))) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             IOUtils.copy(stream, out);

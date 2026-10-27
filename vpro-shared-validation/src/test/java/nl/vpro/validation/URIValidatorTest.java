@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since ...
  */
 @Slf4j
-public class URIValidatorTest {
+class URIValidatorTest {
 
     public static class A {
         @URI(mustHaveScheme = true, minHostParts = 3)
@@ -58,7 +58,7 @@ public class URIValidatorTest {
     Validator validator = factory.getValidator();
 
     @Test
-    public void invalidUrl() {
+    void invalidUrl() {
         A a = new A("http://www.spunk.nl/article/6127/waarom-praten-we-over-sletvrees?fb_action_ids=10202483411149472%2C10202477465200827%2C10202476551657989&fb_action_types=og.likes&fb_source=other_multiline&action_object_map={%2210202483411149472%22%3A513557392073931%2C%2210202477465200827%22%3A734595553235765%2C%2210202476551657989%22%3A537543956332495}&action_type_map={%2210202483411149472%22%3A%22og.likes%22%2C%2210202477465200827%22%3A%22og.likes%22%2C%2210202476551657989%22%3A%22og.likes%22}&action_ref_map=[]");
 
 
@@ -67,21 +67,21 @@ public class URIValidatorTest {
 
 
     @Test
-    public void invalidUrlLenient() {
+    void invalidUrlLenient() {
         Lenient a = new Lenient("http://www.spunk.nl/article/6127/waarom-praten-we-over-sletvrees?fb_action_ids=10202483411149472%2C10202477465200827%2C10202476551657989&fb_action_types=og.likes&fb_source=other_multiline&action_object_map={%2210202483411149472%22%3A513557392073931%2C%2210202477465200827%22%3A734595553235765%2C%2210202476551657989%22%3A537543956332495}&action_type_map={%2210202483411149472%22%3A%22og.likes%22%2C%2210202477465200827%22%3A%22og.likes%22%2C%2210202476551657989%22%3A%22og.likes%22}&action_ref_map=[]");
 
         assertThat(validator.validate(a)).isEmpty();
     }
 
     @Test
-    public void withoutScheme() {
+    void withoutScheme() {
         assertThat(validator.validate(new A("//www.vpro.nl"))).hasSize(1);
 
         assertThat(validator.validate(new Lenient("//www.vpro.nl"))).hasSize(0);
     }
 
     @Test
-    public void minHostParts() {
+    void minHostParts() {
         assertThat(validator.validate(new A("http://vpro.nl"))).hasSize(1);
 
         assertThat(validator.validate(new Lenient("http://vpro.nl?{}"))).hasSize(1);
@@ -89,7 +89,7 @@ public class URIValidatorTest {
     }
 
     @Test
-    public void noHost() throws URISyntaxException {
+    void noHost() throws URISyntaxException {
         java.net.URI uri = new java.net.URI(null, null, "path", null);
         String url = uri.toString();
         log.info("{}", url);
@@ -100,7 +100,7 @@ public class URIValidatorTest {
     }
 
     @Test
-    public void emptyString() {
+    void emptyString() {
         A a1 = new A("");
         A a2 = new A(null);
 
@@ -123,7 +123,7 @@ public class URIValidatorTest {
         """
     )
     // 'Ik had ook nog een andere vraag. MMI heeft een POMS error onderschept en zij trekken daar de conclusie uit dat POMS de URL niet accepteert vanwege de backets [ ] in de file name. Klopt deze aanname?'
-    public void validInvalid(String uri, boolean valid, boolean lenientlyValid) {
+    void validInvalid(String uri, boolean valid, boolean lenientlyValid) {
         A astrict = new A(uri);
         assertThat(validator.validate(astrict)).hasSize(valid ? 0 : 1);
 
@@ -143,7 +143,7 @@ public class URIValidatorTest {
         //data.beeldengeluid.nl/gtaa/1234, false
         """
     )
-    public void gtaa(String uri, boolean valid) throws NoSuchFieldException {
+    void gtaa(String uri, boolean valid) throws NoSuchFieldException {
 
         Gtaa a1 = new Gtaa(uri);
         assertThat(validator.validate(a1)).hasSize(valid ? 0 : 1);

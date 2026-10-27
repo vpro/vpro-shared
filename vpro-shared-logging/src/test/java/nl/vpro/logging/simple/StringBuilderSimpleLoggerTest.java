@@ -11,10 +11,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.77
  */
-public class StringBuilderSimpleLoggerTest {
+class StringBuilderSimpleLoggerTest {
 
     @Test
-    public void test() {
+    void test() {
         StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
         logger.info("x:{}", "y", new Exception());
         assertThat(logger.getStringBuilder().toString()).startsWith("INFO x:y\n" +
@@ -22,7 +22,7 @@ public class StringBuilderSimpleLoggerTest {
     }
 
     @Test
-    public void test2() {
+    void test2() {
         StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
         Map<String, Object> map = new HashMap<>();
         map.put("foo", 1);
@@ -33,7 +33,7 @@ public class StringBuilderSimpleLoggerTest {
 
 
     @Test
-    public void testTruncate() {
+    void truncate() {
         StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
             .builder()
             .maxLength(4L)
@@ -58,7 +58,7 @@ public class StringBuilderSimpleLoggerTest {
     }
 
     @Test
-    public void testFormat() {
+    void format() {
         StringBuilderSimpleLogger logger = StringBuilderSimpleLogger
             .builder()
             .maxLength(4L)

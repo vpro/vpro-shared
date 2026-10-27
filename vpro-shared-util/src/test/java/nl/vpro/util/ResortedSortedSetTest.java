@@ -11,11 +11,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Michiel Meeuwissen
  * @since 2.1
  */
-public class ResortedSortedSetTest {
+class ResortedSortedSetTest {
 
 
     @Test
-    public void test() {
+    void test() {
 
         Collection<String> test = new ArrayList<>();
         test.addAll(Arrays.asList("b", "a"));
@@ -41,7 +41,7 @@ public class ResortedSortedSetTest {
 
 
     @Test
-    public void testAdd() {
+    void add() {
         Collection<String> test = new ArrayList<>();
         test.addAll(Arrays.asList("b", "a"));
 
@@ -54,7 +54,7 @@ public class ResortedSortedSetTest {
     }
 
     @Test
-    public void testRemove() {
+    void testRemove() {
         Collection<String> test = new ArrayList<>();
         test.addAll(Arrays.asList("b", "a"));
 
@@ -67,7 +67,7 @@ public class ResortedSortedSetTest {
     }
 
     @Test
-    public void testIteratorRemove() {
+    void iteratorRemove() {
         Collection<String> test = new ArrayList<>();
         test.addAll(Arrays.asList("b", "a"));
 

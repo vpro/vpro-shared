@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 1.55
  */
 @Log4j2
-public abstract class JpaTest {
+abstract class JpaTest {
 
     @Inject
     protected DRepository repository;
@@ -43,7 +43,7 @@ public abstract class JpaTest {
     }
 
     @Test
-    protected void testRepository() {
+    protected void repository() {
         D d = new D();
         d.setUuidField(UUID.randomUUID());
         d.setUuidField(UUID.randomUUID());

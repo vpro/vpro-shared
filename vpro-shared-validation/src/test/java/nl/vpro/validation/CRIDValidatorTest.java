@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Michiel Meeuwissen
  * @since 2.3
  */
-public class CRIDValidatorTest {
+class CRIDValidatorTest {
     @Test
-    public void testIsValid() {
+    void isValid() {
         CRIDValidator validator = new CRIDValidator();
         assertFalse(validator.isValid("http://bla/bla", null));
         assertFalse(validator.isValid("crid://test", null));

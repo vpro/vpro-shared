@@ -18,46 +18,46 @@ class OrderedPropertiesTest {
     }
 
     @Test
-    public void string() {
+    void string() {
         assertThat(properties.toString()).isEqualTo("{x=X, y=Y, z=Z, a=A}");
     }
 
     @Test
-    public void keys() {
+    void keys() {
         assertThat(Collections.list(properties.keys())).containsExactly("x", "y", "z", "a");
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void propertyNames() {
+    void propertyNames() {
         assertThat((Collection<Object>) Collections.list(properties.propertyNames())).containsExactly("x", "y", "z", "a");
     }
 
     @Test
-    public void values() {
+    void values() {
         assertThat(properties.values()).containsExactly("X", "Y", "Z", "A");
     }
 
     @Test
-    public void keySet() {
+    void keySet() {
         assertThat(properties.keySet()).containsExactly("x", "y", "z", "a");
     }
 
     @Test
-    public void forEach() {
+    void forEach() {
         StringBuilder builder = new StringBuilder();
         properties.forEach((k, v) -> builder.append(k).append("=").append(v).append("\n"));
         assertThat(builder.toString()).isEqualTo("x=X\ny=Y\nz=Z\na=A\n");
     }
 
     @Test
-    public void remove() {
+    void remove() {
         properties.remove("y");
         assertThat(properties.toString()).isEqualTo("{x=X, z=Z, a=A}");
     }
 
     @Test
-    public void reput() {
+    void reput() {
         properties.put("y", "YY");
         assertThat(properties.toString()).isEqualTo("{x=X, z=Z, a=A, y=YY}");
     }

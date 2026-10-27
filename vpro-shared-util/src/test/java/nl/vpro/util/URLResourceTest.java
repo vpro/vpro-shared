@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
  */
 @Slf4j
 @WireMockTest
-public class URLResourceTest {
+class URLResourceTest {
 
     @BeforeEach
     public  void init() throws IOException {
@@ -60,7 +60,7 @@ public class URLResourceTest {
 
 
     @Test
-    public void broadcasters(WireMockRuntimeInfo info) throws InterruptedException {
+    void broadcasters(WireMockRuntimeInfo info) throws InterruptedException {
 
         URLResource<Properties> broadcasters =
             URLResource.properties(URI.create(info.getHttpBaseUrl() + "/broadcasters"));
@@ -100,7 +100,7 @@ public class URLResourceTest {
     }
 
     @Test
-    public void broadcastersRedirect(WireMockRuntimeInfo runtimeInfo) {
+    void broadcastersRedirect(WireMockRuntimeInfo runtimeInfo) {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create(runtimeInfo.getHttpBaseUrl() + "/redirect"));
 
         assertFalse(broadcasters.get().isEmpty());
@@ -109,7 +109,7 @@ public class URLResourceTest {
 
 
     @Test
-    public void broadcastersFromClassPath() throws InterruptedException {
+    void broadcastersFromClassPath() throws InterruptedException {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create("classpath:/broadcasters.properties"));
         broadcasters.setMinAge(Duration.ofMillis(100));
         assertFalse(broadcasters.get().isEmpty());
@@ -131,7 +131,7 @@ public class URLResourceTest {
 
 
     @Test
-    public void broadcastersFromClassPathMap() {
+    void broadcastersFromClassPathMap() {
         URLResource<Map<String, String>> broadcasters = URLResource.map(URI.create("classpath:/broadcasters.properties"));
         assertFalse(broadcasters.get().isEmpty());
         assertThat(broadcasters.getNotCheckedCount()).isEqualTo(0);
@@ -140,7 +140,7 @@ public class URLResourceTest {
     }
 
     @Test
-    public void broadcasters503() throws IOException {
+    void broadcasters503() throws IOException {
         HttpURLConnection connection = mock(HttpURLConnection.class);
         when(connection.getResponseCode()).thenReturn(503, 200, 500, 200);
         when(connection.getInputStream()).thenAnswer(invocation -> new ByteArrayInputStream("VPRO=VPRO".getBytes()));
@@ -182,7 +182,7 @@ public class URLResourceTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "-acc", "-test"})
     @Disabled("This connect to real server")
-    public void broadcastersReal(String env) {
+    void broadcastersReal(String env) {
         URLResource<Properties> broadcasters = URLResource.properties(URI.create(String.format("https://poms%s.omroep.nl/broadcasters/", env)));
         broadcasters.setMinAge(Duration.ZERO);
         Properties properties = broadcasters.get();

@@ -14,13 +14,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Michiel Meeuwissen
  * @since 4.3
  */
-public class JsonBridgeTest {
+class JsonBridgeTest {
 
     /* 100 chars */
     private static final String LONG_STRING = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 
     @Test
-    public void testObjectToString() {
+    void objectToString() {
         String string = "[{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/320x180_180.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/640x360_1000.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/854x480_1500.m4v\"}]\n"
             ;
 
@@ -35,7 +35,7 @@ public class JsonBridgeTest {
 
 
     @Test
-    public void testObjectToStringWithDuration() {
+    void objectToStringWithDuration() {
         String string = "[{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/320x180_180.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/640x360_1000.m4v\"},{\"programUrl\":\"http://content.omroep.nl/avrotros/transcoding/communicatie/1422371188061/854x480_1500.m4v\"}]\n";
 
         try (JsonBridge<LocationWithDurationField[]> bridge = new JsonBridge<>(LocationWithDurationField[].class)) {
@@ -48,7 +48,7 @@ public class JsonBridgeTest {
     }
 
     @Test
-    public void testTooLargeArray() {
+    void tooLargeArray() {
         /* Array with 1000 elements each 100 chars long, cannot serialize to JSON to store in Lucene, use shorter version */
         String[] array = new String[1000];
         Arrays.fill(array, LONG_STRING);
@@ -62,7 +62,7 @@ public class JsonBridgeTest {
     }
 
     @Test
-    public void testOKArray100() {
+    void okArray100() {
         /* Array with 100 elements each 100 chars long, can serialize to JSON to store in Lucene */
         String[] array = new String[100];
         Arrays.fill(array, LONG_STRING);
@@ -75,7 +75,7 @@ public class JsonBridgeTest {
     }
 
     @Test
-    public void testOKArray1() {
+    void okArray1() {
         /* Array with 1 element of  100 chars long, can serialize to JSON to store in Lucene */
         try (JsonBridge<String[]> bridge = new JsonBridge<>(String[].class)) {
             String ret = bridge.toIndexedValue(new String[]{LONG_STRING}, null);
@@ -85,7 +85,7 @@ public class JsonBridgeTest {
     }
 
     @Test
-    public void testTooLargeObject() {
+    void tooLargeObject() {
         /* Single object 100 * 1000 chars long which is too long to serialize to JSON to store in Lucene */
         StringBuilder buf = new StringBuilder();
         buf.repeat(LONG_STRING, 1000);
@@ -97,7 +97,7 @@ public class JsonBridgeTest {
     }
 
     @Test
-    public void testTooLargeArray1() {
+    void tooLargeArray1() {
         /* Array with single object 100 * 1000 chars long which is too long to serialize to JSON to store in Lucene */
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < 1000; i++) {

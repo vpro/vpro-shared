@@ -15,10 +15,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SwaggerFilterTest {
+class SwaggerFilterTest {
 
     @Test
-    public void testFilter() throws IOException {
+    void filter() throws IOException {
         String input = """
             {
               "openapi": "3.0.1",

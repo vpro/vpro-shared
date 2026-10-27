@@ -19,7 +19,7 @@ import nl.vpro.jackson3.Jackson3Mapper;
 
 @Log4j2
 @Disabled
-public class IndexHelperITest {
+class IndexHelperITest {
     HttpHost host = HttpHost.create("https://vpc-vproapi-elasticsearch-test-vltgued6xifxoe534422g642ty.eu-central-1.es.amazonaws.com:9240");
 
     String userName = "elasticsearch";
@@ -69,7 +69,7 @@ public class IndexHelperITest {
     }
 
     @Test
-    public void index() {
+    void index() {
 
         JsonNode node = Jackson3Mapper.getLenientInstance().readerFor(JsonNode.class).readValue(example);
 
@@ -84,7 +84,7 @@ public class IndexHelperITest {
 
 
      @Test
-    public void index2() throws IOException {
+    void index2() throws IOException {
 
 
          RestClient client = RestClient

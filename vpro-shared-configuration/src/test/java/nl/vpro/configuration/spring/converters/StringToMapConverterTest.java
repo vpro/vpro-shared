@@ -11,7 +11,7 @@ class StringToMapConverterTest {
     StringToMapConverter converter = new StringToMapConverter();
 
     @Test
-    public void testEmpty() {
+    void empty() {
         assertThat(converter.convert("")).isEmpty();
         assertThat(converter.convert(null)).isEmpty();
         assertThat(converter.convert(" \n ")).isEmpty();
@@ -19,7 +19,7 @@ class StringToMapConverterTest {
 
 
     @Test
-    public void testSimple() {
+    void simple() {
         assertThat(converter.convert("a=b,c=d")).isEqualTo(Map.of("a", "b", "c", "d"));
     }
 

@@ -13,7 +13,7 @@ class HealthTest {
 
 
     @Test
-    public void json() {
+    void json() {
         Health health = new Health(
             200,
             "ok",

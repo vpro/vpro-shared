@@ -54,7 +54,7 @@ class InputStreamChunkTest {
 
     @ParameterizedTest
     @MethodSource("testers")
-    public void test(org.meeuw.functional.ThrowingFunction<InputStreamChunk, byte[], IOException> tester) throws IOException {
+    void test(org.meeuw.functional.ThrowingFunction<InputStreamChunk, byte[], IOException> tester) throws IOException {
         RandomStream stream = new RandomStream(0, 2_000_123);
         {
             InputStreamChunk chunk = new InputStreamChunk(1_000_000, stream);
@@ -85,7 +85,7 @@ class InputStreamChunkTest {
 
 
     @Test
-    public void test() throws IOException {
+    void test() throws IOException {
         byte[] bytes = new byte[]{ 1 ,2, 3, 4, 5, 6, 7, 8, 9, 10};
         InputStream wrapped = new ByteArrayInputStream(bytes);
         InputStreamChunk chunk1 = new InputStreamChunk(3, wrapped);

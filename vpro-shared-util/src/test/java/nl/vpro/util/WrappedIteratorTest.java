@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
-public class WrappedIteratorTest {
+class WrappedIteratorTest {
 
     @Test
-    public void test() {
+    void test() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", null, "d"));
         WrappedIterator<String, String> wrapped = new WrappedIterator<String, String>(list.iterator()) {
 

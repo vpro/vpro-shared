@@ -40,14 +40,14 @@ class HttpConnectionUtilsTest {
 
 
     @Test
-    public void ok(WireMockRuntimeInfo info) {
+    void ok(WireMockRuntimeInfo info) {
 
         assertThat(HttpConnectionUtils.getByteSize(info.getHttpBaseUrl() + "/ok")).isEqualTo(54321L);
 
     }
 
     @Test
-    public void legallyDenied(WireMockRuntimeInfo info) {
+    void legallyDenied(WireMockRuntimeInfo info) {
 
         assertThat(HttpConnectionUtils.getByteSize(info.getHttpBaseUrl() + "/legal")).isNull();
 
@@ -63,7 +63,7 @@ class HttpConnectionUtilsTest {
 
 
     @Test
-    public void error(WireMockRuntimeInfo info) {
+    void error(WireMockRuntimeInfo info) {
 
         assertThat(HttpConnectionUtils.getOptionalByteSize(info.getHttpBaseUrl() + "/error")).isEmpty();
 
@@ -79,7 +79,7 @@ class HttpConnectionUtilsTest {
 
     @Test
     @Disabled("wip")
-    public void goaway(WireMockRuntimeInfo info) {
+    void goaway(WireMockRuntimeInfo info) {
 
         assertThat(HttpConnectionUtils.getOptionalByteSize(info.getHttpBaseUrl() + "/goaway")).isEmpty();
 
@@ -95,13 +95,13 @@ class HttpConnectionUtilsTest {
 
 
     @Test
-    public void connection(WireMockRuntimeInfo info) {
+    void connection(WireMockRuntimeInfo info) {
         assertThat(HttpConnectionUtils.getByteSize("http://localhost:9999")).isNull();
     }
 
 
     @Test
-    public void protocol(WireMockRuntimeInfo info) {
+    void protocol(WireMockRuntimeInfo info) {
         assertThat(HttpConnectionUtils.getByteSize("mailto:foo@mail.com")).isNull();
     }
 

@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.3
  */
-public class LenientBooleanDeserializerTest {
+class LenientBooleanDeserializerTest {
 
     public static class A {
         @JsonDeserialize(using = LenientBooleanDeserializer.class)
@@ -27,7 +27,7 @@ public class LenientBooleanDeserializerTest {
     JsonMapper mapper = new JsonMapper();
 
     @Test
-    public void deserialize() throws IOException {
+    void deserialize() throws IOException {
 
         assertThat(mapper.readValue("{\"bool\": 1}", A.class).bool).isTrue();
         assertThat(mapper.readValue("{\"bool\": true}", A.class).bool).isTrue();
@@ -40,7 +40,7 @@ public class LenientBooleanDeserializerTest {
     }
 
     @Test
-    public void deserializeNull() throws IOException {
+    void deserializeNull() throws IOException {
         JsonMapper mapper = new JsonMapper();
         assertThat(mapper.readValue("{\"bool\": null}", A.class).bool).isNull();
         assertThat(mapper.readValue("{\"bool\": null}", A.class).b).isFalse();

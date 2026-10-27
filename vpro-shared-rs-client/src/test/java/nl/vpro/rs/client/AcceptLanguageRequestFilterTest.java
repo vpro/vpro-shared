@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
  * @author Michiel Meeuwissen
  * @since 1.69
  */
-public class AcceptLanguageRequestFilterTest {
+class AcceptLanguageRequestFilterTest {
     AcceptLanguageRequestFilter instance = new AcceptLanguageRequestFilter(Locale.ENGLISH, new Locale("nl", "NL"));
     ClientRequestContext context = mock(ClientRequestContext.class);
     MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
@@ -29,20 +29,20 @@ public class AcceptLanguageRequestFilterTest {
     }
 
     @Test
-    public void filterWithoutExisting() {
+    void filterWithoutExisting() {
         instance.filter(context);
         assertThat(headers.getFirst("Accept-Language")).isEqualTo("en, nl_NL");
     }
 
     @Test
-    public void filterWithemptyExisting() {
+    void filterWithemptyExisting() {
         headers.put("Accept-Language", new ArrayList<>());
         instance.filter(context);
         assertThat(headers.getFirst("Accept-Language")).isEqualTo("en, nl_NL");
     }
 
     @Test
-    public void filterWithExisting() {
+    void filterWithExisting() {
         headers.putSingle("Accept-Language", "de, nl");
         instance.filter(context);
         assertThat(headers.getFirst("Accept-Language")).isEqualTo("en, nl_NL");

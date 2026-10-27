@@ -10,11 +10,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.8
  */
-public class DutchTest {
+class DutchTest {
 
 
     @Test
-    public void formatInstantSmartly() {
+    void formatInstantSmartly() {
         ZonedDateTime now = LocalDateTime.of(2018, 11, 16, 10, 0).atZone(Dutch.ZONE_ID);
 
 

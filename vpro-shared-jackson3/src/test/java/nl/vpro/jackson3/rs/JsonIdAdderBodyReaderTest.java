@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
  * @author Michiel Meeuwissen
  * @since 2.7
  */
-public class JsonIdAdderBodyReaderTest {
+class JsonIdAdderBodyReaderTest {
 
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -57,7 +57,7 @@ public class JsonIdAdderBodyReaderTest {
     }
 
     @Test
-    public void testA() {
+    void a() {
 
         Object o = idAdderInterceptor.readFrom(Object.class,
             A.class,
@@ -69,7 +69,7 @@ public class JsonIdAdderBodyReaderTest {
 
 
     @Test
-    public void testBase() {
+    void base() {
 
         Object o = idAdderInterceptor.readFrom(Object.class,
             Base.class,
@@ -78,7 +78,7 @@ public class JsonIdAdderBodyReaderTest {
         assertThat(o).isInstanceOf(A.class);
     }
     @Test
-    public void testC() {
+    void c() {
 
         Object o = idAdderInterceptor.readFrom(Object.class,
             C.class,

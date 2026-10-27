@@ -28,7 +28,7 @@ import static org.meeuw.functional.Optionals.boxed;
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ElasticSearchIteratorContainerTest {
+class ElasticSearchIteratorContainerTest {
 
 
 
@@ -85,7 +85,7 @@ public class ElasticSearchIteratorContainerTest {
 
     @Test
     @Disabled
-    public void test() {
+    void test() {
         try (ElasticSearchIterator<String> i = ElasticSearchIterator
             .<String>builder()
             .client(client)
@@ -110,7 +110,7 @@ public class ElasticSearchIteratorContainerTest {
 
     @Test
     @Disabled
-    public void testSources() {
+    void sources() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator.sources(client)) {
             i.setJsonRequests(false);
             JsonNode search = i.prepareSearch("pageupdates-publish");
@@ -125,7 +125,7 @@ public class ElasticSearchIteratorContainerTest {
     }
 
     @Test
-    public void testAll() {
+    void all() {
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator
             .sourcesBuilder(client)
             .jsonRequests(false)
@@ -146,7 +146,7 @@ public class ElasticSearchIteratorContainerTest {
     }
 
     @Test
-    public void maxed() throws Exception {
+    void maxed() throws Exception {
         AtomicLong count = new AtomicLong(0);
 
         try (ElasticSearchIterator<JsonNode> i = ElasticSearchIterator

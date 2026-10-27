@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("DataFlowIssue")
 @Slf4j
-public class JsonArrayIteratorTest {
+class JsonArrayIteratorTest {
 
 
     @Test
@@ -115,7 +115,7 @@ public class JsonArrayIteratorTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    void testEmpty() {
+    void empty() {
         try (JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[]}".getBytes()), Change.class)) {
             assertThat(it.hasNext()).isFalse();
             assertThat(it.hasNext()).isFalse();
@@ -125,7 +125,7 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    void testNulls() {
+    void nulls() {
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream("{\"array\":[null, {}, null, {}]}".getBytes()), Change.class);
         assertThat(it.hasNext()).isTrue();
         it.next();
@@ -141,7 +141,7 @@ public class JsonArrayIteratorTest {
     }
 
     @Test
-    void testIncompleteJson() {
+    void incompleteJson() {
         InputStream input = getClass().getResourceAsStream("/incomplete_changes.json");
         assert input != null;
         try (JsonArrayIterator<Change> it = JsonArrayIterator.<Change>builder()
@@ -159,7 +159,7 @@ public class JsonArrayIteratorTest {
 
 
     @Test
-    void testZeroBytes() {
+    void zeroBytes() {
 
         JsonArrayIterator<Change> it = new JsonArrayIterator<>(new ByteArrayInputStream(new byte[0]), Change.class);
 

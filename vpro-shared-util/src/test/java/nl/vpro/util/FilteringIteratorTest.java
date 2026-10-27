@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * @author Michiel Meeuwissen
  * @since 1.8
  */
-public class FilteringIteratorTest {
+class FilteringIteratorTest {
 
     private static final Predicate<String> notC = input -> !"c".equals(input);
 
     @Test
-    public void test() {
+    void test() {
         List<String> list = Arrays.asList("a", "b", "c", null, "d");
         AtomicInteger i = new AtomicInteger(0);
         Iterator<String> iterator = new FilteringIterator<>(list.iterator(), notC,
@@ -35,7 +35,7 @@ public class FilteringIteratorTest {
     }
 
     @Test
-    public void testWithNull() {
+    void withNull() {
         List<String> list = Arrays.asList("a", "b", "c", null, "d");
 
         Iterator<String> iterator = new FilteringIterator<>(list.iterator(), null);
@@ -48,7 +48,7 @@ public class FilteringIteratorTest {
     }
 
     @Test
-    public void noSuchElement() {
+    void noSuchElement() {
         assertThatThrownBy(()-> {
             Iterator<String> iterator = new FilteringIterator<>(Arrays.asList("a", "b", "c", null, "d").iterator(), notC);
             assertEquals("a", iterator.next());
@@ -62,7 +62,7 @@ public class FilteringIteratorTest {
 
 
     @Test
-    public void testRemove() {
+    void remove() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", null, "d"));
 
         Iterator<String> iterator = new FilteringIterator<>(list.iterator(),  null);
@@ -76,7 +76,7 @@ public class FilteringIteratorTest {
     }
 
     @Test
-    public void testRemove2() {
+    void remove2() {
         List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", null, "d"));
 
         Iterator<String> iterator = new FilteringIterator<>(list.iterator(), input -> input == null || input.equals("b"));

@@ -10,25 +10,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 4.4
  */
-public class PathSegmentValidatorTest {
+class PathSegmentValidatorTest {
 
 
     @Test
-    public void testSimple() {
+    void simple() {
         String simple = "/de-vloer-op/19-08-2005/HUMAN_20050819_vloer";
 
         assertThat(PathSegmentValidator.isValid(simple)).isTrue();
     }
 
     @Test
-    public void testUrlEncode() {
+    void urlEncode() {
        String withEncoding = "/de-vloer-op/19-08-2005/HUMAN_20050819%20vloer";
 
         assertThat(PathSegmentValidator.isValid(withEncoding)).isTrue();
     }
 
     @Test
-    public void testUrlUnencode() {
+    void urlUnencode() {
         String withEncoding = "/de-vloer-op/19-08-2005/HUMAN_20050819 vloer";
 
         assertThat(PathSegmentValidator.isValid(withEncoding)).isFalse();

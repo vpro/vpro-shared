@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.5
  */
-public class SkipAtStartInputStreamTest {
+class SkipAtStartInputStreamTest {
 
     @Test
-    public void skipUTF8ByteOrderMarks() {
+    void skipUTF8ByteOrderMarks() {
 
         byte[] withUtf8 = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, 'a', 'b'};
 
@@ -25,7 +25,7 @@ public class SkipAtStartInputStreamTest {
 
     }
     @Test
-    public void skipUTF8ByteOrderMarks2() {
+    void skipUTF8ByteOrderMarks2() {
 
         byte[] withUtf8 = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, 'a', 'b'};
 
@@ -33,7 +33,7 @@ public class SkipAtStartInputStreamTest {
     }
 
      @Test
-    public void dontskipUnicodeByteOrderMarks() {
+    void dontskipUnicodeByteOrderMarks() {
          byte[] withunrecognized =  {(byte) 0xFF, (byte) 0xFF, 'x', 'y'};
 
 
@@ -43,7 +43,7 @@ public class SkipAtStartInputStreamTest {
     }
 
     @Test
-    public void noskipifnotrecognized() {
+    void noskipifnotrecognized() {
          byte[] withunrecognized =  {(byte) 0xEF, (byte) 0xFF, 'c', 'd'}; // looks a bit like UTF8
 
         assertThat(new SkipAtStartInputStream(new ByteArrayInputStream(withunrecognized), SkipAtStartInputStream.UTF8_BYTE_ORDER_MARK)).hasSameContentAs(new ByteArrayInputStream(withunrecognized));
@@ -52,7 +52,7 @@ public class SkipAtStartInputStreamTest {
     }
 
     @Test
-    public void skipUnicodeByteOrderMarks() {
+    void skipUnicodeByteOrderMarks() {
 
         byte[] withUtf8 = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF, 'a', 'b'};
 
@@ -74,7 +74,7 @@ public class SkipAtStartInputStreamTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testLarge() throws IOException {
+    void large() throws IOException {
         String name = "/" + SkipAtStartInputStream.class.getName().replaceAll("\\.", "/") + ".class";
         InputStream resourceAsStream = SkipAtStartInputStream.class.getResourceAsStream(name);
         int count = IOUtils.copy(resourceAsStream, NullOutputStream.INSTANCE);

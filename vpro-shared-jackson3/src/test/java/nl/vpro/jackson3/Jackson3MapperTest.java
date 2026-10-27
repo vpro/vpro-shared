@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Log4j2
-public class Jackson3MapperTest {
+class Jackson3MapperTest {
 
     public enum EnumValues {
         a,
@@ -64,7 +64,7 @@ public class Jackson3MapperTest {
      * So, this test can be changed without affecting coverage.
      */
     @Test
-    public void basicJackson3() {
+    void basicJackson3() {
         JsonMapper mapper = JsonMapper.builder()
             .enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
 
@@ -87,7 +87,7 @@ public class Jackson3MapperTest {
 
 
     @Test
-    public void read() {
+    void read() {
         //String example = "/* leading comments */\n{'integer': 2 /* ignore comments */, 'optional': 3}";
         String example ="""
         {"integer": 2, "optional": 3}
@@ -103,7 +103,7 @@ public class Jackson3MapperTest {
     }
 
     @Test
-    public void readChange() {
+    void readChange() {
         String change = """
              {
                     "sequence": 4000,
@@ -133,32 +133,32 @@ public class Jackson3MapperTest {
     }
 
     @Test
-    public void readIntFromString() {
+    void readIntFromString() {
         A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue("{'integer': '2'}");
         assertThat(a.integer).isEqualTo(2);
     }
 
     @Test
-    public void readEnumValue() {
+    void readEnumValue() {
         A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue("{'enumValue': 'a'}");
         assertThat(a.enumValue).isEqualTo(EnumValues.a);
     }
 
     @Test
-    public void readUnknownEnumValue() {
+    void readUnknownEnumValue() {
         assertThatThrownBy(() -> {
             A a = Jackson3Mapper.INSTANCE.readerFor(A.class).readValue("{'enumValue': 'c'}");
         }).isInstanceOf(InvalidFormatException.class);
     }
 
     @Test
-    public void readUnknownEnumValueLenient() {
+    void readUnknownEnumValueLenient() {
         A a = Jackson3Mapper.LENIENT.readerFor(A.class).readValue("{'enumValue': 'c'}");
         assertThat(a.enumValue).isNull();
     }
 
     @Test
-    public void write() throws JacksonException {
+    void write() throws JacksonException {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.of(3);
@@ -166,7 +166,7 @@ public class Jackson3MapperTest {
     }
 
     @Test
-    public void writeWithEmptyOptional() throws JacksonException {
+    void writeWithEmptyOptional() throws JacksonException {
         A a = new A();
         a.integer = 2;
         a.optional = Optional.empty();

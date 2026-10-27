@@ -15,40 +15,40 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2.1
  */
 @Deprecated
-public class SecondsToDateAdapterTest {
+class SecondsToDateAdapterTest {
 
     @Test
-    public void testUnmarshalOnWHoleNumbers() {
+    void unmarshalOnWHoleNumbers() {
         Date date = new SecondsToDateAdapter().unmarshal("11");
         assertThat(date.getTime()).isEqualTo(11000L);
     }
 
     @Test
-    public void testUnmarshalWithMillisRoundedToTens() {
+    void unmarshalWithMillisRoundedToTens() {
         Date date = new SecondsToDateAdapter().unmarshal("10.5");
         assertThat(date.getTime()).isEqualTo(10500L);
     }
 
     @Test
-    public void testUnmarshalWithMillisRoundedToHundreds() {
+    void unmarshalWithMillisRoundedToHundreds() {
         Date date = new SecondsToDateAdapter().unmarshal("10.55");
         assertThat(date.getTime()).isEqualTo(10550L);
     }
 
     @Test
-    public void testUnmarshalWithMillisFull() {
+    void unmarshalWithMillisFull() {
         Date date = new SecondsToDateAdapter().unmarshal("10.555");
         assertThat(date.getTime()).isEqualTo(10555L);
     }
 
     @Test
-    public void testUnmarshalOmmitHigherPrecision() {
+    void unmarshalOmmitHigherPrecision() {
         Date date = new SecondsToDateAdapter().unmarshal("10.5558");
         assertThat(date.getTime()).isEqualTo(10555L);
     }
 
     @Test
-    public void testUnmarshalOnLargeNumbers() {
+    void unmarshalOnLargeNumbers() {
         Date date = new SecondsToDateAdapter().unmarshal("7777777777777777.999111");
         assertThat(date.getTime()).isEqualTo(7777777777777777999L);
     }

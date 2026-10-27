@@ -11,11 +11,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.63
  */
-public class TransformingSortedSetTest {
+class TransformingSortedSetTest {
 
 
     @Test
-    public void testAdd() {
+    void add() {
         SortedSet<Integer> set = new TreeSet<>();
         set.add(1);
         set.add(2);
@@ -29,7 +29,7 @@ public class TransformingSortedSetTest {
 
 
     @Test
-    public void testAddToEmpty() {
+    void addToEmpty() {
         SortedSet<Integer> set = new TreeSet<>();
         assertThat(set.comparator()).isNull();
         TransformingSortedSet<StringBuilder, Integer> transforming =
@@ -42,7 +42,7 @@ public class TransformingSortedSetTest {
 
 
     @Test
-    public void testRemove() {
+    void remove() {
         SortedSet<Integer> set = new TreeSet<>();
         set.add(1);
         set.add(2);
@@ -56,7 +56,7 @@ public class TransformingSortedSetTest {
     }
 
     @Test
-    public void testChangeFirst() {
+    void changeFirst() {
         SortedSet<Integer> set = new TreeSet<>();
         set.add(1);
         set.add(2);
@@ -72,7 +72,7 @@ public class TransformingSortedSetTest {
     }
 
     @Test
-    public void testComparator() {
+    void comparator() {
         SortedSet<Integer> set = new TreeSet<>();
 
         TransformingSortedSet<StringBuilder, Integer> transforming =

@@ -17,7 +17,7 @@ class CaptureToSimpleLoggerTest {
     static final ExecutorService service = Executors.newCachedThreadPool();
 
     @Test
-    public void log() {
+    void log() {
         List<Future<?>> futures = new ArrayList<>();
         List<String> messages = Collections.synchronizedList(new ArrayList<>());
         EventSimpleLogger<Event> logger = EventSimpleLogger.of(Level.INFO, e -> {

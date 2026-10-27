@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
  * @author Michiel Meeuwissen
  * @since 1.79
  */
-public class ChainedSimpleLoggerTest {
+class ChainedSimpleLoggerTest {
 
     @Test
-    public void isEnabled() {
+    void isEnabled() {
         ChainedSimpleLogger logger = new ChainedSimpleLogger(
             new SLogger(Level.DEBUG),
             new SLogger(Level.WARN),

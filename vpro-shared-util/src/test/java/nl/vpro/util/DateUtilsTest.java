@@ -16,14 +16,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Roelof Jan Koekoek
  */
-public class DateUtilsTest {
+class DateUtilsTest {
 
     private static final Date MIN_VALUE = new Date(Long.MIN_VALUE);
 
     private static final Date MAX_VALUE = new Date(Long.MAX_VALUE);
 
     @Test
-    public void testLowest() {
+    void lowest() {
         assertThat(DateUtils.lowest(null,null)).isNull();
         assertThat(DateUtils.lowest(new Date(0),null)).isEqualTo(new Date(0));
         assertThat(DateUtils.lowest(new Date(0),new Date(1))).isEqualTo(new Date(0));
@@ -33,7 +33,7 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void testHighest() {
+    void highest() {
         assertThat(DateUtils.highest(null,null)).isNull();
         assertThat(DateUtils.highest(new Date(0),null)).isEqualTo(new Date(0));
         assertThat(DateUtils.highest(new Date(0),new Date(1))).isEqualTo(new Date(1));
@@ -43,7 +43,7 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void testNullIsMaximal() {
+    void nullIsMaximal() {
         assertThat(DateUtils.nullIsMaximal(null)).isEqualTo(MAX_VALUE);
         assertThat(DateUtils.nullIsMaximal(new Date(100))).isEqualTo(new Date(100));
 
@@ -54,7 +54,7 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void testNullIsMinimal() {
+    void nullIsMinimal() {
         assertThat(DateUtils.nullIsMinimal(null)).isEqualTo(MIN_VALUE);
         assertThat(DateUtils.nullIsMinimal(new Date(100))).isEqualTo(new Date(100));
 
@@ -65,7 +65,7 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void convert() {
+    void convert() {
         Range<Instant> instantRange = Ranges.closedOpen(Instant.parse("2021-12-24T12:00:00Z"), Instant.parse("2021-12-26T12:00:00Z"));
         Range<LocalDateTime> converted = DateUtils.toLocalDateTimeRange(instantRange, ZoneId.of("Europe/Amsterdam"));
         assertThat(converted.toString()).isEqualTo("[2021-12-24T13:00..2021-12-26T13:00)");

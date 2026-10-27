@@ -10,10 +10,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.68
  */
-public class PairTest {
+class PairTest {
 
     @Test
-    public void test() {
+    void test() {
         Pair<String, String> pair = Pair.<String, String>builder()
             .first("a")
             .second("b")
@@ -29,7 +29,7 @@ public class PairTest {
     }
 
     @Test
-    public void testEntry() {
+    void entry() {
         Map.Entry<String, Integer> pair = Pair.<String, Integer>builder()
             .key("1")
             .value(2)

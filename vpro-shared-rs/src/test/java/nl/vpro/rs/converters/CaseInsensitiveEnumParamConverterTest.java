@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.75
  */
-public class CaseInsensitiveEnumParamConverterTest {
+class CaseInsensitiveEnumParamConverterTest {
 
 
     public enum TestEnum {
@@ -23,7 +23,7 @@ public class CaseInsensitiveEnumParamConverterTest {
     CaseInsensitiveEnumParamConverter<TestEnum> instance = CaseInsensitiveEnumParamConverter.getInstant(TestEnum.class);
 
     @Test
-    public void test() {
+    void test() {
         assertThat(instance.fromString("A")).isEqualTo(TestEnum.a);
         assertThat(instance.fromString("a")).isEqualTo(TestEnum.a);
         assertThat(instance.fromString("B")).isEqualTo(TestEnum.B);

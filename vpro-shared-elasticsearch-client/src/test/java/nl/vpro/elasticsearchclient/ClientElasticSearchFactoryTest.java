@@ -9,11 +9,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
-public class ClientElasticSearchFactoryTest {
+class ClientElasticSearchFactoryTest {
 
 
     @Test
-    public void setHosts() {
+    void setHosts() {
         ClientElasticSearchFactory factory = new ClientElasticSearchFactory();
         factory.setHosts("hosta,hostb:9200");
         assertThat(factory.getHttpHosts()).containsExactly(
@@ -23,7 +23,7 @@ public class ClientElasticSearchFactoryTest {
     }
 
     @Test
-    public void setHosts9201() {
+    void setHosts9201() {
         ClientElasticSearchFactory factory = new ClientElasticSearchFactory();
         factory.setHosts("(hosta,hostb):9201");
         assertThat(factory.getHttpHosts()).containsExactly(
@@ -34,7 +34,7 @@ public class ClientElasticSearchFactoryTest {
     }
 
     @Test
-    public void setHosts443() {
+    void setHosts443() {
 
         ClientElasticSearchFactory factory = new ClientElasticSearchFactory();
         factory.setHosts("https://a.es.amazonaws.com,https://b.es.amazonaws.com:4043");
@@ -46,7 +46,7 @@ public class ClientElasticSearchFactoryTest {
     }
 
     @Test
-    public void setHostsDefault() {
+    void setHostsDefault() {
         ClientElasticSearchFactory factory = new ClientElasticSearchFactory();
         factory.setHosts("");
         assertThat(factory.getHttpHosts()).containsExactly(

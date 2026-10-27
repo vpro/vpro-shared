@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * @author Michiel Meeuwissen
  * @since 0.32
  */
-public class InstantXmlAdapterTest {
+class InstantXmlAdapterTest {
 
 
     InstantXmlAdapter instance = new InstantXmlAdapter();
@@ -55,7 +55,7 @@ public class InstantXmlAdapterTest {
 
     @ParameterizedTest
     @MethodSource("parameters")
-    public void testMarshal(
+    void marshal(
         Instant in,
         String xml,
         String xmlomitisfalse,
@@ -71,7 +71,7 @@ public class InstantXmlAdapterTest {
 
     @ParameterizedTest
     @MethodSource("parameters")
-    public void testUnmarshal(
+    void unmarshal(
         Instant in,
         String xml,
         String xmlomitisfalse,

@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Michiel Meeuwissen
  * @since 2.0
  */
-public class UrlProviderTest {
+class UrlProviderTest {
     @Test
-    public void test() {
+    void test() {
         UrlProvider provider = new UrlProvider("a", 80);
         assertEquals("a", provider.getHost());
         assertEquals(80, provider.getPort());
@@ -27,7 +27,7 @@ public class UrlProviderTest {
     }
 
     @Test
-    public void testUrl() {
+    void url() {
         UrlProvider provider = UrlProvider.fromUrl("http://a:81/b");
         assertEquals("http://a:81/b", provider.getUrl());
 

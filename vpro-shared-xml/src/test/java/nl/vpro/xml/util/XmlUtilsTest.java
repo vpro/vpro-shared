@@ -16,7 +16,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @since 1.71
  */
 @Slf4j
-public class XmlUtilsTest {
+class XmlUtilsTest {
 
     static {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
@@ -25,21 +25,21 @@ public class XmlUtilsTest {
 
 
     @Test
-    public void toInstant() {
+    void toInstant() {
         Instant instance = XmlUtils.toInstant(ZoneId.of("Europe/London"), XmlUtils.FACTORY.newXMLGregorianCalendar("2017-06-26T14:23:00+02:00"));
         assertThat(instance).isEqualTo(LocalDateTime.of(2017, 6, 26, 14, 23).atZone(ZoneId.of("Europe/Amsterdam")).toInstant());
         log.info("{}", instance);
     }
 
     @Test
-    public void toInstantImplicitZone() {
+    void toInstantImplicitZone() {
         Instant instance = XmlUtils.toInstant(ZoneId.of("Europe/Amsterdam"), XmlUtils.FACTORY.newXMLGregorianCalendar("2017-06-26T14:23:00"));
         assertThat(instance).isEqualTo(LocalDateTime.of(2017, 6, 26, 14, 23).atZone(ZoneId.of("Europe/Amsterdam")).toInstant());
         log.info("{}", instance);
     }
 
     @Test
-    public void toXml() {
+    void toXml() {
 
         assertThat(XmlUtils.toXml(ZoneId.of("Europe/Amsterdam"), LocalDateTime.of(2017, 6, 26, 14, 23).atZone(ZoneId.of("Europe/Amsterdam")).toInstant()).toXMLFormat())
             .isEqualTo("2017-06-26T14:23:00.000+02:00");

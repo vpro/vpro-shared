@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD;
 @Isolated
 @Execution(SAME_THREAD)
 @DisabledOnOs(OS.WINDOWS) // using some binaries not available on windows
-public class CommandExecutorImplTest {
+class CommandExecutorImplTest {
 
     @BeforeEach
     public void setup() {
@@ -57,7 +57,7 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void execute() {
+    void execute() {
         CommandExecutorImpl instance = new CommandExecutorImpl("/usr/bin/env");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         instance.execute(out, "echo", "hoi");
@@ -66,14 +66,14 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void logger() {
+    void logger() {
         SimpleLogger logger = new CommandExecutorImpl(new File("/usr/bin/env")).getLogger();
         assertEquals(CommandExecutorImpl.class.getName() + ".env.bin.usr", logger.getName());
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    public void lines(boolean useFileCache) {
+    void lines(boolean useFileCache) {
         CommandExecutor find =
                  CommandExecutorImpl.builder()
                      .executablesPaths("/usr/bin/env")
@@ -90,7 +90,7 @@ public class CommandExecutorImplTest {
 
 
     @Test
-    public void optional() throws IOException, InterruptedException {
+    void optional() throws IOException, InterruptedException {
         final File tmpFile = File.createTempFile("env", "test");
         tmpFile.deleteOnExit();
         final StringBuilderSimpleLogger logger = new StringBuilderSimpleLogger();
@@ -120,7 +120,7 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void workdir() {
+    void workdir() {
         File workDir = new File("/tmp");
         CommandExecutorImpl instance = CommandExecutorImpl.builder().executablesPath("/bin/pwd")
             .workdir(workDir).build();
@@ -140,7 +140,7 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void timeout() {
+    void timeout() {
         StringBuilderSimpleLogger sl = StringBuilderSimpleLogger.builder()
             .level(Level.ERROR)
             .build();
@@ -158,7 +158,7 @@ public class CommandExecutorImplTest {
 
 
     @Test
-    public void builder() {
+    void builder() {
         CommandExecutorImpl build = CommandExecutorImpl.builder()
             .executablesPath("a")
             .executable(new File("b"))
@@ -169,7 +169,7 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void invalidConstruction() throws IOException {
+    void invalidConstruction() throws IOException {
         new File("/tmp/foobar").delete();
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/foobar"), null)).isInstanceOf(NoBinaryFound.class);
         assertThatThrownBy(() -> new CommandExecutorImpl(new File("/tmp/"), null)).isInstanceOf(NoBinaryFound.class);
@@ -180,7 +180,7 @@ public class CommandExecutorImplTest {
 
 
     @Test
-    public void commonArgsSupplier() {
+    void commonArgsSupplier() {
         AtomicLong i = new AtomicLong(0);
         CommandExecutor test =
                  CommandExecutorImpl.builder()
@@ -200,7 +200,7 @@ public class CommandExecutorImplTest {
 
     @ValueSource(booleans = {true, false})
     @ParameterizedTest
-    public void noCloseStreams(boolean useFile) {
+    void noCloseStreams(boolean useFile) {
         CommandExecutor cat =
             CommandExecutorImpl.builder()
                 .executablesPaths("/bin/cat")
@@ -249,7 +249,7 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void events() throws InterruptedException {
+    void events() throws InterruptedException {
         CommandExecutor find =
             CommandExecutorImpl.builder()
                 .executablesPaths("/usr/bin/env")
@@ -276,14 +276,14 @@ public class CommandExecutorImplTest {
     }
 
     @Test
-    public void commandToString() {
+    void commandToString() {
         assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo bar"))).isEqualTo("ls \"/tmp/foo bar\"");
 
         assertThat(CommandExecutorImpl.commandToString(Arrays.asList("ls", "/tmp/foo\"bar"))).isEqualTo("ls /tmp/foo\\\"bar");
     }
 
       @Test
-      public void testToString() {
+      void testToString() {
           CommandExecutor find =
               CommandExecutorImpl.builder()
                   .executablesPaths("/usr/bin/env")

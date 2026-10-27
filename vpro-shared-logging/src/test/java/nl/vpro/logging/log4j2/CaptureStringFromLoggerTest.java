@@ -16,7 +16,7 @@ class CaptureStringFromLoggerTest {
     ExecutorService service = Executors.newCachedThreadPool();
 
     @Test
-    public void log() {
+    void log() {
         List<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             final int j = i;
@@ -46,7 +46,7 @@ class CaptureStringFromLoggerTest {
     }
 
     @Test
-    public void nested() {
+    void nested() {
         try (CaptureStringFromLogger capture1 = new CaptureStringFromLogger("1:%msg%n", Level.INFO)) {
             log.info("a");
             log.debug("ignore1");

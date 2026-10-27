@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LoggingInputStreamTest {
 
     @Test
-    public void test() throws IOException {
+    void test() throws IOException {
         Queue<Event> queue = new ArrayDeque<>();
         int number =  1024 * 1024 * 1024;
         QueueSimpleLogger<Event> simpleLogger = QueueSimpleLogger.of(queue);

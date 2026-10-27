@@ -15,7 +15,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.69
  */
-public class ProviderAndBuilderTest {
+class ProviderAndBuilderTest {
 
     @AllArgsConstructor
     @Data
@@ -45,7 +45,7 @@ public class ProviderAndBuilderTest {
     }
 
     @Test
-    public void build() {
+    void build() {
         AProvider a = new AProvider();
         a.setA(Optional.of("X"));
         a.setB(8);
@@ -61,7 +61,7 @@ public class ProviderAndBuilderTest {
 
 
     @Test
-    public void buildNull() {
+    void buildNull() {
         AProvider a = new AProvider();
         a.setA(Optional.empty());
         a.setB(null);
@@ -74,7 +74,7 @@ public class ProviderAndBuilderTest {
     }
 
     @Test
-    public void buildDuration() {
+    void buildDuration() {
         AProvider a = new AProvider();
         a.setDuration(TimeUtils.parseDuration("5s").orElse(null));
         a.setB(null);

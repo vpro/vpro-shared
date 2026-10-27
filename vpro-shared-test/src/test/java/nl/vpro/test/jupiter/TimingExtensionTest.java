@@ -9,7 +9,7 @@ import static java.lang.Thread.sleep;
 class TimingExtensionTest {
 
     @RepeatedTest(10)
-    public void test() throws InterruptedException {
+    void test() throws InterruptedException {
         sleep(10);
     }
 

@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 class HttpServletRequestUtilsTest {
 
     @Test
-    public void getContextURL() {
+    void getContextURL() {
         HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         when(mock.getServerName()).thenReturn("bla");
         when(mock.getServerPort()).thenReturn(443);
@@ -22,7 +22,7 @@ class HttpServletRequestUtilsTest {
     }
 
     @Test
-    public void getContextURLBehindProxy() {
+    void getContextURLBehindProxy() {
         HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
 
         when(mock.getHeader("X-Forwarded-Host")).thenReturn("foo");
@@ -38,7 +38,7 @@ class HttpServletRequestUtilsTest {
     }
 
     @Test
-    public void getContextURL2() {
+    void getContextURL2() {
         HttpServletRequest mock = Mockito.mock(HttpServletRequest.class);
         when(mock.getServerName()).thenReturn("foo");
         when(mock.getServerPort()).thenReturn(8080);

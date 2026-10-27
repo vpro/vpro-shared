@@ -9,35 +9,35 @@ import com.google.common.collect.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class MaxOffsetIteratorTest {
+class MaxOffsetIteratorTest {
 
     @Test
-    public void testMax() {
+    void max() {
         List<String> test = Arrays.asList("a", "b", "c", "d");
         assertThat(Lists.newArrayList(new MaxOffsetIterator<>(test.iterator(), 2))).containsExactly("a", "b");
     }
 
     @Test
-    public void testMaxNull() {
+    void maxNull() {
         List<String> test = Arrays.asList("a", "b", "c", "d");
         assertThat(Lists.newArrayList(
             new MaxOffsetIterator<>(test.iterator(), null))).containsExactly("a", "b", "c", "d");
     }
 
     @Test
-    public void testMaxOffset() {
+    void maxOffset() {
         List<String> test = Arrays.asList("a", "b", null, "c", "d");
         assertThat(Lists.newArrayList(new MaxOffsetIterator<>(test.iterator(), 2, 1))).containsExactly("b", null);
     }
 
     @Test
-    public void testMaxOffsetDontcountNulls() {
+    void maxOffsetDontcountNulls() {
         List<String> test = Arrays.asList("a", null, "b", "c", null, "d", "e");
         assertThat(Lists.newArrayList(new MaxOffsetIterator<>(test.iterator(), 2, 2, false))).containsExactly("c", null, "d");
     }
 
     @Test
-    public void autoClose() {
+    void autoClose() {
         final boolean[] booleans = new boolean[2];
         AutoCloseable autoCloseable = () -> booleans[0] = true;
         Runnable callback  = () -> booleans[1] = true;
@@ -56,7 +56,7 @@ public class MaxOffsetIteratorTest {
 
 
     @Test
-    public void testToString() {
+    void testToString() {
         List<String> test = Arrays.asList("a", "b", "c", "d");
         assertThat(new MaxOffsetIterator<>(test.iterator(), 2).toString()).matches("Closeable\\[.*]\\[0,2]");
 
@@ -65,7 +65,7 @@ public class MaxOffsetIteratorTest {
     }
 
     @Test
-    public void peeking() {
+    void peeking() {
         List<String> list = Arrays.asList("a", "b", "c", "d");
         PeekingIterator<String> i = Iterators.peekingIterator(list.iterator());
         assertThat(i.peek()).isEqualTo("a");
@@ -86,7 +86,7 @@ public class MaxOffsetIteratorTest {
     }
 
     @Test
-    public void predicate() throws Exception {
+    void predicate() throws Exception {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
 
         try (MaxOffsetIterator<String> mo = MaxOffsetIterator

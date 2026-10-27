@@ -17,12 +17,12 @@ import nl.vpro.elasticsearch.Constants;
  * @since ...
  */
 @Slf4j
-public class ESClientTest {
+class ESClientTest {
 
 
     @Test
     @Disabled("Connects to real server")
-    public void test() {
+    void test() {
 
         RestClient client = RestClient.builder(
             new HttpHost("localhost", 9212, "http"))

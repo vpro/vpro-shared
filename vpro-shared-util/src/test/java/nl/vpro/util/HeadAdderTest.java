@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class HeadAdderTest {
+class HeadAdderTest {
 
     @Test
-    public void addTo() {
+    void addTo() {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) -> s + "c").build();
         assertEquals("ac", adder.next());
@@ -20,7 +20,7 @@ public class HeadAdderTest {
     }
 
     @Test
-    public void onlyIfEmptyOnNotEmpty() {
+    void onlyIfEmptyOnNotEmpty() {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) -> s + "c").onlyIfEmpty(true).build();
         assertEquals("a", adder.next());
@@ -30,7 +30,7 @@ public class HeadAdderTest {
 
 
     @Test
-    public void onlyIfEmptyOnEmpty() {
+    void onlyIfEmptyOnEmpty() {
         Iterator<String> i = Collections.<String>emptyList().iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) -> s + "c").onlyIfEmpty(true).build();
         assertEquals("nullc", adder.next());
@@ -39,7 +39,7 @@ public class HeadAdderTest {
 
 
     @Test
-    public void onlyIfNotEmptyOnNotEmpty() {
+    void onlyIfNotEmptyOnNotEmpty() {
         Iterator<String> i = Arrays.asList("a", "b").iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) -> s + "c").onlyIfNotEmpty(true).build();
         assertEquals("ac", adder.next());
@@ -50,14 +50,14 @@ public class HeadAdderTest {
 
 
     @Test
-    public void onlyIfNotEmptyOnEmpty() {
+    void onlyIfNotEmptyOnEmpty() {
         Iterator<String> i = Collections.<String>emptyList().iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) -> s + "c").onlyIfNotEmpty(true).build();
         assertEquals(false, adder.hasNext());
     }
 
     @Test
-    public void headNull() {
+    void headNull() {
         Iterator<String> i = Collections.<String>emptyList().iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) -> null).build();
 
@@ -67,7 +67,7 @@ public class HeadAdderTest {
 
 
     @Test
-    public void headException() {
+    void headException() {
         Iterator<String> i = Collections.<String>emptyList().iterator();
         org.meeuw.collections.HeadAdder<String> adder = HeadAdder.<String>builder().wrapped(i).adder((s) ->{
             throw new RuntimeException();

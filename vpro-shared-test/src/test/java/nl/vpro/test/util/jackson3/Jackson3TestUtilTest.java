@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.48
  */
-public class Jackson3TestUtilTest {
+class Jackson3TestUtilTest {
 
     @SuppressWarnings("FieldMayBeFinal")
     @XmlRootElement
@@ -68,13 +68,13 @@ public class Jackson3TestUtilTest {
     }
 
     @Test
-    public void roundTrip() {
+    void roundTrip() {
         Jackson3TestUtil.roundTrip(new A());
     }
 
 
     @Test
-    public void assertThatTest() {
+    void assertThatTest() {
         JsonNode actual = assertThatJson(MAPPER, new A())
             .isSimilarTo("{'a': 'a'}")
             .actualJson((a) -> {
@@ -87,7 +87,7 @@ public class Jackson3TestUtilTest {
 
 
     @Test
-    public void assertThatWithRemove() {
+    void assertThatWithRemove() {
         Jackson3TestUtilTest.A a = new Jackson3TestUtilTest.A();
         a.b = RandomStringUtils.insecure().nextAlphanumeric(10);
         assertThatJson(a)
@@ -100,7 +100,7 @@ public class Jackson3TestUtilTest {
     }
 
     @Test
-    public void removeJsonPointerArray() {
+    void removeJsonPointerArray() {
         JsonNode node = Jackson3Mapper.getLenientInstance().reader().readTree("""
               {
                    "user" : null,
@@ -117,7 +117,7 @@ public class Jackson3TestUtilTest {
 
 
     @Test
-    public void assertThatWithIgnoreArrayElement() {
+    void assertThatWithIgnoreArrayElement() {
 
         assertThatJson("""
              {
@@ -144,7 +144,7 @@ public class Jackson3TestUtilTest {
     }
 
     @Test
-    public void assertThatWithRemoveArrayElement() {
+    void assertThatWithRemoveArrayElement() {
 
         assertThatJson("""
              {
@@ -171,7 +171,7 @@ public class Jackson3TestUtilTest {
     }
 
     @Test
-    public void assertThatWithContains() {
+    void assertThatWithContains() {
         A a = new A();
         a.b = null;
         assertFail(() ->
@@ -191,25 +191,25 @@ public class Jackson3TestUtilTest {
 
 
     @Test
-    public void testRoundTripAndSimilar() {
+    void testRoundTripAndSimilar() {
         roundTripAndSimilar(new A(), "{'a': 'a'}");
     }
 
     @Test
-    public void roundTripAndSimilarFail() {
+    void roundTripAndSimilarFail() {
         Assertions.assertThrows(AssertionError.class, () ->
             roundTripAndSimilar(new A(), "{'a': 'b'}"));
     }
 
     @Test
-    public void roundTripAndSimilarValueFail() {
+    void roundTripAndSimilarValueFail() {
         Assertions.assertThrows(AssertionError.class, () ->
             roundTripAndSimilarValue("a", "\"b\"")
         );
     }
 
     @Test
-    public void testNotunmarshable() {
+    void notunmarshable() {
         assertThatJson(new NotUnmarshable("x"))
             .containsKeys("string")
             .withoutUnmarshalling()
@@ -220,11 +220,11 @@ public class Jackson3TestUtilTest {
     }
 
     @Test
-    public void prettifyNull() {
+    void prettifyNull() {
         assertThat(prettify(null)).isNull();
     }
     @Test
-    public void removePointers() {
+    void removePointers() {
         assertThatJson(
             """
             {
@@ -243,7 +243,7 @@ public class Jackson3TestUtilTest {
     }
 
     @Test
-    public void removeByJsonPath() {
+    void removeByJsonPath() {
         Configuration config = Configuration.builder()
             .jsonProvider(new Jackson3JsonNodeJsonProvider())
             .mappingProvider(new Jackson3MappingProvider())
@@ -271,7 +271,7 @@ public class Jackson3TestUtilTest {
 
     }
     @Test
-    public void operate() {
+    void operate() {
         assertThatJson(
             """
             {
@@ -298,7 +298,7 @@ public class Jackson3TestUtilTest {
 
 
     @Test
-    public void ignorePointers() {
+    void ignorePointers() {
         assertThatJson(
             """
             {

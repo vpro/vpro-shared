@@ -17,10 +17,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @since 1.68
  */
 @Log4j2
-public class BatchedReceiverTest {
+class BatchedReceiverTest {
 
     @Test
-    public void illegalConstruction() {
+    void illegalConstruction() {
         assertThatThrownBy(() ->
             BatchedReceiver.builder().build()).isInstanceOf(IllegalStateException.class);
 
@@ -32,7 +32,7 @@ public class BatchedReceiverTest {
     }
 
     @Test
-    public void testWithOffsetBatchGetter() {
+    void withOffsetBatchGetter() {
         final List<String> result = new ArrayList<>();
         for (int i = 0; i < 23; i++) {
             result.add(String.valueOf((char) ('a' + i)));
@@ -53,7 +53,7 @@ public class BatchedReceiverTest {
 
 
     @Test
-    public void testWithOffset() {
+    void withOffset() {
         final List<String> result = new ArrayList<>();
         for (int i = 0; i < 23; i++) {
             result.add("a" + i);
@@ -75,7 +75,7 @@ public class BatchedReceiverTest {
 
 
     @Test
-    public void testWithoutBatchSize() {
+    void withoutBatchSize() {
         final List<String> result = new ArrayList<>();
         for (int i = 0; i < 23; i++) {
             result.add("a" + i);
@@ -125,7 +125,7 @@ public class BatchedReceiverTest {
 
 
     @Test
-    public void testWithTokens() {
+    void withTokens() {
         org.meeuw.collections.BatchedReceiver<String> i =
             BatchedReceiver.<String>builder()
                 .initialAndResumption(WithToken::initial,
@@ -140,7 +140,7 @@ public class BatchedReceiverTest {
     }
 
      @Test
-    public void testWithSupplier() {
+    void withSupplier() {
          Supplier<Optional<Iterator<String>>> supplier = new Supplier<>() {
              int i = 10;
              @Override

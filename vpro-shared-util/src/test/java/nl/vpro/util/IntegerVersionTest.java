@@ -26,7 +26,7 @@ class IntegerVersionTest {
     }
 
     @Test
-    public void test() {
+    void test() {
         StringWriter out = new StringWriter();
         A a = new A();
         a.version = IntegerVersion.parseIntegers("3.14.15");
@@ -39,7 +39,7 @@ class IntegerVersionTest {
 
 
     @Test
-    public void testNull() {
+    void testNull() {
         StringWriter out = new StringWriter();
         A a = new A();
         JAXB.marshal(a, out);

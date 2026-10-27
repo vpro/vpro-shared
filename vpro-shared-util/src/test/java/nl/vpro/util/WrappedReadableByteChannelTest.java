@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class WrappedReadableByteChannelTest {
 
     @Test
-    public void test() throws IOException {
+    void test() throws IOException {
         Random random = new Random();
         int size = random.nextInt(1_000_000) + 500_000;
         ReadableByteChannel channel = Channels.newChannel(new RandomStream(random, size));
@@ -45,7 +45,7 @@ class WrappedReadableByteChannelTest {
     }
 
     @Test
-    public void noConsumer() throws IOException {
+    void noConsumer() throws IOException {
         Random random = new Random();
         int size = random.nextInt(1_000_000) + 500_000;
         InputStream inputStream = new RandomStream(random, size);
@@ -63,7 +63,7 @@ class WrappedReadableByteChannelTest {
 
     @SuppressWarnings("resource")
     @Test
-    public void erroneousConstruction() throws IOException {
+    void erroneousConstruction() throws IOException {
         assertThatThrownBy(() -> WrappedReadableByteChannel.builder()
             .build()).isInstanceOf(IllegalArgumentException.class);
 
@@ -84,7 +84,7 @@ class WrappedReadableByteChannelTest {
     }
 
     @Test
-    public void consumesEveryCompletedBatchAndTheRemainderOnClose() throws IOException {
+    void consumesEveryCompletedBatchAndTheRemainderOnClose() throws IOException {
         List<Long> consumed = new ArrayList<>();
         try (WrappedReadableByteChannel wrapped = WrappedReadableByteChannel.builder()
             .inputStream(new RandomStream(new Random(), 7))
@@ -98,7 +98,7 @@ class WrappedReadableByteChannelTest {
     }
 
     @Test
-    public void consumesTheRemainderWhenClosingFails() throws IOException {
+    void consumesTheRemainderWhenClosingFails() throws IOException {
         List<Long> consumed = new ArrayList<>();
         ReadableByteChannel delegate = new ReadableByteChannel() {
             private boolean open = true;

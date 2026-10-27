@@ -22,7 +22,7 @@ class CaptureListFromLoggerTest {
         service.shutdown();
     }
     @Test
-    public void log() {
+    void log() {
         List<Future<?>> futures = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             final int j = i;
@@ -47,7 +47,7 @@ class CaptureListFromLoggerTest {
     }
 
     @Test
-    public void logWithFilter() {
+    void logWithFilter() {
         try (CaptureListFromLogger capture = CaptureListFromLogger.builder()
             .predicate(le -> le.getMessage().getFormattedMessage().contains("foo"))
             .currentThreadOnly(true)
@@ -63,7 +63,7 @@ class CaptureListFromLoggerTest {
 
 
     @Test
-    public void logWithLevel() {
+    void logWithLevel() {
         Logger logger = LogManager.getLogger("foo");
 
         try (CaptureListFromLogger capture = CaptureListFromLogger.builder()

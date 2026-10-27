@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings({"Duplicates", "deprecation", "BusyWait"})
 @Slf4j
 @Isolated
-public class MBeansTest {
+class MBeansTest {
 
     @AfterEach
     public void after() throws InterruptedException {
@@ -39,7 +39,7 @@ public class MBeansTest {
     }
 
     @Test
-    public void testWithUpdateableString() {
+    void withUpdateableString() {
         log.info("Start");
 
         UpdatableString string = new UpdatableString(log, "test");
@@ -62,7 +62,7 @@ public class MBeansTest {
     }
 
     @Test
-    public void testWithStringBuilderLogger() {
+    void withStringBuilderLogger() {
         log.info("Start");
 
 
@@ -92,7 +92,7 @@ public class MBeansTest {
 
     @Test
     @Timeout(value = 5, unit = TimeUnit.SECONDS)
-    public void cancel() throws InterruptedException, ExecutionException {
+    void cancel() throws InterruptedException, ExecutionException {
         returnString("KEY", multiLine(log, "Filling media queues cancel"),  Duration.ofMillis(100), (l) -> {
             int count = 0;
             while(true) {
@@ -116,7 +116,7 @@ public class MBeansTest {
 
 
     @Test
-    public void abandon() throws InterruptedException, ExecutionException {
+    void abandon() throws InterruptedException, ExecutionException {
         AtomicBoolean running = new AtomicBoolean(true);
         final boolean[] started = new boolean[1];
         final List<String> interrupted = new ArrayList<>();
@@ -174,20 +174,20 @@ public class MBeansTest {
 
 
     @Test
-    public void failRegisterBean() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
+    void failRegisterBean() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
         assertThat(MBeans.registerBean(new A())).isEmpty();
         ;
     }
 
     @Test
-    public void registerBBean() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
+    void registerBBean() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
         ObjectName on = assertThat(MBeans.registerBean(new B())).isNotEmpty().get().actual();
         var info = ManagementFactory.getPlatformMBeanServer().getMBeanInfo(on);
         log.info("MBean info: {}", info);
         assertThat(on.toString()).isEqualTo("nl.vpro.jmx:name=B");
     }
     @Test
-    public void registerBBeanWithName() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
+    void registerBBeanWithName() throws ReflectionException, InstanceNotFoundException, IntrospectionException {
         ObjectName on = assertThat(MBeans.registerBean("foobar", new B())).isNotEmpty().get().actual();
         var info = ManagementFactory.getPlatformMBeanServer().getMBeanInfo(on);
         log.info("MBean info: {}", info);

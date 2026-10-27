@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
  * @since ...
  */
 @Slf4j
-public class ESClientTest {
+class ESClientTest {
 
 
     @Test
-    public void test() throws UnknownHostException {
+    void test() throws UnknownHostException {
 
     }
 }

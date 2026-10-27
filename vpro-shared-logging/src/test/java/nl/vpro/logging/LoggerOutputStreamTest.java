@@ -13,11 +13,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  */
 @Slf4j
-public class LoggerOutputStreamTest {
+class LoggerOutputStreamTest {
 
 
     @Test
-    public void test() throws IOException {
+    void test() throws IOException {
         String testString = "bla bla\n\nbloe bloe ";
         final StringBuilder buf = new StringBuilder();
         LoggerOutputStream instance = new LoggerOutputStream(false) {
@@ -33,7 +33,7 @@ public class LoggerOutputStreamTest {
 
 
     @Test
-    public void performance() throws IOException {
+    void performance() throws IOException {
         long nano = System.nanoTime();
         LoggerOutputStream out = LoggerOutputStream.debug(log);
         for (int i = 0 ; i < 10000; i++) {

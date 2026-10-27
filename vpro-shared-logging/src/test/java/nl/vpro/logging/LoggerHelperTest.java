@@ -33,7 +33,7 @@ class LoggerHelperTest {
     private static final Logger log = LoggerFactory.getLogger(LoggerHelperTest.class);
 
     @Test
-    public void trace() {
+    void trace() {
         final StringWriter writer = new StringWriter();
 
 

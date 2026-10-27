@@ -10,11 +10,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JAXBTestUtilTest {
+class JAXBTestUtilTest {
 
 
     @Test
-    public void testMarshal() {
+    void marshal() {
         assertEquals("""
             <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             <a xmlns="urn:test:1234">
@@ -30,7 +30,7 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testMarshalWithNoRootElement () {
+    void marshalWithNoRootElement () {
         assertThatXml(new B()).isSimilarTo("""
             <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             <local:b xmlns="urn:test:1234" xmlns:local="uri:local" i="1" j="2">
@@ -42,7 +42,7 @@ public class JAXBTestUtilTest {
 
     @Test
     @Deprecated
-    public void testContainsDeprecated() {
+    void containsDeprecated() {
         roundTrip(new A(), """
             <b i="1" j="2">
                     <value>bb</value>
@@ -52,7 +52,7 @@ public class JAXBTestUtilTest {
 
 
     @Test
-    public void testContains() {
+    void contains() {
         /*    "        <map>\n" +
             "            <e>\n" +
             "                <k>x</k>\n" +
@@ -70,14 +70,14 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testContainsNoNamespace() {
+    void containsNoNamespace() {
         ANoNamespace a = roundTripContains(new ANoNamespace(),
              "<a>xx</a>",
             "<c>zz</c>");
     }
 
     @Test
-    public void testContainsNoNamespaceFails() {
+    void containsNoNamespaceFails() {
         assertThatThrownBy(() -> {
             ANoNamespace a = roundTripContains(new ANoNamespace(),
                 "<a>xx</a>",
@@ -87,7 +87,7 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testContainsFluentResult() {
+    void containsFluentResult() {
         Result<A> result = assertThatXml(new A()).containsSimilar("""
             <b xmlns="urn:test:1234" i='1' j='2'>
                         <value>bb</value>
@@ -100,7 +100,7 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testContainsFluent() {
+    void containsFluent() {
         A rounded = assertThatXml(new A()).containsSimilar("""
             <b xmlns="urn:test:1234" i='1' j='2'>
                         <value>bb</value>
@@ -110,7 +110,7 @@ public class JAXBTestUtilTest {
     }
 
     @Test
-    public void testContainsFluentFails() {
+    void containsFluentFails() {
         assertThatThrownBy(() ->
             assertThatXml(new A()).containsSimilar("""
                 <b xmlns="urn:test:1234" i='1' j='3'>
@@ -120,7 +120,7 @@ public class JAXBTestUtilTest {
             .isInstanceOf(AssertionError.class);
     }
     @Test
-    public void testFluentWithFilter() {
+    void fluentWithFilter() {
         assertThatXml(new A())
             .withNodeFilter(n -> ! n.getNodeName().equals("value")).isSimilarTo("""
                 <a xmlns="urn:test:1234">
@@ -132,7 +132,7 @@ public class JAXBTestUtilTest {
                        </a>""");
     }
     @Test
-    public void testFluentWithFilterFails() {
+    void fluentWithFilterFails() {
         assertThatThrownBy(() ->
 
             assertThatXml(new A())

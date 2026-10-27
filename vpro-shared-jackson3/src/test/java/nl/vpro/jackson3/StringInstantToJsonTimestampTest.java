@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.*;
  * @author Michiel Meeuwissen
  */
 @Slf4j
-public class StringInstantToJsonTimestampTest {
+class StringInstantToJsonTimestampTest {
 
     @Test
-    public void testOk() {
+    void ok() {
         Instant instant = StringInstantToJsonTimestamp.parseDateTime("2017-05-24T16:30:00+02:00");
         assertThat(instant).isEqualTo(
             LocalDateTime.of(2017, 5, 24, 16, 30, 0).atZone(ZoneId.of("Europe/Amsterdam")).toInstant());
@@ -24,7 +24,7 @@ public class StringInstantToJsonTimestampTest {
     }
 
     @Test // natty does succeed in parsing this
-    public void testOdd() {
+    void odd() {
         Instant instant = StringInstantToJsonTimestamp.parseDateTime("0737-05-22T14:35:55+00:19:32");     // Of course, that is a very odd timezone
 
         assertThat(instant).isEqualTo(
@@ -33,14 +33,14 @@ public class StringInstantToJsonTimestampTest {
     }
 
     @Test
-    public void testNotOk() {
+    void notOk() {
         assertThatThrownBy(() -> {
             StringInstantToJsonTimestamp.parseDateTime("dit is echt geen datum");
         }).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    public void testNattyNow() {
+    void nattyNow() {
         assertThat(StringInstantToJsonTimestamp.parseDateTime("now"))
             .isCloseTo(Instant.now(), within(10, ChronoUnit.SECONDS));
     }

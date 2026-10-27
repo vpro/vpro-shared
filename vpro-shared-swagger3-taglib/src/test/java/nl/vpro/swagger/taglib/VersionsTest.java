@@ -7,7 +7,7 @@ class VersionsTest {
 
 
     @Test
-    public void version() {
+    void version() {
         System.getLogger("test").log(System.Logger.Level.INFO, "swagger version: " + Versions.getSwaggerUIVersion());
     }
 }

@@ -12,7 +12,7 @@ class ZeroOneBooleanAdapterTest {
 
     ZeroOneBooleanAdapter instance = new ZeroOneBooleanAdapter();
     @Test
-    public void unmarshal() {
+    void unmarshal() {
 
         assertThat(instance.unmarshal("1")).isTrue();
         assertThat(instance.unmarshal("0")).isFalse();
@@ -22,7 +22,7 @@ class ZeroOneBooleanAdapterTest {
     }
 
     @Test
-    public void marshal() throws Exception {
+    void marshal() throws Exception {
         assertThat(instance.marshal(null)).isNull();
         assertThat(instance.marshal(true)).isEqualTo("1");
         assertThat(instance.marshal(false)).isEqualTo("0");

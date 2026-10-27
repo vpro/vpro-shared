@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
  * @author Michiel Meeuwissen
  * @since 1.69
  */
-public class AcceptRequestFilterTest {
+class AcceptRequestFilterTest {
 
     AcceptRequestFilter instance = new AcceptRequestFilter(MediaType.APPLICATION_JSON_TYPE);
     ClientRequestContext context = mock(ClientRequestContext.class);
@@ -31,14 +31,14 @@ public class AcceptRequestFilterTest {
 
 
     @Test
-    public void filterWithoutExisting() {
+    void filterWithoutExisting() {
         instance.filter(context);
         assertThat(headers.getFirst("Accept")).isEqualTo("application/json");
 
     }
 
     @Test
-    public void filterWithemptyExisting() {
+    void filterWithemptyExisting() {
         headers.put("Accept", new ArrayList<>());
         instance.filter(context);
         assertThat(headers.getFirst("Accept")).isEqualTo("application/json");
@@ -46,7 +46,7 @@ public class AcceptRequestFilterTest {
     }
 
     @Test
-    public void filterWithExisting() {
+    void filterWithExisting() {
         headers.putSingle("Accept", "application/xml, application/json;charset=UTF-8");
         instance.filter(context);
         assertThat(headers.getFirst("Accept")).isEqualTo("application/json;charset=UTF-8, application/xml;q=0.5");

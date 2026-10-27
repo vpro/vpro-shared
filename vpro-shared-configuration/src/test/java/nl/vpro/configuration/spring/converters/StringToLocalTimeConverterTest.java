@@ -16,7 +16,7 @@ class StringToLocalTimeConverterTest {
     StringToLocalTimeConverter instance = new StringToLocalTimeConverter();
 
     @Test
-    public void test() {
+    void test() {
 
         assertThat(instance.convert("8:00")).isEqualTo(LocalTime.of(8, 0));
         assertThat(instance.convert("08:00")).isEqualTo(LocalTime.of(8, 0));

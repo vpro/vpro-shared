@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CountedPeekingIteratorImplTest {
 
     @Test
-    public void basic() throws Exception {
+    void basic() throws Exception {
         org.meeuw.collections.BasicWrappedIterator<String> wrapped = BasicWrappedIterator.<String>builder()
             .wrapped(Arrays.asList("a", "b", "c").iterator())
             .size(3L)

@@ -41,7 +41,7 @@ class GuavaRangeModuleTest {
 
 
     @Test
-    public void without() throws JacksonException, JSONException {
+    void without() throws JacksonException, JSONException {
         WithoutSerializer a = new WithoutSerializer();
         a.range = Range.closedOpen(1, 2);
         String expected = "{\"range\":{\"lowerEndpoint\":1,\"lowerBoundType\":\"CLOSED\",\"upperEndpoint\":2,\"upperBoundType\":\"OPEN\",\"type\":\"java.lang.Integer\"},\"anotherField\":1}";
@@ -55,14 +55,14 @@ class GuavaRangeModuleTest {
 
 
     @Test
-    public void empty() throws JacksonException {
+    void empty() throws JacksonException {
         WithIntegerRange a = new WithIntegerRange();
         assertThat(mapper.writeValueAsString(a)).isEqualTo("{\"range\":null}");
 
     }
 
     @Test
-    public void filled() throws JacksonException {
+    void filled() throws JacksonException {
         WithIntegerRange a = new WithIntegerRange();
         a.range = Range.closedOpen(1, 10);
 
@@ -71,7 +71,7 @@ class GuavaRangeModuleTest {
     }
 
     @Test
-    public void instant() throws JacksonException {
+    void instant() throws JacksonException {
         WithInstantRange a = new WithInstantRange();
         a.range = Range.closedOpen(
             Instant.parse("2021-12-24T10:00:00Z"),

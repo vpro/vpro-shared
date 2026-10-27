@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Isolated
 @Slf4j
-public class ThreadPoolsTest {
+class ThreadPoolsTest {
 
 
 
     @Test
     @Disabled
-    public void background() throws ExecutionException, InterruptedException {
+    void background() throws ExecutionException, InterruptedException {
         List<Future<Integer>> futures = new ArrayList<>();
         int k = 0;
         for (ExecutorService te : Arrays.asList(ThreadPools.backgroundExecutor, ThreadPools.copyExecutor, ThreadPools.startUpExecutor)) {
@@ -45,7 +45,7 @@ public class ThreadPoolsTest {
 
 
     @Test
-    public void blockingThreads() throws ExecutionException, InterruptedException {
+    void blockingThreads() throws ExecutionException, InterruptedException {
         final long start = System.currentTimeMillis();
         Future<?> f1 = ThreadPools.backgroundExecutor.submit(() -> {
             Thread.sleep(500);
@@ -68,7 +68,7 @@ public class ThreadPoolsTest {
     }
 
     @Test
-    public void copyingThreads() throws ExecutionException, InterruptedException {
+    void copyingThreads() throws ExecutionException, InterruptedException {
         log.info(ThreadPools.copyExecutorDescription());
         final long start = System.currentTimeMillis();
         List<Future<?>> futures = new ArrayList<>();
@@ -95,7 +95,7 @@ public class ThreadPoolsTest {
 
     @Test
     @Disabled
-    public void test() {
+    void test() {
         ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(10);
         ThreadPoolExecutor e = new ThreadPoolExecutor(2,  4, 600, TimeUnit.SECONDS,
             queue,

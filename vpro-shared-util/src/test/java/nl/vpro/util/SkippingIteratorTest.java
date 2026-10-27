@@ -10,10 +10,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.68
  */
-public class SkippingIteratorTest {
+class SkippingIteratorTest {
 
     @Test
-    public void basicTest() {
+    void basicTest() {
         List<String> test = Arrays.asList("a", "b", "b", "c");
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator());
@@ -23,7 +23,7 @@ public class SkippingIteratorTest {
 
 
     @Test
-    public void basicTest2() {
+    void basicTest2() {
         List<String> test = Arrays.asList("a", "b", "x", "b", "c", null, null, "a");
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator(),
@@ -34,7 +34,7 @@ public class SkippingIteratorTest {
 
 
     @Test
-    public void basicTest3() {
+    void basicTest3() {
         List<String> test = Arrays.asList("a", "b", "x", "x", "b", "b", "c", null, null, "a");
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator(), (a, b) ->
@@ -45,7 +45,7 @@ public class SkippingIteratorTest {
 
 
     @Test
-    public void basicTest4() {
+    void basicTest4() {
         List<String> test = Arrays.asList("a", "b", "b", "b", "c");
 
         SkippingIterator<String> iterator = new SkippingIterator<>(test.iterator());

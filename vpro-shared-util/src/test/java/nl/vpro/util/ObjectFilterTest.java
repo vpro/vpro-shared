@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.59
  */
-public class ObjectFilterTest {
+class ObjectFilterTest {
 
     public static class A {
         private String field1 = "a";
@@ -31,7 +31,7 @@ public class ObjectFilterTest {
     }
 
     @Test
-    public void test() {
+    void test() {
         A a1 = new A();
         a1.field1 = "aa";
         A a2 = new A();

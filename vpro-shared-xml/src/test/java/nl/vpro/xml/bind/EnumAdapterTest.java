@@ -19,7 +19,7 @@ class EnumAdapterTest {
     }
 
     @Test
-    public void test() {
+    void test() {
         EnumAdapter<AnEnum> adapter = new EnumAdapter<AnEnum>(AnEnum.class) {
 
         };

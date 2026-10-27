@@ -13,22 +13,22 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 1.64
  */
-public class StringsTest {
+class StringsTest {
 
     @Test
-    public void strings() {
+    void strings() {
         List<String> result = Strings.strings("a,b", "c,d").collect(Collectors.toList());
         assertThat(result).containsExactly("a", "b", "c", "d");
     }
 
     @Test
-    public void stringsWithNewlines() {
+    void stringsWithNewlines() {
         List<String> result = Strings.strings("a\n b", "c,d").collect(Collectors.toList());
         assertThat(result).containsExactly("a", "b", "c", "d");
     }
 
     @Test
-    public void stringsFile() throws IOException {
+    void stringsFile() throws IOException {
         File tempFile = File.createTempFile("test", "test");
         tempFile.deleteOnExit();
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(tempFile), UTF_8)) {

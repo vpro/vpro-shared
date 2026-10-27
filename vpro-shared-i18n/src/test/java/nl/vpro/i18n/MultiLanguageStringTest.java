@@ -13,11 +13,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Michiel Meeuwissen
  */
-public class MultiLanguageStringTest {
+class MultiLanguageStringTest {
 
 
     @Test
-    public void test() {
+    void test() {
         MultiLanguageString string = en("Hello")
             .nl("Hoi")
             .in("eo").is("Saluton")
@@ -40,7 +40,7 @@ public class MultiLanguageStringTest {
     }
 
     @Test
-    public void testWithoutDefault() {
+    void withoutDefault() {
         MultiLanguageString string = en("Hello")
             .nl("Hoi")
             .in("eo").is("Saluton")
@@ -51,7 +51,7 @@ public class MultiLanguageStringTest {
 
 
     @Test
-    public void testWithDefaultLocale() {
+    void withDefaultLocale() {
 
         MultiLanguageString string = MultiLanguageString.builder()
             .nl("Hoi")
@@ -72,7 +72,7 @@ public class MultiLanguageStringTest {
     }
 
     @Test
-    public void in() {
+    void in() {
         MultiLanguageString string = MultiLanguageString
             .of(Locale.CHINESE, "asdfad")
             .build();
@@ -80,7 +80,7 @@ public class MultiLanguageStringTest {
     }
 
      @Test
-    public void testWithSlfjArgs() {
+    void withSlfjArgs() {
         MultiLanguageString string = MultiLanguageString.builder()
             .nl("a {} b {}")
             .en("b {} a {}")
@@ -96,7 +96,7 @@ public class MultiLanguageStringTest {
     }
 
     @Test
-    public void testWithArgs() {
+    void withArgs() {
         MultiLanguageString string = MultiLanguageString.builder()
             .nl("a {0} b {1}")
             .en("b {1} a {0}")
@@ -112,7 +112,7 @@ public class MultiLanguageStringTest {
     }
 
     @Test
-    public void testWithFormattedArgs() {
+    void withFormattedArgs() {
         MultiLanguageString string = MultiLanguageString.builder()
             .nl("a %s b %s")
             .en("b %2$s a %1$s")
@@ -128,7 +128,7 @@ public class MultiLanguageStringTest {
     }
 
     @Test
-    public void withBundle() throws Exception {
+    void withBundle() throws Exception {
         try (AutoCloseable autoCloseable = Locales.with(new Locale("eo"))) {
             MultiLanguageString string = MultiLanguageString.builder()
                 .nl("a {0} b {1}")
@@ -141,7 +141,7 @@ public class MultiLanguageStringTest {
     }
 
     @Test
-    public void log() {
+    void log() {
         try (Locales.RestoreDefaultLocale ignore1 = Locales.with(Locale.US)) {
 
             StringBuilderSimpleLogger logger = StringBuilderSimpleLogger

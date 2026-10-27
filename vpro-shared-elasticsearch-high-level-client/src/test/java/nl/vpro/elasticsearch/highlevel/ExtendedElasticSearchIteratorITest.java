@@ -64,7 +64,7 @@ class ExtendedElasticSearchIteratorITest {
     }
 
     @Test
-    public void iterator() {
+    void iterator() {
         int count = 0;
         try (ExtendedElasticSearchIterator<A> iterator = ExtendedElasticSearchIterator.<A>extendedBuilder()
             .client(highLevelClientFactory.highLevelClient(ExtendedElasticSearchIterator.class.getName()))

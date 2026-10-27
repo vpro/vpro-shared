@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 4.2
  */
-public class IterableJsonTest {
+class IterableJsonTest {
 
     @XmlAccessorType(XmlAccessType.FIELD)
     public static class A {
@@ -126,7 +126,7 @@ public class IterableJsonTest {
 
 
     @Test
-    public void testGetAValueJson() throws Exception {
+    void getAValueJson() throws Exception {
         AIterable in = new AIterable(Arrays.asList(new A("x"), new A("y")));
 
         AIterable out = roundTripAndSimilar(in, "[{\"x\":\"x\"},{\"x\":\"y\"}]");
@@ -136,7 +136,7 @@ public class IterableJsonTest {
     }
 
     @Test
-    public void testGetAValueJsonSingleValue() throws Exception {
+    void getAValueJsonSingleValue() throws Exception {
         AIterable in = new AIterable(Collections.singletonList(new A("a")));
 
         AContainer out = roundTripAndSimilar(new AContainer(in), "{\"testList\":{\"x\":\"a\"}}");
@@ -147,7 +147,7 @@ public class IterableJsonTest {
 
 
     @Test
-    public void testGetValueJson() throws Exception {
+    void getValueJson() throws Exception {
         StringIterable in = new StringIterable(Arrays.asList("a", "b"));
 
         StringIterable out = roundTripAndSimilar(in, "[\"a\",\"b\"]");
@@ -157,7 +157,7 @@ public class IterableJsonTest {
     }
 
     @Test
-    public void testGetValueJsonSingleValue() throws Exception {
+    void getValueJsonSingleValue() throws Exception {
         StringIterable in = new StringIterable(Collections.singletonList("a"));
 
         Container out = roundTripAndSimilar(new Container(in), "{\"testList\":\"a\"}");
