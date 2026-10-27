@@ -81,11 +81,7 @@
         <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-guice</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate7</artifactId>
@@ -112,11 +108,7 @@
         <artifactId>vpro-shared-logging</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-log4j2</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-monitoring</artifactId>
@@ -173,18 +165,8 @@
         <artifactId>vpro-shared-swagger3-taglib</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jcache</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
       <!-- not maintained anymore -->
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jackson2</artifactId>
-        <version>5.18.0</version>
-      </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate-search</artifactId>
@@ -262,7 +244,27 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-guice</artifactId>
+        <version>5.17.5</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-log4j2</artifactId>
+        <version>5.17.5</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate</artifactId>
+        <version>5.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-jcache</artifactId>
+        <version>5.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-jackson2</artifactId>
         <version>5.18.0</version>
       </dependency>
     </dependencies>
