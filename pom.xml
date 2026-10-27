@@ -35,7 +35,7 @@
     -->
     <jboss-logging.version>3.6.3.Final</jboss-logging.version>
 
-    <bytebuddy.version>1.18.15</bytebuddy.version>
+    <bytebuddy.version>1.18.16</bytebuddy.version>
     <slf4j.version>2.0.20</slf4j.version>
     <log4j2.version>2.26.1</log4j2.version>
     <guava.version>33.7.2-jre</guava.version>
@@ -51,7 +51,7 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>7.4.13.Final</hibernate.version>
+    <hibernate.version>7.4.14.Final</hibernate.version>
     <hibernate.search.version>8.4.0.Final</hibernate.search.version>
     <hibernate.validator.version>9.1.5.Final</hibernate.validator.version>
 
