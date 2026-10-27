@@ -173,11 +173,6 @@
         <artifactId>vpro-shared-swagger3-taglib</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jcache</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
       <!-- not maintained anymore -->
       <dependency>
@@ -263,6 +258,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate</artifactId>
+        <version>5.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-jcache</artifactId>
         <version>5.18.0</version>
       </dependency>
     </dependencies>

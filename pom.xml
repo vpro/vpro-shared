@@ -137,7 +137,6 @@
     <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-elasticsearch-high-level-client</module>
 
-    <module>vpro-shared-hibernate</module>
     <!--
     <module>vpro-shared-hibernate-search</module>
     -->
@@ -160,12 +159,14 @@
     <module>vpro-shared-xml</module>
 
     <module>vpro-shared-i18n</module>
-    <module>vpro-shared-jcache</module>
     <module>vpro-shared-bom</module>
     <module>vpro-shared-mediainfo</module>
 
 
     <!--
+        <module>vpro-shared-hibernate</module>
+    <module>vpro-shared-jcache</module>
+
         <module>vpro-shared-swagger</module>
         <module>vpro-shared-client-resteasy3</module> - the other resteasy module as made compatibe with 3 too
          <module>vpro-shared-resteasy</module>
