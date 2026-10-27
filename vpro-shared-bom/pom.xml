@@ -81,11 +81,7 @@
         <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-guice</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate7</artifactId>
@@ -99,6 +95,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-i18n</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-jackson2</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -174,12 +175,10 @@
         <version>${project.version}</version>
       </dependency>
 
+
       <!-- not maintained anymore -->
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-jackson2</artifactId>
-        <version>5.18.0</version>
-      </dependency>
+
+
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate-search</artifactId>
@@ -254,6 +253,11 @@
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger</artifactId>
         <version>3.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-guice</artifactId>
+        <version>5.17.5</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
