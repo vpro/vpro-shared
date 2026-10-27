@@ -114,12 +114,6 @@
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
-        <artifactId>vpro-shared-log4j2</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-monitoring</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -257,6 +251,11 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-guice</artifactId>
+        <version>5.17.5</version>
+      </dependency>
+      <dependency>
+        <groupId>nl.vpro.shared</groupId>
+        <artifactId>vpro-shared-log4j2</artifactId>
         <version>5.17.5</version>
       </dependency>
       <dependency>
