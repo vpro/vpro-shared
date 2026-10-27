@@ -518,9 +518,9 @@ public class ElasticSearchIterator<T>  implements ElasticSearchIteratorInterface
 
 
     @Override
-    public @NonNull Optional<Long> getSize() {
+    public @NonNull OptionalLong getSize() {
         findNext();
-        return Optional.ofNullable(this.totalSize);
+        return this.totalSize == null ? OptionalLong.empty() : OptionalLong.of(this.totalSize);
     }
 
     @Override

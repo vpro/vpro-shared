@@ -362,9 +362,9 @@ public class HighLevelElasticSearchIterator<T> implements ElasticSearchIteratorI
 
 
     @Override
-    public @NonNull Optional<Long> getSize() {
+    public @NonNull OptionalLong getSize() {
         findNext();
-        return Optional.ofNullable(this.totalSize);
+        return this.totalSize == null ? OptionalLong.empty() : OptionalLong.of(this.totalSize);
     }
 
     @Override

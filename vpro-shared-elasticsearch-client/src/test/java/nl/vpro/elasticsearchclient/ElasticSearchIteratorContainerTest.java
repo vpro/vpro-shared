@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
+import org.meeuw.collections.MaxOffsetIterator;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,7 +17,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import nl.vpro.elasticsearch.Constants;
 import nl.vpro.elasticsearch.CreateIndex;
 import nl.vpro.test.opensearch.ElasticsearchContainer;
-import nl.vpro.util.MaxOffsetIterator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michiel Meeuwissen
  * @since 0.47
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @Slf4j
 @Testcontainers(disabledWithoutDocker = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -98,7 +97,7 @@ public class ElasticSearchIteratorContainerTest {
 
             i.forEachRemaining((u) -> {
                 if (i.getCount() % 1000 == 0) {
-                    log.info("{}/{}: {} (eta: {})", i.getCount(), i.getTotalSize().orElse(null), u,
+                    log.info("{}/{}: {} (eta: {})", i.getCount(), i.getTotalSize().orElse(-1), u,
                         i.getETA().map(eta -> eta.atZone(ZoneId.of("Europe/Amsterdam")).toLocalDateTime().truncatedTo(ChronoUnit.SECONDS)).orElse(null)
                     );
                 }
@@ -138,7 +137,7 @@ public class ElasticSearchIteratorContainerTest {
 
             AtomicLong count = new AtomicLong(0);
             i.forEachRemaining((node) -> {
-                log.debug("{}/{}: {}", i.getCount(), i.getTotalSize().get(), node);
+                log.debug("{}/{}: {}", i.getCount(), i.getTotalSize().orElse(-1), node);
                 count.incrementAndGet();
             });
             assertThat(count.get()).isEqualTo(numberOfObjects);

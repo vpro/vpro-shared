@@ -88,7 +88,7 @@ class HighLevelElasticSearchIteratorITest {
             sourceBuilder.size(40);
             sourceBuilder.query(query);
 
-            assertThat(iterator.getTotalSize()).contains(50L);
+            assertThat(iterator.getTotalSize()).hasValue(50L);
             assertThat(iterator.getSizeQualifier()).contains(ElasticSearchIteratorInterface.TotalRelation.EQUAL_TO);
 
             assertThat(iterator.getResponse().getScrollId()).isNotNull();
