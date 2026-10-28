@@ -16,13 +16,13 @@ import javax.management.ObjectName;
 
 import org.apache.http.util.EntityUtils;
 import org.apache.lucene.search.TotalHits;
-
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.*;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.jspecify.annotations.NonNull;
+import org.meeuw.functional.Optionals;
 import org.meeuw.math.windowed.WindowedEventRate;
 
 import nl.vpro.elasticsearch.ElasticSearchIteratorInterface;
