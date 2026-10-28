@@ -2,7 +2,7 @@
     xmlns:jsp="http://java.sun.com/JSP/Page"
     version="2.0"
     >
-  <jsp:directive.tag import="org.apache.commons.text.StringEscapeUtils"/>
+  <jsp:directive.tag import="nl.vpro.swagger.taglib.Escape"/>
   <jsp:directive.tag
             description="This includes the javascript for the swagger index" />
     <jsp:directive.attribute
@@ -38,8 +38,8 @@
       }
       request.setAttribute("swaggerjson", url);
       // avoid dependency on jstl:fn
-      request.setAttribute("escapedOperationSorter", StringEscapeUtils.escapeXml11(operationsSorter));
-      request.setAttribute("escapedFilter", StringEscapeUtils.escapeXml11(filter));
+      request.setAttribute("escapedOperationSorter", Escape.javascript(operationsSorter));
+      request.setAttribute("escapedFilter", Escape.javascript(filter));
 
     </jsp:scriptlet>
     <script type="text/javascript"><![CDATA[
