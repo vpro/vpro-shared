@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 
 import org.apache.commons.text.StringSubstitutor;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.meeuw.json.grep.Sed;
 import org.meeuw.json.grep.matching.*;
 

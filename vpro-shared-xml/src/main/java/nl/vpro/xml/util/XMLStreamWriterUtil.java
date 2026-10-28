@@ -1,8 +1,9 @@
 package nl.vpro.xml.util;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 
-import java.io.*;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -10,8 +11,7 @@ import java.util.Deque;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.*;
 
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.meeuw.functional.ThrowingConsumer;
 
 
@@ -21,7 +21,7 @@ import org.meeuw.functional.ThrowingConsumer;
  * @author Michiel Meeuwissen
  * @since 2.8
  */
-@Slf4j
+@Log
 public class XMLStreamWriterUtil {
 
     private static final XMLOutputFactory FACTORY = XMLOutputFactory.newInstance();
@@ -43,18 +43,30 @@ public class XMLStreamWriterUtil {
         this(FACTORY.createXMLStreamWriter(writer));
     }
      public XMLStreamWriterUtil(StringBuilder builder) throws XMLStreamException {
-        this(FACTORY.createXMLStreamWriter(new StringBuilderWriter(builder)));
+        this(FACTORY.createXMLStreamWriter(new Writer() {
+            @Override
+            public void write(char[] cbuf, int off, int len) {
+                builder.append(cbuf, off, len);
+            }
+            @Override
+            public void write(String str, int off, int len) {
+                builder.append(str, off, off + len);
+            }
+            @Override
+            public void flush() {
+            }
+            @Override
+            public void close() {
+            }
+        }));
     }
 
 
     public ElementCloser writeElement(final String name) throws XMLStreamException {
-        log.info("Opening {}", name);
         writer.writeStartElement(name);
         return new ElementCloser(null, name);
     }
-     public ElementCloser writeElement(String namespace, String name) throws XMLStreamException {
-         log.info("Opening {}{}", namespace, name);
-
+    public ElementCloser writeElement(String namespace, String name) throws XMLStreamException {
         writer.writeStartElement(namespace, name);
         return new ElementCloser(namespace, name);
 
@@ -198,10 +210,10 @@ public class XMLStreamWriterUtil {
 
         @Override
         public void close() throws Exception {
-            log.trace("Closing {}", name);
+            log.fine(() -> "Closing %s".formatted(name));
             while (currentDepth > closeTo) {
                 currentDepth--;
-                log.trace("And also {}", closeables.peek());
+                log.finer(() -> "And also %s".formatted(closeables.peek()));
                 closeables.pop().close();
             }
             currentDepth--;

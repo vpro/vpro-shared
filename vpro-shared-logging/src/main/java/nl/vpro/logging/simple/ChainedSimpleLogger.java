@@ -3,7 +3,7 @@ package nl.vpro.logging.simple;
 import java.util.*;
 import java.util.function.Predicate;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 
 /**

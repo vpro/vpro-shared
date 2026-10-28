@@ -9,7 +9,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.annotation.XmlEnumValue;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This is a nice idea. The sad thing however, is that when using this, the generated XSD will not anymore be an enum.

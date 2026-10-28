@@ -809,6 +809,12 @@
         <artifactId>setup-log4j2</artifactId>
         <version>1.8</version>
       </dependency>
+      <dependency>
+        <groupId>org.checkerframework</groupId>
+        <artifactId>checker-qual</artifactId>
+        <version>${checker.version}</version>
+        <optional>true</optional>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -829,11 +835,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.checkerframework</groupId>
-      <artifactId>checker-qual</artifactId>
-      <version>${checker.version}</version>
-      <optional>true</optional>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>1.0.1</version>
     </dependency>
+
 
     <dependency>
       <groupId>nl.mmprogrami</groupId>

@@ -9,7 +9,7 @@ import javax.management.ReflectionException;
 import javax.management.modelmbean.ModelMBean;
 import javax.management.modelmbean.RequiredModelMBean;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.SpringModelMBean;
 

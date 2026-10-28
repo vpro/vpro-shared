@@ -1,6 +1,7 @@
 package nl.vpro.elasticsearch;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.jspecify.annotations.Nullable;
 
 /**
  * Options for creating indices

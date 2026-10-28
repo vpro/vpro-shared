@@ -1,6 +1,6 @@
 package nl.vpro.configuration.spring.converters;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 
 /**

@@ -1,6 +1,6 @@
 package nl.vpro.xml.bind;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
@@ -10,7 +10,7 @@ import java.time.temporal.Temporal;
  * @author Michiel Meeuwissen
  * @since 2.4
  */
-@Slf4j
+@Log
 public class LenientLocalDateXmlAdapter extends LocalDateXmlAdapter {
 
     @Override
@@ -18,7 +18,7 @@ public class LenientLocalDateXmlAdapter extends LocalDateXmlAdapter {
         try {
             return super.unmarshal(dateValue);
         } catch (DateTimeParseException dte) {
-            log.warn(dte.getMessage());
+            log.warning(dte.getMessage());
             return null;
         }
     }

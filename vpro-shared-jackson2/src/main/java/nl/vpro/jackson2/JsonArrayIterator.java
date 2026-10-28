@@ -7,8 +7,9 @@ import java.io.*;
 import java.util.*;
 import java.util.function.*;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.meeuw.collections.CloseableIterator;
 import org.meeuw.collections.CountedIterator;
 import org.meeuw.functional.Optionals;
@@ -129,7 +130,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
          @Nullable final BiFunction<JsonParser, TreeNode,  T> valueCreator,
          @Nullable final Class<T> valueClass,
          @Nullable Runnable callback,
-        @Nullable String property,
+         @Nullable String property,
          @Nullable String sizeField,
          @Nullable String totalSizeField,
          @Nullable ObjectMapper objectMapper,

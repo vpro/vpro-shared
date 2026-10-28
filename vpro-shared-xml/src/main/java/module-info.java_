@@ -6,7 +6,6 @@ module nl.vpro.shared.xml {
     requires static org.checkerframework.checker.qual;
 
     requires java.xml;
-    requires org.apache.commons.io;
 
     requires org.meeuw.functional;
     requires nl.vpro.shared.util;

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import jakarta.xml.bind.annotation.*;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

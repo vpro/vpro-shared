@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 import static nl.vpro.xml.bind.InstantXmlAdapter.formatWithMillis;
 

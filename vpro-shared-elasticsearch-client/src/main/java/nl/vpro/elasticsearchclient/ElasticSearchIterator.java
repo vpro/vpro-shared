@@ -18,8 +18,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.elasticsearch.client.*;
+import org.jspecify.annotations.NonNull;
 import org.meeuw.math.windowed.WindowedEventRate;
 
 import com.fasterxml.jackson.databind.JsonNode;

@@ -2,7 +2,8 @@ package nl.vpro.elasticsearch;
 
 import java.time.Duration;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
+
 
 /**
  * @author Michiel Meeuwissen

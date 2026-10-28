@@ -1,13 +1,12 @@
 package nl.vpro.xml.bind;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
+
 
 /**
  * This simpler version of {@link DurationXmlAdapter} simply uses {@link Duration#toString()}
@@ -15,7 +14,6 @@ import nl.vpro.util.TimeUtils;
  * @author Michiel Meeuwissen
  * @since 0.36
  */
-@Slf4j
 public class DefaultDurationXmlAdapter extends XmlAdapter<String, Duration> {
 
     @Override

@@ -3,10 +3,10 @@ package nl.vpro.configuration.util;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
 import org.springframework.jmx.support.ObjectNameManager;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Michiel Meeuwissen

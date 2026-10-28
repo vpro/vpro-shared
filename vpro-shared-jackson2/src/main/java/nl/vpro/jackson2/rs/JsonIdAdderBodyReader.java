@@ -13,7 +13,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.*;
 import jakarta.ws.rs.ext.*;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;

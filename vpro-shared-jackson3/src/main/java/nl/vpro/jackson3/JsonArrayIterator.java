@@ -13,8 +13,8 @@ import java.io.OutputStream;
 import java.util.*;
 import java.util.function.*;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.meeuw.collections.CloseableIterator;
 import org.meeuw.collections.CountedIterator;
 import org.slf4j.Logger;
@@ -91,7 +91,7 @@ public class JsonArrayIterator<T> extends UnmodifiableIterator<T>
 
 
         @Override
-        public @NonNull Iterator<T> iterator() {
+        public @org.jspecify.annotations.NonNull Iterator<T> iterator() {
             JsonArrayIterator<T> build = build();
             return build.stream()
                 .onClose(build::close)
