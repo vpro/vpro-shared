@@ -905,32 +905,36 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-maven-plugin</artifactId>
-            <version>1.18.20.0</version>
-            <dependencies>
-              <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-              </dependency>
-            </dependencies>
-            <configuration>
-              <sourceDirectory>${delombok.input}</sourceDirectory>
-              <outputDirectory>${delombok.output}</outputDirectory>
-              <addOutputDirectory>false</addOutputDirectory>
-              <encoding>UTF-8</encoding>
-              <verbose>true</verbose>
-              <formatPreferences>
-
-              </formatPreferences>
-            </configuration>
+            <!--
+              lombok-maven-plugin (unmaintained) passes src/main/java as sourcepath, so javac sees module-info.java,
+              fails to resolve the modules, and delombok silently copies the sources unchanged.
+              Run lombok's own delombok on the copied sources (without module-info.java) instead.
+            -->
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.6.4</version>
             <executions>
               <execution>
+                <id>delombok</id>
                 <phase>generate-sources</phase>
                 <goals>
-                  <goal>delombok</goal>
+                  <goal>exec</goal>
                 </goals>
+                <configuration>
+                  <executable>${java.home}/bin/java</executable>
+                  <classpathScope>compile</classpathScope>
+                  <arguments>
+                    <argument>-jar</argument>
+                    <argument>${settings.localRepository}/org/projectlombok/lombok/${lombok.version}/lombok-${lombok.version}.jar</argument>
+                    <argument>delombok</argument>
+                    <argument>${delombok.input}</argument>
+                    <argument>-d</argument>
+                    <argument>${delombok.output}</argument>
+                    <argument>--encoding=UTF-8</argument>
+                    <argument>--classpath</argument>
+                    <classpath/>
+                  </arguments>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -968,6 +972,8 @@
                 <link>https://javadoc.io/doc/com.fasterxml.jackson.jakarta.rs/jackson-jakarta-rs-base/${jackson2.version}/</link>
               </links>
               <detectLinks>true</detectLinks>
+              <!-- javadoc.io only serves docs for versions it already generated; skip unreachable links instead of failing -->
+              <validateLinks>true</validateLinks>
               <detectJavaApiLink>true</detectJavaApiLink>
               <additionalOptions>
                 <!-- not available in java 17
