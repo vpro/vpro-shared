@@ -856,6 +856,29 @@
       <build>
         <plugins>
           <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>lombok-jar</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.projectlombok</groupId>
+                      <artifactId>lombok</artifactId>
+                      <version>${lombok.version}</version>
+                      <destFileName>lombok.jar</destFileName>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${project.build.directory}/delombok-tool</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
             <artifactId>maven-source-plugin</artifactId>
             <version>3.4.0</version>
             <executions>
@@ -909,6 +932,7 @@
               lombok-maven-plugin (unmaintained) passes src/main/java as sourcepath, so javac sees module-info.java,
               fails to resolve the modules, and delombok silently copies the sources unchanged.
               Run lombok's own delombok on the copied sources (without module-info.java) instead.
+              The lombok jar is copied in by maven-dependency-plugin (lombok-jar) during initialize.
             -->
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
@@ -925,7 +949,7 @@
                   <classpathScope>compile</classpathScope>
                   <arguments>
                     <argument>-jar</argument>
-                    <argument>${settings.localRepository}/org/projectlombok/lombok/${lombok.version}/lombok-${lombok.version}.jar</argument>
+                    <argument>${project.build.directory}/delombok-tool/lombok.jar</argument>
                     <argument>delombok</argument>
                     <argument>${delombok.input}</argument>
                     <argument>-d</argument>
