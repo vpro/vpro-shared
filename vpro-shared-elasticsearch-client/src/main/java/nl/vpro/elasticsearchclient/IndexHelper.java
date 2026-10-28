@@ -26,9 +26,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
-
 import org.elasticsearch.client.*;
 import org.jspecify.annotations.Nullable;
+import org.meeuw.collections.CloseableIterator;
 import org.slf4j.*;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
