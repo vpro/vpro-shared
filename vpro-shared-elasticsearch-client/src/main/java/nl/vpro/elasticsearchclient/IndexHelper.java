@@ -22,9 +22,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
-
 import org.elasticsearch.client.*;
 import org.jspecify.annotations.Nullable;
+import org.meeuw.collections.CloseableIterator;
+import org.meeuw.time.TimeUtils;
 import org.slf4j.*;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
@@ -38,7 +39,8 @@ import com.google.common.base.Suppliers;
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson2.Jackson2Mapper;
 import nl.vpro.logging.simple.*;
-import nl.vpro.util.*;
+import nl.vpro.util.IntegerVersion;
+import nl.vpro.util.Version;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static nl.vpro.elasticsearch.Constants.*;
@@ -1187,7 +1189,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         if (jsonNode == null) {
             return defaultValue;
         }
-        Duration result = TimeUtils.parseDuration(jsonNode.textValue()).orElse(defaultValue);
+        Duration result = org.meeuw.time.TimeUtils.parseDuration(jsonNode.textValue()).orElse(defaultValue);
 
         if (result.isNegative()) {
             return TimeUtils.MAX_DURATION;
