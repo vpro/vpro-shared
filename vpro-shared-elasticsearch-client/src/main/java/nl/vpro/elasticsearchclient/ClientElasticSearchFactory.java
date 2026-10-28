@@ -26,9 +26,9 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.conn.ssl.*;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.ssl.SSLContexts;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
 import nl.vpro.elasticsearch.WrongCluster;
