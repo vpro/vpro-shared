@@ -88,6 +88,11 @@ public class DateUtils {
     public static Date toDate(@PolyNull ZonedDateTime date) {
         return date == null ? null : Date.from(date.toInstant());
     }
+
+    @PolyNull
+    public static Instant toInstant(@PolyNull OffsetDateTime date) {
+        return date == null ? null : date.toInstant();
+    }
     @PolyNull
     public static Instant toInstant(@PolyNull ZonedDateTime date) {
         return date == null ? null : date.toInstant();
