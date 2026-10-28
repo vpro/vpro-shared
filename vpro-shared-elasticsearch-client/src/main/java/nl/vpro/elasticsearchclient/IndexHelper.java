@@ -29,6 +29,7 @@ import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.*;
 import org.jspecify.annotations.Nullable;
 import org.meeuw.collections.CloseableIterator;
+import org.meeuw.time.TimeUtils;
 import org.slf4j.*;
 import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
@@ -38,7 +39,8 @@ import com.google.common.base.Suppliers;
 import nl.vpro.elasticsearch.*;
 import nl.vpro.jackson3.Jackson3Mapper;
 import nl.vpro.logging.simple.*;
-import nl.vpro.util.*;
+import nl.vpro.util.IntegerVersion;
+import nl.vpro.util.Version;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static nl.vpro.elasticsearch.Constants.*;
