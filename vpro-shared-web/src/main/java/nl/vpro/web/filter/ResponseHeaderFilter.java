@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *    </init-param>
  *  </filter>
  * }</pre>
- * @author Peter Maas <peter.maas@finalist.com>
+ * @author Peter Maas
  */
 @Log
 public class ResponseHeaderFilter implements Filter {
