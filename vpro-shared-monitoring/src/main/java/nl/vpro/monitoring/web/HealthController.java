@@ -19,7 +19,6 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +40,6 @@ public class HealthController {
     @Setter
     private Status status = Status.STARTING;
 
-    @MonotonicNonNull
     private Instant ready  = null;
 
     Clock clock = Clock.systemDefaultZone();

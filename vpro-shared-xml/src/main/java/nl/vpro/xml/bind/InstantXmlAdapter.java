@@ -7,7 +7,8 @@ import java.util.Locale;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
+
 import nl.vpro.xml.util.XmlUtils;
 
 /**

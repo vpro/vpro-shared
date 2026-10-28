@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.function.*;
 
 import org.apache.commons.io.IOUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import nl.vpro.jackson3.Jackson3Mapper;
 

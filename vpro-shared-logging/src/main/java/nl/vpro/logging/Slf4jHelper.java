@@ -1,7 +1,6 @@
 package nl.vpro.logging;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.slf4j.helpers.FormattingTuple;
@@ -88,7 +87,7 @@ public class Slf4jHelper {
     }
 
 
-    public static String returnAndWarn(@NonNull  Logger logger, @NonNull String format, Object... arg) {
+    public static String returnAndWarn(@NonNull Logger logger, @NonNull String format, Object... arg) {
         FormattingTuple ft = MessageFormatter.arrayFormat(format, arg);
         String message = ft.getMessage();
         logger.warn(message);

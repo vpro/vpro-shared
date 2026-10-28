@@ -1,6 +1,6 @@
 package nl.vpro.logging.simple;
 
-import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +29,8 @@ public class Slf4jSimpleLogger implements SimpleLogger {
         this(LoggerFactory.getLogger(clazz));
     }
 
-    @PolyNull
-    public static Slf4jSimpleLogger of(@PolyNull Logger logger) {
+    @Nullable
+    public static Slf4jSimpleLogger of(@Nullable Logger logger) {
         if (logger == null) {
             return null;
         }

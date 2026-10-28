@@ -17,8 +17,9 @@ import jakarta.xml.bind.annotation.*;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.PolyNull;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.meeuw.i18n.languages.*;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,8 +41,8 @@ public class LocalizedString implements CharSequence, Serializable {
     @Serial
     private static final long serialVersionUID = 6128871258866551736L; //implements javax.xml.registry.infomodel.LocalizedString {
 
-    @PolyNull
-    public static LocalizedString of(@PolyNull String value, Locale locale) {
+    @Nullable
+    public static LocalizedString of(@Nullable String value, Locale locale) {
         if (value == null) {
             return null;
         } else {

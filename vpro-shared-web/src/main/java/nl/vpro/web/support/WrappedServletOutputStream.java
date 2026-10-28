@@ -4,14 +4,13 @@
  */
 package nl.vpro.web.support;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
+
 
 /**
  * To wrap the output stream we need an implementation of a ServletOutputStream

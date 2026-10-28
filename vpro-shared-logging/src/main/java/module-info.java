@@ -13,10 +13,11 @@ module nl.vpro.shared.logging {
     requires static spring.context;
     requires static org.apache.logging.log4j.core;
     requires static org.apache.logging.log4j;
-    requires static org.checkerframework.checker.qual;
+
     requires static java.logging;
     requires static flogger;
     requires static org.slf4j;
     requires org.meeuw.functional;
+    requires org.jspecify;
 
 }

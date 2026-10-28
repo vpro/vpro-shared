@@ -1,22 +1,21 @@
 package nl.vpro.xml.util;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 
 import java.time.*;
 import java.util.*;
 
 import javax.xml.datatype.*;
 
-import nl.vpro.util.BindingUtils;
-
 /**
  * @author Michiel Meeuwissen
  * @since 0.36
  */
-@Slf4j
+@Log
 public class XmlUtils  {
 
-    public static final ZoneId DEFAULT_ZONE = BindingUtils.DEFAULT_ZONE;
+    public static final ZoneId DEFAULT_ZONE = ZoneId.of("Europe/Amsterdam");
+
 
     private XmlUtils() {
 
@@ -46,7 +45,7 @@ public class XmlUtils  {
                 zone = TimeZone.getTimeZone(defaultZoneId);
             } else {
                 zone = TimeZone.getTimeZone(DEFAULT_ZONE);
-                log.info("{} defines no timezone. Falling back to {}", in, DEFAULT_ZONE);
+                log.info(() -> "%s defines no timezone. Falling back to %s".formatted(in, DEFAULT_ZONE));
             }
             return in.toGregorianCalendar(zone, Locale.US, in).getTime().toInstant();
         } else {

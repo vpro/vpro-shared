@@ -7,7 +7,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.function.Supplier;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.meeuw.i18n.languages.LanguageCode;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;

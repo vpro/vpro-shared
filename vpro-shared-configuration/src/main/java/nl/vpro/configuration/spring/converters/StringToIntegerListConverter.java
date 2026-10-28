@@ -1,14 +1,14 @@
 package nl.vpro.configuration.spring.converters;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalConverter;
-import org.springframework.core.convert.converter.Converter;
-
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntConsumer;
+
+import org.jspecify.annotations.NonNull;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConverter;
+import org.springframework.core.convert.converter.Converter;
 
 /**
  * Converts a string to  a list of integers.

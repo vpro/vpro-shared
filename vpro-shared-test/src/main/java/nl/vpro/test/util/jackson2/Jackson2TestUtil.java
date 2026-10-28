@@ -18,7 +18,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Fail;
-import org.checkerframework.checker.nullness.qual.PolyNull;
+import org.jspecify.annotations.Nullable;
 import org.meeuw.functional.ThrowAnyFunction;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -193,8 +193,8 @@ public class Jackson2TestUtil {
      * @param test JSON
      * @return Prettyfied version of the same JON
      */
-    @PolyNull
-    public static String prettify(@PolyNull CharSequence test) {
+    @Nullable
+    public static String prettify(@Nullable CharSequence test) {
         if (test == null) {
             return null;
         }

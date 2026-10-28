@@ -1,26 +1,27 @@
 package nl.vpro.xml.bind;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
 
 import java.time.*;
-import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 
-import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-import nl.vpro.util.BindingUtils;
-import nl.vpro.util.TimeUtils;
+import static nl.vpro.xml.util.XmlUtils.DEFAULT_ZONE;
+import static org.meeuw.time.TimeUtils.parseDuration;
 
 /**
  * <a href="https://bugs.openjdk.java.net/browse/JDK-8042456">JDK-8042456</a>
  * @author Michiel Meeuwissen
  * @since 0.21
  */
-@Slf4j
+@Log
 public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, Duration> {
+
+
     static final DatatypeFactory DATATYPE_FACTORY;
     static {
         try {
@@ -40,8 +41,8 @@ public class DurationXmlAdapter extends XmlAdapter<javax.xml.datatype.Duration, 
             }
 
             try {
-                return TimeUtils.parseDuration(string, Instant.EPOCH.atZone(BindingUtils.DEFAULT_ZONE)).orElseGet(() -> {
-                    log.warn("Could not parse '" + string + "'");
+                return parseDuration(string, Instant.EPOCH.atZone(DEFAULT_ZONE)).orElseGet(() -> {
+                    log.warning("Could not parse '" + string + "'");
                     return null;
                 });
             } catch (DateTimeParseException dateTimeParseException) {
