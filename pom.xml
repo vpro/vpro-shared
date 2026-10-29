@@ -4,7 +4,7 @@
 
   <groupId>nl.vpro.shared</groupId>
   <artifactId>vpro-shared-parent</artifactId>
-  <version>5.19-SNAPSHOT</version>
+  <version>5.19.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>vpro-shared-parent</name>
@@ -125,7 +125,7 @@
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/vpro/vpro-shared</url>
-    <tag>HEAD</tag>
+    <tag>REL-5.19-SNAPSHOT</tag>
   </scm>
 
   <modules>
@@ -267,7 +267,7 @@
 
             <projectArtifactId>${project.artifactId}</projectArtifactId>
             <log4j2.stdout.level>${log4j2.stdout.level}</log4j2.stdout.level>
-            <log4j2.pattern>%d{HH:mm:ss.SS} %highlight{%5.5p}&#x09;%c{1}&#x09;%M.%L&#x09;%m%n</log4j2.pattern>
+            <log4j2.pattern>%d{HH:mm:ss.SS} %highlight{%5.5p}	%c{1}	%M.%L	%m%n</log4j2.pattern>
 
             <jqwik.hideAntiAiClause>true</jqwik.hideAntiAiClause>
             <jqwik.database />
@@ -956,7 +956,7 @@
                     <argument>${delombok.output}</argument>
                     <argument>--encoding=UTF-8</argument>
                     <argument>--classpath</argument>
-                    <classpath/>
+                    <classpath />
                   </arguments>
                 </configuration>
               </execution>
