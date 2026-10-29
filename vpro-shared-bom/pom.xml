@@ -54,53 +54,53 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-rs-client</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-client-resteasy</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-configuration</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-client</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
 
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate7</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-hibernate-search6</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-i18n</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson2</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -110,58 +110,58 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-logging</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-monitoring</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-persistence</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-rs</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-test</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-util</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-mediainfo</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-validation</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-web</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-xml</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger3</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
