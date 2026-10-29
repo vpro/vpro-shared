@@ -1,6 +1,6 @@
 = Swagger utilities, and OpenAPI
 
-This contains a few utility methods to deal with swagger.
+This contains a few utility methods to deal with swagger, when using jakarta rs (resteasy, not iirc spring mvc)
 
 == Open API Generation
 
@@ -11,6 +11,7 @@ It has some spring configuration properties to:
 - fill in documentation urls
 - make replacements in documentation urls
 - set the version
+
 
 == Swagger filter
 
