@@ -1,20 +1,18 @@
 package nl.vpro.monitoring.config;
 
-import jakarta.annotation.PostConstruct;
-
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.*;
 
-import lombok.extern.log4j.Log4j2;
-
-import lombok.extern.slf4j.Slf4j;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -151,6 +149,10 @@ public class MonitoringProperties implements Serializable {
 
     @PostConstruct
     public void init() {
+        // we added support for openshift bearer authentication
+        // It turned out not to be very useful.
+        // Prometheus does not support it
+        // health endpoint doesn't really need authenticion at all.
         Set<Method> authenticationMethods = new HashSet<>();
         if (StringUtils.isNotBlank(getPassword()) && StringUtils.isNotBlank(getUser())) {
             authenticationMethods.add(Method.BASIC);
@@ -159,7 +161,7 @@ public class MonitoringProperties implements Serializable {
             authenticationMethods.add(Method.BEARER);
         }
         this.authenticationMethods = Collections.unmodifiableSet(authenticationMethods);
-        log.info("Available methods for authentication {}", this.authenticationMethods + (healthPermitAll ? " (/health is always permitted)" : ""));
+        log.atLevel(this.authenticationMethods.size() > 1 ? Level.INFO : Level.DEBUG).log("Available methods for authentication {}", this.authenticationMethods + (healthPermitAll ? " (/health is always permitted)" : ""));
 
     }
 }
