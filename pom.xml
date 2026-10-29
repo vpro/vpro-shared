@@ -131,39 +131,40 @@
   <modules>
     <module>vpro-shared-rs-client</module>
     <module>vpro-shared-client-resteasy</module>
-    <module>vpro-shared-configuration</module>
 
-    <module>vpro-shared-elasticsearch</module>
-    <module>vpro-shared-elasticsearch-client</module>
-    <module>vpro-shared-elasticsearch-high-level-client</module>
-
-    <!--
-    <module>vpro-shared-hibernate-search</module>
-    -->
-    <module>vpro-shared-hibernate-search6</module>
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
     <module>vpro-shared-monitoring</module>
-    <module>vpro-shared-persistence</module>
-    <module>vpro-shared-rs</module>
+
     <module>vpro-shared-swagger3</module>
-    <module>vpro-shared-swagger3-taglib</module>
-
-
+    <!-- seldomly needs build, pinned version in bom
+     <module>vpro-shared-swagger3-taglib</module>
+     <module>vpro-shared-web</module>
+     <module>vpro-shared-mediainfo</module>
+     <module>vpro-shared-persistence</module>
+     <module>vpro-shared-validation</module>
+     <module>vpro-shared-xml</module>
+     <module>vpro-shared-configuration</module>
+     <module>vpro-shared-elasticsearch</module>
+     <module>vpro-shared-elasticsearch-client</module>
+     <module>vpro-shared-elasticsearch-high-level-client</module>
+     <module>vpro-shared-hibernate-search6</module>
+     <module>vpro-shared-rs</module>
+     <module>vpro-shared-i18n</module>
+    -->
     <module>vpro-shared-test</module>
     <module>vpro-shared-util</module>
-    <module>vpro-shared-validation</module>
-    <module>vpro-shared-web</module>
-    <module>vpro-shared-xml</module>
 
-    <module>vpro-shared-i18n</module>
+
     <module>vpro-shared-bom</module>
-    <module>vpro-shared-mediainfo</module>
+
 
 
     <!--
+        <module>vpro-shared-hibernate-search</module>
+
         <module>vpro-shared-hibernate</module>
     <module>vpro-shared-jcache</module>
 
