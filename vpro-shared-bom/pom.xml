@@ -166,7 +166,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger3-taglib</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.2</version>
       </dependency>
 
 
