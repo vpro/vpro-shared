@@ -139,7 +139,6 @@
     <module>vpro-shared-jackson3</module>
 
     <module>vpro-shared-logging</module>
-    <module>vpro-shared-monitoring</module>
     <module>vpro-shared-persistence</module>
     <module>vpro-shared-rs</module>
     <module>vpro-shared-swagger3</module>
@@ -159,12 +158,12 @@
 
     <module>vpro-shared-i18n</module>
     <module>vpro-shared-mediainfo</module>
+        <module>vpro-shared-swagger3-taglib</module>
     -->
 
-    <module>vpro-shared-swagger3-taglib</module>
+
     <module>vpro-shared-bom</module>
-
-
+    <module>vpro-shared-monitoring</module>
 
     <!--
         <module>vpro-shared-hibernate</module>

@@ -105,7 +105,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson3</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -115,7 +115,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-monitoring</artifactId>
-        <version>5.19.0</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
