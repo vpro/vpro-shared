@@ -265,7 +265,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-jackson2</artifactId>
-        <version>5.18.0</version>
+        <version>5.19.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
