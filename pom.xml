@@ -163,9 +163,10 @@
 
 
     <module>vpro-shared-bom</module>
-    <module>vpro-shared-monitoring</module>
+    <module>vpro-shared-util</module>
 
     <!--
+      <module>vpro-shared-monitoring</module>
         <module>vpro-shared-hibernate</module>
     <module>vpro-shared-jcache</module>
 
