@@ -1,5 +1,6 @@
 package nl.vpro.logging.log4j2;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -49,10 +50,48 @@ public class CaptureListFromLogger extends AbstractCaptureLogger implements Supp
 
     @Override
     protected void accept(LogEvent event) {
-        events.add(event.toImmutable());
+        synchronized (events) {
+            events.add(event.toImmutable());
+            events.notifyAll();
+        }
     }
 
     public void clear() {
         events.clear();
+    }
+
+    /**
+     * Blocks the calling thread until an already captured, or newly arriving, event matches {@code predicate}.
+     * <p>
+     * Useful when the event is expected to be logged asynchronously (e.g. by another thread), and polling
+     * {@link #getEvents()} in a loop would otherwise be the only option.
+     *
+     * @throws AssertionError if no matching event arrives within {@code timeout}
+     * @since 5.20
+     */
+    public LogEvent awaitFirst(Predicate<LogEvent> predicate, Duration timeout) throws InterruptedException {
+        final long deadline = System.nanoTime() + timeout.toNanos();
+        synchronized (events) {
+            while (true) {
+                for (LogEvent event : events) {
+                    if (predicate.test(event)) {
+                        return event;
+                    }
+                }
+                long remainingMillis = (deadline - System.nanoTime()) / 1_000_000;
+                if (remainingMillis <= 0) {
+                    throw new AssertionError("No event matching " + predicate + " captured within " + timeout + "; captured: " + events);
+                }
+                events.wait(remainingMillis);
+            }
+        }
+    }
+
+    /**
+     * Shortcut for {@link #awaitFirst(Predicate, Duration)} matching on {@link LogEvent#getLevel()}.
+     * @since 5.20
+     */
+    public LogEvent awaitFirst(Level level, Duration timeout) throws InterruptedException {
+        return awaitFirst(event -> event.getLevel().equals(level), timeout);
     }
 }

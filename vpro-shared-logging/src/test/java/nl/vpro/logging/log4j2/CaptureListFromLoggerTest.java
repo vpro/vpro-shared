@@ -2,15 +2,18 @@ package nl.vpro.logging.log4j2;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
 import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.core.LogEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Log4j2
 
@@ -79,5 +82,38 @@ class CaptureListFromLoggerTest {
         }
     }
 
+    @Test
+    public void awaitFirstBlocksUntilAMatchingEventArrivesFromAnotherThread() throws Exception {
+        String marker = "boom-" + System.nanoTime();
+        try (CaptureListFromLogger capture = CaptureListFromLogger.builder()
+            .level(Level.ERROR)
+            .currentThreadOnly(false)
+            .build()) {
+            service.submit(() -> {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                log.error(marker);
+            });
+
+            LogEvent event = capture.awaitFirst(
+                le -> le.getMessage().getFormattedMessage().equals(marker),
+                Duration.ofSeconds(5));
+
+            assertThat(event.getMessage().getFormattedMessage()).isEqualTo(marker);
+        }
+    }
+
+    @Test
+    public void awaitFirstThrowsIfNoMatchingEventArrivesInTime() {
+        try (CaptureListFromLogger capture = new CaptureListFromLogger(true)) {
+            log.info("not an error");
+
+            assertThatThrownBy(() -> capture.awaitFirst(Level.ERROR, Duration.ofMillis(200)))
+                .isInstanceOf(AssertionError.class);
+        }
+    }
 
 }
