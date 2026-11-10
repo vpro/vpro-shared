@@ -163,7 +163,7 @@
 
 
     <module>vpro-shared-bom</module>
-    <module>vpro-shared-util</module>
+    <module>vpro-shared-logging</module>
 
     <!--
       <module>vpro-shared-monitoring</module>

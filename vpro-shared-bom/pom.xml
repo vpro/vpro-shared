@@ -110,7 +110,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-logging</artifactId>
-        <version>5.19.0</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -136,7 +136,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-util</artifactId>
-        <version>${project.version}</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
