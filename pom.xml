@@ -21,15 +21,15 @@
     <spring-security.version>6.5.11</spring-security.version>
 
 
-    <jackson-annotations.version>2.22</jackson-annotations.version>
-    <jackson2.version>2.22.4</jackson2.version>
-    <jackson3.version>3.2.4</jackson3.version>
+    <jackson-annotations.version>2.23</jackson-annotations.version>
+    <jackson2.version>2.23.0</jackson2.version>
+    <jackson3.version>3.3.0</jackson3.version>
 
 
     <junit.version>6.1.3</junit.version>
     <mockito.version>5.24.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
-    <resteasy.version>7.0.5.Final</resteasy.version>
+    <resteasy.version>7.0.6.Final</resteasy.version>
     <swagger.ui.version>5.34.1</swagger.ui.version>
 
     <!--
