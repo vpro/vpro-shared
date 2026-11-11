@@ -64,22 +64,22 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-configuration</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-client</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-elasticsearch-high-level-client</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
 
       <dependency>
@@ -90,7 +90,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-i18n</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -105,7 +105,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-logging</artifactId>
-        <version>5.19.0</version>
+        <version>5.19.4</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -115,7 +115,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-persistence</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -136,12 +136,12 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-mediainfo</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-validation</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
@@ -151,7 +151,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-xml</artifactId>
-        <version>5.19.1</version>
+        <version>5.19.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
