@@ -3,6 +3,8 @@ package nl.vpro.jmx;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -73,20 +75,26 @@ class MBeans2Test {
     @ValueSource(booleans = {true, false})
     void multiLineCaptureTimeout(boolean currentThreadOnly) throws InterruptedException {
         try (CaptureStringFromLogger capture =  CaptureStringFromLogger.infoAllThreads()) {
-            String result = MBeans2.returnMultilineString("test",
-                Duration.ofMillis(10),
-                currentThreadOnly,
-                () -> {
-
-                    log.info("foo bar!");
-                    Thread.sleep(100);
-                    log.info("pietje puk");
-                });
-            assertThat(result).isEqualTo("""
-                            foo bar!
-                            ...
-                            still busy. Please check logs""");
-            Thread.sleep(200); // wait for logging to be captured
+            CountDownLatch release = new CountDownLatch(1);
+            CountDownLatch finished = new CountDownLatch(1);
+            String result;
+            try {
+                result = MBeans2.returnMultilineString("test",
+                    Duration.ofMillis(10),
+                    currentThreadOnly,
+                    () -> {
+                        log.info("foo bar!");
+                        release.await();
+                        log.info("pietje puk");
+                        finished.countDown();
+                    });
+            } finally {
+                release.countDown();
+            }
+            assertThat(result).isIn(
+                "\n...\nstill busy. Please check logs",
+                "foo bar!\n...\nstill busy. Please check logs");
+            assertThat(finished.await(1, TimeUnit.MINUTES)).isTrue();
             assertThat(capture.get()).endsWith("""
                 foo bar!
                 pietje puk
