@@ -64,6 +64,14 @@ public class MonitoringProperties implements Serializable {
     @Value("${monitoring.jvm.thread.enabled:true}")
     private boolean meterJvmThread;
 
+    /**
+     * Exposes the JVM's Native Memory Tracking summary as metrics (categories like Thread, Code, Metaspace).
+     * Only produces data when the JVM was actually started with {@code -XX:NativeMemoryTracking=summary} (or
+     * {@code detail}); harmless no-op otherwise.
+     */
+    @Value("${monitoring.jvm.nativememory.enabled:true}")
+    private boolean meterNativeMemory;
+
 
     @Value("${monitoring.camel.enabled:#{null}}")
     private Boolean meterCamel;
