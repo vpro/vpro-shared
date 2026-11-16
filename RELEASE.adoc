@@ -5,6 +5,76 @@
 * https://github.com/vpro/vpro-shared/actions/workflows/branch.yml[Create release branch]
 * https://github.com/vpro/vpro-shared/actions/workflows/release.yml[then build release from that new branch]
 
+The release workflow has a `publishTo` input: `central` (default) or `github` (GitHub Packages).
+
+=== Publishing limits on maven central
+
+Maven central limits the number of releases, files and total size per organization per calendar month
+(see https://central.sonatype.com/publishing/usage?org=vpro[usage center]). When exceeded, after a grace period, publishing fails with something like:
+
+----
+Publishing blocked: your organization has reached its monthly release count limit.
+----
+
+* One run of the release workflow is one deployment (all modules are bundled), so it counts as _one_ release.
+* Every file counts (jars, poms, sources, javadoc, `.asc` signatures, checksums). Hence `<checksums>required</checksums>` (only md5/sha1).
+* A failed (blocked) deployment is not published, so the version can still be published to central later, e.g. after the usage resets on the first of the next month.
+
+=== Where releases are published
+
+The target is chosen by profiles in `pom.xml` (and `vpro-shared-bom/pom.xml`, which does not inherit from the parent):
+
+[cols="1,2,3"]
+|===
+|profile |active when |effect
+
+|`publish-central`
+|property `publish.to` is _not_ `github` (so also by default)
+|`central-publishing-maven-plugin`, which takes over the `deploy` phase
+
+|`publish-github`
+|`-Dpublish.to=github`
+|`distributionManagement` pointing to `https://maven.pkg.github.com/vpro/vpro-shared` (server id `github`)
+|===
+
+NOTE: `-Dpublish.to=<anything else than github>` still activates `publish-central`. To deploy elsewhere, explicitly deactivate it with `-P-publish-central`.
+
+Consumers of artifacts on GitHub Packages need a `<repository>` for `https://maven.pkg.github.com/vpro/vpro-shared` and a `github` server in their `settings.xml` with a token having `read:packages` (also for public packages).
+
+=== Deploying an existing tag to another repository (e.g. AWS CodeArtifact)
+
+If a release was tagged, but deploying to central failed, the tag can be deployed somewhere else:
+
+[source,bash]
+----
+git worktree add ../vpro-shared-5.20.2 REL-5.20.2
+cd ../vpro-shared-5.20.2
+
+export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token \
+  --domain <domain> --domain-owner <account-id> --region <region> \
+  --query authorizationToken --output text)
+
+mvn -B deploy -P-publish-central -DskipTests -Dgpg.skip \
+  -DaltDeploymentRepository=codeartifact::https://<domain>-<account-id>.d.codeartifact.<region>.amazonaws.com/maven/<repo>/
+----
+
+with in `~/.m2/settings.xml`:
+
+[source,xml]
+----
+<server>
+  <id>codeartifact</id>
+  <username>aws</username>
+  <password>${env.CODEARTIFACT_TOKEN}</password>
+</server>
+----
+
+Add `-Pdeploy` to also deploy sources and javadoc jars (drop `-Dgpg.skip` if your gpg key is available).
+
+When doing this via `release:perform`, pass the flags in `-Darguments` too, since it runs a forked build.
+
+NOTE: Tags up to and including `REL-5.20.1` have the `central-publishing-maven-plugin` outside a profile. For those, remove the plugin from `pom.xml` and `vpro-shared-bom/pom.xml` locally (don't commit) instead of using `-P-publish-central`.
+
 
 === Getting it faster in vpro-nexus.
 
