@@ -39,6 +39,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 
 import nl.vpro.monitoring.binder.JvmMaxDirectMemorySize;
+import nl.vpro.monitoring.binder.NativeMemoryMetrics;
 import nl.vpro.monitoring.binder.ScriptMeterBinder;
 import nl.vpro.util.locker.ObjectLocker;
 import nl.vpro.util.locker.ObjectLockerAdmin;
@@ -183,6 +184,11 @@ public class MeterRegistryConfiguration {
         if (monitoringProperties.isMeterJvmMemory()) {
             new JvmMemoryMetrics().bindTo(registry);
             new JvmMaxDirectMemorySize().bindTo(registry);
+        }
+        if (monitoringProperties.isMeterNativeMemory()) {
+            NativeMemoryMetrics metrics = new NativeMemoryMetrics();
+            metrics.bindTo(registry);
+            closables.add(metrics);
         }
         if (monitoringProperties.isMeterJvmThread()) {
             new JvmThreadMetrics().bindTo(registry);
