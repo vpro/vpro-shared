@@ -2,6 +2,15 @@
 name: release
 on:
   workflow_dispatch:
+    inputs:
+      publishTo:
+        description: 'Where to publish the release (maven central has a monthly limit on number of releases)'
+        required: true
+        default: 'central'
+        type: choice
+        options:
+          - central
+          - github
 
 jobs:
   build:
@@ -9,27 +18,29 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/REL-')
     permissions:
       contents: write
+      packages: write
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
+      PUBLISH_TO: ${{ inputs.publishTo }}
     steps:
       - name: echo
-        run: echo {{ $github.ref }}
+        run: echo "${{ github.ref }} -> $PUBLISH_TO"
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: 17
-          server-id: central
-          server-username-env-var: CENTRAL_USERNAME
-          server-password-env-var: CENTRAL_PASSWORD
+          server-id: ${{ inputs.publishTo }}
+          server-username-env-var: MAVEN_USERNAME
+          server-password-env-var: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
       - name: Release
         run: |
           git config --global user.name 'github actions'
           git config --global user.email 'github@meeuw.org'
-          mvn  -Pdeploy --batch-mode  -Darguments=-DskipTests  release:prepare release:perform
+          mvn -Pdeploy -Dpublish.to=${PUBLISH_TO} --batch-mode "-Darguments=-DskipTests -Dpublish.to=${PUBLISH_TO}" release:prepare release:perform
         env:
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_USERNAME: ${{ inputs.publishTo == 'github' && github.actor || secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ inputs.publishTo == 'github' && secrets.GITHUB_TOKEN || secrets.CENTRAL_PASSWORD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
