@@ -53,85 +53,82 @@ If a module receives very few, if any, updates, it may be moved to link:archived
 |===
 |Major |remarks |
 
-| 0/1.x
-| lived at subversion @ vpro
-| 2008 - 2018
+| 6.x >
+| java 21 (released in sep. 2023), spring 7, hibernate 7, all json produced by jackson 3. Java 21 is required on `main` since June 2026.
+| 2026?
 
-| 2.x
-| First version at github, java 8
-| september 2018
+| 5.20
+| java 27 compatibility, only actively maintained modules are built and released
+| November 2026
 
-| 3.x
-| java 11
-| november 2022
+| 5.19
+| nullness annotations migrated from checker framework to jspecify, jakarta persistence 3.2
+| October 2026
 
-| 4.x
-| java 17
-| june 2023
+| 5.18
+| modules that never get updates moved to link:archived[archived]
+| September 2026
+
+| 5.15
+| vpro-shared-log4j2 moved to a separate repository, checker framework 4
+| April 2026
+
+| 5.14
+| Support for Jackson3
+| January 2026
+
+| 5.13
+| testcontainers 2
+| November 2025
+
+| 5.12
+| junit 6, resteasy 7
+| October 2025
+
+| 5.11
+| jakarta validation 3.1, hibernate validator 9
+| August 2025
+
+| 5.10
+| new module link:vpro-shared-mediainfo[vpro-shared-mediainfo]
+| June 2025
+
+| 5.7
+| manage endpoints as web-fragment, support for `.well-known/security.txt`, spring security optional
+| March 2025
+
+| 5.4
+| spring 6.2, dropped long deprecated classes (and the dependency on commons-configuration)
+| January 2025
+
+| 5.1
+| hibernate orm 6, hibernate search 7
+| May 2024
+
+| 5.x
+| javax -> jakarta. All 5.x releases still require only java 17. Since June 2026 (5.17 and later), 5.x is maintained on the `REL-5` branch.
+| February 2024
 
 | 4.3-SNAPHOT
 | This is the branch for javax compatiblity. From this minor release can/will be made. Possible it can be merged to 4.4 if needed
   This would be done manually, since release branches are normally made from main
 | February 2024
 
+| 4.x
+| java 17
+| june 2023
 
-| 5.x
-| javax -> jakarta. All 5.x releases still require only java 17. Since June 2026 (5.17 and later), 5.x is maintained on the `REL-5` branch.
-| February 2024
+| 3.x
+| java 11
+| november 2022
 
-| 5.1
-| hibernate orm 6, hibernate search 7
-| May 2024
+| 2.x
+| First version at github, java 8
+| september 2018
 
-| 5.4
-| spring 6.2, dropped long deprecated classes (and the dependency on commons-configuration)
-| January 2025
-
-| 5.7
-| manage endpoints as web-fragment, support for `.well-known/security.txt`, spring security optional
-| March 2025
-
-| 5.10
-| new module link:vpro-shared-mediainfo[vpro-shared-mediainfo]
-| June 2025
-
-| 5.11
-| jakarta validation 3.1, hibernate validator 9
-| August 2025
-
-| 5.12
-| junit 6, resteasy 7
-| October 2025
-
-| 5.13
-| testcontainers 2
-| November 2025
-
-| 5.14
-| Support for Jackson3
-| January 2026
-
-| 5.15
-| vpro-shared-log4j2 moved to a separate repository, checker framework 4
-| April 2026
-
-| 5.18
-| modules that never get updates moved to link:archived[archived]
-| September 2026
-
-| 5.19
-| nullness annotations migrated from checker framework to jspecify, jakarta persistence 3.2
-| October 2026
-
-| 5.20
-| java 27 compatibility, only actively maintained modules are built and released
-| November 2026
-
-
-| 6.x >
-| java 21 (released in sep. 2023), spring 7, hibernate 7, all json produced by jackson 3. Java 21 is required on `main` since June 2026.
-| 2026?
-
+| 0/1.x
+| lived at subversion @ vpro
+| 2008 - 2018
 
 |===
 
