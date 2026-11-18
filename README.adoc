@@ -84,12 +84,48 @@ If a module receives very few, if any, updates, it may be moved to link:archived
 | May 2024
 
 | 5.4
-|
+| spring 6.2, dropped long deprecated classes (and the dependency on commons-configuration)
 | January 2025
+
+| 5.7
+| manage endpoints as web-fragment, support for `.well-known/security.txt`, spring security optional
+| March 2025
+
+| 5.10
+| new module link:vpro-shared-mediainfo[vpro-shared-mediainfo]
+| June 2025
+
+| 5.11
+| jakarta validation 3.1, hibernate validator 9
+| August 2025
+
+| 5.12
+| junit 6, resteasy 7
+| October 2025
+
+| 5.13
+| testcontainers 2
+| November 2025
 
 | 5.14
 | Support for Jackson3
 | January 2026
+
+| 5.15
+| vpro-shared-log4j2 moved to a separate repository, checker framework 4
+| April 2026
+
+| 5.18
+| modules that never get updates moved to link:archived[archived]
+| September 2026
+
+| 5.19
+| nullness annotations migrated from checker framework to jspecify, jakarta persistence 3.2
+| October 2026
+
+| 5.20
+| java 27 compatibility, only actively maintained modules are built and released
+| November 2026
 
 
 | 6.x >
