@@ -138,6 +138,7 @@
     <module>vpro-shared-swagger3</module>
     <module>vpro-shared-test</module>
     <module>vpro-shared-util</module>
+    <module>vpro-shared-elasticsearch-client</module>
     <module>vpro-shared-bom</module>
 
 
@@ -151,7 +152,7 @@
      <module>vpro-shared-xml</module>
      <module>vpro-shared-configuration</module>
      <module>vpro-shared-elasticsearch</module>
-     <module>vpro-shared-elasticsearch-client</module>
+
      <module>vpro-shared-elasticsearch-high-level-client</module>
      <module>vpro-shared-hibernate-search6</module>
      <module>vpro-shared-rs</module>
