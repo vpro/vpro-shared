@@ -76,7 +76,7 @@ If a module receives very few, if any, updates, it may be moved to link:archived
 
 
 | 5.x
-| javax -> jakarta
+| javax -> jakarta. All 5.x releases still require only java 17. Since June 2026 (5.17 and later), 5.x is maintained on the `REL-5` branch.
 | February 2024
 
 | 5.1
@@ -129,7 +129,7 @@ If a module receives very few, if any, updates, it may be moved to link:archived
 
 
 | 6.x >
-| java 21 (released in sep. 2023), spring 7, hibernate 7, all json produced by jackson 3 
+| java 21 (released in sep. 2023), spring 7, hibernate 7, all json produced by jackson 3. Java 21 is required on `main` since June 2026.
 | 2026?
 
 
