@@ -468,7 +468,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
 
         try {
 
-            var refresh = new Request(POST, "/_all/_refresh");
+            Request refresh = new Request(POST, "/_all/_refresh"); // not using var: lombok 1.18.48 + javac 27 crash (JDK-8268850)
             Response response = client().performRequest(refresh);
             JsonNode read = read(response);
 
@@ -596,7 +596,7 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
             }
             log.debug("Posting to {}", path);
 
-            var response = client().performRequest(req);
+            Response response = client().performRequest(req);
 
             return read(response);
         } catch (IOException e) {
