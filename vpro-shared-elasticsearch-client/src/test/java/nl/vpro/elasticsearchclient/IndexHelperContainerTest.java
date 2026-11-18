@@ -122,7 +122,7 @@ public class IndexHelperContainerTest {
     @Test
     public void bulkWithParameters() throws ExecutionException, InterruptedException, IOException {
         final Request settings = new Request("PUT", "/" + helper.getIndexName() + "/_settings");
-        settings.setJsonEntity("{\"index.refresh_interval\": \"30s\"}");
+        settings.setJsonEntity("{\"index.refresh_interval\": \"10s\"}");
         client.performRequest(settings);
 
         TestObject test = new TestObject();
