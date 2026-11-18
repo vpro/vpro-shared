@@ -1074,6 +1074,18 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         return bulkAsync(log, writeJsonDir, client(), request, listeners);
     }
 
+    /**
+     * @param parameters Request parameters for the bulk request (e.g. {@code refresh=wait_for})
+     * @since 5.20
+     */
+    @SafeVarargs
+    public final CompletableFuture<ObjectNode> bulkAsync(
+        Collection<BulkRequestEntry> request,
+        Map<String, String> parameters,
+        Consumer<ObjectNode>... listeners) {
+        return bulkAsync(log, writeJsonDir, client(), request, parameters, listeners);
+    }
+
 
     /**
      *
@@ -1087,12 +1099,31 @@ public class IndexHelper implements IndexHelperInterface<RestClient>, AutoClosea
         RestClient client,
         Collection<BulkRequestEntry> request,
         Consumer<ObjectNode>... listeners) {
+        return bulkAsync(log, jsonDir, client, request, Map.of(), listeners);
+    }
+
+    /**
+     *
+     * @param request Collection of {@link BulkRequestEntry}s
+     * @param parameters Request parameters for the bulk request. E.g. {@code refresh=wait_for}, to make the request only return when the changes are visible for search.
+     * @param listeners Listeners to process results (e.g. log errors or indexing)
+     * @since 5.20
+     */
+    @SafeVarargs
+    public static CompletableFuture<ObjectNode> bulkAsync(
+        SimpleLogger log,
+        File jsonDir,
+        RestClient client,
+        Collection<BulkRequestEntry> request,
+        Map<String, String> parameters,
+        Consumer<ObjectNode>... listeners) {
         final CompletableFuture<ObjectNode> future = new CompletableFuture<>();
         if (request.isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
 
         Request req = new Request(POST, Paths.BULK);
+        parameters.forEach(req::addParameter);
         req.setEntity(bulkEntity(request));
         writeJson(log, jsonDir, request);
 
