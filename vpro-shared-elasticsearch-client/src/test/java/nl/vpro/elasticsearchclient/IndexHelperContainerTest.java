@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.*;
 import org.slf4j.event.Level;
@@ -113,6 +114,23 @@ public class IndexHelperContainerTest {
 
             }
         }).get();
+    }
+
+    /**
+     * With refresh=wait_for the bulk request only returns when the changes are searchable, so they are counted without an explicit refresh.
+     */
+    @Test
+    public void bulkWithParameters() throws ExecutionException, InterruptedException, IOException {
+        final Request settings = new Request("PUT", "/" + helper.getIndexName() + "/_settings");
+        settings.setJsonEntity("{\"index.refresh_interval\": \"30s\"}");
+        client.performRequest(settings);
+
+        TestObject test = new TestObject();
+        test.setId("a");
+        test.setTitle("bla");
+        helper.bulkAsync(List.of(helper.indexRequest(test.getId(), test)), Map.of("refresh", "wait_for")).get();
+
+        assertThat(helper.count()).isEqualTo(1);
     }
 
 
