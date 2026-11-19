@@ -108,37 +108,73 @@ public class RequestsMeteringFilter extends HttpFilter {
                 break;
             }
         }
+        final String finalPathTag = pathTag;
 
-        long nanoStart = System.nanoTime();
+        final long nanoStart = System.nanoTime();
         activeRequests.incrementAndGet();
+        boolean async = false;
         try {
             chain.doFilter(request, response);
+            // chain.doFilter returning does not mean the request is done: if something downstream
+            // called request.startAsync(), the real completion happens later, on another thread.
+            // Recording now (in the finally block below) would decrement activeRequests and record
+            // the duration far too early, so defer to an AsyncListener instead.
+            async = request.isAsyncStarted();
+            if (async) {
+                request.getAsyncContext().addListener(new AsyncListener() {
+                    @Override
+                    public void onComplete(AsyncEvent event) {
+                        recordCompletion(request, response, path, finalPathTag, nanoStart);
+                    }
+
+                    @Override
+                    public void onTimeout(AsyncEvent event) {
+                        recordCompletion(request, response, path, finalPathTag, nanoStart);
+                    }
+
+                    @Override
+                    public void onError(AsyncEvent event) {
+                        recordCompletion(request, response, path, finalPathTag, nanoStart);
+                    }
+
+                    @Override
+                    public void onStartAsync(AsyncEvent event) {
+                        // not re-registering: we only meter the original dispatch's lifecycle
+                    }
+                });
+            }
         } finally {
-            activeRequests.decrementAndGet();
-            String contentType = "?";
-            {
-                if (response.getContentType() != null) {
-                    MediaType type = MediaType.parse(response.getContentType());
-                    contentType = type.withoutParameters().toString();
+            if (!async) {
+                recordCompletion(request, response, path, finalPathTag, nanoStart);
+            }
+        }
+    }
+
+    private void recordCompletion(HttpServletRequest request, HttpServletResponse response, String path, String pathTag, long nanoStart) {
+        activeRequests.decrementAndGet();
+        String contentType = "?";
+        {
+            if (response.getContentType() != null) {
+                MediaType type = MediaType.parse(response.getContentType());
+                contentType = type.withoutParameters().toString();
+            } else {
+                if (request.isAsyncStarted()) {
+                    contentType = "async";
                 } else {
-                    if (request.isAsyncStarted()) {
-                        contentType = "async";
-                    } else {
-                        if (200 == response.getStatus()) {
-                            log.warn("No content type in {}", path);
-                        }
+                    if (200 == response.getStatus()) {
+                        log.warn("No content type in {}", path);
                     }
                 }
             }
-            String[] tags = new String[] {
-                "path", pathTag,
-                "contentType", contentType,
-                "status", String.valueOf(response.getStatus()),
-                "method", request.getMethod()
-            };
-            meterRegistry.counter("servlet_requests", tags).increment();
-            meterRegistry.timer("servlet_requests_duration", tags)
-                .record(Duration.ofNanos(System.nanoTime() - nanoStart));
         }
+        String[] tags = new String[] {
+            "path", pathTag,
+            "contentType", contentType,
+            "status", String.valueOf(response.getStatus()),
+            "method", request.getMethod()
+        };
+        meterRegistry.counter("servlet_requests", tags).increment();
+        meterRegistry.timer("servlet_requests_duration", tags)
+            .record(Duration.ofNanos(System.nanoTime() - nanoStart));
     }
 }
