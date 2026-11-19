@@ -31,6 +31,7 @@ import static nl.vpro.monitoring.config.MeterRegistryConfiguration.meterRegistry
  *   <filter>
  *     <filter-name>RequestsMeteringFilter</filter-name>
  *     <filter-class>nl.vpro.monitoring.web.RequestsMeteringFilter</filter-class>
+ *     <async-supported>true</async-supported>
  *     <init-param>
  *       <param-name>prefixes</param-name>
  *       <param-value>
