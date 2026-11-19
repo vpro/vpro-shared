@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @SuppressWarnings({"OptionalGetWithoutIsPresent"})
 @Slf4j
+@Deprecated
 class TimeUtilsTest {
 
 

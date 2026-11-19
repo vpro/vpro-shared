@@ -1,6 +1,9 @@
 package nl.vpro.jackson3;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.meeuw.time.TimeUtils;
+
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
 
@@ -8,7 +11,6 @@ import java.util.*;
 
 import javax.xml.datatype.*;
 
-import nl.vpro.util.TimeUtils;
 
 @Slf4j
 public class XMLDurationToJsonTimestamp {

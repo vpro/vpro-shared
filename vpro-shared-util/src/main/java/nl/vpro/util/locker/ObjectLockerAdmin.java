@@ -19,7 +19,8 @@ import org.meeuw.math.windowed.WindowedEventRate;
 import org.meeuw.math.windowed.WindowedStatisticalLong;
 
 import nl.vpro.jmx.MBeans;
-import nl.vpro.util.TimeUtils;
+
+import org.meeuw.time.TimeUtils;
 
 /**
  * @author Michiel Meeuwissen

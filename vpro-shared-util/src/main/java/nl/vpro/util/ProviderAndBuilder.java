@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import jakarta.inject.Provider;
 
+import org.meeuw.time.TimeUtils;
+
 
 /**
  * If you have a provider implementation based on a builder, you can fill the fields with the provider to the builder using

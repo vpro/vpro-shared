@@ -1,12 +1,13 @@
 package nl.vpro.jackson3;
 
+import org.meeuw.time.TimeUtils;
+
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
 
 import java.time.Duration;
 import java.util.Calendar;
 
-import nl.vpro.util.TimeUtils;
 
 /**
  * Default Jackson serialized Durations as seconds. In poms we used to serialize durations as Dates, and hence as _milliseconds_.

@@ -29,6 +29,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.ws.rs.core.MediaType;
 
+import nl.vpro.util.*;
+
 import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestWrapper;
@@ -48,6 +50,7 @@ import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
+import org.meeuw.time.TimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +59,7 @@ import nl.vpro.jmx.*;
 import nl.vpro.logging.simple.Level;
 import nl.vpro.logging.simple.Slf4jSimpleLogger;
 import nl.vpro.rs.client.*;
-import nl.vpro.util.*;
+
 
 /**
  * @author Roelof Jan Koekoek
