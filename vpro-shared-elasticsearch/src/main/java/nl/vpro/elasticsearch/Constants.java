@@ -10,7 +10,16 @@ import org.jspecify.annotations.NonNull;
  */
 public class Constants {
 
+    /**
+     * A guess for the time it takes before a document is visible in ES. It was added to the 'publish date' of documents, so that clients of a changes feed
+     * (which only return changes older than its 'commit delay') would not miss them.
+     * <p>
+     * Only the sum of this and the commit delay of the changes feed mattered, so this just made publish dates lie in the future. The NPO publisher now uses
+     * the moment of ingestion as publish date, and the commit delay (configured in the API) is the only margin.
+     * @deprecated Configure the commit delay of the changes feed instead
+     */
     @NonNull
+    @Deprecated(forRemoval = true)
     public static Duration ES_LATENCY = Duration.ofSeconds(10);
 
     public static class Fields {
