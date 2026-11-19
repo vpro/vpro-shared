@@ -1,47 +1,258 @@
 
 = Monitoring
+:toc:
 
+Monitoring for (spring, servlet based) applications, as used in several of our applications running on OpenShift. It provides
 
-Related to monitoring.
+- the `/manage/*` endpoints: a health check and the metrics for prometheus,
+- a `MeterRegistry` with a lot of commonly useful meters,
+- serving of `/.well-known/` files, like `security.txt`,
+- a filter to meter all requests.
 
-This basically adds endpoints:
+== Setup
+
+Normally just adding the dependency suffices:
+
+[source,xml]
+----
+<dependency>
+  <groupId>nl.vpro.shared</groupId>
+  <artifactId>vpro-shared-monitoring</artifactId>
+</dependency>
+----
+
+The jar contains a `web-fragment.xml`, which registers the `ManageFilter` (mapped on `/*`) and sets up its own spring context. Nothing is needed in `web.xml`. If `web.xml` uses `absolute-ordering`, the fragment must be mentioned there:
+
+[source,xml]
+----
+<absolute-ordering>
+  <!-- other fragments -->
+  <name>monitoring_endpoints</name>
+</absolute-ordering>
+----
+
+This also requires the jar to be scanned by tomcat (`jarsToScan`). That defaults to all jars, but it is recommended to limit it, to speed up start up times. This jar must be included then. The `ghcr.io/vpro/tomcat` image is OK in versions >= 10.26.
+
+For the metrics there must be a `MeterRegistry` in the (root) spring context. Put `@EnableMonitoring` on a configuration class to have one set up by link:src/main/java/nl/vpro/monitoring/config/MeterRegistryConfiguration.java[`MeterRegistryConfiguration`], or register one yourself.
+
+Everything can be configured with spring properties `monitoring.*`, see link:src/main/java/nl/vpro/monitoring/config/MonitoringProperties.java[`MonitoringProperties`]. All have defaults, and several can also be set with environment variables.
+
+== The `/manage` endpoints
+
+All endpoints are handled by link:src/main/java/nl/vpro/monitoring/endpoints/ManageFilter.java[`ManageFilter`]. It matches all requests, handles the ones for its endpoints, and passes on everything else. Using a filter (rather than servlets) makes it work too in applications that map `/*` to spring's `DispatcherServlet`.
+
+|===
+|endpoint |property |description
+
+|`/manage/health`
+|`monitoring.endpoints.health`
+|The health of the application, as JSON. See below.
+
+|`/manage/metrics`
+|`monitoring.endpoints.metrics`
+|All meters, in prometheus' text format
+
+|`/manage/prometheus`
+|`monitoring.endpoints.prometheus`
+|The same as `/manage/metrics`
+|===
+
+The paths can be changed with the properties, e.g. `monitoring.endpoints.health=/health`.
+
+=== Health
+
+`/manage/health` returns something like
+
+[source,json]
+----
+{
+  "status": 200,
+  "message": "Application ready",
+  "startTime": "2026-11-19T10:15:30Z",
+  "upTime": "PT2H13M",
+  "prometheusCallDuration": "PT0.05S"
+}
+----
+
+The HTTP status is the same as `status`, so it can be used directly as a readiness or liveness probe.
+
+|===
+|status |HTTP status |when
+
+|starting
+|503
+|Until the spring context is refreshed
+
+|ready
+|200
+|
+
+|stopping
+|503
+|After the spring context is stopped
+
+|unhealthy
+|503
+|Calls to the metrics endpoint have been slow for a while, see below.
+|===
+
+The health check also watches the metrics endpoint: when the average duration of the calls to it in the last 50 seconds is longer than `monitoring.unhealthyThreshold` (default `10s`) at more than `monitoring.unhealthyCount` (default `6`) health checks in a row, the application is reported unhealthy. A slow metrics endpoint usually means that the application is in trouble (e.g. starved of threads). When `data.dir` is set, a thread dump is then written to `${data.dir}/threads-<timestamp>.txt`, at most once per `monitoring.minThreadDumpInterval` (default `1h`).
+
+The health endpoint doesn't require authentication, unless `monitoring.health.permitAll=false`.
+
+=== Metrics
+
+`/manage/metrics` (and `/manage/prometheus`) produce the contents of the `PrometheusMeterRegistry`, to be scraped by prometheus. Which meters are registered (JVM, tomcat, hibernate, postgres, camel, caches, volumes, ...) can be switched on and off with the `monitoring.*.enabled` properties. `monitoring.tags` adds common tags to all meters.
+
+These endpoints are protected with basic authentication when a password is configured:
+
+|===
+|property |environment variable |default
+
+|`monitoring.user`
+|`MONITORING_USER`
+|`manager`
+
+|`monitoring.password`
+|`MONITORING_PASSWORD`
+|none, so no authentication
+|===
+
+=== Spring security
+
+The endpoints do their own authentication, so spring security must not get in the way. `@EnableMonitoringWebSecurity` adds a security filter chain that permits all requests on `/manage/**` and `/.well-known/**`.
+
+== `/.well-known/` files
+
+Since 5.6 the `ManageFilter` can serve files under `/.well-known/`, most notably link:https://securitytxt.org/[`security.txt`]. This is implemented by link:src/main/java/nl/vpro/monitoring/web/WellKnownController.java[`WellKnownController`].
+
+A request for `/.well-known/<file>` is answered with the contents of `<file>` from a directory on the file system, `/well-known` by default. The idea is to mount a (kubernetes) config map there. E.g. a `/well-known/security.txt` like:
 
 [source]
 ----
-/manage/health
-/manage/metrics
+Contact: mailto:security@example.org
+Expires: 2026-12-31T23:59:59+00:00
+Preferred-Languages: en,nl
+Canonical: ${REQUEST}
 ----
 
-to a spring application.
+- The response is `text/plain`, with `Cache-Control: max-age=3600`.
+- `${REQUEST}` is replaced by the original request URL (so `Canonical` doesn't need to be configured per environment).
+- A file that doesn't exist (or isn't readable) results in a 404. Paths escaping the directory result in a 400.
+- The paths are permitted without authentication when using `@EnableMonitoringWebSecurity`.
 
-Normally just taking the dependency should suffice. It can be configured with spring properties (`monitoring.*`, see link:src/main/java/nl/vpro/monitoring/config/MonitoringProperties.java[`MonitoringProperties`]).
+|===
+|property |default |description
 
-All have defaults, or can be set via system properties (such as for example the username/password for the monitoring endpoint)
+|`monitoring.endpoints.wellknown`
+|enabled if the application runs on the root context (`/`), disabled otherwise
+|Whether to serve `/.well-known/` at all
 
-Used in several spring openshift applications.
+|`monitoring.endpoints.wellknown_files`
+|`/well-known`
+|The directory the files are served from
+|===
 
+To try this on macOS, where `/well-known` can't simply be created, you can make it a synthetic link to a directory in your home: add a line `well-known	Users/<you>/well-known` to `/etc/synthetic.conf` and run `/System/Library/Filesystems/apfs.fs/Contents/Resources/apfs.util -t`.
 
-== Changes in 5.7
+== Metering requests
 
-=== BEFORE
-In versions prior to 5.7, there were also the following required changes in web.xml:
+link:src/main/java/nl/vpro/monitoring/web/RequestsMeteringFilter.java[`RequestsMeteringFilter`] is a servlet filter that meters all requests passing through it. It isn't part of the web fragment, so it has to be configured explicitly in `web.xml`:
 
 [source,xml]
-.fragments from web.xml
+----
+<filter>
+  <filter-name>RequestsMeteringFilter</filter-name>
+  <filter-class>nl.vpro.monitoring.web.RequestsMeteringFilter</filter-class>
+  <async-supported>true</async-supported>
+  <init-param>
+    <param-name>prefixes</param-name>
+    <param-value>
+      /manage
+      /import
+    </param-value>
+  </init-param>
+</filter>
+<filter-mapping>
+  <filter-name>RequestsMeteringFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
+----
+
+It uses the `MeterRegistry` set up by `MeterRegistryConfiguration` (e.g. via `@EnableMonitoring`), which must be available when the filter is initialized.
+
+=== Meters
+
+|===
+|name |type |description
+
+|`servlet_requests`
+|counter
+|Number of handled requests
+
+|`servlet_requests_duration`
+|timer
+|Duration of handled requests
+
+|`servlet_requests_active`
+|gauge
+|Number of requests currently being handled. Handy with virtual threads, where the number of threads doesn't tell this anymore.
+|===
+
+The counter and the timer have these tags:
+
+|===
+|tag |description
+
+|`path`
+|The first of the configured `prefixes` (separated by commas and/or whitespace) the path (without context path) starts with, or `*` if none matches. This keeps the number of distinct values limited.
+
+|`method`
+|The HTTP method
+
+|`status`
+|The HTTP status of the response. Note that for an exception thrown by a synchronous request this is usually still `200`, since the container only sets the `500` afterwards. See the `error` tag.
+
+|`contentType`
+|The content type of the response, without parameters (like `charset`). `?` if there is none.
+
+|`async`
+|`true` if the request was handled asynchronously (`request.startAsync()`), `false` otherwise.
+
+|`error`
+|`none` if the request completed normally, `timeout` if an asynchronous request timed out, or otherwise the simple class name of the exception (e.g. `IOException`).
+|===
+
+=== Asynchronous requests
+
+If the request is put in asynchronous mode, returning from the filter chain doesn't mean that the request is finished. In that case the request is only recorded when it actually completes (`AsyncListener#onComplete`, which is also called after a timeout or an error), so the duration, the status and the content type are the final ones, and the request remains counted in `servlet_requests_active` until then.
+
+== Changes
+
+=== 5.12
+
+All endpoints are handled by the `ManageFilter`, rather than by different servlets. Some spring applications map `/*` to the `DispatcherServlet`, which hid the servlets from the web fragment. The paths of the endpoints became configurable (`monitoring.endpoints.*`).
+
+=== 5.7
+
+The servlets and the spring context are set up by the web fragment. Before 5.7 this was needed in `web.xml`:
+
+[source,xml]
 ----
 <servlet>
-    <servlet-name>manage</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-    <load-on-startup>3</load-on-startup>
+  <servlet-name>manage</servlet-name>
+  <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  <load-on-startup>3</load-on-startup>
 </servlet>
 
 <servlet-mapping>
   <servlet-name>manage</servlet-name>
- <url-pattern>/manage/*</url-pattern>
+  <url-pattern>/manage/*</url-pattern>
 </servlet-mapping>
-
 ----
-And a `monitoring-context.xml` like this:
+
+and a `monitoring-context.xml` like this:
+
 [source,xml]
 ----
 <?xml version="1.0" ?>
@@ -56,26 +267,6 @@ And a `monitoring-context.xml` like this:
   <bean class="nl.vpro.monitoring.endpoints.MonitoringEndpoints"/>
 
 </beans>
-
-----
-=== AFTER
-
-It can be much simpler now, because newer servlet versions support 'web-fragment' files, which can be used to add servlets and filters without the need for a web.xml.
-[source,xml]
-.fragments from web.xml
 ----
 
- <absolute-ordering>
-     <!-- other fragments -->
-    <name>monitoring_endpoints</name>
-  </absolute-ordering>
-----
-And even that is optional. The required changes to the servlet environment are then arranged in vpro-shared-monitoring.jar itself.
-
-Note that this does require the jar to be included in 'jarsToScan' of tomcat. That defaults to all jars, but to speed up start up times it is recommended to limit it, but this one should be included then.  The ghcr.io/vpro/tomcat is ok in version >= 10.26
-
-This will set up spring to serve out the `/manage/*` endpoints. Since 5.7 it will also try to serve out `/.well-known/security.txt` (which will be filled with the file /well-known/security.txt).
-
-For `/manage/metrics` to work, you also need a `MeterRegistry` in the spring context.  This can be done, with `@EnabledMonitoring` on a configuration class, or otherwise registering a `MeterRegistry` bean. It should be in the root context. This endpoint is also protected with basic security. The default name password is manager/admin2k, but this can be set by spring properties or environment variables.
-
-Since 5.12 all endpoints are handled by the `ManageFilter` rather than different servlets. Because as it turns out, some  spring applications just map `/\*` to the DispatcherServlet, and then that hides the servlets from the web fragments. This is circumvented this way, the filter also matches everything, and just chains everything it can't handle. An extra advantage is that the ManageFilter can also be configured to use other paths. E.g. if you prefer `/manage/health` can also be set to `/health` or `/admin/health` or whatever you like. See `monitoring.endpoints.*` properties.
+These can be removed now.
