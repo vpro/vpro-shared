@@ -7,6 +7,7 @@ import java.io.Serial;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import jakarta.servlet.*;
@@ -16,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.meeuw.functional.Predicates;
 
 import com.google.common.net.MediaType;
+
+import io.micrometer.core.instrument.Gauge;
 
 import static nl.vpro.monitoring.config.MeterRegistryConfiguration.meterRegistry;
 
@@ -75,6 +78,7 @@ public class RequestsMeteringFilter extends HttpFilter {
 
     private final List<Matcher> matchers = new ArrayList<>();
 
+    private final AtomicInteger activeRequests = new AtomicInteger();
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -86,6 +90,10 @@ public class RequestsMeteringFilter extends HttpFilter {
             }
         }
         matchers.add(Matcher.of("*", Predicates.alwaysTrue()));
+
+        Gauge.builder("servlet_requests_active", activeRequests, AtomicInteger::get)
+            .description("Number of requests currently being served")
+            .register(meterRegistry);
     }
 
     @Override
@@ -102,9 +110,11 @@ public class RequestsMeteringFilter extends HttpFilter {
         }
 
         long nanoStart = System.nanoTime();
+        activeRequests.incrementAndGet();
         try {
             chain.doFilter(request, response);
         } finally {
+            activeRequests.decrementAndGet();
             String contentType = "?";
             {
                 if (response.getContentType() != null) {
