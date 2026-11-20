@@ -1,5 +1,8 @@
 ---
 name: release
+run-name: release -> ${{ inputs.publishTo || 'central' }}
+
+
 on:
   workflow_dispatch:
     inputs:

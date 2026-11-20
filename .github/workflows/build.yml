@@ -1,5 +1,7 @@
 ---
 name: build
+run-name: build ${{ github.ref_name }} -> ${{ inputs.publishTo || 'central' }}
+
 
 on:
   push:
