@@ -109,6 +109,7 @@ class MyTest {
 - Only logging during the test method itself counts, not during `@BeforeEach`/`@AfterEach`.
 - `currentThreadOnly` (default `true`) only captures logging from the thread running the test, so tests running in parallel don't interfere. Set it to `false` if the code under test logs from other threads.
 - A test method can take a `CaptureListFromLogger` parameter (from `vpro-shared-logging`) to inspect the captured warnings and errors. Calling `clear()` on it also resets what is asserted, which is useful after checking an expected warning yourself.
+- `failFast = true` makes the log call itself throw as soon as a warning or error exceeds the expected number, so the stack trace points at where it was logged. Log4j wraps the `AssertionError` in an `AppenderLoggingException`. Code under test may catch that, so the check after the test still happens too.
 - If the test already fails, the logging is not checked, so the original failure stays visible.
 - Requires log4j2-core as the logging implementation (add `org.apache.logging.log4j:log4j-core` as a test dependency).
 

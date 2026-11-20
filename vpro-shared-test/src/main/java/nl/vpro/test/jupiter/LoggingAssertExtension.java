@@ -1,10 +1,10 @@
 package nl.vpro.test.jupiter;
 
 import java.lang.reflect.AnnotatedElement;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
@@ -29,22 +29,25 @@ public class LoggingAssertExtension implements BeforeTestExecutionCallback, Afte
 
     private static final String CAPTURE = "capture";
 
+    private static final Predicate<LogEvent> WARNING = e -> e.getLevel().equals(Level.WARN);
+    private static final Predicate<LogEvent> ERROR = e -> e.getLevel().isMoreSpecificThan(Level.ERROR);
+
     @Override
     public void beforeTestExecution(ExtensionContext context) {
         if (findAnnotation(context).isPresent()) {
-            getOrCreateCapture(context);
+            getOrCreate(context);
         }
     }
 
     @Override
     public void afterTestExecution(ExtensionContext context) {
-        CaptureListFromLogger capture = context.getStore(NAMESPACE).remove(CAPTURE, CaptureListFromLogger.class);
+        Capture capture = context.getStore(NAMESPACE).remove(CAPTURE, Capture.class);
         if (capture == null) {
             return;
         }
         List<LogEvent> events;
         try (capture) {
-            events = capture.getEvents();
+            events = capture.allEvents();
         }
         Optional<LoggingAssert> config = findAnnotation(context);
         if (config.isEmpty() || context.getExecutionException().isPresent()) {
@@ -52,8 +55,8 @@ public class LoggingAssertExtension implements BeforeTestExecutionCallback, Afte
             return;
         }
         StringBuilder failures = new StringBuilder();
-        check(failures, "warnings", config.get().warnings(), events, e -> e.getLevel().equals(Level.WARN));
-        check(failures, "errors", config.get().errors(), events, e -> e.getLevel().isMoreSpecificThan(Level.ERROR));
+        check(failures, "warnings", config.get().warnings(), events, WARNING);
+        check(failures, "errors", config.get().errors(), events, ERROR);
         if (!failures.isEmpty()) {
             throw new AssertionError(failures.toString().trim());
         }
@@ -67,17 +70,12 @@ public class LoggingAssertExtension implements BeforeTestExecutionCallback, Afte
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-        return getOrCreateCapture(extensionContext);
+        return getOrCreate(extensionContext).capture;
     }
 
-    private static CaptureListFromLogger getOrCreateCapture(ExtensionContext context) {
-        boolean currentThreadOnly = findAnnotation(context).map(LoggingAssert::currentThreadOnly).orElse(true);
-        return context.getStore(NAMESPACE).computeIfAbsent(CAPTURE, k ->
-            CaptureListFromLogger.builder()
-                .level(Level.WARN)
-                .currentThreadOnly(currentThreadOnly)
-                .build(),
-            CaptureListFromLogger.class);
+    private static Capture getOrCreate(ExtensionContext context) {
+        Optional<LoggingAssert> config = findAnnotation(context);
+        return context.getStore(NAMESPACE).computeIfAbsent(CAPTURE, k -> new Capture(config.orElse(null)), Capture.class);
     }
 
     private static void check(StringBuilder failures, String name, int expected, List<LogEvent> events, Predicate<LogEvent> predicate) {
@@ -86,12 +84,14 @@ public class LoggingAssertExtension implements BeforeTestExecutionCallback, Afte
         }
         List<LogEvent> matching = events.stream().filter(predicate).toList();
         if (matching.size() != expected) {
-            failures.append("Expected ").append(expected).append(" ").append(name)
-                .append(", but ").append(matching.size()).append(" were logged")
-                .append(matching.isEmpty() ? "" : ":\n")
-                .append(matching.stream().map(LoggingAssertExtension::format).collect(Collectors.joining("\n")))
-                .append("\n");
+            failures.append(message(name, expected, matching)).append("\n");
         }
+    }
+
+    private static String message(String name, int expected, List<LogEvent> matching) {
+        return "Expected " + expected + " " + name + ", but " + matching.size() + " were logged"
+            + (matching.isEmpty() ? "" : ":\n")
+            + matching.stream().map(LoggingAssertExtension::format).collect(Collectors.joining("\n"));
     }
 
     private static String format(LogEvent event) {
@@ -115,5 +115,52 @@ public class LoggingAssertExtension implements BeforeTestExecutionCallback, Afte
             current = current.getParent().orElse(null);
         }
         return Optional.empty();
+    }
+
+    /**
+     * The {@link CaptureListFromLogger}, plus the events that were rejected because of {@link LoggingAssert#failFast()}. Those are not added to the capture, because the exception is thrown before that.
+     */
+    private static class Capture implements AutoCloseable {
+        private final List<LogEvent> rejected = Collections.synchronizedList(new ArrayList<>());
+        private final CaptureListFromLogger capture;
+
+        Capture(LoggingAssert config) {
+            CaptureListFromLogger.Builder builder = CaptureListFromLogger.builder()
+                .level(Level.WARN)
+                .currentThreadOnly(config == null || config.currentThreadOnly());
+            if (config != null && config.failFast()) {
+                // The predicate is called by the capturing appender, which doesn't ignore exceptions, so this makes the log call itself fail
+                builder.predicate(event -> {
+                    failFast(event, "warnings", config.warnings(), WARNING);
+                    failFast(event, "errors", config.errors(), ERROR);
+                    return true;
+                });
+            }
+            this.capture = builder.build();
+        }
+
+        private void failFast(LogEvent event, String name, int expected, Predicate<LogEvent> predicate) {
+            if (expected == LoggingAssert.ANY || !predicate.test(event)) {
+                return;
+            }
+            List<LogEvent> matching = allEvents().stream().filter(predicate).collect(Collectors.toCollection(ArrayList::new));
+            if (matching.size() + 1 > expected) {
+                LogEvent immutable = event.toImmutable();
+                rejected.add(immutable);
+                matching.add(immutable);
+                throw new AssertionError(message(name, expected, matching));
+            }
+        }
+
+        List<LogEvent> allEvents() {
+            synchronized (rejected) {
+                return Stream.concat(capture.getEvents().stream(), rejected.stream()).toList();
+            }
+        }
+
+        @Override
+        public void close() {
+            capture.close();
+        }
     }
 }
