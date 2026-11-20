@@ -19,6 +19,7 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.meeuw.time.TimeUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.*;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import nl.vpro.monitoring.config.MonitoringProperties;
 import nl.vpro.monitoring.domain.Health;
-import nl.vpro.util.TimeUtils;
 
 import static org.slf4j.event.Level.DEBUG;
 import static org.slf4j.event.Level.INFO;
@@ -78,6 +78,7 @@ public class HealthController {
         markReady(refreshedEventEvent);
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     protected boolean markReady(ApplicationContextEvent event) {
         if (status != Status.READY) {
             status = Status.READY;
