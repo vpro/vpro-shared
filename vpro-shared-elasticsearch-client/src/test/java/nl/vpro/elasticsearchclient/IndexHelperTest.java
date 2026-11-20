@@ -6,7 +6,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 import nl.vpro.jackson3.Jackson3Mapper;
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

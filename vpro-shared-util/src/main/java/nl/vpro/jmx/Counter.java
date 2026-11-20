@@ -16,7 +16,7 @@ import javax.management.ObjectName;
 import org.meeuw.math.windowed.WindowedEventRate;
 import org.meeuw.math.windowed.WindowedLongSummaryStatistics;
 
-import static nl.vpro.util.TimeUtils.roundToMillis;
+import static org.meeuw.time.TimeUtils.roundToMillis;
 
 /**
  * @author Michiel Meeuwissen

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 
 import nl.vpro.util.BindingUtils;
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 import static nl.vpro.jackson2.DateModule.ZONE;
 

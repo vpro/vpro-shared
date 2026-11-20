@@ -8,6 +8,7 @@ import tools.jackson.databind.*;
 import java.time.Duration;
 import java.util.Calendar;
 
+import org.meeuw.time.TimeUtils;
 
 /**
  * Default Jackson serialized Durations as seconds. In poms we used to serialize durations as Dates, and hence as _milliseconds_.
