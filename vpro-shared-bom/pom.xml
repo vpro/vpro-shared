@@ -156,7 +156,7 @@
       <dependency>
         <groupId>nl.vpro.shared</groupId>
         <artifactId>vpro-shared-swagger3</artifactId>
-        <version>${project.version}</version>
+        <version>5.20.0</version>
       </dependency>
       <dependency>
         <groupId>nl.vpro.shared</groupId>
