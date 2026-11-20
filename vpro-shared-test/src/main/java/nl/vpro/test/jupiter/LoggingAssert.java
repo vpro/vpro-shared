@@ -55,4 +55,11 @@ public @interface LoggingAssert {
      * Whether only logging from the thread executing the test must be considered. If {@code false}, logging of all threads is captured, which may also include logging from other tests running in parallel.
      */
     boolean currentThreadOnly() default true;
+
+    /**
+     * Whether to fail immediately when a warning or error is logged that exceeds the expected number. The {@code log} call itself then throws (an {@link org.apache.logging.log4j.core.appender.AppenderLoggingException} wrapping an {@link AssertionError}), so the stack trace shows where it was logged.
+     * <p>
+     * The code under test may catch that exception. Therefore, the check after the test still happens too.
+     */
+    boolean failFast() default false;
 }
