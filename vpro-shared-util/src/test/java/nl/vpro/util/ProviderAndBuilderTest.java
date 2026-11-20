@@ -76,7 +76,7 @@ public class ProviderAndBuilderTest {
     @Test
     public void buildDuration() {
         AProvider a = new AProvider();
-        a.setDuration(TimeUtils.parseDuration("5s").orElse(null));
+        a.setDuration(org.meeuw.time.TimeUtils.parseDuration("5s").orElse(null));
         a.setB(null);
 
 

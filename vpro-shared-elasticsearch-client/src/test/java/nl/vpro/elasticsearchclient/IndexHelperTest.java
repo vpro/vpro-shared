@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import nl.vpro.jackson2.Jackson2Mapper;
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

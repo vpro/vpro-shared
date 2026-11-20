@@ -8,7 +8,7 @@ import java.util.*;
 
 import javax.xml.datatype.*;
 
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 @Slf4j
 public class XMLDurationToJsonTimestamp {

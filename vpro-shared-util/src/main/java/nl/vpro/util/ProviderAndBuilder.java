@@ -57,7 +57,7 @@ public class ProviderAndBuilder {
         // I couldn't get DurationConvertor working for providers in magnolia. For now let the provider use String's. It doesn't really matter.
         if (CharSequence.class.isInstance(o) && dest.isAssignableFrom(Duration.class)) {
             try {
-                return TimeUtils.parseDuration((CharSequence) o).orElse(null);
+                return org.meeuw.time.TimeUtils.parseDuration((CharSequence) o).orElse(null);
             } catch (RuntimeException rte) {
                 log.warn(rte.getMessage());
                 return null;

@@ -48,6 +48,7 @@ import org.jboss.resteasy.client.jaxrs.*;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCache;
 import org.jboss.resteasy.client.jaxrs.cache.BrowserCacheFeature;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClientEngine;
+import org.meeuw.time.TimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

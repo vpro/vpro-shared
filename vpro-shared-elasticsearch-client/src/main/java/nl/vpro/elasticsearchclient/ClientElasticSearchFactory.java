@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import nl.vpro.elasticsearch.WrongCluster;
 import nl.vpro.jmx.MBeans;
 import nl.vpro.logging.simple.SimpleLogger;
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 import static nl.vpro.logging.simple.Slf4jSimpleLogger.slf4j;
 

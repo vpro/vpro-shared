@@ -37,7 +37,7 @@ public class Picocli {
     public static class DurationConverter implements CommandLine.ITypeConverter<Duration> {
         @Override
         public Duration convert(String value) {
-            return TimeUtils.parseDuration(value).orElseThrow(() -> new IllegalArgumentException(value));
+            return org.meeuw.time.TimeUtils.parseDuration(value).orElseThrow(() -> new IllegalArgumentException(value));
         }
     }
 

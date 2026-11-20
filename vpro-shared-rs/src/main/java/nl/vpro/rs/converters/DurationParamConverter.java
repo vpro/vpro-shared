@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import jakarta.ws.rs.ext.ParamConverter;
 
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 
 /**

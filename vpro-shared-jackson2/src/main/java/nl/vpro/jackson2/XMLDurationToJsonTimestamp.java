@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 @Slf4j
 public class XMLDurationToJsonTimestamp {
