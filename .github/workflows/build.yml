@@ -1,6 +1,6 @@
 ---
 name: build
-run-name: build ${{ github.ref_name }} -> ${{ inputs.publishTo || 'central' }}
+run-name: build${{ github.event_name == 'workflow_dispatch' && format(' -> {0}', inputs.publishTo) || '' }}
 
 
 on:
