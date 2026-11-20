@@ -2,6 +2,7 @@ package nl.vpro.test.jupiter;
 
 import lombok.extern.log4j.Log4j2;
 
+import org.apache.logging.log4j.core.appender.AppenderLoggingException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import nl.vpro.logging.log4j2.CaptureListFromLogger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EventConditions.*;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.cause;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
@@ -151,6 +153,55 @@ class LoggingAssertExtensionTest {
         void noAssertions(CaptureListFromLogger capture) {
             log.error("an error");
             assertThat(capture.getEvents()).hasSize(1);
+        }
+    }
+
+    @Test
+    void failFast() {
+        EngineTestKit.engine("junit-jupiter")
+            .selectors(selectClass(FailFastCases.class))
+            .execute()
+            .testEvents()
+            .assertStatistics(stats -> stats.succeeded(1).failed(3))
+            .assertThatEvents()
+            .haveExactly(1, event(test("throwsAtLogCall"), finishedWithFailure(instanceOf(AppenderLoggingException.class),
+                cause(instanceOf(AssertionError.class), message(m -> m.contains("Expected 0 warnings, but 1 were logged") && m.contains("a warning"))))))
+            .haveExactly(1, event(test("secondWarningThrows"), finishedWithFailure(instanceOf(AppenderLoggingException.class),
+                cause(instanceOf(AssertionError.class), message(m -> m.contains("Expected 1 warnings, but 2 were logged") && m.contains("second warning"))))))
+            .haveExactly(1, event(test("swallowedStillFailsAfterwards"), finishedWithFailure(instanceOf(AssertionError.class),
+                message(m -> m.contains("Expected 0 errors, but 1 were logged") && m.contains("an error")))));
+    }
+
+    @Log4j2
+    @LoggingAssert(failFast = true)
+    static class FailFastCases {
+        @Test
+        void throwsAtLogCall() {
+            log.warn("a warning");
+            throw new IllegalStateException("should not be reached");
+        }
+
+        @Test
+        @LoggingAssert(warnings = 1, failFast = true)
+        void withinExpected() {
+            log.info("info is fine");
+            log.warn("one warning");
+        }
+
+        @Test
+        @LoggingAssert(warnings = 1, failFast = true)
+        void secondWarningThrows() {
+            log.warn("first warning");
+            log.warn("second warning");
+        }
+
+        @Test
+        void swallowedStillFailsAfterwards() {
+            try {
+                log.error("an error");
+            } catch (RuntimeException e) {
+                // code under test catching everything
+            }
         }
     }
 
