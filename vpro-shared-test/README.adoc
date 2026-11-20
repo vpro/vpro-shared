@@ -1,32 +1,202 @@
-= Test related utilities
+= vpro-shared-test
 :toc:
 
-== Assertj
+Utilities for (JUnit 5/Jupiter) tests: assertions for XML, JSON and serialization, Jupiter extensions, and testcontainer support.
 
-- link:src/test/java/nl/vpro/test/util/jaxb/JAXBTestUtilTest.java[jaxb] related assertions
-- json related assertions link:src/test/java/nl/vpro/test/util/jackson2/Jackson2TestUtilTest.java[jackson2]/link:src/test/java/nl/vpro/test/util/jackson3/Jackson3TestUtilTest.java[jackson3]
-- serialization related assertions
+This artifact is meant to be used as a test dependency only.
 
-E.g.
+[source, xml]
+----
+<dependency>
+  <groupId>nl.vpro.shared</groupId>
+  <artifactId>vpro-shared-test</artifactId>
+  <scope>test</scope>
+</dependency>
+----
+
+Several dependencies are _optional_ (jqwik, hamcrest, spring, testcontainers, postgresql, flyway, log4j-core). If you use the corresponding functionality, you need to add those yourself.
+
+== Assertions
+
+=== XML/JAXB
+
+link:src/main/java/nl/vpro/test/util/jaxb/JAXBTestUtil.java[`JAXBTestUtil`] marshals objects with JAXB, compares the XML with link:https://www.xmlunit.org/[XMLUnit], and unmarshals it again ('round trip').
+
 [source, java]
 ----
-include::src/test/java/nl/vpro/test/util/jaxb/JAXBTestUtilTest.java[label=]
+import static nl.vpro.test.util.jaxb.JAXBTestUtil.assertThatXml;
+
+A rounded = assertThatXml(new A())
+    .isSimilarTo("""
+        <a xmlns="urn:test:1234">
+          <value>aa</value>
+        </a>""")   // marshalled XML must be similar
+    .get();        // the result of unmarshalling it again
+
+assertThatXml(new A()).containsSimilar("<b i=\"1\" j=\"2\"><value>bb</value><c>cc</c></b>");
+
+assertThatXml(xmlString).isSimilarTo(expectedXml);
 ----
 
+- `withNodeFilter(..)`/`withBuilder(..)` customize the XMLUnit comparison (e.g. `JAXBTestUtil.IGNORE_ELEMENT_ORDER`).
+- `isValid(validator)` validates against an XSD.
+- `noRoundTrip()` only marshals.
+- There are also static variants like `roundTripAndSimilar`, `roundTripContains` and `similar`.
 
+link:src/test/java/nl/vpro/test/util/jaxb/JAXBTestUtilTest.java[JAXBTestUtilTest] has more examples.
 
-== Testcontainers
+link:src/main/java/nl/vpro/test/util/jaxb/AbstractSchemaTest.java[`AbstractSchemaTest`] is a base class for tests that check whether the XSDs generated from JAXB classes have changed. It compares them with the XSDs in `/schema/` on the classpath. `testEnum` checks whether an enum in an XSD matches a java enum.
 
-(optional dependencies)
+link:src/main/java/nl/vpro/test/util/TestClass.java[`TestClass`] is a simple JAXB root element wrapping any value, used when the value itself cannot be a root element.
 
-- postgresql
-- elasticsearch
+=== JSON/Jackson
 
-== Jupiter/Junit5
+link:src/main/java/nl/vpro/test/util/jackson2/Jackson2TestUtil.java[`Jackson2TestUtil`] and link:src/main/java/nl/vpro/test/util/jackson3/Jackson3TestUtil.java[`Jackson3TestUtil`] do the same for JSON, for Jackson 2 and Jackson 3 respectively. JSON is compared using link:https://github.com/skyscreamer/JSONassert[JSONassert].
 
-Some extension like
+[source, java]
+----
+import static nl.vpro.test.util.jackson2.Jackson2TestUtil.assertThatJson;
 
-- AbortOnException
-- DoAfterException
-- TestMDC
-- TimingExtension
+A rounded = assertThatJson(new A())
+    .remove("/b")                 // json pointers to remove before comparison
+    .isSimilarTo("{'a': 'a'}")
+    .get();
+
+assertThatJson(jsonString)
+    .ignore("/errors/0/messages/0") // replaced by 'IGNORED'
+    .isSimilarTo(expectedJson);
+----
+
+Examples: link:src/test/java/nl/vpro/test/util/jackson2/Jackson2TestUtilTest.java[jackson2], link:src/test/java/nl/vpro/test/util/jackson3/Jackson3TestUtilTest.java[jackson3].
+
+=== Java serialization
+
+link:src/main/java/nl/vpro/test/util/serialize/SerializeTestUtil.java[`SerializeTestUtil`] checks that objects survive java serialization.
+
+[source, java]
+----
+SerializeTestUtil.roundTripAndEquals(object);
+SerializeTestUtil.assertThatSerialized(object).andRounded().isEqualTo(object);
+----
+
+== Jupiter extensions
+
+All are in link:src/main/java/nl/vpro/test/jupiter/[`nl.vpro.test.jupiter`].
+
+=== LoggingAssert
+
+link:src/main/java/nl/vpro/test/jupiter/LoggingAssert.java[`@LoggingAssert`] asserts how many warnings and errors a test logs. By default it expects none.
+
+[source, java]
+----
+@LoggingAssert                       // no warnings and no errors, in any test of this class
+class MyTest {
+
+    @Test
+    void clean() { ... }
+
+    @Test
+    @LoggingAssert(warnings = 1, errors = LoggingAssert.ANY) // overrides the one on the class
+    void oneWarning(CaptureListFromLogger capture) {
+        ...
+        assertThat(capture.getEvents().get(0).getMessage().getFormattedMessage()).contains("expected");
+    }
+}
+----
+
+- `warnings` counts events of level `WARN`. `errors` counts `ERROR` and `FATAL`. `LoggingAssert.ANY` disables a check.
+- On a method it overrides the one on the class. `@Nested` classes inherit it.
+- Only logging during the test method itself counts, not during `@BeforeEach`/`@AfterEach`.
+- `currentThreadOnly` (default `true`) only captures logging from the thread running the test, so tests running in parallel don't interfere. Set it to `false` if the code under test logs from other threads.
+- A test method can take a `CaptureListFromLogger` parameter (from `vpro-shared-logging`) to inspect the captured warnings and errors. Calling `clear()` on it also resets what is asserted, which is useful after checking an expected warning yourself.
+- If the test already fails, the logging is not checked, so the original failure stays visible.
+- Requires log4j2-core as the logging implementation (add `org.apache.logging.log4j:log4j-core` as a test dependency).
+
+The annotation registers link:src/main/java/nl/vpro/test/jupiter/LoggingAssertExtension.java[`LoggingAssertExtension`] itself. With only `@ExtendWith(LoggingAssertExtension.class)` the `CaptureListFromLogger` parameter is available, but nothing is asserted.
+
+=== AbortOnException
+
+link:src/main/java/nl/vpro/test/jupiter/AbortOnException.java[`AbortOnException`] is for test classes with ordered test methods (e.g. integration tests that build on each other). After a test fails, the remaining tests in the class are aborted instead of failing too.
+
+[source, java]
+----
+@ExtendWith(AbortOnException.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class MyIntegrationTest {
+
+    @Test @Order(1) void create() { ... }
+
+    @Test @Order(2) @AbortOnException.Except  void optional() { ... } // failure doesn't abort the rest
+    @Test @Order(3) void update() { ... }
+
+    @Test @Order(4) @AbortOnException.NoAbort void cleanup() { ... } // runs even if an earlier test failed
+}
+----
+
+- `@AbortOnException.Except`: a failure of this test does not abort the following tests.
+- `@AbortOnException.NoAbort`: this test always runs.
+- `@AbortOnException.Ignore`: both of the above.
+- `@AbortOnException.OnlyIfOrdered` (on the class): without it, using the extension on a class without `@TestMethodOrder` (or with random order) is an error. With it, the extension just does nothing then. Useful when the extension is on a base class.
+
+A `@AfterAll` method can take a `List<Exception>` parameter with the exceptions of the failed tests.
+
+=== DoAfterException
+
+link:src/main/java/nl/vpro/test/jupiter/DoAfterException.java[`DoAfterException`] runs a job when a test fails, e.g. to log extra state or make a screenshot. The test class implements `DoAfterException.WithJob`:
+
+[source, java]
+----
+@ExtendWith(DoAfterException.class)
+class MyTest implements DoAfterException.WithJob {
+    @Override
+    public Consumer<Throwable> getJob() {
+        return t -> log.info("Failed: {}, state: {}", t.getMessage(), state);
+    }
+}
+----
+
+Aborted tests (e.g. by `AbortOnException` or failed assumptions) are only logged; the job does not run for them.
+
+=== ExceptionCollector
+
+link:src/main/java/nl/vpro/test/jupiter/ExceptionCollector.java[`ExceptionCollector`] collects the exceptions of failed tests. It provides them as a `List<Exception>` (or other `List` of `Throwable`) parameter, e.g. for an `@AfterAll` method. `AbortOnException` extends it.
+
+=== TestMDC
+
+link:src/main/java/nl/vpro/test/jupiter/TestMDC.java[`TestMDC`] puts the current test (`currentTest`: `Class#method`) and a sequence number (`testNumber`) on the log4j2 `ThreadContext`. Use `%X{currentTest}` in the log pattern to see which test logged what.
+
+=== TimingExtension
+
+link:src/main/java/nl/vpro/test/jupiter/TimingExtension.java[`TimingExtension`] logs the duration of each test, and after all tests of the class a list of all durations, slowest first. For `@RepeatedTest` the average duration is reported.
+
+[source, java]
+----
+@ExtendWith(TimingExtension.class)
+class MyTest { ... }
+----
+
+== Testcontainers (spring)
+
+These are spring `@Configuration` classes that provide containers as beans. They need the optional dependencies (spring, testcontainers, and the postgresql driver/flyway).
+
+- link:src/main/java/nl/vpro/test/psql/PostgresqlContainerSupport.java[`PostgresqlContainerSupport`]: starts a PostgreSQL container and provides a `DataSource`. If flyway is on the classpath, its migrations are run.
+- link:src/main/java/nl/vpro/test/opensearch/ElasticsearchContainerSupport.java[`ElasticsearchContainerSupport`]: starts an OpenSearch container (`ElasticsearchContainer`). There is no ARM image, so on Apple Silicon it runs emulated. Enabling Rosetta in Docker Desktop helps; see the javadoc.
+
+[source, java]
+----
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {PostgresqlContainerSupport.class})
+class MyTest {
+    @Inject
+    DataSource dataSource;
+}
+----
+
+== jqwik
+
+- link:src/main/java/nl/vpro/test/jqwik/BasicObjectTest.java[`BasicObjectTest`] and link:src/main/java/nl/vpro/test/jqwik/ComparableTest.java[`ComparableTest`]: property based tests for the contracts of `equals`/`hashCode`/`toString` and `compareTo`. _Deprecated_: use `BasicObjectTheory` and `ComparableTheory` from link:https://github.com/mihxil/math[mihxil-theories].
+- link:src/main/java/nl/vpro/test/jqwik/HamcrestAssumptions.java[`HamcrestAssumptions`]: hamcrest style assumptions for jqwik.
+
+== Other
+
+link:src/main/java/nl/vpro/test/util/CleanUp.java[`CleanUp`] is a `TestExecutionListener`, registered automatically through `META-INF/services`. After all tests ran, it removes namespaces registered with `JAXBTestUtil.registerNamespace`.

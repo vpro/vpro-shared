@@ -124,6 +124,22 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <!-- for LoggingAssert -->
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-logging</artifactId>
+    </dependency>
+    <dependency>
+      <!-- for LoggingAssert (which requires log4j2 core as logging implementation) -->
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-testkit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <optional>true</optional>
