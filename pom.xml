@@ -136,6 +136,8 @@
     <module>vpro-shared-util</module>
     <module>vpro-shared-jackson2</module>
     <module>vpro-shared-jackson3</module>
+    <module>vpro-shared-test</module>
+
 
     <module>vpro-shared-bom</module>
 
