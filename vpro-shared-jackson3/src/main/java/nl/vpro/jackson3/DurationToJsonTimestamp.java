@@ -1,7 +1,5 @@
 package nl.vpro.jackson3;
 
-import org.meeuw.time.TimeUtils;
-
 import tools.jackson.core.*;
 import tools.jackson.databind.*;
 
