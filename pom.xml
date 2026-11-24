@@ -17,18 +17,18 @@
     <skipITs>true</skipITs>
     <java.version>21</java.version>
 
-    <spring.version>7.0.10</spring.version>
-    <spring-security.version>7.1.2</spring-security.version>
+    <spring.version>7.1.0</spring.version>
+    <spring-security.version>7.2.0</spring-security.version>
 
-    <jackson-annotations.version>2.22</jackson-annotations.version>
-    <jackson3.version>3.2.4</jackson3.version>
+    <jackson-annotations.version>2.23</jackson-annotations.version>
+    <jackson3.version>3.3.0</jackson3.version>
 
 
     <junit.version>6.1.3</junit.version>
     <mockito.version>5.24.0</mockito.version>
     <assertj.version>3.27.7</assertj.version>
-    <resteasy.version>7.0.5.Final</resteasy.version>
-    <swagger.ui.version>5.35.0</swagger.ui.version>
+    <resteasy.version>7.0.6.Final</resteasy.version>
+    <swagger.ui.version>5.36.0</swagger.ui.version>
 
     <!--
     seems to be in use by both resteasy and hibernate-search
@@ -52,9 +52,9 @@
     <httpcomponents.version>4.5.14</httpcomponents.version>
     <httpcomponentscore.version>4.4.16</httpcomponentscore.version>
 
-    <hibernate.version>7.4.15.Final</hibernate.version>
+    <hibernate.version>7.4.17.Final</hibernate.version>
     <hibernate.search.version>8.4.1.Final</hibernate.search.version>
-    <hibernate.validator.version>9.1.6.Final</hibernate.validator.version>
+    <hibernate.validator.version>9.2.0.Final</hibernate.validator.version>
 
     <!-- jakarta versions -->
     <servlet.api.version>6.1.0</servlet.api.version>
@@ -78,8 +78,8 @@
     <elasticsearch7.version>7.13.4</elasticsearch7.version>
     <lucene.elasticsearch7.version>8.8.2</lucene.elasticsearch7.version>
 
-    <micrometer.version>1.17.2</micrometer.version>
-    <flyway.version>13.12.2</flyway.version>
+    <micrometer.version>1.18.0</micrometer.version>
+    <flyway.version>13.13.0</flyway.version>
     <testcontainers.version>2.0.5</testcontainers.version>
 
     <EXTRA_TEST_OPTS>--add-opens java.base/java.lang=ALL-UNNAMED</EXTRA_TEST_OPTS>
@@ -709,7 +709,7 @@
       <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>42.7.14</version>
+        <version>42.7.15</version>
       </dependency>
       <dependency>
         <groupId>org.meeuw.i18n</groupId>
