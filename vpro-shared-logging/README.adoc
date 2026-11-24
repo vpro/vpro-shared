@@ -11,3 +11,5 @@ E.g.:
 . `nl.vpro.logging.Slf4jHelper` makes it possible to log with the `org.slf4j.event.Level` as an argument
 
 . The `nl.vpro.logging.simple` contains a simple logging framework which main goal is to be simple to implement, so that it is easy to chain and 'tee' logging which simple lines of java code.
+
+. `nl.vpro.logging.aspects.LogIfSlow` is an annotation that can be put on a (spring managed) method to have a warning, or error, logged when it takes suspiciously long. The aspect that actually implements this, `LogIfSlowAspect`, lives in `vpro-shared-monitoring` (it also records the duration as a metric) — see that module's README for how to enable it.
