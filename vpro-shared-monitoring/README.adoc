@@ -227,7 +227,33 @@ The counter and the timer have these tags:
 
 If the request is put in asynchronous mode, returning from the filter chain doesn't mean that the request is finished. In that case the request is only recorded when it actually completes (`AsyncListener#onComplete`, which is also called after a timeout or an error), so the duration, the status and the content type are the final ones, and the request remains counted in `servlet_requests_active` until then.
 
+== Logging slow methods
+
+link:src/main/java/nl/vpro/monitoring/aspects/LogIfSlowAspect.java[`LogIfSlowAspect`] is a spring AOP aspect that works together with the `nl.vpro.logging.aspects.LogIfSlow` annotation (defined in `vpro-shared-logging`). Annotate a (spring managed) method with it:
+
+[source,java]
+----
+@LogIfSlow(warnThreshold = "PT5S", errorThreshold = "PT20S")
+public void doSomething() {
+  // ...
+}
+----
+
+If the aspect is active, a warning or error is logged (via log4j2) when the method takes longer than the given threshold. `errorThreshold` defaults to `PT20S`, `warnThreshold` to half of that. Both are parsed with `java.time.Duration#parse` and may contain spring placeholders (e.g. `${some.property:PT5S}`). `logger()` can be used to override the logger name, which otherwise defaults to the target class.
+
+This requires:
+
+- `@EnableAspectJAutoProxy`, and `LogIfSlowAspect` registered as a spring bean (e.g. via component scanning), to actually weave the aspect in,
+- `org.aspectj:aspectjrt` and `org.apache.logging.log4j:log4j-api` on the classpath (both optional dependencies of this module),
+- a `MeterRegistry` in the spring context, as for the other meters in this module.
+
+Every call is also recorded, regardless of its outcome, as a timer `method.duration`, tagged with `class`, `method` and `level` (`DEBUG`, `WARN` or `ERROR`, depending on which threshold was exceeded). This way the latency of annotated methods can be graphed even for the calls that didn't trigger a log line.
+
 == Changes
+
+=== 5.21
+
+Added `LogIfSlowAspect` (the `@LogIfSlow` annotation itself lives in `vpro-shared-logging`).
 
 === 5.12
 
