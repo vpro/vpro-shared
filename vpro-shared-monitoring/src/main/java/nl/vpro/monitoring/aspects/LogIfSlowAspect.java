@@ -87,7 +87,7 @@ public class LogIfSlowAspect {
 
             logger.log(level, "{} ({}) took {}",
                 () -> joinPoint.getSignature().toShortString(),
-                () -> joinPoint.getArgs(),
+                joinPoint::getArgs,
                 () -> duration
             );
         }
