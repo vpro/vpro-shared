@@ -30,6 +30,10 @@
       <groupId>nl.vpro.shared</groupId>
       <artifactId>vpro-shared-web</artifactId>
     </dependency>
+    <dependency>
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-logging</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -99,6 +103,19 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- LogIfSlowAspect: @LogIfSlow is only functional if aspectj weaving and log4j2 are both on the classpath -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>1.9.27</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
       <optional>true</optional>
     </dependency>
 

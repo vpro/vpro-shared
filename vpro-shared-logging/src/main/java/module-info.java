@@ -4,6 +4,7 @@ module nl.vpro.shared.logging {
     exports nl.vpro.logging.mdc;
     exports nl.vpro.logging.jmx;
     exports nl.vpro.logging.filter;
+    exports nl.vpro.logging.aspects;
 
     requires org.apache.commons.lang3;
 
