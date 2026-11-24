@@ -13,7 +13,7 @@ import javax.management.ObjectName;
 import nl.vpro.logging.simple.Level;
 import nl.vpro.logging.simple.SimpleLogger;
 
-import static nl.vpro.util.TimeUtils.roundToMillis;
+import static org.meeuw.time.TimeUtils.roundToMillis;
 
 /**
  * Wraps all calls to register some statistics.

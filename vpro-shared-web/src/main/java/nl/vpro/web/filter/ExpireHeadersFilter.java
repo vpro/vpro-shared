@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import static org.meeuw.time.TimeUtils.parseDuration;
 
-
 /**
  * <p>A filter that can add expire and cache controll headers to responses if there are missing. (default to 5 minutes)</p>
 

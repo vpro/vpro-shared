@@ -1,5 +1,7 @@
 ---
 name: build
+run-name: build${{ github.event_name == 'workflow_dispatch' && format(' -> {0}', inputs.publishTo) || '' }}
+
 
 on:
   push:
@@ -21,6 +23,14 @@ on:
           - 'all'
           - ubuntu-latest
           - windows-latest
+      publishTo:
+        description: 'Where to publish the snapshots (maven central has a monthly limit on number of files)'
+        required: true
+        default: 'central'
+        type: choice
+        options:
+          - central
+          - github
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -28,6 +38,8 @@ concurrency:
 
 env:
   skipTests: false
+  # on push there are no inputs, so default to central
+  PUBLISH_TO: ${{ inputs.publishTo || 'central' }}
 
 jobs:
   build:
@@ -52,6 +64,8 @@ jobs:
     permissions:
       checks: write
       pull-requests: write
+      contents: read
+      packages: write
     runs-on: ${{ matrix.os }}
     env:
       MAVEN_ARGS: '--no-transfer-progress --color always'
@@ -73,9 +87,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
-          server-id: central
-          server-username-env-var: CENTRAL_USERNAME
-          server-password-env-var: CENTRAL_PASSWORD
+          server-id: ${{ inputs.publishTo || 'central' }}
+          server-username-env-var: MAVEN_USERNAME
+          server-password-env-var: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           cache: maven
       - uses: stCarolas/setup-maven@v5
@@ -91,10 +105,10 @@ jobs:
         if: steps.os_check.outputs.not_skipped && github.event_name != 'pull_request'
         shell: bash
         run: |
-          mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false
+          mvn  -fae -DskipITs=false -DskipTests=${skipTests} -D'maven.test.failure.ignore=true' -B -P'deploy' ${{ matrix.target }}  -Dgpg.skip=false -Dpublish.to=${PUBLISH_TO}
         env:
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_USERNAME: ${{ inputs.publishTo == 'github' && github.actor || secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ inputs.publishTo == 'github' && secrets.GITHUB_TOKEN || secrets.CENTRAL_PASSWORD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_SECRET_KEY_PASSPHRASE }}
         continue-on-error: ${{ matrix.target != 'deploy' }}
       - name: Publish to codecov

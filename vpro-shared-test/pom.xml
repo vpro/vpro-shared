@@ -15,7 +15,7 @@
   <properties>
     <buildnumber.doCheck>false</buildnumber.doCheck>
     <vpro.shared.module.postfix>test</vpro.shared.module.postfix>
-    <log4j2.stdout.level>DEBUG</log4j2.stdout.level>
+    <log4j2.stdout.level>INFO</log4j2.stdout.level>
   </properties>
 
   <dependencies>
@@ -122,6 +122,22 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <!-- for LoggingAssert -->
+      <groupId>nl.vpro.shared</groupId>
+      <artifactId>vpro-shared-logging</artifactId>
+    </dependency>
+    <dependency>
+      <!-- for LoggingAssert (which requires log4j2 core as logging implementation) -->
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-testkit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

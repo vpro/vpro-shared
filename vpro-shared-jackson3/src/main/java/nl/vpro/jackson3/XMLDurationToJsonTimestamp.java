@@ -11,6 +11,7 @@ import java.util.*;
 
 import javax.xml.datatype.*;
 
+import org.meeuw.time.TimeUtils;
 
 @Slf4j
 public class XMLDurationToJsonTimestamp {

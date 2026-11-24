@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import nl.vpro.util.BindingUtils;
-import nl.vpro.util.TimeUtils;
+import org.meeuw.time.TimeUtils;
 
 import static nl.vpro.jackson3.DateModule.ZONE;
 

@@ -420,7 +420,7 @@ public class ReflectionUtils {
         } else if (parameterClass.isAssignableFrom(Locale.class)) {
             return LocaleUtils.toLocale(o);
         } else if (parameterClass.isAssignableFrom(Duration.class)) {
-            return TimeUtils.parseDuration(o).orElse(null);
+            return org.meeuw.time.TimeUtils.parseDuration(o).orElse(null);
         } else if (parameterClass.isAssignableFrom(List.class)) {
             ParameterizedType parameterizedType = (ParameterizedType) parameterType;
             return Arrays.stream(o.split("\\s*,\\s*"))
