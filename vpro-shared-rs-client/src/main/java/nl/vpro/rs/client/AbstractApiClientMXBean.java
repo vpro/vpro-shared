@@ -28,6 +28,15 @@ public interface AbstractApiClientMXBean {
     String getSocketTimeout();
     void setSocketTimeout(String socketTimeout);
 
+    /**
+     * The socket (read) timeout for the 'no timeout' clients, which are meant for long-running (streaming) calls. Defaults to {@code null}, meaning no read timeout at all.
+     * Note that this is a maximum time of inactivity (no bytes received), not a limit on the total duration of a call.
+     * @since 6.0
+     */
+    @Units("duration")
+    String getSocketTimeoutNoTimeout();
+    void setSocketTimeoutNoTimeout(String socketTimeoutNoTimeout);
+
     String getConnectionInPoolTTL();
     void  setConnectionInPoolTTL(String connectionInPoolTTL);
 
