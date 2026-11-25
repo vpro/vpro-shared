@@ -85,6 +85,11 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     protected Duration connectionRequestTimeout;
     protected Duration connectTimeout;
     protected Duration socketTimeout;
+    /**
+     * Socket timeout for {@link #getClientHttpEngineNoTimeout()}. Defaults to {@code null}: no read timeout.
+     * @since 6.0
+     */
+    protected Duration socketTimeoutNoTimeout;
 
     @Getter
     protected Integer maxConnections;
@@ -361,6 +366,29 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
     }
 
     @Override
+    public synchronized String getSocketTimeoutNoTimeout() {
+        return String.valueOf(socketTimeoutNoTimeout);
+    }
+
+    @Override
+    public synchronized void setSocketTimeoutNoTimeout(String socketTimeoutNoTimeout) {
+        setSocketTimeoutNoTimeout(TimeUtils.parseDuration(socketTimeoutNoTimeout).orElse(null));
+    }
+
+    /**
+     * Sets a read timeout for the 'no timeout' clients. Calls on those can take long (e.g. streaming the changes feed), but a connection that
+     * stalls completely would otherwise block forever.
+     * @param socketTimeoutNoTimeout Maximal time without receiving any bytes. {@code null} for no timeout at all (the default)
+     * @since 6.0
+     */
+    public synchronized void setSocketTimeoutNoTimeout(Duration socketTimeoutNoTimeout) {
+        if (! Objects.equals(this.socketTimeoutNoTimeout, socketTimeoutNoTimeout)) {
+            this.socketTimeoutNoTimeout = socketTimeoutNoTimeout;
+            invalidate();
+        }
+    }
+
+    @Override
     public final String test(String arg) {
         // otherwise ProxyBuilder may be called in classloader of JMX, resulting in:
         // class not found org.jboss.resteasy.client.jaxrs.internal.proxy.ProxyBuilderImpl
@@ -577,7 +605,7 @@ public abstract class AbstractApiClient implements AbstractApiClientMXBean, Auto
                 getHttpClient(
                     connectionRequestTimeout,
                     connectTimeout,
-                    null
+                    socketTimeoutNoTimeout
                 ),
                 false);
         }
